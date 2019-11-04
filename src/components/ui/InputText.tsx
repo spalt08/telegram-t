@@ -4,13 +4,14 @@ import React, { FC } from '../../lib/reactt';
 import './InputText.scss';
 
 interface IProps {
+  id?: string,
   onChange: (e: ChangeEvent<HTMLInputElement>) => void,
   placeholder: string,
 }
 
-const InputText: FC<IProps> = ({ onChange, placeholder }: IProps) => {
+const InputText: FC<IProps> = ({ id, onChange, placeholder }: IProps) => {
   return (
-    <input className="InputText" type="text" onChange={onChange} placeholder={placeholder} />
+    <input className="InputText" type="text" id={id} onChange={onChange} placeholder={placeholder} />
   );
 };
 

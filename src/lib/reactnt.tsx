@@ -1,10 +1,18 @@
 import React, { FC, Props, VirtualElementComponent } from './reactt';
+import { UpdateAuthorizationStateType } from '../api/tdlib/updates';
 
-export interface GlobalState {
-  isInitialized: boolean;
-}
+const INITIAL_STATE = {
+  isInitialized: false,
+  isLoggingOut: false,
+  authState: '' as UpdateAuthorizationStateType,
+  authPhoneNumber: '',
+};
 
-type DispatchMap = Record<string, Function>;
+export type GlobalState = Partial<typeof INITIAL_STATE>;
+
+type ActionTypes = 'init' | 'setAuthPhoneNumber' | 'setAuthCode';
+
+export type DispatchMap = Record<ActionTypes, Function>;
 
 interface Container {
   component?: VirtualElementComponent;
@@ -13,45 +21,96 @@ interface Container {
   onGlobalStateUpdate?: Function,
 }
 
-const INITIAL_STATE = {
-  isInitialized: false,
-};
+type ActionPayload = Record<string, any>;
+
+type Reducer = (
+  global: GlobalState,
+  dispatchMap: DispatchMap,
+  payload?: ActionPayload,
+) => GlobalState | void;
 
 let global: GlobalState = INITIAL_STATE;
 
-const reducers: Record<string, Function> = {};
-const dispatch: DispatchMap = {};
+const reducers: Record<string, Reducer[]> = {};
+const callbacks: Function[] = [updateContainers];
+const dispatchMap = {} as DispatchMap;
 const containers: Container[] = [];
 
-export function setGlobal() {
-}
-
-export function onDispatch(name: string) {
-  if (reducers[name]) {
-    global = reducers[name](global);
+export function setGlobal(newGlobal: GlobalState) {
+  if (typeof newGlobal !== 'undefined' && newGlobal !== global) {
+    global = newGlobal;
   }
 
+  runCallbacks();
+}
+
+export function getGlobal() {
+  return global;
+}
+
+export function updateGlobal(update: GlobalState) {
+  global = {
+    ...global,
+    ...update,
+  };
+
+  runCallbacks();
+}
+
+export function getDispatch() {
+  return dispatchMap;
+}
+
+function onDispatch(name: string, payload?: ActionPayload) {
+  if (reducers[name]) {
+    reducers[name].forEach((reducer) => {
+      const newGlobal = reducer(global, dispatchMap, payload);
+
+      if (typeof newGlobal !== 'undefined' && newGlobal !== global) {
+        global = newGlobal;
+      }
+    });
+  }
+
+  runCallbacks();
+}
+
+// export function addCallback(cb: Function) {
+//   callbacks.push(cb);
+// }
+
+function runCallbacks() {
+  // TODO throttle
+  callbacks.forEach(cb => cb(global));
+}
+
+function updateContainers() {
   // TODO throttle
   containers.forEach((c) => c.onGlobalStateUpdate && c.onGlobalStateUpdate(global));
 }
 
-export function addReducer(name: string, reducer: Function) {
-  reducers[name] = reducer;
-  dispatch[name] = () => {
-    onDispatch(name);
-  };
+export function addReducer(name: ActionTypes, reducer: Reducer) {
+  if (!reducers[name]) {
+    reducers[name] = [];
+
+    dispatchMap[name] = (payload?: ActionPayload) => {
+      onDispatch(name, payload);
+    };
+  }
+
+  reducers[name].push(reducer);
 }
 
 export function withGlobal(
-  mapStateToProps: (global: GlobalState) => Partial<GlobalState>,
-  mapReducersToProps: (setGlobal: Function, dispatch: DispatchMap) => Record<string, Function>,
+  mapStateToProps: ((global: GlobalState) => GlobalState) = () => ({}),
+  mapReducersToProps: ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap>) = () => ({}),
 ) {
   return (Component: FC) => {
     const container: Container = {
       onGlobalStateUpdate: (global: GlobalState) => {
         const newMappedProps = {
           ...mapStateToProps(global),
-          ...mapReducersToProps(setGlobal, dispatch),
+          ...mapReducersToProps(setGlobal, dispatchMap),
         };
 
         if (
@@ -75,7 +134,7 @@ export function withGlobal(
       if (!container.mappedProps) {
         container.mappedProps = {
           ...mapStateToProps(global),
-          ...mapReducersToProps(setGlobal, dispatch),
+          ...mapReducersToProps(setGlobal, dispatchMap),
         };
       }
 
