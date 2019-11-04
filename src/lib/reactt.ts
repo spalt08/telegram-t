@@ -3,6 +3,9 @@
 const DEFAULT_TAG = 'div';
 let $renderingComponent: VirtualElementComponent;
 
+export type Props = Record<string, any>;
+export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
+
 export enum VirtualElementTypesEnum {
   Tag,
   Component,
@@ -11,7 +14,7 @@ export enum VirtualElementTypesEnum {
 export interface VirtualElementTag {
   type: VirtualElementTypesEnum.Tag,
   tag: string,
-  props: Record<string, any>,
+  props: Props,
   children: VirtualElementChildren,
 }
 
@@ -52,7 +55,7 @@ export function isComponentElement(object: VirtualElementChildOrEmpty): object i
 
 function createElement(
   tag: string | Function = DEFAULT_TAG,
-  props: Record<string, any>,
+  props: Props,
   ...children: any[]
 ): VirtualElement {
   if (typeof tag === 'function') {
@@ -66,7 +69,11 @@ function createElement(
         cursor: 0,
         store: [],
       },
-      forceUpdate: () => {
+      forceUpdate: (props?: Props) => {
+        if (props) {
+          $element.props = props;
+        }
+
         if ($element.onUpdate) {
           $element.onUpdate({
             ...$element,

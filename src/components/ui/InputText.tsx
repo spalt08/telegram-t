@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React from '../../lib/reactt';
+import React, { FC } from '../../lib/reactt';
 
 import './InputText.scss';
 
@@ -8,7 +8,7 @@ interface IProps {
   placeholder: string,
 }
 
-const InputText = ({ onChange, placeholder }: IProps) => {
+const InputText: FC<IProps> = ({ onChange, placeholder }: IProps) => {
   return (
     <input className="InputText" type="text" onChange={onChange} placeholder={placeholder} />
   );

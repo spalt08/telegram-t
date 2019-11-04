@@ -19,7 +19,5 @@
     "sass": "^1.23.3",
     "typescript": "^3.6.4"
   },
-  "dependencies": {
-    "history": "^4.10.1"
-  }
+  "dependencies": {}
 }

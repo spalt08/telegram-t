@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { JsxChildren } from '../../lib/reactt';
+import React, { FC, JsxChildren } from '../../lib/reactt';
 
 import './Select.scss';
 
@@ -9,7 +9,7 @@ interface IProps {
   children: JsxChildren,
 }
 
-const Select = ({ onChange, name, children }: IProps) => {
+const Select: FC<IProps> = ({ onChange, name, children }: IProps) => {
   return (
     <select className='Select' name={name} onChange={onChange}>
       {children}

@@ -1,12 +1,18 @@
 import { ChangeEvent } from 'react';
 
-import React, { useState } from '../../lib/reactt';
-import Button from '../ui/Button';
+import React, { FC, Props, useState, VirtualElementComponent } from '../../../lib/reactt';
+import Button from '../../ui/Button';
 import './Auth.scss';
-import InputText from '../ui/InputText';
-import Select from '../ui/Select';
+import InputText from '../../ui/InputText';
+import Select from '../../ui/Select';
 
-const Auth = () => {
+interface IProps extends Props{
+  isInitialized: boolean;
+  signIn: Function;
+  signOut: Function;
+}
+
+const Auth: FC<IProps> = ({ signIn, signOut, isInitialized }: IProps): VirtualElementComponent => {
   const [isButtonShown, setIsButtonShown] = useState(false);
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
@@ -23,7 +29,7 @@ const Auth = () => {
       <h2>Sign in to Telegram</h2>
       <div className="note">
         Please confirm your country and
-        <br/>enter phone number
+        <br />enter phone number
       </div>
       <div>
         <Select>
@@ -34,8 +40,15 @@ const Auth = () => {
         <InputText placeholder="Phone Number" onChange={onPhoneNumberChange} />
       </div>
       <div>
-        {isButtonShown && (
-          <Button>NEXT</Button>
+        {isInitialized ? (
+          <div>
+            INITIALIZED!
+            <Button onClick={signOut}>BACK</Button>
+          </div>
+        ) : (
+          isButtonShown && (
+            <Button onClick={signIn}>NEXT</Button>
+          )
         )}
       </div>
     </div>

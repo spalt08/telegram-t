@@ -49,9 +49,9 @@ function renderWithVirtual(
 }
 
 function renderChildren($current: VirtualElementChild, $new: VirtualElementChild, currentEl: HTMLElement) {
-  const newLength = !isStringElement($current) ? $current.children.length : 0;
-  const oldLength = !isStringElement($new) ? $new.children.length : 0;
-  const maxLength = Math.max(newLength, oldLength);
+  const currentLength = !isStringElement($current) ? $current.children.length : 0;
+  const newLength = !isStringElement($new) ? $new.children.length : 0;
+  const maxLength = Math.max(currentLength, newLength);
 
   for (let i = 0; i < maxLength; i++) {
     renderWithVirtual(
