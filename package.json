@@ -1,0 +1,25 @@
+{
+  "name": "telegram-t",
+  "version": "1.0.0-0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "prod": "parcel build src/index.html -d docs/ --public-url ./",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.3",
+    "parcel": "^1.12.4",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "sass": "^1.23.3",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "history": "^4.10.1"
+  }
+}
