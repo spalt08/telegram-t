@@ -1,16 +1,23 @@
 import React, { FC, Props, VirtualElementComponent } from './reactt';
 import { UpdateAuthorizationStateType } from '../api/tdlib/updates';
+import throttleWithRaf from '../util/throttleWithRaf';
 
-const INITIAL_STATE = {
+export type GlobalState = Partial<{
+  isInitialized: boolean,
+  isLoggingOut: boolean,
+  authState: UpdateAuthorizationStateType,
+  authPhoneNumber: string,
+  chats: {
+    byId: Record<string, any>,
+  },
+}>;
+
+const INITIAL_STATE: GlobalState = {
   isInitialized: false,
   isLoggingOut: false,
-  authState: '' as UpdateAuthorizationStateType,
-  authPhoneNumber: '',
 };
 
-export type GlobalState = Partial<typeof INITIAL_STATE>;
-
-type ActionTypes = 'init' | 'setAuthPhoneNumber' | 'setAuthCode';
+type ActionTypes = 'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'loadChats';
 
 export type DispatchMap = Record<ActionTypes, Function>;
 
@@ -41,7 +48,7 @@ export function setGlobal(newGlobal: GlobalState) {
     global = newGlobal;
   }
 
-  runCallbacks();
+  runCallbacksThrottled();
 }
 
 export function getGlobal() {
@@ -54,7 +61,7 @@ export function updateGlobal(update: GlobalState) {
     ...update,
   };
 
-  runCallbacks();
+  runCallbacksThrottled();
 }
 
 export function getDispatch() {
@@ -72,7 +79,7 @@ function onDispatch(name: string, payload?: ActionPayload) {
     });
   }
 
-  runCallbacks();
+  runCallbacksThrottled();
 }
 
 // export function addCallback(cb: Function) {
@@ -80,9 +87,10 @@ function onDispatch(name: string, payload?: ActionPayload) {
 // }
 
 function runCallbacks() {
-  // TODO throttle
   callbacks.forEach(cb => cb(global));
 }
+
+const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
 function updateContainers() {
   // TODO throttle
@@ -102,42 +110,43 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
 }
 
 export function withGlobal(
-  mapStateToProps: ((global: GlobalState) => GlobalState) = () => ({}),
+  mapStateToProps: ((global: GlobalState, ownProps?: any) => Record<string, any>) = () => ({}),
   mapReducersToProps: ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap>) = () => ({}),
 ) {
   return (Component: FC) => {
-    const container: Container = {
-      onGlobalStateUpdate: (global: GlobalState) => {
-        const newMappedProps = {
-          ...mapStateToProps(global),
-          ...mapReducersToProps(setGlobal, dispatchMap),
-        };
-
-        if (
-          container.component && (
-            !arePropsShallowEqual(container.mappedProps || {}, newMappedProps)
-          )) {
-          container.mappedProps = newMappedProps;
-          container.component.forceUpdate({
-            ...container.ownProps,
-            ...container.mappedProps,
-          });
-        }
-      },
-    };
-
-    containers.push(container);
-
     return (props: Props) => {
-      container.ownProps = props;
+      const container: Container = {
+        onGlobalStateUpdate: (global: GlobalState) => {
+          if (!container.component) {
+            return;
+          }
+
+          const newMappedProps = {
+            ...mapStateToProps(global, container.ownProps),
+            ...mapReducersToProps(setGlobal, dispatchMap),
+          };
+
+          if (container.mappedProps && !arePropsShallowEqual(container.mappedProps, newMappedProps)) {
+            container.mappedProps = newMappedProps;
+            container.component.forceUpdate({
+              ...container.ownProps,
+              ...container.mappedProps,
+            });
+          }
+        },
+        ownProps: props,
+      };
+
+      containers.push(container);
 
       if (!container.mappedProps) {
         container.mappedProps = {
-          ...mapStateToProps(global),
+          ...mapStateToProps(global, props),
           ...mapReducersToProps(setGlobal, dispatchMap),
         };
       }
 
+      // TODO Refactor.
       if (!container.component) {
         container.component = <Component {...container.mappedProps} {...props} />;
       }

@@ -21,4 +21,12 @@ export type TdLibUpdateFile = {
   '@type': 'updateFile',
 };
 
-export type TdLibUpdate = TdLibUpdateAuthorizationState | TdLibUpdateFile;
+export type TdLibUpdateNewChat = {
+  '@type': 'updateNewChat',
+  chat: {
+    '@type': 'chat',
+    [k: string]: any,
+  }
+};
+
+export type TdLibUpdate = TdLibUpdateAuthorizationState | TdLibUpdateFile | TdLibUpdateNewChat | any;

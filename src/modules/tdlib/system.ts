@@ -1,15 +1,7 @@
-import { addReducer, getGlobal, GlobalState, updateGlobal } from '../lib/reactnt';
-import * as TdLib from '../api/tdlib';
-import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../api/tdlib/updates';
+import { addReducer, getGlobal, GlobalState, updateGlobal } from '../../lib/reactnt';
 
-addReducer('init', (global: GlobalState) => {
-  TdLib.init(onUpdate);
-
-  return {
-    global,
-    isInitialized: true,
-  };
-});
+import * as TdLib from '../../api/tdlib';
+import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../api/tdlib/updates';
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
@@ -29,9 +21,7 @@ addReducer('setAuthCode', (global, actions, payload) => {
   });
 });
 
-function onUpdate(update: TdLibUpdate) {
-  console.log('[TdLib] UPDATE', { update });
-
+export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
     case 'updateAuthorizationState':
       onUpdateAuthorizationState(update);

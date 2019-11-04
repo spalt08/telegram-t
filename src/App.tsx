@@ -5,7 +5,7 @@ import './modules';
 
 import Loading from './pages/Loading';
 import Auth from './pages/auth/Auth';
-import Main from './pages/Main';
+import Main from './pages/main/Main';
 
 type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>
 
@@ -36,9 +36,8 @@ export default withGlobal(
     const { isInitialized, authState } = global;
     return { isInitialized, authState };
   },
-  (setGlobal, dispatchMap) => ({
-    init() {
-      dispatchMap.init();
-    },
-  }),
+  (setGlobal, actions) => {
+    const { init } = actions;
+    return { init };
+  },
 )(App);

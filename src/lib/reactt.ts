@@ -28,6 +28,7 @@ interface State {
 
 export interface VirtualElementComponent extends Omit<VirtualElementTag, 'type'> {
   type: VirtualElementTypesEnum.Component,
+  key?: string,
   name: string,
   state: State,
   forceUpdate: Function,
@@ -63,6 +64,7 @@ function createElement(
       type: VirtualElementTypesEnum.Component,
       tag: DEFAULT_TAG, // TODO Try to remove.
       name: tag.name,
+      key: props && props.key ? String(props.key) : undefined,
       props: props !== null ? props : {},
       children: [],
       state: {

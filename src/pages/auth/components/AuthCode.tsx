@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 
-import React, { FC, useState, VirtualElementComponent } from '../../../lib/reactt';
+import React, { FC, useState } from '../../../lib/reactt';
 import { DispatchMap, GlobalState, withGlobal } from '../../../lib/reactnt';
 
 import Button from '../../../components/ui/Button';
@@ -10,7 +10,7 @@ import './AuthCode.scss';
 
 type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'>;
 
-const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }: IProps): VirtualElementComponent => {
+const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }: IProps) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
