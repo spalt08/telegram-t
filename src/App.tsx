@@ -1,15 +1,20 @@
-import React, { FC } from './lib/reactt';
-import { DispatchMap, GlobalState, withGlobal } from './lib/reactnt';
+import { FC } from './lib/reactt';
+import React, { DispatchMap, GlobalState, withGlobal } from './lib/reactnt';
 
 import './modules';
 
 import Loading from './pages/Loading';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
+import Test from './pages/test/Test';
 
 type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>
 
-const App: FC<IProps> = ({ isInitialized, authState, init }: IProps) => {
+const App: FC<IProps> = ({ isInitialized, authState, init }) => {
+  console.log('APP RE-RENDER', authState);
+
+  // return <Test />;
+
   if (!isInitialized) {
     init();
   }
@@ -41,3 +46,4 @@ export default withGlobal(
     return { init };
   },
 )(App);
+

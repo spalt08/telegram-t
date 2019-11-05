@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, GlobalState, updateGlobal } from '../../lib/reactnt';
+import { addReducer, getGlobal, updateGlobal } from '../../lib/reactnt';
 
 import * as TdLib from '../../api/tdlib';
 import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../api/tdlib/updates';
@@ -19,6 +19,10 @@ addReducer('setAuthCode', (global, actions, payload) => {
     '@type': 'checkAuthenticationCode',
     code,
   });
+});
+
+addReducer('signOut', () => {
+  void TdLib.send({ '@type': 'logOut' });
 });
 
 export function onUpdate(update: TdLibUpdate) {

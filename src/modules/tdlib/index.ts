@@ -9,7 +9,7 @@ addReducer('init', (global: GlobalState) => {
   TdLib.init(onUpdate);
 
   return {
-    global,
+    ...global,
     isInitialized: true,
   };
 });

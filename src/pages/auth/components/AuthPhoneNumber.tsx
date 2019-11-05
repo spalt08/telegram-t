@@ -11,18 +11,19 @@ import './AuthPhoneNumber.scss';
 
 type IProps = Pick<DispatchMap, 'setAuthPhoneNumber'>;
 
-const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }: IProps) => {
+const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     const target = e.target;
 
-    target.value = target.value.replace(/[^\d]+/, '');
+    target.value = target.value.replace(/[^\d]+/g, '');
 
     setIsButtonShown(target.value.length === 10);
   }
 
   function handleSubmit() {
+    // TODO ref
     const codeInput = document.getElementById('sign-in-phone-code') as HTMLSelectElement;
     const numberInput = document.getElementById('sign-in-phone-number') as HTMLInputElement;
     const phoneNumber = `${codeInput.value}${numberInput.value}`;

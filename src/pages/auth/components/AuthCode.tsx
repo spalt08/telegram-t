@@ -10,7 +10,7 @@ import './AuthCode.scss';
 
 type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'>;
 
-const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }: IProps) => {
+const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {

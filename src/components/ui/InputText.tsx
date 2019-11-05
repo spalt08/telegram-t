@@ -9,7 +9,7 @@ interface IProps {
   placeholder: string,
 }
 
-const InputText: FC<IProps> = ({ id, onChange, placeholder }: IProps) => {
+const InputText: FC<IProps> = ({ id, onChange, placeholder }) => {
   return (
     <input className="InputText" type="text" id={id} onChange={onChange} placeholder={placeholder} />
   );

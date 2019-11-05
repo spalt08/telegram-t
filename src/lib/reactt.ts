@@ -1,7 +1,9 @@
 // import React from 'react';
+// export { useState } from 'react';
+// export default React;
 
 const DEFAULT_TAG = 'div';
-let $renderingComponent: VirtualElementComponent;
+let renderingInstance: ComponentInstance;
 
 export type Props = Record<string, any>;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
@@ -20,7 +22,7 @@ export interface VirtualElementTag {
 
 interface State {
   cursor: number,
-  store: {
+  byCursor: {
     value: any,
     setter: Function
   }[],
@@ -28,66 +30,100 @@ interface State {
 
 export interface VirtualElementComponent extends Omit<VirtualElementTag, 'type'> {
   type: VirtualElementTypesEnum.Component,
-  key?: string,
+  componentInstance: ComponentInstance,
+}
+
+interface ComponentInstance {
+  $element: VirtualElementComponent,
+  $prevElement: VirtualElementComponent,
+  Component: FC,
   name: string,
+  key?: string,
+  props: Props,
+  children: VirtualElementChildren,
   state: State,
+  render: () => VirtualElementComponent,
   forceUpdate: Function,
   onUpdate?: Function,
+  isUnmounted: boolean,
 }
 
 export type VirtualElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChild = string | VirtualElementTag | VirtualElementComponent;
-type VirtualElementChildOrEmpty = VirtualElementChild | undefined;
+export type VirtualElementChildOrEmpty = VirtualElementChild | undefined;
 export type VirtualElementChildren = VirtualElementChildOrEmpty[];
 // Fix for default JSX type error.
 export type JsxChildren = VirtualElementChildren | VirtualElementChild;
 
-export function isStringElement(object: VirtualElementChildOrEmpty): object is string {
-  return typeof object === 'string';
+export function isStringElement($element: VirtualElementChildOrEmpty): $element is string {
+  return typeof $element === 'string';
 }
 
-export function isTagElement(object: VirtualElementChildOrEmpty): object is VirtualElementTag {
-  return typeof object === 'object' && object.type === VirtualElementTypesEnum.Tag;
+export function isRealElement($element: VirtualElementChildOrEmpty): $element is VirtualElement {
+  return typeof $element === 'object';
 }
 
-export function isComponentElement(object: VirtualElementChildOrEmpty): object is VirtualElementComponent {
-  return typeof object === 'object' && object.type === VirtualElementTypesEnum.Component;
+export function isTagElement($element: VirtualElementChildOrEmpty): $element is VirtualElementTag {
+  return isRealElement($element) && $element.type === VirtualElementTypesEnum.Tag;
+}
+
+export function isComponentElement($element: VirtualElementChildOrEmpty): $element is VirtualElementComponent {
+  return isRealElement($element) && $element.type === VirtualElementTypesEnum.Component;
 }
 
 function createElement(
-  tag: string | Function = DEFAULT_TAG,
+  tag: string | FC = DEFAULT_TAG,
   props: Props,
   ...children: any[]
 ): VirtualElement {
+  if (!props) {
+    props = {};
+  }
+
   if (typeof tag === 'function') {
-    const $element: VirtualElementComponent = {
-      type: VirtualElementTypesEnum.Component,
-      tag: DEFAULT_TAG, // TODO Try to remove.
-      name: tag.name,
+    const componentInstance: ComponentInstance = {
+      $element: {} as VirtualElementComponent,
+      $prevElement: {} as VirtualElementComponent,
+      Component: tag,
       key: props && props.key ? String(props.key) : undefined,
-      props: props !== null ? props : {},
-      children: [],
+      name: tag.name,
+      props,
+      children,
+      isUnmounted: false,
       state: {
         cursor: 0,
-        store: [],
+        byCursor: [],
+      },
+      render: () => {
+        const rendered = renderComponent(componentInstance);
+
+        if (rendered) {
+          const children = getUpdatedChildren(componentInstance.$element, [rendered]);
+          componentInstance.$prevElement = componentInstance.$element;
+          componentInstance.$element = createComponentElement(componentInstance, children);
+        }
+
+        return componentInstance.$element;
       },
       forceUpdate: (props?: Props) => {
         if (props) {
-          $element.props = props;
+          componentInstance.props = props;
         }
 
-        if ($element.onUpdate) {
-          $element.onUpdate({
-            ...$element,
-            children: [renderComponent($element, tag, children)],
-          });
+        if (componentInstance.onUpdate && !componentInstance.isUnmounted) {
+          const currentElement = componentInstance.$element;
+          componentInstance.render();
+
+          if (componentInstance.$element !== currentElement) {
+            componentInstance.onUpdate(componentInstance.$prevElement, componentInstance.$element);
+          }
         }
       },
     };
 
-    $element.children = [renderComponent($element, tag, children)];
+    componentInstance.$element = createComponentElement(componentInstance);
 
-    return $element;
+    return componentInstance.$element;
   }
 
   const childrenArray = Array.isArray(children[0]) ? children[0] : children;
@@ -95,8 +131,8 @@ function createElement(
   return {
     type: VirtualElementTypesEnum.Tag,
     tag,
-    props: props !== null ? props : {},
-    children: childrenArray.map((child): VirtualElementChild | undefined => {
+    props,
+    children: childrenArray.map((child): VirtualElementChildOrEmpty => {
       if (typeof child === 'object') {
         return child;
       } else if (child === false) {
@@ -109,40 +145,112 @@ function createElement(
   };
 }
 
-function renderComponent($element: VirtualElementComponent, tag: Function, children: VirtualElementChildren) {
-  $renderingComponent = $element;
-  $renderingComponent.state.cursor = 0;
+const createComponentElement = (
+  componentInstance: ComponentInstance,
+  children: VirtualElementChildren = [],
+): VirtualElementComponent => {
+  const { props } = componentInstance;
 
-  return tag({
-    ...$element.props,
+  return {
+    componentInstance,
+    type: VirtualElementTypesEnum.Component,
+    tag: DEFAULT_TAG, // TODO Try to remove.
+    props,
+    children,
+  };
+};
+
+function renderComponent(componentInstance: ComponentInstance) {
+  renderingInstance = componentInstance;
+  renderingInstance.state.cursor = 0;
+
+  const { Component, props, children } = componentInstance;
+
+  return Component({
+    ...props,
     children,
   });
 }
 
-export function useState(initial: any) {
-  const { cursor, store } = $renderingComponent.state;
+function getUpdatedChildren($element: VirtualElement, newChildren: VirtualElementChildren) {
+  const currentLength = $element.children.length;
+  const newLength = newChildren.length;
+  const maxLength = Math.max(currentLength, newLength);
 
-  if (typeof store[cursor] === 'undefined') {
-    store[cursor] = {
+  const children = [];
+  for (let i = 0; i < maxLength; i++) {
+    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]));
+  }
+  return children;
+}
+
+function getUpdatedChild(
+  $element: VirtualElement,
+  childIndex: number,
+  currentChild: VirtualElementChildOrEmpty,
+  newChild: VirtualElementChildOrEmpty,
+) {
+  if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
+    if (isComponentElement(currentChild) && isComponentElement(newChild)) {
+      currentChild.componentInstance.props = newChild.componentInstance.props;
+      // TODO Support new children
+      return currentChild.componentInstance.render();
+    } else {
+      newChild.children = getUpdatedChildren(currentChild, newChild.children);
+    }
+  } else {
+    if (isComponentElement(currentChild)) {
+      // TODO Remove hooks.
+      currentChild.componentInstance.isUnmounted = true;
+    }
+
+    if (isComponentElement(newChild)) {
+      return newChild.componentInstance.render();
+    }
+  }
+
+  return newChild;
+}
+
+export function hasElementChanged($old: VirtualElementChild, $new: VirtualElementChild) {
+  if (typeof $old !== typeof $new) {
+    return true;
+  } else if (isStringElement($old) || isStringElement($new)) {
+    return $old !== $new;
+  } else if ($old.type !== $new.type) {
+    return true;
+  } else if (isTagElement($old) && isTagElement($new)) {
+    return $old.tag !== $new.tag;
+  } else if (isComponentElement($old) && isComponentElement($new)) {
+    // TODO Support keys.
+    return $old.componentInstance.Component !== $new.componentInstance.Component;
+  }
+}
+
+export function useState(initial: any) {
+  const { cursor, byCursor } = renderingInstance.state;
+
+  if (typeof byCursor[cursor] === 'undefined') {
+    byCursor[cursor] = {
       value: initial,
-      setter: (($component) => (newValue: any) => {
-        if (store[cursor].value !== newValue) {
-          store[cursor].value = newValue;
-          $component.forceUpdate();
+      setter: ((componentInstance) => (newValue: any) => {
+        if (byCursor[cursor].value !== newValue) {
+          byCursor[cursor].value = newValue;
+          componentInstance.forceUpdate();
         }
-      })($renderingComponent),
+      })(renderingInstance),
     };
+
+    renderingInstance.state.cursor++;
   }
 
   return [
-    store[cursor].value,
-    store[cursor].setter,
+    byCursor[cursor].value,
+    byCursor[cursor].setter,
   ];
 }
 
 export default {
   createElement,
 };
-//
-// export default React;
 

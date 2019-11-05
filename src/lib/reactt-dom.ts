@@ -1,35 +1,43 @@
+// import ReactDOM from 'react-dom';
+// export default ReactDOM;
+
 import {
-  isComponentElement, isStringElement, isTagElement,
+  hasElementChanged,
+  isComponentElement, isRealElement, isStringElement, isTagElement,
   VirtualElement,
-  VirtualElementChild,
+  VirtualElementChild, VirtualElementChildOrEmpty,
   VirtualElementComponent,
 } from './reactt';
 
-let $currentRoot: VirtualElementComponent | undefined;
+let $currentRoot: VirtualElementComponent;
 
-function render($element: VirtualElement, parentEl: HTMLElement | null) {
+function render($element: VirtualElementComponent, parentEl: HTMLElement | null) {
   if (!parentEl) {
     return;
   }
 
-  renderWithVirtual(parentEl, 0, $currentRoot, $element, true);
+  renderWithVirtual(parentEl, 0, $currentRoot, $element);
+
+  $currentRoot = $element;
 }
 
 function renderWithVirtual(
   parentEl: HTMLElement,
   childIndex: number,
-  $current?: VirtualElementChild,
-  $new?: VirtualElementChild,
-  isRoot: boolean = false,
+  $current: VirtualElementChildOrEmpty,
+  $new: VirtualElementChildOrEmpty,
 ) {
+  const currentEl = parentEl.childNodes[childIndex];
+
   if (isComponentElement($new)) {
-    $new.onUpdate = ($updated: VirtualElementComponent) => {
-      renderChildren($new, $updated, parentEl.childNodes[childIndex] as HTMLElement);
-      $new.children = $updated.children;
+    if (!$new.children.length) {
+      $new = $new.componentInstance.render();
+    }
+
+    $new.componentInstance.onUpdate = ($previous: VirtualElementComponent, $updated: VirtualElementComponent) => {
+      renderChildren($previous, $updated, parentEl.childNodes[childIndex] as HTMLElement);
     };
   }
-
-  const currentEl = parentEl.childNodes[childIndex];
 
   if (!$current && $new) {
     parentEl.appendChild(createHTMLElement($new));
@@ -38,38 +46,95 @@ function renderWithVirtual(
   } else if ($current && $new) {
     if (hasElementChanged($current, $new)) {
       parentEl.replaceChild(createHTMLElement($new), currentEl);
-    } else {
+    } else if (isRealElement($current) && isRealElement($new)) {
+      if (isTagElement($current)) {
+        updateAttributes($current, $new, currentEl as HTMLElement);
+      }
+
       renderChildren($current, $new, currentEl as HTMLElement);
     }
   }
+}
 
-  if (isRoot) {
-    $currentRoot = $new as VirtualElementComponent;
+function updateAttributes($current: VirtualElement, $new: VirtualElement, element: HTMLElement) {
+  const currentKeys = Object.keys($current.props);
+  const newKeys = Object.keys($new.props);
+
+  currentKeys.forEach((key) => {
+    if (!$new.props.hasOwnProperty(key)) {
+      removeAttribute(element, key, $current.props[key]);
+    }
+  });
+
+  newKeys.forEach((key) => {
+    if (hasAttribute(element, key)) {
+      if ($current.props[key] !== $new.props[key]) {
+        removeAttribute(element, key, $current.props[key]);
+      }
+    }
+
+    addAttribute(element, key, $new.props[key]);
+  });
+}
+
+function hasAttribute(element: HTMLElement, key: string) {
+  if (key === 'className') {
+    return typeof element.className !== 'undefined';
+  } else if (key.startsWith('on')) {
+    // There is no way to check event listener, so there will be some redundant removes, but it is fine.
+    return true;
+  } else {
+    element.hasAttribute(key);
   }
 }
 
-function renderChildren($current: VirtualElementChild, $new: VirtualElementChild, currentEl: HTMLElement) {
-  const currentLength = !isStringElement($current) ? $current.children.length : 0;
-  const newLength = !isStringElement($new) ? $new.children.length : 0;
+function addAttribute(element: HTMLElement, key: string, value: any) {
+  if (key === 'className') {
+    element.className = value;
+  } else if (key.startsWith('on')) {
+    element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
+
+    if (key === 'onChange') {
+      setupAdditionalOnChangeHandlers(element, value);
+    }
+  } else {
+    element.setAttribute(key, value);
+  }
+}
+
+function removeAttribute(element: HTMLElement, key: string, value: any) {
+  if (key === 'className') {
+    delete element.className;
+  } else if (key.startsWith('on')) {
+    element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
+
+    if (key === 'onChange') {
+      removeAdditionalOnChangeHandlers(element, value);
+    }
+  } else {
+    element.removeAttribute(key);
+  }
+}
+
+function renderChildren($current: VirtualElement, $new: VirtualElement, currentEl: HTMLElement) {
+  const currentLength = isRealElement($current) ? $current.children.length : 0;
+  const newLength = isRealElement($new) ? $new.children.length : 0;
   const maxLength = Math.max(currentLength, newLength);
 
   for (let i = 0; i < maxLength; i++) {
+    let $currentChild = isRealElement($current) ? $current.children[i] : undefined;
+
+    // Child components tree is always changed.
+    if (isComponentElement($currentChild)) {
+      $currentChild = $currentChild.componentInstance.$prevElement;
+    }
+
     renderWithVirtual(
       currentEl,
       i,
-      !isStringElement($current) ? $current.children[i] : undefined,
-      !isStringElement($new) ? $new.children[i] : undefined,
+      $currentChild,
+      isRealElement($new) ? $new.children[i] : undefined,
     );
-  }
-}
-
-function hasElementChanged($old: VirtualElementChild, $new: VirtualElementChild) {
-  if (typeof $old !== typeof $new) {
-    return true;
-  } else if (isStringElement($old) && isStringElement($new)) {
-    return $old !== $new;
-  } else if (!isStringElement($old) && !isStringElement($new)) {
-    return $old.tag !== $new.tag;
   }
 }
 
@@ -83,17 +148,7 @@ function createHTMLElement($element: VirtualElementChild) {
 
   if (isTagElement($element)) {
     Object.keys(props).forEach((key) => {
-      if (key === 'className') {
-        element.className = props[key];
-      } else if (key.startsWith('on')) {
-        element.addEventListener(key.replace(/^on/, '').toLowerCase(), props[key], false);
-
-        if (key === 'onChange') {
-          setupAdditionalOnChangeHandlers(element, props[key]);
-        }
-      } else {
-        element.setAttribute(key, props[key]);
-      }
+      addAttribute(element, key, props[key]);
     });
   }
 
@@ -107,6 +162,11 @@ function createHTMLElement($element: VirtualElementChild) {
 function setupAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
   element.addEventListener('input', handler);
   element.addEventListener('paste', handler);
+}
+
+function removeAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
+  element.removeEventListener('paste', handler);
+  element.removeEventListener('input', handler);
 }
 
 export default { render };

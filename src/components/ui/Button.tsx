@@ -10,7 +10,7 @@ interface IProps {
   children: JsxChildren,
 }
 
-const Button: FC<IProps> = ({ onClick, children }: IProps) => {
+const Button: FC<IProps> = ({ onClick, children }) => {
   return (
     <button className="Button" onClick={onClick as OnClickHandler}>{children}</button>
   );

@@ -27,7 +27,7 @@ function getChatLetters(chat: Record<string, any>) {
 }
 
 export default withGlobal(
-  (global, ownProps: IProps) => {
+  (global, ownProps) => {
     const { chats } = global;
     const { id } = ownProps;
 
