@@ -1,0 +1,12 @@
+.Message {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.7rem;
+
+  .text {
+    border-radius: 8px;
+    background: white;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

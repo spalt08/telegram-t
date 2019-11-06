@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, updateGlobal } from '../../lib/reactnt';
+import { addReducer, getGlobal, setGlobal } from '../../lib/reactnt';
 
 import * as TdLib from '../../api/tdlib';
 import { TdLibUpdate } from '../../api/tdlib/updates';
@@ -26,10 +26,14 @@ export function onUpdate(update: TdLibUpdate) {
     case 'updateNewChat':
       const { byId = {} } = getGlobal().chats || {};
 
-      updateGlobal({
+      const global = getGlobal();
+
+      setGlobal({
+        ...global,
         chats: {
+          ...global.chats,
           byId: {
-            ...byId,
+            ...global.chats.byId,
             [update.chat.id]: update.chat,
           },
         },
@@ -55,12 +59,6 @@ async function loadChats() {
     offset_order: offsetOrder,
     limit: 25,
   });
-
-  // updateGlobal({
-  //   chats: {
-  //     ...getGlobal().chats.
-  //   },
-  // });
 }
 
 async function loadChat(id: number) {

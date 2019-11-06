@@ -1,9 +1,11 @@
 import { addReducer, GlobalState } from '../../lib/reactnt';
+
 import * as TdLib from '../../api/tdlib';
+import { TdLibUpdate } from '../../api/tdlib/updates';
 
 import * as system from './system';
 import * as chats from './chats';
-import { TdLibUpdate } from '../../api/tdlib/updates';
+import * as messages from './messages';
 
 addReducer('init', (global: GlobalState) => {
   TdLib.init(onUpdate);
@@ -19,4 +21,5 @@ function onUpdate(update: TdLibUpdate) {
 
   system.onUpdate(update);
   chats.onUpdate(update);
-};
+  messages.onUpdate(update);
+}

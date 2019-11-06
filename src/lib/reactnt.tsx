@@ -14,7 +14,12 @@ export type GlobalState = {
 
   chats: {
     selectedId?: number;
-    byId: Record<string, any>,
+    byId: Record<string, object>,
+  },
+
+  messages: {
+    selectedId?: number;
+    byChatId: Record<string, object[]>,
   },
 
   // TODO Move to `auth`.
@@ -29,24 +34,22 @@ const INITIAL_STATE: GlobalState = {
   chats: {
     byId: {},
   },
+
+  messages: {
+    byChatId: {}
+  }
 };
 
 type ActionTypes = (
   // system
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'signOut' |
   // chats
-  'loadChats' | 'selectChat'
+  'loadChats' | 'selectChat' |
+  // messages
+  'loadChatMessages' | 'selectMessage'
   );
 
 export type DispatchMap = Record<ActionTypes, Function>;
-
-// TODO Replace with nested reducers
-export function updateGlobal(update: Partial<GlobalState>) {
-  setGlobal({
-    ...getGlobal(),
-    ...update,
-  });
-}
 
 /* Polyfill start */
 import React, { FC, Props, useState } from './reactt';

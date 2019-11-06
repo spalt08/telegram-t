@@ -1,6 +1,8 @@
 import React, { FC } from '../../../../lib/reactt';
 import { withGlobal } from '../../../../lib/reactnt';
 
+import MessageList from './MessageList';
+
 import './MiddleColumn.scss';
 
 type IProps = {
@@ -11,9 +13,9 @@ const MiddleColumn: FC<IProps> = ({ selectedChatId }) => {
   return (
     <div className="MiddleColumn">
       {selectedChatId ? (
-        <div>Selected chat ID: {selectedChatId}</div>
+        <MessageList />
       ) : (
-        <div>Select chat to start messaging...</div>
+        <div className="select-chat-note">Select chat to start messaging...</div>
       )}
     </div>
   );
@@ -22,7 +24,7 @@ const MiddleColumn: FC<IProps> = ({ selectedChatId }) => {
 export default withGlobal(
   (global) => {
     return {
-      selectedChatId: global.chats && global.chats.selectedId,
+      selectedChatId: global.chats.selectedId,
     };
   },
 )(MiddleColumn);

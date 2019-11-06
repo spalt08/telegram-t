@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, updateGlobal } from '../../lib/reactnt';
+import { addReducer, getGlobal, setGlobal } from '../../lib/reactnt';
 
 import * as TdLib from '../../api/tdlib';
 import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../api/tdlib/updates';
@@ -34,11 +34,17 @@ export function onUpdate(update: TdLibUpdate) {
 }
 
 function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
-  updateGlobal({ authState: update.authorization_state['@type'] });
+  setGlobal({
+    ...getGlobal(),
+    authState: update.authorization_state['@type'],
+  });
 
   switch (update.authorization_state['@type']) {
     case 'authorizationStateLoggingOut':
-      updateGlobal({ isLoggingOut: true });
+      setGlobal({
+        ...getGlobal(),
+        isLoggingOut: true,
+      });
       break;
     case 'authorizationStateWaitTdlibParameters':
       TdLib.sendParameters();
@@ -60,12 +66,15 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
       });
       break;
     case 'authorizationStateReady':
-      updateGlobal({ isLoggingOut: false });
+      setGlobal({
+        ...getGlobal(),
+        isLoggingOut: false,
+      });
       break;
     case 'authorizationStateClosing':
       break;
     case 'authorizationStateClosed':
-      if (!getGlobal().isLoggingOut) {
+      if (getGlobal().isLoggingOut) {
         document.title += ': Zzz…';
         // this.emit('clientUpdateAppInactive');
       } else {

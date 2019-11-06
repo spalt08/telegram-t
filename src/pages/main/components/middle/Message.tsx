@@ -3,19 +3,20 @@ import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
 
 import Avatar from '../../../../components/Avatar';
 
-import './Chat.scss';
+import './Message.scss';
 
 type IProps = {
-  id: number,
-  chat: Record<string, any>,
+  message: Record<string, any>,
   isSelected: boolean,
-} & Pick<DispatchMap, 'selectChat'>;
+} & Pick<DispatchMap, 'selectMessage'>;
 
-const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
+const Chat: FC<IProps> = ({ message, isSelected, selectMessage }) => {
+  const text = message.content.text.text;
+
   return (
-    <div className={`Chat ${isSelected ? 'selected' : ''}`} onClick={() => selectChat({ id: chat.id })}>
-      <Avatar>{getChatLetters(chat)}</Avatar>
-      <div className="title">{chat.title}</div>
+    <div className={`Message ${isSelected ? 'selected' : ''}`} /*onClick={() => ({ id: message.id })}*/>
+      <Avatar small>HE</Avatar>
+      <div className="text">{text}</div>
     </div>
   );
 };
@@ -31,16 +32,15 @@ function getChatLetters(chat: Record<string, any>) {
 
 export default withGlobal(
   (global, ownProps) => {
-    const { chats } = global;
+    const { messages } = global;
     const { id } = ownProps;
 
     return {
-      chat: chats.byId[id],
-      isSelected: Number(id) === chats.selectedId,
+      isSelected: Number(id) === messages.selectedId,
     };
   },
   (setGlobal, actions) => {
-    const { selectChat } = actions;
-    return { selectChat };
+    const { selectMessage } = actions;
+    return { selectMessage };
   },
 )(Chat);
