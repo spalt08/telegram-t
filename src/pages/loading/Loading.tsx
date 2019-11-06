@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/reactt';
+import React, { FC } from '../../lib/teact';
 
 import './Loading.scss';
 

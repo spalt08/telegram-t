@@ -52,7 +52,7 @@ type ActionTypes = (
 export type DispatchMap = Record<ActionTypes, Function>;
 
 /* Polyfill start */
-import React, { FC, Props, useState } from './reactt';
+import React, { FC, Props, useState } from './teact';
 
 type ActionPayload = Record<string, any>;
 

@@ -1,7 +1,7 @@
 import { ChangeEvent } from 'react';
 
-import React, { FC, useState } from '../../../lib/reactt';
-import { DispatchMap, withGlobal } from '../../../lib/reactnt';
+import React, { FC, useState } from '../../../lib/teact';
+import { DispatchMap, withGlobal } from '../../../lib/teactn';
 
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';

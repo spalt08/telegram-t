@@ -1,5 +1,5 @@
-import { FC, useState } from '../../lib/reactt';
-import React from '../../lib/reactnt';
+import { FC, useState } from '../../lib/teact';
+import React from '../../lib/teactn';
 import { UpdateAuthorizationStateType } from '../../api/tdlib/updates';
 
 type IProps = {

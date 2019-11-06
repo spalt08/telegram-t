@@ -1,5 +1,5 @@
-import React, { FC } from '../../../../lib/reactt';
-import { withGlobal } from '../../../../lib/reactnt';
+import React, { FC } from '../../../../lib/teact';
+import { withGlobal } from '../../../../lib/teactn';
 
 import MessageList from './MessageList';
 

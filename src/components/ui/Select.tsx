@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, JsxChildren } from '../../lib/reactt';
+import React, { FC, JsxChildren } from '../../lib/teact';
 
 import './Select.scss';
 

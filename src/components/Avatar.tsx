@@ -1,9 +1,9 @@
-import React, { FC, JsxChildren } from '../lib/reactt';
+import React, { FC, JsxChildren } from '../lib/teact';
 
 import './Avatar.scss';
 
 interface IProps {
-  small: boolean,
+  small?: boolean,
   children: JsxChildren,
 }
 

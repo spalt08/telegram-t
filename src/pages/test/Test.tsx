@@ -1,6 +1,6 @@
-import React, { GlobalState, withGlobal } from '../../lib/reactnt';
+import React, { GlobalState, withGlobal } from '../../lib/teactn';
 import SubTest from './SubTest';
-import { FC } from '../../lib/reactt';
+import { FC } from '../../lib/teact';
 
 type IProps = Pick<GlobalState, 'authState'> & {
   rand: string;

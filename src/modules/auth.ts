@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/reactnt';
+import { addReducer } from '../lib/teactn';
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;

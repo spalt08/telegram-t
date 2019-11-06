@@ -1,5 +1,5 @@
-import React, { FC } from '../../../../lib/reactt';
-import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
+import React, { FC } from '../../../../lib/teact';
+import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import Button from '../../../../components/ui/Button';
 

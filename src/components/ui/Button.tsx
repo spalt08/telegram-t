@@ -1,6 +1,6 @@
 import { MouseEvent } from 'react';
 
-import React, { FC, JsxChildren } from '../../lib/reactt';
+import React, { FC, JsxChildren } from '../../lib/teact';
 import './Button.scss';
 
 type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;

@@ -1,5 +1,5 @@
-import { FC } from './lib/reactt';
-import React, { DispatchMap, GlobalState, withGlobal } from './lib/reactnt';
+import { FC } from './lib/teact';
+import React, { DispatchMap, GlobalState, withGlobal } from './lib/teactn';
 
 import './modules';
 

@@ -5,7 +5,7 @@ import {
   hasElementChanged,
   isComponentElement, isEmptyElement, isRealElement, isTextElement, isTagElement, VIRTUAL_ELEMENT_EMPTY,
   VirtualElement, VirtualElementChild, VirtualElementComponent,
-} from './reactt';
+} from './teact';
 
 let $currentRoot: VirtualElementComponent;
 

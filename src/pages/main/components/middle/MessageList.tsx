@@ -1,5 +1,5 @@
-import React, { FC } from '../../../../lib/reactt';
-import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
+import React, { FC } from '../../../../lib/teact';
+import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import Message from './Message';
 import orderBy from '../../../../util/orderBy';

@@ -1,5 +1,5 @@
-import React, { FC } from '../../lib/reactt';
-import { GlobalState, withGlobal } from '../../lib/reactnt';
+import React, { FC } from '../../lib/teact';
+import { GlobalState, withGlobal } from '../../lib/teactn';
 
 import LeftColumn from './components/left/LeftColumn';
 import MiddleColumn from './components/middle/MiddleColumn';

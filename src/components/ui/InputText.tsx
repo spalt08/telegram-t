@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/reactt';
+import React, { FC } from '../../lib/teact';
 
 import './InputText.scss';
 

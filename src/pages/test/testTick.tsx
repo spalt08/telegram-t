@@ -1,5 +1,5 @@
-import React from '../../lib/reactt';
-import ReacttDOM from '../../lib/reactt-dom';
+import React from '../../lib/teact';
+import TeactDOM from '../../lib/teact-dom';
 
 function tick() {
   const element = (
@@ -8,7 +8,7 @@ function tick() {
       <h2>It is {new Date().toLocaleTimeString()}.</h2>
     </div>
   );
-  ReacttDOM.render(element, document.getElementById('root'));
+  TeactDOM.render(element, document.getElementById('root'));
 }
 
 setInterval(tick, 1000);

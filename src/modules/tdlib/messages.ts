@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../lib/reactnt';
+import { addReducer, getGlobal, setGlobal } from '../../lib/teactn';
 
 import * as TdLib from '../../api/tdlib';
 import { TdLibUpdate } from '../../api/tdlib/updates';

@@ -1,5 +1,5 @@
-import React, { FC } from '../../../../lib/reactt';
-import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/reactnt';
+import React, { FC } from '../../../../lib/teact';
+import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
 import Chat from './Chat';
 
 import './ChatList.scss';

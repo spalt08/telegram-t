@@ -1,5 +1,5 @@
-import React, { FC } from '../../../../lib/reactt';
-import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
+import React, { FC } from '../../../../lib/teact';
+import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import Avatar from '../../../../components/Avatar';
 
@@ -10,11 +10,11 @@ type IProps = {
   isSelected: boolean,
 } & Pick<DispatchMap, 'selectMessage'>;
 
-const Chat: FC<IProps> = ({ message, isSelected, selectMessage }) => {
+const Message: FC<IProps> = ({ message, isSelected }) => {
   const text = message.content.text.text;
 
   return (
-    <div className={`Message ${isSelected ? 'selected' : ''}`} /*onClick={() => ({ id: message.id })}*/>
+    <div className={`Message ${isSelected ? 'selected' : ''}`}>
       <Avatar small>HE</Avatar>
       <div className="text">{text}</div>
     </div>
@@ -43,4 +43,4 @@ export default withGlobal(
     const { selectMessage } = actions;
     return { selectMessage };
   },
-)(Chat);
+)(Message);

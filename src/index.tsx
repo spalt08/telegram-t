@@ -1,10 +1,10 @@
-import React, { getGlobal, setGlobal } from './lib/reactnt';
-import ReacttDOM from './lib/reactt-dom';
+import React, { getGlobal, setGlobal } from './lib/teactn';
+import TeactDOM from './lib/teact-dom';
 
 import App from './App';
 import './global.scss';
 
-ReacttDOM.render(
+TeactDOM.render(
   <App />,
   document.getElementById('root'),
 );
