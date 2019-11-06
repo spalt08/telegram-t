@@ -16,9 +16,6 @@ function onSignOut(signOut: Function) {
 const RightColumn: FC<IProps> = ({ signOut }) => {
   return (
     <div className='RightColumn'>
-      Right Column
-      <br />
-      <br />
       <Button onClick={() => onSignOut(signOut)}>Sign Out</Button>
     </div>
   );

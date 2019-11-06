@@ -14,20 +14,11 @@ type IProps = {
 const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
   return (
     <div className={`Chat ${isSelected ? 'selected' : ''}`} onClick={() => selectChat({ id: chat.id })}>
-      <Avatar>{getChatLetters(chat)}</Avatar>
+      <Avatar chat={chat} />
       <div className="title">{chat.title}</div>
     </div>
   );
 };
-
-function getChatLetters(chat: Record<string, any>) {
-  return chat.title
-    .replace(/[^\W\w\s]+/, '')
-    .split(' ')
-    .map((word: string) => word[0].toUpperCase())
-    .slice(0, 2)
-    .join('');
-}
 
 export default withGlobal(
   (global, ownProps) => {

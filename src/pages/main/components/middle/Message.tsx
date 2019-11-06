@@ -15,7 +15,7 @@ const Message: FC<IProps> = ({ message, isSelected }) => {
 
   return (
     <div className={`Message ${isSelected ? 'selected' : ''}`}>
-      <Avatar small>HE</Avatar>
+      <Avatar size="small">HE</Avatar>
       <div className="text">{text}</div>
     </div>
   );

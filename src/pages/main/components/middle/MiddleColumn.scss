@@ -1,8 +1,14 @@
 .MiddleColumn {
   display: flex;
   justify-content: center;
-  padding: 5px;
   background: rgb(230, 235, 238);
+
+  .messages-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
 
   .select-chat-note {
     display: flex;

@@ -4,14 +4,14 @@
   text-align: left;
 
   > div:nth-child(1), > div:nth-child(3) {
-    flex: 1;
+    flex: 3;
     height: 100%;
     overflow: auto;
   }
 
   > div:nth-child(2) {
-    flex: 3;
-    border-left: 1px solid rgb(236, 237, 239);
-    border-right: 1px solid rgb(236, 237, 239);
+    flex: 6;
+    border-left: 1px solid #ECEDEF;
+    border-right: 1px solid #ECEDEF;
   }
 }
