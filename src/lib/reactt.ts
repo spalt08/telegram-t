@@ -2,8 +2,6 @@
 // export { useState } from 'react';
 // export default React;
 
-let renderingInstance: ComponentInstance;
-
 export type Props = Record<string, any>;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
 
@@ -11,6 +9,10 @@ export enum VirtualElementTypesEnum {
   Tag,
   Component,
 }
+
+export type VirtualElementEmpty = 'VIRTUAL_ELEMENT_EMPTY';
+
+export type VirtualElementText = string;
 
 export interface VirtualElementTag {
   type: VirtualElementTypesEnum.Tag,
@@ -42,9 +44,8 @@ interface ComponentInstance {
 }
 
 export type VirtualElement = VirtualElementTag | VirtualElementComponent;
-export type VirtualElementChild = string | VirtualElementTag | VirtualElementComponent;
-export type VirtualElementChildOrEmpty = VirtualElementChild | undefined;
-export type VirtualElementChildren = VirtualElementChildOrEmpty[];
+export type VirtualElementChild = VirtualElement | VirtualElementEmpty | VirtualElementText;
+export type VirtualElementChildren = VirtualElementChild[];
 // Fix for default JSX type error.
 export type JsxChildren = VirtualElementChildren | VirtualElementChild;
 
@@ -56,19 +57,27 @@ interface ComponentInstanceState {
   }[],
 }
 
-export function isStringElement($element: VirtualElementChildOrEmpty): $element is string {
-  return typeof $element === 'string';
+let renderingInstance: ComponentInstance;
+
+export const VIRTUAL_ELEMENT_EMPTY: VirtualElementEmpty = 'VIRTUAL_ELEMENT_EMPTY';
+
+export function isEmptyElement($element: VirtualElementChild): $element is VirtualElementEmpty {
+  return $element === VIRTUAL_ELEMENT_EMPTY;
 }
 
-export function isRealElement($element: VirtualElementChildOrEmpty): $element is VirtualElement {
+export function isTextElement($element: VirtualElementChild): $element is VirtualElementText {
+  return typeof $element === 'string' && !isEmptyElement($element);
+}
+
+export function isRealElement($element: VirtualElementChild): $element is VirtualElement {
   return typeof $element === 'object';
 }
 
-export function isTagElement($element: VirtualElementChildOrEmpty): $element is VirtualElementTag {
+export function isTagElement($element: VirtualElementChild): $element is VirtualElementTag {
   return isRealElement($element) && $element.type === VirtualElementTypesEnum.Tag;
 }
 
-export function isComponentElement($element: VirtualElementChildOrEmpty): $element is VirtualElementComponent {
+export function isComponentElement($element: VirtualElementChild): $element is VirtualElementComponent {
   return isRealElement($element) && $element.type === VirtualElementTypesEnum.Component;
 }
 
@@ -133,12 +142,12 @@ function createElement(
     type: VirtualElementTypesEnum.Tag,
     tag,
     props,
-    children: childrenArray.map((child): VirtualElementChildOrEmpty => {
+    children: childrenArray.map((child): VirtualElementChild => {
       if (typeof child === 'object') {
         return child;
       } else if (child === false) {
         // Support for `&&` operator.
-        return undefined;
+        return VIRTUAL_ELEMENT_EMPTY;
       } else {
         return String(child);
       }
@@ -177,9 +186,9 @@ function getUpdatedChildren($element: VirtualElement, newChildren: VirtualElemen
   const newLength = newChildren.length;
   const maxLength = Math.max(currentLength, newLength);
 
-  const children = [];
+  const children: VirtualElementChildren = [];
   for (let i = 0; i < maxLength; i++) {
-    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]));
+    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]) || VIRTUAL_ELEMENT_EMPTY);
   }
   return children;
 }
@@ -187,8 +196,8 @@ function getUpdatedChildren($element: VirtualElement, newChildren: VirtualElemen
 function getUpdatedChild(
   $element: VirtualElement,
   childIndex: number,
-  currentChild: VirtualElementChildOrEmpty,
-  newChild: VirtualElementChildOrEmpty,
+  currentChild: VirtualElementChild,
+  newChild: VirtualElementChild,
 ) {
   if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
@@ -215,7 +224,7 @@ function getUpdatedChild(
 export function hasElementChanged($old: VirtualElementChild, $new: VirtualElementChild) {
   if (typeof $old !== typeof $new) {
     return true;
-  } else if (isStringElement($old) || isStringElement($new)) {
+  } else if (isTextElement($old) || isTextElement($new)) {
     return $old !== $new;
   } else if ($old.type !== $new.type) {
     return true;

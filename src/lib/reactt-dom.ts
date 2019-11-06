@@ -3,10 +3,8 @@
 
 import {
   hasElementChanged,
-  isComponentElement, isRealElement, isStringElement, isTagElement,
-  VirtualElement,
-  VirtualElementChild, VirtualElementChildOrEmpty,
-  VirtualElementComponent,
+  isComponentElement, isEmptyElement, isRealElement, isTextElement, isTagElement, VIRTUAL_ELEMENT_EMPTY,
+  VirtualElement, VirtualElementChild, VirtualElementComponent,
 } from './reactt';
 
 let $currentRoot: VirtualElementComponent;
@@ -24,9 +22,10 @@ function render($element: VirtualElementComponent, parentEl: HTMLElement | null)
 function renderWithVirtual(
   parentEl: HTMLElement,
   childIndex: number,
-  $current: VirtualElementChildOrEmpty,
-  $new: VirtualElementChildOrEmpty,
+  $current: VirtualElementChild | null,
+  $new: VirtualElementChild,
 ) {
+
   const currentEl = parentEl.childNodes[childIndex];
 
   if (!$current && $new) {
@@ -59,12 +58,16 @@ function initComponentElement($element: VirtualElementComponent, parentEl: HTMLE
 }
 
 // Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
-function getActualPrevElement($element: VirtualElementChildOrEmpty): VirtualElementChildOrEmpty {
+function getActualPrevElement($element: VirtualElementChild): VirtualElementChild {
   return isComponentElement($element) ? $element.componentInstance.$prevElement : $element;
 }
 
 function createNode($element: VirtualElementChild, parentEl: HTMLElement, childIndex: number): Node {
-  if (isStringElement($element)) {
+  if (isEmptyElement($element)) {
+    return document.createTextNode('');
+  }
+
+  if (isTextElement($element)) {
     return document.createTextNode($element);
   }
 
@@ -83,7 +86,7 @@ function createNode($element: VirtualElementChild, parentEl: HTMLElement, childI
   }
 
   children.forEach(($child, i) => {
-    renderWithVirtual(element, i, undefined, $child);
+    renderWithVirtual(element, i, null, $child);
   });
 
   return element;
@@ -95,13 +98,13 @@ function renderChildren($current: VirtualElement, $new: VirtualElement, currentE
   const maxLength = Math.max(currentLength, newLength);
 
   for (let i = 0; i < maxLength; i++) {
-    const $currentChild = isRealElement($current) ? getActualPrevElement($current.children[i]) : undefined;
+    const $currentChild = getActualPrevElement($current.children[i]);
 
     renderWithVirtual(
       currentEl,
       i,
       $currentChild,
-      isRealElement($new) ? $new.children[i] : undefined,
+      isRealElement($new) ? $new.children[i] : VIRTUAL_ELEMENT_EMPTY,
     );
   }
 }
