@@ -2,7 +2,6 @@
 // export { useState } from 'react';
 // export default React;
 
-const DEFAULT_TAG = 'div';
 let renderingInstance: ComponentInstance;
 
 export type Props = Record<string, any>;
@@ -20,17 +19,11 @@ export interface VirtualElementTag {
   children: VirtualElementChildren,
 }
 
-interface State {
-  cursor: number,
-  byCursor: {
-    value: any,
-    setter: Function
-  }[],
-}
-
-export interface VirtualElementComponent extends Omit<VirtualElementTag, 'type'> {
+export interface VirtualElementComponent {
   type: VirtualElementTypesEnum.Component,
   componentInstance: ComponentInstance,
+  props: Props,
+  children: VirtualElementChildren,
 }
 
 interface ComponentInstance {
@@ -41,7 +34,7 @@ interface ComponentInstance {
   key?: string,
   props: Props,
   children: VirtualElementChildren,
-  state: State,
+  state: ComponentInstanceState,
   render: () => VirtualElementComponent,
   forceUpdate: Function,
   onUpdate?: Function,
@@ -54,6 +47,14 @@ export type VirtualElementChildOrEmpty = VirtualElementChild | undefined;
 export type VirtualElementChildren = VirtualElementChildOrEmpty[];
 // Fix for default JSX type error.
 export type JsxChildren = VirtualElementChildren | VirtualElementChild;
+
+interface ComponentInstanceState {
+  cursor: number,
+  byCursor: {
+    value: any,
+    setter: Function
+  }[],
+}
 
 export function isStringElement($element: VirtualElementChildOrEmpty): $element is string {
   return typeof $element === 'string';
@@ -72,7 +73,7 @@ export function isComponentElement($element: VirtualElementChildOrEmpty): $eleme
 }
 
 function createElement(
-  tag: string | FC = DEFAULT_TAG,
+  tag: string | FC,
   props: Props,
   ...children: any[]
 ): VirtualElement {
@@ -154,7 +155,6 @@ const createComponentElement = (
   return {
     componentInstance,
     type: VirtualElementTypesEnum.Component,
-    tag: DEFAULT_TAG, // TODO Try to remove.
     props,
     children,
   };

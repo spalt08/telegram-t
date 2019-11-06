@@ -7,9 +7,14 @@ html, body {
 }
 
 #root {
+  height: 100%;
   text-align: center;
 }
 
 .hidden {
   visibility: hidden;
+}
+
+* {
+  box-sizing: border-box;
 }

@@ -29,30 +29,80 @@ function renderWithVirtual(
 ) {
   const currentEl = parentEl.childNodes[childIndex];
 
-  if (isComponentElement($new)) {
-    if (!$new.children.length) {
-      $new = $new.componentInstance.render();
-    }
-
-    $new.componentInstance.onUpdate = ($previous: VirtualElementComponent, $updated: VirtualElementComponent) => {
-      renderChildren($previous, $updated, parentEl.childNodes[childIndex] as HTMLElement);
-    };
-  }
-
   if (!$current && $new) {
-    parentEl.appendChild(createHTMLElement($new));
+    parentEl.appendChild(createNode($new, parentEl, childIndex));
   } else if ($current && !$new) {
     parentEl.removeChild(currentEl);
   } else if ($current && $new) {
     if (hasElementChanged($current, $new)) {
-      parentEl.replaceChild(createHTMLElement($new), currentEl);
+      parentEl.replaceChild(createNode($new, parentEl, childIndex), currentEl);
     } else if (isRealElement($current) && isRealElement($new)) {
       if (isTagElement($current)) {
         updateAttributes($current, $new, currentEl as HTMLElement);
       }
 
-      renderChildren($current, $new, currentEl as HTMLElement);
+      if (isComponentElement($new)) {
+        renderWithVirtual(parentEl, childIndex, getActualPrevElement($current.children[0]), $new.children[0]);
+      } else {
+        renderChildren($current, $new, currentEl as HTMLElement);
+      }
     }
+  }
+}
+
+function initComponentElement($element: VirtualElementComponent, parentEl: HTMLElement, childIndex: number) {
+  $element.componentInstance.onUpdate = ($previous: VirtualElementComponent, $updated: VirtualElementComponent) => {
+    renderWithVirtual(parentEl, childIndex, $previous, $updated);
+  };
+
+  return $element.children.length ? $element : $element.componentInstance.render();
+}
+
+// Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
+function getActualPrevElement($element: VirtualElementChildOrEmpty): VirtualElementChildOrEmpty {
+  return isComponentElement($element) ? $element.componentInstance.$prevElement : $element;
+}
+
+function createNode($element: VirtualElementChild, parentEl: HTMLElement, childIndex: number): Node {
+  if (isStringElement($element)) {
+    return document.createTextNode($element);
+  }
+
+  if (isComponentElement($element)) {
+    $element = initComponentElement($element, parentEl, childIndex);
+    return createNode($element.children[0] as VirtualElementChild, parentEl, childIndex);
+  }
+
+  const { tag, props, children = [] } = $element;
+  const element = document.createElement(tag);
+
+  if (isTagElement($element)) {
+    Object.keys(props).forEach((key) => {
+      addAttribute(element, key, props[key]);
+    });
+  }
+
+  children.forEach(($child, i) => {
+    renderWithVirtual(element, i, undefined, $child);
+  });
+
+  return element;
+}
+
+function renderChildren($current: VirtualElement, $new: VirtualElement, currentEl: HTMLElement) {
+  const currentLength = isRealElement($current) ? $current.children.length : 0;
+  const newLength = isRealElement($new) ? $new.children.length : 0;
+  const maxLength = Math.max(currentLength, newLength);
+
+  for (let i = 0; i < maxLength; i++) {
+    const $currentChild = isRealElement($current) ? getActualPrevElement($current.children[i]) : undefined;
+
+    renderWithVirtual(
+      currentEl,
+      i,
+      $currentChild,
+      isRealElement($new) ? $new.children[i] : undefined,
+    );
   }
 }
 
@@ -114,49 +164,6 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   } else {
     element.removeAttribute(key);
   }
-}
-
-function renderChildren($current: VirtualElement, $new: VirtualElement, currentEl: HTMLElement) {
-  const currentLength = isRealElement($current) ? $current.children.length : 0;
-  const newLength = isRealElement($new) ? $new.children.length : 0;
-  const maxLength = Math.max(currentLength, newLength);
-
-  for (let i = 0; i < maxLength; i++) {
-    let $currentChild = isRealElement($current) ? $current.children[i] : undefined;
-
-    // Child components tree is always changed.
-    if (isComponentElement($currentChild)) {
-      $currentChild = $currentChild.componentInstance.$prevElement;
-    }
-
-    renderWithVirtual(
-      currentEl,
-      i,
-      $currentChild,
-      isRealElement($new) ? $new.children[i] : undefined,
-    );
-  }
-}
-
-function createHTMLElement($element: VirtualElementChild) {
-  if (isStringElement($element)) {
-    return document.createTextNode($element);
-  }
-
-  const { tag, props, children = [] } = $element;
-  const element = document.createElement(tag);
-
-  if (isTagElement($element)) {
-    Object.keys(props).forEach((key) => {
-      addAttribute(element, key, props[key]);
-    });
-  }
-
-  children.forEach(($child, i) => {
-    renderWithVirtual(element, i, undefined, $child);
-  });
-
-  return element;
 }
 
 function setupAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {

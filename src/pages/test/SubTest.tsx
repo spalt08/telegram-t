@@ -9,7 +9,7 @@ type IProps = {
 
 const SubTest: FC<IProps> = ({ authState, rand }) => {
   console.log('rendering SUB TEST', authState, rand);
-  // const [value, setValue] = useState(0);
+  const [value, setValue] = useState(0);
 
   return (
     <div>
@@ -23,8 +23,8 @@ const SubTest: FC<IProps> = ({ authState, rand }) => {
         rand: {rand}!
       </div>
       <div>
-        {/*state value: {value}!*/}
-        {/*<input type="button" onClick={() => setValue(value + 1)} value=" + " />*/}
+        state value: {value}!
+        <input type="button" onClick={() => setValue(value + 1)} value=" + " />
       </div>
     </div>
   );

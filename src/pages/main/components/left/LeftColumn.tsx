@@ -13,7 +13,7 @@ const LeftColumn: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
 
   return areChatsLoaded ? (
     <div>
-      {Object.keys(chats.byId).map((id) => (
+      {Object.keys(chats.byId).map(id => (
         <div>
           <Chat key={id} id={id} />
         </div>
