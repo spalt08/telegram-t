@@ -7,6 +7,20 @@ addReducer('loadChats', () => {
   void loadChats();
 });
 
+addReducer('selectChat', (global, actions, payload) => {
+  const { id } = payload!;
+
+  void loadChat(id);
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      selectedId: id,
+    }
+  };
+});
+
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
     case 'updateNewChat':
@@ -47,4 +61,7 @@ async function loadChats() {
   //     ...getGlobal().chats.
   //   },
   // });
+}
+
+async function loadChat(id: number) {
 }

@@ -5,6 +5,7 @@ type UpdateAuthorizationStateType = (
   'authorizationStateWaitPhoneNumber' |
   'authorizationStateWaitCode' |
   'authorizationStateWaitPassword' |
+  'authorizationStateWaitRegistration' |
   'authorizationStateReady' |
   'authorizationStateClosing' |
   'authorizationStateClosed'

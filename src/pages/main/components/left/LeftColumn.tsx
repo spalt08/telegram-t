@@ -2,15 +2,16 @@ import React, { FC } from '../../../../lib/reactt';
 import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/reactnt';
 import Chat from './Chat';
 
-type IProps = Pick<GlobalState, 'chats'> & Pick<DispatchMap, 'loadChats'>
+type IProps = Pick<GlobalState, 'chats'> & Pick<DispatchMap, 'loadChats'> & {
+  areChatsLoaded: boolean;
+};
 
-const LeftColumn: FC<IProps> = ({ chats, loadChats }) => {
-  if (!chats) {
-    // TODO use effect
+const LeftColumn: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
+  if (!areChatsLoaded) {
     loadChats();
   }
 
-  return chats && chats.byId ? (
+  return areChatsLoaded ? (
     <div>
       {Object.keys(chats.byId).map((id) => (
         <div>
@@ -26,7 +27,10 @@ const LeftColumn: FC<IProps> = ({ chats, loadChats }) => {
 export default withGlobal(
   global => {
     const { chats } = global;
-    return { chats };
+    return {
+      chats,
+      areChatsLoaded: Object.keys(chats.byId).length,
+    };
   },
   (setGlobal, actions) => {
     const { loadChats } = actions;

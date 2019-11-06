@@ -1,16 +1,16 @@
 import React, { FC } from '../../../../lib/reactt';
-import { withGlobal } from '../../../../lib/reactnt';
+import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
 
 import './Chat.scss';
 
 type IProps = {
   id: number,
   chat: Record<string, any>,
-};
+} & Pick<DispatchMap, 'selectChat'>;
 
-const Chat: FC<IProps> = ({ chat }) => {
+const Chat: FC<IProps> = ({ chat, selectChat }) => {
   return (
-    <div className="Chat">
+    <div className="Chat" onClick={() => selectChat({ id: chat.id })}>
       <div className="avatar">{getChatLetters(chat)}</div>
       <div className="title">{chat.title}</div>
     </div>
@@ -31,8 +31,12 @@ export default withGlobal(
     const { chats } = global;
     const { id } = ownProps;
 
-    const chat = chats!.byId[id];
-
-    return { chat };
+    return {
+      chat: chats.byId[id],
+    };
+  },
+  (setGlobal, actions) => {
+    const { selectChat } = actions;
+    return { selectChat };
   },
 )(Chat);

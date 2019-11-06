@@ -3,7 +3,7 @@ import React, { DispatchMap, GlobalState, withGlobal } from './lib/reactnt';
 
 import './modules';
 
-import Loading from './pages/Loading';
+import Loading from './pages/loading/Loading';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
 import Test from './pages/test/Test';

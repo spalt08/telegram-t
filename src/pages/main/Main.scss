@@ -2,10 +2,6 @@
   display: flex;
   text-align: left;
 
-  > div {
-    padding: 1rem;
-  }
-
   > div:nth-child(1), > div:nth-child(3) {
     flex: 1;
     height: 100%;

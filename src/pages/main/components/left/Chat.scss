@@ -1,6 +1,15 @@
 .Chat {
-  padding: 0.5rem 0;
+  padding: 0.5rem 1rem;
   display: flex;
+  cursor: pointer;
+
+  &:hover {
+    background: #4ea4f6;
+  }
+
+  &:active {
+    background: #4b9dec;
+  }
 
   .avatar {
     margin-right: 0.5rem;

@@ -52,6 +52,13 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
       break;
     case 'authorizationStateWaitPassword':
       break;
+    case 'authorizationStateWaitRegistration':
+      TdLib.send({
+        '@type': 'registerUser',
+        first_name: 'Tester',
+        last_name: 'Account',
+      });
+      break;
     case 'authorizationStateReady':
       updateGlobal({ isLoggingOut: false });
       break;

@@ -9,27 +9,39 @@ import throttleWithRaf from '../util/throttleWithRaf';
 
 export default React;
 
-export type GlobalState = Partial<{
+export type GlobalState = {
   isInitialized: boolean,
-  isLoggingOut: boolean,
-  authState: UpdateAuthorizationStateType,
-  authPhoneNumber: string,
+
   chats: {
+    selectedId?: number;
     byId: Record<string, any>,
   },
-}>;
+
+  // TODO Move to `auth`.
+  isLoggingOut?: boolean,
+  authState?: UpdateAuthorizationStateType,
+  authPhoneNumber?: string,
+};
 
 const INITIAL_STATE: GlobalState = {
   isInitialized: false,
-  isLoggingOut: false,
+
+  chats: {
+    byId: {},
+  },
 };
 
-type ActionTypes = 'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'loadChats' | 'signOut';
+type ActionTypes = (
+  // system
+  'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'signOut' |
+  // chats
+  'loadChats' | 'selectChat'
+  );
 
 export type DispatchMap = Record<ActionTypes, Function>;
 
 // TODO Replace with nested reducers
-export function updateGlobal(update: GlobalState) {
+export function updateGlobal(update: Partial<GlobalState>) {
   setGlobal({
     ...getGlobal(),
     ...update,
@@ -50,7 +62,7 @@ type Reducer = (
 type MapStateToProps = ((global: GlobalState, ownProps?: any) => Record<string, any>);
 type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap>);
 
-let global: GlobalState = INITIAL_STATE;
+let global = INITIAL_STATE;
 
 const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
@@ -64,6 +76,8 @@ const containers: Record<string, {
 }> = {};
 
 export function setGlobal(newGlobal: GlobalState) {
+  console.log('[State] UPDATE', { global, newGlobal });
+
   if (typeof newGlobal !== 'undefined' && newGlobal !== global) {
     global = newGlobal;
   }
@@ -123,6 +137,8 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
     reducers[name] = [];
 
     actions[name] = (payload?: ActionPayload) => {
+      console.log('[State] ACTION', name, payload);
+
       onDispatch(name, payload);
     };
   }

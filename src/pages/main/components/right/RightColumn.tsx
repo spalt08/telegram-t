@@ -1,7 +1,9 @@
 import React, { FC } from '../../../../lib/reactt';
-import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/reactnt';
+import { DispatchMap, withGlobal } from '../../../../lib/reactnt';
 
 import Button from '../../../../components/ui/Button';
+
+import './RightColumn.scss';
 
 type IProps = Pick<DispatchMap, 'signOut'>
 
@@ -13,7 +15,7 @@ function onSignOut(signOut: Function) {
 
 const RightColumn: FC<IProps> = ({ signOut }) => {
   return (
-    <div>
+    <div className='RightColumn'>
       Right Column
       <br />
       <br />

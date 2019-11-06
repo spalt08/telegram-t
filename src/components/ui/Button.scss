@@ -7,4 +7,13 @@
   background: #4ea4f6;
   padding: 10px;
   color: white;
+  cursor: pointer;
+
+  &:hover {
+    background: #51aaff;
+  }
+
+  &:active {
+    background: #4b9dec;
+  }
 }

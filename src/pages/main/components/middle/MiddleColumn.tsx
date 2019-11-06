@@ -1,15 +1,28 @@
 import React, { FC } from '../../../../lib/reactt';
-import { GlobalState, withGlobal } from '../../../../lib/reactnt';
+import { withGlobal } from '../../../../lib/reactnt';
 
-type IProps = Partial<GlobalState>
+import './MiddleColumn.scss';
 
-const MiddleColumn: FC<IProps> = () => {
+type IProps = {
+  selectedChatId: number;
+};
+
+const MiddleColumn: FC<IProps> = ({ selectedChatId }) => {
   return (
-    <div>
-      Middle Column
+    <div className="MiddleColumn">
+      {selectedChatId ? (
+        <div>Selected chat ID: {selectedChatId}</div>
+      ) : (
+        <div>Select chat to start messaging...</div>
+      )}
     </div>
-  )
+  );
 };
 
 export default withGlobal(
+  (global) => {
+    return {
+      selectedChatId: global.chats && global.chats.selectedId,
+    };
+  },
 )(MiddleColumn);
