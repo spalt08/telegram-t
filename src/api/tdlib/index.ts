@@ -1,5 +1,3 @@
-// @ts-ignore
-import TdClient from 'tdweb/dist/tdweb';
 import { getBrowser, getOsName } from './utils';
 
 let client: any;
@@ -28,8 +26,16 @@ const TD_PARAMETERS = {
   files_directory: '/',
 };
 
-export function init(onUpdate: Function) {
+let TdClient: any;
+
+export async function init(onUpdate: Function) {
   console.log('[TdLib] INIT');
+
+  if (!TdClient) {
+    // @ts-ignore
+    const module = await import('tdweb/dist/tdweb');
+    TdClient = module.default;
+  }
 
   client = new TdClient(INIT_OPTIONS);
   client.onUpdate = onUpdate;
