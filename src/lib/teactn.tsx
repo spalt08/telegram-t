@@ -14,6 +14,7 @@ export type GlobalState = {
 
   chats: {
     selectedId?: number;
+    ids: number[],
     byId: Record<string, ApiChat>,
   },
 
@@ -32,6 +33,7 @@ const INITIAL_STATE: GlobalState = {
   isInitialized: false,
 
   chats: {
+    ids: [],
     byId: {},
   },
 

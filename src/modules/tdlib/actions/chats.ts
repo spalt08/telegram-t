@@ -1,23 +1,9 @@
-import { addReducer } from '../../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 
 addReducer('loadChats', () => {
   void loadChats();
-});
-
-addReducer('selectChat', (global, actions, payload) => {
-  const { id } = payload!;
-
-  void loadChat(id);
-
-  return {
-    ...global,
-    chats: {
-      ...global.chats,
-      selectedId: id,
-    }
-  };
 });
 
 async function loadChats() {
@@ -37,7 +23,22 @@ async function loadChats() {
     offset_order: offsetOrder,
     limit: 25,
   });
-}
 
-async function loadChat(id: number) {
+  if (!result) {
+    return;
+  }
+
+  const { chat_ids } = result;
+  const global = getGlobal();
+
+  setGlobal({
+    ...global,
+    chats: {
+      ...global.chats,
+      ids: [
+        ...global.chats.ids,
+        ...chat_ids,
+      ],
+    },
+  });
 }

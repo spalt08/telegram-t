@@ -27,7 +27,7 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
         <div>
           {chats.map(({ id }) => (
             <Chat key={id} id={id} />
-            ))}
+          ))}
         </div>
       ) : (
         <Loading />
@@ -38,14 +38,14 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
 
 export default withGlobal(
   global => {
-    const chats = toArray(global.chats.byId);
-    const areChatsLoaded = Boolean(chats.length);
+    const idsLength = global.chats.ids.length;
+    const areChatsLoaded = idsLength > 0 && Object.keys(global.chats.byId).length >= idsLength;
     const sortedChats = areChatsLoaded
-      ? orderBy(chats, chat => chat.last_message && chat.last_message.date)
+      // TODO @perf New object returned each time.
+      ? orderBy(toArray(global.chats.byId), chat => chat.last_message && chat.last_message.date)
       : null;
 
     return {
-      // TODO @perf New object returned each time.
       chats: sortedChats,
       areChatsLoaded,
     };
