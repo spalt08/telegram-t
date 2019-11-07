@@ -27,7 +27,7 @@ const Message: FC<IProps> = ({ message, isSelected }) => {
       textParts = text;
     } else {
       className = 'text';
-      textParts = enhanceTextParts(text, [addBreaksToLongWords, addLineBreaks]);
+      textParts = enhanceTextParts(text, [addLineBreaks, addLinks, addBreaksToLongWords]);
     }
   }
 
@@ -71,27 +71,54 @@ function addLineBreaks(part: TextPart): TextPart[] {
     }, []);
 }
 
-function addBreaksToLongWords(part: TextPart): TextPart[] {
-  let wasLastLong = false;
+function addLinks(part: TextPart): TextPart[] {
+  return replaceWordsWithElements(
+    part,
+    word => word.startsWith('http:') || word.startsWith('https:'),
+    word => (
+      <a href={word} target="_blank">{word}</a>
+    ),
+  );
+}
 
+function addBreaksToLongWords(part: TextPart): TextPart[] {
+  return replaceWordsWithElements(
+    part,
+    word => word.length > 50,
+    word => (
+      <div className="long-word-break-all">{word}</div>
+    ),
+  );
+}
+
+function replaceWordsWithElements(
+  part: TextPart,
+  testFn: (word: string) => boolean,
+  replaceFn: (word: string) => Element,
+): TextPart[] {
   if (typeof part !== 'string') {
     return [part];
   }
 
+  let wasLastTag = false;
+
   return part
     .split(' ')
     .reduce((parts: TextPart[], word: string, i) => {
-      if (word.length > 50) {
-        parts.push(<div className="long-word-break-all">{word}</div>);
-        wasLastLong = true;
+      if (testFn(word)) {
+        if (parts.length > 0 && !wasLastTag) {
+          parts[parts.length - 1] += ' ';
+        }
+        parts.push(replaceFn(word));
+        wasLastTag = true;
       } else {
-        if (parts.length > 0 && !wasLastLong) {
+        if (parts.length > 0 && !wasLastTag) {
           parts[parts.length - 1] += ` ${word}`;
         } else {
-          parts.push(word);
+          parts.push(wasLastTag ? ` ${word}` : word);
         }
 
-        wasLastLong = false;
+        wasLastTag = false;
       }
 
       return parts;

@@ -20,6 +20,15 @@
     .long-word-break-all {
       word-break: break-all;
     }
+
+    a {
+      color: #4898e4;
+      text-decoration: none;
+
+      &:hover, &:active, &:visited {
+        color: #51aaff;
+      }
+    }
   }
 
   .emoji-only-1, .emoji-only-2, .emoji-only-3 {
