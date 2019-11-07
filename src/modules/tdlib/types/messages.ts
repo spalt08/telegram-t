@@ -6,4 +6,6 @@ export interface ApiMessage {
     };
   };
   date: number;
+  is_outgoing: boolean;
+  sender_user_id: boolean;
 }

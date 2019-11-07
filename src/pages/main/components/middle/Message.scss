@@ -3,10 +3,29 @@
   align-items: flex-end;
   margin-bottom: 0.7rem;
 
+  &.own {
+    flex-direction: row-reverse;
+  }
+
+  .Avatar {
+    margin-right: 0.5rem;
+  }
+
   .text {
     border-radius: 8px;
     background: white;
     padding: 0.5rem 0.5rem;
     font-size: 0.8rem;
+  }
+
+  &.own {
+    & .Avatar {
+      margin-right: 0;
+      margin-left: 0.5rem;
+    }
+
+    & .text {
+      background-color: #EEFEDF;
+    }
   }
 }

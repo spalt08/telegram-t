@@ -3,7 +3,7 @@ import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 
-import { getMessageText } from '../../../../modules/tdlib/helpers';
+import { getMessageText, isOwnMessage } from '../../../../modules/tdlib/helpers';
 
 import Avatar from '../../../../components/Avatar';
 
@@ -17,7 +17,7 @@ type IProps = {
 const Message: FC<IProps> = ({ message, isSelected }) => {
 
   return (
-    <div className={`Message ${isSelected ? 'selected' : ''}`}>
+    <div className={`Message ${isSelected ? 'selected' : ''} ${isOwnMessage(message) ? 'own' : ''}`}>
       <Avatar size="small">HE</Avatar>
       <div className="text">{getMessageText(message)}</div>
     </div>
