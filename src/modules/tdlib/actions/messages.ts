@@ -1,7 +1,6 @@
-import { addReducer, getGlobal, setGlobal } from '../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import * as TdLib from '../../api/tdlib';
-import { TdLibUpdate } from '../../api/tdlib/updates';
+import * as TdLib from '../../../api/tdlib';
 
 const MESSAGE_SLICE_LIMIT = 20;
 
@@ -10,9 +9,6 @@ addReducer('loadChatMessages', (global, actions, payload) => {
 
   void loadChatMessages(chatId, fromMessageId);
 });
-
-export function onUpdate(update: TdLibUpdate) {
-}
 
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
   let messages = await loadChatMessagesPart(chatId, fromMessageId);
@@ -58,7 +54,7 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
     offset: 0,
     limit: MESSAGE_SLICE_LIMIT,
   }) as {
-    messages: Record<string, any>[];
+    messages: AnyLiteral[];
   };
 
   if (!result) {

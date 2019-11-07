@@ -1,22 +1,25 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
+import { ApiMessage } from '../../../../modules/tdlib/types/messages';
+
+import { getMessageText } from '../../../../modules/tdlib/helpers';
+
 import Avatar from '../../../../components/Avatar';
 
 import './Message.scss';
 
 type IProps = {
-  message: Record<string, any>,
+  message: ApiMessage,
   isSelected: boolean,
 } & Pick<DispatchMap, 'selectMessage'>;
 
 const Message: FC<IProps> = ({ message, isSelected }) => {
-  const text = message.content.text ? message.content.text.text : '%NO_TEXT_MESSAGE%';
 
   return (
     <div className={`Message ${isSelected ? 'selected' : ''}`}>
       <Avatar size="small">HE</Avatar>
-      <div className="text">{text}</div>
+      <div className="text">{getMessageText(message)}</div>
     </div>
   );
 };

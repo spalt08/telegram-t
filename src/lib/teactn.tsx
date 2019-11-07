@@ -14,12 +14,12 @@ export type GlobalState = {
 
   chats: {
     selectedId?: number;
-    byId: Record<string, object>,
+    byId: Record<string, ApiChat>,
   },
 
   messages: {
     selectedId?: number;
-    byChatId: Record<string, object[]>,
+    byChatId: Record<string, ApiMessage[]>,
   },
 
   // TODO Move to `auth`.
@@ -53,8 +53,10 @@ export type DispatchMap = Record<ActionTypes, Function>;
 
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
+import { ApiMessage } from '../modules/tdlib/types/messages';
+import { ApiChat } from '../modules/tdlib/types/chats';
 
-type ActionPayload = Record<string, any>;
+type ActionPayload = AnyLiteral;
 
 type Reducer = (
   global: GlobalState,
@@ -62,7 +64,7 @@ type Reducer = (
   payload?: ActionPayload,
 ) => GlobalState | void;
 
-type MapStateToProps = ((global: GlobalState, ownProps?: any) => Record<string, any>);
+type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral);
 type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap>);
 
 let global = INITIAL_STATE;

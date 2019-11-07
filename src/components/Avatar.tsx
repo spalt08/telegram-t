@@ -1,10 +1,12 @@
 import React, { FC, JsxChildren } from '../lib/teact';
 
+import { ApiChat } from '../modules/tdlib/types/chats';
+
 import './Avatar.scss';
 
 interface IProps {
   size?: 'small' | 'medium' | 'large',
-  chat?: Record<string, any>;
+  chat?: ApiChat;
   children?: JsxChildren,
 }
 
@@ -16,7 +18,11 @@ const Avatar: FC<IProps> = ({ size = 'large', chat, children }) => {
   );
 };
 
-function getChatLetters(chat: Record<string, any>) {
+function getChatLetters(chat: ApiChat) {
+  if (!chat.title) {
+    return '';
+  }
+
   return chat.title
     .replace(/[^\W\w\s]+/, '')
     .split(' ')

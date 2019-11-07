@@ -17,10 +17,25 @@
     background: #efefef;
   }
 
-  .title {
+  .info {
     flex: 1;
-    overflow: hidden;
-    padding-top: 0.5rem;
-    font-size: 0.8rem;
+    // TODO @css-magic
+    width: 80%;
+
+    .title {
+      flex: 1;
+      overflow: hidden;
+      margin-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .last-message {
+      margin-top: 3px;
+      width: 100%;
+      overflow: hidden;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
 }

@@ -1,4 +1,4 @@
-export default (store: Record<string, any>) => {
+export default (store: AnyLiteral) => {
   let id;
 
   do {

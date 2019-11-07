@@ -6,7 +6,7 @@ import Avatar from '../../../../components/Avatar';
 import './MiddleHeader.scss';
 
 type IProps = {
-  chat: Record<string, any>;
+  chat: AnyLiteral;
 };
 
 const MiddleHeader: FC<IProps> = ({ chat }) => {

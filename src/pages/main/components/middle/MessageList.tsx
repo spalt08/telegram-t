@@ -1,6 +1,8 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
+import { ApiMessage } from '../../../../modules/tdlib/types/messages';
+
 import orderBy from '../../../../util/orderBy';
 import onNextTick from '../../../../util/onNextTick';
 
@@ -11,7 +13,7 @@ import './MessageList.scss';
 
 type IProps = Pick<DispatchMap, 'loadChatMessages'> & {
   selectedChatId: number;
-  messages: Record<string, any>[];
+  messages: ApiMessage[];
 };
 
 const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages }) => {
@@ -47,6 +49,7 @@ export default withGlobal(
 
     return {
       selectedChatId: chats.selectedId,
+      // TODO @perf New object returned each time.
       messages: chatMessages && orderBy(chatMessages, 'date', 'desc'),
     };
   },

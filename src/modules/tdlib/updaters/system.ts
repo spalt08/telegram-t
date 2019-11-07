@@ -1,29 +1,7 @@
-import { addReducer, getGlobal, setGlobal } from '../../lib/teactn';
+import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import * as TdLib from '../../api/tdlib';
-import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../api/tdlib/updates';
-
-addReducer('setAuthPhoneNumber', (global, actions, payload) => {
-  const { phoneNumber } = payload!;
-
-  void TdLib.send({
-    '@type': 'setAuthenticationPhoneNumber',
-    phone_number: phoneNumber,
-  });
-});
-
-addReducer('setAuthCode', (global, actions, payload) => {
-  const { code } = payload!;
-
-  void TdLib.send({
-    '@type': 'checkAuthenticationCode',
-    code,
-  });
-});
-
-addReducer('signOut', () => {
-  void TdLib.send({ '@type': 'logOut' });
-});
+import * as TdLib from '../../../api/tdlib';
+import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/updates';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {

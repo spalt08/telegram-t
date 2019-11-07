@@ -2,7 +2,7 @@
 // export { useState } from 'react';
 // export default React;
 
-export type Props = Record<string, any>;
+export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
 
 export enum VirtualElementTypesEnum {
@@ -69,16 +69,16 @@ export function isTextElement($element: VirtualElementChild): $element is Virtua
   return typeof $element === 'string' && !isEmptyElement($element);
 }
 
-export function isRealElement($element: VirtualElementChild): $element is VirtualElement {
-  return typeof $element === 'object';
-}
-
 export function isTagElement($element: VirtualElementChild): $element is VirtualElementTag {
-  return isRealElement($element) && $element.type === VirtualElementTypesEnum.Tag;
+  return typeof $element === 'object' && $element.type === VirtualElementTypesEnum.Tag;
 }
 
 export function isComponentElement($element: VirtualElementChild): $element is VirtualElementComponent {
-  return isRealElement($element) && $element.type === VirtualElementTypesEnum.Component;
+  return typeof $element === 'object' && $element.type === VirtualElementTypesEnum.Component;
+}
+
+export function isRealElement($element: VirtualElementChild): $element is VirtualElement {
+  return isTagElement($element) || isComponentElement($element);
 }
 
 function createElement(
@@ -143,10 +143,10 @@ function createElement(
     tag,
     props,
     children: childrenArray.map((child): VirtualElementChild => {
-      if (typeof child === 'object') {
+      if (isRealElement(child)) {
         return child;
-      } else if (child === false) {
-        // Support for `&&` operator.
+      } else if (child === false || child === null || child === undefined) {
+        // Support for `&&` operators.
         return VIRTUAL_ELEMENT_EMPTY;
       } else {
         return String(child);

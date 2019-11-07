@@ -5,6 +5,7 @@
 
   > div:nth-child(1), > div:nth-child(3) {
     flex: 3;
+    min-width: 250px;
     height: 100%;
     overflow: auto;
   }
