@@ -18,6 +18,24 @@
     font-size: 0.8rem;
   }
 
+  .emoji-only-1, .emoji-only-2, .emoji-only-3 {
+    line-height: 1em;
+    margin-top: 5px;
+    margin-bottom: -5px;
+
+    &.emoji-only-1 {
+      font-size: 5rem;
+    }
+
+    &.emoji-only-2 {
+      font-size: 4rem;
+    }
+
+    &.emoji-only-3 {
+      font-size: 3rem;
+    }
+  }
+
   &.own {
     & .Avatar {
       margin-right: 0;
