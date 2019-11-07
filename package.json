@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "mkdir -p dist/ && cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "prod": "rm -rf docs/* && parcel build src/index.html -d docs/ --public-url ./ && cp node_modules/tdweb/dist/* docs/",
+    "prod": "./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
