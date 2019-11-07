@@ -16,10 +16,15 @@ const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages })
     loadChatMessages({ chatId: selectedChatId });
   }
 
+  requestAnimationFrame(() => {
+    const scrollContainer = document.getElementsByClassName('MessageList')[0];
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+  });
+
   return (
     <div className="MessageList">{
       messages ? (
-        <div>
+        <div className="messages-container">
           {messages.map(message => (
             <Message key={message.id} message={message} />
           ))}

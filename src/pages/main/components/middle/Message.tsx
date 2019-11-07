@@ -11,7 +11,7 @@ type IProps = {
 } & Pick<DispatchMap, 'selectMessage'>;
 
 const Message: FC<IProps> = ({ message, isSelected }) => {
-  const text = message.content.text.text;
+  const text = message.content.text ? message.content.text.text : '%NO_TEXT_MESSAGE%';
 
   return (
     <div className={`Message ${isSelected ? 'selected' : ''}`}>
@@ -20,15 +20,6 @@ const Message: FC<IProps> = ({ message, isSelected }) => {
     </div>
   );
 };
-
-function getChatLetters(chat: Record<string, any>) {
-  return chat.title
-    .replace(/[^\W\w\s]+/, '')
-    .split(' ')
-    .map((word: string) => word[0].toUpperCase())
-    .slice(0, 2)
-    .join('');
-}
 
 export default withGlobal(
   (global, ownProps) => {
