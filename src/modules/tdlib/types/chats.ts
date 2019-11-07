@@ -4,4 +4,5 @@ export interface ApiChat {
   id: number;
   title?: string;
   last_message?: ApiMessage;
+  order: string;
 }

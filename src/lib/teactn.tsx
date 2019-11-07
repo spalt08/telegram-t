@@ -48,7 +48,7 @@ type ActionTypes = (
   // chats
   'loadChats' | 'selectChat' |
   // messages
-  'loadChatMessages' | 'selectMessage'
+  'loadChatMessages' | 'selectMessage' | 'sendTextMessage'
   );
 
 export type DispatchMap = Record<ActionTypes, Function>;

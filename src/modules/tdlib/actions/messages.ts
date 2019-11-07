@@ -10,6 +10,12 @@ addReducer('loadChatMessages', (global, actions, payload) => {
   void loadChatMessages(chatId, fromMessageId);
 });
 
+addReducer('sendTextMessage', (global, actions, payload) => {
+  const { chatId, text, fromMessageId } = payload!;
+
+  void sendTextMessage(chatId, text, fromMessageId);
+});
+
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
   let messages = await loadChatMessagesPart(chatId, fromMessageId);
 
@@ -25,7 +31,7 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
       messages = [
         ...messages,
         ...messages2,
-      ]
+      ];
     }
   }
 
@@ -62,4 +68,22 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   }
 
   return result.messages;
+}
+
+async function sendTextMessage(chatId: number, text: string, replyToMessageId?: number) {
+  await TdLib.send({
+    '@type': 'sendMessage',
+    chat_id: chatId,
+    input_message_content: {
+      '@type': 'inputMessageText',
+      text: {
+        '@type': 'formattedText',
+        text,
+        entities: [],
+      },
+      disable_web_page_preview: false,
+      clear_draft: true,
+    },
+    reply_to_message_id: replyToMessageId,
+  });
 }

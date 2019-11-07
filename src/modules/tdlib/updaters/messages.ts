@@ -7,6 +7,10 @@ export function onUpdate(update: TdLibUpdate) {
     case 'updateChatLastMessage':
       onUpdateChatLastMessage(update);
       break;
+
+    case 'updateNewMessage':
+      onUpdateNewMessage(update);
+      break;
   }
 }
 
@@ -26,9 +30,30 @@ function onUpdateChatLastMessage(update: TdLibUpdate) {
           ...chat,
           last_message,
           // @magic
-          order: order === '0' && chat.order || order
-        }
-      }
-    }
+          order: order === '0' && chat.order || order,
+        },
+      },
+    },
+  });
+}
+
+
+function onUpdateNewMessage(update: TdLibUpdate) {
+  const { message } = update;
+
+  const global = getGlobal();
+
+  setGlobal({
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {
+        ...global.messages.byChatId,
+        [message.chat_id]: [
+          ...(global.messages.byChatId[message.chat_id] || []),
+          message,
+        ],
+      },
+    },
   });
 }
