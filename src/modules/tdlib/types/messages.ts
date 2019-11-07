@@ -4,5 +4,6 @@ export interface ApiMessage {
     text?: {
       text: string
     };
-  }
+  };
+  date: number;
 }
