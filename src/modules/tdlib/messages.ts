@@ -15,12 +15,39 @@ export function onUpdate(update: TdLibUpdate) {
 }
 
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
-  const messages = await loadChatMessagesPart(chatId, fromMessageId);
+  let messages = await loadChatMessagesPart(chatId, fromMessageId);
+
+  if (!messages) {
+    return;
+  }
 
   // Request without `fromMessageId` always returns only last message.
-  if (!fromMessageId && messages && messages.length) {
-    await loadChatMessagesPart(chatId, messages[0].id);
+  if (!fromMessageId && messages.length) {
+    const messages2 = await loadChatMessagesPart(chatId, messages[0].id);
+
+    if (messages2) {
+      messages = [
+        ...messages,
+        ...messages2,
+      ]
+    }
   }
+
+  const global = getGlobal();
+
+  setGlobal({
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {
+        ...global.messages.byChatId,
+        [chatId]: [
+          ...(global.messages.byChatId[chatId] || []),
+          ...messages,
+        ],
+      },
+    },
+  });
 }
 
 async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
@@ -38,23 +65,5 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
     return;
   }
 
-  const { messages } = result;
-
-  const global = getGlobal();
-
-  setGlobal({
-    ...global,
-    messages: {
-      ...global.messages,
-      byChatId: {
-        ...global.messages.byChatId,
-        [chatId]: [
-          ...(global.messages.byChatId[chatId] || []),
-          ...messages,
-        ],
-      },
-    },
-  });
-
-  return messages;
+  return result.messages;
 }

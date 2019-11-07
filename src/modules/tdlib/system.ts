@@ -74,9 +74,8 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
     case 'authorizationStateClosing':
       break;
     case 'authorizationStateClosed':
-      if (getGlobal().isLoggingOut) {
+      if (!getGlobal().isLoggingOut) {
         document.title += ': Zzz…';
-        // this.emit('clientUpdateAppInactive');
       } else {
         TdLib.init(onUpdate);
       }

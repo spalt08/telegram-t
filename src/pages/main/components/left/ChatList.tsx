@@ -2,6 +2,8 @@ import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
 import Chat from './Chat';
 
+import Loading from '../../../../components/Loading';
+
 import './ChatList.scss';
 
 type IProps = Pick<GlobalState, 'chats'> & Pick<DispatchMap, 'loadChats'> & {
@@ -22,7 +24,7 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
           ))}
         </div>
       ) : (
-        <div>Loading...</div>
+        <Loading />
       )
     }</div>
   );

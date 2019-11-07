@@ -1,8 +1,11 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import Message from './Message';
 import orderBy from '../../../../util/orderBy';
+import onNextTick from '../../../../util/onNextTick';
+
+import Loading from '../../../../components/Loading';
+import Message from './Message';
 
 import './MessageList.scss';
 
@@ -16,7 +19,7 @@ const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages })
     loadChatMessages({ chatId: selectedChatId });
   }
 
-  requestAnimationFrame(() => {
+  onNextTick(() => {
     const scrollContainer = document.getElementsByClassName('MessageList')[0];
     scrollContainer.scrollTop = scrollContainer.scrollHeight;
   });
@@ -30,7 +33,7 @@ const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages })
           ))}
         </div>
       ) : (
-        <div>Loading...</div>
+        <Loading />
       )
     }</div>
   );

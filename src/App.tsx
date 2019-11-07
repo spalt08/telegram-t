@@ -3,7 +3,7 @@ import React, { DispatchMap, GlobalState, withGlobal } from './lib/teactn';
 
 import './modules';
 
-import Loading from './pages/loading/Loading';
+import Loading from './components/Loading';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
 import Test from './pages/test/Test';
