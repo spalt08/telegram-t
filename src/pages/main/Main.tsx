@@ -14,7 +14,7 @@ const Main: FC<IProps> = () => {
     <div className="Main">
       <LeftColumn />
       <MiddleColumn />
-      <RightColumn />
+      {/*<RightColumn />*/}
     </div>
   );
 };
