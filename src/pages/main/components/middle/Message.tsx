@@ -27,7 +27,7 @@ const Message: FC<IProps> = ({ message, isSelected }) => {
       textParts = text;
     } else {
       className = 'text';
-      textParts = enhanceTextParts(text, [addLineBreaks, addLinks, addBreaksToLongWords]);
+      textParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
     }
   }
 
