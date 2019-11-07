@@ -16,6 +16,10 @@
     background: white;
     padding: 0.5rem 0.5rem;
     font-size: 0.8rem;
+
+    .long-word-break-all {
+      word-break: break-all;
+    }
   }
 
   .emoji-only-1, .emoji-only-2, .emoji-only-3 {
