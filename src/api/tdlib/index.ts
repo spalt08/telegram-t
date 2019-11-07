@@ -16,7 +16,7 @@ const INIT_OPTIONS = {
 
 const TD_PARAMETERS = {
   '@type': 'tdParameters',
-  use_test_dc: true,
+  use_test_dc: false,
   system_language_code: navigator.language || 'en',
   device_model: getBrowser(),
   system_version: getOsName(),
