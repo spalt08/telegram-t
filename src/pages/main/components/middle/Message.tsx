@@ -5,39 +5,61 @@ import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 import { getMessageText, isOwnMessage } from '../../../../modules/tdlib/helpers';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import Avatar from '../../../../components/Avatar';
+import MessageMeta from './MessageMeta';
 import './Message.scss';
 
 type IProps = {
   message: ApiMessage,
-  isSelected: boolean,
-} & Pick<DispatchMap, 'selectMessage'>;
+};
 
 type TextPart = string | Element;
 
-const Message: FC<IProps> = ({ message, isSelected }) => {
+const Message: FC<IProps> = ({ message }) => {
+  const className = buildClassName(message);
+  const [contentParts, contentClassName] = buildContent(message);
+
+  return (
+    <div className={className}>
+      <Avatar size="small">HE</Avatar>
+      <div className={contentClassName}>
+        {contentParts}
+        <MessageMeta message={message} />
+      </div>
+    </div>
+  );
+};
+
+function buildClassName(message: ApiMessage) {
+  const classNames = ['Message'];
+
+  if (isOwnMessage(message)) {
+    classNames.push('own');
+  }
+
+  return classNames.join(' ');
+}
+
+function buildContent(message: ApiMessage): [TextPart | TextPart[] | undefined, string | undefined] {
   const text = getMessageText(message);
-  let className;
-  let textParts: TextPart | TextPart[] | undefined;
+  const classNames = ['content'];
+  let contentParts: TextPart | TextPart[] | undefined;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
     if (emojiOnlyCount) {
-      className = emojiOnlyCount ? `emoji-only-${emojiOnlyCount}` : undefined;
-      textParts = text;
+      classNames.push(`emoji-only-${emojiOnlyCount}`);
+      contentParts = text;
     } else {
-      className = 'text';
-      textParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
+      classNames.push('text');
+      contentParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
     }
   }
 
-  return (
-    <div className={`Message ${isSelected ? 'selected' : ''} ${isOwnMessage(message) ? 'own' : ''}`}>
-      <Avatar size="small">HE</Avatar>
-      <div className={className}>{textParts}</div>
-    </div>
-  );
-};
+  classNames.push('status-read');
+
+  return [contentParts, classNames.join(' ')];
+}
 
 function enhanceTextParts(text: string, enhancers: ((part: TextPart) => TextPart[])[]) {
   let parts: TextPart[] = [text];
@@ -128,17 +150,4 @@ function replaceWordsWithElements(
     }, []);
 }
 
-export default withGlobal(
-  (global, ownProps) => {
-    const { messages } = global;
-    const { id } = ownProps;
-
-    return {
-      isSelected: Number(id) === messages.selectedId,
-    };
-  },
-  (setGlobal, actions) => {
-    const { selectMessage } = actions;
-    return { selectMessage };
-  },
-)(Message);
+export default Message;
