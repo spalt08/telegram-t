@@ -14,7 +14,8 @@ html, body {
 
 #root {
   height: 100%;
-  text-align: center;
+  max-width: 1680px;
+  margin: 0 auto;
 }
 
 .hidden {

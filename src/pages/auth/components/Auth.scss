@@ -1,15 +1,30 @@
 .auth-form {
   width: 100%;
-  max-width: 28.75rem;
+  max-width: 25.5rem;
   margin: 0 auto;
-  padding: 50px;
-  padding-top: 6.8rem;
+  padding: 1.5rem;
+  padding-top: 5rem;
   text-align: center;
 
+  @media (min-width: 768px) {
+    padding-top: 6.8rem;
+  }
+
+  #logo, #monkey {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 7rem;
+    height: 7rem;
+    margin-bottom: 2rem;
+
+    @media (min-width: 768px) {
+      width: 10rem;
+      height: 10rem;
+    }
+  }
+
   #logo {
-    display: inline-block;
-    width: 10rem;
-    height: 10rem;
     margin-bottom: 2rem;
     // background: url('../../../assets/telegram_logo.svg');
     background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgMjQwIiB2ZXJzaW9uPSIxLjEiPiAgPGNpcmNsZSAgICAgZmlsbD0iIzRlYTRmNiIgICAgIHI9IjEyMCIgICAgIGN5PSIxMjAiICAgICBjeD0iMTIwIiAvPiAgPHBhdGggICAgIGZpbGw9IiNmZmYiICAgICBkPSJtNDQuNjkxIDEyNS44N2MxNC4wMjgtNy43MjY4IDI5LjY4Ny0xNC4xNzYgNDQuMzE4LTIwLjY1OCAyNS4xNzEtMTAuNjE3IDUwLjQ0Mi0yMS4wNSA3NS45NjgtMzAuNzYzIDQuOTY2NC0xLjY1NDkgMTMuODktMy4yNzMxIDE0Ljc2NSA0LjA4NjYtMC40NzkzNCAxMC40MTgtMi40NTAzIDIwLjc3NS0zLjgwMjEgMzEuMTMyLTMuNDMxMyAyMi43NzYtNy4zOTc1IDQ1LjQ3NC0xMS4yNjUgNjguMTc1LTEuMzMyNiA3LjU2MTgtMTAuODA1IDExLjQ3Ni0xNi44NjYgNi42MzY5LTE0LjU2Ni05LjgzODYtMjkuMjQ0LTE5LjU4Mi00My42MjQtMjkuNjQ5LTQuNzEwNS00Ljc4NjMtMC4zNDIzOS0xMS42NiAzLjg2NDUtMTUuMDc4IDExLjk5Ny0xMS44MjMgMjQuNzItMjEuODY4IDM2LjA5LTM0LjMwMiAzLjA2Ny03LjQwNjEtNS45OTUxLTEuMTY0NS04Ljk4NDIgMC43NDgxNS0xNi40MjQgMTEuMzE4LTMyLjQ0NiAyMy4zMjctNDkuNzYyIDMzLjI3NC04Ljg0NSA0Ljg2ODktMTkuMTU0IDAuNzA4MDktMjcuOTk1LTIuMDA4Ny03LjkyNjktMy4yODIxLTE5LjU0My02LjU4ODgtMTIuNzA4LTExLjU5M3oiIC8+PC9zdmc+);
@@ -18,9 +33,6 @@
   }
 
   #monkey {
-    display: inline-block;
-    width: 10rem;
-    height: 10rem;
     background: #f6c137;
     border-radius: 50%;
   }
