@@ -1,5 +1,4 @@
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 
 import { getMessageText, isOwnMessage } from '../../../../modules/tdlib/helpers';
@@ -22,7 +21,7 @@ const Message: FC<IProps> = ({ message }) => {
     <div className={className}>
       <Avatar size="small">HE</Avatar>
       <div className={contentClassName}>
-        {contentParts}
+        <div>{contentParts}</div>
         <MessageMeta message={message} />
       </div>
     </div>

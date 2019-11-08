@@ -12,10 +12,3 @@ TeactDOM.render(
 document.addEventListener('dblclick', () => {
   console.log('GLOBAL STATE', getGlobal());
 });
-
-document.addEventListener('contextmenu', () => {
-  setGlobal({
-    ...getGlobal(),
-    authState: 'authorizationStateReady',
-  });
-});
