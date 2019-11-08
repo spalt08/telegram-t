@@ -2,22 +2,22 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 3.375rem;
+  height: 3.375rem;
   border-radius: 50%;
   background: var(--color-primary);
   color: white;
   display: flex;
 
   &.size-small {
-    width: 25px;
-    height: 25px;
-    font-size: 0.7rem;
+    width: 2.125rem;
+    height: 2.125rem;
+    font-size: 0.8rem;
   }
 
   &.size-medium {
-    width: 40px;
-    height: 40px;
+    width: 2.75rem;
+    height: 2.75rem;
     font-size: 1rem;
   }
 }
