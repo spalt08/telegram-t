@@ -1,11 +1,9 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
-
 import { ApiChat } from '../../../../modules/tdlib/types/chats';
-
 import { getMessageText } from '../../../../modules/tdlib/helpers';
-
 import Avatar from '../../../../components/Avatar';
+import LastMessageMeta from './LastMessageMeta';
 
 import './Chat.scss';
 
@@ -22,6 +20,9 @@ const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
       <div className="info">
         <div className="title">{chat.title}</div>
         <div className="last-message">{chat.last_message && getMessageText(chat.last_message)}</div>
+        {chat.last_message && (
+          <LastMessageMeta message={chat.last_message} />
+        )}
       </div>
     </div>
   );
