@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "mkdir -p dist/ && cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "prod": "./build.sh",
+    "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
+    "prod": "shx ./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
@@ -18,6 +18,7 @@
     "react-dom": "^16.11.0",
     "reactn": "^2.2.4",
     "sass": "^1.23.3",
+    "shx": "^0.3.2",
     "terser": "^4.3.9",
     "typescript": "^3.6.4"
   },
