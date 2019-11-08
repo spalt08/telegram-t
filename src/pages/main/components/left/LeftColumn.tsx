@@ -5,7 +5,7 @@ import './LeftColumn.scss';
 
 const LeftColumn: FC = () => {
   return (
-    <div id="left">
+    <div id="LeftColumn">
       <ChatList />
     </div>
   );
