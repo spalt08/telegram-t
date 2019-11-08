@@ -24,10 +24,12 @@ const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
             <LastMessageMeta message={chat.last_message} />
           )}
         </div>
-        {chat.last_message && (
-          <p className="last-message">{getMessageText(chat.last_message)}</p>
-        )}
-        <Badge chat={chat} />
+        <div className="subtitle">
+          {chat.last_message && (
+            <p className="last-message">{getMessageText(chat.last_message)}</p>
+          )}
+          <Badge chat={chat} />
+        </div>
       </div>
     </div>
   );

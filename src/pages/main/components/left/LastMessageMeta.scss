@@ -1,7 +1,8 @@
 .LastMessageMeta {
-  padding: 2px 4px;
-  content: "12:31";
-  font-size: 0.8rem;
+  margin-right: .2rem;
+  padding: .15rem 0;
+  flex-shrink: 0;
+  font-size: 0.75rem;
   line-height: 1;
 
   .sending-state {
