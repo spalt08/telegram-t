@@ -26,28 +26,25 @@
     flex: 1;
     overflow: hidden;
 
-    .title {
+    .title, .subtitle {
       overflow: hidden;
-      margin-bottom: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-right: .15rem;
+    }
 
-      h3 {
-        font-size: 1rem;
-        line-height: 2rem;
-        margin: 0;
-      }
+    h3, .last-message {
+      font-size: 1rem;
+      line-height: 1.6875rem;
+      margin: 0;
+      width: 80%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .last-message {
-      width: 80%;
-      overflow: hidden;
-      font-size: 1rem;
-      line-height: 1;
-      margin: 0;
-      white-space: nowrap;
-      text-overflow: ellipsis;
       opacity: .5;
     }
   }

@@ -19,9 +19,11 @@ const Message: FC<IProps> = ({ message }) => {
 
   return (
     <div className={className}>
-      <Avatar size="small">HE</Avatar>
+      {!isOwnMessage(message) && (
+        <Avatar size="small">HE</Avatar>
+      )}
       <div className={contentClassName}>
-        <div>{contentParts}</div>
+        <p>{contentParts}</p>
         <MessageMeta message={message} />
       </div>
     </div>

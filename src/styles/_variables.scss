@@ -1,6 +1,9 @@
 $color-primary: #4ea4f6;
 $color-primary-shade: #51aaff;
 $color-primary-shade-2: #4b9dec;
+
+$color-links: #52a1ef;
+
 $color-white: #ffffff;
 $color-black: #000000;
 $color-borders: #ecedef;
@@ -14,5 +17,11 @@ $color-borders: #ecedef;
   --color-primary-shade: #{$color-primary-shade};
   --color-primary-shade-2: #{$color-primary-shade-2};
 
+  --color-links: #{$color-links};
+  --color-links-hover: #{darken($color-links, 8%)};
+
   --border-radius-default: 0.5rem;
+  --border-radius-messages: 0.75rem;
+  --border-radius-messages-small: 0.375rem;
+  --messages-container-width: 45.5rem;
 }

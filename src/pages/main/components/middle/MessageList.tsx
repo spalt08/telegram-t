@@ -2,6 +2,7 @@ import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
+import { isOwnMessage } from '../../../../modules/tdlib/helpers';
 
 import orderBy from '../../../../util/orderBy';
 import onNextTick from '../../../../util/onNextTick';
@@ -30,8 +31,12 @@ const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages })
     <div className="MessageList">{
       messages ? (
         <div className="messages-container">
-          {messages.map(message => (
-            <Message key={message.id} message={message} />
+          {groupMessages(messages).map(messageGroup => (
+            <div className="message-group">
+              {messageGroup.map(message => (
+                <Message key={message.id} message={message} />
+              ))}
+            </div>
           ))}
         </div>
       ) : (
@@ -40,6 +45,30 @@ const MessageList: FC<IProps> = ({ selectedChatId, messages, loadChatMessages })
     }</div>
   );
 };
+
+function groupMessages(messages: ApiMessage[]) {
+  const messageGroups: ApiMessage[][] = [];
+  let group: ApiMessage[] = [];
+
+  messages.forEach((message, index) => {
+    if (
+      !group.length
+      || isOwnMessage(message) === isOwnMessage(group[group.length - 1])
+    ) {
+      group.push(message);
+    }
+
+    if (
+      messages[index + 1]
+      && isOwnMessage(message) !== isOwnMessage(messages[index + 1])
+    ) {
+      messageGroups.push(group);
+      group = [];
+    }
+  });
+
+  return messageGroups;
+}
 
 export default withGlobal(
   global => {
