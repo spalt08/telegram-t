@@ -6,7 +6,7 @@ import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 
-import './AuthCode.scss';
+import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'>;
 
@@ -28,21 +28,17 @@ const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
   }
 
   return (
-    <div id="auth-code-form">
+    <div id="auth-code-form" className="auth-form">
       <div id="monkey" />
       <h2>{authPhoneNumber}</h2>
-      <div className="note">
+      <p className="note">
         We have sent you an SMS
         <br />with the code.
-      </div>
-      <div>
-        <InputText id="sign-in-code" placeholder="Code" onChange={onCodeChange} />
-      </div>
-      <div>
-        {isButtonShown && (
-          <Button onClick={handleSubmit}>NEXT</Button>
-        )}
-      </div>
+      </p>
+      <InputText id="sign-in-code" placeholder="Code" onChange={onCodeChange} />
+      {isButtonShown && (
+        <Button onClick={handleSubmit}>NEXT</Button>
+      )}
     </div>
   );
 };
