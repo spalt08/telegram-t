@@ -1,10 +1,10 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 import { ApiChat } from '../../../../modules/tdlib/types/chats';
-import { getMessageText } from '../../../../modules/tdlib/helpers';
+import { getMessageText, isPrivate } from '../../../../modules/tdlib/helpers';
 import Avatar from '../../../../components/Avatar';
 import LastMessageMeta from './LastMessageMeta';
-
+import Badge from './Badge';
 import './Chat.scss';
 
 type IProps = {
@@ -15,7 +15,7 @@ type IProps = {
 
 const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
   return (
-    <div className={`Chat ${isSelected ? 'selected' : ''}`} onClick={() => selectChat({ id: chat.id })}>
+    <div className={buildClassNames(chat, isSelected)} onClick={() => selectChat({ id: chat.id })}>
       <Avatar chat={chat} />
       <div className="info">
         <div className="title">
@@ -24,11 +24,26 @@ const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
             <LastMessageMeta message={chat.last_message} />
           )}
         </div>
-        <p className="last-message">{chat.last_message && getMessageText(chat.last_message)}</p>
+        {chat.last_message && (
+          <p className="last-message">{getMessageText(chat.last_message)}</p>
+        )}
+        <Badge chat={chat} />
       </div>
     </div>
   );
 };
+
+function buildClassNames(chat: ApiChat, isSelected: boolean) {
+  const classNames = ['Chat'];
+
+  classNames.push(isPrivate(chat.id) ? 'private' : 'group');
+
+  if (isSelected) {
+    classNames.push('selected');
+  }
+
+  return classNames.join(' ');
+}
 
 export default withGlobal(
   (global, ownProps) => {

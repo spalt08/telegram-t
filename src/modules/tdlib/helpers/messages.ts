@@ -10,20 +10,12 @@ export function isOwnMessage(message: ApiMessage) {
 }
 
 function isUnread(message: ApiMessage) {
-  if (!message.is_outgoing) {
-    return false;
-  }
-
   const chat = getChatById(message.chat_id);
 
   return chat.last_read_outbox_message_id < message.id;
 }
 
 export function getSendingState(message: ApiMessage) {
-  if (!message.is_outgoing) {
-    return;
-  }
-
   if (!message.sending_state) {
     return 'succeeded';
   }
@@ -32,9 +24,6 @@ export function getSendingState(message: ApiMessage) {
 }
 
 export function getOutgoingStatus(message: ApiMessage) {
-  if (!message.is_outgoing) {
-    return;
-  }
   if (!isUnread(message)) {
     return 'read';
   }

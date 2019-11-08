@@ -1,0 +1,20 @@
+.Badge {
+  position: absolute;
+  top: 25px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: #c4c9cc;
+  border-radius: 10px;
+  padding: 4px 7px;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+
+  .Chat.private & {
+    background: #53CB63;
+  }
+}
