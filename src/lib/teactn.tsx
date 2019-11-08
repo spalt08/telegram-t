@@ -15,12 +15,14 @@ export type GlobalState = {
   chats: {
     selectedId?: number;
     ids: number[],
-    byId: Record<string, ApiChat>,
+    byId: Record<number, ApiChat>,
   },
 
   messages: {
     selectedId?: number;
-    byChatId: Record<string, ApiMessage[]>,
+    byChatId: Record<number, {
+      byId: Record<number, ApiMessage>
+    }>,
   },
 
   // TODO Move to `auth`.
@@ -38,8 +40,8 @@ const INITIAL_STATE: GlobalState = {
   },
 
   messages: {
-    byChatId: {}
-  }
+    byChatId: {},
+  },
 };
 
 type ActionTypes = (

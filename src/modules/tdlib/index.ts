@@ -5,6 +5,7 @@ import * as TdLib from '../../api/tdlib';
 import onUpdate from './updaters';
 import './actions';
 import './helpers';
+import './selectors';
 
 addReducer('init', (global: GlobalState) => {
   TdLib.init(onUpdate);

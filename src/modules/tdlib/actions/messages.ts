@@ -1,6 +1,8 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
+import { ApiMessage } from '../types/messages';
 import * as TdLib from '../../../api/tdlib';
+import buildCollectionById from '../../../util/buildCollectionById';
 
 const MESSAGE_SLICE_LIMIT = 20;
 
@@ -35,6 +37,8 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
     }
   }
 
+  const messagesById = buildCollectionById<ApiMessage>(messages);
+
   const global = getGlobal();
 
   setGlobal({
@@ -43,10 +47,12 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
       ...global.messages,
       byChatId: {
         ...global.messages.byChatId,
-        [chatId]: [
-          ...(global.messages.byChatId[chatId] || []),
-          ...messages,
-        ],
+        [chatId]: {
+          byId: {
+            ...(global.messages.byChatId[chatId] || {}).byId,
+            ...messagesById,
+          },
+        },
       },
     },
   });
@@ -60,7 +66,7 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
     offset: 0,
     limit: MESSAGE_SLICE_LIMIT,
   }) as {
-    messages: AnyLiteral[];
+    messages: ApiMessage[];
   };
 
   if (!result) {

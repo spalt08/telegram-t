@@ -1,46 +1,37 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate } from '../../../api/tdlib/updates';
+import { ApiMessage } from '../types/messages';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
-    case 'updateChatLastMessage':
-      onUpdateChatLastMessage(update);
-      break;
+    case 'updateNewMessage': {
+      const { message } = update;
 
-    case 'updateNewMessage':
-      onUpdateNewMessage(update);
+      updateMessage(message.chat_id, message.id, message);
+
       break;
+    }
+
+    case 'updateMessageSendSucceeded': {
+      const { message, old_message_id } = update;
+
+      replaceMessage(message.chat_id, old_message_id, message);
+
+      break;
+    }
+
+    // case 'updateMessageSendFailed': {
+    //   const { message, old_message_id } = update;
+    //
+    //   updateMessage(message.chat_id, old_message_id, message);
+    //
+    //   break;
+    // }
   }
 }
 
-function onUpdateChatLastMessage(update: TdLibUpdate) {
-  const { chat_id, order, last_message } = update;
-
-  const global = getGlobal();
-  const chat = global.chats.byId[chat_id] || {};
-
-  setGlobal({
-    ...global,
-    chats: {
-      ...global.chats,
-      byId: {
-        ...global.chats.byId,
-        [chat_id]: {
-          ...chat,
-          last_message,
-          // @magic
-          order: order === '0' && chat.order || order,
-        },
-      },
-    },
-  });
-}
-
-
-function onUpdateNewMessage(update: TdLibUpdate) {
-  const { message } = update;
-
+function updateMessage(chatId: number, messageId: number, messageUpdate: Partial<ApiMessage>) {
   const global = getGlobal();
 
   setGlobal({
@@ -49,11 +40,42 @@ function onUpdateNewMessage(update: TdLibUpdate) {
       ...global.messages,
       byChatId: {
         ...global.messages.byChatId,
-        [message.chat_id]: [
-          ...(global.messages.byChatId[message.chat_id] || []),
-          message,
-        ],
+        [chatId]: {
+          byId: {
+            ...(global.messages.byChatId[chatId] || {}).byId,
+            [messageId]: {
+              ...((global.messages.byChatId[chatId] || {}).byId[messageId] || {}),
+              ...messageUpdate,
+            },
+          },
+        },
       },
     },
   });
+}
+
+function replaceMessage(chatId: number, oldMessageId: number, message: ApiMessage) {
+  const global = getGlobal();
+
+  const newMessageId = message.id;
+
+  const newGlobal = {
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {
+        ...global.messages.byChatId,
+        [chatId]: {
+          byId: {
+            ...(global.messages.byChatId[chatId] || {}).byId,
+            [newMessageId]: message,
+          },
+        },
+      },
+    },
+  };
+
+  delete newGlobal.messages.byChatId[chatId].byId[oldMessageId];
+
+  setGlobal(newGlobal);
 }

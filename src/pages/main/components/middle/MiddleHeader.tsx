@@ -1,12 +1,12 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
+import { ApiChat } from '../../../../modules/tdlib/types/chats';
 import Avatar from '../../../../components/Avatar';
-
 import './MiddleHeader.scss';
 
 type IProps = {
-  chat: AnyLiteral;
+  chat: ApiChat;
 };
 
 const MiddleHeader: FC<IProps> = ({ chat }) => {

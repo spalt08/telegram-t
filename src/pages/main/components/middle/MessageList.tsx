@@ -2,23 +2,23 @@ import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
-
+import { selectChatMessages } from '../../../../modules/tdlib/selectors';
+import { isPrivate } from '../../../../modules/tdlib/helpers';
 import orderBy from '../../../../util/orderBy';
+import toArray from '../../../../util/toArray';
 import onNextTick from '../../../../util/onNextTick';
-
 import Loading from '../../../../components/Loading';
 import Message from './Message';
-
 import './MessageList.scss';
-import { isPrivate } from '../../../../modules/tdlib/helpers';
 
 type IProps = Pick<DispatchMap, 'loadChatMessages'> & {
+  areMessagesLoaded: boolean,
   chatId: number;
   messages: ApiMessage[];
 };
 
-const MessageList: FC<IProps> = ({ chatId, messages, loadChatMessages }) => {
-  if (!messages) {
+const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChatMessages }) => {
+  if (!areMessagesLoaded) {
     loadChatMessages({ chatId });
   }
 
@@ -29,11 +29,11 @@ const MessageList: FC<IProps> = ({ chatId, messages, loadChatMessages }) => {
 
   return (
     <div className={`MessageList ${isPrivate(chatId) ? 'no-avatars' : ''}`}>{
-      messages ? (
+      areMessagesLoaded ? (
         <div className="messages-container">
           {groupMessages(messages).map(messageGroup => (
             <div className="message-group">
-              {messageGroup.map((message, i) => (
+              {messageGroup.map(message => (
                 <Message key={message.id} message={message} />
               ))}
             </div>
@@ -59,8 +59,8 @@ function groupMessages(messages: ApiMessage[]) {
     }
 
     if (
-        messages[index + 1]
-        && message.sender_user_id !== messages[index + 1].sender_user_id
+      messages[index + 1]
+      && message.sender_user_id !== messages[index + 1].sender_user_id
     ) {
       messageGroups.push(group);
       group = [];
@@ -76,14 +76,16 @@ function groupMessages(messages: ApiMessage[]) {
 
 export default withGlobal(
   global => {
-    const { chats, messages } = global;
+    const { chats } = global;
 
-    const chatMessages = chats.selectedId ? messages.byChatId[chats.selectedId] : null;
+    const chatMessages = chats.selectedId ? selectChatMessages(global, chats.selectedId) : null;
+    const areMessagesLoaded = chatMessages && Object.keys(chatMessages).length;
 
     return {
       chatId: chats.selectedId,
+      areMessagesLoaded,
       // TODO @perf New object returned each time.
-      messages: chatMessages && orderBy(chatMessages, 'date', 'desc'),
+      messages: chatMessages && orderBy(toArray(chatMessages), 'date', 'desc'),
     };
   },
   (setGlobal, actions) => {

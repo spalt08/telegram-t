@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "prod": "shx ./build.sh",
+    "prod": "./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
