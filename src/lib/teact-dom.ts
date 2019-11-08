@@ -157,7 +157,7 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
-    delete element.className;
+    element.className = '';
   } else if (key.startsWith('on')) {
     element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
