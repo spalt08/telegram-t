@@ -1,10 +1,10 @@
 .Chat {
   position: relative;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   display: flex;
   cursor: pointer;
-  margin-bottom: 5px;
-  border-radius: 0.5rem;
+  margin-bottom: 0.35rem;
+  border-radius: var(--border-radius-default);
 
   &:hover {
     background: #f8f8f8;
@@ -24,23 +24,31 @@
 
   .info {
     flex: 1;
-    // TODO @css-magic
-    width: 80%;
+    overflow: hidden;
 
     .title {
-      flex: 1;
       overflow: hidden;
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
+      margin-bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h3 {
+        font-size: 1rem;
+        line-height: 2rem;
+        margin: 0;
+      }
     }
 
     .last-message {
-      margin-top: 3px;
       width: 100%;
       overflow: hidden;
-      font-size: 0.7rem;
+      font-size: 1rem;
+      line-height: 1;
+      margin: 0;
       white-space: nowrap;
       text-overflow: ellipsis;
+      opacity: .5;
     }
   }
 }

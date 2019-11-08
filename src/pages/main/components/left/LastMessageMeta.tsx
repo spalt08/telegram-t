@@ -12,8 +12,8 @@ type IProps = {
 const LastMessageMeta: FC<IProps> = ({ message }) => {
   return (
     <div className='LastMessageMeta'>
-      <div className="sending-state">{renderSendingState(message)}</div>
-      <div className="div time">{getTime(message.date * 1000)}</div>
+      <span className="sending-state">{renderSendingState(message)}</span>
+      <span className="last-message-time">{getTime(message.date * 1000)}</span>
     </div>
   );
 };

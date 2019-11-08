@@ -13,7 +13,7 @@ type IProps = {
 
 const MiddleColumn: FC<IProps> = ({ selectedChatId }) => {
   return (
-    <div className="MiddleColumn">
+    <div id="middle">
       {selectedChatId ? (
         <div className="messages-layout">
           <MiddleHeader />
