@@ -11,7 +11,7 @@ type IProps = GlobalState;
 
 const Main: FC<IProps> = () => {
   return (
-    <div className="Main">
+    <div id="Main">
       <LeftColumn />
       <MiddleColumn />
       {/*<RightColumn />*/}

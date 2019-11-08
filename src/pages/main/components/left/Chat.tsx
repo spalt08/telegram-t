@@ -18,12 +18,14 @@ const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
     <div className={buildClassNames(chat, isSelected)} onClick={() => selectChat({ id: chat.id })}>
       <Avatar chat={chat} />
       <div className="info">
-        <div className="title">{chat.title}</div>
+        <div className="title">
+          <h3>{chat.title}</h3>
+          {chat.last_message && (
+            <LastMessageMeta message={chat.last_message} />
+          )}
+        </div>
         {chat.last_message && (
-          <div className="last-message">{getMessageText(chat.last_message)}</div>
-        )}
-        {chat.last_message && (
-          <LastMessageMeta message={chat.last_message} />
+          <p className="last-message">{getMessageText(chat.last_message)}</p>
         )}
         <Badge chat={chat} />
       </div>

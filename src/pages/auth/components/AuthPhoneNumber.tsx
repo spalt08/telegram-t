@@ -7,7 +7,7 @@ import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 import Select from '../../../components/ui/Select';
 
-import './AuthPhoneNumber.scss';
+import './Auth.scss';
 
 type IProps = Pick<DispatchMap, 'setAuthPhoneNumber'>;
 
@@ -31,26 +31,20 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
   }
 
   return (
-    <div id="auth-phone-number-form">
+    <div id="auth-phone-number-form" className="auth-form">
       <div id="logo" />
       <h2>Sign in to Telegram</h2>
-      <div className="note">
+      <p className="note">
         Please confirm your country and
-        <br />enter phone number.
-      </div>
-      <div>
-        <Select id="sign-in-phone-code">
-          <option value="+7">Russia +7</option>
-        </Select>
-      </div>
-      <div>
-        <InputText id="sign-in-phone-number" placeholder="Phone Number" onChange={onPhoneNumberChange} />
-      </div>
-      <div>
-        {isButtonShown && (
-          <Button onClick={handleSubmit}>NEXT</Button>
-        )}
-      </div>
+        <br />enter your phone number.
+      </p>
+      <Select id="sign-in-phone-code">
+        <option value="+7">Russia +7</option>
+      </Select>
+      <InputText id="sign-in-phone-number" placeholder="Phone Number" onChange={onPhoneNumberChange} />
+      {isButtonShown && (
+        <Button onClick={handleSubmit}>NEXT</Button>
+      )}
     </div>
   );
 };

@@ -1,0 +1,18 @@
+$color-primary: #4ea4f6;
+$color-primary-shade: #51aaff;
+$color-primary-shade-2: #4b9dec;
+$color-white: #ffffff;
+$color-black: #000000;
+$color-borders: #ecedef;
+
+:root {
+  --color-background: #{$color-white};
+  --color-text: #{$color-black};
+  --color-borders: #{$color-borders};
+
+  --color-primary: #{$color-primary};
+  --color-primary-shade: #{$color-primary-shade};
+  --color-primary-shade-2: #{$color-primary-shade-2};
+
+  --border-radius-default: 0.5rem;
+}

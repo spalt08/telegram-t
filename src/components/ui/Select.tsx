@@ -1,8 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, { FC, JsxChildren } from '../../lib/teact';
 
-import './Select.scss';
-
 interface IProps {
   id?: string,
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void,
@@ -12,7 +10,7 @@ interface IProps {
 
 const Select: FC<IProps> = ({ onChange, id, name, children }) => {
   return (
-    <select className='Select' id={id} name={name} onChange={onChange}>
+    <select className="form-control" id={id} name={name} onChange={onChange}>
       {children}
     </select>
   );
