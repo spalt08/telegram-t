@@ -22,17 +22,17 @@ function render($element: VirtualElementComponent, parentEl: HTMLElement | null)
 function renderWithVirtual(
   parentEl: HTMLElement,
   childIndex: number,
-  $current: VirtualElementChild | null,
+  $current: VirtualElementChild | undefined,
   $new: VirtualElementChild,
 ) {
 
   const currentEl = parentEl.childNodes[childIndex];
 
-  if (!$current && $new) {
+  if ($current === undefined && $new !== undefined) {
     parentEl.appendChild(createNode($new, parentEl, childIndex));
-  } else if ($current && !$new) {
+  } else if ($current !== undefined && $new === undefined) {
     parentEl.removeChild(currentEl);
-  } else if ($current && $new) {
+  } else if ($current !== undefined && $new !== undefined) {
     if (hasElementChanged($current, $new)) {
       parentEl.replaceChild(createNode($new, parentEl, childIndex), currentEl);
     } else if (isRealElement($current) && isRealElement($new)) {
@@ -86,7 +86,7 @@ function createNode($element: VirtualElementChild, parentEl: HTMLElement, childI
   }
 
   children.forEach(($child, i) => {
-    renderWithVirtual(element, i, null, $child);
+    renderWithVirtual(element, i, undefined, $child);
   });
 
   return element;

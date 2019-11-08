@@ -10,7 +10,8 @@ export enum VirtualElementTypesEnum {
   Component,
 }
 
-export type VirtualElementEmpty = 'VIRTUAL_ELEMENT_EMPTY';
+export const VIRTUAL_ELEMENT_EMPTY = Symbol('VirtualElementEmpty');
+export type VirtualElementEmpty = typeof VIRTUAL_ELEMENT_EMPTY;
 
 export type VirtualElementText = string;
 
@@ -59,14 +60,12 @@ interface ComponentInstanceState {
 
 let renderingInstance: ComponentInstance;
 
-export const VIRTUAL_ELEMENT_EMPTY: VirtualElementEmpty = 'VIRTUAL_ELEMENT_EMPTY';
-
 export function isEmptyElement($element: VirtualElementChild): $element is VirtualElementEmpty {
   return $element === VIRTUAL_ELEMENT_EMPTY;
 }
 
 export function isTextElement($element: VirtualElementChild): $element is VirtualElementText {
-  return typeof $element === 'string' && !isEmptyElement($element);
+  return typeof $element === 'string';
 }
 
 export function isTagElement($element: VirtualElementChild): $element is VirtualElementTag {

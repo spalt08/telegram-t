@@ -62,10 +62,13 @@ function addLineBreaks(part: TextPart): TextPart[] {
   }
 
   return part
-    .split(/\n/g)
-    .reduce((parts: TextPart[], line: string) => {
+    .split(/\r\n|\r|\n/g)
+    .reduce((parts: TextPart[], line: string, i, source) => {
       parts.push(line);
-      parts.push(<br />);
+
+      if (i !== source.length - 1) {
+        parts.push(<br />);
+      }
 
       return parts;
     }, []);
