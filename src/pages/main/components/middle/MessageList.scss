@@ -8,6 +8,12 @@
   padding: 0 1rem;
   overflow: auto;
 
+  &.no-avatars {
+    .Avatar {
+      display: none;
+    }
+  }
+
   .messages-container {
     width: 100%;
     height: 100%;
@@ -23,6 +29,10 @@
 
     &:last-child {
       margin-bottom: 0;
+    }
+
+    :not(:last-child) .Avatar {
+      visibility: hidden;
     }
   }
 }
