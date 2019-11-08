@@ -1,0 +1,19 @@
+.LastMessageMeta {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  padding: 2px 4px;
+  color: #66b161;
+  content: "12:31";
+  font-size: 0.6rem;
+  line-height: 0.6rem;
+
+  .sending-state {
+    color: #66b161;
+  }
+
+  .time {
+    color: #777777;
+  }
+}
