@@ -223,7 +223,7 @@ function getUpdatedChild(
 export function hasElementChanged($old: VirtualElementChild, $new: VirtualElementChild) {
   if (typeof $old !== typeof $new) {
     return true;
-  } else if (isTextElement($old) || isTextElement($new)) {
+  } else if (!isRealElement($old) || !isRealElement($new)) {
     return $old !== $new;
   } else if ($old.type !== $new.type) {
     return true;
