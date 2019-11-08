@@ -1,0 +1,16 @@
+$color-primary: #4ea4f6;
+$color-white: #ffffff;
+$color-black: #000000;
+$color-border: #ecedef;
+
+:root {
+    --color-background: $color-white;
+    --color-text: $color-black;
+    --color-borders: $color-borders; 
+
+    --color-primary: $color-primary;
+    --color-primary-shade: mix($color-primary, $color-black, 8%);
+    --color-primary-shade-2: mix($color-primary, $color-black, 16%);
+
+    --border-radius-default: 5px;
+}

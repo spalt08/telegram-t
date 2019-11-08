@@ -2,8 +2,8 @@
   outline: none;
   display: block;
   width: 100%;
-  border: 2px solid #4ea4f6;
-  border-radius: 5px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-default);
   padding: 10px;
-  color: black;
+  color: var(--color-text);
 }

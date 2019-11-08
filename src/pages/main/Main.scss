@@ -12,7 +12,7 @@
 
   > div:nth-child(2) {
     flex: 3;
-    border-left: 1px solid #ECEDEF;
-    border-right: 1px solid #ECEDEF;
+    border-left: 1px solid var(--color-borders);
+    border-right: 1px solid var(--color-borders);
   }
 }

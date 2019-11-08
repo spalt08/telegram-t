@@ -3,17 +3,17 @@
   display: block;
   width: 100%;
   border: 0;
-  border-radius: 5px;
-  background: #4ea4f6;
+  border-radius: var(--border-radius-default);
+  background: var(--color-primary);
   padding: 10px;
   color: white;
   cursor: pointer;
 
   &:hover {
-    background: #51aaff;
+    background: var(--color-primary-shade);
   }
 
   &:active {
-    background: #4b9dec;
+    background: var(--color-primary-shade-2);
   }
 }
