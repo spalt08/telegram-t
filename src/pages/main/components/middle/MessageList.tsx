@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import { ApiMessage } from '../../../../modules/tdlib/types/messages';
+import { ApiMessage } from '../../../../modules/tdlib/types';
 import { selectChatMessages } from '../../../../modules/tdlib/selectors';
 import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import orderBy from '../../../../util/orderBy';

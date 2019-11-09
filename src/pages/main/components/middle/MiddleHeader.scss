@@ -1,4 +1,6 @@
-.MiddleHeader {
+//TODO @pixel-perfect
+
+.DialogHeader, .GroupHeader {
   display: flex;
   align-items: center;
   width: 100%;
@@ -11,9 +13,18 @@
   }
 
   .title {
-    height: 100%;
-    padding-top: 12px;
+    padding-top: 5px;
     font-weight: bold;
     font-size: 0.9em;
+  }
+
+  .status {
+    font-weight: bold;
+    font-size: 0.8em;
+    color: #868e96;
+
+    &.online {
+      color: var(--color-primary);
+    }
   }
 }

@@ -65,10 +65,8 @@ export type DispatchMap = Record<ActionTypes, Function>;
 
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
-import { ApiMessage } from '../modules/tdlib/types/messages';
-import { ApiChat } from '../modules/tdlib/types/chats';
+import { ApiUser, ApiChat, ApiMessage } from '../modules/tdlib/types';
 import orderBy from '../util/orderBy';
-import { ApiUser } from '../modules/tdlib/types/users';
 
 type ActionPayload = AnyLiteral;
 

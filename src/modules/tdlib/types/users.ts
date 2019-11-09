@@ -5,5 +5,11 @@ export interface ApiUser {
   };
   first_name?: string;
   last_name?: string;
-  status?: string;
+  status?: {
+    '@type': (
+      'userStatusEmpty' | 'userStatusLastMonth' | 'userStatusLastWeek' |
+      'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
+      );
+    was_online?: number;
+  };
 }

@@ -1,7 +1,6 @@
 import React, { FC, JsxChildren } from '../lib/teact';
 
-import { ApiChat } from '../modules/tdlib/types/chats';
-import { ApiUser } from '../modules/tdlib/types/users';
+import { ApiUser, ApiChat } from '../modules/tdlib/types';
 import { getUserFullName } from '../modules/tdlib/helpers';
 import { isPrivateChat } from '../modules/tdlib/helpers';
 import './Avatar.scss';

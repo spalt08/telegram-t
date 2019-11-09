@@ -1,14 +1,13 @@
 import React, { FC } from '../../../../lib/teact';
-import { ApiMessage } from '../../../../modules/tdlib/types/messages';
-
 import { withGlobal } from '../../../../lib/teactn';
+
+import { ApiUser, ApiMessage } from '../../../../modules/tdlib/types';
 import { getMessageText, isOwnMessage, getUserFullName } from '../../../../modules/tdlib/helpers';
 import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import Avatar from '../../../../components/Avatar';
 import MessageMeta from './MessageMeta';
 import './Message.scss';
-import { ApiUser } from '../../../../modules/tdlib/types/users';
 
 type IProps = {
   message: ApiMessage;

@@ -21,7 +21,7 @@ export function onUpdate(update: TdLibUpdate) {
       break;
     }
 
-    case 'updateUserFullInfo': {
+    case 'updateUserStatus': {
       const { user_id, status } = update;
 
       updateUser(user_id, { status });

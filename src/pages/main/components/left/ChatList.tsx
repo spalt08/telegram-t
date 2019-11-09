@@ -1,15 +1,12 @@
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
+import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat } from '../../../../modules/tdlib/types/chats';
-
-import Chat from './Chat';
-
-import Loading from '../../../../components/Loading';
-
-import './ChatList.scss';
+import { ApiChat } from '../../../../modules/tdlib/types';
 import toArray from '../../../../util/toArray';
 import orderBy from '../../../../util/orderBy';
+import Chat from './Chat';
+import Loading from '../../../../components/Loading';
+import './ChatList.scss';
 
 type IProps = Pick<DispatchMap, 'loadChats'> & {
   chats: Record<number, ApiChat>,
