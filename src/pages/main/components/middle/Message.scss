@@ -65,7 +65,7 @@
           content: '';
           display: block;
           position: absolute;
-          bottom: -.24rem;
+          bottom: -.25rem;
           left: -.64rem;
           width: .75rem;
           height: 1.2rem;
@@ -85,6 +85,10 @@
   .content {
     position: relative;
     max-width: 29rem;
+
+    p {
+      margin: 0;
+    }
   }
 
   .sender-name {
@@ -106,15 +110,11 @@
       word-break: break-all;
     }
 
-    p {
-      margin: 0;
-
-      &::after {
-        content: '';
-        display: inline-block;
-        width: 4rem;
-        height: 1rem;
-      }
+    p::after {
+      content: '';
+      display: inline-block;
+      width: 2rem;
+      height: 1rem;
     }
 
     a {
@@ -129,9 +129,7 @@
   }
 
   .emoji-only-1, .emoji-only-2, .emoji-only-3 {
-    line-height: 1;
-    margin-top: 0.5rem;
-    margin-bottom: -0.5rem;
+    line-height: 1.2;
 
     &.emoji-only-1 {
       font-size: 5rem;
@@ -149,6 +147,10 @@
   &.own {
     .text {
       background-color: #EEFEDF;
+
+      p::after {
+        width: 3.5rem;
+      }
     }
 
     .content {

@@ -18,13 +18,13 @@ const MessageOutgoingStatus: FC<IProps> = ({ message, outgoingStatus }) => {
 function renderOutgoingStatus(message: ApiMessage, outgoingStatus: ReturnType<typeof selectOutgoingStatus>) {
   switch (outgoingStatus) {
     case 'read':
-      return '<R>';
+      return <i className="icon-message-read" />;
     case 'pending':
-      return '<P>';
+      return <i className="icon-message-sending" />;
     case 'succeeded':
-      return '<S>';
+      return <i className="icon-message-delivered" />;
     case 'failed':
-      return '<F>';
+      return <i className="icon-message-sending-error" />;
   }
 }
 

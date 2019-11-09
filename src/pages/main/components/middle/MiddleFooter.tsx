@@ -2,8 +2,11 @@ import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import InputText from '../../../../components/ui/InputText';
-import './MiddleFooter.scss';
+import Button from '../../../../components/ui/Button';
+
 import onNextTick from '../../../../util/onNextTick';
+
+import './MiddleFooter.scss';
 
 type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
   selectedChatId: number;
@@ -24,9 +27,24 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   onNextTick(focusInput);
 
   return (
-    <div className="MiddleFooter">{
-      <InputText id="message-input-text" placeholder="Message" onKeyPress={onKeyPress} />
-    }</div>
+    <div className="MiddleFooter">
+      <div id="message-input-wrapper">
+        {/* TODO @not-implemented */}
+        {/* <Button round color="translucent" onClick={() => {}}>
+          <i className="icon-smile" />
+        </Button> */}
+        {/* TODO Convert to textarea, add auto-sizing */}
+        <InputText id="message-input-text" placeholder="Message" onKeyPress={onKeyPress} />
+        {/* TODO @not-implemented */}
+        {/* <Button round color="translucent" onClick={() => { }}>
+          <i className="icon-attach" />
+        </Button> */}
+      </div>
+      {/* TODO @not-implemented */}
+      {/* <Button round color="primary" onClick={() => { }}>
+        <i className="icon-microphone" />
+      </Button> */}
+    </div>
   );
 };
 

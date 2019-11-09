@@ -8,11 +8,24 @@ type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 interface IProps {
   onClick: Function
   children: JsxChildren,
+  color?: 'primary' | 'secondary' | 'translucent',
+  className?: string,
+  round?: boolean;
 }
 
-const Button: FC<IProps> = ({ onClick, children }) => {
+const Button: FC<IProps> = ({ onClick, children, color = 'primary', className, round }) => {
+  let combinedClass = "Button";
+  combinedClass += ` ${color}`;
+
+  if (round) {
+    combinedClass += " round";
+  }
+  if (className) {
+    combinedClass += ` ${className}`;
+  }
+
   return (
-    <button className="Button" onClick={onClick as OnClickHandler}>{children}</button>
+    <button className={combinedClass} onClick={onClick as OnClickHandler}>{children}</button>
   );
 };
 

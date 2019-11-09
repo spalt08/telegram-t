@@ -5,16 +5,63 @@
   height: 3.5rem;
   border: 0;
   border-radius: var(--border-radius-default);
-  background: var(--color-primary);
+  background: transparent;
   padding: 10px;
   color: white;
   cursor: pointer;
 
-  &:hover, &:focus {
-    background: var(--color-primary-shade);
+  &.round {
+    width: 3.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 1.5rem;
+    }
   }
 
-  &:active {
-    background: var(--color-primary-shade-2);
+  &.primary {
+    background: var(--color-primary);
+
+    &:hover, &:focus {
+      background: var(--color-primary-shade);
+    }
+
+    &:active {
+      background: var(--color-primary-shade-2);
+    }
+  }
+
+  &.secondary {
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+
+    &:hover, &:focus {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    &:active {
+      background: var(--color-primary-shade);
+      color: white;
+    }
+  }
+
+  &.translucent {
+    background: transparent;
+    color: var(--color-text-secondary);
+    opacity: 0.75;
+
+    &:hover, &:focus {
+      color: var(--color-primary);
+      opacity: 1;
+    }
+
+    &:active {
+      color: var(--color-primary-shade);
+      opacity: 1;
+    }
   }
 }

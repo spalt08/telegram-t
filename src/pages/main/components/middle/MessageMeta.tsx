@@ -11,8 +11,10 @@ type IProps = {
 
 const MessageMeta: FC<IProps> = ({ message }) => {
   return (
-    <span className='MessageMeta'>
-      {formatTime(message.date * 1000)}
+    <span className="MessageMeta">
+      <span className="message-time">
+        {formatTime(message.date * 1000)}
+      </span>
       {message.is_outgoing && (
         <MessageOutgoingStatus message={message} />
       )}

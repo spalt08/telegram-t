@@ -4,21 +4,38 @@ $color-primary-shade-2: #4b9dec;
 
 $color-links: #52a1ef;
 
+$color-text-green: #4fae4e;
+$color-green: #4dcd5e;
+
 $color-white: #ffffff;
 $color-black: #000000;
+$color-gray: #c4c9cc;
+$color-text-secondary: #707579;
+$color-text-meta: #686c72;
 $color-borders: #ecedef;
+$color-chat-hover: #f4f4f5;
 
 :root {
   --color-background: #{$color-white};
   --color-text: #{$color-black};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-meta: #{$color-text-meta};
+  --color-text-green: #{$color-text-green};
   --color-borders: #{$color-borders};
 
   --color-primary: #{$color-primary};
   --color-primary-shade: #{$color-primary-shade};
   --color-primary-shade-2: #{$color-primary-shade-2};
 
+  --color-green: #{$color-green};
+
   --color-links: #{$color-links};
   --color-links-hover: #{darken($color-links, 8%)};
+
+  --color-gray: #{$color-gray};
+
+  --color-chat-hover: #{$color-chat-hover};
+  --color-chat-active: #{$color-borders};
 
   --border-radius-default: 0.5rem;
   --border-radius-messages: 0.75rem;

@@ -14,8 +14,68 @@
 
   .select-chat-note {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    text-align: center;
+    color: var(--color-text-secondary);
+
+    .icon-chats-placeholder {
+      font-size: 9rem;
+      opacity: 0.5;
+      margin-bottom: 1.8rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      line-height: 1.3;
+      font-weight: 500;
+      margin-bottom: 3rem;
+    }
+  }
+
+  .create-chat-buttons {
+    display: flex;
+
+    .Button {
+      position: relative;
+      margin: 0 2rem;
+      width: 4.5rem;
+      height: 4.5rem;
+
+      &:first-child {
+        margin-left: 0;
+      }
+      &:last-child {
+        margin-right: 0;
+      }
+
+      i {
+        font-size: 2.2rem;
+      }
+
+      span {
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1.6rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      &:hover, &:focus {
+        span {
+          color: var(--color-primary);
+        }
+      }
+
+      &:active {
+        span {
+          color: var(--color-primary-shade);
+        }
+      }
+    }
   }
 }

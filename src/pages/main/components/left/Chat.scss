@@ -6,16 +6,12 @@
   margin-bottom: 0.35rem;
   border-radius: var(--border-radius-default);
 
-  &:hover {
-    background: #f8f8f8;
+  &:hover, &.selected {
+    background: var(--color-chat-hover);
   }
 
   &:active {
-    background: #efefef;
-  }
-
-  &.selected {
-    background: #efefef;
+    background: var(--color-chat-active);
   }
 
   .Avatar {
@@ -45,7 +41,7 @@
     }
 
     .last-message {
-      opacity: .5;
+      color: var(--color-text-secondary);
     }
   }
 }

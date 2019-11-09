@@ -142,11 +142,11 @@ function createElement(
     tag,
     props,
     children: childrenArray.map((child): VirtualElementChild => {
-      if (isRealElement(child)) {
-        return child;
-      } else if (child === false || child === null || child === undefined) {
+      if (child === false || child === null || child === undefined) {
         // Support for `&&` operators.
         return VIRTUAL_ELEMENT_EMPTY;
+      } else if (isRealElement(child)) {
+        return child;
       } else {
         return String(child);
       }

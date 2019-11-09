@@ -1,0 +1,5 @@
+@mixin icon-styles() {
+  [class^="icon-"], [class*=" icon-"] {
+    @content;
+  }
+}

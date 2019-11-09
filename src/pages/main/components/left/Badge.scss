@@ -1,7 +1,7 @@
 .Badge {
   min-width: 1.5rem;
   height: 1.5rem;
-  background: #c4c9cc;
+  background: var(--color-gray);
   border-radius: 0.75rem;
   padding: 0 .45rem;
   color: white;
@@ -11,6 +11,6 @@
   text-align: center;
 
   .Chat.private & {
-    background: #53CB63;
+    background: var(--color-green);
   }
 }

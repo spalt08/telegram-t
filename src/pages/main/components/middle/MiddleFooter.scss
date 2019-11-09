@@ -2,8 +2,52 @@
   width: 100%;
   max-width: var(--messages-container-width);
   padding: 0.5rem 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+
+  > .Button {
+    flex-shrink: 0;
+    margin-left: .5rem;
+  }
+}
+
+#message-input-wrapper {
+  flex-grow: 1;
+  display: flex;
+  background: white;
+  border-radius: var(--border-radius-messages);
+  border-bottom-right-radius: 0;
+  box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+  position: relative;
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -.25rem;
+    right: -.64rem;
+    width: .75rem;
+    height: 1.2rem;
+    // background-image: url('../../../../assets/chat-bubble-white.svg');
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDYuNjc3IiBoZWlnaHQ9IjM5IiB2aWV3Qm94PSIwIDAgNDYuNjc3IDM5Ij4gIDxkZWZzPiAgICA8ZmlsdGVyIGlkPSJCdWJibGUiIHg9IjAiIHk9IjAiIHdpZHRoPSI0Ni42NzciIGhlaWdodD0iMzkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+ICAgICAgPGZlT2Zmc2V0IGR5PSIxIiBpbnB1dD0iU291cmNlQWxwaGEiLz4gICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxIiByZXN1bHQ9ImJsdXIiLz4gICAgICA8ZmVGbG9vZCBmbG9vZC1jb2xvcj0iIzEwMjMyZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNDkiLz4gICAgICA8ZmVDb21wb3NpdGUgb3BlcmF0b3I9ImluIiBpbjI9ImJsdXIiLz4gICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiLz4gICAgPC9maWx0ZXI+ICA8L2RlZnM+ICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLCAwLCAwLCAxLCAwLCAwKSIgZmlsdGVyPSJ1cmwoI0J1YmJsZSkiPiAgICA8cGF0aCBpZD0iQnViYmxlLTIiIGRhdGEtbmFtZT0iQnViYmxlIiBkPSJNNywzM1Y2YTYsNiwwLDAsMSw2LTZIMjhBMTIsMTIsMCwwLDEsNDAsMTJ2OUExMiwxMiwwLDAsMSwyOCwzM1pNLjMyNCwzM2ExLDEsMCwwLDEtLjc3My0xLjYzNGw1LjQtNi41ODNBMzMuMzg3LDMzLjM4NywwLDAsMCw3LDE2VjMzWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMy42OCAyKSIgZmlsbD0iI2ZmZiIvPiAgPC9nPjwvc3ZnPg==);
+    background-size: auto;
+    background-position: bottom left;
+    transform: scaleX(-1);
+  }
+
+  > .Button {
+    flex-shrink: 0;
+  }
 }
 
 #message-input-text {
+  flex-grow: 1;
   margin-bottom: 0;
+  background: transparent !important;
+  border-color: transparent !important;
+
+  &:not(:only-child) {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
