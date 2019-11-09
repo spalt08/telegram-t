@@ -2,9 +2,8 @@ import React, { FC } from '../../../../lib/teact';
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 
 import { withGlobal } from '../../../../lib/teactn';
-import { getMessageText, isOwnMessage } from '../../../../modules/tdlib/helpers';
-import { getUserFullName } from '../../../../modules/tdlib/helpers/users';
-import { selectUser } from '../../../../modules/tdlib/selectors/users';
+import { getMessageText, isOwnMessage, getUserFullName } from '../../../../modules/tdlib/helpers';
+import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import Avatar from '../../../../components/Avatar';
 import MessageMeta from './MessageMeta';
@@ -23,14 +22,15 @@ type TextPart = string | Element;
 const Message: FC<IProps> = ({ message, showAvatar, showSenderName, sender }) => {
   const className = buildClassName(message);
   const [contentParts, contentClassName] = buildContent(message);
+  const isText = contentClassName && contentClassName.indexOf('text') !== -1;
 
   return (
     <div className={className}>
       {showAvatar && (
-        <Avatar size="small" user={sender}>HE</Avatar>
+        <Avatar size="small" user={sender} />
       )}
       <div className={contentClassName}>
-        {showSenderName && sender && (
+        {showSenderName && sender && isText && (
           <div className="sender-name">{getUserFullName(sender)}</div>
         )}
         <p>{contentParts}</p>
