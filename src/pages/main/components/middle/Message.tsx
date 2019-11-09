@@ -1,28 +1,38 @@
 import React, { FC } from '../../../../lib/teact';
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 
+import { withGlobal } from '../../../../lib/teactn';
 import { getMessageText, isOwnMessage } from '../../../../modules/tdlib/helpers';
+import { getUserFullName } from '../../../../modules/tdlib/helpers/users';
+import { selectUser } from '../../../../modules/tdlib/selectors/users';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import Avatar from '../../../../components/Avatar';
 import MessageMeta from './MessageMeta';
 import './Message.scss';
+import { ApiUser } from '../../../../modules/tdlib/types/users';
 
 type IProps = {
-  message: ApiMessage,
+  message: ApiMessage;
+  showAvatar? : boolean;
+  showSenderName? : boolean;
+  sender?: ApiUser;
 };
 
 type TextPart = string | Element;
 
-const Message: FC<IProps> = ({ message }) => {
+const Message: FC<IProps> = ({ message, showAvatar, showSenderName, sender }) => {
   const className = buildClassName(message);
   const [contentParts, contentClassName] = buildContent(message);
 
   return (
     <div className={className}>
-      {!isOwnMessage(message) && (
-        <Avatar size="small">HE</Avatar>
+      {showAvatar && (
+        <Avatar size="small" user={sender}>HE</Avatar>
       )}
       <div className={contentClassName}>
+        {showSenderName && sender && (
+          <div className="sender-name">{getUserFullName(sender)}</div>
+        )}
         <p>{contentParts}</p>
         <MessageMeta message={message} />
       </div>
@@ -151,4 +161,14 @@ function replaceWordsWithElements(
     }, []);
 }
 
-export default Message;
+export default withGlobal(
+  (global, { message, showSenderName, showAvatar }: IProps) => {
+    if (!showSenderName && !showAvatar) {
+      return;
+    }
+
+    return {
+      sender: selectUser(global, message.sender_user_id),
+    };
+  },
+)(Message);

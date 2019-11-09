@@ -3,7 +3,7 @@ import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiMessage } from '../../../../modules/tdlib/types/messages';
 import { selectChatMessages } from '../../../../modules/tdlib/selectors';
-import { isPrivate } from '../../../../modules/tdlib/helpers';
+import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import orderBy from '../../../../util/orderBy';
 import toArray from '../../../../util/toArray';
 import onNextTick from '../../../../util/onNextTick';
@@ -14,7 +14,7 @@ import './MessageList.scss';
 type IProps = Pick<DispatchMap, 'loadChatMessages'> & {
   areMessagesLoaded: boolean,
   chatId: number;
-  messages: ApiMessage[];
+  messages?: Record<number, ApiMessage>;
 };
 
 const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChatMessages }) => {
@@ -22,20 +22,31 @@ const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChat
     loadChatMessages({ chatId });
   }
 
+  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date', 'desc') : undefined;
+  const isPrivate = isPrivateChat(chatId);
+
   onNextTick(() => {
     const scrollContainer = document.getElementsByClassName('MessageList')[0];
     scrollContainer.scrollTop = scrollContainer.scrollHeight;
   });
 
   return (
-    <div className={`MessageList ${isPrivate(chatId) ? 'no-avatars' : ''}`}>{
-      areMessagesLoaded ? (
+    <div className={`MessageList ${isPrivate ? 'no-avatars' : ''}`}>{
+      areMessagesLoaded && messagesArray ? (
         <div className="messages-container">
-          {groupMessages(messages).map(messageGroup => (
+          {groupMessages(messagesArray).map(messageGroup => (
             <div className="message-group">
-              {messageGroup.map(message => (
-                <Message key={message.id} message={message} />
-              ))}
+              {messageGroup.map((message, i) => {
+                const isOwn = isOwnMessage(message);
+
+                return (
+                  <Message
+                    key={message.id}
+                    message={message}
+                    showAvatar={!isPrivate && !isOwn}
+                    showSenderName={i === 0 && !isPrivate && !isOwn} />
+                );
+              })}
             </div>
           ))}
         </div>
@@ -78,14 +89,13 @@ export default withGlobal(
   global => {
     const { chats } = global;
 
-    const chatMessages = chats.selectedId ? selectChatMessages(global, chats.selectedId) : null;
-    const areMessagesLoaded = chatMessages && Object.keys(chatMessages).length;
+    const messages = chats.selectedId ? selectChatMessages(global, chats.selectedId) : undefined;
+    const areMessagesLoaded = messages && Object.keys(messages).length;
 
     return {
       chatId: chats.selectedId,
       areMessagesLoaded,
-      // TODO @perf New object returned each time.
-      messages: chatMessages && orderBy(toArray(chatMessages), 'date', 'desc'),
+      messages,
     };
   },
   (setGlobal, actions) => {

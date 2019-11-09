@@ -12,6 +12,10 @@ export default React;
 export type GlobalState = {
   isInitialized: boolean,
 
+  users: {
+    byId: Record<number, ApiUser>,
+  },
+
   chats: {
     selectedId?: number;
     ids: number[],
@@ -33,6 +37,10 @@ export type GlobalState = {
 
 const INITIAL_STATE: GlobalState = {
   isInitialized: false,
+
+  users: {
+    byId: {},
+  },
 
   chats: {
     ids: [],
@@ -60,6 +68,7 @@ import React, { FC, Props, useState } from './teact';
 import { ApiMessage } from '../modules/tdlib/types/messages';
 import { ApiChat } from '../modules/tdlib/types/chats';
 import orderBy from '../util/orderBy';
+import { ApiUser } from '../modules/tdlib/types/users';
 
 type ActionPayload = AnyLiteral;
 
@@ -69,8 +78,8 @@ type Reducer = (
   payload?: ActionPayload,
 ) => GlobalState | void;
 
-type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral);
-type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap>);
+type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | undefined);
+type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap> | undefined);
 
 let global = INITIAL_STATE;
 
@@ -133,7 +142,7 @@ function updateContainers() {
       ...mapReducersToProps(setGlobal, actions),
     };
 
-    if (!arePropsShallowEqual(mappedProps, newMappedProps)) {
+    if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps, newMappedProps)) {
       containers[id].mappedProps = newMappedProps;
       containers[id]._updates++;
       forceUpdate();
@@ -200,5 +209,5 @@ function arePropsShallowEqual(currentProps: Props, newProps: Props) {
 }
 
 document.addEventListener('dblclick', () => {
-  console.log('GLOBAL', { containers: orderBy(Object.values(containers), '_updates') });
+  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), '_updates'));
 });

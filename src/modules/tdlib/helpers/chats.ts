@@ -1,3 +1,3 @@
-export function isPrivate(chatId: number) {
+export function isPrivateChat(chatId: number) {
   return chatId > 0;
 }

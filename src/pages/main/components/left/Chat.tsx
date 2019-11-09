@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 import { ApiChat } from '../../../../modules/tdlib/types/chats';
-import { getMessageText, isPrivate } from '../../../../modules/tdlib/helpers';
+import { getMessageText, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import Avatar from '../../../../components/Avatar';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
@@ -38,7 +38,7 @@ const Chat: FC<IProps> = ({ chat, isSelected, selectChat }) => {
 function buildClassNames(chat: ApiChat, isSelected: boolean) {
   const classNames = ['Chat'];
 
-  classNames.push(isPrivate(chat.id) ? 'private' : 'group');
+  classNames.push(isPrivateChat(chat.id) ? 'private' : 'group');
 
   if (isSelected) {
     classNames.push('selected');

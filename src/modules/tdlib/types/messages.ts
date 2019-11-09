@@ -8,7 +8,7 @@ export interface ApiMessage {
   };
   date: number;
   is_outgoing: boolean;
-  sender_user_id: boolean;
+  sender_user_id: number;
   sending_state?: {
     '@type': 'messageSendingStateFailed'
   }

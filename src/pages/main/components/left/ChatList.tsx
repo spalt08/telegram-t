@@ -12,7 +12,7 @@ import toArray from '../../../../util/toArray';
 import orderBy from '../../../../util/orderBy';
 
 type IProps = Pick<DispatchMap, 'loadChats'> & {
-  chats: ApiChat[],
+  chats: Record<number, ApiChat>,
   areChatsLoaded: boolean;
 };
 
@@ -21,11 +21,15 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
     loadChats();
   }
 
+  const chatsArray = areChatsLoaded && chats
+    ? orderBy(toArray(chats), chat => chat.last_message && chat.last_message.date)
+    : undefined;
+
   return (
     <div className="ChatList">{
-      areChatsLoaded ? (
+      areChatsLoaded && chatsArray ? (
         <div>
-          {chats.map(({ id }) => (
+          {chatsArray.map(({ id }) => (
             <Chat key={id} id={id} />
           ))}
         </div>
@@ -38,16 +42,13 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
 
 export default withGlobal(
   global => {
-    const idsLength = global.chats.ids.length;
-    const areChatsLoaded = idsLength > 0 && Object.keys(global.chats.byId).length >= idsLength;
-    const sortedChats = areChatsLoaded
-      // TODO @perf New object returned each time.
-      ? orderBy(toArray(global.chats.byId), chat => chat.last_message && chat.last_message.date)
-      : null;
+    const { chats } = global;
+    const idsLength = chats.ids.length;
+    const areChatsLoaded = idsLength > 0 && Object.keys(chats.byId).length >= idsLength;
 
     return {
-      chats: sortedChats,
       areChatsLoaded,
+      chats: chats.byId,
     };
   },
   (setGlobal, actions) => {
