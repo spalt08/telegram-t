@@ -9,7 +9,7 @@ export interface ApiUser {
     '@type': (
       'userStatusEmpty' | 'userStatusLastMonth' | 'userStatusLastWeek' |
       'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
-      );
+    );
     was_online?: number;
   };
 }

@@ -25,7 +25,6 @@ function renderWithVirtual(
   $current: VirtualElementChild | undefined,
   $new: VirtualElementChild,
 ) {
-
   const currentEl = parentEl.childNodes[childIndex];
 
   if ($current === undefined && $new !== undefined) {
@@ -137,7 +136,7 @@ function hasAttribute(element: HTMLElement, key: string) {
     // There is no way to check event listener, so there will be some redundant removes, but it is fine.
     return true;
   } else {
-    element.hasAttribute(key);
+    return element.hasAttribute(key);
   }
 }
 

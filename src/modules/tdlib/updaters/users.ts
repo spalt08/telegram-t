@@ -1,7 +1,7 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiUser } from '../types/users';
-import { TdLibUpdate } from '../../../api/tdlib/updates';
+import { TdLibUpdate } from '../../../api/tdlib/types';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {

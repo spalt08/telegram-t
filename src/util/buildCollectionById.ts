@@ -7,4 +7,4 @@ export default <T extends Member>(collection: T[]) => {
 
     return byId;
   }, {});
-}
+};

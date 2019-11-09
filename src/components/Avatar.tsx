@@ -1,8 +1,8 @@
-import React, { FC, JsxChildren } from '../lib/teact';
+import React, { FC } from '../lib/teact';
 
 import { ApiUser, ApiChat } from '../modules/tdlib/types';
-import { getUserFullName } from '../modules/tdlib/helpers';
-import { isPrivateChat } from '../modules/tdlib/helpers';
+import { getUserFullName, isPrivateChat } from '../modules/tdlib/helpers';
+
 import './Avatar.scss';
 
 interface IProps {
@@ -12,11 +12,11 @@ interface IProps {
 }
 
 const Avatar: FC<IProps> = ({ size = 'large', chat, user }) => {
-  let content = '';
+  let content: string | null = '';
 
   if (user) {
     const userName = getUserFullName(user);
-    content = userName && getFirstLetters(userName).slice(0, 2);
+    content = userName ? getFirstLetters(userName).slice(0, 2) : null;
   } else if (chat && chat.title) {
     content = chat.title && getFirstLetters(chat.title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
   }

@@ -1,4 +1,4 @@
-type UpdateAuthorizationStateType = (
+export type UpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
   'authorizationStateWaitTdlibParameters' |
   'authorizationStateWaitEncryptionKey' |
@@ -9,7 +9,7 @@ type UpdateAuthorizationStateType = (
   'authorizationStateReady' |
   'authorizationStateClosing' |
   'authorizationStateClosed'
-  )
+)
 
 export type TdLibUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState',

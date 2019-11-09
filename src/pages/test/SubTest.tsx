@@ -1,6 +1,6 @@
 import { FC, useState } from '../../lib/teact';
 import React from '../../lib/teactn';
-import { UpdateAuthorizationStateType } from '../../api/tdlib/updates';
+import { UpdateAuthorizationStateType } from '../../api/tdlib/types';
 
 type IProps = {
   authState?: UpdateAuthorizationStateType,

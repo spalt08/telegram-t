@@ -6,7 +6,7 @@ import './modules';
 import Loading from './components/Loading';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
-import Test from './pages/test/Test';
+// import Test from './pages/test/Test';
 
 type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>
 
@@ -46,4 +46,3 @@ export default withGlobal(
     return { init };
   },
 )(App);
-

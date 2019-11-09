@@ -103,20 +103,20 @@ function createElement(
         cursor: 0,
         byCursor: [],
       },
-      render: () => {
+      render() {
         const rendered = renderComponent(componentInstance);
 
         if (rendered) {
-          const children = getUpdatedChildren(componentInstance.$element, [rendered]);
+          const renderedChildren = getUpdatedChildren(componentInstance.$element, [rendered]);
           componentInstance.$prevElement = componentInstance.$element;
-          componentInstance.$element = createComponentElement(componentInstance, children);
+          componentInstance.$element = createComponentElement(componentInstance, renderedChildren);
         }
 
         return componentInstance.$element;
       },
-      forceUpdate: (props?: Props) => {
-        if (props) {
-          componentInstance.props = props;
+      forceUpdate(newProps?: Props) {
+        if (newProps) {
+          componentInstance.props = newProps;
         }
 
         if (componentInstance.onUpdate && !componentInstance.isUnmounted) {
@@ -154,10 +154,10 @@ function createElement(
   };
 }
 
-const createComponentElement = (
+function createComponentElement(
   componentInstance: ComponentInstance,
   children: VirtualElementChildren = [],
-): VirtualElementComponent => {
+): VirtualElementComponent {
   const { props } = componentInstance;
 
   return {
@@ -166,7 +166,7 @@ const createComponentElement = (
     props,
     children,
   };
-};
+}
 
 function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
@@ -233,12 +233,14 @@ export function hasElementChanged($old: VirtualElementChild, $new: VirtualElemen
     // TODO Support keys.
     return $old.componentInstance.Component !== $new.componentInstance.Component;
   }
+
+  return false;
 }
 
 export function useState(initial: any) {
   const { cursor, byCursor } = renderingInstance.state;
 
-  if (typeof byCursor[cursor] === 'undefined') {
+  if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
       value: initial,
       setter: ((componentInstance) => (newValue: any) => {
@@ -261,4 +263,3 @@ export function useState(initial: any) {
 export default {
   createElement,
 };
-

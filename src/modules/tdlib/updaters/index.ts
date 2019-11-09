@@ -1,4 +1,4 @@
-import { TdLibUpdate } from '../../../api/tdlib/updates';
+import { TdLibUpdate } from '../../../api/tdlib/types';
 
 import * as system from './system';
 import * as users from './users';

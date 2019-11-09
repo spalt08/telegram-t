@@ -1,6 +1,6 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate } from '../../../api/tdlib/updates';
+import { TdLibUpdate } from '../../../api/tdlib/types';
 import { ApiMessage } from '../types/messages';
 
 export function onUpdate(update: TdLibUpdate) {

@@ -12,7 +12,7 @@ type IProps = {
 const Badge: FC<IProps> = ({ chat }) => {
   return (
     chat.unread_count ? (
-      <div className='Badge'>
+      <div className="Badge">
         {chat.unread_count}
       </div>
     ) : (

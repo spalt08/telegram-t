@@ -2,10 +2,15 @@
 // import React, { getGlobal, setGlobal } from 'reactn';
 // export { addReducer, getGlobal, setGlobal, withGlobal, useGlobal } from 'reactn';
 
-import { UpdateAuthorizationStateType } from '../api/tdlib/updates';
+import { UpdateAuthorizationStateType } from '../api/tdlib/types';
 import useForceUpdate from '../hooks/useForceUpdate';
 import generateIdFor from '../util/generateIdFor';
 import throttleWithRaf from '../util/throttleWithRaf';
+
+/* Polyfill start */
+import React, { FC, Props, useState } from './teact';
+import { ApiUser, ApiChat, ApiMessage } from '../modules/tdlib/types';
+import orderBy from '../util/orderBy';
 
 export default React;
 
@@ -59,14 +64,9 @@ type ActionTypes = (
   'loadChats' | 'selectChat' |
   // messages
   'loadChatMessages' | 'selectMessage' | 'sendTextMessage'
-  );
+);
 
 export type DispatchMap = Record<ActionTypes, Function>;
-
-/* Polyfill start */
-import React, { FC, Props, useState } from './teact';
-import { ApiUser, ApiChat, ApiMessage } from '../modules/tdlib/types';
-import orderBy from '../util/orderBy';
 
 type ActionPayload = AnyLiteral;
 
@@ -76,8 +76,8 @@ type Reducer = (
   payload?: ActionPayload,
 ) => GlobalState | void;
 
-type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | undefined);
-type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap> | undefined);
+type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | null);
+type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap> | null);
 
 let global = INITIAL_STATE;
 
@@ -90,9 +90,15 @@ const containers: Record<string, {
   ownProps: Props;
   mappedProps: Props;
   forceUpdate: Function;
-  _updates: number;
-  _componentName: string;
+  DEBUG_updates: number;
+  DEBUG_componentName: string;
 }> = {};
+
+function runCallbacks() {
+  callbacks.forEach((cb) => cb(global));
+}
+
+const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
 export function setGlobal(newGlobal?: GlobalState) {
   if (typeof newGlobal === 'object' && newGlobal !== global) {
@@ -122,19 +128,11 @@ function onDispatch(name: string, payload?: ActionPayload) {
   }
 }
 
-// export function addCallback(cb: Function) {
-//   callbacks.push(cb);
-// }
-
-function runCallbacks() {
-  callbacks.forEach(cb => cb(global));
-}
-
-const runCallbacksThrottled = throttleWithRaf(runCallbacks);
-
 function updateContainers() {
-  Object.keys(containers).forEach(id => {
-    const { mapStateToProps, mapReducersToProps, ownProps, mappedProps, forceUpdate } = containers[id];
+  Object.keys(containers).forEach((id) => {
+    const {
+      mapStateToProps, mapReducersToProps, ownProps, mappedProps, forceUpdate,
+    } = containers[id];
     const newMappedProps = {
       ...mapStateToProps(global, ownProps),
       ...mapReducersToProps(setGlobal, actions),
@@ -142,7 +140,7 @@ function updateContainers() {
 
     if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps, newMappedProps)) {
       containers[id].mappedProps = newMappedProps;
-      containers[id]._updates++;
+      containers[id].DEBUG_updates++;
       forceUpdate();
     }
   });
@@ -182,13 +180,14 @@ export function withGlobal(
             ...mapReducersToProps(setGlobal, actions),
           },
           forceUpdate,
-          _updates: 0,
-          _componentName: Component.name,
+          DEBUG_updates: 0,
+          DEBUG_componentName: Component.name,
         };
       }
 
       containers[id].ownProps = props;
 
+      // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...containers[id].mappedProps} {...props} />;
     };
   };
@@ -207,5 +206,5 @@ function arePropsShallowEqual(currentProps: Props, newProps: Props) {
 }
 
 document.addEventListener('dblclick', () => {
-  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), '_updates'));
+  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
 });

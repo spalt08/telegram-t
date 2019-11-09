@@ -8,7 +8,9 @@ interface IProps {
   children: JsxChildren,
 }
 
-const Select: FC<IProps> = ({ onChange, id, name, children }) => {
+const Select: FC<IProps> = ({
+  onChange, id, name, children,
+}) => {
   return (
     <select className="form-control" id={id} name={name} onChange={onChange}>
       {children}

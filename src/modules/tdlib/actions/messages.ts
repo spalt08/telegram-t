@@ -70,7 +70,7 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   };
 
   if (!result) {
-    return;
+    return null;
   }
 
   return result.messages;

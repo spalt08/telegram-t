@@ -19,7 +19,7 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
   }
 
   const chatsArray = areChatsLoaded && chats
-    ? orderBy(toArray(chats), chat => chat.last_message && chat.last_message.date)
+    ? orderBy(toArray(chats), (chat) => chat.last_message && chat.last_message.date)
     : undefined;
 
   return (
@@ -33,7 +33,8 @@ const ChatList: FC<IProps> = ({ chats, areChatsLoaded, loadChats }) => {
       ) : (
         <Loading />
       )
-    }</div>
+    }
+    </div>
   );
 };
 

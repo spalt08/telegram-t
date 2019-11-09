@@ -11,7 +11,7 @@ type IProps = {
 
 const MessageOutgoingStatus: FC<IProps> = ({ message, outgoingStatus }) => {
   return (
-    <span className='MessageOutgoingStatus'>{renderOutgoingStatus(message, outgoingStatus)}</span>
+    <span className="MessageOutgoingStatus">{renderOutgoingStatus(message, outgoingStatus)}</span>
   );
 };
 
@@ -26,6 +26,8 @@ function renderOutgoingStatus(message: ApiMessage, outgoingStatus: ReturnType<ty
     case 'failed':
       return <i className="icon-message-sending-error" />;
   }
+
+  return null;
 }
 
 export default withGlobal(

@@ -3,7 +3,9 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser, ApiPrivateChat } from '../../../../modules/tdlib/types';
 import { selectChat, selectUser } from '../../../../modules/tdlib/selectors';
-import { getPrivateChatUserId, getUserFullName, getUserStatus, isUserOnline } from '../../../../modules/tdlib/helpers';
+import {
+  getPrivateChatUserId, getUserFullName, getUserStatus, isUserOnline,
+} from '../../../../modules/tdlib/helpers';
 import Avatar from '../../../../components/Avatar';
 
 type IProps = {
@@ -12,7 +14,7 @@ type IProps = {
   user: ApiUser;
 };
 
-const PrivateChatHeader: FC<IProps> = ({ user}) => {
+const PrivateChatHeader: FC<IProps> = ({ user }) => {
   return (
     <div className="DialogHeader">
       <Avatar size="medium" user={user} />

@@ -2,7 +2,6 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { isPrivateChat } from '../../../../modules/tdlib/helpers';
-import Button from '../../../../components/ui/Button';
 
 import DialogHeader from './PrivateChatHeader';
 import GroupHeader from './GroupHeader';
@@ -16,7 +15,7 @@ type IProps = {
   areChatsLoaded: boolean;
 };
 
-const MiddleColumn: FC<IProps> = props => {
+const MiddleColumn: FC<IProps> = (props) => {
   return (
     <div id="MiddleColumn">
       {renderSelectedChat(props)}
@@ -25,7 +24,7 @@ const MiddleColumn: FC<IProps> = props => {
   );
 };
 
-const renderSelectedChat = (props: IProps) => {
+function renderSelectedChat(props: IProps) {
   const { selectedChatId } = props;
 
   if (!selectedChatId) {
@@ -37,15 +36,15 @@ const renderSelectedChat = (props: IProps) => {
       {isPrivateChat(selectedChatId) ? (
         <DialogHeader chatId={selectedChatId} />
       ) : (
-          <GroupHeader chatId={selectedChatId} />
-        )}
+        <GroupHeader chatId={selectedChatId} />
+      )}
       <MessageList />
       <MiddleFooter />
     </div>
   );
-};
+}
 
-const renderOpenChatScreen = (props: IProps) => {
+function renderOpenChatScreen(props: IProps) {
   const { selectedChatId, areChatsLoaded } = props;
 
   if (selectedChatId || !areChatsLoaded) {
@@ -63,22 +62,22 @@ const renderOpenChatScreen = (props: IProps) => {
 
       {/* TODO @not-implemented */}
       {/* <div className="create-chat-buttons">
-        <Button round color="secondary" onClick={() => { }}>
-          <i className="icon-new-private" />
-          <span>Private</span>
-        </Button>
-        <Button round color="secondary" onClick={() => { }}>
-          <i className="icon-new-group" />
-          <span>Group</span>
-        </Button>
-        <Button round color="secondary" onClick={() => { }}>
-          <i className="icon-new-channel" />
-          <span>Channel</span>
-        </Button>
-      </div> */}
+       <Button round color="secondary" onClick={() => { }}>
+       <i className="icon-new-private" />
+       <span>Private</span>
+       </Button>
+       <Button round color="secondary" onClick={() => { }}>
+       <i className="icon-new-group" />
+       <span>Group</span>
+       </Button>
+       <Button round color="secondary" onClick={() => { }}>
+       <i className="icon-new-channel" />
+       <span>Channel</span>
+       </Button>
+       </div> */}
     </div>
   );
-};
+}
 
 export default withGlobal(
   (global) => {

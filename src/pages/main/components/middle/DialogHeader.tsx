@@ -12,7 +12,7 @@ type IProps = {
   user: ApiUser;
 };
 
-const DialogHeader: FC<IProps> = ({ user}) => {
+const DialogHeader: FC<IProps> = ({ user }) => {
   return (
     <div className="DialogHeader">
       <Avatar size="medium" user={user} />

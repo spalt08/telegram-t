@@ -1,9 +1,9 @@
 import { useState } from '../lib/teact';
 
-export default  () => {
+export default () => {
   const [, setRandom] = useState(0);
 
   return () => {
     setRandom(Math.random());
-  }
+  };
 };

@@ -8,7 +8,9 @@ interface IProps {
   placeholder: string,
 }
 
-const InputText: FC<IProps> = ({ id, onChange, onKeyPress, placeholder }) => {
+const InputText: FC<IProps> = ({
+  id, onChange, onKeyPress, placeholder,
+}) => {
   return (
     <input
       className="form-control"

@@ -48,9 +48,9 @@ export function sendParameters() {
   if (!apiId || !apiHash) {
     if (
       window.confirm(
-        'API id is missing!\n' +
-        'In order to obtain an API id and develop your own application ' +
-        'using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id',
+        'API id is missing!\n'
+        + 'In order to obtain an API id and develop your own application '
+        + 'using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id',
       )
     ) {
       window.location.href = 'https://core.telegram.org/api/obtaining_api_id';
@@ -80,5 +80,7 @@ export async function send(request: any) {
   } catch (err) {
     // TODO Notification
     console.error('[TdLib] ERROR', err);
+
+    return null;
   }
 }

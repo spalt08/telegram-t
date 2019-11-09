@@ -1,6 +1,6 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate } from '../../../api/tdlib/updates';
+import { TdLibUpdate } from '../../../api/tdlib/types';
 import { ApiChat } from '../types/chats';
 
 export function onUpdate(update: TdLibUpdate) {
@@ -11,17 +11,18 @@ export function onUpdate(update: TdLibUpdate) {
       break;
     }
 
-    case 'updateChatLastMessage':
+    case 'updateChatLastMessage': {
       const { chat_id, order, last_message } = update;
       const chat = getGlobal().chats.byId[chat_id] || {};
 
       updateChat(chat_id, {
         last_message,
         // @magic
-        order: order === '0' && chat.order || order,
+        order: (order === '0' && chat.order) || order,
       });
 
       break;
+    }
 
     case 'updateChatReadInbox': {
       const { chat_id, last_read_inbox_message_id, unread_count } = update;

@@ -7,8 +7,8 @@ addReducer('loadChats', () => {
 });
 
 async function loadChats() {
-  let offsetOrder = '9223372036854775807'; // 2^63 - 1
-  let offsetChatId = 0;
+  const offsetOrder = '9223372036854775807'; // 2^63 - 1
+  const offsetChatId = 0;
   // if (!replace && chats && chats.length > 0) {
   //   const chat = ChatStore.get(chats[chats.length - 1]);
   //   if (chat) {

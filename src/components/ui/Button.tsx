@@ -13,19 +13,21 @@ interface IProps {
   round?: boolean;
 }
 
-const Button: FC<IProps> = ({ onClick, children, color = 'primary', className, round }) => {
-  let combinedClass = "Button";
+const Button: FC<IProps> = ({
+  onClick, children, color = 'primary', className, round,
+}) => {
+  let combinedClass = 'Button';
   combinedClass += ` ${color}`;
 
   if (round) {
-    combinedClass += " round";
+    combinedClass += ' round';
   }
   if (className) {
     combinedClass += ` ${className}`;
   }
 
   return (
-    <button className={combinedClass} onClick={onClick as OnClickHandler}>{children}</button>
+    <button type="button" className={combinedClass} onClick={onClick as OnClickHandler}>{children}</button>
   );
 };
 

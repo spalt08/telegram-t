@@ -18,12 +18,17 @@ export function getUserFullName(user: ApiUser) {
       if (user.last_name) {
         return user.last_name;
       }
+
+      break;
     }
+
     case 'userTypeDeleted':
     case 'userTypeUnknown': {
       return 'Deleted account';
     }
   }
+
+  return null;
 }
 
 export function getUserStatus(user: ApiUser) {
@@ -64,7 +69,7 @@ export function getUserStatus(user: ApiUser) {
         return 'last seen just now';
       }
 
-      let diff = new Date(now.getTime() - wasOnline.getTime());
+      const diff = new Date(now.getTime() - wasOnline.getTime());
 
       // within a minute
       if (diff.getTime() / 1000 < 60) {
@@ -74,7 +79,7 @@ export function getUserStatus(user: ApiUser) {
       // within an hour
       if (diff.getTime() / 1000 < 60 * 60) {
         const minutes = Math.floor(diff.getTime() / 1000 / 60);
-        return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
+        return `last seen ${minutes === 1 ? '1 minute' : `${minutes} minutes`} ago`;
       }
 
       // today
@@ -84,7 +89,7 @@ export function getUserStatus(user: ApiUser) {
         // up to 6 hours ago
         if (diff.getTime() / 1000 < 6 * 60 * 60) {
           const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
-          return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
+          return `last seen ${hours === 1 ? '1 hour' : `${hours} hours`} ago`;
         }
 
         // other
@@ -92,7 +97,7 @@ export function getUserStatus(user: ApiUser) {
       }
 
       // yesterday
-      let yesterday = new Date();
+      const yesterday = new Date();
       yesterday.setDate(now.getDate() - 1);
       today.setHours(0, 0, 0, 0);
       if (wasOnline > yesterday) {

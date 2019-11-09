@@ -17,6 +17,6 @@ export default <T = AnyLiteral>(
     }
 
 
-    return mode == 'asc' ? bValue - aValue : aValue - bValue;
+    return mode === 'asc' ? bValue - aValue : aValue - bValue;
   });
 };

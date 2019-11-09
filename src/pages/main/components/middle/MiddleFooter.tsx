@@ -1,11 +1,9 @@
+import { KeyboardEvent } from 'react';
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import InputText from '../../../../components/ui/InputText';
-import Button from '../../../../components/ui/Button';
-
 import onNextTick from '../../../../util/onNextTick';
-
 import './MiddleFooter.scss';
 
 type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
@@ -13,14 +11,16 @@ type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
 };
 
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
-  function onKeyPress(this: HTMLInputElement, e: React.KeyboardEvent) {
-    if (e.keyCode === 13 && this.value.trim().length) {
+  function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
+    const { currentTarget } = e;
+
+    if (e.keyCode === 13 && currentTarget.value.trim().length) {
       sendTextMessage({
         chatId: selectedChatId,
-        text: this.value,
+        text: currentTarget.value,
       });
 
-      this.value = '';
+      currentTarget.value = '';
     }
   }
 
@@ -31,19 +31,19 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
       <div id="message-input-wrapper">
         {/* TODO @not-implemented */}
         {/* <Button round color="translucent" onClick={() => {}}>
-          <i className="icon-smile" />
-        </Button> */}
+         <i className="icon-smile" />
+         </Button> */}
         {/* TODO Convert to textarea, add auto-sizing */}
         <InputText id="message-input-text" placeholder="Message" onKeyPress={onKeyPress} />
         {/* TODO @not-implemented */}
         {/* <Button round color="translucent" onClick={() => { }}>
-          <i className="icon-attach" />
-        </Button> */}
+         <i className="icon-attach" />
+         </Button> */}
       </div>
       {/* TODO @not-implemented */}
       {/* <Button round color="primary" onClick={() => { }}>
-        <i className="icon-microphone" />
-      </Button> */}
+       <i className="icon-microphone" />
+       </Button> */}
     </div>
   );
 };

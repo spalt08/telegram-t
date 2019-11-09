@@ -15,7 +15,7 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
-    const target = e.target;
+    const { target } = e;
 
     target.value = target.value.replace(/[^\d]+/g, '');
 

@@ -1,4 +1,4 @@
-import React, { getGlobal, setGlobal } from './lib/teactn';
+import React, { getGlobal } from './lib/teactn';
 import TeactDOM from './lib/teact-dom';
 
 import App from './App';

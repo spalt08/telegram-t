@@ -17,7 +17,9 @@ type IProps = Pick<DispatchMap, 'loadChatMessages'> & {
   messages?: Record<number, ApiMessage>;
 };
 
-const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChatMessages }) => {
+const MessageList: FC<IProps> = ({
+  areMessagesLoaded, chatId, messages, loadChatMessages,
+}) => {
   if (!areMessagesLoaded) {
     loadChatMessages({ chatId });
   }
@@ -34,7 +36,7 @@ const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChat
     <div className={`MessageList ${isPrivate ? 'no-avatars' : ''}`}>{
       areMessagesLoaded && messagesArray ? (
         <div className="messages-container">
-          {groupMessages(messagesArray).map(messageGroup => (
+          {groupMessages(messagesArray).map((messageGroup) => (
             <div className="message-group">
               {messageGroup.map((message, i) => {
                 const isOwn = isOwnMessage(message);
@@ -44,7 +46,8 @@ const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChat
                     key={message.id}
                     message={message}
                     showAvatar={!isPrivate && !isOwn}
-                    showSenderName={i === 0 && !isPrivate && !isOwn} />
+                    showSenderName={i === 0 && !isPrivate && !isOwn}
+                  />
                 );
               })}
             </div>
@@ -53,7 +56,8 @@ const MessageList: FC<IProps> = ({ areMessagesLoaded, chatId, messages, loadChat
       ) : (
         <Loading />
       )
-    }</div>
+    }
+    </div>
   );
 };
 

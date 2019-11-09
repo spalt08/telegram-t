@@ -11,14 +11,16 @@ import './Message.scss';
 
 type IProps = {
   message: ApiMessage;
-  showAvatar? : boolean;
-  showSenderName? : boolean;
+  showAvatar?: boolean;
+  showSenderName?: boolean;
   sender?: ApiUser;
 };
 
 type TextPart = string | Element;
 
-const Message: FC<IProps> = ({ message, showAvatar, showSenderName, sender }) => {
+const Message: FC<IProps> = ({
+  message, showAvatar, showSenderName, sender,
+}) => {
   const className = buildClassName(message);
   const [contentParts, contentClassName] = buildContent(message);
   const isText = contentClassName && contentClassName.includes('text');
@@ -109,9 +111,9 @@ function addLineBreaks(part: TextPart): TextPart[] {
 function addLinks(part: TextPart): TextPart[] {
   return replaceWordsWithElements(
     part,
-    word => word.startsWith('http:') || word.startsWith('https:'),
-    word => (
-      <a href={word} target="_blank">{word}</a>
+    (word) => word.startsWith('http:') || word.startsWith('https:'),
+    (word) => (
+      <a href={word} target="_blank" rel="noopener noreferrer">{word}</a>
     ),
   );
 }
@@ -119,8 +121,8 @@ function addLinks(part: TextPart): TextPart[] {
 function addBreaksToLongWords(part: TextPart): TextPart[] {
   return replaceWordsWithElements(
     part,
-    word => word.length > 50,
-    word => (
+    (word) => word.length > 50,
+    (word) => (
       <div className="long-word-break-all">{word}</div>
     ),
   );
@@ -139,7 +141,7 @@ function replaceWordsWithElements(
 
   return part
     .split(' ')
-    .reduce((parts: TextPart[], word: string, i) => {
+    .reduce((parts: TextPart[], word: string) => {
       if (testFn(word)) {
         if (parts.length > 0 && !wasLastTag) {
           parts[parts.length - 1] += ' ';
@@ -163,7 +165,7 @@ function replaceWordsWithElements(
 export default withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
     if (!showSenderName && !showAvatar) {
-      return;
+      return null;
     }
 
     return {

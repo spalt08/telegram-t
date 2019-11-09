@@ -8,6 +8,6 @@ addReducer('selectChat', (global, actions, payload) => {
     chats: {
       ...global.chats,
       selectedId: id,
-    }
+    },
   };
 });
