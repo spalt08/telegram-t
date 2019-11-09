@@ -21,7 +21,7 @@ type TextPart = string | Element;
 const Message: FC<IProps> = ({ message, showAvatar, showSenderName, sender }) => {
   const className = buildClassName(message);
   const [contentParts, contentClassName] = buildContent(message);
-  const isText = contentClassName && contentClassName.indexOf('text') !== -1;
+  const isText = contentClassName && contentClassName.includes('text');
 
   return (
     <div className={className}>

@@ -22,7 +22,9 @@ async function loadChats() {
     offset_chat_id: offsetChatId,
     offset_order: offsetOrder,
     limit: 25,
-  });
+  }) as {
+    chat_ids: number[];
+  };
 
   if (!result) {
     return;
@@ -30,14 +32,16 @@ async function loadChats() {
 
   const { chat_ids } = result;
   const global = getGlobal();
+  const currentIds = global.chats.ids;
+  const newIds = currentIds && currentIds.length ? chat_ids.filter((id) => !currentIds.includes(id)) : chat_ids;
 
   setGlobal({
     ...global,
     chats: {
       ...global.chats,
       ids: [
-        ...global.chats.ids,
-        ...chat_ids,
+        ...currentIds,
+        ...newIds,
       ],
     },
   });
