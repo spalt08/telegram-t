@@ -59,6 +59,7 @@ export type DispatchMap = Record<ActionTypes, Function>;
 import React, { FC, Props, useState } from './teact';
 import { ApiMessage } from '../modules/tdlib/types/messages';
 import { ApiChat } from '../modules/tdlib/types/chats';
+import orderBy from '../util/orderBy';
 
 type ActionPayload = AnyLiteral;
 
@@ -77,21 +78,22 @@ const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
 const actions = {} as DispatchMap;
 const containers: Record<string, {
-  mapStateToProps: MapStateToProps,
-  mapReducersToProps: MapActionsToProps,
+  mapStateToProps: MapStateToProps;
+  mapReducersToProps: MapActionsToProps;
   ownProps: Props;
   mappedProps: Props;
   forceUpdate: Function;
+  _updates: number;
+  _componentName: string;
 }> = {};
 
-export function setGlobal(newGlobal: GlobalState) {
-  console.log('[State] UPDATE', { global, newGlobal });
+export function setGlobal(newGlobal?: GlobalState) {
+  if (typeof newGlobal === 'object' && newGlobal !== global) {
+    console.log('[State] UPDATE', { global, newGlobal });
 
-  if (typeof newGlobal !== 'undefined' && newGlobal !== global) {
     global = newGlobal;
+    runCallbacksThrottled();
   }
-
-  runCallbacksThrottled();
 }
 
 export function getGlobal() {
@@ -106,14 +108,11 @@ function onDispatch(name: string, payload?: ActionPayload) {
   if (reducers[name]) {
     reducers[name].forEach((reducer) => {
       const newGlobal = reducer(global, actions, payload);
-
-      if (typeof newGlobal !== 'undefined' && newGlobal !== global) {
-        global = newGlobal;
+      if (newGlobal) {
+        setGlobal(newGlobal);
       }
     });
   }
-
-  runCallbacksThrottled();
 }
 
 // export function addCallback(cb: Function) {
@@ -136,6 +135,7 @@ function updateContainers() {
 
     if (!arePropsShallowEqual(mappedProps, newMappedProps)) {
       containers[id].mappedProps = newMappedProps;
+      containers[id]._updates++;
       forceUpdate();
     }
   });
@@ -175,6 +175,8 @@ export function withGlobal(
             ...mapReducersToProps(setGlobal, actions),
           },
           forceUpdate,
+          _updates: 0,
+          _componentName: Component.name,
         };
       }
 
@@ -196,3 +198,7 @@ function arePropsShallowEqual(currentProps: Props, newProps: Props) {
 
   return currentKeys.every((prop) => currentProps[prop] === newProps[prop]);
 }
+
+document.addEventListener('dblclick', () => {
+  console.log('GLOBAL', { containers: orderBy(Object.values(containers), '_updates') });
+});

@@ -56,7 +56,7 @@ function updateChat(chatId: number, chatUpdate: Partial<ApiChat>) {
       byId: {
         ...global.chats.byId,
         [chatId]: {
-          ...(global.chats.byId[chatId] || {}),
+          ...global.chats.byId[chatId],
           ...chatUpdate,
         },
       },

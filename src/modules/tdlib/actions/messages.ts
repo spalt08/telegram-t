@@ -37,7 +37,7 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
     }
   }
 
-  const messagesById = buildCollectionById<ApiMessage>(messages);
+  const messagesById = buildCollectionById(messages);
 
   const global = getGlobal();
 

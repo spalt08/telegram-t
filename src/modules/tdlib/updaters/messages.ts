@@ -44,7 +44,7 @@ function updateMessage(chatId: number, messageId: number, messageUpdate: Partial
           byId: {
             ...(global.messages.byChatId[chatId] || {}).byId,
             [messageId]: {
-              ...((global.messages.byChatId[chatId] || {}).byId[messageId] || {}),
+              ...((global.messages.byChatId[chatId] || {}).byId || {})[messageId],
               ...messageUpdate,
             },
           },
