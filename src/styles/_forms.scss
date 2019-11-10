@@ -14,8 +14,17 @@
     transition: all 0.15s ease;
   }
 
-  &.touched label {
+  &.touched label,
+  .form-control:focus + label {
     opacity: 1;
+  }
+
+  &.touched input::placeholder,
+  .form-control:focus::placeholder {
+    color: transparent;
+  }
+
+  &.touched label {
     color: var(--color-text-secondary);
   }
 
