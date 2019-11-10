@@ -19,7 +19,7 @@
       "error",
       120
     ],
-    "no-console": "warn",
+    "no-console": "error",
     "semi": "error",
     "arrow-body-style": "off",
     "no-else-return": "off",

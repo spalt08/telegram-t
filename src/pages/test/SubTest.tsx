@@ -8,7 +8,9 @@ type IProps = {
 };
 
 const SubTest: FC<IProps> = ({ authState, rand }) => {
+  // eslint-disable-next-line no-console
   console.log('rendering SUB TEST', authState, rand);
+
   const [value, setValue] = useState(0);
 
   return (

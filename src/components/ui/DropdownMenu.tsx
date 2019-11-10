@@ -23,26 +23,25 @@ const DropdownMenu: FC<IProps> = (props) => {
     positionY = 'top',
   } = props;
   const [isOpen, setIsOpen] = useState(false);
-  // TODO Waiting for fix
-  // const [isHidden, setIsHidden] = useState(true);
+  const [isShown, setIsShown] = useState(false);
 
-  let className = 'dropdown-bubble';
-  className += ` ${positionY} ${positionX}`;
+  let className = `dropdown-bubble ${positionY} ${positionX}`;
+
   if (isOpen) {
     className += ' open';
   }
-  // TODO Waiting for fix
-  // if (isHidden) {
-  //   className += ' hidden';
-  // }
+
+  if (isShown) {
+    className += ' shown';
+  }
 
   const toggleIsOpen = () => {
-    // TODO Waiting for fix
-    // if (isOpen) {
-    //   setTimeout(() => setIsHidden(true), 150);
-    // } else {
-    //   setIsHidden(false);
-    // }
+    if (isOpen) {
+      setTimeout(() => setIsShown(false), 150);
+    } else {
+      setIsShown(true);
+    }
+
     setIsOpen(!isOpen);
   };
 

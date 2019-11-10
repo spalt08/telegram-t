@@ -2,6 +2,8 @@
 // export { useState } from 'react';
 // export default React;
 
+import throttleWithRaf from '../util/throttleWithRaf';
+
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
 
@@ -114,7 +116,7 @@ function createElement(
 
         return componentInstance.$element;
       },
-      forceUpdate(newProps?: Props) {
+      forceUpdate: throttleWithRaf((newProps?: Props) => {
         if (newProps) {
           componentInstance.props = newProps;
         }
@@ -127,7 +129,7 @@ function createElement(
             componentInstance.onUpdate(componentInstance.$prevElement, componentInstance.$element);
           }
         }
-      },
+      }),
     };
 
     componentInstance.$element = createComponentElement(componentInstance);
@@ -250,9 +252,9 @@ export function useState(initial: any) {
         }
       })(renderingInstance),
     };
-
-    renderingInstance.state.cursor++;
   }
+
+  renderingInstance.state.cursor++;
 
   return [
     byCursor[cursor].value,

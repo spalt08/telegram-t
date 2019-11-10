@@ -25,7 +25,7 @@
   z-index: 10;
   transition: opacity .15s ease;
 
-  &.hidden, &:not(.open) {
+  &:not(.shown) {
     visibility: hidden;
     pointer-events: none;
   }

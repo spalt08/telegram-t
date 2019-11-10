@@ -8,7 +8,7 @@ import './RightColumn.scss';
 type IProps = Pick<DispatchMap, 'signOut'>
 
 function onSignOut(signOut: Function) {
-  // eslint-disable-next-line no-restricted-globals
+  // eslint-disable-next-line no-restricted-globals no-alert
   if (confirm('Are you sure?')) {
     signOut();
   }

@@ -1,9 +1,9 @@
-import { KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent } from 'react';
 import React, { FC, useState } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import InputText from '../../../../components/ui/InputText';
 import onNextTick from '../../../../util/onNextTick';
+import InputText from '../../../../components/ui/InputText';
 import './MiddleFooter.scss';
 
 type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
@@ -13,9 +13,13 @@ type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   const [messageText, setMessageText] = useState('');
 
-  function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
+  function onChange(e: ChangeEvent<HTMLInputElement>) {
     const { currentTarget } = e;
     setMessageText(currentTarget.value.trim());
+  }
+
+  function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
+    const { currentTarget } = e;
 
     if (e.keyCode === 13 && currentTarget.value.trim().length) {
       sendTextMessage({
@@ -23,7 +27,8 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         text: currentTarget.value,
       });
 
-      setMessageText('');
+      // Make sure to clear the text after the latest `onChange`.
+      setTimeout(() => setMessageText(''), 0);
     }
   }
 
@@ -40,6 +45,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         <InputText
           id="message-input-text"
           placeholder="Message"
+          onChange={onChange}
           onKeyPress={onKeyPress}
           value={messageText}
         />

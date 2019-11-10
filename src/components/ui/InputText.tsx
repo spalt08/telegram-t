@@ -22,6 +22,7 @@ const InputText: FC<IProps> = (props) => {
 
   let className = 'input-group';
   if (value) {
+    console.log({value});
     className += ' touched';
   }
 
@@ -37,7 +38,7 @@ const InputText: FC<IProps> = (props) => {
         placeholder={placeholder || label}
       />
       {label && id && (
-        <label htmlFor={id}>{label}</label>
+        <label>{label}</label>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { DEBUG } from '../../config';
 import { getBrowser, getOsName } from './utils';
 
 let client: any;
@@ -29,7 +30,10 @@ const TD_PARAMETERS = {
 let TdClient: any;
 
 export async function init(onUpdate: Function) {
-  console.log('[TdLib] INIT');
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[TdLib] INIT');
+  }
 
   if (!TdClient) {
     // @ts-ignore
@@ -46,15 +50,7 @@ export function sendParameters() {
   const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
 
   if (!apiId || !apiHash) {
-    if (
-      window.confirm(
-        'API id is missing!\n'
-        + 'In order to obtain an API id and develop your own application '
-        + 'using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id',
-      )
-    ) {
-      window.location.href = 'https://core.telegram.org/api/obtaining_api_id';
-    }
+    throw new Error('Provide `REACT_APP_TELEGRAM_API_ID` and `REACT_APP_TELEGRAM_API_HASH` env vars.');
   }
 
   send({
@@ -69,17 +65,26 @@ export function sendParameters() {
 
 // TODO Types.
 export async function send(request: any) {
-  console.log('[TdLib] SEND', request);
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[TdLib] SEND', request);
+  }
 
   try {
     const result = await client.send(request);
 
-    console.log('[TdLib] RECEIVE', result);
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log('[TdLib] RECEIVE', result);
+    }
 
     return result;
   } catch (err) {
     // TODO Notification
-    console.error('[TdLib] ERROR', err);
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('[TdLib] ERROR', err);
+    }
 
     return null;
   }
