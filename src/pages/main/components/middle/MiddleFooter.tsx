@@ -11,11 +11,11 @@ type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
 };
 
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
-  const [message, setMessage] = useState('');
+  const [messageText, setMessageText] = useState('');
 
   function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
     const { currentTarget } = e;
-    setMessage(currentTarget.value.trim());
+    setMessageText(currentTarget.value.trim());
 
     if (e.keyCode === 13 && currentTarget.value.trim().length) {
       sendTextMessage({
@@ -23,7 +23,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         text: currentTarget.value,
       });
 
-      setMessage('');
+      setMessageText('');
     }
   }
 
@@ -41,7 +41,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
           id="message-input-text"
           placeholder="Message"
           onKeyPress={onKeyPress}
-          value={message}
+          value={messageText}
         />
         {/* TODO @not-implemented */}
         {/* <Button round color="translucent" onClick={() => { }}>
