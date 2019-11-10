@@ -13,20 +13,26 @@ type IProps = Pick<DispatchMap, 'setAuthPhoneNumber'>;
 
 const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
+  const [code, setCode] = useState('+7');
+  const [phone, setPhone] = useState('');
+
+  function onCodeChange(e: ChangeEvent<HTMLSelectElement>) {
+    const { target } = e;
+
+    setCode(target.value);
+  }
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
 
     target.value = target.value.replace(/[^\d]+/g, '');
 
+    setPhone(target.value);
     setIsButtonShown(target.value.length === 10);
   }
 
   function handleSubmit() {
-    // TODO ref
-    const codeInput = document.getElementById('sign-in-phone-code') as HTMLSelectElement;
-    const numberInput = document.getElementById('sign-in-phone-number') as HTMLInputElement;
-    const phoneNumber = `${codeInput.value}${numberInput.value}`;
+    const phoneNumber = `${code}${phone}`;
     setAuthPhoneNumber({ phoneNumber });
   }
 
@@ -38,10 +44,20 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
         Please confirm your country and
         <br />enter your phone number.
       </p>
-      <Select id="sign-in-phone-code">
+      <Select
+        id="sign-in-phone-code"
+        label="Country"
+        value={code}
+        onChange={onCodeChange}
+      >
         <option value="+7">Russia +7</option>
       </Select>
-      <InputText id="sign-in-phone-number" placeholder="Phone Number" onChange={onPhoneNumberChange} />
+      <InputText
+        id="sign-in-phone-number"
+        label="Phone Number"
+        onChange={onPhoneNumberChange}
+        value={phone}
+      />
       {isButtonShown && (
         <Button onClick={handleSubmit}>NEXT</Button>
       )}

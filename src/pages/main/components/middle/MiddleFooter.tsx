@@ -1,5 +1,5 @@
 import { KeyboardEvent } from 'react';
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useState } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import InputText from '../../../../components/ui/InputText';
@@ -11,8 +11,11 @@ type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
 };
 
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
+  const [message, setMessage] = useState('');
+
   function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
     const { currentTarget } = e;
+    setMessage(currentTarget.value.trim());
 
     if (e.keyCode === 13 && currentTarget.value.trim().length) {
       sendTextMessage({
@@ -20,7 +23,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         text: currentTarget.value,
       });
 
-      currentTarget.value = '';
+      setMessage('');
     }
   }
 
@@ -34,7 +37,12 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
          <i className="icon-smile" />
          </Button> */}
         {/* TODO Convert to textarea, add auto-sizing */}
-        <InputText id="message-input-text" placeholder="Message" onKeyPress={onKeyPress} />
+        <InputText
+          id="message-input-text"
+          placeholder="Message"
+          onKeyPress={onKeyPress}
+          value={message}
+        />
         {/* TODO @not-implemented */}
         {/* <Button round color="translucent" onClick={() => { }}>
          <i className="icon-attach" />

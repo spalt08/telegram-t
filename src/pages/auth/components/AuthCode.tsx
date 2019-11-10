@@ -12,18 +12,18 @@ type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthC
 
 const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
+  const [code, setCode] = useState(undefined);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
 
     target.value = target.value.replace(/[^\d]+/, '');
 
+    setCode(target.value);
     setIsButtonShown(target.value.length === 5);
   }
 
   function handleSubmit() {
-    const codeInput = document.getElementById('sign-in-code') as HTMLInputElement;
-    const code = codeInput.value;
     setAuthCode({ code });
   }
 
@@ -35,7 +35,12 @@ const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
         We have sent you an SMS
         <br />with the code.
       </p>
-      <InputText id="sign-in-code" placeholder="Code" onChange={onCodeChange} />
+      <InputText
+        id="sign-in-code"
+        label="Code"
+        onChange={onCodeChange}
+        value={code}
+      />
       {isButtonShown && (
         <Button onClick={handleSubmit}>NEXT</Button>
       )}
