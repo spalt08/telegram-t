@@ -1,0 +1,11 @@
+#LeftHeader {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  z-index: 5;
+  background-color: var(--color-background);
+
+  .Button {
+    margin-right: 1rem;
+  }
+}
