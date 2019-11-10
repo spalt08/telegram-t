@@ -18,6 +18,8 @@ type IProps = {
 
 type TextPart = string | Element;
 
+const MAX_EMOJI_COUNT = 3;
+
 const Message: FC<IProps> = ({
   message, showAvatar, showSenderName, sender,
 }) => {
@@ -59,7 +61,7 @@ function buildContent(message: ApiMessage): [TextPart | TextPart[] | undefined, 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
-    if (emojiOnlyCount) {
+    if (emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
       classNames.push(`emoji-only-${emojiOnlyCount}`);
       contentParts = text;
     } else {

@@ -19,7 +19,7 @@
       border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child:not(:only-child) {
+    &:last-child:not(:only-child) .content {
       border-top-right-radius: var(--border-radius-messages-small);
     }
 
@@ -32,7 +32,7 @@
           display: block;
           position: absolute;
           right: -.64rem;
-          bottom: -.25rem;
+          bottom: -4px;
           width: .7rem;
           height: 1.2rem;
           // background-image: url('../../../../assets/chat-bubble-green.svg');
@@ -53,7 +53,7 @@
       border-bottom-left-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child:not(:only-child) {
+    &:last-child:not(:only-child) .content {
       border-top-left-radius: var(--border-radius-messages-small);
     }
 
@@ -65,7 +65,7 @@
           content: '';
           display: block;
           position: absolute;
-          bottom: -.25rem;
+          bottom: -4px;
           left: -.64rem;
           width: .75rem;
           height: 1.2rem;
@@ -133,14 +133,26 @@
 
     &.emoji-only-1 {
       font-size: 5rem;
+
+      p {
+        margin-bottom: 1rem;
+      }
     }
 
     &.emoji-only-2 {
       font-size: 4rem;
+
+      p {
+        margin-bottom: 1.1rem;
+      }
     }
 
     &.emoji-only-3 {
       font-size: 3rem;
+
+      p {
+        margin-bottom: 1.1rem;
+      }
     }
   }
 
