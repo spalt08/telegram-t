@@ -25,7 +25,7 @@ const DropdownMenu: FC<IProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
 
-  let className = `dropdown-bubble ${positionY} ${positionX}`;
+  let className = `bubble ${positionY} ${positionX}`;
 
   if (isOpen) {
     className += ' open';
@@ -51,7 +51,7 @@ const DropdownMenu: FC<IProps> = (props) => {
         <i className={`icon-${icon}`} />
       </Button>
       {isOpen && (
-        <div className="dropdown-backdrop" onClick={toggleIsOpen} />
+        <div className="backdrop" onClick={toggleIsOpen} />
       )}
       <ul className={className}>
         {children}
