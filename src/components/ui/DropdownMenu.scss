@@ -1,0 +1,74 @@
+.DropdownMenu {
+  position: relative;
+}
+
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 9;
+}
+
+.dropdown-bubble {
+  display: block;
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+  border-radius: var(--border-radius-default);
+  width: 13.5rem;
+  opacity: 0;
+  z-index: 10;
+  transition: opacity .15s ease;
+
+  &.hidden, &:not(.open) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &.open {
+    opacity: 1;
+  }
+
+  --offset-y: calc(100% + 0.5rem);
+  --offset-x: 0;
+
+  &.top {
+    top: var(--offset-y);
+  }
+  &.bottom {
+    bottom: var(--offset-y);
+  }
+  &.left {
+    left: var(--offset-x);
+  }
+  &.right {
+    right: var(--offset-x);
+  }
+
+  button {
+    width: 100%;
+    background: none;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+
+    &:hover, &:focus {
+      background-color: var(--color-chat-hover);
+    }
+
+    i {
+      font-size: 1.5rem;
+      margin-right: 2rem;
+      opacity: 0.5;
+    }
+  }
+}
