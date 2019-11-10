@@ -1,9 +1,9 @@
-import { KeyboardEvent } from 'react';
-import React, { FC } from '../../../../lib/teact';
+import { ChangeEvent, KeyboardEvent } from 'react';
+import React, { FC, useState } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import InputText from '../../../../components/ui/InputText';
 import onNextTick from '../../../../util/onNextTick';
+import InputText from '../../../../components/ui/InputText';
 import './MiddleFooter.scss';
 
 type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
@@ -11,6 +11,13 @@ type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
 };
 
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
+  const [messageText, setMessageText] = useState('');
+
+  function onChange(e: ChangeEvent<HTMLInputElement>) {
+    const { currentTarget } = e;
+    setMessageText(currentTarget.value.trim());
+  }
+
   function onKeyPress(e: KeyboardEvent<HTMLInputElement>) {
     const { currentTarget } = e;
 
@@ -20,7 +27,8 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         text: currentTarget.value,
       });
 
-      currentTarget.value = '';
+      // Make sure to clear the text after the latest `onChange`.
+      setTimeout(() => setMessageText(''), 0);
     }
   }
 
@@ -34,7 +42,13 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
          <i className="icon-smile" />
          </Button> */}
         {/* TODO Convert to textarea, add auto-sizing */}
-        <InputText id="message-input-text" placeholder="Message" onKeyPress={onKeyPress} />
+        <InputText
+          id="message-input-text"
+          placeholder="Message"
+          onChange={onChange}
+          onKeyPress={onKeyPress}
+          value={messageText}
+        />
         {/* TODO @not-implemented */}
         {/* <Button round color="translucent" onClick={() => { }}>
          <i className="icon-attach" />

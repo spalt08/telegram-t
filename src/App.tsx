@@ -11,8 +11,6 @@ import Main from './pages/main/Main';
 type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>
 
 const App: FC<IProps> = ({ isInitialized, authState, init }) => {
-  console.log('APP RE-RENDER', authState);
-
   // return <Test />;
 
   if (!isInitialized) {

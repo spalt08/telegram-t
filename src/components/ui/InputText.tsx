@@ -3,23 +3,43 @@ import React, { FC } from '../../lib/teact';
 
 interface IProps {
   id?: string,
+  value?: string,
+  label?: string,
+  placeholder?: string,
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void,
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void,
-  placeholder: string,
 }
 
-const InputText: FC<IProps> = ({
-  id, onChange, onKeyPress, placeholder,
-}) => {
+const InputText: FC<IProps> = (props) => {
+  const {
+    id,
+    value,
+    label,
+    placeholder,
+    onChange,
+    onKeyPress,
+  } = props;
+
+  let className = 'input-group';
+  if (value) {
+    className += ' touched';
+  }
+
   return (
-    <input
-      className="form-control"
-      type="text"
-      id={id}
-      onChange={onChange}
-      onKeyPress={onKeyPress}
-      placeholder={placeholder}
-    />
+    <div className={className}>
+      <input
+        className="form-control"
+        type="text"
+        id={id}
+        value={value || ''}
+        onChange={onChange}
+        onKeyPress={onKeyPress}
+        placeholder={placeholder || label}
+      />
+      {label && (
+        <label>{label}</label>
+      )}
+    </div>
   );
 };
 

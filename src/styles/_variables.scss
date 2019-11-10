@@ -1,3 +1,7 @@
+@function toRGB($color) {
+  @return red($color) + ", " + green($color) + ", " + blue($color);
+}
+
 $color-primary: #4ea4f6;
 $color-primary-shade: #51aaff;
 $color-primary-shade-2: #4b9dec;
@@ -19,6 +23,7 @@ $color-chat-hover: #f4f4f5;
   --color-background: #{$color-white};
   --color-text: #{$color-black};
   --color-text-secondary: #{$color-text-secondary};
+  --color-text-secondary-rgb: #{toRGB($color-text-secondary)};
   --color-text-meta: #{$color-text-meta};
   --color-text-green: #{$color-text-green};
   --color-borders: #{$color-borders};

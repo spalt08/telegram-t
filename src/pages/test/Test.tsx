@@ -7,6 +7,7 @@ type IProps = Pick<GlobalState, 'authState'> & {
 }
 
 const Test: FC<IProps> = ({ authState, rand }) => {
+  // eslint-disable-next-line no-console
   console.log('rendering TEST', authState, rand);
 
   return <SubTest authState={authState} rand={rand} />;

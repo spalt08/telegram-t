@@ -1,4 +1,7 @@
 .Badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 1.5rem;
   height: 1.5rem;
   background: var(--color-gray);
@@ -6,7 +9,6 @@
   padding: 0 .45rem;
   color: white;
   font-size: 0.9rem;
-  line-height: 1.5rem;
   font-weight: bold;
   text-align: center;
 

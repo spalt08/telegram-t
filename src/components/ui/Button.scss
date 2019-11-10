@@ -6,9 +6,10 @@
   border: 0;
   border-radius: var(--border-radius-default);
   background: transparent;
-  padding: 10px;
+  padding: 0.625rem;
   color: white;
   cursor: pointer;
+  flex-shrink: 0;
 
   &.round {
     width: 3.5rem;
@@ -50,18 +51,27 @@
   }
 
   &.translucent {
-    background: transparent;
+    background-color: transparent;
     color: var(--color-text-secondary);
     opacity: 0.75;
 
     &:hover, &:focus {
-      color: var(--color-primary);
+      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
       opacity: 1;
     }
 
     &:active {
-      color: var(--color-primary-shade);
+      background-color: rgba(var(--color-text-secondary-rgb), 0.16);
       opacity: 1;
+    }
+  }
+
+  &.smaller {
+    height: 2.75rem;
+    padding: 0.3125rem;
+
+    &.round {
+      width: 2.75rem;
     }
   }
 }

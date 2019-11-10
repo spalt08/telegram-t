@@ -131,7 +131,9 @@ function updateAttributes($current: VirtualElement, $new: VirtualElement, elemen
 
 function hasAttribute(element: HTMLElement, key: string) {
   if (key === 'className') {
-    return typeof element.className !== 'undefined';
+    return element.className !== undefined && element.className !== '';
+  } else if (key === 'className') {
+    return (element as HTMLInputElement).value !== undefined && (element as HTMLInputElement).value !== '';
   } else if (key.startsWith('on')) {
     // There is no way to check event listener, so there will be some redundant removes, but it is fine.
     return true;
@@ -143,6 +145,8 @@ function hasAttribute(element: HTMLElement, key: string) {
 function addAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
     element.className = value;
+  } else if (key === 'value') {
+    (element as HTMLInputElement).value = value;
   } else if (key.startsWith('on')) {
     element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
@@ -157,6 +161,8 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
     element.className = '';
+  } else if (key === 'value') {
+    (element as HTMLInputElement).value = '';
   } else if (key.startsWith('on')) {
     element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
 

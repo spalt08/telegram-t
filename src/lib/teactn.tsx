@@ -9,6 +9,7 @@ import throttleWithRaf from '../util/throttleWithRaf';
 
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
+import { DEBUG } from '../config';
 import { ApiUser, ApiChat, ApiMessage } from '../modules/tdlib/types';
 import orderBy from '../util/orderBy';
 
@@ -102,7 +103,10 @@ const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
 export function setGlobal(newGlobal?: GlobalState) {
   if (typeof newGlobal === 'object' && newGlobal !== global) {
-    console.log('[State] UPDATE', { global, newGlobal });
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log('[State] UPDATE', { global, newGlobal });
+    }
 
     global = newGlobal;
     runCallbacksThrottled();
@@ -151,7 +155,10 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
     reducers[name] = [];
 
     actions[name] = (payload?: ActionPayload) => {
-      console.log('[State] ACTION', name, payload);
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.log('[State] ACTION', name, payload);
+      }
 
       onDispatch(name, payload);
     };
@@ -205,6 +212,9 @@ function arePropsShallowEqual(currentProps: Props, newProps: Props) {
   return currentKeys.every((prop) => currentProps[prop] === newProps[prop]);
 }
 
-document.addEventListener('dblclick', () => {
-  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
-});
+if (DEBUG) {
+  document.addEventListener('dblclick', () => {
+    // eslint-disable-next-line no-console
+    console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
+  });
+}

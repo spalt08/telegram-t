@@ -7,7 +7,7 @@
   right: 0rem;
   display: flex;
   align-items: center;
-  background: rgba(#999999, 0.8);
+  background: rgba(#999999, 0.6);
   border-radius: 9px;
   padding: 0 0.375rem;
   color: white;
@@ -36,9 +36,11 @@
     height: 1.1rem;
     font-size: 1.1rem;
 
-    @include icon-styles() {
-      position: relative;
-      top: -0.2rem;
+    .text & {
+      @include icon-styles() {
+        position: relative;
+        top: -0.2rem;
+      }
     }
   }
 }
