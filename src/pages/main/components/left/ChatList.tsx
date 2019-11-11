@@ -11,9 +11,9 @@ import Loading from '../../../../components/Loading';
 import './ChatList.scss';
 
 type IProps = {
-  chats: Record<number, ApiChat>,
-  loadedChatIds: number[],
-  selectedChatId: number,
+  chats: Record<number, ApiChat>;
+  loadedChatIds: number[];
+  selectedChatId: number;
   areChatsLoaded: boolean;
 } & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
 

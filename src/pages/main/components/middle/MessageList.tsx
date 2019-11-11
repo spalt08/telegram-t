@@ -13,7 +13,7 @@ import Message from './Message';
 import './MessageList.scss';
 
 type IProps = Pick<DispatchMap, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
-  areMessagesLoaded: boolean,
+  areMessagesLoaded: boolean;
   chatId: number;
   messages?: Record<number, ApiMessage>;
 };

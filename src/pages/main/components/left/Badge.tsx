@@ -4,8 +4,8 @@ import { ApiChat } from '../../../../modules/tdlib/types';
 import './Badge.scss';
 
 type IProps = {
-  chat: ApiChat
-}
+  chat: ApiChat;
+};
 
 // TODO Support mentions and `is_pinned`.
 

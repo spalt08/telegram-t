@@ -6,8 +6,8 @@ import MessageOutgoingStatus from '../../../../components/MessageOutgoingStatus'
 import './LastMessageMeta.scss';
 
 type IProps = {
-  message: ApiMessage
-}
+  message: ApiMessage;
+};
 
 const LastMessageMeta: FC<IProps> = ({ message }) => {
   return (

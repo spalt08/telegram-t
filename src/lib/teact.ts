@@ -18,33 +18,33 @@ export type VirtualElementEmpty = typeof VIRTUAL_ELEMENT_EMPTY;
 export type VirtualElementText = string;
 
 export interface VirtualElementTag {
-  type: VirtualElementTypesEnum.Tag,
-  tag: string,
-  props: Props,
-  children: VirtualElementChildren,
+  type: VirtualElementTypesEnum.Tag;
+  tag: string;
+  props: Props;
+  children: VirtualElementChildren;
 }
 
 export interface VirtualElementComponent {
-  type: VirtualElementTypesEnum.Component,
-  componentInstance: ComponentInstance,
-  props: Props,
-  children: VirtualElementChildren,
+  type: VirtualElementTypesEnum.Component;
+  componentInstance: ComponentInstance;
+  props: Props;
+  children: VirtualElementChildren;
 }
 
 interface ComponentInstance {
-  $element: VirtualElementComponent,
-  $prevElement: VirtualElementComponent,
-  Component: FC,
-  name: string,
-  key?: string,
-  props: Props,
-  children: VirtualElementChildren,
-  state: ComponentInstanceState,
-  effects: ComponentInstanceEffects,
-  render: () => VirtualElementComponent,
-  forceUpdate: Function,
-  onUpdate?: Function,
-  isUnmounted: boolean,
+  $element: VirtualElementComponent;
+  $prevElement: VirtualElementComponent;
+  Component: FC;
+  name: string;
+  key?: string;
+  props: Props;
+  children: VirtualElementChildren;
+  state: ComponentInstanceState;
+  effects: ComponentInstanceEffects;
+  render: () => VirtualElementComponent;
+  forceUpdate: Function;
+  onUpdate?: Function;
+  isUnmounted: boolean;
 }
 
 export type VirtualElement = VirtualElementTag | VirtualElementComponent;
@@ -54,19 +54,19 @@ export type VirtualElementChildren = VirtualElementChild[];
 export type JsxChildren = VirtualElementChildren | VirtualElementChild;
 
 interface ComponentInstanceState {
-  cursor: number,
+  cursor: number;
   byCursor: {
-    value: any,
-    setter: Function
-  }[],
+    value: any;
+    setter: Function;
+  }[];
 }
 
 interface ComponentInstanceEffects {
-  cursor: number,
+  cursor: number;
   byCursor: {
-    effect: () => void,
-    dependencies?: any[]
-  }[],
+    effect: () => void;
+    dependencies?: any[];
+  }[];
 }
 
 let renderingInstance: ComponentInstance;

@@ -3,8 +3,8 @@ import React from '../../lib/teactn';
 import { UpdateAuthorizationStateType } from '../../api/tdlib/types';
 
 type IProps = {
-  authState?: UpdateAuthorizationStateType,
-  rand: string,
+  authState?: UpdateAuthorizationStateType;
+  rand: string;
 };
 
 const SubTest: FC<IProps> = ({ authState, rand }) => {

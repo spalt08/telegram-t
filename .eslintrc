@@ -7,7 +7,6 @@
     "no-async-without-await"
   ],
   "rules": {
-    "@typescript-eslint/semi": "off",
     "indent": [
       "error",
       2,
@@ -43,6 +42,7 @@
         "functions": false
       }
     ],
-    "@typescript-eslint/camelcase": "off"
+    "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/member-delimiter-style": "error"
   }
 }

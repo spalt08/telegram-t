@@ -16,30 +16,30 @@ import orderBy from '../util/orderBy';
 export default React;
 
 export type GlobalState = {
-  isInitialized: boolean,
+  isInitialized: boolean;
 
   users: {
-    byId: Record<number, ApiUser>,
-  },
+    byId: Record<number, ApiUser>;
+  };
 
   chats: {
     selectedId?: number;
-    ids: number[],
-    byId: Record<number, ApiChat>,
-    scrollOffsetById: Record<number, number>
-  },
+    ids: number[];
+    byId: Record<number, ApiChat>;
+    scrollOffsetById: Record<number, number>;
+  };
 
   messages: {
     selectedId?: number;
     byChatId: Record<number, {
-      byId: Record<number, ApiMessage>
-    }>,
-  },
+      byId: Record<number, ApiMessage>;
+    }>;
+  };
 
   // TODO Move to `auth`.
-  isLoggingOut?: boolean,
-  authState?: UpdateAuthorizationStateType,
-  authPhoneNumber?: string,
+  isLoggingOut?: boolean;
+  authState?: UpdateAuthorizationStateType;
+  authPhoneNumber?: string;
 };
 
 const INITIAL_STATE: GlobalState = {

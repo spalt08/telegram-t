@@ -1,3 +1,3 @@
 declare namespace JSX {
-  type Element = VirtualElement
+  type Element = VirtualElement;
 }

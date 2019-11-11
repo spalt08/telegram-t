@@ -9,25 +9,25 @@ export type UpdateAuthorizationStateType = (
   'authorizationStateReady' |
   'authorizationStateClosing' |
   'authorizationStateClosed'
-)
+);
 
 export type TdLibUpdateAuthorizationState = {
-  '@type': 'updateAuthorizationState',
+  '@type': 'updateAuthorizationState';
   authorization_state: {
-    '@type': UpdateAuthorizationStateType
-  }
+    '@type': UpdateAuthorizationStateType;
+  };
 };
 
 export type TdLibUpdateFile = {
-  '@type': 'updateFile',
+  '@type': 'updateFile';
 };
 
 export type TdLibUpdateNewChat = {
-  '@type': 'updateNewChat',
+  '@type': 'updateNewChat';
   chat: {
-    '@type': 'chat',
-    [k: string]: any,
-  }
+    '@type': 'chat';
+    [k: string]: any;
+  };
 };
 
 export type TdLibUpdate = TdLibUpdateAuthorizationState | TdLibUpdateFile | TdLibUpdateNewChat | any;

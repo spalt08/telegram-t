@@ -3,13 +3,13 @@ export interface ApiMessage {
   chat_id: number;
   content: {
     text?: {
-      text: string
+      text: string;
     };
   };
   date: number;
   is_outgoing: boolean;
   sender_user_id: number;
   sending_state?: {
-    '@type': 'messageSendingStateFailed'
-  }
+    '@type': 'messageSendingStateFailed';
+  };
 }

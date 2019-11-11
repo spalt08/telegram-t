@@ -2,12 +2,12 @@ import { ChangeEvent } from 'react';
 import React, { FC, JsxChildren } from '../../lib/teact';
 
 interface IProps {
-  id?: string,
-  value?: string,
-  label?: string,
-  placeholder?: string,
-  onChange?: (e: ChangeEvent<HTMLSelectElement>) => void,
-  children: JsxChildren,
+  id?: string;
+  value?: string;
+  label?: string;
+  placeholder?: string;
+  onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
+  children: JsxChildren;
 }
 
 const Select: FC<IProps> = (props) => {

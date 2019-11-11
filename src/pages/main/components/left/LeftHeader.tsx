@@ -7,7 +7,7 @@ import SearchInput from './SearchInput';
 
 import './LeftHeader.scss';
 
-type IProps = Pick<DispatchMap, 'signOut'>
+type IProps = Pick<DispatchMap, 'signOut'>;
 
 function onSignOut(signOut: Function) {
   // eslint-disable-next-line no-restricted-globals, no-alert

@@ -4,7 +4,7 @@ import { FC } from '../../lib/teact';
 
 type IProps = Pick<GlobalState, 'authState'> & {
   rand: string;
-}
+};
 
 const Test: FC<IProps> = ({ authState, rand }) => {
   // eslint-disable-next-line no-console

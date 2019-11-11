@@ -6,11 +6,11 @@ import './Button.scss';
 type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {
-  onClick: Function
-  children: JsxChildren,
-  size?: 'default' | 'smaller',
-  color?: 'primary' | 'secondary' | 'translucent',
-  className?: string,
+  onClick: Function;
+  children: JsxChildren;
+  size?: 'default' | 'smaller';
+  color?: 'primary' | 'secondary' | 'translucent';
+  className?: string;
   round?: boolean;
 }
 

@@ -9,8 +9,8 @@ import Badge from './Badge';
 import './Chat.scss';
 
 type IProps = {
-  chat: ApiChat,
-  selected: boolean,
+  chat: ApiChat;
+  selected: boolean;
 } & Pick<DispatchMap, 'selectChat'>;
 
 const Chat: FC<IProps> = ({ chat, selected, selectChat }) => {

@@ -7,9 +7,9 @@ import './DropdownMenu.scss';
 type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {
-  icon: string,
-  children: JsxChildren,
-  onClick: OnClickHandler,
+  icon: string;
+  children: JsxChildren;
+  onClick: OnClickHandler;
 }
 
 const DropdownMenuItem: FC<IProps> = (props) => {

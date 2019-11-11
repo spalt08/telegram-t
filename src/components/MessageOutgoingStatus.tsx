@@ -5,9 +5,9 @@ import { ApiMessage } from '../modules/tdlib/types';
 import { selectOutgoingStatus } from '../modules/tdlib/selectors';
 
 type IProps = {
-  message: ApiMessage,
-  outgoingStatus: ReturnType<typeof selectOutgoingStatus>,
-}
+  message: ApiMessage;
+  outgoingStatus: ReturnType<typeof selectOutgoingStatus>;
+};
 
 const MessageOutgoingStatus: FC<IProps> = ({ message, outgoingStatus }) => {
   return (

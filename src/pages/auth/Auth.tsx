@@ -4,7 +4,7 @@ import { GlobalState, withGlobal } from '../../lib/teactn';
 import AuthPhoneNumber from './components/AuthPhoneNumber';
 import AuthCode from './components/AuthCode';
 
-type IProps = Pick<GlobalState, 'authState'>
+type IProps = Pick<GlobalState, 'authState'>;
 
 const Auth: FC<IProps> = ({ authState }) => {
   switch (authState) {

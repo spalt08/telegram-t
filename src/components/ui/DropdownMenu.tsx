@@ -5,12 +5,12 @@ import Button from './Button';
 import './DropdownMenu.scss';
 
 interface IProps {
-  icon: string,
-  size?: 'default' | 'smaller',
-  color?: 'primary' | 'secondary' | 'translucent',
+  icon: string;
+  size?: 'default' | 'smaller';
+  color?: 'primary' | 'secondary' | 'translucent';
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
-  children: JsxChildren,
+  children: JsxChildren;
 }
 
 const DropdownMenu: FC<IProps> = (props) => {

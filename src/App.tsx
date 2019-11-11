@@ -8,7 +8,7 @@ import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
 // import Test from './pages/test/Test';
 
-type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>
+type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>;
 
 const App: FC<IProps> = ({ isInitialized, authState, init }) => {
   // return <Test />;

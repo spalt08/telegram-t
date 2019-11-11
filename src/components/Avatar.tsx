@@ -6,7 +6,7 @@ import { getChatTitle, getUserFullName, isPrivateChat } from '../modules/tdlib/h
 import './Avatar.scss';
 
 interface IProps {
-  size?: 'small' | 'medium' | 'large',
+  size?: 'small' | 'medium' | 'large';
   chat?: ApiChat;
   user?: ApiUser;
 }
