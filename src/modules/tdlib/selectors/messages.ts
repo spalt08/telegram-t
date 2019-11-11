@@ -3,10 +3,10 @@ import { selectChat } from './chats';
 import { GlobalState } from '../../../lib/teactn';
 import { getSendingState } from '../helpers';
 
-const EMPTY_OBJECT = {};
-
 export function selectChatMessages(global: GlobalState, chatId: number) {
-  return (global.messages.byChatId[chatId] || {}).byId || EMPTY_OBJECT;
+  const byChatId = global.messages.byChatId[chatId];
+
+  return byChatId ? byChatId.byId : null;
 }
 
 export function selectIsUnread(global: GlobalState, message: ApiMessage) {

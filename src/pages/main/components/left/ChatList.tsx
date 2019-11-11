@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
+import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat } from '../../../../modules/tdlib/types';
 import toArray from '../../../../util/toArray';
@@ -10,15 +10,15 @@ import Chat from './Chat';
 import Loading from '../../../../components/Loading';
 import './ChatList.scss';
 
-const LOAD_MORE_TRESHOLD_PX = 1000;
-const SCROLL_THROTTLE_MS = 1000;
-
 type IProps = {
-  chats: GlobalState['chats']['byId'],
-  loadedChatIds: GlobalState['chats']['ids'],
-  selectedChatId: GlobalState['chats']['selectedId'],
+  chats: Record<number, ApiChat>,
+  loadedChatIds: number[],
+  selectedChatId: number,
   areChatsLoaded: boolean;
 } & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
+
+const LOAD_MORE_TRESHOLD_PX = 1000;
+const SCROLL_THROTTLE_MS = 1000;
 
 const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
 
@@ -47,19 +47,19 @@ const ChatList: FC<IProps> = ({
   );
 };
 
-function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
-  const filtered = toArray(chats)
-    .filter((chat) => Boolean(chat.last_message) && loadedChatIds.includes(chat.id));
-
-  return orderBy(filtered, (chat: ApiChat) => chat.last_message!.date);
-}
-
 function handleScroll(e: UIEvent, loadMoreChats: DispatchMap['loadMoreChats']) {
   const target = e.target as HTMLElement;
 
   if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_TRESHOLD_PX) {
     loadMoreChats();
   }
+}
+
+function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
+  const filtered = toArray(chats)
+    .filter((chat) => Boolean(chat.last_message) && loadedChatIds.includes(chat.id));
+
+  return orderBy(filtered, (chat: ApiChat) => chat.last_message!.date);
 }
 
 export default withGlobal(

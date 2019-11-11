@@ -1,15 +1,24 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { ApiMessage } from '../types/messages';
+import { ApiMessage } from '../types';
 import * as TdLib from '../../../api/tdlib';
 import buildCollectionById from '../../../util/buildCollectionById';
 
-const MESSAGE_SLICE_LIMIT = 20;
+const MESSAGE_SLICE_LIMIT = 50;
 
 addReducer('loadChatMessages', (global, actions, payload) => {
-  const { chatId, fromMessageId } = payload!;
+  const { chatId } = payload!;
 
-  void loadChatMessages(chatId, fromMessageId);
+  void loadChatMessages(chatId);
+});
+
+addReducer('loadMoreChatMessages', (global, actions, payload) => {
+  const { chatId } = payload!;
+
+  const chatMessageIds = Object.keys(global.messages.byChatId[chatId].byId || {});
+  const lowestMessageId = chatMessageIds.length && Math.min(...chatMessageIds.map(Number));
+
+  void loadChatMessages(chatId, lowestMessageId);
 });
 
 addReducer('sendTextMessage', (global, actions, payload) => {
@@ -25,15 +34,18 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
     return;
   }
 
-  // Request without `fromMessageId` always returns only last message.
-  if (!fromMessageId && messages.length) {
-    const messages2 = await loadChatMessagesPart(chatId, messages[0].id);
+  let wasLatestEmpty = !messages.length;
 
-    if (messages2) {
+  while (messages.length < MESSAGE_SLICE_LIMIT && !wasLatestEmpty) {
+    const nextPart: ApiMessage[] | null = await loadChatMessagesPart(chatId, messages[messages.length - 1].id);
+
+    if (nextPart && nextPart.length) {
       messages = [
         ...messages,
-        ...messages2,
+        ...nextPart,
       ];
+    } else {
+      wasLatestEmpty = true;
     }
   }
 

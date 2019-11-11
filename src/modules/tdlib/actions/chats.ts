@@ -17,6 +17,21 @@ addReducer('loadMoreChats', (global) => {
   void loadChats(lastChatId, lastOrder);
 });
 
+addReducer('setChatScrollOffset', (global, actions, payload) => {
+  const { chatId, scrollOffset } = payload!;
+
+  setGlobal({
+    ...global,
+    chats: {
+      ...global.chats,
+      scrollOffsetById: {
+        ...global.chats.scrollOffsetById,
+        [chatId]: scrollOffset,
+      },
+    },
+  });
+});
+
 async function loadChats(offsetChatId: number | null = null, offsetOrder = OFFSET_ORDER) {
   const result = await TdLib.send({
     '@type': 'getChats',

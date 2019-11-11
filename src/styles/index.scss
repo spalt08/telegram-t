@@ -31,10 +31,16 @@ html, body {
 * {
   box-sizing: border-box;
 
-  // TODO Show during scroll.
+  // TODO @pixel-perfect
   ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 0;
-    height: 0;
+    width: 5px;
+    height: 80px;
+    background-color: transparent; /* or add it to the track */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(78, 78, 78, 0.3);
+    border-radius: 2.5px;
+    -webkit-box-shadow: inset 0 0 6px rgba(100, 100, 100, 0.5);
   }
 }

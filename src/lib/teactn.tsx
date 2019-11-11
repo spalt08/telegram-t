@@ -26,6 +26,7 @@ export type GlobalState = {
     selectedId?: number;
     ids: number[],
     byId: Record<number, ApiChat>,
+    scrollOffsetById: Record<number, number>
   },
 
   messages: {
@@ -51,6 +52,7 @@ const INITIAL_STATE: GlobalState = {
   chats: {
     ids: [],
     byId: {},
+    scrollOffsetById: {},
   },
 
   messages: {
@@ -62,7 +64,7 @@ type ActionTypes = (
   // system
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'signOut' |
   // chats
-  'loadChats' | 'loadMoreChats' | 'selectChat' |
+  'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages
   'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage'
 );
