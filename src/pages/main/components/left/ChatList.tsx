@@ -17,7 +17,7 @@ type IProps = {
   areChatsLoaded: boolean;
 } & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
 
-const LOAD_MORE_TRESHOLD_PX = 1000;
+const LOAD_MORE_THRESHOLD_PX = 1000;
 const SCROLL_THROTTLE_MS = 1000;
 
 const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
@@ -50,7 +50,7 @@ const ChatList: FC<IProps> = ({
 function handleScroll(e: UIEvent, loadMoreChats: DispatchMap['loadMoreChats']) {
   const target = e.target as HTMLElement;
 
-  if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_TRESHOLD_PX) {
+  if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
     loadMoreChats();
   }
 }

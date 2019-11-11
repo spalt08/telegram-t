@@ -18,7 +18,7 @@ type IProps = Pick<DispatchMap, 'loadChatMessages' | 'loadMoreChatMessages' | 's
   messages?: Record<number, ApiMessage>;
 };
 
-const LOAD_MORE_TRESHOLD_PX = 1000;
+const LOAD_MORE_THRESHOLD_PX = 1000;
 const SCROLL_THROTTLE_MS = 1000;
 
 let loadMoreChatMessagesThrottled: Function | undefined;
@@ -89,7 +89,7 @@ function handleScroll(
 
   setChatScrollOffset({ chatId, scrollOffset: target.scrollHeight - target.scrollTop });
 
-  if (loadMoreChatMessagesThrottled && target.scrollTop <= LOAD_MORE_TRESHOLD_PX) {
+  if (loadMoreChatMessagesThrottled && target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
     loadMoreChatMessagesThrottled({ chatId });
   }
 }
