@@ -1,6 +1,6 @@
 import React, { FC } from '../lib/teact';
 
-import { ApiUser, ApiChat } from '../modules/tdlib/types';
+import { ApiUser, ApiChat } from '../api/tdlib/types';
 import { getChatTitle, getUserFullName, isPrivateChat } from '../modules/tdlib/helpers';
 
 import './Avatar.scss';

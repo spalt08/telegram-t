@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiPrivateChat } from '../../../../modules/tdlib/types';
+import { ApiUser, ApiPrivateChat } from '../../../../api/tdlib/types';
 import { selectChat, selectUser } from '../../../../modules/tdlib/selectors';
 import {
   getPrivateChatUserId, getUserFullName, getUserStatus, isUserOnline,

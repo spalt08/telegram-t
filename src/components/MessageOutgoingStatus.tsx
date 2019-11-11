@@ -1,7 +1,7 @@
 import React, { FC } from '../lib/teact';
 import { GlobalState, withGlobal } from '../lib/teactn';
 
-import { ApiMessage } from '../modules/tdlib/types';
+import { ApiMessage } from '../api/tdlib/types';
 import { selectOutgoingStatus } from '../modules/tdlib/selectors';
 
 type IProps = {

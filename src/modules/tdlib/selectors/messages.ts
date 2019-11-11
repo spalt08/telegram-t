@@ -1,4 +1,4 @@
-import { ApiMessage } from '../types/messages';
+import { ApiMessage } from '../../../api/tdlib/types/messages';
 import { selectChat } from './chats';
 import { GlobalState } from '../../../lib/teactn';
 import { getSendingState } from '../helpers';

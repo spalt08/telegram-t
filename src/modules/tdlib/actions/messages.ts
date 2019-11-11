@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { ApiMessage } from '../types';
+import { ApiMessage } from '../../../api/tdlib/types';
 import * as TdLib from '../../../api/tdlib';
 import buildCollectionById from '../../../util/buildCollectionById';
 

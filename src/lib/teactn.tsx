@@ -2,7 +2,9 @@
 // import React, { getGlobal, setGlobal } from 'reactn';
 // export { addReducer, getGlobal, setGlobal, withGlobal, useGlobal } from 'reactn';
 
-import { UpdateAuthorizationStateType } from '../api/tdlib/types';
+import {
+  UpdateAuthorizationStateType, ApiUser, ApiChat, ApiMessage,
+} from '../api/tdlib/types';
 import useForceUpdate from '../hooks/useForceUpdate';
 import generateIdFor from '../util/generateIdFor';
 import { throttleWithRaf } from '../util/schedulers';
@@ -10,7 +12,6 @@ import { throttleWithRaf } from '../util/schedulers';
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
 import { DEBUG } from '../config';
-import { ApiUser, ApiChat, ApiMessage } from '../modules/tdlib/types';
 import orderBy from '../util/orderBy';
 
 export default React;

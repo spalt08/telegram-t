@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat } from '../../../../modules/tdlib/types';
+import { ApiChat } from '../../../../api/tdlib/types';
 import { getChatTitle, getMessageText, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import Avatar from '../../../../components/Avatar';
 import LastMessageMeta from './LastMessageMeta';

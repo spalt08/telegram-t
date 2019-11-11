@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiMessage } from '../../../../modules/tdlib/types';
+import { ApiUser, ApiMessage } from '../../../../api/tdlib/types';
 import { getMessageText, isOwnMessage, getUserFullName } from '../../../../modules/tdlib/helpers';
 import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';

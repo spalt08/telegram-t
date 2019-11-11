@@ -2,7 +2,7 @@ import { UIEvent } from 'react';
 import React, { FC, useEffect } from '../../../../lib/teact';
 import { DispatchMap, getGlobal, withGlobal } from '../../../../lib/teactn';
 
-import { ApiMessage } from '../../../../modules/tdlib/types';
+import { ApiMessage } from '../../../../api/tdlib/types';
 import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/tdlib/selectors';
 import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import orderBy from '../../../../util/orderBy';

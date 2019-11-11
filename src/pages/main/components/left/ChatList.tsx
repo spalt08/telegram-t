@@ -2,7 +2,7 @@ import { UIEvent } from 'react';
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat } from '../../../../modules/tdlib/types';
+import { ApiChat } from '../../../../api/tdlib/types';
 import toArray from '../../../../util/toArray';
 import orderBy from '../../../../util/orderBy';
 import { throttle } from '../../../../util/schedulers';

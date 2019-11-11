@@ -1,4 +1,4 @@
-import { ApiMessage } from '../types/messages';
+import { ApiMessage } from '../../../api/tdlib/types/messages';
 
 export function getMessageText(message: ApiMessage) {
   return message.content.text ? message.content.text.text : '%NO_TEXT_MESSAGE%';

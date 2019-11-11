@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat } from '../../../../modules/tdlib/types';
+import { ApiChat } from '../../../../api/tdlib/types';
 import Avatar from '../../../../components/Avatar';
 
 type IProps = {
