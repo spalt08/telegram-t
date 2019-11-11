@@ -3,6 +3,7 @@
 // export default React;
 
 import { onNextTick, throttleWithRaf } from '../util/schedulers';
+import { flatten } from '../util/iteratees';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
@@ -108,7 +109,7 @@ function createElement(
       key: props && props.key ? String(props.key) : undefined,
       name: tag.name,
       props,
-      children,
+      children: flatten(children),
       isUnmounted: false,
       state: {
         cursor: 0,
@@ -150,13 +151,11 @@ function createElement(
     return componentInstance.$element;
   }
 
-  const childrenArray = Array.isArray(children[0]) ? children[0] : children;
-
   return {
     type: VirtualElementTypesEnum.Tag,
     tag,
     props,
-    children: childrenArray.map((child): VirtualElementChild => {
+    children: flatten(children).map((child: any): VirtualElementChild => {
       if (child === false || child === null || child === undefined) {
         // Support for `&&` operators.
         return VIRTUAL_ELEMENT_EMPTY;
