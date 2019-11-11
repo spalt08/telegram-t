@@ -3,8 +3,7 @@ import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat } from '../../../../api/tdlib/types';
-import toArray from '../../../../util/toArray';
-import orderBy from '../../../../util/orderBy';
+import { toArray, orderBy } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import Chat from './Chat';
 import Loading from '../../../../components/Loading';

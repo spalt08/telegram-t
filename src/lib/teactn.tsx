@@ -12,7 +12,7 @@ import { throttleWithRaf } from '../util/schedulers';
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
 import { DEBUG } from '../config';
-import orderBy from '../util/orderBy';
+import { orderBy } from '../util/iteratees';
 
 export default React;
 

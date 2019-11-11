@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiMessage } from '../../../api/tdlib/types';
 import * as TdLib from '../../../api/tdlib';
-import buildCollectionById from '../../../util/buildCollectionById';
+import { buildCollectionById } from '../../../util/iteratees';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
