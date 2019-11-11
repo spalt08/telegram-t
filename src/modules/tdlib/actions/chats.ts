@@ -5,7 +5,7 @@ import * as TdLib from '../../../api/tdlib';
 // https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1get_chats.html
 const OFFSET_ORDER = '9223372036854775807';
 // Each call to `getChats` produce 100 `updateNewChat` updates, no matter what the next limit is.
-const LOAD_CHATS_LIMIT = 100;
+const LOAD_CHATS_LIMIT = 50;
 
 addReducer('loadChats', () => {
   void loadChats();
