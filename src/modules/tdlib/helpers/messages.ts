@@ -1,7 +1,7 @@
 import { ApiMessage } from '../../../api/tdlib/types/messages';
 
 export function getMessageText(message: ApiMessage) {
-  return message.content.text ? message.content.text.text : '%NO_TEXT_MESSAGE%';
+  return message.content.text ? message.content.text.text : '%RICH_CONTENT_NOT_IMPLEMENTED%';
 }
 
 export function isOwnMessage(message: ApiMessage) {

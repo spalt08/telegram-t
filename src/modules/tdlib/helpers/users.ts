@@ -1,5 +1,6 @@
 import { ApiUser } from '../../../api/tdlib/types';
 import { formatDate, formatTime } from '../../../util/dateFormat';
+import { getFileSrc } from '../../../api/tdlib/files';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
@@ -131,4 +132,10 @@ export function isUserOnline(user: ApiUser) {
   }
 
   return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
+}
+
+export function getUserImage(user: ApiUser) {
+  const smallPhoto = user.profile_photo && user.profile_photo.small;
+
+  return smallPhoto ? getFileSrc(smallPhoto) : null;
 }

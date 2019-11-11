@@ -1,5 +1,7 @@
+import { TdLibUpdate } from './types/updates';
 import { DEBUG } from '../../config';
 import { getBrowser, getOsName } from './utils';
+import legacyTdLibController from './LegacyTdLibController';
 
 let client: any;
 
@@ -42,7 +44,12 @@ export async function init(onUpdate: Function) {
   }
 
   client = new TdClient(INIT_OPTIONS);
-  client.onUpdate = onUpdate;
+  client.onUpdate = (update: TdLibUpdate) => {
+    onUpdate(update);
+    legacyTdLibController.onUpdate(update);
+  };
+
+  legacyTdLibController.send = send;
 }
 
 export function sendParameters() {

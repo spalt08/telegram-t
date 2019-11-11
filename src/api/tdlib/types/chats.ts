@@ -1,4 +1,5 @@
 import { ApiMessage } from './messages';
+import { ApiFile } from './files';
 
 export interface ApiChat {
   id: number;
@@ -12,6 +13,10 @@ export interface ApiChat {
   unread_count: number;
   unread_mention_count: number;
   order: string;
+  photo?: {
+    small: ApiFile;
+    big: ApiFile;
+  };
 }
 
 export interface ApiPrivateChat extends ApiChat {

@@ -1,3 +1,5 @@
+import { ApiFile } from './files';
+
 export interface ApiUser {
   id: number;
   type: {
@@ -11,5 +13,9 @@ export interface ApiUser {
       'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
     );
     was_online?: number;
+  };
+  profile_photo?: {
+    small: ApiFile;
+    big: ApiFile;
   };
 }

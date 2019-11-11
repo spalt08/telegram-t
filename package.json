@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
+    "dev": "shx rm -rf .cache/ dist && shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
     "prod": "./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx",
@@ -12,7 +12,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged -- --fix"
     }
   },
   "lint-staged": {
@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "emoji-regex": "^8.0.0",
-    "tdweb": "^1.5.0"
+    "tdweb": "^1.5.0",
+    "events": "^3.0.0"
   }
 }

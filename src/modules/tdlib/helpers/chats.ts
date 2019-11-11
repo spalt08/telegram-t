@@ -1,4 +1,5 @@
 import { ApiChat, ApiPrivateChat } from '../../../api/tdlib/types';
+import { getFileSrc } from '../../../api/tdlib/files';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;
@@ -10,4 +11,10 @@ export function getPrivateChatUserId(chat: ApiPrivateChat) {
 
 export function getChatTitle(chat: ApiChat) {
   return chat.title || 'Deleted account';
+}
+
+export function getChatImage(chat: ApiChat) {
+  const smallPhoto = chat.photo && chat.photo.small;
+
+  return smallPhoto ? getFileSrc(smallPhoto) : null;
 }
