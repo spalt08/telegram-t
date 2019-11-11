@@ -5,7 +5,7 @@
 import { UpdateAuthorizationStateType } from '../api/tdlib/types';
 import useForceUpdate from '../hooks/useForceUpdate';
 import generateIdFor from '../util/generateIdFor';
-import throttleWithRaf from '../util/throttleWithRaf';
+import { throttleWithRaf } from '../util/schedulers';
 
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
@@ -62,9 +62,9 @@ type ActionTypes = (
   // system
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'signOut' |
   // chats
-  'loadChats' | 'selectChat' |
+  'loadChats' | 'loadMoreChats' | 'selectChat' |
   // messages
-  'loadChatMessages' | 'selectMessage' | 'sendTextMessage'
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage'
 );
 
 export type DispatchMap = Record<ActionTypes, Function>;
@@ -81,6 +81,8 @@ type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | nu
 type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap> | null);
 
 let global = INITIAL_STATE;
+// TODO Remove before release.
+(window as any).getGlobal = getGlobal;
 
 const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
@@ -212,9 +214,7 @@ function arePropsShallowEqual(currentProps: Props, newProps: Props) {
   return currentKeys.every((prop) => currentProps[prop] === newProps[prop]);
 }
 
-if (DEBUG) {
-  document.addEventListener('dblclick', () => {
-    // eslint-disable-next-line no-console
-    console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
-  });
-}
+document.addEventListener('dblclick', () => {
+  // eslint-disable-next-line no-console
+  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
+});

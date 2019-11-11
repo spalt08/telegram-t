@@ -6,7 +6,7 @@ import { selectChatMessages } from '../../../../modules/tdlib/selectors';
 import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import orderBy from '../../../../util/orderBy';
 import toArray from '../../../../util/toArray';
-import onNextTick from '../../../../util/onNextTick';
+import { onNextTick } from '../../../../util/schedulers';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import './MessageList.scss';

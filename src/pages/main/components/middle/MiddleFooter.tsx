@@ -2,7 +2,7 @@ import { ChangeEvent, KeyboardEvent } from 'react';
 import React, { FC, useState } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import onNextTick from '../../../../util/onNextTick';
+import { onNextTick } from '../../../../util/schedulers';
 import InputText from '../../../../components/ui/InputText';
 import './MiddleFooter.scss';
 

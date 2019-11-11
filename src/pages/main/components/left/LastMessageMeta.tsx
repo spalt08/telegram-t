@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 
 import { ApiMessage } from '../../../../modules/tdlib/types';
-import { formatTime } from '../../../../util/dateFormat';
+import { formatPastTimeShort } from '../../../../util/dateFormat';
 import MessageOutgoingStatus from '../../../../components/MessageOutgoingStatus';
 import './LastMessageMeta.scss';
 
@@ -15,7 +15,7 @@ const LastMessageMeta: FC<IProps> = ({ message }) => {
       {message.is_outgoing && (
         <MessageOutgoingStatus message={message} />
       )}
-      <span className="time">{formatTime(message.date * 1000)}</span>
+      <span className="time">{formatPastTimeShort(message.date * 1000)}</span>
     </div>
   );
 };

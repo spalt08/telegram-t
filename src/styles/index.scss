@@ -31,6 +31,7 @@ html, body {
 * {
   box-sizing: border-box;
 
+  // TODO Show during scroll.
   ::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 0;

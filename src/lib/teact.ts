@@ -2,7 +2,7 @@
 // export { useState } from 'react';
 // export default React;
 
-import throttleWithRaf from '../util/throttleWithRaf';
+import { throttleWithRaf } from '../util/schedulers';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;

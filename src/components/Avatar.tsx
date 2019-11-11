@@ -1,7 +1,7 @@
 import React, { FC } from '../lib/teact';
 
 import { ApiUser, ApiChat } from '../modules/tdlib/types';
-import { getUserFullName, isPrivateChat } from '../modules/tdlib/helpers';
+import { getChatTitle, getUserFullName, isPrivateChat } from '../modules/tdlib/helpers';
 
 import './Avatar.scss';
 
@@ -17,8 +17,9 @@ const Avatar: FC<IProps> = ({ size = 'large', chat, user }) => {
   if (user) {
     const userName = getUserFullName(user);
     content = userName ? getFirstLetters(userName).slice(0, 2) : null;
-  } else if (chat && chat.title) {
-    content = chat.title && getFirstLetters(chat.title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
+  } else if (chat) {
+    const title = getChatTitle(chat);
+    content = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
   }
 
   return (

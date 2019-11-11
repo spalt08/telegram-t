@@ -1,4 +1,4 @@
-import { ApiPrivateChat } from '../types/chats';
+import { ApiChat, ApiPrivateChat } from '../types';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;
@@ -6,4 +6,8 @@ export function isPrivateChat(chatId: number) {
 
 export function getPrivateChatUserId(chat: ApiPrivateChat) {
   return chat.type.user_id;
+}
+
+export function getChatTitle(chat: ApiChat) {
+  return chat.title || 'Deleted account';
 }
