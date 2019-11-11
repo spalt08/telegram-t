@@ -93,6 +93,7 @@ const containers: Record<string, {
   ownProps: Props;
   mappedProps: Props;
   forceUpdate: Function;
+  areMappedPropsChanged: boolean;
   DEBUG_updates: number;
   DEBUG_componentName: string;
 }> = {};
@@ -146,7 +147,9 @@ function updateContainers() {
 
     if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps, newMappedProps)) {
       containers[id].mappedProps = newMappedProps;
+      containers[id].areMappedPropsChanged = true;
       containers[id].DEBUG_updates++;
+
       forceUpdate();
     }
   });
@@ -184,18 +187,23 @@ export function withGlobal(
           mapStateToProps,
           mapReducersToProps,
           ownProps: props,
-          mappedProps: {
-            ...mapStateToProps(global, props),
-            ...mapReducersToProps(setGlobal, actions),
-          },
+          mappedProps: {},
+          areMappedPropsChanged: false,
           forceUpdate,
           DEBUG_updates: 0,
           DEBUG_componentName: Component.name,
         };
       }
 
-      containers[id].ownProps = props;
-
+      if (containers[id].areMappedPropsChanged) {
+        containers[id].areMappedPropsChanged = false;
+      } else {
+        containers[id].ownProps = props;
+        containers[id].mappedProps = {
+          ...mapStateToProps(global, props),
+          ...mapReducersToProps(setGlobal, actions),
+        };
+      }
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...containers[id].mappedProps} {...props} />;
     };
