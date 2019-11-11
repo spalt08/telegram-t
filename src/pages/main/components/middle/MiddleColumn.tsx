@@ -57,7 +57,7 @@ function renderOpenChatScreen(props: IProps) {
       <h2>
         Open Chat
         <br />
-        or create a new one
+        to start messaging
       </h2>
 
       {/* TODO @not-implemented */}
