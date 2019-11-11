@@ -2,7 +2,7 @@
 // export { useState } from 'react';
 // export default React;
 
-import { throttleWithRaf } from '../util/schedulers';
+import { onNextTick, throttleWithRaf } from '../util/schedulers';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
@@ -40,6 +40,7 @@ interface ComponentInstance {
   props: Props,
   children: VirtualElementChildren,
   state: ComponentInstanceState,
+  effects: ComponentInstanceEffects,
   render: () => VirtualElementComponent,
   forceUpdate: Function,
   onUpdate?: Function,
@@ -57,6 +58,14 @@ interface ComponentInstanceState {
   byCursor: {
     value: any,
     setter: Function
+  }[],
+}
+
+interface ComponentInstanceEffects {
+  cursor: number,
+  byCursor: {
+    effect: () => void,
+    dependencies?: any[]
   }[],
 }
 
@@ -102,6 +111,10 @@ function createElement(
       children,
       isUnmounted: false,
       state: {
+        cursor: 0,
+        byCursor: [],
+      },
+      effects: {
         cursor: 0,
         byCursor: [],
       },
@@ -202,6 +215,7 @@ function getUpdatedChild(
 ) {
   if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
+      // TODO @perf shallow equal?
       currentChild.componentInstance.props = newChild.componentInstance.props;
       // TODO Support new children
       return currentChild.componentInstance.render();
@@ -260,6 +274,26 @@ export function useState(initial: any) {
     byCursor[cursor].value,
     byCursor[cursor].setter,
   ];
+}
+
+// TODO Support cleanup.
+export function useEffect(effect: () => void, dependencies?: any[]) {
+  const { cursor, byCursor } = renderingInstance.effects;
+
+  if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
+    if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
+      onNextTick(effect);
+    }
+  } else {
+    onNextTick(effect);
+  }
+
+  byCursor[cursor] = {
+    effect,
+    dependencies,
+  };
+
+  renderingInstance.state.cursor++;
 }
 
 export default {
