@@ -15,10 +15,11 @@ addReducer('loadChatMessages', (global, actions, payload) => {
 addReducer('loadMoreChatMessages', (global, actions, payload) => {
   const { chatId } = payload!;
 
-  const chatMessageIds = Object.keys(global.messages.byChatId[chatId].byId || {});
-  const lowestMessageId = chatMessageIds.length && Math.min(...chatMessageIds.map(Number));
+  const byChatId = global.messages.byChatId[chatId];
+  const chatMessageIds = byChatId ? Object.keys(byChatId.byId || {}) : null;
+  const lowestMessageId = chatMessageIds && chatMessageIds.length && Math.min(...chatMessageIds.map(Number));
 
-  void loadChatMessages(chatId, lowestMessageId);
+  void loadChatMessages(chatId, lowestMessageId || undefined);
 });
 
 addReducer('sendTextMessage', (global, actions, payload) => {
