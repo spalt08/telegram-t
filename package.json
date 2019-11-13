@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "shx rm -rf .cache/ dist && shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
+    "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
     "prod": "./build.sh",
+    "build:gramjs": "parcel build src/lib/gramjs/index.js -d src/lib/gramjs/build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
@@ -21,6 +22,8 @@
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.3",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
@@ -47,8 +50,17 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "aes-js": "^3.1.2",
+    "crc": "^3.8.0",
+    "crypto": "^1.0.1",
     "emoji-regex": "^8.0.0",
+    "events": "^3.0.0",
+    "node-gzip": "^1.1.2",
+    "node-rsa": "^1.0.6",
+    "python-struct": "^1.1.2",
+    "stack-trace": "0.0.10",
+    "string-format": "^2.0.0",
     "tdweb": "^1.5.0",
-    "events": "^3.0.0"
+    "websocket": "^1.0.30"
   }
 }
