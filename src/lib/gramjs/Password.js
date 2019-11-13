@@ -1,5 +1,5 @@
 const Factorizator = require('./crypto/Factorizator')
-const { types } = require('./tl/index')
+const { types } = require('./tl')
 const { readBigIntFromBuffer, readBufferFromBigInt, sha256, modExp, generateRandomBytes } = require('./Helpers')
 const crypto = require('crypto')
 const SIZE_FOR_HASH = 256

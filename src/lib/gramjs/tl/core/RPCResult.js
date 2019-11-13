@@ -1,5 +1,5 @@
 const { TLObject } = require('../tlobject')
-const { RpcError } = require('../types/index')
+const { RpcError } = require('../types')
 const GZIPPacked = require('./GZIPPacked')
 
 class RPCResult extends TLObject {

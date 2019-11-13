@@ -19,12 +19,12 @@ class RegisterDeviceRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x68976c6f;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.noMuted = args.noMuted || null;
         this.tokenType = args.tokenType;
         this.token = args.token;
         this.appSandbox = args.appSandbox;
         this.secret = args.secret;
         this.otherUids = args.otherUids;
-        this.noMuted = args.noMuted || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -39,16 +39,17 @@ class RegisterDeviceRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _no_muted;
         let _token_type;
         let _token;
         let _app_sandbox;
         let _secret;
         let _other_uids;
-        let _no_muted;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _no_muted = Boolean(flags & 1);
         _token_type = reader.readInt();
         _token = reader.tgReadString();
         _app_sandbox = reader.tgReadBool();
@@ -60,13 +61,12 @@ class RegisterDeviceRequest extends TLRequest {
             _x = reader.readInt();
             _other_uids.push(_x);
             }
-            _no_muted = Boolean(flags & 1);
-            return new this({tokenType:_token_type,
+            return new this({noMuted:_no_muted,
+	tokenType:_token_type,
 	token:_token,
 	appSandbox:_app_sandbox,
 	secret:_secret,
-	otherUids:_other_uids,
-	noMuted:_no_muted})
+	otherUids:_other_uids})
         }
     }
 
@@ -227,33 +227,33 @@ class UpdateProfileRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x78515775;
         this.SUBCLASS_OF_ID = 0x2da17977;
 
-        this.about = args.about || null;
-        this.lastName = args.lastName || null;
         this.firstName = args.firstName || null;
+        this.lastName = args.lastName || null;
+        this.about = args.about || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("75575178","hex"),
-            struct.pack('<I', (this.about === undefined || this.about === false || this.about === null) ? 0 : 4 | (this.lastName === undefined || this.lastName === false || this.lastName === null) ? 0 : 2 | (this.firstName === undefined || this.firstName === false || this.firstName === null) ? 0 : 1),
-            (this.about === undefined || this.about === false || this.about ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.about)],
-            (this.lastName === undefined || this.lastName === false || this.lastName ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.lastName)],
+            struct.pack('<I', (this.firstName === undefined || this.firstName === false || this.firstName === null) ? 0 : 1 | (this.lastName === undefined || this.lastName === false || this.lastName === null) ? 0 : 2 | (this.about === undefined || this.about === false || this.about === null) ? 0 : 4),
             (this.firstName === undefined || this.firstName === false || this.firstName ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.firstName)],
+            (this.lastName === undefined || this.lastName === false || this.lastName ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.lastName)],
+            (this.about === undefined || this.about === false || this.about ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.about)],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _about;
-        let _last_name;
         let _first_name;
+        let _last_name;
+        let _about;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        if (flags & 4) {
-            _about = reader.tgReadString();
+        if (flags & 1) {
+            _first_name = reader.tgReadString();
         }
         else {
-            _about = null
+            _first_name = null
         }
         if (flags & 2) {
             _last_name = reader.tgReadString();
@@ -261,15 +261,15 @@ class UpdateProfileRequest extends TLRequest {
         else {
             _last_name = null
         }
-        if (flags & 1) {
-            _first_name = reader.tgReadString();
+        if (flags & 4) {
+            _about = reader.tgReadString();
         }
         else {
-            _first_name = null
+            _about = null
         }
-        return new this({about:_about,
+        return new this({firstName:_first_name,
 	lastName:_last_name,
-	firstName:_first_name})
+	about:_about})
     }
 }
 
@@ -1420,55 +1420,55 @@ class InitTakeoutSessionRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xf05b4804;
         this.SUBCLASS_OF_ID = 0x843ebe85;
 
-        this.fileMaxSize = args.fileMaxSize || null;
-        this.files = args.files || null;
-        this.messageChannels = args.messageChannels || null;
-        this.messageMegagroups = args.messageMegagroups || null;
-        this.messageChats = args.messageChats || null;
-        this.messageUsers = args.messageUsers || null;
         this.contacts = args.contacts || null;
+        this.messageUsers = args.messageUsers || null;
+        this.messageChats = args.messageChats || null;
+        this.messageMegagroups = args.messageMegagroups || null;
+        this.messageChannels = args.messageChannels || null;
+        this.files = args.files || null;
+        this.fileMaxSize = args.fileMaxSize || null;
     }
     get bytes() {
-        if (!((this.file_max_size || this.file_max_size!==null && this.files || this.files!==null) && (this.file_max_size===null || this.file_max_size===false && this.files===null || this.files===false)))
-	 throw new Error('file_max_size, files paramaters must all be false-y or all true')
+        if (!((this.files || this.files!==null && this.file_max_size || this.file_max_size!==null) && (this.files===null || this.files===false && this.file_max_size===null || this.file_max_size===false)))
+	 throw new Error('files, file_max_size paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("04485bf0","hex"),
-            struct.pack('<I', (this.fileMaxSize === undefined || this.fileMaxSize === false || this.fileMaxSize === null) ? 0 : 32 | (this.files === undefined || this.files === false || this.files === null) ? 0 : 32 | (this.messageChannels === undefined || this.messageChannels === false || this.messageChannels === null) ? 0 : 16 | (this.messageMegagroups === undefined || this.messageMegagroups === false || this.messageMegagroups === null) ? 0 : 8 | (this.messageChats === undefined || this.messageChats === false || this.messageChats === null) ? 0 : 4 | (this.messageUsers === undefined || this.messageUsers === false || this.messageUsers === null) ? 0 : 2 | (this.contacts === undefined || this.contacts === false || this.contacts === null) ? 0 : 1),
+            struct.pack('<I', (this.contacts === undefined || this.contacts === false || this.contacts === null) ? 0 : 1 | (this.messageUsers === undefined || this.messageUsers === false || this.messageUsers === null) ? 0 : 2 | (this.messageChats === undefined || this.messageChats === false || this.messageChats === null) ? 0 : 4 | (this.messageMegagroups === undefined || this.messageMegagroups === false || this.messageMegagroups === null) ? 0 : 8 | (this.messageChannels === undefined || this.messageChannels === false || this.messageChannels === null) ? 0 : 16 | (this.files === undefined || this.files === false || this.files === null) ? 0 : 32 | (this.fileMaxSize === undefined || this.fileMaxSize === false || this.fileMaxSize === null) ? 0 : 32),
             (this.fileMaxSize === undefined || this.fileMaxSize === false || this.fileMaxSize ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.fileMaxSize)],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _file_max_size;
-        let _files;
-        let _message_channels;
-        let _message_megagroups;
-        let _message_chats;
-        let _message_users;
         let _contacts;
+        let _message_users;
+        let _message_chats;
+        let _message_megagroups;
+        let _message_channels;
+        let _files;
+        let _file_max_size;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _contacts = Boolean(flags & 1);
+        _message_users = Boolean(flags & 2);
+        _message_chats = Boolean(flags & 4);
+        _message_megagroups = Boolean(flags & 8);
+        _message_channels = Boolean(flags & 16);
+        _files = Boolean(flags & 32);
         if (flags & 32) {
             _file_max_size = reader.readInt();
         }
         else {
             _file_max_size = null
         }
-        _files = Boolean(flags & 32);
-        _message_channels = Boolean(flags & 16);
-        _message_megagroups = Boolean(flags & 8);
-        _message_chats = Boolean(flags & 4);
-        _message_users = Boolean(flags & 2);
-        _contacts = Boolean(flags & 1);
-        return new this({fileMaxSize:_file_max_size,
-	files:_files,
-	messageChannels:_message_channels,
-	messageMegagroups:_message_megagroups,
-	messageChats:_message_chats,
+        return new this({contacts:_contacts,
 	messageUsers:_message_users,
-	contacts:_contacts})
+	messageChats:_message_chats,
+	messageMegagroups:_message_megagroups,
+	messageChannels:_message_channels,
+	files:_files,
+	fileMaxSize:_file_max_size})
     }
 }
 
@@ -1651,8 +1651,8 @@ class GetNotifyExceptionsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x53577479;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
-        this.peer = args.peer || null;
         this.compareSound = args.compareSound || null;
+        this.peer = args.peer || null;
     }
     async resolve(client, utils) {
         if (this.peer) {
@@ -1662,27 +1662,27 @@ class GetNotifyExceptionsRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("79745753","hex"),
-            struct.pack('<I', (this.peer === undefined || this.peer === false || this.peer === null) ? 0 : 1 | (this.compareSound === undefined || this.compareSound === false || this.compareSound === null) ? 0 : 2),
+            struct.pack('<I', (this.compareSound === undefined || this.compareSound === false || this.compareSound === null) ? 0 : 2 | (this.peer === undefined || this.peer === false || this.peer === null) ? 0 : 1),
             (this.peer === undefined || this.peer === false || this.peer ===null) ? Buffer.alloc(0) : [this.peer.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _peer;
         let _compare_sound;
+        let _peer;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _compare_sound = Boolean(flags & 2);
         if (flags & 1) {
             _peer = reader.tgReadObject();
         }
         else {
             _peer = null
         }
-        _compare_sound = Boolean(flags & 2);
-        return new this({peer:_peer,
-	compareSound:_compare_sound})
+        return new this({compareSound:_compare_sound,
+	peer:_peer})
     }
 }
 
@@ -1895,32 +1895,32 @@ class SaveAutoDownloadSettingsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x76f36233;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.settings = args.settings;
-        this.high = args.high || null;
         this.low = args.low || null;
+        this.high = args.high || null;
+        this.settings = args.settings;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("3362f376","hex"),
-            struct.pack('<I', (this.high === undefined || this.high === false || this.high === null) ? 0 : 2 | (this.low === undefined || this.low === false || this.low === null) ? 0 : 1),
+            struct.pack('<I', (this.low === undefined || this.low === false || this.low === null) ? 0 : 1 | (this.high === undefined || this.high === false || this.high === null) ? 0 : 2),
             this.settings.bytes,
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _settings;
-        let _high;
         let _low;
+        let _high;
+        let _settings;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _settings = reader.tgReadObject();
-        _high = Boolean(flags & 2);
         _low = Boolean(flags & 1);
-        return new this({settings:_settings,
+        _high = Boolean(flags & 2);
+        _settings = reader.tgReadObject();
+        return new this({low:_low,
 	high:_high,
-	low:_low})
+	settings:_settings})
     }
 }
 
@@ -1939,43 +1939,43 @@ class UploadThemeRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x211fe820;
 
         this.file = args.file;
+        this.thumb = args.thumb || null;
         this.fileName = args.fileName;
         this.mimeType = args.mimeType;
-        this.thumb = args.thumb || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("33b33d1c","hex"),
             struct.pack('<I', (this.thumb === undefined || this.thumb === false || this.thumb === null) ? 0 : 1),
             this.file.bytes,
+            (this.thumb === undefined || this.thumb === false || this.thumb ===null) ? Buffer.alloc(0) : [this.thumb.bytes],
             TLObject.serializeBytes(this.fileName),
             TLObject.serializeBytes(this.mimeType),
-            (this.thumb === undefined || this.thumb === false || this.thumb ===null) ? Buffer.alloc(0) : [this.thumb.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _file;
+        let _thumb;
         let _file_name;
         let _mime_type;
-        let _thumb;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _file = reader.tgReadObject();
-        _file_name = reader.tgReadString();
-        _mime_type = reader.tgReadString();
         if (flags & 1) {
             _thumb = reader.tgReadObject();
         }
         else {
             _thumb = null
         }
+        _file_name = reader.tgReadString();
+        _mime_type = reader.tgReadString();
         return new this({file:_file,
+	thumb:_thumb,
 	fileName:_file_name,
-	mimeType:_mime_type,
-	thumb:_thumb})
+	mimeType:_mime_type})
     }
 }
 
@@ -2039,9 +2039,9 @@ class UpdateThemeRequest extends TLRequest {
 
         this.format = args.format;
         this.theme = args.theme;
-        this.document = args.document || null;
-        this.title = args.title || null;
         this.slug = args.slug || null;
+        this.title = args.title || null;
+        this.document = args.document || null;
     }
     async resolve(client, utils) {
         if (this.document) {
@@ -2051,32 +2051,32 @@ class UpdateThemeRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("02a28e3b","hex"),
-            struct.pack('<I', (this.document === undefined || this.document === false || this.document === null) ? 0 : 4 | (this.title === undefined || this.title === false || this.title === null) ? 0 : 2 | (this.slug === undefined || this.slug === false || this.slug === null) ? 0 : 1),
+            struct.pack('<I', (this.slug === undefined || this.slug === false || this.slug === null) ? 0 : 1 | (this.title === undefined || this.title === false || this.title === null) ? 0 : 2 | (this.document === undefined || this.document === false || this.document === null) ? 0 : 4),
             TLObject.serializeBytes(this.format),
             this.theme.bytes,
-            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.bytes],
-            (this.title === undefined || this.title === false || this.title ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.title)],
             (this.slug === undefined || this.slug === false || this.slug ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.slug)],
+            (this.title === undefined || this.title === false || this.title ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.title)],
+            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _format;
         let _theme;
-        let _document;
-        let _title;
         let _slug;
+        let _title;
+        let _document;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _format = reader.tgReadString();
         _theme = reader.tgReadObject();
-        if (flags & 4) {
-            _document = reader.tgReadObject();
+        if (flags & 1) {
+            _slug = reader.tgReadString();
         }
         else {
-            _document = null
+            _slug = null
         }
         if (flags & 2) {
             _title = reader.tgReadString();
@@ -2084,17 +2084,17 @@ class UpdateThemeRequest extends TLRequest {
         else {
             _title = null
         }
-        if (flags & 1) {
-            _slug = reader.tgReadString();
+        if (flags & 4) {
+            _document = reader.tgReadObject();
         }
         else {
-            _slug = null
+            _document = null
         }
         return new this({format:_format,
 	theme:_theme,
-	document:_document,
+	slug:_slug,
 	title:_title,
-	slug:_slug})
+	document:_document})
     }
 }
 
@@ -2148,45 +2148,45 @@ class InstallThemeRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x7ae43737;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.theme = args.theme || null;
-        this.format = args.format || null;
         this.dark = args.dark || null;
+        this.format = args.format || null;
+        this.theme = args.theme || null;
     }
     get bytes() {
-        if (!((this.theme || this.theme!==null && this.format || this.format!==null) && (this.theme===null || this.theme===false && this.format===null || this.format===false)))
-	 throw new Error('theme, format paramaters must all be false-y or all true')
+        if (!((this.format || this.format!==null && this.theme || this.theme!==null) && (this.format===null || this.format===false && this.theme===null || this.theme===false)))
+	 throw new Error('format, theme paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("3737e47a","hex"),
-            struct.pack('<I', (this.theme === undefined || this.theme === false || this.theme === null) ? 0 : 2 | (this.format === undefined || this.format === false || this.format === null) ? 0 : 2 | (this.dark === undefined || this.dark === false || this.dark === null) ? 0 : 1),
-            (this.theme === undefined || this.theme === false || this.theme ===null) ? Buffer.alloc(0) : [this.theme.bytes],
+            struct.pack('<I', (this.dark === undefined || this.dark === false || this.dark === null) ? 0 : 1 | (this.format === undefined || this.format === false || this.format === null) ? 0 : 2 | (this.theme === undefined || this.theme === false || this.theme === null) ? 0 : 2),
             (this.format === undefined || this.format === false || this.format ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.format)],
+            (this.theme === undefined || this.theme === false || this.theme ===null) ? Buffer.alloc(0) : [this.theme.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _theme;
-        let _format;
         let _dark;
+        let _format;
+        let _theme;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        if (flags & 2) {
-            _theme = reader.tgReadObject();
-        }
-        else {
-            _theme = null
-        }
+        _dark = Boolean(flags & 1);
         if (flags & 2) {
             _format = reader.tgReadString();
         }
         else {
             _format = null
         }
-        _dark = Boolean(flags & 1);
-        return new this({theme:_theme,
+        if (flags & 2) {
+            _theme = reader.tgReadObject();
+        }
+        else {
+            _theme = null
+        }
+        return new this({dark:_dark,
 	format:_format,
-	dark:_dark})
+	theme:_theme})
     }
 }
 

@@ -20,47 +20,47 @@ class SentCode extends TLObject {
 
         this.type = args.type;
         this.phoneCodeHash = args.phoneCodeHash;
-        this.timeout = args.timeout || null;
         this.nextType = args.nextType || null;
+        this.timeout = args.timeout || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("0225005e","hex"),
-            struct.pack('<I', (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 4 | (this.nextType === undefined || this.nextType === false || this.nextType === null) ? 0 : 2),
+            struct.pack('<I', (this.nextType === undefined || this.nextType === false || this.nextType === null) ? 0 : 2 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 4),
             this.type.bytes,
             TLObject.serializeBytes(this.phoneCodeHash),
-            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             (this.nextType === undefined || this.nextType === false || this.nextType ===null) ? Buffer.alloc(0) : [this.nextType.bytes],
+            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _type;
         let _phone_code_hash;
-        let _timeout;
         let _next_type;
+        let _timeout;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _type = reader.tgReadObject();
         _phone_code_hash = reader.tgReadString();
-        if (flags & 4) {
-            _timeout = reader.readInt();
-        }
-        else {
-            _timeout = null
-        }
         if (flags & 2) {
             _next_type = reader.tgReadObject();
         }
         else {
             _next_type = null
         }
+        if (flags & 4) {
+            _timeout = reader.readInt();
+        }
+        else {
+            _timeout = null
+        }
         return new this({type:_type,
 	phoneCodeHash:_phone_code_hash,
-	timeout:_timeout,
-	nextType:_next_type})
+	nextType:_next_type,
+	timeout:_timeout})
     }
 }
 
@@ -78,34 +78,34 @@ class Authorization extends TLObject {
         this.CONSTRUCTOR_ID = 0xcd050916;
         this.SUBCLASS_OF_ID = 0xb9e04e39;
 
-        this.user = args.user;
         this.tmpSessions = args.tmpSessions || null;
+        this.user = args.user;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("160905cd","hex"),
             struct.pack('<I', (this.tmpSessions === undefined || this.tmpSessions === false || this.tmpSessions === null) ? 0 : 1),
-            this.user.bytes,
             (this.tmpSessions === undefined || this.tmpSessions === false || this.tmpSessions ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.tmpSessions)],
+            this.user.bytes,
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _user;
         let _tmp_sessions;
+        let _user;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _user = reader.tgReadObject();
         if (flags & 1) {
             _tmp_sessions = reader.readInt();
         }
         else {
             _tmp_sessions = null
         }
-        return new this({user:_user,
-	tmpSessions:_tmp_sessions})
+        _user = reader.tgReadObject();
+        return new this({tmpSessions:_tmp_sessions,
+	user:_user})
     }
 }
 

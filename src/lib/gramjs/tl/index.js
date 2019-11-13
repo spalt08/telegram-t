@@ -1,6 +1,6 @@
-const types = require('./types/index')
-const functions = require('./functions/index')
-const custom = require('./custom/index')
+const types = require('./types')
+const functions = require('./functions')
+const custom = require('./custom')
 const patched = null
 const { TLObject, TLRequest } = require('./tlobject')
 module.exports = {

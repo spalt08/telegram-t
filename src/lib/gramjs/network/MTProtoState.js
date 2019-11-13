@@ -3,9 +3,9 @@ const Helpers = require('../Helpers')
 const AES = require('../crypto/AES')
 const BinaryReader = require('../extensions/BinaryReader')
 const GZIPPacked = require('../tl/core/GZIPPacked')
-const { TLMessage } = require('../tl/core/index')
+const { TLMessage } = require('../tl/core')
 const { SecurityError, InvalidBufferError } = require('../errors/Common')
-const { InvokeAfterMsgRequest } = require('../tl/functions/index')
+const { InvokeAfterMsgRequest } = require('../tl/functions')
 
 class MTProtoState {
     /**

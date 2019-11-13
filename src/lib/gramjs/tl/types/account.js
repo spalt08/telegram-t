@@ -114,75 +114,60 @@ class Password extends TLObject {
         this.CONSTRUCTOR_ID = 0xad2641f8;
         this.SUBCLASS_OF_ID = 0x53a211a3;
 
-        this.srpId = args.srpId || null;
-        this.newSecureAlgo = args.newSecureAlgo;
-        this.newAlgo = args.newAlgo;
-        this.secureRandom = args.secureRandom;
+        this.hasRecovery = args.hasRecovery || null;
         this.hasSecureValues = args.hasSecureValues || null;
         this.hasPassword = args.hasPassword || null;
-        this.emailUnconfirmedPattern = args.emailUnconfirmedPattern || null;
-        this.hint = args.hint || null;
-        this.hasRecovery = args.hasRecovery || null;
-        this.srp_B = args.srp_B || null;
         this.currentAlgo = args.currentAlgo || null;
+        this.srp_B = args.srp_B || null;
+        this.srpId = args.srpId || null;
+        this.hint = args.hint || null;
+        this.emailUnconfirmedPattern = args.emailUnconfirmedPattern || null;
+        this.newAlgo = args.newAlgo;
+        this.newSecureAlgo = args.newSecureAlgo;
+        this.secureRandom = args.secureRandom;
     }
     get bytes() {
-        if (!((this.srp_id || this.srp_id!==null && this.has_password || this.has_password!==null && this.srp_B || this.srp_B!==null && this.current_algo || this.current_algo!==null) && (this.srp_id===null || this.srp_id===false && this.has_password===null || this.has_password===false && this.srp_B===null || this.srp_B===false && this.current_algo===null || this.current_algo===false)))
-	 throw new Error('srp_id, has_password, srp_B, current_algo paramaters must all be false-y or all true')
+        if (!((this.has_password || this.has_password!==null && this.current_algo || this.current_algo!==null && this.srp_B || this.srp_B!==null && this.srp_id || this.srp_id!==null) && (this.has_password===null || this.has_password===false && this.current_algo===null || this.current_algo===false && this.srp_B===null || this.srp_B===false && this.srp_id===null || this.srp_id===false)))
+	 throw new Error('has_password, current_algo, srp_B, srp_id paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("f84126ad","hex"),
-            (this.srpId === undefined || this.srpId === false || this.srpId ===null) ? Buffer.alloc(0) : [readBufferFromBigInt(this.srpId,8,true,true)],
-            struct.pack('<I', (this.srpId === undefined || this.srpId === false || this.srpId === null) ? 0 : 4 | (this.hasSecureValues === undefined || this.hasSecureValues === false || this.hasSecureValues === null) ? 0 : 2 | (this.hasPassword === undefined || this.hasPassword === false || this.hasPassword === null) ? 0 : 4 | (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern === null) ? 0 : 16 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 8 | (this.hasRecovery === undefined || this.hasRecovery === false || this.hasRecovery === null) ? 0 : 1 | (this.srp_B === undefined || this.srp_B === false || this.srp_B === null) ? 0 : 4 | (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo === null) ? 0 : 4),
-            this.newSecureAlgo.bytes,
-            this.newAlgo.bytes,
-            TLObject.serializeBytes(this.secureRandom),
-            (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.emailUnconfirmedPattern)],
-            (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
-            (this.srp_B === undefined || this.srp_B === false || this.srp_B ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.srp_B)],
+            struct.pack('<I', (this.hasRecovery === undefined || this.hasRecovery === false || this.hasRecovery === null) ? 0 : 1 | (this.hasSecureValues === undefined || this.hasSecureValues === false || this.hasSecureValues === null) ? 0 : 2 | (this.hasPassword === undefined || this.hasPassword === false || this.hasPassword === null) ? 0 : 4 | (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo === null) ? 0 : 4 | (this.srp_B === undefined || this.srp_B === false || this.srp_B === null) ? 0 : 4 | (this.srpId === undefined || this.srpId === false || this.srpId === null) ? 0 : 4 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 8 | (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern === null) ? 0 : 16),
             (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo ===null) ? Buffer.alloc(0) : [this.currentAlgo.bytes],
+            (this.srp_B === undefined || this.srp_B === false || this.srp_B ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.srp_B)],
+            (this.srpId === undefined || this.srpId === false || this.srpId ===null) ? Buffer.alloc(0) : [readBufferFromBigInt(this.srpId,8,true,true)],
+            (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
+            (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.emailUnconfirmedPattern)],
+            this.newAlgo.bytes,
+            this.newSecureAlgo.bytes,
+            TLObject.serializeBytes(this.secureRandom),
             ])
         }
     static fromReader(reader) {
-        let _srp_id;
         let _flags;
-        let _new_secure_algo;
-        let _new_algo;
-        let _secure_random;
+        let _has_recovery;
         let _has_secure_values;
         let _has_password;
-        let _email_unconfirmed_pattern;
-        let _hint;
-        let _has_recovery;
-        let _srp_B;
         let _current_algo;
+        let _srp_B;
+        let _srp_id;
+        let _hint;
+        let _email_unconfirmed_pattern;
+        let _new_algo;
+        let _new_secure_algo;
+        let _secure_random;
         let _x;
         let len;
-        if (flags & 4) {
-            _srp_id = reader.readLong();
-        }
-        else {
-            _srp_id = null
-        }
         let flags = reader.readInt();
 
-        _new_secure_algo = reader.tgReadObject();
-        _new_algo = reader.tgReadObject();
-        _secure_random = reader.tgReadBytes();
+        _has_recovery = Boolean(flags & 1);
         _has_secure_values = Boolean(flags & 2);
         _has_password = Boolean(flags & 4);
-        if (flags & 16) {
-            _email_unconfirmed_pattern = reader.tgReadString();
+        if (flags & 4) {
+            _current_algo = reader.tgReadObject();
         }
         else {
-            _email_unconfirmed_pattern = null
+            _current_algo = null
         }
-        if (flags & 8) {
-            _hint = reader.tgReadString();
-        }
-        else {
-            _hint = null
-        }
-        _has_recovery = Boolean(flags & 1);
         if (flags & 4) {
             _srp_B = reader.tgReadBytes();
         }
@@ -190,22 +175,37 @@ class Password extends TLObject {
             _srp_B = null
         }
         if (flags & 4) {
-            _current_algo = reader.tgReadObject();
+            _srp_id = reader.readLong();
         }
         else {
-            _current_algo = null
+            _srp_id = null
         }
-        return new this({srpId:_srp_id,
-	newSecureAlgo:_new_secure_algo,
-	newAlgo:_new_algo,
-	secureRandom:_secure_random,
+        if (flags & 8) {
+            _hint = reader.tgReadString();
+        }
+        else {
+            _hint = null
+        }
+        if (flags & 16) {
+            _email_unconfirmed_pattern = reader.tgReadString();
+        }
+        else {
+            _email_unconfirmed_pattern = null
+        }
+        _new_algo = reader.tgReadObject();
+        _new_secure_algo = reader.tgReadObject();
+        _secure_random = reader.tgReadBytes();
+        return new this({hasRecovery:_has_recovery,
 	hasSecureValues:_has_secure_values,
 	hasPassword:_has_password,
-	emailUnconfirmedPattern:_email_unconfirmed_pattern,
-	hint:_hint,
-	hasRecovery:_has_recovery,
+	currentAlgo:_current_algo,
 	srp_B:_srp_B,
-	currentAlgo:_current_algo})
+	srpId:_srp_id,
+	hint:_hint,
+	emailUnconfirmedPattern:_email_unconfirmed_pattern,
+	newAlgo:_new_algo,
+	newSecureAlgo:_new_secure_algo,
+	secureRandom:_secure_random})
     }
 }
 
@@ -223,39 +223,39 @@ class PasswordSettings extends TLObject {
         this.CONSTRUCTOR_ID = 0x9a5c33e5;
         this.SUBCLASS_OF_ID = 0xd23fb078;
 
-        this.secureSettings = args.secureSettings || null;
         this.email = args.email || null;
+        this.secureSettings = args.secureSettings || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("e5335c9a","hex"),
-            struct.pack('<I', (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings === null) ? 0 : 2 | (this.email === undefined || this.email === false || this.email === null) ? 0 : 1),
-            (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings ===null) ? Buffer.alloc(0) : [this.secureSettings.bytes],
+            struct.pack('<I', (this.email === undefined || this.email === false || this.email === null) ? 0 : 1 | (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings === null) ? 0 : 2),
             (this.email === undefined || this.email === false || this.email ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.email)],
+            (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings ===null) ? Buffer.alloc(0) : [this.secureSettings.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _secure_settings;
         let _email;
+        let _secure_settings;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        if (flags & 2) {
-            _secure_settings = reader.tgReadObject();
-        }
-        else {
-            _secure_settings = null
-        }
         if (flags & 1) {
             _email = reader.tgReadString();
         }
         else {
             _email = null
         }
-        return new this({secureSettings:_secure_settings,
-	email:_email})
+        if (flags & 2) {
+            _secure_settings = reader.tgReadObject();
+        }
+        else {
+            _secure_settings = null
+        }
+        return new this({email:_email,
+	secureSettings:_secure_settings})
     }
 }
 
@@ -273,53 +273,41 @@ class PasswordInputSettings extends TLObject {
         this.CONSTRUCTOR_ID = 0xc23727c9;
         this.SUBCLASS_OF_ID = 0xc426ca6;
 
-        this.newSecureSettings = args.newSecureSettings || null;
-        this.email = args.email || null;
-        this.hint = args.hint || null;
-        this.newPasswordHash = args.newPasswordHash || null;
         this.newAlgo = args.newAlgo || null;
+        this.newPasswordHash = args.newPasswordHash || null;
+        this.hint = args.hint || null;
+        this.email = args.email || null;
+        this.newSecureSettings = args.newSecureSettings || null;
     }
     get bytes() {
-        if (!((this.hint || this.hint!==null && this.new_password_hash || this.new_password_hash!==null && this.new_algo || this.new_algo!==null) && (this.hint===null || this.hint===false && this.new_password_hash===null || this.new_password_hash===false && this.new_algo===null || this.new_algo===false)))
-	 throw new Error('hint, new_password_hash, new_algo paramaters must all be false-y or all true')
+        if (!((this.new_algo || this.new_algo!==null && this.new_password_hash || this.new_password_hash!==null && this.hint || this.hint!==null) && (this.new_algo===null || this.new_algo===false && this.new_password_hash===null || this.new_password_hash===false && this.hint===null || this.hint===false)))
+	 throw new Error('new_algo, new_password_hash, hint paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("c92737c2","hex"),
-            struct.pack('<I', (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings === null) ? 0 : 4 | (this.email === undefined || this.email === false || this.email === null) ? 0 : 2 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 1 | (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash === null) ? 0 : 1 | (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo === null) ? 0 : 1),
-            (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings ===null) ? Buffer.alloc(0) : [this.newSecureSettings.bytes],
-            (this.email === undefined || this.email === false || this.email ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.email)],
-            (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
-            (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.newPasswordHash)],
+            struct.pack('<I', (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo === null) ? 0 : 1 | (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash === null) ? 0 : 1 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 1 | (this.email === undefined || this.email === false || this.email === null) ? 0 : 2 | (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings === null) ? 0 : 4),
             (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo ===null) ? Buffer.alloc(0) : [this.newAlgo.bytes],
+            (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.newPasswordHash)],
+            (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
+            (this.email === undefined || this.email === false || this.email ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.email)],
+            (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings ===null) ? Buffer.alloc(0) : [this.newSecureSettings.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _new_secure_settings;
-        let _email;
-        let _hint;
-        let _new_password_hash;
         let _new_algo;
+        let _new_password_hash;
+        let _hint;
+        let _email;
+        let _new_secure_settings;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        if (flags & 4) {
-            _new_secure_settings = reader.tgReadObject();
-        }
-        else {
-            _new_secure_settings = null
-        }
-        if (flags & 2) {
-            _email = reader.tgReadString();
-        }
-        else {
-            _email = null
-        }
         if (flags & 1) {
-            _hint = reader.tgReadString();
+            _new_algo = reader.tgReadObject();
         }
         else {
-            _hint = null
+            _new_algo = null
         }
         if (flags & 1) {
             _new_password_hash = reader.tgReadBytes();
@@ -328,16 +316,28 @@ class PasswordInputSettings extends TLObject {
             _new_password_hash = null
         }
         if (flags & 1) {
-            _new_algo = reader.tgReadObject();
+            _hint = reader.tgReadString();
         }
         else {
-            _new_algo = null
+            _hint = null
         }
-        return new this({newSecureSettings:_new_secure_settings,
-	email:_email,
-	hint:_hint,
+        if (flags & 2) {
+            _email = reader.tgReadString();
+        }
+        else {
+            _email = null
+        }
+        if (flags & 4) {
+            _new_secure_settings = reader.tgReadObject();
+        }
+        else {
+            _new_secure_settings = null
+        }
+        return new this({newAlgo:_new_algo,
 	newPasswordHash:_new_password_hash,
-	newAlgo:_new_algo})
+	hint:_hint,
+	email:_email,
+	newSecureSettings:_new_secure_settings})
     }
 }
 

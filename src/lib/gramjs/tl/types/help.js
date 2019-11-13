@@ -18,39 +18,40 @@ class AppUpdate extends TLObject {
         this.CONSTRUCTOR_ID = 0x1da7158f;
         this.SUBCLASS_OF_ID = 0x5897069e;
 
+        this.canNotSkip = args.canNotSkip || null;
         this.id = args.id;
         this.version = args.version;
         this.text = args.text;
         this.entities = args.entities;
-        this.url = args.url || null;
         this.document = args.document || null;
-        this.canNotSkip = args.canNotSkip || null;
+        this.url = args.url || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("8f15a71d","hex"),
-            struct.pack('<I', (this.url === undefined || this.url === false || this.url === null) ? 0 : 4 | (this.document === undefined || this.document === false || this.document === null) ? 0 : 2 | (this.canNotSkip === undefined || this.canNotSkip === false || this.canNotSkip === null) ? 0 : 1),
+            struct.pack('<I', (this.canNotSkip === undefined || this.canNotSkip === false || this.canNotSkip === null) ? 0 : 1 | (this.document === undefined || this.document === false || this.document === null) ? 0 : 2 | (this.url === undefined || this.url === false || this.url === null) ? 0 : 4),
             struct.pack('<i', this.id),
             TLObject.serializeBytes(this.version),
             TLObject.serializeBytes(this.text),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
-            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
             (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.bytes],
+            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _can_not_skip;
         let _id;
         let _version;
         let _text;
         let _entities;
-        let _url;
         let _document;
-        let _can_not_skip;
+        let _url;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _can_not_skip = Boolean(flags & 1);
         _id = reader.readInt();
         _version = reader.tgReadString();
         _text = reader.tgReadString();
@@ -61,26 +62,25 @@ class AppUpdate extends TLObject {
             _x = reader.tgReadObject();
             _entities.push(_x);
             }
-            if (flags & 4) {
-                _url = reader.tgReadString();
-            }
-            else {
-                _url = null
-            }
             if (flags & 2) {
                 _document = reader.tgReadObject();
             }
             else {
                 _document = null
             }
-            _can_not_skip = Boolean(flags & 1);
-            return new this({id:_id,
+            if (flags & 4) {
+                _url = reader.tgReadString();
+            }
+            else {
+                _url = null
+            }
+            return new this({canNotSkip:_can_not_skip,
+	id:_id,
 	version:_version,
 	text:_text,
 	entities:_entities,
-	url:_url,
 	document:_document,
-	canNotSkip:_can_not_skip})
+	url:_url})
         }
     }
 
@@ -188,16 +188,16 @@ class TermsOfService extends TLObject {
         this.CONSTRUCTOR_ID = 0x780a0310;
         this.SUBCLASS_OF_ID = 0x20ee8312;
 
+        this.popup = args.popup || null;
         this.id = args.id;
         this.text = args.text;
         this.entities = args.entities;
         this.minAgeConfirm = args.minAgeConfirm || null;
-        this.popup = args.popup || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("10030a78","hex"),
-            struct.pack('<I', (this.minAgeConfirm === undefined || this.minAgeConfirm === false || this.minAgeConfirm === null) ? 0 : 2 | (this.popup === undefined || this.popup === false || this.popup === null) ? 0 : 1),
+            struct.pack('<I', (this.popup === undefined || this.popup === false || this.popup === null) ? 0 : 1 | (this.minAgeConfirm === undefined || this.minAgeConfirm === false || this.minAgeConfirm === null) ? 0 : 2),
             this.id.bytes,
             TLObject.serializeBytes(this.text),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
@@ -206,15 +206,16 @@ class TermsOfService extends TLObject {
         }
     static fromReader(reader) {
         let _flags;
+        let _popup;
         let _id;
         let _text;
         let _entities;
         let _min_age_confirm;
-        let _popup;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _popup = Boolean(flags & 1);
         _id = reader.tgReadObject();
         _text = reader.tgReadString();
         reader.readInt();
@@ -230,12 +231,11 @@ class TermsOfService extends TLObject {
             else {
                 _min_age_confirm = null
             }
-            _popup = Boolean(flags & 1);
-            return new this({id:_id,
+            return new this({popup:_popup,
+	id:_id,
 	text:_text,
 	entities:_entities,
-	minAgeConfirm:_min_age_confirm,
-	popup:_popup})
+	minAgeConfirm:_min_age_confirm})
         }
     }
 
@@ -491,27 +491,28 @@ class DeepLinkInfo extends TLObject {
         this.CONSTRUCTOR_ID = 0x6a4ee832;
         this.SUBCLASS_OF_ID = 0x984aac38;
 
+        this.updateApp = args.updateApp || null;
         this.message = args.message;
         this.entities = args.entities || null;
-        this.updateApp = args.updateApp || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("32e84e6a","hex"),
-            struct.pack('<I', (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 2 | (this.updateApp === undefined || this.updateApp === false || this.updateApp === null) ? 0 : 1),
+            struct.pack('<I', (this.updateApp === undefined || this.updateApp === false || this.updateApp === null) ? 0 : 1 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 2),
             TLObject.serializeBytes(this.message),
             (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _update_app;
         let _message;
         let _entities;
-        let _update_app;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _update_app = Boolean(flags & 1);
         _message = reader.tgReadString();
         if (flags & 2) {
             reader.readInt();
@@ -525,10 +526,9 @@ class DeepLinkInfo extends TLObject {
             else {
                 _entities = null
             }
-            _update_app = Boolean(flags & 1);
-            return new this({message:_message,
-	entities:_entities,
-	updateApp:_update_app})
+            return new this({updateApp:_update_app,
+	message:_message,
+	entities:_entities})
         }
     }
 

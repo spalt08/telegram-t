@@ -1,6 +1,6 @@
 const { unpack } = require('python-struct')
 const { TypeNotFoundError } = require('../errors/Common')
-const { coreObjects } = require('../tl/core/index')
+const { coreObjects } = require('../tl/core')
 const { tlobjects } = require('../tl/AllTLObjects')
 const { readBigIntFromBuffer } = require('../Helpers')
 

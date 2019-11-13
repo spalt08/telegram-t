@@ -81,9 +81,9 @@ class ValidateRequestedInfoRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x770a8e74;
         this.SUBCLASS_OF_ID = 0x8f8044b7;
 
+        this.save = args.save || null;
         this.msgId = args.msgId;
         this.info = args.info;
-        this.save = args.save || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -95,19 +95,19 @@ class ValidateRequestedInfoRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _save;
         let _msg_id;
         let _info;
-        let _save;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _save = Boolean(flags & 1);
         _msg_id = reader.readInt();
         _info = reader.tgReadObject();
-        _save = Boolean(flags & 1);
-        return new this({msgId:_msg_id,
-	info:_info,
-	save:_save})
+        return new this({save:_save,
+	msgId:_msg_id,
+	info:_info})
     }
 }
 
@@ -126,48 +126,48 @@ class SendPaymentFormRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x8ae16a9d;
 
         this.msgId = args.msgId;
-        this.credentials = args.credentials;
-        this.shippingOptionId = args.shippingOptionId || null;
         this.requestedInfoId = args.requestedInfoId || null;
+        this.shippingOptionId = args.shippingOptionId || null;
+        this.credentials = args.credentials;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("b379882b","hex"),
-            struct.pack('<I', (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId === null) ? 0 : 2 | (this.requestedInfoId === undefined || this.requestedInfoId === false || this.requestedInfoId === null) ? 0 : 1),
+            struct.pack('<I', (this.requestedInfoId === undefined || this.requestedInfoId === false || this.requestedInfoId === null) ? 0 : 1 | (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId === null) ? 0 : 2),
             struct.pack('<i', this.msgId),
-            this.credentials.bytes,
-            (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.shippingOptionId)],
             (this.requestedInfoId === undefined || this.requestedInfoId === false || this.requestedInfoId ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.requestedInfoId)],
+            (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.shippingOptionId)],
+            this.credentials.bytes,
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _msg_id;
-        let _credentials;
-        let _shipping_option_id;
         let _requested_info_id;
+        let _shipping_option_id;
+        let _credentials;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _msg_id = reader.readInt();
-        _credentials = reader.tgReadObject();
-        if (flags & 2) {
-            _shipping_option_id = reader.tgReadString();
-        }
-        else {
-            _shipping_option_id = null
-        }
         if (flags & 1) {
             _requested_info_id = reader.tgReadString();
         }
         else {
             _requested_info_id = null
         }
+        if (flags & 2) {
+            _shipping_option_id = reader.tgReadString();
+        }
+        else {
+            _shipping_option_id = null
+        }
+        _credentials = reader.tgReadObject();
         return new this({msgId:_msg_id,
-	credentials:_credentials,
+	requestedInfoId:_requested_info_id,
 	shippingOptionId:_shipping_option_id,
-	requestedInfoId:_requested_info_id})
+	credentials:_credentials})
     }
 }
 
@@ -208,27 +208,27 @@ class ClearSavedInfoRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xd83d70c1;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.info = args.info || null;
         this.credentials = args.credentials || null;
+        this.info = args.info || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("c1703dd8","hex"),
-            struct.pack('<I', (this.info === undefined || this.info === false || this.info === null) ? 0 : 2 | (this.credentials === undefined || this.credentials === false || this.credentials === null) ? 0 : 1),
+            struct.pack('<I', (this.credentials === undefined || this.credentials === false || this.credentials === null) ? 0 : 1 | (this.info === undefined || this.info === false || this.info === null) ? 0 : 2),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _info;
         let _credentials;
+        let _info;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _info = Boolean(flags & 2);
         _credentials = Boolean(flags & 1);
-        return new this({info:_info,
-	credentials:_credentials})
+        _info = Boolean(flags & 2);
+        return new this({credentials:_credentials,
+	info:_info})
     }
 }
 

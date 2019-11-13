@@ -42,11 +42,11 @@ class RequestCallRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x42ff96ed;
         this.SUBCLASS_OF_ID = 0xd48afe4f;
 
+        this.video = args.video || null;
         this.userId = args.userId;
+        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(4),false,true);
         this.gAHash = args.gAHash;
         this.protocol = args.protocol;
-        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(4),false,true);
-        this.video = args.video || null;
     }
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
@@ -56,32 +56,32 @@ class RequestCallRequest extends TLRequest {
             Buffer.from("ed96ff42","hex"),
             struct.pack('<I', (this.video === undefined || this.video === false || this.video === null) ? 0 : 1),
             this.userId.bytes,
+            struct.pack('<i', this.randomId),
             TLObject.serializeBytes(this.gAHash),
             this.protocol.bytes,
-            struct.pack('<i', this.randomId),
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _video;
         let _user_id;
+        let _random_id;
         let _g_a_hash;
         let _protocol;
-        let _random_id;
-        let _video;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _video = Boolean(flags & 1);
         _user_id = reader.tgReadObject();
+        _random_id = reader.readInt();
         _g_a_hash = reader.tgReadBytes();
         _protocol = reader.tgReadObject();
-        _random_id = reader.readInt();
-        _video = Boolean(flags & 1);
-        return new this({userId:_user_id,
-	gAHash:_g_a_hash,
-	protocol:_protocol,
+        return new this({video:_video,
+	userId:_user_id,
 	randomId:_random_id,
-	video:_video})
+	gAHash:_g_a_hash,
+	protocol:_protocol})
     }
 }
 
@@ -217,11 +217,11 @@ class DiscardCallRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xb2cbc1c0;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.video = args.video || null;
         this.peer = args.peer;
         this.duration = args.duration;
         this.reason = args.reason;
         this.connectionId = args.connectionId;
-        this.video = args.video || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -235,25 +235,25 @@ class DiscardCallRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _video;
         let _peer;
         let _duration;
         let _reason;
         let _connection_id;
-        let _video;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _video = Boolean(flags & 1);
         _peer = reader.tgReadObject();
         _duration = reader.readInt();
         _reason = reader.tgReadObject();
         _connection_id = reader.readLong();
-        _video = Boolean(flags & 1);
-        return new this({peer:_peer,
+        return new this({video:_video,
+	peer:_peer,
 	duration:_duration,
 	reason:_reason,
-	connectionId:_connection_id,
-	video:_video})
+	connectionId:_connection_id})
     }
 }
 
@@ -271,10 +271,10 @@ class SetCallRatingRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x59ead627;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.userInitiative = args.userInitiative || null;
         this.peer = args.peer;
         this.rating = args.rating;
         this.comment = args.comment;
-        this.userInitiative = args.userInitiative || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -287,22 +287,22 @@ class SetCallRatingRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _user_initiative;
         let _peer;
         let _rating;
         let _comment;
-        let _user_initiative;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _user_initiative = Boolean(flags & 1);
         _peer = reader.tgReadObject();
         _rating = reader.readInt();
         _comment = reader.tgReadString();
-        _user_initiative = Boolean(flags & 1);
-        return new this({peer:_peer,
+        return new this({userInitiative:_user_initiative,
+	peer:_peer,
 	rating:_rating,
-	comment:_comment,
-	userInitiative:_user_initiative})
+	comment:_comment})
     }
 }
 

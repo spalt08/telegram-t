@@ -414,59 +414,59 @@ class CreateChannelRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x3d5fb10f;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.broadcast = args.broadcast || null;
+        this.megagroup = args.megagroup || null;
         this.title = args.title;
         this.about = args.about;
-        this.address = args.address || null;
         this.geoPoint = args.geoPoint || null;
-        this.megagroup = args.megagroup || null;
-        this.broadcast = args.broadcast || null;
+        this.address = args.address || null;
     }
     get bytes() {
-        if (!((this.address || this.address!==null && this.geo_point || this.geo_point!==null) && (this.address===null || this.address===false && this.geo_point===null || this.geo_point===false)))
-	 throw new Error('address, geo_point paramaters must all be false-y or all true')
+        if (!((this.geo_point || this.geo_point!==null && this.address || this.address!==null) && (this.geo_point===null || this.geo_point===false && this.address===null || this.address===false)))
+	 throw new Error('geo_point, address paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("0fb15f3d","hex"),
-            struct.pack('<I', (this.address === undefined || this.address === false || this.address === null) ? 0 : 4 | (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint === null) ? 0 : 4 | (this.megagroup === undefined || this.megagroup === false || this.megagroup === null) ? 0 : 2 | (this.broadcast === undefined || this.broadcast === false || this.broadcast === null) ? 0 : 1),
+            struct.pack('<I', (this.broadcast === undefined || this.broadcast === false || this.broadcast === null) ? 0 : 1 | (this.megagroup === undefined || this.megagroup === false || this.megagroup === null) ? 0 : 2 | (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint === null) ? 0 : 4 | (this.address === undefined || this.address === false || this.address === null) ? 0 : 4),
             TLObject.serializeBytes(this.title),
             TLObject.serializeBytes(this.about),
-            (this.address === undefined || this.address === false || this.address ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.address)],
             (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint ===null) ? Buffer.alloc(0) : [this.geoPoint.bytes],
+            (this.address === undefined || this.address === false || this.address ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.address)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _broadcast;
+        let _megagroup;
         let _title;
         let _about;
-        let _address;
         let _geo_point;
-        let _megagroup;
-        let _broadcast;
+        let _address;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _broadcast = Boolean(flags & 1);
+        _megagroup = Boolean(flags & 2);
         _title = reader.tgReadString();
         _about = reader.tgReadString();
-        if (flags & 4) {
-            _address = reader.tgReadString();
-        }
-        else {
-            _address = null
-        }
         if (flags & 4) {
             _geo_point = reader.tgReadObject();
         }
         else {
             _geo_point = null
         }
-        _megagroup = Boolean(flags & 2);
-        _broadcast = Boolean(flags & 1);
-        return new this({title:_title,
-	about:_about,
-	address:_address,
-	geoPoint:_geo_point,
+        if (flags & 4) {
+            _address = reader.tgReadString();
+        }
+        else {
+            _address = null
+        }
+        return new this({broadcast:_broadcast,
 	megagroup:_megagroup,
-	broadcast:_broadcast})
+	title:_title,
+	about:_about,
+	geoPoint:_geo_point,
+	address:_address})
     }
 }
 
@@ -925,27 +925,27 @@ class GetAdminedPublicChannelsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xf8b036af;
         this.SUBCLASS_OF_ID = 0x99d5cb14;
 
-        this.checkLimit = args.checkLimit || null;
         this.byLocation = args.byLocation || null;
+        this.checkLimit = args.checkLimit || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("af36b0f8","hex"),
-            struct.pack('<I', (this.checkLimit === undefined || this.checkLimit === false || this.checkLimit === null) ? 0 : 2 | (this.byLocation === undefined || this.byLocation === false || this.byLocation === null) ? 0 : 1),
+            struct.pack('<I', (this.byLocation === undefined || this.byLocation === false || this.byLocation === null) ? 0 : 1 | (this.checkLimit === undefined || this.checkLimit === false || this.checkLimit === null) ? 0 : 2),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _check_limit;
         let _by_location;
+        let _check_limit;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _check_limit = Boolean(flags & 2);
         _by_location = Boolean(flags & 1);
-        return new this({checkLimit:_check_limit,
-	byLocation:_by_location})
+        _check_limit = Boolean(flags & 2);
+        return new this({byLocation:_by_location,
+	checkLimit:_check_limit})
     }
 }
 
@@ -1010,11 +1010,11 @@ class GetAdminLogRequest extends TLRequest {
 
         this.channel = args.channel;
         this.q = args.q;
+        this.eventsFilter = args.eventsFilter || null;
+        this.admins = args.admins || null;
         this.maxId = args.maxId;
         this.minId = args.minId;
         this.limit = args.limit;
-        this.admins = args.admins || null;
-        this.eventsFilter = args.eventsFilter || null;
     }
     async resolve(client, utils) {
         this.channel = utils.getInputChannel(await client.getInputEntity(this.channel))
@@ -1028,34 +1028,37 @@ class GetAdminLogRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("80f4dd33","hex"),
-            struct.pack('<I', (this.admins === undefined || this.admins === false || this.admins === null) ? 0 : 2 | (this.eventsFilter === undefined || this.eventsFilter === false || this.eventsFilter === null) ? 0 : 1),
+            struct.pack('<I', (this.eventsFilter === undefined || this.eventsFilter === false || this.eventsFilter === null) ? 0 : 1 | (this.admins === undefined || this.admins === false || this.admins === null) ? 0 : 2),
             this.channel.bytes,
             TLObject.serializeBytes(this.q),
+            (this.eventsFilter === undefined || this.eventsFilter === false || this.eventsFilter ===null) ? Buffer.alloc(0) : [this.eventsFilter.bytes],
+            (this.admins === undefined || this.admins === false || this.admins ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.admins.length),Buffer.concat(this.admins.map(x => x.bytes))]),
             readBufferFromBigInt(this.maxId,8,true,true),
             readBufferFromBigInt(this.minId,8,true,true),
             struct.pack('<i', this.limit),
-            (this.admins === undefined || this.admins === false || this.admins ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.admins.length),Buffer.concat(this.admins.map(x => x.bytes))]),
-            (this.eventsFilter === undefined || this.eventsFilter === false || this.eventsFilter ===null) ? Buffer.alloc(0) : [this.eventsFilter.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _channel;
         let _q;
+        let _events_filter;
+        let _admins;
         let _max_id;
         let _min_id;
         let _limit;
-        let _admins;
-        let _events_filter;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _channel = reader.tgReadObject();
         _q = reader.tgReadString();
-        _max_id = reader.readLong();
-        _min_id = reader.readLong();
-        _limit = reader.readInt();
+        if (flags & 1) {
+            _events_filter = reader.tgReadObject();
+        }
+        else {
+            _events_filter = null
+        }
         if (flags & 2) {
             reader.readInt();
             _admins = [];
@@ -1068,19 +1071,16 @@ class GetAdminLogRequest extends TLRequest {
             else {
                 _admins = null
             }
-            if (flags & 1) {
-                _events_filter = reader.tgReadObject();
-            }
-            else {
-                _events_filter = null
-            }
+            _max_id = reader.readLong();
+            _min_id = reader.readLong();
+            _limit = reader.readInt();
             return new this({channel:_channel,
 	q:_q,
+	eventsFilter:_events_filter,
+	admins:_admins,
 	maxId:_max_id,
 	minId:_min_id,
-	limit:_limit,
-	admins:_admins,
-	eventsFilter:_events_filter})
+	limit:_limit})
         }
     }
 

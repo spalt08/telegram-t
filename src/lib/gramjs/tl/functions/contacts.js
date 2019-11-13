@@ -401,66 +401,66 @@ class GetTopPeersRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xd4982db5;
         this.SUBCLASS_OF_ID = 0x9ee8bb88;
 
-        this.forwardChats = args.forwardChats || null;
-        this.limit = args.limit;
-        this.offset = args.offset;
-        this.hash = args.hash;
+        this.correspondents = args.correspondents || null;
         this.botsPm = args.botsPm || null;
         this.botsInline = args.botsInline || null;
-        this.channels = args.channels || null;
-        this.groups = args.groups || null;
-        this.correspondents = args.correspondents || null;
-        this.forwardUsers = args.forwardUsers || null;
         this.phoneCalls = args.phoneCalls || null;
+        this.forwardUsers = args.forwardUsers || null;
+        this.forwardChats = args.forwardChats || null;
+        this.groups = args.groups || null;
+        this.channels = args.channels || null;
+        this.offset = args.offset;
+        this.limit = args.limit;
+        this.hash = args.hash;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("b52d98d4","hex"),
-            struct.pack('<I', (this.forwardChats === undefined || this.forwardChats === false || this.forwardChats === null) ? 0 : 32 | (this.botsPm === undefined || this.botsPm === false || this.botsPm === null) ? 0 : 2 | (this.botsInline === undefined || this.botsInline === false || this.botsInline === null) ? 0 : 4 | (this.channels === undefined || this.channels === false || this.channels === null) ? 0 : 32768 | (this.groups === undefined || this.groups === false || this.groups === null) ? 0 : 1024 | (this.correspondents === undefined || this.correspondents === false || this.correspondents === null) ? 0 : 1 | (this.forwardUsers === undefined || this.forwardUsers === false || this.forwardUsers === null) ? 0 : 16 | (this.phoneCalls === undefined || this.phoneCalls === false || this.phoneCalls === null) ? 0 : 8),
-            struct.pack('<i', this.limit),
+            struct.pack('<I', (this.correspondents === undefined || this.correspondents === false || this.correspondents === null) ? 0 : 1 | (this.botsPm === undefined || this.botsPm === false || this.botsPm === null) ? 0 : 2 | (this.botsInline === undefined || this.botsInline === false || this.botsInline === null) ? 0 : 4 | (this.phoneCalls === undefined || this.phoneCalls === false || this.phoneCalls === null) ? 0 : 8 | (this.forwardUsers === undefined || this.forwardUsers === false || this.forwardUsers === null) ? 0 : 16 | (this.forwardChats === undefined || this.forwardChats === false || this.forwardChats === null) ? 0 : 32 | (this.groups === undefined || this.groups === false || this.groups === null) ? 0 : 1024 | (this.channels === undefined || this.channels === false || this.channels === null) ? 0 : 32768),
             struct.pack('<i', this.offset),
+            struct.pack('<i', this.limit),
             struct.pack('<i', this.hash),
             ])
         }
     static fromReader(reader) {
-        let _forward_chats;
         let _flags;
-        let _limit;
-        let _offset;
-        let _hash;
+        let _correspondents;
         let _bots_pm;
         let _bots_inline;
-        let _channels;
-        let _groups;
-        let _correspondents;
-        let _forward_users;
         let _phone_calls;
+        let _forward_users;
+        let _forward_chats;
+        let _groups;
+        let _channels;
+        let _offset;
+        let _limit;
+        let _hash;
         let _x;
         let len;
-        _forward_chats = Boolean(flags & 32);
         let flags = reader.readInt();
 
-        _limit = reader.readInt();
-        _offset = reader.readInt();
-        _hash = reader.readInt();
+        _correspondents = Boolean(flags & 1);
         _bots_pm = Boolean(flags & 2);
         _bots_inline = Boolean(flags & 4);
-        _channels = Boolean(flags & 32768);
-        _groups = Boolean(flags & 1024);
-        _correspondents = Boolean(flags & 1);
-        _forward_users = Boolean(flags & 16);
         _phone_calls = Boolean(flags & 8);
-        return new this({forwardChats:_forward_chats,
-	limit:_limit,
-	offset:_offset,
-	hash:_hash,
+        _forward_users = Boolean(flags & 16);
+        _forward_chats = Boolean(flags & 32);
+        _groups = Boolean(flags & 1024);
+        _channels = Boolean(flags & 32768);
+        _offset = reader.readInt();
+        _limit = reader.readInt();
+        _hash = reader.readInt();
+        return new this({correspondents:_correspondents,
 	botsPm:_bots_pm,
 	botsInline:_bots_inline,
-	channels:_channels,
-	groups:_groups,
-	correspondents:_correspondents,
+	phoneCalls:_phone_calls,
 	forwardUsers:_forward_users,
-	phoneCalls:_phone_calls})
+	forwardChats:_forward_chats,
+	groups:_groups,
+	channels:_channels,
+	offset:_offset,
+	limit:_limit,
+	hash:_hash})
     }
 }
 
@@ -594,11 +594,11 @@ class AddContactRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xe8f463d0;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.addPhonePrivacyException = args.addPhonePrivacyException || null;
         this.id = args.id;
         this.firstName = args.firstName;
         this.lastName = args.lastName;
         this.phone = args.phone;
-        this.addPhonePrivacyException = args.addPhonePrivacyException || null;
     }
     async resolve(client, utils) {
         this.id = utils.getInputUser(await client.getInputEntity(this.id))
@@ -615,25 +615,25 @@ class AddContactRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _add_phone_privacy_exception;
         let _id;
         let _first_name;
         let _last_name;
         let _phone;
-        let _add_phone_privacy_exception;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _add_phone_privacy_exception = Boolean(flags & 1);
         _id = reader.tgReadObject();
         _first_name = reader.tgReadString();
         _last_name = reader.tgReadString();
         _phone = reader.tgReadString();
-        _add_phone_privacy_exception = Boolean(flags & 1);
-        return new this({id:_id,
+        return new this({addPhonePrivacyException:_add_phone_privacy_exception,
+	id:_id,
 	firstName:_first_name,
 	lastName:_last_name,
-	phone:_phone,
-	addPhonePrivacyException:_add_phone_privacy_exception})
+	phone:_phone})
     }
 }
 

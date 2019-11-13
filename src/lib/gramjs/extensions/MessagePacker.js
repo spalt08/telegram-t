@@ -1,7 +1,7 @@
 const MessageContainer = require('../tl/core/MessageContainer')
 const TLMessage = require('../tl/core/TLMessage')
 const { TLRequest } = require('../tl/tlobject')
-const BinaryWriter = require('./BinaryWriter')
+const BinaryWriter = require('../extensions/BinaryWriter')
 const struct = require('python-struct')
 
 class MessagePacker {

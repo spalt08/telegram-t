@@ -6,7 +6,7 @@ const {
     ConnectionTCPFull,
     ConnectionTCPAbridged,
     ConnectionTCPObfuscated,
-} = require('./connection/index')
+} = require('./connection')
 module.exports = {
     Connection,
     ConnectionTCPFull,

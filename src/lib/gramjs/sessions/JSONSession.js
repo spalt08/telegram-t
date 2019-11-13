@@ -4,7 +4,7 @@ const { existsSync, readFileSync } = require('fs')
 const AuthKey = require('../crypto/AuthKey')
 const { TLObject } = require('../tl/tlobject')
 const utils = require('../Utils')
-const types = require('../tl/types/index')
+const types = require('../tl/types')
 
 BigInt.toJSON = function() {
     return { fool: this.fool.toString('hex') }

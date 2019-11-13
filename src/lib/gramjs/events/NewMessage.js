@@ -1,5 +1,5 @@
 const { EventBuilder, EventCommon } = require('./common')
-const { types } = require('../tl/index')
+const { types } = require('../tl')
 
 class NewMessage extends EventBuilder {
     constructor(args = {

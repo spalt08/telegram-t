@@ -18,56 +18,82 @@ class PaymentForm extends TLObject {
         this.CONSTRUCTOR_ID = 0x3f56aea3;
         this.SUBCLASS_OF_ID = 0xa0483f19;
 
-        this.url = args.url;
-        this.providerId = args.providerId;
-        this.botId = args.botId;
-        this.invoice = args.invoice;
-        this.users = args.users;
-        this.savedCredentials = args.savedCredentials || null;
-        this.savedInfo = args.savedInfo || null;
-        this.nativeParams = args.nativeParams || null;
-        this.nativeProvider = args.nativeProvider || null;
         this.canSaveCredentials = args.canSaveCredentials || null;
         this.passwordMissing = args.passwordMissing || null;
+        this.botId = args.botId;
+        this.invoice = args.invoice;
+        this.providerId = args.providerId;
+        this.url = args.url;
+        this.nativeProvider = args.nativeProvider || null;
+        this.nativeParams = args.nativeParams || null;
+        this.savedInfo = args.savedInfo || null;
+        this.savedCredentials = args.savedCredentials || null;
+        this.users = args.users;
     }
     get bytes() {
-        if (!((this.native_params || this.native_params!==null && this.native_provider || this.native_provider!==null) && (this.native_params===null || this.native_params===false && this.native_provider===null || this.native_provider===false)))
-	 throw new Error('native_params, native_provider paramaters must all be false-y or all true')
+        if (!((this.native_provider || this.native_provider!==null && this.native_params || this.native_params!==null) && (this.native_provider===null || this.native_provider===false && this.native_params===null || this.native_params===false)))
+	 throw new Error('native_provider, native_params paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("a3ae563f","hex"),
-            TLObject.serializeBytes(this.url),
-            struct.pack('<I', (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials === null) ? 0 : 2 | (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1 | (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams === null) ? 0 : 16 | (this.nativeProvider === undefined || this.nativeProvider === false || this.nativeProvider === null) ? 0 : 16 | (this.canSaveCredentials === undefined || this.canSaveCredentials === false || this.canSaveCredentials === null) ? 0 : 4 | (this.passwordMissing === undefined || this.passwordMissing === false || this.passwordMissing === null) ? 0 : 8),
-            struct.pack('<i', this.providerId),
+            struct.pack('<I', (this.canSaveCredentials === undefined || this.canSaveCredentials === false || this.canSaveCredentials === null) ? 0 : 4 | (this.passwordMissing === undefined || this.passwordMissing === false || this.passwordMissing === null) ? 0 : 8 | (this.nativeProvider === undefined || this.nativeProvider === false || this.nativeProvider === null) ? 0 : 16 | (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams === null) ? 0 : 16 | (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1 | (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials === null) ? 0 : 2),
             struct.pack('<i', this.botId),
             this.invoice.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials ===null) ? Buffer.alloc(0) : [this.savedCredentials.bytes],
-            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.bytes],
-            (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams ===null) ? Buffer.alloc(0) : [this.nativeParams.bytes],
+            struct.pack('<i', this.providerId),
+            TLObject.serializeBytes(this.url),
             (this.nativeProvider === undefined || this.nativeProvider === false || this.nativeProvider ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nativeProvider)],
+            (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams ===null) ? Buffer.alloc(0) : [this.nativeParams.bytes],
+            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.bytes],
+            (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials ===null) ? Buffer.alloc(0) : [this.savedCredentials.bytes],
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
             ])
         }
     static fromReader(reader) {
-        let _url;
         let _flags;
-        let _provider_id;
-        let _bot_id;
-        let _invoice;
-        let _users;
-        let _saved_credentials;
-        let _saved_info;
-        let _native_params;
-        let _native_provider;
         let _can_save_credentials;
         let _password_missing;
+        let _bot_id;
+        let _invoice;
+        let _provider_id;
+        let _url;
+        let _native_provider;
+        let _native_params;
+        let _saved_info;
+        let _saved_credentials;
+        let _users;
         let _x;
         let len;
-        _url = reader.tgReadString();
         let flags = reader.readInt();
 
-        _provider_id = reader.readInt();
+        _can_save_credentials = Boolean(flags & 4);
+        _password_missing = Boolean(flags & 8);
         _bot_id = reader.readInt();
         _invoice = reader.tgReadObject();
+        _provider_id = reader.readInt();
+        _url = reader.tgReadString();
+        if (flags & 16) {
+            _native_provider = reader.tgReadString();
+        }
+        else {
+            _native_provider = null
+        }
+        if (flags & 16) {
+            _native_params = reader.tgReadObject();
+        }
+        else {
+            _native_params = null
+        }
+        if (flags & 1) {
+            _saved_info = reader.tgReadObject();
+        }
+        else {
+            _saved_info = null
+        }
+        if (flags & 2) {
+            _saved_credentials = reader.tgReadObject();
+        }
+        else {
+            _saved_credentials = null
+        }
         reader.readInt();
         _users = [];
         len = reader.readInt();
@@ -75,43 +101,17 @@ class PaymentForm extends TLObject {
             _x = reader.tgReadObject();
             _users.push(_x);
             }
-            if (flags & 2) {
-                _saved_credentials = reader.tgReadObject();
-            }
-            else {
-                _saved_credentials = null
-            }
-            if (flags & 1) {
-                _saved_info = reader.tgReadObject();
-            }
-            else {
-                _saved_info = null
-            }
-            if (flags & 16) {
-                _native_params = reader.tgReadObject();
-            }
-            else {
-                _native_params = null
-            }
-            if (flags & 16) {
-                _native_provider = reader.tgReadString();
-            }
-            else {
-                _native_provider = null
-            }
-            _can_save_credentials = Boolean(flags & 4);
-            _password_missing = Boolean(flags & 8);
-            return new this({url:_url,
-	providerId:_provider_id,
+            return new this({canSaveCredentials:_can_save_credentials,
+	passwordMissing:_password_missing,
 	botId:_bot_id,
 	invoice:_invoice,
-	users:_users,
-	savedCredentials:_saved_credentials,
-	savedInfo:_saved_info,
-	nativeParams:_native_params,
+	providerId:_provider_id,
+	url:_url,
 	nativeProvider:_native_provider,
-	canSaveCredentials:_can_save_credentials,
-	passwordMissing:_password_missing})
+	nativeParams:_native_params,
+	savedInfo:_saved_info,
+	savedCredentials:_saved_credentials,
+	users:_users})
         }
     }
 
@@ -129,25 +129,31 @@ class ValidatedRequestedInfo extends TLObject {
         this.CONSTRUCTOR_ID = 0xd1451883;
         this.SUBCLASS_OF_ID = 0x8f8044b7;
 
-        this.shippingOptions = args.shippingOptions || null;
         this.id = args.id || null;
+        this.shippingOptions = args.shippingOptions || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("831845d1","hex"),
-            struct.pack('<I', (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2 | (this.id === undefined || this.id === false || this.id === null) ? 0 : 1),
-            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
+            struct.pack('<I', (this.id === undefined || this.id === false || this.id === null) ? 0 : 1 | (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2),
             (this.id === undefined || this.id === false || this.id ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.id)],
+            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _shipping_options;
         let _id;
+        let _shipping_options;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        if (flags & 1) {
+            _id = reader.tgReadString();
+        }
+        else {
+            _id = null
+        }
         if (flags & 2) {
             reader.readInt();
             _shipping_options = [];
@@ -160,14 +166,8 @@ class ValidatedRequestedInfo extends TLObject {
             else {
                 _shipping_options = null
             }
-            if (flags & 1) {
-                _id = reader.tgReadString();
-            }
-            else {
-                _id = null
-            }
-            return new this({shippingOptions:_shipping_options,
-	id:_id})
+            return new this({id:_id,
+	shippingOptions:_shipping_options})
         }
     }
 
@@ -247,62 +247,68 @@ class PaymentReceipt extends TLObject {
         this.CONSTRUCTOR_ID = 0x500911e1;
         this.SUBCLASS_OF_ID = 0x590093c9;
 
-        this.info = args.info || null;
+        this.date = args.date;
         this.botId = args.botId;
         this.invoice = args.invoice;
         this.providerId = args.providerId;
-        this.date = args.date;
-        this.credentialsTitle = args.credentialsTitle;
+        this.info = args.info || null;
+        this.shipping = args.shipping || null;
         this.currency = args.currency;
         this.totalAmount = args.totalAmount;
+        this.credentialsTitle = args.credentialsTitle;
         this.users = args.users;
-        this.shipping = args.shipping || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("e1110950","hex"),
-            (this.info === undefined || this.info === false || this.info ===null) ? Buffer.alloc(0) : [this.info.bytes],
             struct.pack('<I', (this.info === undefined || this.info === false || this.info === null) ? 0 : 1 | (this.shipping === undefined || this.shipping === false || this.shipping === null) ? 0 : 2),
+            struct.pack('<i', this.date),
             struct.pack('<i', this.botId),
             this.invoice.bytes,
             struct.pack('<i', this.providerId),
-            struct.pack('<i', this.date),
-            TLObject.serializeBytes(this.credentialsTitle),
+            (this.info === undefined || this.info === false || this.info ===null) ? Buffer.alloc(0) : [this.info.bytes],
+            (this.shipping === undefined || this.shipping === false || this.shipping ===null) ? Buffer.alloc(0) : [this.shipping.bytes],
             TLObject.serializeBytes(this.currency),
             readBufferFromBigInt(this.totalAmount,8,true,true),
+            TLObject.serializeBytes(this.credentialsTitle),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.shipping === undefined || this.shipping === false || this.shipping ===null) ? Buffer.alloc(0) : [this.shipping.bytes],
             ])
         }
     static fromReader(reader) {
-        let _info;
         let _flags;
+        let _date;
         let _bot_id;
         let _invoice;
         let _provider_id;
-        let _date;
-        let _credentials_title;
+        let _info;
+        let _shipping;
         let _currency;
         let _total_amount;
+        let _credentials_title;
         let _users;
-        let _shipping;
         let _x;
         let len;
+        let flags = reader.readInt();
+
+        _date = reader.readInt();
+        _bot_id = reader.readInt();
+        _invoice = reader.tgReadObject();
+        _provider_id = reader.readInt();
         if (flags & 1) {
             _info = reader.tgReadObject();
         }
         else {
             _info = null
         }
-        let flags = reader.readInt();
-
-        _bot_id = reader.readInt();
-        _invoice = reader.tgReadObject();
-        _provider_id = reader.readInt();
-        _date = reader.readInt();
-        _credentials_title = reader.tgReadString();
+        if (flags & 2) {
+            _shipping = reader.tgReadObject();
+        }
+        else {
+            _shipping = null
+        }
         _currency = reader.tgReadString();
         _total_amount = reader.readLong();
+        _credentials_title = reader.tgReadString();
         reader.readInt();
         _users = [];
         len = reader.readInt();
@@ -310,22 +316,16 @@ class PaymentReceipt extends TLObject {
             _x = reader.tgReadObject();
             _users.push(_x);
             }
-            if (flags & 2) {
-                _shipping = reader.tgReadObject();
-            }
-            else {
-                _shipping = null
-            }
-            return new this({info:_info,
+            return new this({date:_date,
 	botId:_bot_id,
 	invoice:_invoice,
 	providerId:_provider_id,
-	date:_date,
-	credentialsTitle:_credentials_title,
+	info:_info,
+	shipping:_shipping,
 	currency:_currency,
 	totalAmount:_total_amount,
-	users:_users,
-	shipping:_shipping})
+	credentialsTitle:_credentials_title,
+	users:_users})
         }
     }
 
@@ -343,33 +343,33 @@ class SavedInfo extends TLObject {
         this.CONSTRUCTOR_ID = 0xfb8fe43c;
         this.SUBCLASS_OF_ID = 0xad3cf146;
 
-        this.savedInfo = args.savedInfo || null;
         this.hasSavedCredentials = args.hasSavedCredentials || null;
+        this.savedInfo = args.savedInfo || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("3ce48ffb","hex"),
-            struct.pack('<I', (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1 | (this.hasSavedCredentials === undefined || this.hasSavedCredentials === false || this.hasSavedCredentials === null) ? 0 : 2),
+            struct.pack('<I', (this.hasSavedCredentials === undefined || this.hasSavedCredentials === false || this.hasSavedCredentials === null) ? 0 : 2 | (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1),
             (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _saved_info;
         let _has_saved_credentials;
+        let _saved_info;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _has_saved_credentials = Boolean(flags & 2);
         if (flags & 1) {
             _saved_info = reader.tgReadObject();
         }
         else {
             _saved_info = null
         }
-        _has_saved_credentials = Boolean(flags & 2);
-        return new this({savedInfo:_saved_info,
-	hasSavedCredentials:_has_saved_credentials})
+        return new this({hasSavedCredentials:_has_saved_credentials,
+	savedInfo:_saved_info})
     }
 }
 

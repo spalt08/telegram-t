@@ -43,43 +43,43 @@ class GetDifferenceRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x20482874;
 
         this.pts = args.pts;
+        this.ptsTotalLimit = args.ptsTotalLimit || null;
         this.date = args.date;
         this.qts = args.qts;
-        this.ptsTotalLimit = args.ptsTotalLimit || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("51969325","hex"),
             struct.pack('<I', (this.ptsTotalLimit === undefined || this.ptsTotalLimit === false || this.ptsTotalLimit === null) ? 0 : 1),
             struct.pack('<i', this.pts),
+            (this.ptsTotalLimit === undefined || this.ptsTotalLimit === false || this.ptsTotalLimit ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.ptsTotalLimit)],
             struct.pack('<i', this.date),
             struct.pack('<i', this.qts),
-            (this.ptsTotalLimit === undefined || this.ptsTotalLimit === false || this.ptsTotalLimit ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.ptsTotalLimit)],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _pts;
+        let _pts_total_limit;
         let _date;
         let _qts;
-        let _pts_total_limit;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _pts = reader.readInt();
-        _date = reader.readInt();
-        _qts = reader.readInt();
         if (flags & 1) {
             _pts_total_limit = reader.readInt();
         }
         else {
             _pts_total_limit = null
         }
+        _date = reader.readInt();
+        _qts = reader.readInt();
         return new this({pts:_pts,
+	ptsTotalLimit:_pts_total_limit,
 	date:_date,
-	qts:_qts,
-	ptsTotalLimit:_pts_total_limit})
+	qts:_qts})
     }
 }
 
@@ -97,11 +97,11 @@ class GetChannelDifferenceRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x03173d78;
         this.SUBCLASS_OF_ID = 0x29896f5d;
 
+        this.force = args.force || null;
         this.channel = args.channel;
         this.filter = args.filter;
         this.pts = args.pts;
         this.limit = args.limit;
-        this.force = args.force || null;
     }
     async resolve(client, utils) {
         this.channel = utils.getInputChannel(await client.getInputEntity(this.channel))
@@ -118,25 +118,25 @@ class GetChannelDifferenceRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _force;
         let _channel;
         let _filter;
         let _pts;
         let _limit;
-        let _force;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _force = Boolean(flags & 1);
         _channel = reader.tgReadObject();
         _filter = reader.tgReadObject();
         _pts = reader.readInt();
         _limit = reader.readInt();
-        _force = Boolean(flags & 1);
-        return new this({channel:_channel,
+        return new this({force:_force,
+	channel:_channel,
 	filter:_filter,
 	pts:_pts,
-	limit:_limit,
-	force:_force})
+	limit:_limit})
     }
 }
 

@@ -253,37 +253,44 @@ class MessagesSlice extends TLObject {
         this.CONSTRUCTOR_ID = 0xc8edce1e;
         this.SUBCLASS_OF_ID = 0xd4b40b5e;
 
+        this.inexact = args.inexact || null;
         this.count = args.count;
+        this.nextRate = args.nextRate || null;
         this.messages = args.messages;
         this.chats = args.chats;
         this.users = args.users;
-        this.nextRate = args.nextRate || null;
-        this.inexact = args.inexact || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("1eceedc8","hex"),
-            struct.pack('<I', (this.nextRate === undefined || this.nextRate === false || this.nextRate === null) ? 0 : 1 | (this.inexact === undefined || this.inexact === false || this.inexact === null) ? 0 : 2),
+            struct.pack('<I', (this.inexact === undefined || this.inexact === false || this.inexact === null) ? 0 : 2 | (this.nextRate === undefined || this.nextRate === false || this.nextRate === null) ? 0 : 1),
             struct.pack('<i', this.count),
+            (this.nextRate === undefined || this.nextRate === false || this.nextRate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.nextRate)],
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.messages.length),Buffer.concat(this.messages.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.nextRate === undefined || this.nextRate === false || this.nextRate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.nextRate)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _inexact;
         let _count;
+        let _next_rate;
         let _messages;
         let _chats;
         let _users;
-        let _next_rate;
-        let _inexact;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _inexact = Boolean(flags & 2);
         _count = reader.readInt();
+        if (flags & 1) {
+            _next_rate = reader.readInt();
+        }
+        else {
+            _next_rate = null
+        }
         reader.readInt();
         _messages = [];
         len = reader.readInt();
@@ -305,19 +312,12 @@ class MessagesSlice extends TLObject {
                     _x = reader.tgReadObject();
                     _users.push(_x);
                     }
-                    if (flags & 1) {
-                        _next_rate = reader.readInt();
-                    }
-                    else {
-                        _next_rate = null
-                    }
-                    _inexact = Boolean(flags & 2);
-                    return new this({count:_count,
+                    return new this({inexact:_inexact,
+	count:_count,
+	nextRate:_next_rate,
 	messages:_messages,
 	chats:_chats,
-	users:_users,
-	nextRate:_next_rate,
-	inexact:_inexact})
+	users:_users})
                 }
             }
 
@@ -335,12 +335,12 @@ class ChannelMessages extends TLObject {
         this.CONSTRUCTOR_ID = 0x99262e37;
         this.SUBCLASS_OF_ID = 0xd4b40b5e;
 
+        this.inexact = args.inexact || null;
         this.pts = args.pts;
         this.count = args.count;
         this.messages = args.messages;
         this.chats = args.chats;
         this.users = args.users;
-        this.inexact = args.inexact || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -355,16 +355,17 @@ class ChannelMessages extends TLObject {
         }
     static fromReader(reader) {
         let _flags;
+        let _inexact;
         let _pts;
         let _count;
         let _messages;
         let _chats;
         let _users;
-        let _inexact;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _inexact = Boolean(flags & 2);
         _pts = reader.readInt();
         _count = reader.readInt();
         reader.readInt();
@@ -388,13 +389,12 @@ class ChannelMessages extends TLObject {
                     _x = reader.tgReadObject();
                     _users.push(_x);
                     }
-                    _inexact = Boolean(flags & 2);
-                    return new this({pts:_pts,
+                    return new this({inexact:_inexact,
+	pts:_pts,
 	count:_count,
 	messages:_messages,
 	chats:_chats,
-	users:_users,
-	inexact:_inexact})
+	users:_users})
                 }
             }
 
@@ -1086,40 +1086,53 @@ class BotResults extends TLObject {
         this.CONSTRUCTOR_ID = 0x947ca848;
         this.SUBCLASS_OF_ID = 0x3ed4d9c9;
 
+        this.gallery = args.gallery || null;
         this.queryId = args.queryId;
+        this.nextOffset = args.nextOffset || null;
+        this.switchPm = args.switchPm || null;
         this.results = args.results;
         this.cacheTime = args.cacheTime;
         this.users = args.users;
-        this.switchPm = args.switchPm || null;
-        this.nextOffset = args.nextOffset || null;
-        this.gallery = args.gallery || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("48a87c94","hex"),
-            struct.pack('<I', (this.switchPm === undefined || this.switchPm === false || this.switchPm === null) ? 0 : 4 | (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset === null) ? 0 : 2 | (this.gallery === undefined || this.gallery === false || this.gallery === null) ? 0 : 1),
+            struct.pack('<I', (this.gallery === undefined || this.gallery === false || this.gallery === null) ? 0 : 1 | (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset === null) ? 0 : 2 | (this.switchPm === undefined || this.switchPm === false || this.switchPm === null) ? 0 : 4),
             readBufferFromBigInt(this.queryId,8,true,true),
+            (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nextOffset)],
+            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.bytes],
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.results.length),Buffer.concat(this.results.map(x => x.bytes)),
             struct.pack('<i', this.cacheTime),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.bytes],
-            (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nextOffset)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _gallery;
         let _query_id;
+        let _next_offset;
+        let _switch_pm;
         let _results;
         let _cache_time;
         let _users;
-        let _switch_pm;
-        let _next_offset;
-        let _gallery;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _gallery = Boolean(flags & 1);
         _query_id = reader.readLong();
+        if (flags & 2) {
+            _next_offset = reader.tgReadString();
+        }
+        else {
+            _next_offset = null
+        }
+        if (flags & 4) {
+            _switch_pm = reader.tgReadObject();
+        }
+        else {
+            _switch_pm = null
+        }
         reader.readInt();
         _results = [];
         len = reader.readInt();
@@ -1135,26 +1148,13 @@ class BotResults extends TLObject {
                 _x = reader.tgReadObject();
                 _users.push(_x);
                 }
-                if (flags & 4) {
-                    _switch_pm = reader.tgReadObject();
-                }
-                else {
-                    _switch_pm = null
-                }
-                if (flags & 2) {
-                    _next_offset = reader.tgReadString();
-                }
-                else {
-                    _next_offset = null
-                }
-                _gallery = Boolean(flags & 1);
-                return new this({queryId:_query_id,
+                return new this({gallery:_gallery,
+	queryId:_query_id,
+	nextOffset:_next_offset,
+	switchPm:_switch_pm,
 	results:_results,
 	cacheTime:_cache_time,
-	users:_users,
-	switchPm:_switch_pm,
-	nextOffset:_next_offset,
-	gallery:_gallery})
+	users:_users})
             }
         }
 
@@ -1172,56 +1172,56 @@ class BotCallbackAnswer extends TLObject {
         this.CONSTRUCTOR_ID = 0x36585ea4;
         this.SUBCLASS_OF_ID = 0x6c4dd18c;
 
-        this.cacheTime = args.cacheTime;
-        this.url = args.url || null;
-        this.message = args.message || null;
-        this.nativeUi = args.nativeUi || null;
-        this.hasUrl = args.hasUrl || null;
         this.alert = args.alert || null;
+        this.hasUrl = args.hasUrl || null;
+        this.nativeUi = args.nativeUi || null;
+        this.message = args.message || null;
+        this.url = args.url || null;
+        this.cacheTime = args.cacheTime;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("a45e5836","hex"),
-            struct.pack('<I', (this.url === undefined || this.url === false || this.url === null) ? 0 : 4 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 1 | (this.nativeUi === undefined || this.nativeUi === false || this.nativeUi === null) ? 0 : 16 | (this.hasUrl === undefined || this.hasUrl === false || this.hasUrl === null) ? 0 : 8 | (this.alert === undefined || this.alert === false || this.alert === null) ? 0 : 2),
-            struct.pack('<i', this.cacheTime),
-            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
+            struct.pack('<I', (this.alert === undefined || this.alert === false || this.alert === null) ? 0 : 2 | (this.hasUrl === undefined || this.hasUrl === false || this.hasUrl === null) ? 0 : 8 | (this.nativeUi === undefined || this.nativeUi === false || this.nativeUi === null) ? 0 : 16 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 1 | (this.url === undefined || this.url === false || this.url === null) ? 0 : 4),
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
+            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
+            struct.pack('<i', this.cacheTime),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _cache_time;
-        let _url;
-        let _message;
-        let _native_ui;
-        let _has_url;
         let _alert;
+        let _has_url;
+        let _native_ui;
+        let _message;
+        let _url;
+        let _cache_time;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _cache_time = reader.readInt();
-        if (flags & 4) {
-            _url = reader.tgReadString();
-        }
-        else {
-            _url = null
-        }
+        _alert = Boolean(flags & 2);
+        _has_url = Boolean(flags & 8);
+        _native_ui = Boolean(flags & 16);
         if (flags & 1) {
             _message = reader.tgReadString();
         }
         else {
             _message = null
         }
-        _native_ui = Boolean(flags & 16);
-        _has_url = Boolean(flags & 8);
-        _alert = Boolean(flags & 2);
-        return new this({cacheTime:_cache_time,
-	url:_url,
-	message:_message,
-	nativeUi:_native_ui,
+        if (flags & 4) {
+            _url = reader.tgReadString();
+        }
+        else {
+            _url = null
+        }
+        _cache_time = reader.readInt();
+        return new this({alert:_alert,
 	hasUrl:_has_url,
-	alert:_alert})
+	nativeUi:_native_ui,
+	message:_message,
+	url:_url,
+	cacheTime:_cache_time})
     }
 }
 
@@ -1802,9 +1802,9 @@ class SearchCounter extends TLObject {
         this.CONSTRUCTOR_ID = 0xe844ebff;
         this.SUBCLASS_OF_ID = 0xd6a7bfa2;
 
+        this.inexact = args.inexact || null;
         this.filter = args.filter;
         this.count = args.count;
-        this.inexact = args.inexact || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -1816,19 +1816,19 @@ class SearchCounter extends TLObject {
         }
     static fromReader(reader) {
         let _flags;
+        let _inexact;
         let _filter;
         let _count;
-        let _inexact;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _inexact = Boolean(flags & 2);
         _filter = reader.tgReadObject();
         _count = reader.readInt();
-        _inexact = Boolean(flags & 2);
-        return new this({filter:_filter,
-	count:_count,
-	inexact:_inexact})
+        return new this({inexact:_inexact,
+	filter:_filter,
+	count:_count})
     }
 }
 

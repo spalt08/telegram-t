@@ -19,11 +19,11 @@ class CreateStickerSetRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x9bd86e6a;
         this.SUBCLASS_OF_ID = 0x9b704a5a;
 
+        this.masks = args.masks || null;
         this.userId = args.userId;
         this.title = args.title;
         this.shortName = args.shortName;
         this.stickers = args.stickers;
-        this.masks = args.masks || null;
     }
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
@@ -40,15 +40,16 @@ class CreateStickerSetRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _masks;
         let _user_id;
         let _title;
         let _short_name;
         let _stickers;
-        let _masks;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _masks = Boolean(flags & 1);
         _user_id = reader.tgReadObject();
         _title = reader.tgReadString();
         _short_name = reader.tgReadString();
@@ -59,12 +60,11 @@ class CreateStickerSetRequest extends TLRequest {
             _x = reader.tgReadObject();
             _stickers.push(_x);
             }
-            _masks = Boolean(flags & 1);
-            return new this({userId:_user_id,
+            return new this({masks:_masks,
+	userId:_user_id,
 	title:_title,
 	shortName:_short_name,
-	stickers:_stickers,
-	masks:_masks})
+	stickers:_stickers})
         }
     }
 

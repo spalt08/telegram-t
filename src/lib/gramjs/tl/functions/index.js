@@ -99,70 +99,70 @@ class InitConnectionRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x785188b8;
         this.SUBCLASS_OF_ID = 0xb7b2364b;
 
-        this.appVersion = args.appVersion;
         this.apiId = args.apiId;
         this.deviceModel = args.deviceModel;
         this.systemVersion = args.systemVersion;
+        this.appVersion = args.appVersion;
         this.systemLangCode = args.systemLangCode;
         this.langPack = args.langPack;
         this.langCode = args.langCode;
-        this.query = args.query;
         this.proxy = args.proxy || null;
+        this.query = args.query;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("b8885178","hex"),
-            TLObject.serializeBytes(this.appVersion),
+            struct.pack('<I', (this.proxy === undefined || this.proxy === false || this.proxy === null) ? 0 : 1),
             struct.pack('<i', this.apiId),
             TLObject.serializeBytes(this.deviceModel),
             TLObject.serializeBytes(this.systemVersion),
-            struct.pack('<I', (this.proxy === undefined || this.proxy === false || this.proxy === null) ? 0 : 1),
+            TLObject.serializeBytes(this.appVersion),
             TLObject.serializeBytes(this.systemLangCode),
             TLObject.serializeBytes(this.langPack),
             TLObject.serializeBytes(this.langCode),
-            this.query.bytes,
             (this.proxy === undefined || this.proxy === false || this.proxy ===null) ? Buffer.alloc(0) : [this.proxy.bytes],
+            this.query.bytes,
             ])
         }
     static fromReader(reader) {
-        let _app_version;
         let _X;
+        let _flags;
         let _api_id;
         let _device_model;
         let _system_version;
-        let _flags;
+        let _app_version;
         let _system_lang_code;
         let _lang_pack;
         let _lang_code;
-        let _query;
         let _proxy;
+        let _query;
         let _x;
         let len;
-        _app_version = reader.tgReadString();
+        let flags = reader.readInt();
+
         _api_id = reader.readInt();
         _device_model = reader.tgReadString();
         _system_version = reader.tgReadString();
-        let flags = reader.readInt();
-
+        _app_version = reader.tgReadString();
         _system_lang_code = reader.tgReadString();
         _lang_pack = reader.tgReadString();
         _lang_code = reader.tgReadString();
-        _query = reader.tgReadObject();
         if (flags & 1) {
             _proxy = reader.tgReadObject();
         }
         else {
             _proxy = null
         }
-        return new this({appVersion:_app_version,
-	apiId:_api_id,
+        _query = reader.tgReadObject();
+        return new this({apiId:_api_id,
 	deviceModel:_device_model,
 	systemVersion:_system_version,
+	appVersion:_app_version,
 	systemLangCode:_system_lang_code,
 	langPack:_lang_pack,
 	langCode:_lang_code,
-	query:_query,
-	proxy:_proxy})
+	proxy:_proxy,
+	query:_query})
     }
 }
 

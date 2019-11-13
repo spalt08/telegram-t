@@ -62,13 +62,13 @@ class GetDialogsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xa0ee3b73;
         this.SUBCLASS_OF_ID = 0xe1b52ee;
 
+        this.excludePinned = args.excludePinned || null;
+        this.folderId = args.folderId || null;
         this.offsetDate = args.offsetDate;
         this.offsetId = args.offsetId;
         this.offsetPeer = args.offsetPeer;
         this.limit = args.limit;
         this.hash = args.hash;
-        this.folderId = args.folderId || null;
-        this.excludePinned = args.excludePinned || null;
     }
     async resolve(client, utils) {
         this.offset_peer = utils.getInputPeer(await client.getInputEntity(this.offsetPeer))
@@ -76,47 +76,47 @@ class GetDialogsRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("733beea0","hex"),
-            struct.pack('<I', (this.folderId === undefined || this.folderId === false || this.folderId === null) ? 0 : 2 | (this.excludePinned === undefined || this.excludePinned === false || this.excludePinned === null) ? 0 : 1),
+            struct.pack('<I', (this.excludePinned === undefined || this.excludePinned === false || this.excludePinned === null) ? 0 : 1 | (this.folderId === undefined || this.folderId === false || this.folderId === null) ? 0 : 2),
+            (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             struct.pack('<i', this.offsetDate),
             struct.pack('<i', this.offsetId),
             this.offsetPeer.bytes,
             struct.pack('<i', this.limit),
             struct.pack('<i', this.hash),
-            (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _exclude_pinned;
+        let _folder_id;
         let _offset_date;
         let _offset_id;
         let _offset_peer;
         let _limit;
         let _hash;
-        let _folder_id;
-        let _exclude_pinned;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _offset_date = reader.readInt();
-        _offset_id = reader.readInt();
-        _offset_peer = reader.tgReadObject();
-        _limit = reader.readInt();
-        _hash = reader.readInt();
+        _exclude_pinned = Boolean(flags & 1);
         if (flags & 2) {
             _folder_id = reader.readInt();
         }
         else {
             _folder_id = null
         }
-        _exclude_pinned = Boolean(flags & 1);
-        return new this({offsetDate:_offset_date,
+        _offset_date = reader.readInt();
+        _offset_id = reader.readInt();
+        _offset_peer = reader.tgReadObject();
+        _limit = reader.readInt();
+        _hash = reader.readInt();
+        return new this({excludePinned:_exclude_pinned,
+	folderId:_folder_id,
+	offsetDate:_offset_date,
 	offsetId:_offset_id,
 	offsetPeer:_offset_peer,
 	limit:_limit,
-	hash:_hash,
-	folderId:_folder_id,
-	excludePinned:_exclude_pinned})
+	hash:_hash})
     }
 }
 
@@ -203,18 +203,18 @@ class SearchRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x8614ef68;
         this.SUBCLASS_OF_ID = 0xd4b40b5e;
 
-        this.maxDate = args.maxDate;
+        this.peer = args.peer;
         this.q = args.q;
-        this.minId = args.minId;
+        this.fromId = args.fromId || null;
         this.filter = args.filter;
         this.minDate = args.minDate;
-        this.peer = args.peer;
+        this.maxDate = args.maxDate;
         this.offsetId = args.offsetId;
         this.addOffset = args.addOffset;
         this.limit = args.limit;
         this.maxId = args.maxId;
+        this.minId = args.minId;
         this.hash = args.hash;
-        this.fromId = args.fromId || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -225,68 +225,68 @@ class SearchRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("68ef1486","hex"),
-            struct.pack('<i', this.maxDate),
             struct.pack('<I', (this.fromId === undefined || this.fromId === false || this.fromId === null) ? 0 : 1),
+            this.peer.bytes,
             TLObject.serializeBytes(this.q),
-            struct.pack('<i', this.minId),
+            (this.fromId === undefined || this.fromId === false || this.fromId ===null) ? Buffer.alloc(0) : [this.fromId.bytes],
             this.filter.bytes,
             struct.pack('<i', this.minDate),
-            this.peer.bytes,
+            struct.pack('<i', this.maxDate),
             struct.pack('<i', this.offsetId),
             struct.pack('<i', this.addOffset),
             struct.pack('<i', this.limit),
             struct.pack('<i', this.maxId),
+            struct.pack('<i', this.minId),
             struct.pack('<i', this.hash),
-            (this.fromId === undefined || this.fromId === false || this.fromId ===null) ? Buffer.alloc(0) : [this.fromId.bytes],
             ])
         }
     static fromReader(reader) {
-        let _max_date;
         let _flags;
+        let _peer;
         let _q;
-        let _min_id;
+        let _from_id;
         let _filter;
         let _min_date;
-        let _peer;
+        let _max_date;
         let _offset_id;
         let _add_offset;
         let _limit;
         let _max_id;
+        let _min_id;
         let _hash;
-        let _from_id;
         let _x;
         let len;
-        _max_date = reader.readInt();
         let flags = reader.readInt();
 
-        _q = reader.tgReadString();
-        _min_id = reader.readInt();
-        _filter = reader.tgReadObject();
-        _min_date = reader.readInt();
         _peer = reader.tgReadObject();
-        _offset_id = reader.readInt();
-        _add_offset = reader.readInt();
-        _limit = reader.readInt();
-        _max_id = reader.readInt();
-        _hash = reader.readInt();
+        _q = reader.tgReadString();
         if (flags & 1) {
             _from_id = reader.tgReadObject();
         }
         else {
             _from_id = null
         }
-        return new this({maxDate:_max_date,
+        _filter = reader.tgReadObject();
+        _min_date = reader.readInt();
+        _max_date = reader.readInt();
+        _offset_id = reader.readInt();
+        _add_offset = reader.readInt();
+        _limit = reader.readInt();
+        _max_id = reader.readInt();
+        _min_id = reader.readInt();
+        _hash = reader.readInt();
+        return new this({peer:_peer,
 	q:_q,
-	minId:_min_id,
+	fromId:_from_id,
 	filter:_filter,
 	minDate:_min_date,
-	peer:_peer,
+	maxDate:_max_date,
 	offsetId:_offset_id,
 	addOffset:_add_offset,
 	limit:_limit,
 	maxId:_max_id,
-	hash:_hash,
-	fromId:_from_id})
+	minId:_min_id,
+	hash:_hash})
     }
 }
 
@@ -343,10 +343,10 @@ class DeleteHistoryRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x1c015b09;
         this.SUBCLASS_OF_ID = 0x2c49c116;
 
+        this.justClear = args.justClear || null;
+        this.revoke = args.revoke || null;
         this.peer = args.peer;
         this.maxId = args.maxId;
-        this.revoke = args.revoke || null;
-        this.justClear = args.justClear || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -354,29 +354,29 @@ class DeleteHistoryRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("095b011c","hex"),
-            struct.pack('<I', (this.revoke === undefined || this.revoke === false || this.revoke === null) ? 0 : 2 | (this.justClear === undefined || this.justClear === false || this.justClear === null) ? 0 : 1),
+            struct.pack('<I', (this.justClear === undefined || this.justClear === false || this.justClear === null) ? 0 : 1 | (this.revoke === undefined || this.revoke === false || this.revoke === null) ? 0 : 2),
             this.peer.bytes,
             struct.pack('<i', this.maxId),
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _just_clear;
+        let _revoke;
         let _peer;
         let _max_id;
-        let _revoke;
-        let _just_clear;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _just_clear = Boolean(flags & 1);
+        _revoke = Boolean(flags & 2);
         _peer = reader.tgReadObject();
         _max_id = reader.readInt();
-        _revoke = Boolean(flags & 2);
-        _just_clear = Boolean(flags & 1);
-        return new this({peer:_peer,
-	maxId:_max_id,
+        return new this({justClear:_just_clear,
 	revoke:_revoke,
-	justClear:_just_clear})
+	peer:_peer,
+	maxId:_max_id})
     }
 }
 
@@ -394,8 +394,8 @@ class DeleteMessagesRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xe58e95d2;
         this.SUBCLASS_OF_ID = 0xced3c06e;
 
-        this.id = args.id;
         this.revoke = args.revoke || null;
+        this.id = args.id;
     }
     get bytes() {
         return Buffer.concat([
@@ -406,12 +406,13 @@ class DeleteMessagesRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
-        let _id;
         let _revoke;
+        let _id;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _revoke = Boolean(flags & 1);
         reader.readInt();
         _id = [];
         len = reader.readInt();
@@ -419,9 +420,8 @@ class DeleteMessagesRequest extends TLRequest {
             _x = reader.readInt();
             _id.push(_x);
             }
-            _revoke = Boolean(flags & 1);
-            return new this({id:_id,
-	revoke:_revoke})
+            return new this({revoke:_revoke,
+	id:_id})
         }
     }
 
@@ -509,17 +509,17 @@ class SendMessageRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x520c3870;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
-        this.replyToMsgId = args.replyToMsgId || null;
-        this.message = args.message;
-        this.peer = args.peer;
-        this.scheduleDate = args.scheduleDate || null;
-        this.entities = args.entities || null;
-        this.replyMarkup = args.replyMarkup || null;
-        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
-        this.silent = args.silent || null;
         this.noWebpage = args.noWebpage || null;
+        this.silent = args.silent || null;
         this.background = args.background || null;
         this.clearDraft = args.clearDraft || null;
+        this.peer = args.peer;
+        this.replyToMsgId = args.replyToMsgId || null;
+        this.message = args.message;
+        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
+        this.replyMarkup = args.replyMarkup || null;
+        this.entities = args.entities || null;
+        this.scheduleDate = args.scheduleDate || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -527,46 +527,51 @@ class SendMessageRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("70380c52","hex"),
-            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
-            struct.pack('<I', (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128),
-            TLObject.serializeBytes(this.message),
+            struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
             this.peer.bytes,
-            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
+            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
+            TLObject.serializeBytes(this.message),
             readBufferFromBigInt(this.randomId,8,true,true),
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
     static fromReader(reader) {
-        let _reply_to_msg_id;
         let _flags;
-        let _message;
-        let _peer;
-        let _schedule_date;
-        let _entities;
-        let _reply_markup;
-        let _random_id;
-        let _silent;
         let _no_webpage;
+        let _silent;
         let _background;
         let _clear_draft;
+        let _peer;
+        let _reply_to_msg_id;
+        let _message;
+        let _random_id;
+        let _reply_markup;
+        let _entities;
+        let _schedule_date;
         let _x;
         let len;
+        let flags = reader.readInt();
+
+        _no_webpage = Boolean(flags & 2);
+        _silent = Boolean(flags & 32);
+        _background = Boolean(flags & 64);
+        _clear_draft = Boolean(flags & 128);
+        _peer = reader.tgReadObject();
         if (flags & 1) {
             _reply_to_msg_id = reader.readInt();
         }
         else {
             _reply_to_msg_id = null
         }
-        let flags = reader.readInt();
-
         _message = reader.tgReadString();
-        _peer = reader.tgReadObject();
-        if (flags & 1024) {
-            _schedule_date = reader.readInt();
+        _random_id = reader.readLong();
+        if (flags & 4) {
+            _reply_markup = reader.tgReadObject();
         }
         else {
-            _schedule_date = null
+            _reply_markup = null
         }
         if (flags & 8) {
             reader.readInt();
@@ -580,28 +585,23 @@ class SendMessageRequest extends TLRequest {
             else {
                 _entities = null
             }
-            if (flags & 4) {
-                _reply_markup = reader.tgReadObject();
+            if (flags & 1024) {
+                _schedule_date = reader.readInt();
             }
             else {
-                _reply_markup = null
+                _schedule_date = null
             }
-            _random_id = reader.readLong();
-            _silent = Boolean(flags & 32);
-            _no_webpage = Boolean(flags & 2);
-            _background = Boolean(flags & 64);
-            _clear_draft = Boolean(flags & 128);
-            return new this({replyToMsgId:_reply_to_msg_id,
-	message:_message,
-	peer:_peer,
-	scheduleDate:_schedule_date,
-	entities:_entities,
-	replyMarkup:_reply_markup,
-	randomId:_random_id,
+            return new this({noWebpage:_no_webpage,
 	silent:_silent,
-	noWebpage:_no_webpage,
 	background:_background,
-	clearDraft:_clear_draft})
+	clearDraft:_clear_draft,
+	peer:_peer,
+	replyToMsgId:_reply_to_msg_id,
+	message:_message,
+	randomId:_random_id,
+	replyMarkup:_reply_markup,
+	entities:_entities,
+	scheduleDate:_schedule_date})
         }
     }
 
@@ -619,61 +619,71 @@ class SendMediaRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x3491eba9;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.silent = args.silent || null;
+        this.background = args.background || null;
+        this.clearDraft = args.clearDraft || null;
+        this.peer = args.peer;
+        this.replyToMsgId = args.replyToMsgId || null;
         this.media = args.media;
         this.message = args.message;
-        this.peer = args.peer;
-        this.scheduleDate = args.scheduleDate || null;
-        this.entities = args.entities || null;
-        this.replyMarkup = args.replyMarkup || null;
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
-        this.background = args.background || null;
-        this.silent = args.silent || null;
-        this.replyToMsgId = args.replyToMsgId || null;
-        this.clearDraft = args.clearDraft || null;
+        this.replyMarkup = args.replyMarkup || null;
+        this.entities = args.entities || null;
+        this.scheduleDate = args.scheduleDate || null;
     }
     async resolve(client, utils) {
-        this.media = utils.getInputMedia(this.media)
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
+        this.media = utils.getInputMedia(this.media)
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("a9eb9134","hex"),
-            this.media.bytes,
-            struct.pack('<I', (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128),
-            TLObject.serializeBytes(this.message),
+            struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
             this.peer.bytes,
-            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            readBufferFromBigInt(this.randomId,8,true,true),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
+            this.media.bytes,
+            TLObject.serializeBytes(this.message),
+            readBufferFromBigInt(this.randomId,8,true,true),
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
     static fromReader(reader) {
-        let _media;
         let _flags;
-        let _message;
-        let _peer;
-        let _schedule_date;
-        let _entities;
-        let _reply_markup;
-        let _random_id;
-        let _background;
         let _silent;
-        let _reply_to_msg_id;
+        let _background;
         let _clear_draft;
+        let _peer;
+        let _reply_to_msg_id;
+        let _media;
+        let _message;
+        let _random_id;
+        let _reply_markup;
+        let _entities;
+        let _schedule_date;
         let _x;
         let len;
-        _media = reader.tgReadObject();
         let flags = reader.readInt();
 
-        _message = reader.tgReadString();
+        _silent = Boolean(flags & 32);
+        _background = Boolean(flags & 64);
+        _clear_draft = Boolean(flags & 128);
         _peer = reader.tgReadObject();
-        if (flags & 1024) {
-            _schedule_date = reader.readInt();
+        if (flags & 1) {
+            _reply_to_msg_id = reader.readInt();
         }
         else {
-            _schedule_date = null
+            _reply_to_msg_id = null
+        }
+        _media = reader.tgReadObject();
+        _message = reader.tgReadString();
+        _random_id = reader.readLong();
+        if (flags & 4) {
+            _reply_markup = reader.tgReadObject();
+        }
+        else {
+            _reply_markup = null
         }
         if (flags & 8) {
             reader.readInt();
@@ -687,33 +697,23 @@ class SendMediaRequest extends TLRequest {
             else {
                 _entities = null
             }
-            if (flags & 4) {
-                _reply_markup = reader.tgReadObject();
+            if (flags & 1024) {
+                _schedule_date = reader.readInt();
             }
             else {
-                _reply_markup = null
+                _schedule_date = null
             }
-            _random_id = reader.readLong();
-            _background = Boolean(flags & 64);
-            _silent = Boolean(flags & 32);
-            if (flags & 1) {
-                _reply_to_msg_id = reader.readInt();
-            }
-            else {
-                _reply_to_msg_id = null
-            }
-            _clear_draft = Boolean(flags & 128);
-            return new this({media:_media,
-	message:_message,
-	peer:_peer,
-	scheduleDate:_schedule_date,
-	entities:_entities,
-	replyMarkup:_reply_markup,
-	randomId:_random_id,
+            return new this({silent:_silent,
 	background:_background,
-	silent:_silent,
+	clearDraft:_clear_draft,
+	peer:_peer,
 	replyToMsgId:_reply_to_msg_id,
-	clearDraft:_clear_draft})
+	media:_media,
+	message:_message,
+	randomId:_random_id,
+	replyMarkup:_reply_markup,
+	entities:_entities,
+	scheduleDate:_schedule_date})
         }
     }
 
@@ -731,15 +731,15 @@ class ForwardMessagesRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xd9fee60e;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.silent = args.silent || null;
+        this.background = args.background || null;
+        this.withMyScore = args.withMyScore || null;
+        this.grouped = args.grouped || null;
         this.fromPeer = args.fromPeer;
         this.id = args.id;
+        this.randomId = args.randomId !== undefined ? args.randomId : new Array(id.length).fill().map(_ => readBigIntFromBuffer(generateRandomBytes(8),false,true));
         this.toPeer = args.toPeer;
         this.scheduleDate = args.scheduleDate || null;
-        this.randomId = args.randomId !== undefined ? args.randomId : new Array(id.length).fill().map(_ => readBigIntFromBuffer(generateRandomBytes(8),false,true));
-        this.grouped = args.grouped || null;
-        this.withMyScore = args.withMyScore || null;
-        this.background = args.background || null;
-        this.silent = args.silent || null;
     }
     async resolve(client, utils) {
         this.from_peer = utils.getInputPeer(await client.getInputEntity(this.fromPeer))
@@ -748,29 +748,33 @@ class ForwardMessagesRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("0ee6fed9","hex"),
-            struct.pack('<I', (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024 | (this.grouped === undefined || this.grouped === false || this.grouped === null) ? 0 : 512 | (this.withMyScore === undefined || this.withMyScore === false || this.withMyScore === null) ? 0 : 256 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32),
+            struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.withMyScore === undefined || this.withMyScore === false || this.withMyScore === null) ? 0 : 256 | (this.grouped === undefined || this.grouped === false || this.grouped === null) ? 0 : 512 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
             this.fromPeer.bytes,
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.randomId.length),Buffer.concat(this.randomId.map(x => readBufferFromBigInt(x,8,true,true))),
             this.toPeer.bytes,
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.randomId.length),Buffer.concat(this.randomId.map(x => readBufferFromBigInt(x,8,true,true))),
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _silent;
+        let _background;
+        let _with_my_score;
+        let _grouped;
         let _from_peer;
         let _id;
+        let _random_id;
         let _to_peer;
         let _schedule_date;
-        let _random_id;
-        let _grouped;
-        let _with_my_score;
-        let _background;
-        let _silent;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _silent = Boolean(flags & 32);
+        _background = Boolean(flags & 64);
+        _with_my_score = Boolean(flags & 256);
+        _grouped = Boolean(flags & 512);
         _from_peer = reader.tgReadObject();
         reader.readInt();
         _id = [];
@@ -779,13 +783,6 @@ class ForwardMessagesRequest extends TLRequest {
             _x = reader.readInt();
             _id.push(_x);
             }
-            _to_peer = reader.tgReadObject();
-            if (flags & 1024) {
-                _schedule_date = reader.readInt();
-            }
-            else {
-                _schedule_date = null
-            }
             reader.readInt();
             _random_id = [];
             len = reader.readInt();
@@ -793,19 +790,22 @@ class ForwardMessagesRequest extends TLRequest {
                 _x = reader.readLong();
                 _random_id.push(_x);
                 }
-                _grouped = Boolean(flags & 512);
-                _with_my_score = Boolean(flags & 256);
-                _background = Boolean(flags & 64);
-                _silent = Boolean(flags & 32);
-                return new this({fromPeer:_from_peer,
-	id:_id,
-	toPeer:_to_peer,
-	scheduleDate:_schedule_date,
-	randomId:_random_id,
-	grouped:_grouped,
-	withMyScore:_with_my_score,
+                _to_peer = reader.tgReadObject();
+                if (flags & 1024) {
+                    _schedule_date = reader.readInt();
+                }
+                else {
+                    _schedule_date = null
+                }
+                return new this({silent:_silent,
 	background:_background,
-	silent:_silent})
+	withMyScore:_with_my_score,
+	grouped:_grouped,
+	fromPeer:_from_peer,
+	id:_id,
+	randomId:_random_id,
+	toPeer:_to_peer,
+	scheduleDate:_schedule_date})
             }
         }
 
@@ -1255,8 +1255,8 @@ class RequestEncryptionRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x6d28a37a;
 
         this.userId = args.userId;
-        this.gA = args.gA;
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(4),false,true);
+        this.gA = args.gA;
     }
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
@@ -1265,22 +1265,22 @@ class RequestEncryptionRequest extends TLRequest {
         return Buffer.concat([
             Buffer.from("43af4df6","hex"),
             this.userId.bytes,
-            TLObject.serializeBytes(this.gA),
             struct.pack('<i', this.randomId),
+            TLObject.serializeBytes(this.gA),
             ])
         }
     static fromReader(reader) {
         let _user_id;
-        let _g_a;
         let _random_id;
+        let _g_a;
         let _x;
         let len;
         _user_id = reader.tgReadObject();
-        _g_a = reader.tgReadBytes();
         _random_id = reader.readInt();
+        _g_a = reader.tgReadBytes();
         return new this({userId:_user_id,
-	gA:_g_a,
-	randomId:_random_id})
+	randomId:_random_id,
+	gA:_g_a})
     }
 }
 
@@ -1443,29 +1443,29 @@ class SendEncryptedRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xc99e3e50;
 
         this.peer = args.peer;
-        this.data = args.data;
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
+        this.data = args.data;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("736777a9","hex"),
             this.peer.bytes,
-            TLObject.serializeBytes(this.data),
             readBufferFromBigInt(this.randomId,8,true,true),
+            TLObject.serializeBytes(this.data),
             ])
         }
     static fromReader(reader) {
         let _peer;
-        let _data;
         let _random_id;
+        let _data;
         let _x;
         let len;
         _peer = reader.tgReadObject();
-        _data = reader.tgReadBytes();
         _random_id = reader.readLong();
+        _data = reader.tgReadBytes();
         return new this({peer:_peer,
-	data:_data,
-	randomId:_random_id})
+	randomId:_random_id,
+	data:_data})
     }
 }
 
@@ -1484,34 +1484,34 @@ class SendEncryptedFileRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xc99e3e50;
 
         this.peer = args.peer;
+        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
         this.data = args.data;
         this.file = args.file;
-        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("661b909a","hex"),
             this.peer.bytes,
+            readBufferFromBigInt(this.randomId,8,true,true),
             TLObject.serializeBytes(this.data),
             this.file.bytes,
-            readBufferFromBigInt(this.randomId,8,true,true),
             ])
         }
     static fromReader(reader) {
         let _peer;
+        let _random_id;
         let _data;
         let _file;
-        let _random_id;
         let _x;
         let len;
         _peer = reader.tgReadObject();
+        _random_id = reader.readLong();
         _data = reader.tgReadBytes();
         _file = reader.tgReadObject();
-        _random_id = reader.readLong();
         return new this({peer:_peer,
+	randomId:_random_id,
 	data:_data,
-	file:_file,
-	randomId:_random_id})
+	file:_file})
     }
 }
 
@@ -1530,29 +1530,29 @@ class SendEncryptedServiceRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xc99e3e50;
 
         this.peer = args.peer;
-        this.data = args.data;
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
+        this.data = args.data;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("a439d432","hex"),
             this.peer.bytes,
-            TLObject.serializeBytes(this.data),
             readBufferFromBigInt(this.randomId,8,true,true),
+            TLObject.serializeBytes(this.data),
             ])
         }
     static fromReader(reader) {
         let _peer;
-        let _data;
         let _random_id;
+        let _data;
         let _x;
         let len;
         _peer = reader.tgReadObject();
-        _data = reader.tgReadBytes();
         _random_id = reader.readLong();
+        _data = reader.tgReadBytes();
         return new this({peer:_peer,
-	data:_data,
-	randomId:_random_id})
+	randomId:_random_id,
+	data:_data})
     }
 }
 
@@ -1992,8 +1992,8 @@ class StartBotRequest extends TLRequest {
 
         this.bot = args.bot;
         this.peer = args.peer;
-        this.startParam = args.startParam;
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
+        this.startParam = args.startParam;
     }
     async resolve(client, utils) {
         this.bot = utils.getInputUser(await client.getInputEntity(this.bot))
@@ -2004,25 +2004,25 @@ class StartBotRequest extends TLRequest {
             Buffer.from("7873dfe6","hex"),
             this.bot.bytes,
             this.peer.bytes,
-            TLObject.serializeBytes(this.startParam),
             readBufferFromBigInt(this.randomId,8,true,true),
+            TLObject.serializeBytes(this.startParam),
             ])
         }
     static fromReader(reader) {
         let _bot;
         let _peer;
-        let _start_param;
         let _random_id;
+        let _start_param;
         let _x;
         let len;
         _bot = reader.tgReadObject();
         _peer = reader.tgReadObject();
-        _start_param = reader.tgReadString();
         _random_id = reader.readLong();
+        _start_param = reader.tgReadString();
         return new this({bot:_bot,
 	peer:_peer,
-	startParam:_start_param,
-	randomId:_random_id})
+	randomId:_random_id,
+	startParam:_start_param})
     }
 }
 
@@ -2175,12 +2175,12 @@ class SearchGlobalRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xbf7225a4;
         this.SUBCLASS_OF_ID = 0xd4b40b5e;
 
+        this.folderId = args.folderId || null;
         this.q = args.q;
         this.offsetRate = args.offsetRate;
         this.offsetPeer = args.offsetPeer;
         this.offsetId = args.offsetId;
         this.limit = args.limit;
-        this.folderId = args.folderId || null;
     }
     async resolve(client, utils) {
         this.offset_peer = utils.getInputPeer(await client.getInputEntity(this.offsetPeer))
@@ -2189,43 +2189,43 @@ class SearchGlobalRequest extends TLRequest {
         return Buffer.concat([
             Buffer.from("a42572bf","hex"),
             struct.pack('<I', (this.folderId === undefined || this.folderId === false || this.folderId === null) ? 0 : 1),
+            (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             TLObject.serializeBytes(this.q),
             struct.pack('<i', this.offsetRate),
             this.offsetPeer.bytes,
             struct.pack('<i', this.offsetId),
             struct.pack('<i', this.limit),
-            (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _folder_id;
         let _q;
         let _offset_rate;
         let _offset_peer;
         let _offset_id;
         let _limit;
-        let _folder_id;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _q = reader.tgReadString();
-        _offset_rate = reader.readInt();
-        _offset_peer = reader.tgReadObject();
-        _offset_id = reader.readInt();
-        _limit = reader.readInt();
         if (flags & 1) {
             _folder_id = reader.readInt();
         }
         else {
             _folder_id = null
         }
-        return new this({q:_q,
+        _q = reader.tgReadString();
+        _offset_rate = reader.readInt();
+        _offset_peer = reader.tgReadObject();
+        _offset_id = reader.readInt();
+        _limit = reader.readInt();
+        return new this({folderId:_folder_id,
+	q:_q,
 	offsetRate:_offset_rate,
 	offsetPeer:_offset_peer,
 	offsetId:_offset_id,
-	limit:_limit,
-	folderId:_folder_id})
+	limit:_limit})
     }
 }
 
@@ -2243,8 +2243,8 @@ class ReorderStickerSetsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x78337739;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.order = args.order;
         this.masks = args.masks || null;
+        this.order = args.order;
     }
     get bytes() {
         return Buffer.concat([
@@ -2255,12 +2255,13 @@ class ReorderStickerSetsRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
-        let _order;
         let _masks;
+        let _order;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _masks = Boolean(flags & 1);
         reader.readInt();
         _order = [];
         len = reader.readInt();
@@ -2268,9 +2269,8 @@ class ReorderStickerSetsRequest extends TLRequest {
             _x = reader.readLong();
             _order.push(_x);
             }
-            _masks = Boolean(flags & 1);
-            return new this({order:_order,
-	masks:_masks})
+            return new this({masks:_masks,
+	order:_order})
         }
     }
 
@@ -2437,9 +2437,9 @@ class GetInlineBotResultsRequest extends TLRequest {
 
         this.bot = args.bot;
         this.peer = args.peer;
+        this.geoPoint = args.geoPoint || null;
         this.query = args.query;
         this.offset = args.offset;
-        this.geoPoint = args.geoPoint || null;
     }
     async resolve(client, utils) {
         this.bot = utils.getInputUser(await client.getInputEntity(this.bot))
@@ -2451,37 +2451,37 @@ class GetInlineBotResultsRequest extends TLRequest {
             struct.pack('<I', (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint === null) ? 0 : 1),
             this.bot.bytes,
             this.peer.bytes,
+            (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint ===null) ? Buffer.alloc(0) : [this.geoPoint.bytes],
             TLObject.serializeBytes(this.query),
             TLObject.serializeBytes(this.offset),
-            (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint ===null) ? Buffer.alloc(0) : [this.geoPoint.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _bot;
         let _peer;
+        let _geo_point;
         let _query;
         let _offset;
-        let _geo_point;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _bot = reader.tgReadObject();
         _peer = reader.tgReadObject();
-        _query = reader.tgReadString();
-        _offset = reader.tgReadString();
         if (flags & 1) {
             _geo_point = reader.tgReadObject();
         }
         else {
             _geo_point = null
         }
+        _query = reader.tgReadString();
+        _offset = reader.tgReadString();
         return new this({bot:_bot,
 	peer:_peer,
+	geoPoint:_geo_point,
 	query:_query,
-	offset:_offset,
-	geoPoint:_geo_point})
+	offset:_offset})
     }
 }
 
@@ -2499,38 +2499,40 @@ class SetInlineBotResultsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xeb5ea206;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.gallery = args.gallery || null;
+        this.private = args.private || null;
         this.queryId = args.queryId;
         this.results = args.results;
         this.cacheTime = args.cacheTime;
-        this.switchPm = args.switchPm || null;
         this.nextOffset = args.nextOffset || null;
-        this.private = args.private || null;
-        this.gallery = args.gallery || null;
+        this.switchPm = args.switchPm || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("06a25eeb","hex"),
-            struct.pack('<I', (this.switchPm === undefined || this.switchPm === false || this.switchPm === null) ? 0 : 8 | (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset === null) ? 0 : 4 | (this.private === undefined || this.private === false || this.private === null) ? 0 : 2 | (this.gallery === undefined || this.gallery === false || this.gallery === null) ? 0 : 1),
+            struct.pack('<I', (this.gallery === undefined || this.gallery === false || this.gallery === null) ? 0 : 1 | (this.private === undefined || this.private === false || this.private === null) ? 0 : 2 | (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset === null) ? 0 : 4 | (this.switchPm === undefined || this.switchPm === false || this.switchPm === null) ? 0 : 8),
             readBufferFromBigInt(this.queryId,8,true,true),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.results.length),Buffer.concat(this.results.map(x => x.bytes)),
             struct.pack('<i', this.cacheTime),
-            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.bytes],
             (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nextOffset)],
+            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.bytes],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _gallery;
+        let _private;
         let _query_id;
         let _results;
         let _cache_time;
-        let _switch_pm;
         let _next_offset;
-        let _private;
-        let _gallery;
+        let _switch_pm;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _gallery = Boolean(flags & 1);
+        _private = Boolean(flags & 2);
         _query_id = reader.readLong();
         reader.readInt();
         _results = [];
@@ -2540,27 +2542,25 @@ class SetInlineBotResultsRequest extends TLRequest {
             _results.push(_x);
             }
             _cache_time = reader.readInt();
-            if (flags & 8) {
-                _switch_pm = reader.tgReadObject();
-            }
-            else {
-                _switch_pm = null
-            }
             if (flags & 4) {
                 _next_offset = reader.tgReadString();
             }
             else {
                 _next_offset = null
             }
-            _private = Boolean(flags & 2);
-            _gallery = Boolean(flags & 1);
-            return new this({queryId:_query_id,
+            if (flags & 8) {
+                _switch_pm = reader.tgReadObject();
+            }
+            else {
+                _switch_pm = null
+            }
+            return new this({gallery:_gallery,
+	private:_private,
+	queryId:_query_id,
 	results:_results,
 	cacheTime:_cache_time,
-	switchPm:_switch_pm,
 	nextOffset:_next_offset,
-	private:_private,
-	gallery:_gallery})
+	switchPm:_switch_pm})
         }
     }
 
@@ -2578,16 +2578,16 @@ class SendInlineBotResultRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x220815b0;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
-        this.peer = args.peer;
-        this.id = args.id;
-        this.queryId = args.queryId;
-        this.scheduleDate = args.scheduleDate || null;
+        this.silent = args.silent || null;
         this.background = args.background || null;
         this.clearDraft = args.clearDraft || null;
-        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
-        this.replyToMsgId = args.replyToMsgId || null;
-        this.silent = args.silent || null;
         this.hideVia = args.hideVia || null;
+        this.peer = args.peer;
+        this.replyToMsgId = args.replyToMsgId || null;
+        this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
+        this.queryId = args.queryId;
+        this.id = args.id;
+        this.scheduleDate = args.scheduleDate || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -2595,61 +2595,61 @@ class SendInlineBotResultRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("b0150822","hex"),
+            struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.hideVia === undefined || this.hideVia === false || this.hideVia === null) ? 0 : 2048 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
             this.peer.bytes,
-            struct.pack('<I', (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.hideVia === undefined || this.hideVia === false || this.hideVia === null) ? 0 : 2048),
-            TLObject.serializeBytes(this.id),
-            readBufferFromBigInt(this.queryId,8,true,true),
-            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            readBufferFromBigInt(this.randomId,8,true,true),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
+            readBufferFromBigInt(this.randomId,8,true,true),
+            readBufferFromBigInt(this.queryId,8,true,true),
+            TLObject.serializeBytes(this.id),
+            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
     static fromReader(reader) {
-        let _peer;
         let _flags;
-        let _id;
-        let _query_id;
-        let _schedule_date;
+        let _silent;
         let _background;
         let _clear_draft;
-        let _random_id;
-        let _reply_to_msg_id;
-        let _silent;
         let _hide_via;
+        let _peer;
+        let _reply_to_msg_id;
+        let _random_id;
+        let _query_id;
+        let _id;
+        let _schedule_date;
         let _x;
         let len;
-        _peer = reader.tgReadObject();
         let flags = reader.readInt();
 
-        _id = reader.tgReadString();
-        _query_id = reader.readLong();
-        if (flags & 1024) {
-            _schedule_date = reader.readInt();
-        }
-        else {
-            _schedule_date = null
-        }
+        _silent = Boolean(flags & 32);
         _background = Boolean(flags & 64);
         _clear_draft = Boolean(flags & 128);
-        _random_id = reader.readLong();
+        _hide_via = Boolean(flags & 2048);
+        _peer = reader.tgReadObject();
         if (flags & 1) {
             _reply_to_msg_id = reader.readInt();
         }
         else {
             _reply_to_msg_id = null
         }
-        _silent = Boolean(flags & 32);
-        _hide_via = Boolean(flags & 2048);
-        return new this({peer:_peer,
-	id:_id,
-	queryId:_query_id,
-	scheduleDate:_schedule_date,
+        _random_id = reader.readLong();
+        _query_id = reader.readLong();
+        _id = reader.tgReadString();
+        if (flags & 1024) {
+            _schedule_date = reader.readInt();
+        }
+        else {
+            _schedule_date = null
+        }
+        return new this({silent:_silent,
 	background:_background,
 	clearDraft:_clear_draft,
-	randomId:_random_id,
+	hideVia:_hide_via,
+	peer:_peer,
 	replyToMsgId:_reply_to_msg_id,
-	silent:_silent,
-	hideVia:_hide_via})
+	randomId:_random_id,
+	queryId:_query_id,
+	id:_id,
+	scheduleDate:_schedule_date})
     }
 }
 
@@ -2706,14 +2706,14 @@ class EditMessageRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x48f71778;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.noWebpage = args.noWebpage || null;
         this.peer = args.peer;
         this.id = args.id;
-        this.scheduleDate = args.scheduleDate || null;
-        this.entities = args.entities || null;
-        this.replyMarkup = args.replyMarkup || null;
-        this.media = args.media || null;
         this.message = args.message || null;
-        this.noWebpage = args.noWebpage || null;
+        this.media = args.media || null;
+        this.replyMarkup = args.replyMarkup || null;
+        this.entities = args.entities || null;
+        this.scheduleDate = args.scheduleDate || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -2724,37 +2724,50 @@ class EditMessageRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("7817f748","hex"),
-            struct.pack('<I', (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 32768 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2),
+            struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 32768),
             this.peer.bytes,
             struct.pack('<i', this.id),
-            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
+            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _no_webpage;
         let _peer;
         let _id;
-        let _schedule_date;
-        let _entities;
-        let _reply_markup;
-        let _media;
         let _message;
-        let _no_webpage;
+        let _media;
+        let _reply_markup;
+        let _entities;
+        let _schedule_date;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _no_webpage = Boolean(flags & 2);
         _peer = reader.tgReadObject();
         _id = reader.readInt();
-        if (flags & 32768) {
-            _schedule_date = reader.readInt();
+        if (flags & 2048) {
+            _message = reader.tgReadString();
         }
         else {
-            _schedule_date = null
+            _message = null
+        }
+        if (flags & 16384) {
+            _media = reader.tgReadObject();
+        }
+        else {
+            _media = null
+        }
+        if (flags & 4) {
+            _reply_markup = reader.tgReadObject();
+        }
+        else {
+            _reply_markup = null
         }
         if (flags & 8) {
             reader.readInt();
@@ -2768,33 +2781,20 @@ class EditMessageRequest extends TLRequest {
             else {
                 _entities = null
             }
-            if (flags & 4) {
-                _reply_markup = reader.tgReadObject();
+            if (flags & 32768) {
+                _schedule_date = reader.readInt();
             }
             else {
-                _reply_markup = null
+                _schedule_date = null
             }
-            if (flags & 16384) {
-                _media = reader.tgReadObject();
-            }
-            else {
-                _media = null
-            }
-            if (flags & 2048) {
-                _message = reader.tgReadString();
-            }
-            else {
-                _message = null
-            }
-            _no_webpage = Boolean(flags & 2);
-            return new this({peer:_peer,
+            return new this({noWebpage:_no_webpage,
+	peer:_peer,
 	id:_id,
-	scheduleDate:_schedule_date,
-	entities:_entities,
-	replyMarkup:_reply_markup,
-	media:_media,
 	message:_message,
-	noWebpage:_no_webpage})
+	media:_media,
+	replyMarkup:_reply_markup,
+	entities:_entities,
+	scheduleDate:_schedule_date})
         }
     }
 
@@ -2812,12 +2812,12 @@ class EditInlineBotMessageRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x83557dba;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.id = args.id;
-        this.entities = args.entities || null;
-        this.replyMarkup = args.replyMarkup || null;
-        this.media = args.media || null;
-        this.message = args.message || null;
         this.noWebpage = args.noWebpage || null;
+        this.id = args.id;
+        this.message = args.message || null;
+        this.media = args.media || null;
+        this.replyMarkup = args.replyMarkup || null;
+        this.entities = args.entities || null;
     }
     async resolve(client, utils) {
         if (this.media) {
@@ -2827,27 +2827,46 @@ class EditInlineBotMessageRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("ba7d5583","hex"),
-            struct.pack('<I', (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2),
+            struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8),
             this.id.bytes,
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
+            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _id;
-        let _entities;
-        let _reply_markup;
-        let _media;
-        let _message;
         let _no_webpage;
+        let _id;
+        let _message;
+        let _media;
+        let _reply_markup;
+        let _entities;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _no_webpage = Boolean(flags & 2);
         _id = reader.tgReadObject();
+        if (flags & 2048) {
+            _message = reader.tgReadString();
+        }
+        else {
+            _message = null
+        }
+        if (flags & 16384) {
+            _media = reader.tgReadObject();
+        }
+        else {
+            _media = null
+        }
+        if (flags & 4) {
+            _reply_markup = reader.tgReadObject();
+        }
+        else {
+            _reply_markup = null
+        }
         if (flags & 8) {
             reader.readInt();
             _entities = [];
@@ -2860,31 +2879,12 @@ class EditInlineBotMessageRequest extends TLRequest {
             else {
                 _entities = null
             }
-            if (flags & 4) {
-                _reply_markup = reader.tgReadObject();
-            }
-            else {
-                _reply_markup = null
-            }
-            if (flags & 16384) {
-                _media = reader.tgReadObject();
-            }
-            else {
-                _media = null
-            }
-            if (flags & 2048) {
-                _message = reader.tgReadString();
-            }
-            else {
-                _message = null
-            }
-            _no_webpage = Boolean(flags & 2);
-            return new this({id:_id,
-	entities:_entities,
-	replyMarkup:_reply_markup,
-	media:_media,
+            return new this({noWebpage:_no_webpage,
+	id:_id,
 	message:_message,
-	noWebpage:_no_webpage})
+	media:_media,
+	replyMarkup:_reply_markup,
+	entities:_entities})
         }
     }
 
@@ -2902,10 +2902,10 @@ class GetBotCallbackAnswerRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x810a9fec;
         this.SUBCLASS_OF_ID = 0x6c4dd18c;
 
+        this.game = args.game || null;
         this.peer = args.peer;
         this.msgId = args.msgId;
         this.data = args.data || null;
-        this.game = args.game || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -2913,7 +2913,7 @@ class GetBotCallbackAnswerRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("ec9f0a81","hex"),
-            struct.pack('<I', (this.data === undefined || this.data === false || this.data === null) ? 0 : 1 | (this.game === undefined || this.game === false || this.game === null) ? 0 : 2),
+            struct.pack('<I', (this.game === undefined || this.game === false || this.game === null) ? 0 : 2 | (this.data === undefined || this.data === false || this.data === null) ? 0 : 1),
             this.peer.bytes,
             struct.pack('<i', this.msgId),
             (this.data === undefined || this.data === false || this.data ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.data)],
@@ -2921,14 +2921,15 @@ class GetBotCallbackAnswerRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _game;
         let _peer;
         let _msg_id;
         let _data;
-        let _game;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _game = Boolean(flags & 2);
         _peer = reader.tgReadObject();
         _msg_id = reader.readInt();
         if (flags & 1) {
@@ -2937,11 +2938,10 @@ class GetBotCallbackAnswerRequest extends TLRequest {
         else {
             _data = null
         }
-        _game = Boolean(flags & 2);
-        return new this({peer:_peer,
+        return new this({game:_game,
+	peer:_peer,
 	msgId:_msg_id,
-	data:_data,
-	game:_game})
+	data:_data})
     }
 }
 
@@ -2959,53 +2959,53 @@ class SetBotCallbackAnswerRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xd58f130a;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.queryId = args.queryId;
-        this.cacheTime = args.cacheTime;
-        this.url = args.url || null;
-        this.message = args.message || null;
         this.alert = args.alert || null;
+        this.queryId = args.queryId;
+        this.message = args.message || null;
+        this.url = args.url || null;
+        this.cacheTime = args.cacheTime;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("0a138fd5","hex"),
-            struct.pack('<I', (this.url === undefined || this.url === false || this.url === null) ? 0 : 4 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 1 | (this.alert === undefined || this.alert === false || this.alert === null) ? 0 : 2),
+            struct.pack('<I', (this.alert === undefined || this.alert === false || this.alert === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 1 | (this.url === undefined || this.url === false || this.url === null) ? 0 : 4),
             readBufferFromBigInt(this.queryId,8,true,true),
-            struct.pack('<i', this.cacheTime),
-            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
+            (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
+            struct.pack('<i', this.cacheTime),
             ])
         }
     static fromReader(reader) {
         let _flags;
-        let _query_id;
-        let _cache_time;
-        let _url;
-        let _message;
         let _alert;
+        let _query_id;
+        let _message;
+        let _url;
+        let _cache_time;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _alert = Boolean(flags & 2);
         _query_id = reader.readLong();
-        _cache_time = reader.readInt();
-        if (flags & 4) {
-            _url = reader.tgReadString();
-        }
-        else {
-            _url = null
-        }
         if (flags & 1) {
             _message = reader.tgReadString();
         }
         else {
             _message = null
         }
-        _alert = Boolean(flags & 2);
-        return new this({queryId:_query_id,
-	cacheTime:_cache_time,
-	url:_url,
+        if (flags & 4) {
+            _url = reader.tgReadString();
+        }
+        else {
+            _url = null
+        }
+        _cache_time = reader.readInt();
+        return new this({alert:_alert,
+	queryId:_query_id,
 	message:_message,
-	alert:_alert})
+	url:_url,
+	cacheTime:_cache_time})
     }
 }
 
@@ -3066,11 +3066,11 @@ class SaveDraftRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xbc39e14b;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.noWebpage = args.noWebpage || null;
+        this.replyToMsgId = args.replyToMsgId || null;
         this.peer = args.peer;
         this.message = args.message;
         this.entities = args.entities || null;
-        this.replyToMsgId = args.replyToMsgId || null;
-        this.noWebpage = args.noWebpage || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -3078,24 +3078,31 @@ class SaveDraftRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("4be139bc","hex"),
-            struct.pack('<I', (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2),
+            struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8),
+            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             this.peer.bytes,
             TLObject.serializeBytes(this.message),
             (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
-            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _no_webpage;
+        let _reply_to_msg_id;
         let _peer;
         let _message;
         let _entities;
-        let _reply_to_msg_id;
-        let _no_webpage;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _no_webpage = Boolean(flags & 2);
+        if (flags & 1) {
+            _reply_to_msg_id = reader.readInt();
+        }
+        else {
+            _reply_to_msg_id = null
+        }
         _peer = reader.tgReadObject();
         _message = reader.tgReadString();
         if (flags & 8) {
@@ -3110,18 +3117,11 @@ class SaveDraftRequest extends TLRequest {
             else {
                 _entities = null
             }
-            if (flags & 1) {
-                _reply_to_msg_id = reader.readInt();
-            }
-            else {
-                _reply_to_msg_id = null
-            }
-            _no_webpage = Boolean(flags & 2);
-            return new this({peer:_peer,
-	message:_message,
-	entities:_entities,
+            return new this({noWebpage:_no_webpage,
 	replyToMsgId:_reply_to_msg_id,
-	noWebpage:_no_webpage})
+	peer:_peer,
+	message:_message,
+	entities:_entities})
         }
     }
 
@@ -3230,8 +3230,8 @@ class GetRecentStickersRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x5ea192c9;
         this.SUBCLASS_OF_ID = 0xf76f8683;
 
-        this.hash = args.hash;
         this.attached = args.attached || null;
+        this.hash = args.hash;
     }
     get bytes() {
         return Buffer.concat([
@@ -3242,16 +3242,16 @@ class GetRecentStickersRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
-        let _hash;
         let _attached;
+        let _hash;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _hash = reader.readInt();
         _attached = Boolean(flags & 1);
-        return new this({hash:_hash,
-	attached:_attached})
+        _hash = reader.readInt();
+        return new this({attached:_attached,
+	hash:_hash})
     }
 }
 
@@ -3269,9 +3269,9 @@ class SaveRecentStickerRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x392718f8;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.attached = args.attached || null;
         this.id = args.id;
         this.unsave = args.unsave;
-        this.attached = args.attached || null;
     }
     async resolve(client, utils) {
         this.id = utils.getInputDocument(this.id)
@@ -3286,19 +3286,19 @@ class SaveRecentStickerRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _attached;
         let _id;
         let _unsave;
-        let _attached;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _attached = Boolean(flags & 1);
         _id = reader.tgReadObject();
         _unsave = reader.tgReadBool();
-        _attached = Boolean(flags & 1);
-        return new this({id:_id,
-	unsave:_unsave,
-	attached:_attached})
+        return new this({attached:_attached,
+	id:_id,
+	unsave:_unsave})
     }
 }
 
@@ -3350,9 +3350,9 @@ class GetArchivedStickersRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x57f17692;
         this.SUBCLASS_OF_ID = 0x7296d771;
 
+        this.masks = args.masks || null;
         this.offsetId = args.offsetId;
         this.limit = args.limit;
-        this.masks = args.masks || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -3364,19 +3364,19 @@ class GetArchivedStickersRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _masks;
         let _offset_id;
         let _limit;
-        let _masks;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _masks = Boolean(flags & 1);
         _offset_id = reader.readLong();
         _limit = reader.readInt();
-        _masks = Boolean(flags & 1);
-        return new this({offsetId:_offset_id,
-	limit:_limit,
-	masks:_masks})
+        return new this({masks:_masks,
+	offsetId:_offset_id,
+	limit:_limit})
     }
 }
 
@@ -3456,12 +3456,12 @@ class SetGameScoreRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x8ef8ecc0;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.editMessage = args.editMessage || null;
+        this.force = args.force || null;
         this.peer = args.peer;
         this.id = args.id;
         this.userId = args.userId;
         this.score = args.score;
-        this.force = args.force || null;
-        this.editMessage = args.editMessage || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -3470,7 +3470,7 @@ class SetGameScoreRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("c0ecf88e","hex"),
-            struct.pack('<I', (this.force === undefined || this.force === false || this.force === null) ? 0 : 2 | (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1),
+            struct.pack('<I', (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1 | (this.force === undefined || this.force === false || this.force === null) ? 0 : 2),
             this.peer.bytes,
             struct.pack('<i', this.id),
             this.userId.bytes,
@@ -3479,28 +3479,28 @@ class SetGameScoreRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _edit_message;
+        let _force;
         let _peer;
         let _id;
         let _user_id;
         let _score;
-        let _force;
-        let _edit_message;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _edit_message = Boolean(flags & 1);
+        _force = Boolean(flags & 2);
         _peer = reader.tgReadObject();
         _id = reader.readInt();
         _user_id = reader.tgReadObject();
         _score = reader.readInt();
-        _force = Boolean(flags & 2);
-        _edit_message = Boolean(flags & 1);
-        return new this({peer:_peer,
+        return new this({editMessage:_edit_message,
+	force:_force,
+	peer:_peer,
 	id:_id,
 	userId:_user_id,
-	score:_score,
-	force:_force,
-	editMessage:_edit_message})
+	score:_score})
     }
 }
 
@@ -3518,11 +3518,11 @@ class SetInlineGameScoreRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x15ad9f64;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.editMessage = args.editMessage || null;
+        this.force = args.force || null;
         this.id = args.id;
         this.userId = args.userId;
         this.score = args.score;
-        this.force = args.force || null;
-        this.editMessage = args.editMessage || null;
     }
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
@@ -3530,7 +3530,7 @@ class SetInlineGameScoreRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("649fad15","hex"),
-            struct.pack('<I', (this.force === undefined || this.force === false || this.force === null) ? 0 : 2 | (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1),
+            struct.pack('<I', (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1 | (this.force === undefined || this.force === false || this.force === null) ? 0 : 2),
             this.id.bytes,
             this.userId.bytes,
             struct.pack('<i', this.score),
@@ -3538,25 +3538,25 @@ class SetInlineGameScoreRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _edit_message;
+        let _force;
         let _id;
         let _user_id;
         let _score;
-        let _force;
-        let _edit_message;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _edit_message = Boolean(flags & 1);
+        _force = Boolean(flags & 2);
         _id = reader.tgReadObject();
         _user_id = reader.tgReadObject();
         _score = reader.readInt();
-        _force = Boolean(flags & 2);
-        _edit_message = Boolean(flags & 1);
-        return new this({id:_id,
-	userId:_user_id,
-	score:_score,
+        return new this({editMessage:_edit_message,
 	force:_force,
-	editMessage:_edit_message})
+	id:_id,
+	userId:_user_id,
+	score:_score})
     }
 }
 
@@ -3775,8 +3775,8 @@ class ToggleDialogPinRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xa731e257;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.peer = args.peer;
         this.pinned = args.pinned || null;
+        this.peer = args.peer;
     }
     async resolve(client, utils) {
         this.peer = await client._getInputDialog(this.peer)
@@ -3790,16 +3790,16 @@ class ToggleDialogPinRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
-        let _peer;
         let _pinned;
+        let _peer;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _peer = reader.tgReadObject();
         _pinned = Boolean(flags & 1);
-        return new this({peer:_peer,
-	pinned:_pinned})
+        _peer = reader.tgReadObject();
+        return new this({pinned:_pinned,
+	peer:_peer})
     }
 }
 
@@ -3817,9 +3817,9 @@ class ReorderPinnedDialogsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x3b1adf37;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.force = args.force || null;
         this.folderId = args.folderId;
         this.order = args.order;
-        this.force = args.force || null;
     }
     async resolve(client, utils) {
         const _tmp = [];for (const _x of this.order) {
@@ -3837,13 +3837,14 @@ class ReorderPinnedDialogsRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _force;
         let _folder_id;
         let _order;
-        let _force;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _force = Boolean(flags & 1);
         _folder_id = reader.readInt();
         reader.readInt();
         _order = [];
@@ -3852,10 +3853,9 @@ class ReorderPinnedDialogsRequest extends TLRequest {
             _x = reader.tgReadObject();
             _order.push(_x);
             }
-            _force = Boolean(flags & 1);
-            return new this({folderId:_folder_id,
-	order:_order,
-	force:_force})
+            return new this({force:_force,
+	folderId:_folder_id,
+	order:_order})
         }
     }
 
@@ -3905,28 +3905,34 @@ class SetBotShippingResultsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
         this.queryId = args.queryId;
-        this.shippingOptions = args.shippingOptions || null;
         this.error = args.error || null;
+        this.shippingOptions = args.shippingOptions || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("fa72f6e5","hex"),
-            struct.pack('<I', (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2 | (this.error === undefined || this.error === false || this.error === null) ? 0 : 1),
+            struct.pack('<I', (this.error === undefined || this.error === false || this.error === null) ? 0 : 1 | (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2),
             readBufferFromBigInt(this.queryId,8,true,true),
-            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
             (this.error === undefined || this.error === false || this.error ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.error)],
+            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
             ])
         }
     static fromReader(reader) {
         let _flags;
         let _query_id;
-        let _shipping_options;
         let _error;
+        let _shipping_options;
         let _x;
         let len;
         let flags = reader.readInt();
 
         _query_id = reader.readLong();
+        if (flags & 1) {
+            _error = reader.tgReadString();
+        }
+        else {
+            _error = null
+        }
         if (flags & 2) {
             reader.readInt();
             _shipping_options = [];
@@ -3939,15 +3945,9 @@ class SetBotShippingResultsRequest extends TLRequest {
             else {
                 _shipping_options = null
             }
-            if (flags & 1) {
-                _error = reader.tgReadString();
-            }
-            else {
-                _error = null
-            }
             return new this({queryId:_query_id,
-	shippingOptions:_shipping_options,
-	error:_error})
+	error:_error,
+	shippingOptions:_shipping_options})
         }
     }
 
@@ -3965,27 +3965,28 @@ class SetBotPrecheckoutResultsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x09c2dd95;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
+        this.success = args.success || null;
         this.queryId = args.queryId;
         this.error = args.error || null;
-        this.success = args.success || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("95ddc209","hex"),
-            struct.pack('<I', (this.error === undefined || this.error === false || this.error === null) ? 0 : 1 | (this.success === undefined || this.success === false || this.success === null) ? 0 : 2),
+            struct.pack('<I', (this.success === undefined || this.success === false || this.success === null) ? 0 : 2 | (this.error === undefined || this.error === false || this.error === null) ? 0 : 1),
             readBufferFromBigInt(this.queryId,8,true,true),
             (this.error === undefined || this.error === false || this.error ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.error)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _success;
         let _query_id;
         let _error;
-        let _success;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _success = Boolean(flags & 2);
         _query_id = reader.readLong();
         if (flags & 1) {
             _error = reader.tgReadString();
@@ -3993,10 +3994,9 @@ class SetBotPrecheckoutResultsRequest extends TLRequest {
         else {
             _error = null
         }
-        _success = Boolean(flags & 2);
-        return new this({queryId:_query_id,
-	error:_error,
-	success:_success})
+        return new this({success:_success,
+	queryId:_query_id,
+	error:_error})
     }
 }
 
@@ -4305,13 +4305,13 @@ class SendMultiMediaRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xcc0110cb;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.silent = args.silent || null;
+        this.background = args.background || null;
+        this.clearDraft = args.clearDraft || null;
         this.peer = args.peer;
+        this.replyToMsgId = args.replyToMsgId || null;
         this.multiMedia = args.multiMedia;
         this.scheduleDate = args.scheduleDate || null;
-        this.replyToMsgId = args.replyToMsgId || null;
-        this.clearDraft = args.clearDraft || null;
-        this.background = args.background || null;
-        this.silent = args.silent || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -4319,27 +4319,36 @@ class SendMultiMediaRequest extends TLRequest {
     get bytes() {
         return Buffer.concat([
             Buffer.from("cb1001cc","hex"),
-            struct.pack('<I', (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32),
+            struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
             this.peer.bytes,
+            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.multiMedia.length),Buffer.concat(this.multiMedia.map(x => x.bytes)),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
-            (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _silent;
+        let _background;
+        let _clear_draft;
         let _peer;
+        let _reply_to_msg_id;
         let _multi_media;
         let _schedule_date;
-        let _reply_to_msg_id;
-        let _clear_draft;
-        let _background;
-        let _silent;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _silent = Boolean(flags & 32);
+        _background = Boolean(flags & 64);
+        _clear_draft = Boolean(flags & 128);
         _peer = reader.tgReadObject();
+        if (flags & 1) {
+            _reply_to_msg_id = reader.readInt();
+        }
+        else {
+            _reply_to_msg_id = null
+        }
         reader.readInt();
         _multi_media = [];
         len = reader.readInt();
@@ -4353,22 +4362,13 @@ class SendMultiMediaRequest extends TLRequest {
             else {
                 _schedule_date = null
             }
-            if (flags & 1) {
-                _reply_to_msg_id = reader.readInt();
-            }
-            else {
-                _reply_to_msg_id = null
-            }
-            _clear_draft = Boolean(flags & 128);
-            _background = Boolean(flags & 64);
-            _silent = Boolean(flags & 32);
-            return new this({peer:_peer,
-	multiMedia:_multi_media,
-	scheduleDate:_schedule_date,
-	replyToMsgId:_reply_to_msg_id,
-	clearDraft:_clear_draft,
+            return new this({silent:_silent,
 	background:_background,
-	silent:_silent})
+	clearDraft:_clear_draft,
+	peer:_peer,
+	replyToMsgId:_reply_to_msg_id,
+	multiMedia:_multi_media,
+	scheduleDate:_schedule_date})
         }
     }
 
@@ -4422,9 +4422,9 @@ class SearchStickerSetsRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xc2b7d08b;
         this.SUBCLASS_OF_ID = 0x40df361;
 
+        this.excludeFeatured = args.excludeFeatured || null;
         this.q = args.q;
         this.hash = args.hash;
-        this.excludeFeatured = args.excludeFeatured || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -4436,19 +4436,19 @@ class SearchStickerSetsRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _exclude_featured;
         let _q;
         let _hash;
-        let _exclude_featured;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _exclude_featured = Boolean(flags & 1);
         _q = reader.tgReadString();
         _hash = reader.readInt();
-        _exclude_featured = Boolean(flags & 1);
-        return new this({q:_q,
-	hash:_hash,
-	excludeFeatured:_exclude_featured})
+        return new this({excludeFeatured:_exclude_featured,
+	q:_q,
+	hash:_hash})
     }
 }
 
@@ -4489,8 +4489,8 @@ class MarkDialogUnreadRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xc286d98f;
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
-        this.peer = args.peer;
         this.unread = args.unread || null;
+        this.peer = args.peer;
     }
     async resolve(client, utils) {
         this.peer = await client._getInputDialog(this.peer)
@@ -4504,16 +4504,16 @@ class MarkDialogUnreadRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
-        let _peer;
         let _unread;
+        let _peer;
         let _x;
         let len;
         let flags = reader.readInt();
 
-        _peer = reader.tgReadObject();
         _unread = Boolean(flags & 1);
-        return new this({peer:_peer,
-	unread:_unread})
+        _peer = reader.tgReadObject();
+        return new this({unread:_unread,
+	peer:_peer})
     }
 }
 
@@ -4577,9 +4577,9 @@ class UpdatePinnedMessageRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xd2aaf7ec;
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
+        this.silent = args.silent || null;
         this.peer = args.peer;
         this.id = args.id;
-        this.silent = args.silent || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -4594,19 +4594,19 @@ class UpdatePinnedMessageRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _silent;
         let _peer;
         let _id;
-        let _silent;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _silent = Boolean(flags & 1);
         _peer = reader.tgReadObject();
         _id = reader.readInt();
-        _silent = Boolean(flags & 1);
-        return new this({peer:_peer,
-	id:_id,
-	silent:_silent})
+        return new this({silent:_silent,
+	peer:_peer,
+	id:_id})
     }
 }
 
@@ -4747,9 +4747,9 @@ class GetStatsURLRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0x812c2ae6;
         this.SUBCLASS_OF_ID = 0x8d4c94c0;
 
+        this.dark = args.dark || null;
         this.peer = args.peer;
         this.params = args.params;
-        this.dark = args.dark || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -4764,19 +4764,19 @@ class GetStatsURLRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _dark;
         let _peer;
         let _params;
-        let _dark;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _dark = Boolean(flags & 1);
         _peer = reader.tgReadObject();
         _params = reader.tgReadString();
-        _dark = Boolean(flags & 1);
-        return new this({peer:_peer,
-	params:_params,
-	dark:_dark})
+        return new this({dark:_dark,
+	peer:_peer,
+	params:_params})
     }
 }
 
@@ -5096,10 +5096,10 @@ class AcceptUrlAuthRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xf729ea98;
         this.SUBCLASS_OF_ID = 0x7765cb1e;
 
+        this.writeAllowed = args.writeAllowed || null;
         this.peer = args.peer;
         this.msgId = args.msgId;
         this.buttonId = args.buttonId;
-        this.writeAllowed = args.writeAllowed || null;
     }
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
@@ -5115,22 +5115,22 @@ class AcceptUrlAuthRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _write_allowed;
         let _peer;
         let _msg_id;
         let _button_id;
-        let _write_allowed;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _write_allowed = Boolean(flags & 1);
         _peer = reader.tgReadObject();
         _msg_id = reader.readInt();
         _button_id = reader.readInt();
-        _write_allowed = Boolean(flags & 1);
-        return new this({peer:_peer,
+        return new this({writeAllowed:_write_allowed,
+	peer:_peer,
 	msgId:_msg_id,
-	buttonId:_button_id,
-	writeAllowed:_write_allowed})
+	buttonId:_button_id})
     }
 }
 

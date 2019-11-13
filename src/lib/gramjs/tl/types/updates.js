@@ -308,27 +308,28 @@ class ChannelDifferenceEmpty extends TLObject {
         this.CONSTRUCTOR_ID = 0x3e11affb;
         this.SUBCLASS_OF_ID = 0x29896f5d;
 
+        this.final = args.final || null;
         this.pts = args.pts;
         this.timeout = args.timeout || null;
-        this.final = args.final || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("fbaf113e","hex"),
-            struct.pack('<I', (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2 | (this.final === undefined || this.final === false || this.final === null) ? 0 : 1),
+            struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
             struct.pack('<i', this.pts),
             (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _final;
         let _pts;
         let _timeout;
-        let _final;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _final = Boolean(flags & 1);
         _pts = reader.readInt();
         if (flags & 2) {
             _timeout = reader.readInt();
@@ -336,10 +337,9 @@ class ChannelDifferenceEmpty extends TLObject {
         else {
             _timeout = null
         }
-        _final = Boolean(flags & 1);
-        return new this({pts:_pts,
-	timeout:_timeout,
-	final:_final})
+        return new this({final:_final,
+	pts:_pts,
+	timeout:_timeout})
     }
 }
 
@@ -357,36 +357,43 @@ class ChannelDifferenceTooLong extends TLObject {
         this.CONSTRUCTOR_ID = 0xa4bcc6fe;
         this.SUBCLASS_OF_ID = 0x29896f5d;
 
+        this.final = args.final || null;
+        this.timeout = args.timeout || null;
         this.dialog = args.dialog;
         this.messages = args.messages;
         this.chats = args.chats;
         this.users = args.users;
-        this.timeout = args.timeout || null;
-        this.final = args.final || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("fec6bca4","hex"),
-            struct.pack('<I', (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2 | (this.final === undefined || this.final === false || this.final === null) ? 0 : 1),
+            struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
+            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             this.dialog.bytes,
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.messages.length),Buffer.concat(this.messages.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _final;
+        let _timeout;
         let _dialog;
         let _messages;
         let _chats;
         let _users;
-        let _timeout;
-        let _final;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _final = Boolean(flags & 1);
+        if (flags & 2) {
+            _timeout = reader.readInt();
+        }
+        else {
+            _timeout = null
+        }
         _dialog = reader.tgReadObject();
         reader.readInt();
         _messages = [];
@@ -409,19 +416,12 @@ class ChannelDifferenceTooLong extends TLObject {
                     _x = reader.tgReadObject();
                     _users.push(_x);
                     }
-                    if (flags & 2) {
-                        _timeout = reader.readInt();
-                    }
-                    else {
-                        _timeout = null
-                    }
-                    _final = Boolean(flags & 1);
-                    return new this({dialog:_dialog,
+                    return new this({final:_final,
+	timeout:_timeout,
+	dialog:_dialog,
 	messages:_messages,
 	chats:_chats,
-	users:_users,
-	timeout:_timeout,
-	final:_final})
+	users:_users})
                 }
             }
 
@@ -439,40 +439,47 @@ class ChannelDifference extends TLObject {
         this.CONSTRUCTOR_ID = 0x2064674e;
         this.SUBCLASS_OF_ID = 0x29896f5d;
 
+        this.final = args.final || null;
         this.pts = args.pts;
+        this.timeout = args.timeout || null;
         this.newMessages = args.newMessages;
         this.otherUpdates = args.otherUpdates;
         this.chats = args.chats;
         this.users = args.users;
-        this.timeout = args.timeout || null;
-        this.final = args.final || null;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("4e676420","hex"),
-            struct.pack('<I', (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2 | (this.final === undefined || this.final === false || this.final === null) ? 0 : 1),
+            struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
             struct.pack('<i', this.pts),
+            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
             ])
         }
     static fromReader(reader) {
         let _flags;
+        let _final;
         let _pts;
+        let _timeout;
         let _new_messages;
         let _other_updates;
         let _chats;
         let _users;
-        let _timeout;
-        let _final;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _final = Boolean(flags & 1);
         _pts = reader.readInt();
+        if (flags & 2) {
+            _timeout = reader.readInt();
+        }
+        else {
+            _timeout = null
+        }
         reader.readInt();
         _new_messages = [];
         len = reader.readInt();
@@ -501,20 +508,13 @@ class ChannelDifference extends TLObject {
                         _x = reader.tgReadObject();
                         _users.push(_x);
                         }
-                        if (flags & 2) {
-                            _timeout = reader.readInt();
-                        }
-                        else {
-                            _timeout = null
-                        }
-                        _final = Boolean(flags & 1);
-                        return new this({pts:_pts,
+                        return new this({final:_final,
+	pts:_pts,
+	timeout:_timeout,
 	newMessages:_new_messages,
 	otherUpdates:_other_updates,
 	chats:_chats,
-	users:_users,
-	timeout:_timeout,
-	final:_final})
+	users:_users})
                     }
                 }
 

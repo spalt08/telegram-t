@@ -7,8 +7,6 @@
 const { rpcErrorsObject, rpcErrorRe } = require('./RPCErrorList')
 
 function RPCMessageToError(rpcError, request) {
-    console.error({ rpcError, request })
-
     // Try to get the error by direct look-up, otherwise regex
     const cls = rpcErrorsObject[rpcError.errorMessage]
     if (cls) {

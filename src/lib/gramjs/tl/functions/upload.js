@@ -60,10 +60,10 @@ class GetFileRequest extends TLRequest {
         this.CONSTRUCTOR_ID = 0xb15a9afc;
         this.SUBCLASS_OF_ID = 0x6c9bd728;
 
+        this.precise = args.precise || null;
         this.location = args.location;
         this.offset = args.offset;
         this.limit = args.limit;
-        this.precise = args.precise || null;
     }
     get bytes() {
         return Buffer.concat([
@@ -76,22 +76,22 @@ class GetFileRequest extends TLRequest {
         }
     static fromReader(reader) {
         let _flags;
+        let _precise;
         let _location;
         let _offset;
         let _limit;
-        let _precise;
         let _x;
         let len;
         let flags = reader.readInt();
 
+        _precise = Boolean(flags & 1);
         _location = reader.tgReadObject();
         _offset = reader.readInt();
         _limit = reader.readInt();
-        _precise = Boolean(flags & 1);
-        return new this({location:_location,
+        return new this({precise:_precise,
+	location:_location,
 	offset:_offset,
-	limit:_limit,
-	precise:_precise})
+	limit:_limit})
     }
 }
 

@@ -1,4 +1,4 @@
-const { types } = require('./tl/index')
+const { types } = require('./tl')
 
 const USERNAME_RE = new RegExp('@|(?:https?:\\/\\/)?(?:www\\.)?' +
     '(?:telegram\\.(?:me|dog)|t\\.me)\\/(@|joinchat\\/)?')
