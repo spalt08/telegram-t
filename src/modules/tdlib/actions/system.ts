@@ -1,6 +1,16 @@
-import { addReducer } from '../../../lib/teactn';
+import { addReducer, GlobalState } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
+import onUpdate from '../updaters';
+
+addReducer('init', (global: GlobalState) => {
+  TdLib.init(onUpdate);
+
+  return {
+    ...global,
+    isInitialized: true,
+  };
+});
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
