@@ -1,21 +1,32 @@
 import { MouseEvent } from 'react';
 
 import React, { FC, JsxChildren } from '../../lib/teact';
+
+import Spinner from '../Spinner';
 import './Button.scss';
 
 type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {
-  onClick: Function;
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: Function;
   children: JsxChildren;
   size?: 'default' | 'smaller';
   color?: 'primary' | 'secondary' | 'translucent';
   className?: string;
   round?: boolean;
+  isLoading?: boolean;
 }
 
 const Button: FC<IProps> = ({
-  onClick, children, size = 'default', color = 'primary', className, round,
+  type = 'button',
+  onClick,
+  children,
+  size = 'default',
+  color = 'primary',
+  className,
+  round,
+  isLoading,
 }) => {
   let combinedClass = 'Button';
   combinedClass += ` ${size} ${color}`;
@@ -26,9 +37,20 @@ const Button: FC<IProps> = ({
   if (className) {
     combinedClass += ` ${className}`;
   }
+  if (isLoading) {
+    combinedClass += ' loading';
+  }
 
   return (
-    <button type="button" className={combinedClass} onClick={onClick as OnClickHandler}>{children}</button>
+    // eslint-disable-next-line react/button-has-type
+    <button type={type} className={combinedClass} onClick={onClick ? onClick as OnClickHandler : undefined}>
+      {isLoading ? (
+        <div>
+          <span>Please wait...</span>
+          <Spinner color="white" />
+        </div>
+      ) : children}
+    </button>
   );
 };
 

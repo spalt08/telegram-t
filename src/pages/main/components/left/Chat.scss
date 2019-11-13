@@ -30,18 +30,30 @@
       padding-right: .15rem;
     }
 
+    h3 {
+      width: 80%;
+    }
+
     h3, .last-message {
       font-size: 1rem;
       line-height: 1.6875rem;
       margin: 0;
-      width: 80%;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
     .last-message {
+      flex-grow: 1;
       color: var(--color-text-secondary);
+
+      .sender-name {
+        color: var(--color-text);
+
+        &::after {
+          content: ': ';
+        }
+      }
     }
   }
 }

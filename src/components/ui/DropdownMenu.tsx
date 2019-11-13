@@ -1,13 +1,10 @@
 import React, { FC, JsxChildren, useState } from '../../lib/teact';
 
-import Button from './Button';
-
 import './DropdownMenu.scss';
 
 interface IProps {
-  icon: string;
-  size?: 'default' | 'smaller';
-  color?: 'primary' | 'secondary' | 'translucent';
+  className?: string;
+  trigger: FC<{ onClick: () => void }>;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   children: JsxChildren;
@@ -15,9 +12,8 @@ interface IProps {
 
 const DropdownMenu: FC<IProps> = (props) => {
   const {
-    icon,
-    size = 'smaller',
-    color = 'translucent',
+    trigger,
+    className,
     children,
     positionX = 'left',
     positionY = 'top',
@@ -25,14 +21,14 @@ const DropdownMenu: FC<IProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
 
-  let className = `bubble ${positionY} ${positionX}`;
+  let bubbleClassName = `bubble ${positionY} ${positionX}`;
 
   if (isOpen) {
-    className += ' open';
+    bubbleClassName += ' open';
   }
 
   if (isShown) {
-    className += ' shown';
+    bubbleClassName += ' shown';
   }
 
   const toggleIsOpen = () => {
@@ -46,14 +42,13 @@ const DropdownMenu: FC<IProps> = (props) => {
   };
 
   return (
-    <div className="DropdownMenu">
-      <Button round size={size} color={color} onClick={toggleIsOpen}>
-        <i className={`icon-${icon}`} />
-      </Button>
+    <div className={`DropdownMenu ${className || ''}`}>
+      {trigger({ onClick: toggleIsOpen })}
       {isOpen && (
         <div className="backdrop" onClick={toggleIsOpen} />
       )}
-      <ul className={className}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <ul className={bubbleClassName} onClick={toggleIsOpen}>
         {children}
       </ul>
     </div>

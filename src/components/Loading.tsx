@@ -1,11 +1,12 @@
 import React, { FC } from '../lib/teact';
 
+import Spinner from './Spinner';
 import './Loading.scss';
 
 const Loading: FC = () => {
   return (
     <div className="Loading">
-      <i className="icon-loader" />
+      <Spinner />
     </div>
   );
 };

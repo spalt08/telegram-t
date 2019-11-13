@@ -1,0 +1,37 @@
+@import '../../styles/flags';
+
+.CountryCodeInput {
+  cursor: pointer;
+
+  .bubble {
+    width: 100%;
+    max-height: 23.5rem;
+    overflow-y: auto;
+  }
+
+  .DropdownMenuItem {
+    button {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .country-flag {
+    font-size: 2rem;
+    margin-right: 2rem;
+
+    &.sprite {
+      color: transparent;
+      width: 1.5rem;
+      height: 1.5rem;
+      background-image: url('../../assets/flags.png');
+      background-repeat: no-repeat;
+      display: block;
+    }
+  }
+
+  .country-code {
+    margin-left: auto;
+    opacity: 0.5;
+  }
+}

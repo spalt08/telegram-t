@@ -4,7 +4,7 @@
   flex: 1;
   width: 100%;
   max-width: var(--messages-container-width);
-  height: 100%;
+  height: calc(100% - 1.1rem);
   padding: 0 1rem;
   overflow: auto;
 
@@ -28,7 +28,7 @@
     margin-bottom: 0.625rem;
 
     &:last-child {
-      margin-bottom: 0;
+      margin-bottom: 0.375rem;
     }
 
     :not(:last-child) .Avatar {

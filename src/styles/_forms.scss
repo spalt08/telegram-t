@@ -9,12 +9,14 @@
     top: -0.4rem;
     background-color: var(--color-background);
     font-size: 0.75rem;
+    font-weight: 400;
     color: transparent;
     opacity: 0;
     transition: all 0.15s ease;
   }
 
   &.touched label,
+  &.error label,
   .form-control:focus + label {
     opacity: 1;
   }
@@ -28,8 +30,8 @@
     color: var(--color-text-secondary);
   }
 
-  .form-control:focus + label {
-    color: var(--color-primary);
+  &.error label {
+    color: var(--color-error) !important;
   }
 }
 
@@ -52,6 +54,17 @@
   &:focus {
     --border-width: 2px;
     border-color: var(--color-primary);
+    caret-color: var(--color-primary);
+
+    & + label {
+      color: var(--color-primary);
+    }
+  }
+
+  .error & {
+    --border-width: 2px;
+    caret-color: var(--color-error);
+    border-color: var(--color-error);
   }
 }
 

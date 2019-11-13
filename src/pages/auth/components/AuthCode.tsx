@@ -3,7 +3,6 @@ import { ChangeEvent } from 'react';
 import React, { FC, useState } from '../../../lib/teact';
 import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
-import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 
 import './Auth.scss';
@@ -11,20 +10,17 @@ import './Auth.scss';
 type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'>;
 
 const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
-  const [isButtonShown, setIsButtonShown] = useState(false);
   const [code, setCode] = useState(undefined);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
 
-    target.value = target.value.replace(/[^\d]+/, '');
+    target.value = target.value.replace(/[^\d]+/, '').substr(0, 5);
 
     setCode(target.value);
-    setIsButtonShown(target.value.length === 5);
-  }
-
-  function handleSubmit() {
-    setAuthCode({ code });
+    if (target.value.length === 5) {
+      setAuthCode({ code: target.value });
+    }
   }
 
   return (
@@ -41,9 +37,6 @@ const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
         onChange={onCodeChange}
         value={code}
       />
-      {isButtonShown && (
-        <Button onClick={handleSubmit}>NEXT</Button>
-      )}
     </div>
   );
 };

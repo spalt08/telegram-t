@@ -2,37 +2,43 @@ import { ChangeEvent } from 'react';
 
 import React, { FC, useState } from '../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../lib/teactn';
+import countryList from '../../../../public/countries.json';
+import formatPhoneNumber from '../../../util/formatPhoneNumber';
 
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
-import Select from '../../../components/ui/Select';
+import CountryCodeInput from '../../../components/ui/CountryCodeInput';
 
 import './Auth.scss';
 
 type IProps = Pick<DispatchMap, 'setAuthPhoneNumber'>;
 
 const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
+  const currentCountry = countryList.find((c) => c.id === 'RU');
+
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [code, setCode] = useState('+7');
+  const [country, setCountry] = useState(currentCountry);
+  const [code, setCode] = useState(currentCountry ? currentCountry.code : undefined);
   const [phone, setPhone] = useState('');
 
-  function onCodeChange(e: ChangeEvent<HTMLSelectElement>) {
-    const { target } = e;
-
-    setCode(target.value);
+  function onCodeChange(newCountry: Country) {
+    setCode(newCountry.code);
+    setCountry(newCountry);
   }
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
 
-    target.value = target.value.replace(/[^\d]+/g, '');
+    const phoneNumber = formatPhoneNumber(target.value, country);
 
-    setPhone(target.value);
-    setIsButtonShown(target.value.length === 10);
+    setPhone(phoneNumber);
+    setIsButtonShown(phoneNumber.length >= 9);
+    target.value = `${code} ${phoneNumber}`;
   }
 
-  function handleSubmit() {
-    const phoneNumber = `${code}${phone}`;
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const phoneNumber = `${code}${phone.replace(/[^\d]+/g, '')}`;
     setAuthPhoneNumber({ phoneNumber });
   }
 
@@ -44,23 +50,22 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
         Please confirm your country and
         <br />enter your phone number.
       </p>
-      <Select
-        id="sign-in-phone-code"
-        label="Country"
-        value={code}
-        onChange={onCodeChange}
-      >
-        <option value="+7">Russia +7</option>
-      </Select>
-      <InputText
-        id="sign-in-phone-number"
-        label="Phone Number"
-        onChange={onPhoneNumberChange}
-        value={phone}
-      />
-      {isButtonShown && (
-        <Button onClick={handleSubmit}>NEXT</Button>
-      )}
+      <form action="" method="post" onSubmit={handleSubmit}>
+        <CountryCodeInput
+          id="sign-in-phone-code"
+          value={country}
+          onChange={onCodeChange}
+        />
+        <InputText
+          id="sign-in-phone-number"
+          label="Phone Number"
+          onChange={onPhoneNumberChange}
+          value={`${code} ${phone}`}
+        />
+        {isButtonShown && (
+          <Button type="submit">Next</Button>
+        )}
+      </form>
     </div>
   );
 };

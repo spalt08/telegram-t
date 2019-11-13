@@ -11,6 +11,8 @@ $color-links: #52a1ef;
 $color-text-green: #4fae4e;
 $color-green: #4dcd5e;
 
+$color-error: #e53935;
+
 $color-white: #ffffff;
 $color-black: #000000;
 $color-gray: #c4c9cc;
@@ -33,6 +35,8 @@ $color-chat-hover: #f4f4f5;
   --color-primary-shade-2: #{$color-primary-shade-2};
 
   --color-green: #{$color-green};
+
+  --color-error: #{$color-error};
 
   --color-links: #{$color-links};
   --color-links-hover: #{darken($color-links, 8%)};

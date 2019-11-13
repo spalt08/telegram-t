@@ -5,6 +5,10 @@ export function isPrivateChat(chatId: number) {
   return chatId > 0;
 }
 
+export function isGroupChat(chat: ApiChat) {
+  return chat.type['@type'] === 'chatTypeBasicGroup' || chat.type['@type'] === 'chatTypeSupergroup';
+}
+
 export function getPrivateChatUserId(chat: ApiPrivateChat) {
   return chat.type.user_id;
 }

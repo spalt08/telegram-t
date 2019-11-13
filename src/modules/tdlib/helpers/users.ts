@@ -4,6 +4,26 @@ import { getFileSrc } from '../../../api/tdlib/files';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
+export function getUserFirstName(user?: ApiUser) {
+  if (!user) {
+    return null;
+  }
+
+  switch (user.type['@type']) {
+    case 'userTypeBot':
+    case 'userTypeRegular': {
+      return user.first_name;
+    }
+
+    case 'userTypeDeleted':
+    case 'userTypeUnknown': {
+      return 'Deleted';
+    }
+  }
+
+  return null;
+}
+
 export function getUserFullName(user: ApiUser) {
   switch (user.type['@type']) {
     case 'userTypeBot':

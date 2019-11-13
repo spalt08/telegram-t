@@ -3,6 +3,7 @@ import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
 import DropdownMenu from '../../../../components/ui/DropdownMenu';
 import DropdownMenuItem from '../../../../components/ui/DropdownMenuItem';
+import Button from '../../../../components/ui/Button';
 import SearchInput from './SearchInput';
 
 import './LeftHeader.scss';
@@ -16,13 +17,17 @@ function onSignOut(signOut: Function) {
   }
 }
 
+const MenuButton: FC<{ onClick: () => void }> = ({ onClick }) => (
+  <Button round size="smaller" color="translucent" onClick={onClick}>
+    <i className="icon-menu" />
+  </Button>
+);
+
 const LeftHeader: FC<IProps> = ({ signOut }) => {
   return (
     <div id="LeftHeader">
       <DropdownMenu
-        size="smaller"
-        color="translucent"
-        icon="menu"
+        trigger={MenuButton}
       >
         {/* TODO @not-implemented */}
         {/* <DropdownMenuItem icon="new-group" onClick={() => {}}>New Group</DropdownMenuItem> */}

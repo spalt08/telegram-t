@@ -5,6 +5,7 @@ interface IProps {
   id?: string;
   value?: string;
   label?: string;
+  error?: string;
   placeholder?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -15,6 +16,7 @@ const InputText: FC<IProps> = (props) => {
     id,
     value,
     label,
+    error,
     placeholder,
     onChange,
     onKeyPress,
@@ -23,6 +25,9 @@ const InputText: FC<IProps> = (props) => {
   let className = 'input-group';
   if (value) {
     className += ' touched';
+  }
+  if (error) {
+    className += ' error';
   }
 
   return (
@@ -36,8 +41,8 @@ const InputText: FC<IProps> = (props) => {
         onKeyPress={onKeyPress}
         placeholder={placeholder || label}
       />
-      {label && (
-        <label>{label}</label>
+      {(error || label) && (
+        <label>{error || label}</label>
       )}
     </div>
   );

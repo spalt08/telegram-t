@@ -9,6 +9,7 @@
   padding: 0.625rem;
   color: white;
   cursor: pointer;
+  text-transform: uppercase;
   flex-shrink: 0;
 
   &.round {
@@ -72,6 +73,19 @@
 
     &.round {
       width: 2.75rem;
+    }
+  }
+
+  &.loading {
+    position: relative;
+    pointer-events: none;
+
+    .Spinner {
+      position: absolute;
+      right: 0.875rem;
+      top: 0.875rem;
+
+      --spinner-size: 1.8rem;
     }
   }
 }

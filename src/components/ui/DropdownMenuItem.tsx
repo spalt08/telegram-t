@@ -1,13 +1,14 @@
-import { MouseEvent } from 'react';
+import { MouseEvent as ReactMouseEvent } from 'react';
 
 import React, { FC, JsxChildren } from '../../lib/teact';
 
 import './DropdownMenu.scss';
 
-type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {
-  icon: string;
+  icon?: string;
+  className?: string;
   children: JsxChildren;
   onClick: OnClickHandler;
 }
@@ -15,14 +16,17 @@ interface IProps {
 const DropdownMenuItem: FC<IProps> = (props) => {
   const {
     icon,
+    className,
     children,
     onClick,
   } = props;
 
   return (
-    <li className="DropdownMenuItem">
+    <li className={`DropdownMenuItem ${className}`}>
       <button type="button" onClick={onClick as OnClickHandler}>
-        <i className={`icon-${icon}`} />
+        {icon && (
+          <i className={`icon-${icon}`} />
+        )}
         {children}
       </button>
     </li>

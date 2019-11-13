@@ -1,8 +1,15 @@
 import React, { FC } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat } from '../../../../api/tdlib/types';
-import { getChatTitle, getMessageText, isPrivateChat } from '../../../../modules/tdlib/helpers';
+import { ApiChat, ApiUser } from '../../../../api/tdlib/types';
+import {
+  getChatTitle,
+  getMessageText,
+  getUserFirstName,
+  isPrivateChat,
+  isGroupChat,
+} from '../../../../modules/tdlib/helpers';
+import { selectUser } from '../../../../modules/tdlib/selectors';
 import Avatar from '../../../../components/Avatar';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
@@ -10,10 +17,16 @@ import './Chat.scss';
 
 type IProps = {
   chat: ApiChat;
+  lastMessageSender?: ApiUser;
   selected: boolean;
 } & Pick<DispatchMap, 'selectChat'>;
 
-const Chat: FC<IProps> = ({ chat, selected, selectChat }) => {
+const Chat: FC<IProps> = ({
+  chat,
+  lastMessageSender,
+  selected,
+  selectChat,
+}) => {
   return (
     <div className={buildClassNames(chat, selected)} onClick={() => selectChat({ id: chat.id })} data-id={chat.id}>
       <Avatar chat={chat} />
@@ -26,7 +39,12 @@ const Chat: FC<IProps> = ({ chat, selected, selectChat }) => {
         </div>
         <div className="subtitle">
           {chat.last_message && (
-            <p className="last-message">{getMessageText(chat.last_message)}</p>
+            <p className="last-message">
+              {isGroupChat(chat) && getUserFirstName(lastMessageSender) && (
+                <span className="sender-name">{getUserFirstName(lastMessageSender)}</span>
+              )}
+              {getMessageText(chat.last_message)}
+            </p>
           )}
           <Badge chat={chat} />
         </div>
@@ -48,7 +66,15 @@ function buildClassNames(chat: ApiChat, isSelected: boolean) {
 }
 
 export default withGlobal(
-  undefined,
+  (global, { chat }: IProps) => {
+    if (!chat || !chat.last_message) {
+      return null;
+    }
+
+    return {
+      lastMessageSender: selectUser(global, chat.last_message.sender_user_id),
+    };
+  },
   (setGlobal, actions) => {
     const { selectChat } = actions;
     return { selectChat };
