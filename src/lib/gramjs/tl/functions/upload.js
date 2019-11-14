@@ -2,7 +2,7 @@
 const { TLObject } = require('../tlobject');
 const { TLRequest } = require('../tlobject');
 const struct = require('python-struct');
-const { readBigIntFromBuffer, 
+const { readBigIntFromBuffer,
         readBufferFromBigInt, generateRandomBytes } = require('../../Helpers')
 
 
@@ -21,14 +21,14 @@ class SaveFilePartRequest extends TLRequest {
 
         this.fileId = args.fileId;
         this.filePart = args.filePart;
-        this.bytes = args.bytes;
+        this._bytes = args.bytes;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("21a604b3","hex"),
             readBufferFromBigInt(this.fileId,8,true,true),
             struct.pack('<i', this.filePart),
-            TLObject.serializeBytes(this.bytes),
+            TLObject.serializeBytes(this._bytes),
             ])
         }
     static fromReader(reader) {
@@ -112,7 +112,7 @@ class SaveBigFilePartRequest extends TLRequest {
         this.fileId = args.fileId;
         this.filePart = args.filePart;
         this.fileTotalParts = args.fileTotalParts;
-        this.bytes = args.bytes;
+        this._bytes = args.bytes;
     }
     get bytes() {
         return Buffer.concat([
@@ -120,7 +120,7 @@ class SaveBigFilePartRequest extends TLRequest {
             readBufferFromBigInt(this.fileId,8,true,true),
             struct.pack('<i', this.filePart),
             struct.pack('<i', this.fileTotalParts),
-            TLObject.serializeBytes(this.bytes),
+            TLObject.serializeBytes(this._bytes),
             ])
         }
     static fromReader(reader) {

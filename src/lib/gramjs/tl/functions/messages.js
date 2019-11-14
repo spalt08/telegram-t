@@ -2,9 +2,9 @@
 const { TLObject } = require('../tlobject');
 const { TLRequest } = require('../tlobject');
 const struct = require('python-struct');
-const { readBigIntFromBuffer, 
-        readBufferFromBigInt, generateRandomBytes } = require('../../Helpers')
-
+const { readBigIntFromBuffer,
+        readBufferFromBigInt, generateRandomBytes } = require('../../Helpers');
+const { InputPeerEmpty } = require('../types');
 
 class GetMessagesRequest extends TLRequest {
     static CONSTRUCTOR_ID = 0x63c66506;
@@ -66,7 +66,7 @@ class GetDialogsRequest extends TLRequest {
         this.folderId = args.folderId || null;
         this.offsetDate = args.offsetDate;
         this.offsetId = args.offsetId;
-        this.offsetPeer = args.offsetPeer;
+        this.offsetPeer = args.offsetPeer || new InputPeerEmpty();
         this.limit = args.limit;
         this.hash = args.hash;
     }

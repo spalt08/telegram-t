@@ -1,5 +1,6 @@
-require('regenerator-runtime/runtime')
-require('regenerator-runtime')
+// Not needed when build with Parcel.
+// require('regenerator-runtime/runtime')
+// require('regenerator-runtime')
 
 const TelegramClient = require('./client/TelegramClient')
 const connection = require('./network')

@@ -2,7 +2,7 @@
 const { TLObject } = require('../tlobject');
 const { TLRequest } = require('../tlobject');
 const struct = require('python-struct');
-const { readBigIntFromBuffer, 
+const { readBigIntFromBuffer,
         readBufferFromBigInt, generateRandomBytes } = require('../../Helpers')
 
 
@@ -230,13 +230,13 @@ class ImportAuthorizationRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xb9e04e39;
 
         this.id = args.id;
-        this.bytes = args.bytes;
+        this._bytes = args.bytes;
     }
     get bytes() {
         return Buffer.concat([
             Buffer.from("1396efe3","hex"),
             struct.pack('<i', this.id),
-            TLObject.serializeBytes(this.bytes),
+            TLObject.serializeBytes(this._bytes),
             ])
         }
     static fromReader(reader) {
