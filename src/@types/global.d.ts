@@ -8,3 +8,5 @@ type Country = {
   flag: string;
   code: string;
 };
+
+declare module '*.png';

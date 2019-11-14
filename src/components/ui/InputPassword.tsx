@@ -4,23 +4,23 @@ import React, { FC } from '../../lib/teact';
 interface IProps {
   id?: string;
   value?: string;
-  label?: string;
   error?: string;
-  placeholder?: string;
+  showPassword?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onShowToggle?: () => void;
 }
 
 const InputText: FC<IProps> = ({
   id,
   value,
-  label,
   error,
-  placeholder,
+  showPassword,
   onChange,
   onKeyPress,
+  onShowToggle,
 }) => {
-  let className = 'input-group';
+  let className = 'input-group password-input';
   if (value) {
     className += ' touched';
   }
@@ -32,16 +32,27 @@ const InputText: FC<IProps> = ({
     <div className={className}>
       <input
         className="form-control"
-        type="text"
+        type={showPassword ? 'text' : 'password'}
         id={id}
         value={value || ''}
         onChange={onChange}
         onKeyPress={onKeyPress}
-        placeholder={placeholder || label}
+        placeholder="Password"
       />
-      {(error || label) && (
-        <label>{error || label}</label>
-      )}
+      <label>{error || 'Password'}</label>
+      <div
+        className="toggle-password"
+        onClick={onShowToggle}
+        role="button"
+        tabIndex={0}
+        title="Toggle password visibility"
+      >
+        {showPassword ? (
+          <i className="icon-eye" />
+        ) : (
+          <i className="icon-eye-closed" />
+        )}
+      </div>
     </div>
   );
 };

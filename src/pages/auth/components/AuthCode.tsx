@@ -5,11 +5,15 @@ import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
 import InputText from '../../../components/ui/InputText';
 
+import monkeyCode from '../../../assets/monkey_code.png';
+import monkeyCodeInvalid from '../../../assets/monkey_code_invalid.png';
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'>;
+type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'> & {
+  error?: string;
+};
 
-const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
+const AuthCode: FC<IProps> = ({ authPhoneNumber, setAuthCode, error }) => {
   const [code, setCode] = useState(undefined);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
@@ -23,10 +27,28 @@ const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
     }
   }
 
+  function returnToAuthPhoneNumber() {
+    // TODO @not-implented
+  }
+
   return (
     <div id="auth-code-form" className="auth-form">
-      <div id="monkey" />
-      <h2>{authPhoneNumber}</h2>
+      <div id="monkey">
+        <img src={monkeyCode} className={!error ? 'shown' : ''} alt="" />
+        <img src={monkeyCodeInvalid} className={error ? 'shown' : ''} alt="" />
+      </div>
+      <h2>
+        {authPhoneNumber}
+        <div
+          className="auth-number-edit"
+          onClick={returnToAuthPhoneNumber}
+          role="button"
+          tabIndex={0}
+          title="Sign In with another phone number"
+        >
+          <i className="icon-edit" />
+        </div>
+      </h2>
       <p className="note">
         We have sent you an SMS
         <br />with the code.
@@ -36,6 +58,7 @@ const AuthPhoneNumber: FC<IProps> = ({ authPhoneNumber, setAuthCode }) => {
         label="Code"
         onChange={onCodeChange}
         value={code}
+        error={error}
       />
     </div>
   );
@@ -50,4 +73,4 @@ export default withGlobal(
     const { setAuthCode } = actions;
     return { setAuthCode };
   },
-)(AuthPhoneNumber);
+)(AuthCode);
