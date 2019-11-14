@@ -21,6 +21,7 @@ const App: FC<IProps> = ({ isInitialized, authState, init }) => {
     switch (authState) {
       case 'authorizationStateWaitCode':
       case 'authorizationStateWaitPassword':
+      case 'authorizationStateWaitRegistration':
       case 'authorizationStateWaitPhoneNumber':
         return <Auth />;
       case 'authorizationStateClosed':

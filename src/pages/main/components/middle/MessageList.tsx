@@ -100,9 +100,9 @@ function groupMessages(messages: ApiMessage[]) {
   messages.forEach((message, index) => {
     if (
       !group.length || (
-        message.sender_user_id === group[group.length - 1].sender_user_id &&
+        message.sender_user_id === group[group.length - 1].sender_user_id
         // Forwarded messages to chat with self.
-        message.is_outgoing === group[group.length - 1].is_outgoing
+        && message.is_outgoing === group[group.length - 1].is_outgoing
       )
     ) {
       group.push(message);
@@ -110,8 +110,8 @@ function groupMessages(messages: ApiMessage[]) {
 
     if (
       messages[index + 1] && (
-        message.sender_user_id !== messages[index + 1].sender_user_id ||
-        message.is_outgoing !== messages[index + 1].is_outgoing
+        message.sender_user_id !== messages[index + 1].sender_user_id
+        || message.is_outgoing !== messages[index + 1].is_outgoing
       )
     ) {
       messageGroups.push(group);

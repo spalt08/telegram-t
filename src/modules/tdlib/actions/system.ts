@@ -1,4 +1,6 @@
-import { addReducer, GlobalState, setGlobal } from '../../../lib/teactn';
+import {
+  addReducer, getGlobal, GlobalState, setGlobal,
+} from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import onUpdate from '../updaters';
@@ -12,59 +14,28 @@ addReducer('init', (global: GlobalState) => {
   };
 });
 
-addReducer('returnToAuthPhoneNumber', (global: GlobalState) => {
-  return {
-    ...global,
-    authState: 'authorizationStateWaitPhoneNumber',
-  };
-});
-
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
-  void TdLib.send({
-    '@type': 'setAuthenticationPhoneNumber',
-    phone_number: phoneNumber,
-  });
+  void setAuthPhoneNumber(phoneNumber);
 });
 
 addReducer('setAuthCode', (global, actions, payload) => {
   const { code } = payload!;
 
-  void TdLib.send({
-    '@type': 'checkAuthenticationCode',
-    code,
-  }, () => {
-    setGlobal({
-      ...global,
-      authError: 'Invalid Code',
-    });
-  });
+  void setAuthCode(code);
 });
 
 addReducer('setAuthPassword', (global, actions, payload) => {
   const { password } = payload!;
 
-  void TdLib.send({
-    '@type': 'checkAuthenticationPassword',
-    password,
-  }, () => {
-    setGlobal({
-      ...global,
-      authError: 'Invalid Password',
-    });
-  });
+  void setAuthPassword(password);
 });
 
 addReducer('signUp', (global, actions, payload) => {
   const { firstName, lastName } = payload!;
 
-  // TODO Support avatar.
-  TdLib.send({
-    '@type': 'registerUser',
-    first_name: firstName,
-    last_name: lastName,
-  });
+  void signUp(firstName, lastName);
 });
 
 addReducer('signOut', (global) => {
@@ -75,3 +46,97 @@ addReducer('signOut', (global) => {
     authError: undefined,
   });
 });
+
+async function setAuthPhoneNumber(phoneNumber: string) {
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: true,
+    authError: undefined,
+  });
+
+  await TdLib.send({
+    '@type': 'setAuthenticationPhoneNumber',
+    phone_number: phoneNumber,
+  }, () => {
+    setGlobal({
+      ...getGlobal(),
+      authError: 'Try Again Later',
+    });
+  });
+
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: false,
+  });
+}
+
+async function setAuthCode(code: string) {
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: true,
+    authError: undefined,
+  });
+
+  await TdLib.send({
+    '@type': 'checkAuthenticationCode',
+    code,
+  }, () => {
+    setGlobal({
+      ...getGlobal(),
+      authError: 'Invalid Code',
+    });
+  });
+
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: false,
+  });
+}
+
+async function setAuthPassword(password: string) {
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: true,
+    authError: undefined,
+  });
+
+  await TdLib.send({
+    '@type': 'checkAuthenticationPassword',
+    password,
+  }, () => {
+    setGlobal({
+      ...getGlobal(),
+      authError: 'Invalid Password',
+    });
+  });
+
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: false,
+  });
+}
+
+async function signUp(firstName: string, lastName: string) {
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: true,
+    authError: undefined,
+  });
+
+  // TODO Support avatar.
+  await TdLib.send({
+    '@type': 'registerUser',
+    first_name: firstName,
+    last_name: lastName,
+  }, () => {
+    setGlobal({
+      ...getGlobal(),
+      authError: 'Registration Error',
+    });
+  });
+
+  setGlobal({
+    ...getGlobal(),
+    authIsLoading: false,
+  });
+}

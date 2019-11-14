@@ -42,6 +42,7 @@ export type GlobalState = {
   isLoggingOut?: boolean;
   authState?: UpdateAuthorizationStateType;
   authPhoneNumber?: string;
+  authIsLoading?: boolean;
   authError?: string;
 };
 

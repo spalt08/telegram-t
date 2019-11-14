@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import { DispatchMap, withGlobal } from '../../../lib/teactn';
+import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
 import React, { FC, useState } from '../../../lib/teact';
 // import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
@@ -13,10 +13,10 @@ import monkeyPasswordShown from '../../../assets/monkey_password_shown.png';
 import monkeyPasswordHidden from '../../../assets/monkey_password_hidden.png';
 import './Auth.scss';
 
-type IProps = Pick<DispatchMap, 'setAuthPassword'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'setAuthPassword'>;
 
 // TODO Support `authError`.
-const AuthPassword: FC<IProps> = ({ setAuthPassword }) => {
+const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -31,7 +31,13 @@ const AuthPassword: FC<IProps> = ({ setAuthPassword }) => {
     setShowPassword(!showPassword);
   }
 
-  function handleSubmit() {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (authIsLoading) {
+      return;
+    }
+
     setAuthPassword({ password });
   }
 
@@ -53,9 +59,10 @@ const AuthPassword: FC<IProps> = ({ setAuthPassword }) => {
           onChange={onPasswordChange}
           onShowToggle={togglePasswordVisibility}
           value={password}
+          error={authError}
         />
         {isButtonShown && (
-          <Button type="submit">Next</Button>
+          <Button type="submit" isLoading={authIsLoading}>Next</Button>
         )}
       </form>
     </div>
@@ -63,7 +70,10 @@ const AuthPassword: FC<IProps> = ({ setAuthPassword }) => {
 };
 
 export default withGlobal(
-  undefined,
+  (global) => {
+    const { authIsLoading, authError } = global;
+    return { authIsLoading, authError };
+  },
   (setGlobal, actions) => {
     const { setAuthPassword } = actions;
     return { setAuthPassword };

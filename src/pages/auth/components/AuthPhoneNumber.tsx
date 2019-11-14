@@ -1,7 +1,7 @@
 import { ChangeEvent } from 'react';
 
 import React, { FC, useState } from '../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../lib/teactn';
+import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 import countryList from '../../../../public/countries.json';
 import formatPhoneNumber from '../../../util/formatPhoneNumber';
 
@@ -11,9 +11,9 @@ import CountryCodeInput from '../../../components/ui/CountryCodeInput';
 
 import './Auth.scss';
 
-type IProps = Pick<DispatchMap, 'setAuthPhoneNumber'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'setAuthPhoneNumber'>;
 
-const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
+const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNumber }) => {
   const currentCountry = countryList.find((c) => c.id === 'RU');
 
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -38,6 +38,11 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (authIsLoading) {
+      return;
+    }
+
     const phoneNumber = `${code}${phone.replace(/[^\d]+/g, '')}`;
     setAuthPhoneNumber({ phoneNumber });
   }
@@ -61,9 +66,10 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
           label="Phone Number"
           onChange={onPhoneNumberChange}
           value={`${code} ${phone}`}
+          error={authError}
         />
         {isButtonShown && (
-          <Button type="submit">Next</Button>
+          <Button type="submit" isLoading={authIsLoading}>Next</Button>
         )}
       </form>
     </div>
@@ -71,7 +77,10 @@ const AuthPhoneNumber: FC<IProps> = ({ setAuthPhoneNumber }) => {
 };
 
 export default withGlobal(
-  undefined,
+  (global) => {
+    const { authIsLoading, authError } = global;
+    return { authIsLoading, authError };
+  },
   (setGlobal, actions) => {
     const { setAuthPhoneNumber } = actions;
     return { setAuthPhoneNumber };

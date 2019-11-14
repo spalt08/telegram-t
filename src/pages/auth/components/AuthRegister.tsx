@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import { DispatchMap, withGlobal } from '../../../lib/teactn';
+import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
 import React, { FC, useState } from '../../../lib/teact';
 // import { DispatchMap, withGlobal } from '../../../lib/teactn';
@@ -9,9 +9,9 @@ import InputText from '../../../components/ui/InputText';
 
 import './Auth.scss';
 
-type IProps = Pick<DispatchMap, 'signUp'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'signUp'>;
 
-const AuthRegister: FC<IProps> = ({ signUp }) => {
+const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -78,7 +78,9 @@ const AuthRegister: FC<IProps> = ({ signUp }) => {
     reader.readAsDataURL(imgFile);
   }
 
-  function handleSubmit() {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
     signUp({ firstName, lastName });
   }
 
@@ -112,9 +114,10 @@ const AuthRegister: FC<IProps> = ({ signUp }) => {
           label="Last Name (optional)"
           onChange={onLastNameChange}
           value={lastName}
+          error={authError}
         />
         {isButtonShown && (
-          <Button type="submit">Start Messaging</Button>
+          <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
         )}
       </form>
     </div>
@@ -122,7 +125,10 @@ const AuthRegister: FC<IProps> = ({ signUp }) => {
 };
 
 export default withGlobal(
-  undefined,
+  (global) => {
+    const { authIsLoading, authError } = global;
+    return { authIsLoading, authError };
+  },
   (setGlobal, actions) => {
     const { signUp } = actions;
     return { signUp };
