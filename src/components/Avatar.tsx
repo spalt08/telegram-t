@@ -2,7 +2,7 @@ import React, { FC } from '../lib/teact';
 
 import { ApiUser, ApiChat } from '../api/tdlib/types';
 import {
-  getChatImage, getChatTitle, getUserFullName, getUserImage, isPrivateChat,
+  getChatImage, getChatTitle, getUserFullName, getUserImage, isPrivateChat, isUserOnline,
 } from '../modules/tdlib/helpers';
 
 import './Avatar.scss';
@@ -19,6 +19,7 @@ const Avatar: FC<IProps> = ({
   size = 'large', chat, user, imageUrl,
 }) => {
   let content: string | null = '';
+  const isOnline = user && isUserOnline(user);
 
   if (imageUrl) {
     content = (
@@ -33,7 +34,7 @@ const Avatar: FC<IProps> = ({
   }
 
   return (
-    <div className={`Avatar size-${size}`}>
+    <div className={`Avatar size-${size} ${isOnline ? 'online' : ''}`}>
       {content}
     </div>
   );

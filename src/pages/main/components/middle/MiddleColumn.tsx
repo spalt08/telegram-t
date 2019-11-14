@@ -3,7 +3,7 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { isPrivateChat } from '../../../../modules/tdlib/helpers';
 
-import DialogHeader from './PrivateChatHeader';
+import PrivateChatHeader from './PrivateChatHeader';
 import GroupHeader from './GroupHeader';
 import MessageList from './MessageList';
 import MiddleFooter from './MiddleFooter';
@@ -34,7 +34,7 @@ function renderSelectedChat(props: IProps) {
   return (
     <div className="messages-layout">
       {isPrivateChat(selectedChatId) ? (
-        <DialogHeader chatId={selectedChatId} />
+        <PrivateChatHeader chatId={selectedChatId} />
       ) : (
         <GroupHeader chatId={selectedChatId} />
       )}

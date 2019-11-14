@@ -89,7 +89,8 @@ class FileStore extends EventEmitter {
         if (!file) return;
 
         this.handleDownloads(file);
-        this.handleUploads(file);
+        // TODO Support uploads.
+        // this.handleUploads(file);
     };
 
     handleDownloads = file => {
