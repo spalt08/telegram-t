@@ -70,8 +70,9 @@ export function sendParameters() {
   });
 }
 
-// TODO Types.
-export async function send(request: any) {
+// TODO @types Types.
+// TODO @refactoring Reject promise instead of `onError`.
+export async function send(request: any, onError?: Function) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('[TdLib] SEND', request);
@@ -91,6 +92,10 @@ export async function send(request: any) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.error('[TdLib] ERROR', err);
+    }
+
+    if (onError) {
+      onError(err);
     }
 
     return null;

@@ -5,15 +5,17 @@ import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
 import InputText from '../../../components/ui/InputText';
 
+// @ts-ignore
 import monkeyCode from '../../../assets/monkey_code.png';
+// @ts-ignore
 import monkeyCodeInvalid from '../../../assets/monkey_code_invalid.png';
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authPhoneNumber'> & Pick<DispatchMap, 'setAuthCode'> & {
-  error?: string;
-};
-
-const AuthCode: FC<IProps> = ({ authPhoneNumber, setAuthCode, error }) => {
+type IProps = Pick<GlobalState, 'authPhoneNumber' | 'authError'> &
+Pick<DispatchMap, 'setAuthCode' | 'returnToAuthPhoneNumber'>;
+const AuthCode: FC<IProps> = ({
+  authPhoneNumber, authError, setAuthCode, returnToAuthPhoneNumber,
+}) => {
   const [code, setCode] = useState(undefined);
 
   function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
@@ -27,21 +29,17 @@ const AuthCode: FC<IProps> = ({ authPhoneNumber, setAuthCode, error }) => {
     }
   }
 
-  function returnToAuthPhoneNumber() {
-    // TODO @not-implented
-  }
-
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
-        <img src={monkeyCode} className={!error ? 'shown' : ''} alt="" />
-        <img src={monkeyCodeInvalid} className={error ? 'shown' : ''} alt="" />
+        <img src={monkeyCode} className={!authError ? 'shown' : ''} alt="" />
+        <img src={monkeyCodeInvalid} className={authError ? 'shown' : ''} alt="" />
       </div>
       <h2>
         {authPhoneNumber}
         <div
           className="auth-number-edit"
-          onClick={returnToAuthPhoneNumber}
+          onClick={() => returnToAuthPhoneNumber()}
           role="button"
           tabIndex={0}
           title="Sign In with another phone number"
@@ -58,7 +56,7 @@ const AuthCode: FC<IProps> = ({ authPhoneNumber, setAuthCode, error }) => {
         label="Code"
         onChange={onCodeChange}
         value={code}
-        error={error}
+        error={authError}
       />
     </div>
   );
@@ -66,11 +64,11 @@ const AuthCode: FC<IProps> = ({ authPhoneNumber, setAuthCode, error }) => {
 
 export default withGlobal(
   global => {
-    const { authPhoneNumber } = global;
-    return { authPhoneNumber };
+    const { authPhoneNumber, authError } = global;
+    return { authPhoneNumber, authError };
   },
   (setGlobal, actions) => {
-    const { setAuthCode } = actions;
-    return { setAuthCode };
+    const { setAuthCode, returnToAuthPhoneNumber } = actions;
+    return { setAuthCode, returnToAuthPhoneNumber };
   },
 )(AuthCode);

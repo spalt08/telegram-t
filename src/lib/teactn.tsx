@@ -41,6 +41,7 @@ export type GlobalState = {
   isLoggingOut?: boolean;
   authState?: UpdateAuthorizationStateType;
   authPhoneNumber?: string;
+  authError?: string;
 };
 
 const INITIAL_STATE: GlobalState = {
@@ -63,7 +64,7 @@ const INITIAL_STATE: GlobalState = {
 
 type ActionTypes = (
   // system
-  'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'signOut' |
+  'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages

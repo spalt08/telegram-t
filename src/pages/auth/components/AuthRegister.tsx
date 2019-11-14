@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import { DispatchMap, withGlobal } from '../../../lib/teactn';
 
 import React, { FC, useState } from '../../../lib/teact';
 // import { DispatchMap, withGlobal } from '../../../lib/teactn';
@@ -8,9 +9,9 @@ import InputText from '../../../components/ui/InputText';
 
 import './Auth.scss';
 
-type IProps = {};
+type IProps = Pick<DispatchMap, 'signUp'>;
 
-const AuthRegister: FC<IProps> = () => {
+const AuthRegister: FC<IProps> = ({ signUp }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -78,7 +79,7 @@ const AuthRegister: FC<IProps> = () => {
   }
 
   function handleSubmit() {
-    // TODO @not-implented
+    signUp({ firstName, lastName });
   }
 
   return (
@@ -120,4 +121,10 @@ const AuthRegister: FC<IProps> = () => {
   );
 };
 
-export default AuthRegister;
+export default withGlobal(
+  undefined,
+  (setGlobal, actions) => {
+    const { signUp } = actions;
+    return { signUp };
+  },
+)(AuthRegister);

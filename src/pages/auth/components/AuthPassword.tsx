@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import { DispatchMap, withGlobal } from '../../../lib/teactn';
 
 import React, { FC, useState } from '../../../lib/teact';
 // import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
@@ -6,13 +7,16 @@ import React, { FC, useState } from '../../../lib/teact';
 import InputPassword from '../../../components/ui/InputPassword';
 import Button from '../../../components/ui/Button';
 
+// @ts-ignore
 import monkeyPasswordShown from '../../../assets/monkey_password_shown.png';
+// @ts-ignore
 import monkeyPasswordHidden from '../../../assets/monkey_password_hidden.png';
 import './Auth.scss';
 
-type IProps = {};
+type IProps = Pick<DispatchMap, 'setAuthPassword'>;
 
-const AuthPassword: FC<IProps> = () => {
+// TODO Support `authError`.
+const AuthPassword: FC<IProps> = ({ setAuthPassword }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -28,7 +32,7 @@ const AuthPassword: FC<IProps> = () => {
   }
 
   function handleSubmit() {
-    // TODO @not-implented
+    setAuthPassword({ password });
   }
 
   return (
@@ -58,4 +62,10 @@ const AuthPassword: FC<IProps> = () => {
   );
 };
 
-export default AuthPassword;
+export default withGlobal(
+  undefined,
+  (setGlobal, actions) => {
+    const { setAuthPassword } = actions;
+    return { setAuthPassword };
+  },
+)(AuthPassword);
