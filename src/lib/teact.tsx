@@ -6,7 +6,7 @@ import { onNextTick, throttleWithRaf } from '../util/schedulers';
 import { flatten } from '../util/iteratees';
 
 export type Props = AnyLiteral;
-export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
+export type FC<P extends Props = any> = (props: P) => VirtualElementComponent | null;
 
 export enum VirtualElementTypesEnum {
   Tag,
@@ -233,8 +233,7 @@ function getUpdatedChild(
     }
   } else {
     if (isComponentElement(currentChild)) {
-      // TODO Remove hooks.
-      currentChild.componentInstance.isUnmounted = true;
+      unmountComponent(currentChild.componentInstance);
     }
 
     if (isComponentElement(newChild)) {
@@ -263,6 +262,16 @@ export function hasElementChanged($old: VirtualElementChild, $new: VirtualElemen
   }
 
   return false;
+}
+
+function unmountComponent(componentInstance: ComponentInstance) {
+  // TODO Remove hooks.
+  componentInstance.isUnmounted = true;
+  componentInstance.$element.children.forEach((child) => {
+    if (isComponentElement(child)) {
+      unmountComponent(child.componentInstance);
+    }
+  });
 }
 
 export function useState(initial: any) {
@@ -325,8 +334,8 @@ export function useRef(initial: any) {
 
 // TODO Not working, breaks DOM rendering, debug and fix needed.
 // TODO Support `areEqual` argument.
-// function memo(Component: FC) {
-//   const memoWrapper: FC = (props: Props) => {
+// export function memo(Component: FC): FC {
+//   return function memoWrapper(props: Props) {
 //     const propsRef = useRef({});
 //
 //     if (arePropsShallowEqual(propsRef.current, props)) {
@@ -335,7 +344,7 @@ export function useRef(initial: any) {
 //
 //     propsRef.current = props;
 //
-//     return createElement(Component, props);
+//     return createElement(Component, props) as VirtualElementComponent;
 //   };
 // }
 
