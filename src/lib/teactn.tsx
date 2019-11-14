@@ -2,16 +2,17 @@
 // import React, { getGlobal, setGlobal } from 'reactn';
 // export { addReducer, getGlobal, setGlobal, withGlobal, useGlobal } from 'reactn';
 
+/* Polyfill start */
+import React, { FC, Props, useState } from './teact';
 import {
   UpdateAuthorizationStateType, ApiUser, ApiChat, ApiMessage,
 } from '../api/tdlib/types';
+
+import { DEBUG } from '../config';
 import useForceUpdate from '../hooks/useForceUpdate';
 import generateIdFor from '../util/generateIdFor';
 import { throttleWithRaf } from '../util/schedulers';
-
-/* Polyfill start */
-import React, { FC, Props, useState } from './teact';
-import { DEBUG } from '../config';
+import arePropsShallowEqual from '../util/arePropsShallowEqual';
 import { orderBy } from '../util/iteratees';
 
 export default React;
@@ -212,18 +213,6 @@ export function withGlobal(
       return <Component {...containers[id].mappedProps} {...props} />;
     };
   };
-}
-
-function arePropsShallowEqual(currentProps: Props, newProps: Props) {
-  const currentKeys = Object.keys(currentProps);
-  const currentKeysLength = currentKeys.length;
-  const newKeysLength = Object.keys(newProps).length;
-
-  if (currentKeysLength !== newKeysLength) {
-    return false;
-  }
-
-  return currentKeys.every((prop) => currentProps[prop] === newProps[prop]);
 }
 
 document.addEventListener('dblclick', () => {

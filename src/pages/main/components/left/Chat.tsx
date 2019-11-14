@@ -28,7 +28,7 @@ const Chat: FC<IProps> = ({
   selectChat,
 }) => {
   return (
-    <div className={buildClassNames(chat, selected)} onClick={() => selectChat({ id: chat.id })} data-id={chat.id}>
+    <div className={buildClassNames(chat, selected)} onClick={() => selectChat({ id: chat.id })}>
       <Avatar chat={chat} />
       <div className="info">
         <div className="title">

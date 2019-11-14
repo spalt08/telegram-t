@@ -37,11 +37,11 @@ interface ComponentInstance {
   $prevElement: VirtualElementComponent;
   Component: FC;
   name: string;
-  key?: string;
   props: Props;
   children: VirtualElementChildren;
   state: ComponentInstanceState;
   effects: ComponentInstanceEffects;
+  refs: ComponentInstanceRefs;
   render: () => VirtualElementComponent;
   forceUpdate: Function;
   onUpdate?: Function;
@@ -70,6 +70,14 @@ interface ComponentInstanceEffects {
   }[];
 }
 
+interface ComponentInstanceRefs {
+  cursor: number;
+  byCursor: {
+    current: any;
+  }[];
+}
+
+// Used for memoization.
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElementChild): $element is VirtualElementEmpty {
@@ -106,7 +114,6 @@ function createElement(
       $element: {} as VirtualElementComponent,
       $prevElement: {} as VirtualElementComponent,
       Component: tag,
-      key: props && props.key ? String(props.key) : undefined,
       name: tag.name,
       props,
       children: flatten(children),
@@ -116,6 +123,10 @@ function createElement(
         byCursor: [],
       },
       effects: {
+        cursor: 0,
+        byCursor: [],
+      },
+      refs: {
         cursor: 0,
         byCursor: [],
       },
@@ -214,7 +225,6 @@ function getUpdatedChild(
 ) {
   if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
-      // TODO @perf shallow equal?
       currentChild.componentInstance.props = newChild.componentInstance.props;
       // TODO Support new children
       return currentChild.componentInstance.render();
@@ -243,10 +253,13 @@ export function hasElementChanged($old: VirtualElementChild, $new: VirtualElemen
   } else if ($old.type !== $new.type) {
     return true;
   } else if (isTagElement($old) && isTagElement($new)) {
-    return $old.tag !== $new.tag;
+    return ($old.tag !== $new.tag) || ($old.props.key !== $new.props.key);
   } else if (isComponentElement($old) && isComponentElement($new)) {
-    // TODO Support keys.
-    return $old.componentInstance.Component !== $new.componentInstance.Component;
+    return (
+      $old.componentInstance.Component !== $new.componentInstance.Component
+    ) || (
+      $old.props.key !== $new.props.key
+    );
   }
 
   return false;
@@ -295,6 +308,38 @@ export function useEffect(effect: () => void, dependencies?: any[]) {
   renderingInstance.state.cursor++;
 }
 
+// TODO Support in `teact-dom`.
+export function useRef(initial: any) {
+  const { cursor, byCursor } = renderingInstance.refs;
+
+  if (byCursor[cursor] === undefined) {
+    byCursor[cursor] = {
+      current: initial,
+    };
+  }
+
+  renderingInstance.state.cursor++;
+
+  return byCursor[cursor];
+}
+
+// TODO Not working, breaks DOM rendering, debug and fix needed.
+// TODO Support `areEqual` argument.
+// function memo(Component: FC) {
+//   const memoWrapper: FC = (props: Props) => {
+//     const propsRef = useRef({});
+//
+//     if (arePropsShallowEqual(propsRef.current, props)) {
+//       return null;
+//     }
+//
+//     propsRef.current = props;
+//
+//     return createElement(Component, props);
+//   };
+// }
+
+// We need to keep it here for JSX.
 export default {
   createElement,
 };

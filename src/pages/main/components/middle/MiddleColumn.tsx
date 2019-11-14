@@ -38,7 +38,7 @@ function renderSelectedChat(props: IProps) {
       ) : (
         <GroupHeader chatId={selectedChatId} />
       )}
-      <MessageList />
+      <MessageList key={selectedChatId} />
       <MiddleFooter />
     </div>
   );
