@@ -1,4 +1,4 @@
-// import './tdlib';
-import './gramjs';
+import './tdlib';
+// import './gramjs';
 import './auth';
 import './chats';

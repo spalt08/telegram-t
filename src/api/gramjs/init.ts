@@ -1,33 +1,64 @@
-import { OnUpdate } from './types';
-import { provideUpdater, onRequestPhoneNumber, onRequestCode, onRequestPassword, onReady } from './auth';
+import {
+  OnUpdate, OriginMessageData, WorkerMessageEvent, WorkerMessageResponse,
+} from './types/types';
 
-const SESSION_NAME = '';
+import { init as initAuth } from './methods/auth';
+import { init as initChats } from './methods/chats';
+import { init as initMessages } from './methods/messages';
+import { onGramJsUpdate } from './updaters';
+import generateIdFor from '../../util/generateIdFor';
 
-let gramjs: any;
+type WorkerPromiseStore = {
+  promise: Promise<WorkerMessageResponse>;
+  resolve: Function;
+  reject: Function;
+};
 
-export async function init(onUpdate: OnUpdate) {
-  if (!gramjs) {
-    gramjs = await import('../../lib/gramjs');
-  }
+const worker = new Worker('./tdweb.worker.ts');
+const workerPromises: Record<string, WorkerPromiseStore> = {};
 
-  const { TelegramClient, session } = gramjs;
-  const { StringSession } = session;
+function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false) {
+  const messageId = generateIdFor(workerPromises);
 
-  const stringSession = new StringSession(SESSION_NAME);
-  const client = new TelegramClient(
-    stringSession,
-    process.env.REACT_APP_TELEGRAM_API_ID,
-    process.env.REACT_APP_TELEGRAM_API_HASH,
+  workerPromises[messageId] = {} as WorkerPromiseStore;
+  workerPromises[messageId].promise = new Promise((resolve, reject) => {
+    Object.assign(workerPromises[messageId], { resolve, reject });
+  });
+
+  workerPromises[messageId].promise.then(
+    () => {
+      delete workerPromises[messageId];
+    },
+    () => {
+      delete workerPromises[messageId];
+    },
   );
 
-  provideUpdater(onUpdate);
+  worker.postMessage({
+    ...(shouldWaitForResponse && { messageId }),
+    ...message,
+  });
 
-  client
-    .start({
-      phone: onRequestPhoneNumber,
-      code: onRequestCode,
-      password: onRequestPassword,
-    } as any)
-    .then(onReady);
+  return workerPromises[messageId].promise;
 }
 
+export function init(onUpdate: OnUpdate) {
+  sendToWorker({ type: 'init' });
+
+  worker.onmessage = (({ data }: WorkerMessageEvent) => {
+    if (data.type === 'apiUpdate') {
+      onUpdate(data.update);
+    } else if (data.type === 'gramJsUpdate') {
+      onGramJsUpdate(data, onUpdate);
+    } else if (data.type === 'invokeResponse') {
+      if (data.messageId && workerPromises[data.messageId]) {
+        // TODO Support reject
+        workerPromises[data.messageId].resolve(data.result);
+      }
+    }
+  });
+
+  initAuth(sendToWorker);
+  initChats(sendToWorker, onUpdate);
+  initMessages(sendToWorker, onUpdate);
+}

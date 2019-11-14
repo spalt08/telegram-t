@@ -1,4 +1,4 @@
-
+// TODO @size Make target es7, check file size.
 {
   "compilerOptions": {
     "target": "es5",

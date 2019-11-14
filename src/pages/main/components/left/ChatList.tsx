@@ -63,15 +63,19 @@ function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
 
 export default withGlobal(
   global => {
-    const { chats } = global;
-    const idsLength = chats.ids.length;
-    const areChatsLoaded = idsLength > 0 && Object.keys(chats.byId).length >= idsLength;
+    const {
+      chats: {
+        ids: loadedChatIds,
+        byId: chats,
+        selectedId: selectedChatId,
+      },
+    } = global;
 
     return {
-      areChatsLoaded,
-      chats: chats.byId,
-      loadedChatIds: chats.ids,
-      selectedChatId: chats.selectedId,
+      areChatsLoaded: loadedChatIds.length > 0 && Object.keys(chats).length >= loadedChatIds.length,
+      chats,
+      loadedChatIds,
+      selectedChatId,
     };
   },
   (setGlobal, actions) => {

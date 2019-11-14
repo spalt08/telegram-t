@@ -29,6 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^2.6.1",
     "@typescript-eslint/parser": "^2.6.1",
     "babel-eslint": "^10.0.3",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^6.6.0",
     "eslint-config-airbnb-typescript": "^6.0.0",
     "eslint-config-react-app": "^5.0.2",
@@ -60,6 +61,7 @@
     "python-struct": "^1.1.2",
     "stack-trace": "0.0.10",
     "string-format": "^2.0.0",
+    "td": "^0.3.2",
     "tdweb": "^1.5.0",
     "websocket": "^1.0.30"
   }

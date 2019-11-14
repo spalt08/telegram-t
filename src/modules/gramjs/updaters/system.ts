@@ -1,9 +1,8 @@
+import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
+
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { GramJsUpdate } from '../../../api/gramjs/types';
-import { TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
-
-export function onUpdate(update: GramJsUpdate) {
+export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
     case 'updateAuthorizationState':
       onUpdateAuthorizationState(update as TdLibUpdateAuthorizationState);
