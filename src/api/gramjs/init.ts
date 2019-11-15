@@ -18,6 +18,11 @@ const worker = new Worker('./gramjs.worker.ts');
 const workerPromises: Record<string, WorkerPromiseStore> = {};
 
 function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false) {
+  if (!shouldWaitForResponse) {
+    worker.postMessage(message);
+    return null;
+  }
+
   const messageId = generateIdFor(workerPromises);
 
   workerPromises[messageId] = {} as WorkerPromiseStore;
@@ -35,7 +40,7 @@ function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false)
   );
 
   worker.postMessage({
-    ...(shouldWaitForResponse && { messageId }),
+    messageId,
     ...message,
   });
 
@@ -52,8 +57,11 @@ export function init(onUpdate: OnUpdate) {
       onGramJsUpdate(data, onUpdate);
     } else if (data.type === 'invokeResponse') {
       if (data.messageId && workerPromises[data.messageId]) {
-        // TODO Support reject
-        workerPromises[data.messageId].resolve(data.result);
+        if (data.result) {
+          workerPromises[data.messageId].resolve(data.result);
+        } else if (data.error) {
+          workerPromises[data.messageId].reject(data.error);
+        }
       }
     }
   });

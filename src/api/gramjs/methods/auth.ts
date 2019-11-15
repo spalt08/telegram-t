@@ -7,21 +7,21 @@ export function init(_sendToClient: SendToWorker) {
 }
 
 export function provideAuthPhoneNumber(phoneNumber: string) {
-  sendToClient({
+  return sendToClient({
     type: 'provideAuthPhoneNumber',
     phoneNumber,
   });
 }
 
 export function provideAuthCode(code: string) {
-  sendToClient({
+  return sendToClient({
     type: 'provideAuthCode',
     code,
   });
 }
 
 export function provideAuthPassword(password: string) {
-  sendToClient({
+  return sendToClient({
     type: 'provideAuthPassword',
     password,
   });

@@ -45,7 +45,8 @@ export type WorkerMessageResponse = {
   messageId: number;
   type: 'invokeResponse';
   name: SupportedRequests;
-  result: AnyLiteral;
+  result?: AnyLiteral;
+  error?: AnyLiteral;
 };
 
 export type WorkerMessageData = WorkerMessageGramJsUpdate | WorkerMessageApiUpdate | WorkerMessageResponse;
@@ -55,5 +56,5 @@ export interface WorkerMessageEvent extends MessageEvent {
 }
 
 export interface SendToWorker {
-  (message: OriginMessageData, shouldWaitForResponse?: boolean): any;
+  (message: OriginMessageData, shouldWaitForResponse?: boolean): Promise<WorkerMessageResponse['result']> | null;
 }

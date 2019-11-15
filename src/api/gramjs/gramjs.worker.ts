@@ -71,10 +71,19 @@ onmessage = (async (message: OriginMessageEvent) => {
               result,
             });
           }
-        } catch (err) {
+        } catch (error) {
           if (DEBUG) {
             // eslint-disable-next-line no-console
-            console.log(`[GramJs/worker] INVOKE ERROR ${name}`, err);
+            console.log(`[GramJs/worker] INVOKE ERROR ${name}`, error);
+          }
+
+          if (messageId) {
+            sendToOrigin({
+              messageId,
+              type: 'invokeResponse',
+              name: data.name,
+              error,
+            });
           }
         }
 
@@ -122,6 +131,7 @@ export async function init() {
     stringSession,
     process.env.REACT_APP_TELEGRAM_API_ID,
     process.env.REACT_APP_TELEGRAM_API_HASH,
+    { useWSS: true } as any,
   );
 
   client.addEventHandler(onGramJsUpdate, { build: (update: object) => update });
