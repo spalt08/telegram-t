@@ -3,7 +3,6 @@ import React, { DispatchMap, GlobalState, withGlobal } from './lib/teactn';
 
 import './modules';
 
-import Loading from './components/Loading';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
 // import Test from './pages/test/Test';
@@ -32,7 +31,7 @@ const App: FC<IProps> = ({ isInitialized, authState, init }) => {
     }
   }
 
-  return <Loading />;
+  return <Main />;
 };
 
 export default withGlobal(

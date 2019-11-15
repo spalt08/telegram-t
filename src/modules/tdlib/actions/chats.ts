@@ -1,4 +1,6 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
+import {
+  addReducer, getDispatch, getGlobal, setGlobal,
+} from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 
@@ -66,4 +68,11 @@ async function loadChats(offsetChatId: number | null = null, offsetOrder = OFFSE
       ],
     },
   });
+
+  const currentSelectedId = global.chats.selectedId;
+  const prevSelectedId = Number(localStorage.getItem('selectedChatId'));
+
+  if (!currentSelectedId && prevSelectedId && newIds.includes(prevSelectedId)) {
+    getDispatch().selectChat({ id: prevSelectedId });
+  }
 }

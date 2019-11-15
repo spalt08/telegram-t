@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../../lib/teactn';
+import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat } from '../../../../api/tdlib/types';
 import { toArray, orderBy } from '../../../../util/iteratees';
@@ -14,7 +14,7 @@ type IProps = {
   loadedChatIds: number[];
   selectedChatId: number;
   areChatsLoaded: boolean;
-} & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
+} & Pick<GlobalState, 'authState'> & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
 const SCROLL_THROTTLE_MS = 1000;
@@ -22,9 +22,9 @@ const SCROLL_THROTTLE_MS = 1000;
 const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
 
 const ChatList: FC<IProps> = ({
-  chats, loadedChatIds, areChatsLoaded, selectedChatId, loadChats, loadMoreChats,
+  chats, loadedChatIds, areChatsLoaded, selectedChatId, authState, loadChats, loadMoreChats,
 }) => {
-  if (!areChatsLoaded) {
+  if (authState === 'authorizationStateReady' && !areChatsLoaded) {
     loadChats();
   }
 
@@ -69,6 +69,7 @@ export default withGlobal(
         byId: chats,
         selectedId: selectedChatId,
       },
+      authState,
     } = global;
 
     return {
@@ -76,6 +77,7 @@ export default withGlobal(
       chats,
       loadedChatIds,
       selectedChatId,
+      authState,
     };
   },
   (setGlobal, actions) => {
