@@ -22,7 +22,7 @@ export function formatDate(datetime: number | Date, isShort = false) {
   return `${day}.${month}.${year}`;
 }
 
-export function formatDateForChat(datetime: number | Date) {
+export function formatDateForMessageList(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const day = date.getDate();
   const month = MONTHS[date.getMonth()];
@@ -84,7 +84,7 @@ export function formatChatDateHeader(datetime: number | Date) {
     return WEEKDAYS_FULL[date.getDay()];
   }
 
-  return formatDateForChat(date);
+  return formatDateForMessageList(date);
 }
 
 export function formatPastTime(datetime: number | Date) {
@@ -138,5 +138,8 @@ export function isSameDay(datetime1: number | Date, datetime2: number | Date) {
   const date1 = typeof datetime1 === 'number' ? new Date(datetime1) : datetime1;
   const date2 = typeof datetime2 === 'number' ? new Date(datetime2) : datetime2;
 
-  return date1.getDate() === date2.getDate();
+  date1.setHours(0, 0, 0, 0);
+  date2.setHours(0, 0, 0, 0);
+
+  return date1.valueOf() === date2.valueOf();
 }
