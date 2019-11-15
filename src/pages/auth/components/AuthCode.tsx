@@ -5,10 +5,6 @@ import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
 
 import InputText from '../../../components/ui/InputText';
 
-// @ts-ignore
-import monkeyCode from '../../../assets/monkey_code.png';
-// @ts-ignore
-import monkeyCodeInvalid from '../../../assets/monkey_code_invalid.png';
 import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authPhoneNumber' | 'authError'> &
@@ -31,10 +27,7 @@ const AuthCode: FC<IProps> = ({
 
   return (
     <div id="auth-code-form" className="auth-form">
-      <div id="monkey">
-        <img src={monkeyCode} className={!authError ? 'shown' : ''} alt="" />
-        <img src={monkeyCodeInvalid} className={authError ? 'shown' : ''} alt="" />
-      </div>
+      <div id="monkey" className={`code${authError ? ' invalid' : ''}`} />
       <h2>
         {authPhoneNumber}
         <div

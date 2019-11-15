@@ -1,7 +1,4 @@
 .Badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-width: 1.5rem;
   height: 1.5rem;
   margin-left: 2rem;
@@ -10,8 +7,10 @@
   padding: 0 .45rem;
   color: white;
   font-size: 0.9rem;
+  line-height: 1.5rem;
   font-weight: bold;
   text-align: center;
+  flex-shrink: 0;
 
   .Chat.private & {
     background: var(--color-green);

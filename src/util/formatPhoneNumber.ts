@@ -4,11 +4,11 @@ function getPhoneNumberFormat(country?: Country) {
   switch (id) {
     case 'RU':
     case 'US':
-      return /(\d{1,3})(\d{1,3})?(\d{1,4})?()?()?/;
+      return /(\d{1,3})(\d{1,3})?(\d{1,2})?(\d{1,2})?()?/;
     case 'UA':
     case 'FI':
     case 'AE':
-      return /(\d{1,2})(\d{1,3})?(\d{1,4})?()?()?/;
+      return /(\d{1,2})(\d{1,3})?(\d{1,2})?(\d{1,2})?()?/;
     default:
       return /(\d{1,3})(\d{1,3})?(\d{1,3})?(\d{1,3})?(\d{1,3})?/;
   }
@@ -24,9 +24,9 @@ export default function formatPhoneNumber(input: string, country?: Country) {
     let output = '';
     if (p1) output = `${p1}`;
     if (p2) output += ` ${p2}`;
-    if (p3) output += ` ${p3}`;
-    if (p4) output += ` ${p4}`;
-    if (p5) output += ` ${p5}`;
+    if (p3) output += `-${p3}`;
+    if (p4) output += `-${p4}`;
+    if (p5) output += `-${p5}`;
     return output;
   });
 

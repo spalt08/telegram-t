@@ -32,8 +32,8 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
     const phoneNumber = formatPhoneNumber(target.value, country);
 
     setPhone(phoneNumber);
-    setIsButtonShown(phoneNumber.length >= 9);
     target.value = `${code} ${phoneNumber}`;
+    setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 11);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -43,7 +43,7 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
       return;
     }
 
-    const phoneNumber = `${code}${phone.replace(/[^\d]+/g, '')}`;
+    const phoneNumber = `${code} ${phone}`;
     setAuthPhoneNumber({ phoneNumber });
   }
 

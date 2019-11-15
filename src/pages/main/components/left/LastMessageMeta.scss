@@ -9,7 +9,8 @@
 
   .MessageOutgoingStatus {
     display: inline-block;
-    height: 1.25rem;
+    height: 1.15rem;
+    line-height: 1.15rem;
     color: var(--color-text-green);
     margin-right: 0.1rem;
     font-size: 1.15rem;
@@ -17,5 +18,6 @@
 
   .time {
     color: var(--color-text-meta);
+    line-height: 1.15rem;
   }
 }

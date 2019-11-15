@@ -1,17 +1,20 @@
 @import 'reboot';
 @import 'variables';
-@import 'typography';
 @import 'forms';
 @import 'icons';
 
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600&display=swap');
+
 html, body {
+  width: 100%;
   height: 100%;
   background: var(--color-background);
   margin: 0;
   padding: 0;
   font-size: 16px;
-  font-family: Roboto, Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
   color: var(--color-text);
+  overflow-x: hidden;
 
   @media (max-width: 1440px) {
     font-size: 14px;

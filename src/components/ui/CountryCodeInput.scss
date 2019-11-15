@@ -30,6 +30,14 @@
     }
   }
 
+  .country-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 1rem;
+    text-align: left;
+  }
+
   .country-code {
     margin-left: auto;
     opacity: 0.5;

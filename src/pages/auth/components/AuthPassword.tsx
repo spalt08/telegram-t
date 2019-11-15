@@ -7,10 +7,6 @@ import React, { FC, useState } from '../../../lib/teact';
 import InputPassword from '../../../components/ui/InputPassword';
 import Button from '../../../components/ui/Button';
 
-// @ts-ignore
-import monkeyPasswordShown from '../../../assets/monkey_password_shown.png';
-// @ts-ignore
-import monkeyPasswordHidden from '../../../assets/monkey_password_hidden.png';
 import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'setAuthPassword'>;
@@ -43,10 +39,7 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
 
   return (
     <div id="auth-code-form" className="auth-form">
-      <div id="monkey">
-        <img src={monkeyPasswordHidden} className={!showPassword ? 'shown' : ''} alt="" />
-        <img src={monkeyPasswordShown} className={showPassword ? 'shown' : ''} alt="" />
-      </div>
+      <div id="monkey" className={`password${showPassword ? ' shown' : ''}`} />
       <h2>Enter a Password</h2>
       <p className="note">
         Your account is protected width
