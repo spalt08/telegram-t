@@ -27,28 +27,28 @@
   &.primary {
     background: var(--color-primary);
 
-    &:hover, &:focus {
+    &:hover {
       background: var(--color-primary-shade);
     }
 
-    // &:active {
-    //   background: var(--color-primary-shade-2);
-    // }
+    &:active {
+      background: var(--color-primary-shade-2);
+    }
   }
 
   &.secondary {
     background: var(--color-background);
     color: var(--color-text-secondary);
 
-    &:hover, &:focus {
+    &:hover {
       background: var(--color-primary);
       color: white;
     }
 
-    // &:active {
-    //   background: var(--color-primary-shade);
-    //   color: white;
-    // }
+    &:active {
+      background: var(--color-primary-shade);
+      color: white;
+    }
   }
 
   &.translucent {
@@ -56,15 +56,15 @@
     color: var(--color-text-secondary);
     opacity: 0.75;
 
-    &:hover, &:focus {
+    &:hover {
       background-color: rgba(var(--color-text-secondary-rgb), 0.08);
       opacity: 1;
     }
 
-    // &:active {
-    //   background-color: rgba(var(--color-text-secondary-rgb), 0.16);
-    //   opacity: 1;
-    // }
+    &:active {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.16);
+      opacity: 1;
+    }
   }
 
   &.smaller {
