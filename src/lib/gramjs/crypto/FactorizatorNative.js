@@ -1,27 +1,26 @@
 const { getRandomInt } = require('../Helpers')
-const JSBI = require('jsbi')
 
-class Factorizator {
+class FactorizatorNative {
     /**
      * Finds the small multiplier by using Lopatin's method
-     * @param what {JSBI.BigInt}
-     * @return {JSBI.BigInt}
+     * @param what {BigInt}
+     * @return {BigInt}
      */
     static findSmallMultiplierLopatin(what) {
-        let g = JSBI.BigInt(0)
-        for (let i = JSBI.BigInt(0); i < JSBI.BigInt(3); i++) {
-            const q = JSBI.BigInt(30) || JSBI.BigInt((getRandomInt(0, 127) & 15) + 17)
-            let x = JSBI.BigInt(40) || JSBI.BigInt(getRandomInt(0, 1000000000) + 1)
-
+        let g = BigInt(0)
+        for (let i = BigInt(0); i < BigInt(3); i++) {
+            const q = BigInt(30) || BigInt((getRandomInt(0, 127) & 15) + 17)
+            let x = BigInt(40) || BigInt(getRandomInt(0, 1000000000) + 1)
             let y = x
-            const lim = JSBI.BigInt(1) << (i + JSBI.BigInt(18))
-            for (let j = JSBI.BigInt(1); j < lim; j++) {
+            const lim = BigInt(1) << (i + BigInt(18))
+            for (let j = BigInt(1); j < lim; j++) {
+
                 let a = x
                 let b = x
 
                 let c = q
-                while (b !== JSBI.BigInt(0)) {
-                    if (JSBI.BigInt(b & JSBI.BigInt(1)) !== JSBI.BigInt(0)) {
+                while (b !== BigInt(0)) {
+                    if ((b & BigInt(1)) !== BigInt(0)) {
                         c += a
                         if (c >= what) {
                             c -= what
@@ -31,18 +30,18 @@ class Factorizator {
                     if (a >= what) {
                         a -= what
                     }
-                    b >>= JSBI.BigInt(1)
+                    b >>= BigInt(1)
                 }
 
                 x = c
-                const z = JSBI.BigInt(x < y ? y - x : x - y)
+                const z = BigInt(x < y ? y - x : x - y)
                 g = this.gcd(z, what)
 
-                if (g !== JSBI.BigInt(1)) {
+                if (g !== BigInt(1)) {
                     break
                 }
 
-                if ((j & (j - JSBI.BigInt(1))) === JSBI.BigInt(0)) {
+                if ((j & (j - BigInt(1))) === BigInt(0)) {
                     y = x
                 }
             }
@@ -57,17 +56,17 @@ class Factorizator {
 
     /**
      * Calculates the greatest common divisor
-     * @param a {JSBI.BigInt}
-     * @param b {JSBI.BigInt}
-     * @returns {JSBI.BigInt}
+     * @param a {BigInt}
+     * @param b {BigInt}
+     * @returns {BigInt}
      */
     static gcd(a, b) {
-        while (a !== JSBI.BigInt(0) && b !== JSBI.BigInt(0)) {
-            while ((b & JSBI.BigInt(1)) === JSBI.BigInt(0)) {
-                b >>= JSBI.BigInt(1)
+        while (a !== BigInt(0) && b !== BigInt(0)) {
+            while ((b & BigInt(1)) === BigInt(0)) {
+                b >>= BigInt(1)
             }
-            while ((a & JSBI.BigInt(1)) === JSBI.BigInt(0)) {
-                a >>= JSBI.BigInt(1)
+            while ((a & BigInt(1)) === BigInt(0)) {
+                a >>= BigInt(1)
             }
             if (a > b) {
                 a -= b
@@ -75,13 +74,13 @@ class Factorizator {
                 b -= a
             }
         }
-        return b === JSBI.BigInt(0) ? a : b
+        return b === BigInt(0) ? a : b
     }
 
     /**
      * Factorizes the given number and returns both the divisor and the number divided by the divisor
-     * @param pq {JSBI.BigInt}
-     * @returns {{p: JSBI.BigInt, q: JSBI.BigInt}}
+     * @param pq {BigInt}
+     * @returns {{p: BigInt, q: BigInt}}
      */
     static factorize(pq) {
         const divisor = this.findSmallMultiplierLopatin(pq)
@@ -89,4 +88,4 @@ class Factorizator {
     }
 }
 
-module.exports = Factorizator
+module.exports = FactorizatorNative

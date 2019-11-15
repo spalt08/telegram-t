@@ -41,11 +41,11 @@ class MTProtoPlainSender {
         }
         const reader = new BinaryReader(body)
         const authKeyId = reader.readLong()
-        if (authKeyId !== JSBI.BigInt(0)) {
+        if (JSBI.notEqual(authKeyId, JSBI.BigInt(0))) {
             throw new Error('Bad authKeyId')
         }
         msgId = reader.readLong()
-        if (msgId === JSBI.BigInt(0)) {
+        if (JSBI.equal(msgId, JSBI.BigInt(0))) {
             throw new Error('Bad msgId')
         }
         /** ^ We should make sure that the read ``msg_id`` is greater

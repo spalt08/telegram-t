@@ -1,6 +1,6 @@
 const AES = require('../crypto/AES')
 const AuthKey = require('../crypto/AuthKey')
-const Factorizator = require('../crypto/Factorizator')
+const Factorizator = require('../crypto/FactorizatorLeemon')
 const RSA = require('../crypto/RSA')
 const Helpers = require('../Helpers')
 const { ServerDHParamsFail } = require('../tl/types')
@@ -37,17 +37,17 @@ async function doAuthentication(sender, log) {
     if (!(resPQ instanceof ResPQ)) {
         throw new Error(`Step 1 answer was ${resPQ}`)
     }
-    if (true || resPQ.nonce !== nonce) {
+    if (JSBI.notEqual(resPQ.nonce, nonce)) {
         throw new SecurityError('Step 1 invalid nonce from server')
     }
     const pq = Helpers.readBigIntFromBuffer(resPQ.pq, false, true)
     log.debug('Finished authKey generation step 1')
     log.debug('Starting authKey generation step 2')
     // Step 2 sending: DH Exchange
-    let { p, q } = Factorizator.factorize(pq)
-    p = getByteArray(p)
+    let { p, q } = Factorizator.factorize(resPQ.pq)
 
-    q = getByteArray(q)
+    p = Buffer.from(p)
+    q = Buffer.from(q)
 
     bytes = Helpers.generateRandomBytes(32)
     const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true)
@@ -88,18 +88,18 @@ async function doAuthentication(sender, log) {
     if (!(serverDhParams instanceof ServerDHParamsOk || serverDhParams instanceof ServerDHParamsFail)) {
         throw new Error(`Step 2.1 answer was ${serverDhParams}`)
     }
-    if (serverDhParams.nonce !== resPQ.nonce) {
+    if (JSBI.notEqual(serverDhParams.nonce, resPQ.nonce)) {
         throw new SecurityError('Step 2 invalid nonce from server')
     }
 
-    if (serverDhParams.serverNonce !== resPQ.serverNonce) {
+    if (JSBI.notEqual(serverDhParams.serverNonce, resPQ.serverNonce)) {
         throw new SecurityError('Step 2 invalid server nonce from server')
     }
 
     if (serverDhParams instanceof ServerDHParamsFail) {
         const sh = Helpers.sha1(Helpers.readBufferFromBigInt(newNonce, 32, true, true).slice(4, 20))
         const nnh = Helpers.readBigIntFromBuffer(sh, true, true)
-        if (serverDhParams.newNonceHash !== nnh) {
+        if (JSBI.notEqual(serverDhParams.newNonceHash, nnh)) {
             throw new SecurityError('Step 2 invalid DH fail nonce from server')
         }
     }
@@ -123,10 +123,10 @@ async function doAuthentication(sender, log) {
         throw new Error(`Step 3 answer was ${serverDhInner}`)
     }
 
-    if (serverDhInner.nonce !== resPQ.nonce) {
+    if (JSBI.notEqual(serverDhInner.nonce, resPQ.nonce)) {
         throw new SecurityError('Step 3 Invalid nonce in encrypted answer')
     }
-    if (serverDhInner.serverNonce !== resPQ.serverNonce) {
+    if (JSBI.notEqual(serverDhInner.serverNonce, resPQ.serverNonce)) {
         throw new SecurityError('Step 3 Invalid server nonce in encrypted answer')
     }
     const dhPrime = Helpers.readBigIntFromBuffer(serverDhInner.dhPrime, false, false)
@@ -160,10 +160,10 @@ async function doAuthentication(sender, log) {
         throw new Error(`Step 3.1 answer was ${dhGen}`)
     }
     const { name } = dhGen.constructor
-    if (dhGen.nonce !== resPQ.nonce) {
+    if (JSBI.notEqual(dhGen.nonce, resPQ.nonce)) {
         throw new SecurityError(`Step 3 invalid ${name} nonce from server`)
     }
-    if (dhGen.serverNonce !== resPQ.serverNonce) {
+    if (JSBI.notEqual(dhGen.serverNonce, resPQ.serverNonce)) {
         throw new SecurityError(`Step 3 invalid ${name} server nonce from server`)
     }
     const authKey = new AuthKey(getByteArray(gab))
@@ -172,7 +172,7 @@ async function doAuthentication(sender, log) {
     const newNonceHash = authKey.calcNewNonceHash(newNonce, nonceNumber)
     const dhHash = dhGen[`newNonceHash${nonceNumber}`]
 
-    if (dhHash !== newNonceHash) {
+    if (JSBI.notEqual(dhHash, newNonceHash)) {
         throw new SecurityError('Step 3 invalid new nonce hash')
     }
 

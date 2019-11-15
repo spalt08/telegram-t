@@ -14,7 +14,7 @@ type WorkerPromiseStore = {
   reject: Function;
 };
 
-const worker = new Worker('./tdweb.worker.ts');
+const worker = new Worker('./gramjs.worker.ts');
 const workerPromises: Record<string, WorkerPromiseStore> = {};
 
 function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false) {

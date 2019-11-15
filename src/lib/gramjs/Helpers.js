@@ -46,11 +46,11 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
     if (bytesNumber < bytes) {
         throw new Error('OverflowError: int too big to convert')
     }
-    if (!signed && JSBI.lessThan(bigInt, 0)) {
+    if (!signed && JSBI.lessThan(bigInt, JSBI.BigInt(0))) {
         throw new Error('Cannot convert to unsigned')
     }
     let below = false
-    if (JSBI.lessThan(bigInt, 0)) {
+    if (JSBI.lessThan(bigInt, JSBI.BigInt(0))) {
         below = true
         bigInt = JSBI.unaryMinus(bigInt)
     }
@@ -182,18 +182,18 @@ function sha256(data) {
  * @returns {bigint}
  */
 function modExp(a, b, n) {
-    a = a % n
+    a = JSBI.remainder(a, n)
     let result = JSBI.BigInt(1)
     let x = a
-    while (b > JSBI.BigInt(0)) {
-        const leastSignificantBit = b % JSBI.BigInt(2)
-        b = b / JSBI.BigInt(2)
-        if (leastSignificantBit === JSBI.BigInt(1)) {
-            result = result * x
-            result = result % n
+    while (JSBI.greaterThan(b, JSBI.BigInt(0))) {
+        const leastSignificantBit = JSBI.remainder(b, JSBI.BigInt(2))
+        b = JSBI.divide(b, JSBI.BigInt(2))
+        if (JSBI.equal(leastSignificantBit, JSBI.BigInt(1))) {
+            result = JSBI.multiply(result, x)
+            result = JSBI.remainder(result, n)
         }
-        x = x * x
-        x = x % n
+        x = JSBI.multiply(x, x)
+        x = JSBI.remainder(x, n)
     }
     return result
 }
