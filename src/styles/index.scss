@@ -36,17 +36,30 @@ html, body {
 * {
   box-sizing: border-box;
 
-  // TODO @pixel-perfect
-  ::-webkit-scrollbar {
-    width: 5px;
-    height: 80px;
-    background-color: transparent; /* or add it to the track */
+
+}
+
+.custom-scroll {
+  &::-webkit-scrollbar {
+    width: .25rem;
   }
 
-  ::-webkit-scrollbar-thumb {
+  &::-webkit-scrollbar-thumb {
     background: rgba(78, 78, 78, 0.3);
-    border-radius: 2.5px;
-    -webkit-box-shadow: inset 0 0 6px rgba(100, 100, 100, 0.5);
+    border-radius: .125rem;
+  }
+
+  @media (min-width: 1367px) {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(78, 78, 78, 0);
+      -webkit-transition: background-color .3s ease;
+    }
+
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(78, 78, 78, 0.3);
+      }
+    }
   }
 }
 

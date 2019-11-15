@@ -48,7 +48,7 @@ const MessageList: FC<IProps> = ({
   // TODO @perf Replace the whole element while rendering, it will be faster for long lists.
   return (
     <div
-      className={`MessageList ${isPrivate ? 'no-avatars' : ''}`}
+      className={`MessageList custom-scroll ${isPrivate ? 'no-avatars' : ''}`}
       onScroll={(e) => handleScroll(e, chatId, setChatScrollOffset)}
     >
       {
