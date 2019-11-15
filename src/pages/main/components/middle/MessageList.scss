@@ -3,9 +3,8 @@
   display: grid;
   flex: 1;
   width: 100%;
-  max-width: var(--messages-container-width);
   height: calc(100% - 1.1rem);
-  padding: 0 1rem;
+
   overflow: auto;
 
   &.no-avatars {
@@ -26,6 +25,10 @@
 
   .message-date-group {
     text-align: center;
+    width: 100%;
+    max-width: var(--messages-container-width);
+    padding: 0 1rem;
+    margin: 0 auto;
   }
 
   .message-date-header {
