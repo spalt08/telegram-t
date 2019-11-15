@@ -5,7 +5,7 @@
 /* Polyfill start */
 import React, { FC, Props, useState } from './teact';
 import {
-  UpdateAuthorizationStateType, ApiUser, ApiChat, ApiMessage,
+  UpdateAuthorizationStateType, ApiUser, ApiChat, ApiMessage, ApiFile,
 } from '../api/tdlib/types';
 
 import { DEBUG } from '../config';
@@ -38,6 +38,10 @@ export type GlobalState = {
     }>;
   };
 
+  files: {
+    byId: Record<number, ApiFile>;
+  };
+
   // TODO Move to `auth`.
   isLoggingOut?: boolean;
   authState?: UpdateAuthorizationStateType;
@@ -62,6 +66,10 @@ const INITIAL_STATE: GlobalState = {
   messages: {
     byChatId: {},
   },
+
+  files: {
+    byId: {},
+  },
 };
 
 type ActionTypes = (
@@ -70,7 +78,9 @@ type ActionTypes = (
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage'
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' |
+  // files
+  'loadChatPhoto' | 'loadUserPhoto'
 );
 
 export type DispatchMap = Record<ActionTypes, Function>;

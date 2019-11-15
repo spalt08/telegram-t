@@ -217,7 +217,7 @@ class FileStore extends EventEmitter {
 
     deleteLocalFile = (store, file) => {};
 
-    getLocalFile(store, file, arr, callback, faultCallback) {
+    async getLocalFile(store, file, arr, callback, faultCallback) {
         if (!useDownloadFile) {
             return;
         }
@@ -229,7 +229,7 @@ class FileStore extends EventEmitter {
                 return;
             }
 
-            (async file => {
+            return (async file => {
                 // console.log('[fs] readFile file_id=' + file.id);
                 const response = await TdLibController.send({
                     '@type': 'readFile',
@@ -239,8 +239,6 @@ class FileStore extends EventEmitter {
                 // console.log(`[fs] readFile result file_id=${file.id}`, file, response);
                 this.setBlob(file.id, response.data);
             })(file).then(callback, faultCallback);
-
-            return;
         }
 
         let idb_key = file.idb_key;

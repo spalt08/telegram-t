@@ -29,7 +29,7 @@ const Message: FC<IProps> = ({
 
   return (
     <div className={className}>
-      {showAvatar && (
+      {showAvatar && sender && (
         <Avatar size="small" user={sender} />
       )}
       <div className={contentClassName}>

@@ -19,4 +19,5 @@ export interface ApiFile {
     uploaded_size: number;
   };
   blob?: Blob;
+  blobUrl?: string;
 }

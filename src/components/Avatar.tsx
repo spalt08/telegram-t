@@ -1,12 +1,13 @@
 import React, { FC } from '../lib/teact';
+import { withGlobal } from '../lib/teactn';
 
 import { ApiUser, ApiChat } from '../api/tdlib/types';
 import {
-  getChatImage, getChatTitle, getUserFullName, getUserImage, isPrivateChat, isUserOnline,
+  getChatTitle, getUserFullName, isPrivateChat, isUserOnline,
 } from '../modules/tdlib/helpers';
+import { selectChatPhotoUrl, selectUserPhotoUrl } from '../modules/tdlib/selectors';
 
 import './Avatar.scss';
-import { withGlobal } from '../lib/teactn';
 
 interface IProps {
   size?: 'small' | 'medium' | 'large';
@@ -50,16 +51,14 @@ function getFirstLetters(phrase: string) {
     .toUpperCase();
 }
 
-// TODO Store should be updated by images load
-// TODO Preload images to avoid flickering
 export default withGlobal(
   (global, { chat, user }) => {
     let imageUrl = null;
 
     if (chat) {
-      imageUrl = getChatImage(chat);
+      imageUrl = selectChatPhotoUrl(global, chat);
     } else if (user) {
-      imageUrl = getUserImage(user);
+      imageUrl = selectUserPhotoUrl(global, user);
     }
 
     return { imageUrl };

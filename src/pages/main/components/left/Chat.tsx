@@ -40,7 +40,7 @@ const Chat: FC<IProps> = ({
         <div className="subtitle">
           {chat.last_message && (
             <p className="last-message">
-              {isGroupChat(chat) && getUserFirstName(lastMessageSender) && (
+              {isGroupChat(chat.id) && getUserFirstName(lastMessageSender) && (
                 <span className="sender-name">{getUserFirstName(lastMessageSender)}</span>
               )}
               {getMessageText(chat.last_message)}

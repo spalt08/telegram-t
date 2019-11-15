@@ -1,7 +1,6 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiUser } from '../../../api/tdlib/types';
-import { loadUserPhoto } from '../../../api/tdlib/files';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
@@ -10,7 +9,7 @@ export function onUpdate(update: TdLibUpdate) {
 
       updateUser(user.id, user);
 
-      loadUserPhoto(user);
+      getDispatch().loadUserPhoto({ user });
 
       break;
     }

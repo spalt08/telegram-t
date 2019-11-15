@@ -4,68 +4,62 @@ import FileStore from './legacy/Stores/FileStore';
 // @magic
 export const THUMBNAIL_PRIORITY = 32;
 
-function getFileSrc(file: ApiFile) {
-  const blob = getBlob(file);
-
-  return FileStore.getBlobUrl(blob) || '';
-}
-
-function getBlob(file: ApiFile) {
+export function getBlob(file: ApiFile) {
   return file ? FileStore.getBlob(file.id) || file.blob : null;
 }
 
-function loadUserPhoto(user: ApiUser) {
+export function loadUserPhoto(user: ApiUser) {
   const { profile_photo, id: userId } = user;
 
   if (!profile_photo) {
-    return;
+    return null;
   }
 
   const { small: file } = profile_photo;
 
-  if (!file) return;
+  if (!file) return null;
 
   const { id } = file;
   const storedFile = FileStore.get(id) || file;
   const store = FileStore.getStore();
   const blob = file.blob || FileStore.getBlob(id);
-  if (blob) return;
+  if (blob) return blob;
 
-  FileStore.getLocalFile(
+  return FileStore.getLocalFile(
     store,
     storedFile,
     null,
     () => FileStore.updateUserPhotoBlob(userId, id),
     () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, user),
-  );
+  ).then(() => {
+    return file.blob || FileStore.getBlob(id);
+  });
 }
 
-function loadChatPhoto(chat: ApiChat) {
+export function loadChatPhoto(chat: ApiChat) {
   const { photo, id: chatId } = chat;
 
   if (!photo) {
-    return;
+    return null;
   }
 
   const { small: file } = photo;
+
+  if (!file) return null;
 
   const { id } = file;
   const storedFile = FileStore.get(id) || file;
   const store = FileStore.getStore();
   const blob = file.blob || FileStore.getBlob(id);
-  if (blob) return;
+  if (blob) return blob;
 
-  FileStore.getLocalFile(
+  return FileStore.getLocalFile(
     store,
     storedFile,
     null,
     () => FileStore.updateChatPhotoBlob(chatId, id),
     () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, chat),
-  );
+  ).then(() => {
+    return file.blob || FileStore.getBlob(id);
+  });
 }
-
-export {
-  loadChatPhoto,
-  loadUserPhoto,
-  getFileSrc,
-};
