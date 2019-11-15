@@ -16,9 +16,8 @@ const MTProtoSender = require('../network/MTProtoSender')
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated')
 
 const DEFAULT_DC_ID = 4
-const DEFAULT_IPV4_IP = '149.154.167.51'
+const DEFAULT_IPV4_IP = 'vesta-1.web.telegram.org'
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
-const DEFAULT_PORT = 443
 
 class TelegramClient {
     static DEFAULT_OPTIONS = {
@@ -38,6 +37,7 @@ class TelegramClient {
         langCode: 'en',
         systemLangCode: 'en',
         baseLogger: 'gramjs',
+        useWSS: false,
     }
 
 
@@ -67,7 +67,7 @@ class TelegramClient {
             throw new Error('The given session must be str or a session instance')
         }
         if (!session.serverAddress || (session.serverAddress.includes(':') !== this._useIPV6)) {
-            session.setDC(DEFAULT_DC_ID, this._useIPV6 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, DEFAULT_PORT)
+            session.setDC(DEFAULT_DC_ID, this._useIPV6 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, args.useWSS ? 443 : 80)
         }
         this.floodSleepLimit = args.floodSleepLimit
         this._eventBuilders = []
