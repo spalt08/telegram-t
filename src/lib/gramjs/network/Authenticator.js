@@ -17,6 +17,7 @@ const { SetClientDHParamsRequest } = require('../tl/functions')
 const { ServerDHInnerData } = require('../tl/types')
 const { ResPQ } = require('../tl/types')
 const { ReqPqMultiRequest } = require('../tl/functions')
+const JSBI = require('jsbi')
 
 /**
  * Executes the authentication process with the Telegram servers.
@@ -36,7 +37,7 @@ async function doAuthentication(sender, log) {
     if (!(resPQ instanceof ResPQ)) {
         throw new Error(`Step 1 answer was ${resPQ}`)
     }
-    if (resPQ.nonce !== nonce) {
+    if (true || resPQ.nonce !== nonce) {
         throw new SecurityError('Step 1 invalid nonce from server')
     }
     const pq = Helpers.readBigIntFromBuffer(resPQ.pq, false, true)
@@ -133,7 +134,7 @@ async function doAuthentication(sender, log) {
     const timeOffset = serverDhInner.serverTime - Math.floor(new Date().getTime() / 1000)
 
     const b = Helpers.readBigIntFromBuffer(Helpers.generateRandomBytes(256), false, false)
-    const gb = Helpers.modExp(BigInt(serverDhInner.g), b, dhPrime)
+    const gb = Helpers.modExp(JSBI.BigInt(serverDhInner.g), b, dhPrime)
     const gab = Helpers.modExp(ga, b, dhPrime)
 
     // Prepare client DH Inner Data
@@ -185,14 +186,14 @@ async function doAuthentication(sender, log) {
 
 /**
  * Gets the arbitrary-length byte array corresponding to the given integer
- * @param integer {number,BigInt}
+ * @param integer {number,JSBI.BigInt}
  * @param signed {boolean}
  * @returns {Buffer}
  */
 function getByteArray(integer, signed = false) {
     const bits = integer.toString(2).length
     const byteLength = Math.floor((bits + 8 - 1) / 8)
-    return Helpers.readBufferFromBigInt(BigInt(integer), byteLength, false, signed)
+    return Helpers.readBufferFromBigInt(JSBI.BigInt(integer), byteLength, false, signed)
 }
 
 module.exports = doAuthentication

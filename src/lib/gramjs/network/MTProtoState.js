@@ -6,6 +6,7 @@ const GZIPPacked = require('../tl/core/GZIPPacked')
 const { TLMessage } = require('../tl/core')
 const { SecurityError, InvalidBufferError } = require('../errors/Common')
 const { InvokeAfterMsgRequest } = require('../tl/functions')
+const JSBI = require('jsbi')
 
 class MTProtoState {
     /**
@@ -133,7 +134,7 @@ class MTProtoState {
         // TODO Check salt,sessionId, and sequenceNumber
         const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8))
 
-        if (keyId !== this.authKey.keyId) {
+        if (JSBI.notEqual(keyId, this.authKey.keyId)) {
             throw new SecurityError('Server replied with an invalid auth key')
         }
 
@@ -177,9 +178,12 @@ class MTProtoState {
     _getNewMsgId() {
         const now = new Date().getTime() / 1000 + this.timeOffset
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9)
-        let newMsgId = (BigInt(Math.floor(now)) << BigInt(32)) | (BigInt(nanoseconds) << BigInt(2))
-        if (this._lastMsgId >= newMsgId) {
-            newMsgId = this._lastMsgId + BigInt(4)
+        let newMsgId = JSBI.bitwiseOr(
+            JSBI.leftShift(JSBI.BigInt(Math.floor(now)), JSBI.BigInt(32)),
+            JSBI.leftShift(JSBI.BigInt(nanoseconds), JSBI.BigInt(2))
+        )
+        if (JSBI.greaterThanOrEqual(this._lastMsgId, newMsgId)) {
+            newMsgId = JSBI.add(this._lastMsgId, JSBI.BigInt(4))
         }
         this._lastMsgId = newMsgId
         return newMsgId
@@ -194,7 +198,7 @@ class MTProtoState {
         const bad = this._getNewMsgId()
         const old = this.timeOffset
         const now = Math.floor(new Date().getTime() / 1000)
-        const correct = correctMsgId >> BigInt(32)
+        const correct = correctMsgId >> JSBI.BigInt(32)
         this.timeOffset = correct - now
 
         if (this.timeOffset !== old) {

@@ -2,17 +2,18 @@ const NodeRSA = require('node-rsa')
 const { TLObject } = require('../tl/tlobject')
 const { readBigIntFromBuffer, sha1, modExp, readBufferFromBigInt, generateRandomBytes } = require('../Helpers')
 const _serverKeys = {}
+const JSBI = require('jsbi')
 
 /**
  * Gets the arbitrary-length byte array corresponding to the given integer
- * @param integer {number,BigInt}
+ * @param integer {number,JSBI.BigInt}
  * @param signed {boolean}
  * @returns {Buffer}
  */
 function getByteArray(integer, signed = false) {
     const { length: bits } = integer.toString(2)
     const byteLength = Math.floor((bits + 8 - 1) / 8)
-    return readBufferFromBigInt(BigInt(integer), byteLength, false, signed)
+    return readBufferFromBigInt(JSBI.BigInt(integer), byteLength, false, signed)
 }
 
 function _computeFingerprint(key) {
@@ -40,7 +41,7 @@ function encrypt(fingerprint, data) {
     const rand = generateRandomBytes(235 - data.length)
     const toEncrypt = Buffer.concat([sha1(data), data, rand])
     const payload = readBigIntFromBuffer(toEncrypt, false)
-    const encrypted = modExp(payload, BigInt(key.keyPair.e), buf)
+    const encrypted = modExp(payload, JSBI.BigInt(key.keyPair.e), buf)
     const block = readBufferFromBigInt(encrypted, 256, false)
     return block
 }

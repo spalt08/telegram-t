@@ -1,6 +1,10 @@
-// Not needed when build with Parcel.
-// require('regenerator-runtime/runtime')
-// require('regenerator-runtime')
+require('regenerator-runtime/runtime')
+require('regenerator-runtime')
+const JSBI = require('jsbi')
+
+JSBI.prototype.valueOf = () => {
+    throw new Error('Use `JSBI.BigInt` methods');
+}
 
 const TelegramClient = require('./client/TelegramClient')
 const connection = require('./network')

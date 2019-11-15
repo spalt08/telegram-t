@@ -3,12 +3,13 @@ const { types } = require('./tl')
 const { readBigIntFromBuffer, readBufferFromBigInt, sha256, modExp, generateRandomBytes } = require('./Helpers')
 const crypto = require('crypto')
 const SIZE_FOR_HASH = 256
+const JSBI = require('jsbi')
 
 /**
  *
  *
- * @param prime{BigInt}
- * @param g{BigInt}
+ * @param prime{JSBI.BigInt}
+ * @param g{JSBI.BigInt}
  */
 function checkPrimeAndGoodCheck(prime, g) {
     const goodPrimeBitsCount = 2048
@@ -19,33 +20,33 @@ function checkPrimeAndGoodCheck(prime, g) {
     if (Factorizator.factorize(prime)[0] !== 1) {
         throw new Error('give "prime" is not prime')
     }
-    if (g === BigInt(2)) {
-        if (prime % BigInt(8) !== BigInt(7)) {
+    if (g === JSBI.BigInt(2)) {
+        if (prime % JSBI.BigInt(8) !== JSBI.BigInt(7)) {
             throw new Error(`bad g ${g}, mod8 ${prime % 8}`)
         }
-    } else if (g === BigInt(3)) {
-        if (prime % BigInt(3) !== BigInt(2)) {
+    } else if (g === JSBI.BigInt(3)) {
+        if (prime % JSBI.BigInt(3) !== JSBI.BigInt(2)) {
             throw new Error(`bad g ${g}, mod3 ${prime % 3}`)
         }
         // eslint-disable-next-line no-empty
-    } else if (g === BigInt(4)) {
+    } else if (g === JSBI.BigInt(4)) {
 
-    } else if (g === BigInt(5)) {
-        if (!([BigInt(1), BigInt(4)].includes(prime % BigInt(5)))) {
+    } else if (g === JSBI.BigInt(5)) {
+        if (!([JSBI.BigInt(1), JSBI.BigInt(4)].includes(prime % JSBI.BigInt(5)))) {
             throw new Error(`bad g ${g}, mod8 ${prime % 5}`)
         }
-    } else if (g === BigInt(6)) {
-        if (!([BigInt(19), BigInt(23)].includes(prime % BigInt(24)))) {
+    } else if (g === JSBI.BigInt(6)) {
+        if (!([JSBI.BigInt(19), JSBI.BigInt(23)].includes(prime % JSBI.BigInt(24)))) {
             throw new Error(`bad g ${g}, mod8 ${prime % 24}`)
         }
-    } else if (g === BigInt(7)) {
-        if (!([BigInt(3), BigInt(5), BigInt(6)].includes(prime % BigInt(7)))) {
+    } else if (g === JSBI.BigInt(7)) {
+        if (!([JSBI.BigInt(3), JSBI.BigInt(5), JSBI.BigInt(6)].includes(prime % JSBI.BigInt(7)))) {
             throw new Error(`bad g ${g}, mod8 ${prime % 7}`)
         }
     } else {
         throw new Error(`bad g ${g}`)
     }
-    const primeSub1Div2 = (prime - BigInt(1)) / BigInt(2)
+    const primeSub1Div2 = (prime - JSBI.BigInt(1)) / JSBI.BigInt(2)
     if (Factorizator.factorize(primeSub1Div2)[0] !== 1) {
         throw new Error('(prime - 1) // 2 is not prime')
     }
@@ -85,12 +86,12 @@ function checkPrimeAndGood(primeBytes, g) {
 
 /**
  *
- * @param number{BigInt}
- * @param p{BigInt}
+ * @param number{JSBI.BigInt}
+ * @param p{JSBI.BigInt}
  * @returns {boolean}
  */
 function isGoodLarge(number, p) {
-    return (number > BigInt(0) && (p - number) > BigInt(0))
+    return (number > JSBI.BigInt(0) && (p - number) > JSBI.BigInt(0))
 }
 
 /**
@@ -174,7 +175,7 @@ function computeDigest(algo, password) {
         throw new Error('bad p/g in password')
     }
 
-    const value = modExp(BigInt(algo.g),
+    const value = modExp(JSBI.BigInt(algo.g),
         readBigIntFromBuffer(computeHash(algo, password), false),
         readBigIntFromBuffer(algo.p, false))
     return bigNumForHash(value)
@@ -207,7 +208,7 @@ function computeCheck(request, password) {
     const pForHash = numBytesForHash(algo.p)
     const gForHash = bigNumForHash(g)
     const bForHash = numBytesForHash(request.srp_B)
-    const gX = modExp(BigInt(g), x, p)
+    const gX = modExp(JSBI.BigInt(g), x, p)
     const k = readBigIntFromBuffer(sha256(Buffer.concat([pForHash, gForHash])), false)
     const kgX = (k * gX) % p
     const generateAndCheckRandom = () => {
@@ -216,11 +217,11 @@ function computeCheck(request, password) {
         while (true) {
             const random = generateRandomBytes(randomSize)
             const a = readBigIntFromBuffer(random, false)
-            const A = modExp(BigInt(g), a, p)
+            const A = modExp(JSBI.BigInt(g), a, p)
             if (isGoodModExpFirst(A, p)) {
                 const aForHash = bigNumForHash(A)
                 const u = readBigIntFromBuffer(sha256(Buffer.concat([aForHash, bForHash])), false)
-                if (u > BigInt(0)) {
+                if (u > JSBI.BigInt(0)) {
                     return [a, aForHash, u]
                 }
             }

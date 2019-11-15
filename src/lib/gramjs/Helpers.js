@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const JSBI = require('jsbi')
 
 /**
  * use this instead of ** because of webpack
@@ -7,14 +8,7 @@ const crypto = require('crypto')
  * @returns {bigint}
  */
 function bigIntPower(a, b) {
-    let i
-    let pow = BigInt(1)
-
-    for (i = BigInt(0); i < b; i++) {
-        pow = pow * a
-    }
-
-    return pow
+    return JSBI.exponentiate(a, b)
 }
 
 /**
@@ -30,9 +24,9 @@ function readBigIntFromBuffer(buffer, little = true, signed = false) {
     if (little) {
         randBuffer = randBuffer.reverse()
     }
-    let bigInt = BigInt('0x' + randBuffer.toString('hex'))
+    let bigInt = JSBI.BigInt('0x' + randBuffer.toString('hex'))
     if (signed && Math.floor(bigInt.toString('2').length / 8) >= bytesNumber) {
-        bigInt -= bigIntPower(BigInt(2), BigInt(bytesNumber * 8))
+        bigInt = JSBI.subtract(bigInt, bigIntPower(JSBI.BigInt(2), JSBI.BigInt(bytesNumber * 8)))
     }
     return bigInt
 }
@@ -52,13 +46,13 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
     if (bytesNumber < bytes) {
         throw new Error('OverflowError: int too big to convert')
     }
-    if (!signed && bigInt < 0) {
+    if (!signed && JSBI.lessThan(bigInt, 0)) {
         throw new Error('Cannot convert to unsigned')
     }
     let below = false
-    if (bigInt < 0) {
+    if (JSBI.lessThan(bigInt, 0)) {
         below = true
-        bigInt = -bigInt
+        bigInt = JSBI.unaryMinus(bigInt)
     }
 
     const hex = bigInt.toString('16').padStart(bytesNumber * 2, '0')
@@ -85,7 +79,7 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
 
 /**
  * Generates a random long integer (8 bytes), which is optionally signed
- * @returns {BigInt}
+ * @returns {JSBI.BigInt}
  */
 function generateRandomLong(signed = true) {
     return readBigIntFromBuffer(generateRandomBytes(8), true, signed)
@@ -189,12 +183,12 @@ function sha256(data) {
  */
 function modExp(a, b, n) {
     a = a % n
-    let result = BigInt(1)
+    let result = JSBI.BigInt(1)
     let x = a
-    while (b > BigInt(0)) {
-        const leastSignificantBit = b % BigInt(2)
-        b = b / BigInt(2)
-        if (leastSignificantBit === BigInt(1)) {
+    while (b > JSBI.BigInt(0)) {
+        const leastSignificantBit = b % JSBI.BigInt(2)
+        b = b / JSBI.BigInt(2)
+        if (leastSignificantBit === JSBI.BigInt(1)) {
             result = result * x
             result = result % n
         }

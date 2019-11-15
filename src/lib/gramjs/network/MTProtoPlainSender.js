@@ -7,6 +7,7 @@ const MTProtoState = require('./MTProtoState')
 const struct = require('python-struct')
 const BinaryReader = require('../extensions/BinaryReader')
 const { InvalidBufferError } = require('../errors/Common')
+const JSBI = require('jsbi')
 
 /**
  * MTProto Mobile Protocol plain sender (https://core.telegram.org/mtproto/description#unencrypted-messages)
@@ -40,11 +41,11 @@ class MTProtoPlainSender {
         }
         const reader = new BinaryReader(body)
         const authKeyId = reader.readLong()
-        if (authKeyId !== BigInt(0)) {
+        if (authKeyId !== JSBI.BigInt(0)) {
             throw new Error('Bad authKeyId')
         }
         msgId = reader.readLong()
-        if (msgId === BigInt(0)) {
+        if (msgId === JSBI.BigInt(0)) {
             throw new Error('Bad msgId')
         }
         /** ^ We should make sure that the read ``msg_id`` is greater
@@ -67,21 +68,21 @@ class MTProtoPlainSender {
 
     /**
      * Generates a new message ID based on the current time (in ms) since epoch
-     * @returns {BigInt}
+     * @returns {JSBI.BigInt}
      */
     getNewMsgId() {
         // See https://core.telegram.org/mtproto/description#message-identifier-msg-id
         const msTime = Date.now()
         let newMsgId =
-            (BigInt(Math.floor(msTime / 1000)) << BigInt(32)) | // "must approximately equal unixtime*2^32"
-            (BigInt(msTime % 1000) << BigInt(32)) | // "approximate moment in time the message was created"
-            (BigInt(Helpers.getRandomInt(0, 524288)) << BigInt(2)) // "message identifiers are divisible by 4"
+            (JSBI.BigInt(Math.floor(msTime / 1000)) << JSBI.BigInt(32)) | // "must approximately equal unixtime*2^32"
+            (JSBI.BigInt(msTime % 1000) << JSBI.BigInt(32)) | // "approximate moment in time the message was created"
+            (JSBI.BigInt(Helpers.getRandomInt(0, 524288)) << JSBI.BigInt(2)) // "message identifiers are divisible by 4"
         // Ensure that we always return a message ID which is higher than the previous one
         if (this._lastMsgId >= newMsgId) {
-            newMsgId = this._lastMsgId + BigInt(4)
+            newMsgId = this._lastMsgId + JSBI.BigInt(4)
         }
         this._lastMsgId = newMsgId
-        return BigInt(newMsgId)
+        return JSBI.BigInt(newMsgId)
     }
 }
 

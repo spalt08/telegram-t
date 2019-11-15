@@ -5,12 +5,13 @@ const AuthKey = require('../crypto/AuthKey')
 const { TLObject } = require('../tl/tlobject')
 const utils = require('../Utils')
 const types = require('../tl/types')
+const JSBI = require('jsbi')
 
-BigInt.toJSON = function() {
+JSBI.BigInt.toJSON = function() {
     return { fool: this.fool.toString('hex') }
 }
-BigInt.parseJson = function() {
-    return { fool: BigInt('0x' + this.fool) }
+JSBI.BigInt.parseJson = function() {
+    return { fool: JSBI.BigInt('0x' + this.fool) }
 }
 
 class Session {
@@ -24,9 +25,9 @@ class Session {
         this.authKey = undefined
         this.id = generateRandomLong(false)
         this.sequence = 0
-        this.salt = BigInt(0) // Unsigned long
-        this.timeOffset = BigInt(0)
-        this.lastMessageId = BigInt(0)
+        this.salt = JSBI.BigInt(0) // Unsigned long
+        this.timeOffset = JSBI.BigInt(0)
+        this.lastMessageId = JSBI.BigInt(0)
         this.user = undefined
         this._files = {}
         this._entities = new Set()
@@ -39,7 +40,7 @@ class Session {
     async save() {
         if (this.sessionUserId) {
             const str = JSON.stringify(this, function(key, value) {
-                if (typeof value === 'bigint') {
+                if (value instanceof JSBI) {
                     return value.toString() + 'n'
                 } else {
                     return value
@@ -160,7 +161,7 @@ class Session {
             try {
                 const ob = JSON.parse(readFileSync(filepath, 'utf-8'), function(key, value) {
                     if (typeof value == 'string' && value.match(/(\d+)n/)) {
-                        return BigInt(value.slice(0, -1))
+                        return JSBI.BigInt(value.slice(0, -1))
                     } else {
                         return value
                     }
@@ -193,12 +194,12 @@ class Session {
     getNewMsgId() {
         const msTime = new Date().getTime()
         let newMessageId =
-            (BigInt(BigInt(Math.floor(msTime / 1000)) + this.timeOffset) << BigInt(32)) |
-            (BigInt(msTime % 1000) << BigInt(22)) |
-            (BigInt(getRandomInt(0, 524288)) << BigInt(2)) // 2^19
+            (JSBI.BigInt(JSBI.BigInt(Math.floor(msTime / 1000)) + this.timeOffset) << JSBI.BigInt(32)) |
+            (JSBI.BigInt(msTime % 1000) << JSBI.BigInt(22)) |
+            (JSBI.BigInt(getRandomInt(0, 524288)) << JSBI.BigInt(2)) // 2^19
 
         if (this.lastMessageId >= newMessageId) {
-            newMessageId = this.lastMessageId + BigInt(4)
+            newMessageId = this.lastMessageId + JSBI.BigInt(4)
         }
         this.lastMessageId = newMessageId
         return newMessageId

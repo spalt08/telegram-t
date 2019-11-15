@@ -3,6 +3,7 @@ const { TypeNotFoundError } = require('../errors/Common')
 const { coreObjects } = require('../tl/core')
 const { tlobjects } = require('../tl/AllTLObjects')
 const { readBigIntFromBuffer } = require('../Helpers')
+const JSBI = require('jsbi')
 
 class BinaryReader {
     /**
@@ -60,7 +61,7 @@ class BinaryReader {
 
     /**
      * Reads a real floating point (8 bytes) value.
-     * @returns {BigInt}
+     * @returns {JSBI.BigInt}
      */
     readDouble() {
         return unpack('<f', this.read(8))[0]
