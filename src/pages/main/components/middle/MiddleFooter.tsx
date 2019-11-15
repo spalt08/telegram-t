@@ -2,6 +2,7 @@ import { ChangeEvent, KeyboardEvent } from 'react';
 import React, { FC, useState } from '../../../../lib/teact';
 import { DispatchMap, withGlobal } from '../../../../lib/teactn';
 
+import Button from '../../../../components/ui/Button';
 import { onNextTick } from '../../../../util/schedulers';
 import InputText from '../../../../components/ui/InputText';
 import './MiddleFooter.scss';
@@ -37,10 +38,9 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   return (
     <div className="MiddleFooter">
       <div id="message-input-wrapper">
-        {/* TODO @not-implemented */}
-        {/* <Button round color="translucent" onClick={() => {}}>
-         <i className="icon-smile" />
-         </Button> */}
+        <Button className="not-implemented" round color="translucent">
+          <i className="icon-smile" />
+        </Button>
         {/* TODO Convert to textarea, add auto-sizing */}
         <InputText
           id="message-input-text"
@@ -49,15 +49,13 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
           onKeyPress={onKeyPress}
           value={messageText}
         />
-        {/* TODO @not-implemented */}
-        {/* <Button round color="translucent" onClick={() => { }}>
-         <i className="icon-attach" />
-         </Button> */}
+        <Button className="not-implemented" round color="translucent">
+          <i className="icon-attach" />
+        </Button>
       </div>
-      {/* TODO @not-implemented */}
-      {/* <Button round color="primary" onClick={() => { }}>
-       <i className="icon-microphone" />
-       </Button> */}
+      <Button className="not-implemented" round color="primary">
+        <i className="icon-microphone" />
+      </Button>
     </div>
   );
 };

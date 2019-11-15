@@ -2,7 +2,7 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { isPrivateChat } from '../../../../modules/tdlib/helpers';
-
+import Button from '../../../../components/ui/Button';
 import PrivateChatHeader from './PrivateChatHeader';
 import GroupHeader from './GroupHeader';
 import MessageList from './MessageList';
@@ -57,24 +57,23 @@ function renderOpenChatScreen(props: IProps) {
       <h2>
         Open Chat
         <br />
-        to start messaging
+        or create a new one
       </h2>
 
-      {/* TODO @not-implemented */}
-      {/* <div className="create-chat-buttons">
-       <Button round color="secondary" onClick={() => { }}>
-       <i className="icon-new-private" />
-       <span>Private</span>
-       </Button>
-       <Button round color="secondary" onClick={() => { }}>
-       <i className="icon-new-group" />
-       <span>Group</span>
-       </Button>
-       <Button round color="secondary" onClick={() => { }}>
-       <i className="icon-new-channel" />
-       <span>Channel</span>
-       </Button>
-       </div> */}
+      <div className="create-chat-buttons">
+        <Button className="not-implemented" round color="secondary">
+          <i className="icon-new-private" />
+          <span>Private</span>
+        </Button>
+        <Button className="not-implemented" round color="secondary">
+          <i className="icon-new-group" />
+          <span>Group</span>
+        </Button>
+        <Button className="not-implemented" round color="secondary">
+          <i className="icon-new-channel" />
+          <span>Channel</span>
+        </Button>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ interface IProps {
   icon?: string;
   className?: string;
   children: JsxChildren;
-  onClick: OnClickHandler;
+  onClick?: OnClickHandler;
 }
 
 const DropdownMenuItem: FC<IProps> = (props) => {

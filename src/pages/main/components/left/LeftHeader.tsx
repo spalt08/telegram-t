@@ -29,13 +29,12 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
       <DropdownMenu
         trigger={MenuButton}
       >
-        {/* TODO @not-implemented */}
-        {/* <DropdownMenuItem icon="new-group" onClick={() => {}}>New Group</DropdownMenuItem> */}
-        {/* <DropdownMenuItem icon="user" onClick={() => {}}>Contacts</DropdownMenuItem> */}
-        {/* <DropdownMenuItem icon="archive" onClick={() => {}}>Archived</DropdownMenuItem> */}
-        {/* <DropdownMenuItem icon="saved-messages" onClick={() => {}}>Saved</DropdownMenuItem> */}
-        {/* <DropdownMenuItem icon="settings" onClick={() => {}}>Settings</DropdownMenuItem> */}
-        {/* <DropdownMenuItem icon="help" onClick={() => {}}>Help</DropdownMenuItem> */}
+        <DropdownMenuItem className="not-implemented" icon="new-group">New Group</DropdownMenuItem>
+        <DropdownMenuItem className="not-implemented" icon="user">Contacts</DropdownMenuItem>
+        <DropdownMenuItem className="not-implemented" icon="archive">Archived</DropdownMenuItem>
+        <DropdownMenuItem className="not-implemented" icon="saved-messages">Saved</DropdownMenuItem>
+        <DropdownMenuItem className="not-implemented" icon="settings">Settings</DropdownMenuItem>
+        <DropdownMenuItem className="not-implemented" icon="help">Help</DropdownMenuItem>
         <DropdownMenuItem icon="logout" onClick={() => onSignOut(signOut)}>Log Out</DropdownMenuItem>
       </DropdownMenu>
       <SearchInput />

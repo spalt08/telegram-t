@@ -4,8 +4,7 @@ import './SearchInput.scss';
 
 const SearchInput: FC = () => {
   return (
-    <div className="SearchInput">
-      {/* TODO @not-implemented */}
+    <div className="SearchInput not-implemented">
       <input
         type="text"
         placeholder="Search"

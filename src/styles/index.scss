@@ -28,6 +28,10 @@ html, body {
   visibility: hidden;
 }
 
+.not-implemented, .not-implemented * {
+  cursor: not-allowed !important;
+}
+
 * {
   box-sizing: border-box;
 
