@@ -15,8 +15,8 @@ const { computeCheck } = require('../Password')
 const MTProtoSender = require('../network/MTProtoSender')
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated')
 
-const DEFAULT_DC_ID = 4
-const DEFAULT_IPV4_IP = 'vesta-1.web.telegram.org'
+const DEFAULT_DC_ID = 2
+const DEFAULT_IPV4_IP = 'venus.web.telegram.org'
 const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 
 class TelegramClient {
