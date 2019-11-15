@@ -23,7 +23,7 @@ const authPromiseResolvers: {
 };
 
 // @ts-ignore
-window.onmessage = (async (message: OriginMessageEvent) => {
+onmessage = (async (message: OriginMessageEvent) => {
   const { data } = message;
 
   if (data.type === 'init') {
@@ -110,7 +110,7 @@ function onGramJsUpdate(update: object) {
 
 function sendToOrigin(message: WorkerMessageData) {
   // @ts-ignore
-  window.postMessage(message);
+  postMessage(message);
 }
 
 export async function init() {
