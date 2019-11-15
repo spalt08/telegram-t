@@ -7,6 +7,7 @@ import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/
 import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
+import { formatChatDateHeader, isSameDay } from '../../../../util/dateFormat';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import './MessageList.scss';
@@ -15,6 +16,11 @@ type IProps = Pick<DispatchMap, 'loadChatMessages' | 'loadMoreChatMessages' | 's
   areMessagesLoaded: boolean;
   chatId: number;
   messages?: Record<number, ApiMessage>;
+};
+
+type MessageDateGroup = {
+  datetime: number;
+  messageGroups: ApiMessage[][];
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -45,6 +51,30 @@ const MessageList: FC<IProps> = ({
     }
   });
 
+  function renderMessageDateGroup(messageDateGroup: MessageDateGroup) {
+    return (
+      <div className="message-date-group">
+        <div className="message-date-header">{formatChatDateHeader(messageDateGroup.datetime)}</div>
+        {messageDateGroup.messageGroups.map((messageGroup) => (
+          <div className="message-group">
+            {messageGroup.map((message, i) => {
+              const isOwn = isOwnMessage(message);
+
+              return (
+                <Message
+                  key={message.id}
+                  message={message}
+                  showAvatar={!isPrivate && !isOwn}
+                  showSenderName={i === 0 && !isPrivate && !isOwn}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   // TODO @perf Replace the whole element while rendering, it will be faster for long lists.
   return (
     <div
@@ -54,22 +84,7 @@ const MessageList: FC<IProps> = ({
       {
         areMessagesLoaded ? (
           <div className="messages-container">
-            {messagesArray && groupMessages(messagesArray).map((messageGroup) => (
-              <div className="message-group">
-                {messageGroup.map((message, i) => {
-                  const isOwn = isOwnMessage(message);
-
-                  return (
-                    <Message
-                      key={message.id}
-                      message={message}
-                      showAvatar={!isPrivate && !isOwn}
-                      showSenderName={i === 0 && !isPrivate && !isOwn}
-                    />
-                  );
-                })}
-              </div>
-            ))}
+            {messagesArray && groupMessages(messagesArray).map(renderMessageDateGroup)}
           </div>
         ) : (
           <Loading />
@@ -94,18 +109,36 @@ function handleScroll(
 }
 
 function groupMessages(messages: ApiMessage[]) {
-  const messageGroups: ApiMessage[][] = [];
-  let group: ApiMessage[] = [];
+  const messageDateGroups: MessageDateGroup[] = [
+    {
+      datetime: messages[0].date * 1000,
+      messageGroups: [],
+    },
+  ];
+  let currentMessageGroup: ApiMessage[] = [];
+  let currentMessageDateGroup = messageDateGroups[0];
 
   messages.forEach((message, index) => {
+    if (!isSameDay(currentMessageDateGroup.datetime, message.date * 1000)) {
+      if (currentMessageDateGroup && currentMessageGroup && currentMessageGroup.length) {
+        currentMessageDateGroup.messageGroups.push(currentMessageGroup);
+        currentMessageGroup = [];
+      }
+      messageDateGroups.push({
+        datetime: message.date * 1000,
+        messageGroups: [],
+      });
+      currentMessageDateGroup = messageDateGroups[messageDateGroups.length - 1];
+    }
+
     if (
-      !group.length || (
-        message.sender_user_id === group[group.length - 1].sender_user_id
+      !currentMessageGroup.length || (
+        message.sender_user_id === currentMessageGroup[currentMessageGroup.length - 1].sender_user_id
         // Forwarded messages to chat with self.
-        && message.is_outgoing === group[group.length - 1].is_outgoing
+        && message.is_outgoing === currentMessageGroup[currentMessageGroup.length - 1].is_outgoing
       )
     ) {
-      group.push(message);
+      currentMessageGroup.push(message);
     }
 
     if (
@@ -114,16 +147,16 @@ function groupMessages(messages: ApiMessage[]) {
         || message.is_outgoing !== messages[index + 1].is_outgoing
       )
     ) {
-      messageGroups.push(group);
-      group = [];
+      currentMessageDateGroup.messageGroups.push(currentMessageGroup);
+      currentMessageGroup = [];
     }
   });
 
-  if (group.length) {
-    messageGroups.push(group);
+  if (currentMessageGroup.length) {
+    currentMessageDateGroup.messageGroups.push(currentMessageGroup);
   }
 
-  return messageGroups;
+  return messageDateGroups;
 }
 
 export default withGlobal(

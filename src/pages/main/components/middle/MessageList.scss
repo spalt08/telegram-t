@@ -24,7 +24,28 @@
     padding-bottom: .1rem;
   }
 
+  .message-date-group {
+    text-align: center;
+  }
+
+  .message-date-header {
+    display: inline-block;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(var(--color-text-secondary-rgb), 0.45);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+    padding: 0 .5rem;
+    border-radius: 0.75rem;
+    position: sticky;
+    top: 0.625rem;
+    z-index: 10;
+  }
+
   .message-group {
+    text-align: left;
     margin-bottom: 0.625rem;
 
     &:last-child {
