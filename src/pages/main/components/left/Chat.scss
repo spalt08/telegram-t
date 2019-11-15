@@ -8,10 +8,18 @@
 
   &:hover, &.selected {
     background: var(--color-chat-hover);
+
+    .Avatar.online::after {
+      border-color: var(--color-chat-hover)
+    }
   }
 
   &:active {
     background: var(--color-chat-active);
+
+    .Avatar.online::after {
+      border-color: var(--color-chat-hover)
+    }
   }
 
   .Avatar {
