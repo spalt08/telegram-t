@@ -1,6 +1,3 @@
-// import ReactDOM from 'react-dom';
-// export default ReactDOM;
-
 import {
   hasElementChanged,
   isComponentElement, isEmptyElement, isRealElement, isTextElement, isTagElement, VIRTUAL_ELEMENT_EMPTY,

@@ -1,16 +1,20 @@
 import {
-  addReducer, getGlobal, GlobalState, setGlobal,
+  addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teactn';
 
+import { GlobalState } from '../../../store/types';
+import { GRAM_JS_SESSION_ID_KEY } from '../../../config';
 import { init, provideAuthPhoneNumber, provideAuthCode } from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
-  init(onUpdate);
+  const sessionId = localStorage.getItem(GRAM_JS_SESSION_ID_KEY) || '';
+  init(onUpdate, sessionId);
 
   return {
     ...global,
     isInitialized: true,
+    authIsSessionRemembered: Boolean(sessionId),
   };
 });
 
@@ -54,7 +58,9 @@ async function setAuthPhoneNumber(phoneNumber: string) {
 //
 //   void provideAuthPassword(code);
 // });
-//
-// addReducer('signOut', () => {
-//   void TdLib.send({ '@type': 'logOut' });
-// });
+
+addReducer('signOut', () => {
+  localStorage.removeItem(GRAM_JS_SESSION_ID_KEY);
+
+  getDispatch().init();
+});

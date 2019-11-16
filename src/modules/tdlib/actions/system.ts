@@ -1,7 +1,6 @@
-import {
-  addReducer, getGlobal, GlobalState, setGlobal,
-} from '../../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
+import { GlobalState } from '../../../store/types';
 import * as TdLib from '../../../api/tdlib';
 import onUpdate from '../updaters';
 
@@ -16,8 +15,10 @@ addReducer('init', (global: GlobalState) => {
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
+  const { authShouldRememberMe } = global;
 
-  void setAuthPhoneNumber(phoneNumber);
+
+  void setAuthPhoneNumber(phoneNumber, authShouldRememberMe);
 });
 
 addReducer('setAuthCode', (global, actions, payload) => {
@@ -38,16 +39,15 @@ addReducer('signUp', (global, actions, payload) => {
   void signUp(firstName, lastName);
 });
 
-addReducer('signOut', (global) => {
+addReducer('signOut', () => {
   void TdLib.send({ '@type': 'logOut' });
 
-  setGlobal({
-    ...global,
-    authError: undefined,
-  });
+  return {
+    ...getGlobal(),
+  };
 });
 
-async function setAuthPhoneNumber(phoneNumber: string) {
+async function setAuthPhoneNumber(phoneNumber: string, authShouldRememberMe = false) {
   setGlobal({
     ...getGlobal(),
     authIsLoading: true,
@@ -57,6 +57,8 @@ async function setAuthPhoneNumber(phoneNumber: string) {
   await TdLib.send({
     '@type': 'setAuthenticationPhoneNumber',
     phone_number: phoneNumber,
+    // TODO Not implemented.
+    authShouldRememberMe,
   }, () => {
     setGlobal({
       ...getGlobal(),

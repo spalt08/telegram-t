@@ -1,5 +1,5 @@
-import { GlobalState } from '../../../lib/teactn';
 import { ApiChat } from '../../../api/tdlib/types';
+import { GlobalState } from '../../../store/types';
 import { getChatPhotoId } from '../helpers';
 
 export function selectChat(global: GlobalState, chatId: number) {

@@ -1,14 +1,14 @@
 import { ChangeEvent } from 'react';
-
 import React, { FC, useState } from '../../../lib/teact';
-import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
+import { withGlobal } from '../../../lib/teactn';
 
+import { GlobalState, GlobalActions } from '../../../store/types';
 import InputText from '../../../components/ui/InputText';
 
 import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authPhoneNumber' | 'authError'> &
-Pick<DispatchMap, 'setAuthCode' | 'returnToAuthPhoneNumber'>;
+Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber'>;
 const AuthCode: FC<IProps> = ({
   authPhoneNumber, authError, setAuthCode, returnToAuthPhoneNumber,
 }) => {

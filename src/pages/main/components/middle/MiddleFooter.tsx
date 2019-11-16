@@ -1,13 +1,14 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
 import React, { FC, useState } from '../../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../../lib/teactn';
+import { withGlobal } from '../../../../lib/teactn';
 
+import { GlobalActions } from '../../../../store/types';
 import Button from '../../../../components/ui/Button';
 import { onNextTick } from '../../../../util/schedulers';
 import InputText from '../../../../components/ui/InputText';
 import './MiddleFooter.scss';
 
-type IProps = Pick<DispatchMap, 'sendTextMessage'> & {
+type IProps = Pick<GlobalActions, 'sendTextMessage'> & {
   selectedChatId: number;
 };
 

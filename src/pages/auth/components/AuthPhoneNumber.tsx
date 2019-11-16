@@ -1,7 +1,8 @@
 import { ChangeEvent } from 'react';
-
 import React, { FC, useState } from '../../../lib/teact';
-import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
+import { withGlobal } from '../../../lib/teactn';
+
+import { GlobalState, GlobalActions } from '../../../store/types';
 import countryList from '../../../../public/countries.json';
 import formatPhoneNumber from '../../../util/formatPhoneNumber';
 
@@ -12,16 +13,18 @@ import Checkbox from '../../../components/ui/Checkbox';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'setAuthPhoneNumber'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authShouldRememberMe'> &
+Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe'>;
 
-const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNumber }) => {
+const AuthPhoneNumber: FC<IProps> = ({
+  authIsLoading, authError, authShouldRememberMe, setAuthPhoneNumber, setAuthRememberMe,
+}) => {
   const currentCountry = countryList.find((c) => c.id === 'RU');
 
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [country, setCountry] = useState(currentCountry);
   const [code, setCode] = useState(currentCountry ? currentCountry.code : undefined);
   const [phone, setPhone] = useState('');
-  const [keepSession, setKeepSession] = useState(true);
 
   function onCodeChange(newCountry: Country) {
     setCode(newCountry.code);
@@ -40,7 +43,7 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
 
   function onKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
-    setKeepSession(target.checked);
+    setAuthRememberMe(target.checked);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -78,7 +81,7 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
         <Checkbox
           id="sign-in-keep-session"
           label="Keep me signed in"
-          checked={keepSession}
+          checked={Boolean(authShouldRememberMe)}
           onChange={onKeepSessionChange}
         />
         {isButtonShown && (
@@ -91,11 +94,11 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
 
 export default withGlobal(
   (global) => {
-    const { authIsLoading, authError } = global;
-    return { authIsLoading, authError };
+    const { authIsLoading, authError, authShouldRememberMe } = global;
+    return { authIsLoading, authError, authShouldRememberMe };
   },
   (setGlobal, actions) => {
-    const { setAuthPhoneNumber } = actions;
-    return { setAuthPhoneNumber };
+    const { setAuthPhoneNumber, setAuthRememberMe } = actions;
+    return { setAuthPhoneNumber, setAuthRememberMe };
   },
 )(AuthPhoneNumber);

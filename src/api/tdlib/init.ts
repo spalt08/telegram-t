@@ -12,7 +12,7 @@ const INIT_OPTIONS = {
   prefix: 'tdlib',
   readOnly: false,
   isBackground: false,
-  useDatabase: false,
+  useDatabase: true,
 };
 
 const TD_PARAMETERS = {
@@ -24,7 +24,7 @@ const TD_PARAMETERS = {
   application_version: '0.0.1',
   use_secret_chats: false,
   use_message_database: true,
-  use_file_database: false,
+  use_file_database: true,
   database_directory: '/db',
   files_directory: '/',
 };

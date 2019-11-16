@@ -1,6 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../../lib/teactn';
+import { withGlobal } from '../../../../lib/teactn';
 
+import { GlobalActions } from '../../../../store/types';
 import { ApiChat, ApiUser } from '../../../../api/tdlib/types';
 import {
   getChatTitle,
@@ -19,7 +20,7 @@ type IProps = {
   chat: ApiChat;
   lastMessageSender?: ApiUser;
   selected: boolean;
-} & Pick<DispatchMap, 'selectChat'>;
+} & Pick<GlobalActions, 'selectChat'>;
 
 const Chat: FC<IProps> = ({
   chat,

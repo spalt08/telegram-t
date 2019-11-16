@@ -196,13 +196,14 @@ function onRequestPassword() {
 }
 
 function onAuthReady(sessionId: string) {
-  sendToOrigin({ type: 'setSessionId', sessionId });
-
   if (!onApiUpdate) {
     return;
   }
 
-  onApiUpdate(buildAuthState('authorizationStateReady'));
+  onApiUpdate({
+    ...buildAuthState('authorizationStateReady'),
+    sessionId,
+  });
 }
 
 function buildAuthState(authState: UpdateAuthorizationStateType): TdLibUpdateAuthorizationState {

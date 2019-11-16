@@ -1,5 +1,5 @@
-import { TdLibUpdate } from '../../../api/tdlib/types';
 
+import { TdLibUpdate } from '../../../api/tdlib/types';
 import { DEBUG } from '../../../config';
 import * as system from './system';
 import * as users from './users';

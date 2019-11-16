@@ -1,20 +1,16 @@
 import { FC } from './lib/teact';
-import React, { DispatchMap, GlobalState, withGlobal } from './lib/teactn';
+import React, { withGlobal } from './lib/teactn';
 
-import './modules';
-
+import { GlobalState } from './store/types';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
+import Loading from './components/Loading';
 // import Test from './pages/test/Test';
 
-type IProps = Pick<GlobalState, 'isInitialized' | 'authState'> & Pick<DispatchMap, 'init'>;
+type IProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
 
-const App: FC<IProps> = ({ isInitialized, authState, init }) => {
+const App: FC<IProps> = ({ authState, authIsSessionRemembered }) => {
   // return <Test />;
-
-  if (!isInitialized) {
-    init();
-  }
 
   if (authState) {
     switch (authState) {
@@ -29,18 +25,16 @@ const App: FC<IProps> = ({ isInitialized, authState, init }) => {
       case 'authorizationStateReady':
         return <Main />;
     }
+  } else if (authIsSessionRemembered) {
+    return <Main />;
   }
 
-  return <Main />;
+  return <Loading />;
 };
 
 export default withGlobal(
   global => {
-    const { isInitialized, authState } = global;
-    return { isInitialized, authState };
-  },
-  (setGlobal, actions) => {
-    const { init } = actions;
-    return { init };
+    const { authState, authIsSessionRemembered } = global;
+    return { authState, authIsSessionRemembered };
   },
 )(App);

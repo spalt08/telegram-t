@@ -1,6 +1,7 @@
 import React, { FC } from '../../lib/teact';
-import { GlobalState, withGlobal } from '../../lib/teactn';
+import { withGlobal } from '../../lib/teactn';
 
+import { GlobalState } from '../../store/types';
 import LeftColumn from './components/left/LeftColumn';
 import MiddleColumn from './components/middle/MiddleColumn';
 // import RightColumn from './components/right/RightColumn';

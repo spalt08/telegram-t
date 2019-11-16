@@ -16,6 +16,7 @@ export type TdLibUpdateAuthorizationState = {
   authorization_state: {
     '@type': UpdateAuthorizationStateType;
   };
+  sessionId?: string;
 };
 
 export type TdLibUpdateFile = {

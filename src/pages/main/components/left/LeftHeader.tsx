@@ -1,14 +1,14 @@
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, withGlobal } from '../../../../lib/teactn';
+import { withGlobal } from '../../../../lib/teactn';
 
+import { GlobalActions } from '../../../../store/types';
 import DropdownMenu from '../../../../components/ui/DropdownMenu';
 import DropdownMenuItem from '../../../../components/ui/DropdownMenuItem';
 import Button from '../../../../components/ui/Button';
 import SearchInput from './SearchInput';
-
 import './LeftHeader.scss';
 
-type IProps = Pick<DispatchMap, 'signOut'>;
+type IProps = Pick<GlobalActions, 'signOut'>;
 
 function onSignOut(signOut: Function) {
   // eslint-disable-next-line no-restricted-globals, no-alert

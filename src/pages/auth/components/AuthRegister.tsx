@@ -1,15 +1,14 @@
 import { ChangeEvent } from 'react';
-import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
-
 import React, { FC, useState } from '../../../lib/teact';
-// import { DispatchMap, withGlobal } from '../../../lib/teactn';
+import { withGlobal } from '../../../lib/teactn';
 
+import { GlobalState, GlobalActions } from '../../../store/types';
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'signUp'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'signUp'>;
 
 const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);

@@ -1,12 +1,4 @@
-// TODO default?
-// import React, { getGlobal, setGlobal } from 'reactn';
-// export { addReducer, getGlobal, setGlobal, withGlobal, useGlobal } from 'reactn';
-
-/* Polyfill start */
 import React, { FC, Props, useState } from './teact';
-import {
-  UpdateAuthorizationStateType, ApiUser, ApiChat, ApiMessage, ApiFile,
-} from '../api/tdlib/types';
 
 import { DEBUG } from '../config';
 import useForceUpdate from '../hooks/useForceUpdate';
@@ -14,95 +6,29 @@ import generateIdFor from '../util/generateIdFor';
 import { throttleWithRaf } from '../util/schedulers';
 import arePropsShallowEqual from '../util/arePropsShallowEqual';
 import { orderBy } from '../util/iteratees';
+import { GlobalState, GlobalActions, ActionTypes } from '../store/types';
 
 export default React;
-
-export type GlobalState = {
-  isInitialized: boolean;
-
-  users: {
-    byId: Record<number, ApiUser>;
-  };
-
-  chats: {
-    selectedId?: number;
-    ids: number[];
-    byId: Record<number, ApiChat>;
-    scrollOffsetById: Record<number, number>;
-  };
-
-  messages: {
-    selectedId?: number;
-    byChatId: Record<number, {
-      byId: Record<number, ApiMessage>;
-    }>;
-  };
-
-  files: {
-    byId: Record<number, ApiFile>;
-  };
-
-  // TODO Move to `auth`.
-  isLoggingOut?: boolean;
-  authState?: UpdateAuthorizationStateType;
-  authPhoneNumber?: string;
-  authIsLoading?: boolean;
-  authError?: string;
-};
-
-const INITIAL_STATE: GlobalState = {
-  isInitialized: false,
-
-  users: {
-    byId: {},
-  },
-
-  chats: {
-    ids: [],
-    byId: {},
-    scrollOffsetById: {},
-  },
-
-  messages: {
-    byChatId: {},
-  },
-
-  files: {
-    byId: {},
-  },
-};
-
-type ActionTypes = (
-  // system
-  'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  // chats
-  'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
-  // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' |
-  // files
-  'loadChatPhoto' | 'loadUserPhoto'
-);
-
-export type DispatchMap = Record<ActionTypes, Function>;
 
 type ActionPayload = AnyLiteral;
 
 type Reducer = (
   global: GlobalState,
-  actions: DispatchMap,
+  actions: GlobalActions,
   payload?: ActionPayload,
 ) => GlobalState | void;
 
 type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | null);
-type MapActionsToProps = ((setGlobal: Function, actions: DispatchMap) => Partial<DispatchMap> | null);
+type MapActionsToProps = ((setGlobal: Function, actions: GlobalActions) => Partial<GlobalActions> | null);
 
-let global = INITIAL_STATE;
+let global = {} as GlobalState;
+
 // TODO Remove before release.
 (window as any).getGlobal = getGlobal;
 
 const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
-const actions = {} as DispatchMap;
+const actions = {} as GlobalActions;
 const containers: Record<string, {
   mapStateToProps: MapStateToProps;
   mapReducersToProps: MapActionsToProps;

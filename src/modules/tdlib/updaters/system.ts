@@ -1,4 +1,4 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
@@ -50,7 +50,7 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
       if (!getGlobal().isLoggingOut) {
         document.title += ': Zzz…';
       } else {
-        TdLib.init(onUpdate);
+        getDispatch().init();
       }
       break;
     default:

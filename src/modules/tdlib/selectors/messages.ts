@@ -1,6 +1,6 @@
-import { ApiMessage } from '../../../api/tdlib/types/messages';
+import { GlobalState } from '../../../store/types';
+import { ApiMessage } from '../../../api/tdlib/types';
 import { selectChat } from './chats';
-import { GlobalState } from '../../../lib/teactn';
 import { getSendingState } from '../helpers';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {

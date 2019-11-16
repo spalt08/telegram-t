@@ -1,7 +1,8 @@
 import { UIEvent } from 'react';
 import React, { FC } from '../../../../lib/teact';
-import { DispatchMap, GlobalState, withGlobal } from '../../../../lib/teactn';
+import { withGlobal } from '../../../../lib/teactn';
 
+import { GlobalState, GlobalActions } from '../../../../store/types';
 import { ApiChat } from '../../../../api/tdlib/types';
 import { toArray, orderBy } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
@@ -14,7 +15,7 @@ type IProps = {
   loadedChatIds: number[];
   selectedChatId: number;
   areChatsLoaded: boolean;
-} & Pick<GlobalState, 'authState'> & Pick<DispatchMap, 'loadChats' | 'loadMoreChats'>;
+} & Pick<GlobalState, 'authState'> & Pick<GlobalActions, 'loadChats' | 'loadMoreChats'>;
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
 const SCROLL_THROTTLE_MS = 1000;
@@ -46,7 +47,7 @@ const ChatList: FC<IProps> = ({
   );
 };
 
-function handleScroll(e: UIEvent, loadMoreChats: DispatchMap['loadMoreChats']) {
+function handleScroll(e: UIEvent, loadMoreChats: GlobalActions['loadMoreChats']) {
   const target = e.target as HTMLElement;
 
   if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {

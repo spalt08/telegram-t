@@ -17,6 +17,7 @@ export type OriginMessageData = ({
 } | {
   type: 'provideAuthPhoneNumber';
   phoneNumber: string;
+  shouldRememberMe?: boolean;
 } | {
   type: 'provideAuthCode';
   code: string;
@@ -50,13 +51,7 @@ export type WorkerMessageResponse = {
   error?: AnyLiteral;
 };
 
-export type WorkerMessageSessionId = {
-  type: 'setSessionId';
-  sessionId: string;
-};
-
-export type WorkerMessageData = WorkerMessageGramJsUpdate | WorkerMessageApiUpdate |
-WorkerMessageResponse | WorkerMessageSessionId;
+export type WorkerMessageData = WorkerMessageGramJsUpdate | WorkerMessageApiUpdate | WorkerMessageResponse;
 
 export interface WorkerMessageEvent extends MessageEvent {
   data: WorkerMessageData;

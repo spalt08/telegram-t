@@ -1,7 +1,3 @@
-// import React from 'react';
-// export { useState } from 'react';
-// export default React;
-
 import { onNextTick, throttleWithRaf } from '../util/schedulers';
 import { flatten } from '../util/iteratees';
 

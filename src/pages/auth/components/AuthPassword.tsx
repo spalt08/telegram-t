@@ -1,15 +1,14 @@
 import { ChangeEvent } from 'react';
-import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
-
 import React, { FC, useState } from '../../../lib/teact';
-// import { DispatchMap, GlobalState, withGlobal } from '../../../lib/teactn';
+import { withGlobal } from '../../../lib/teactn';
 
+import { GlobalState, GlobalActions } from '../../../store/types';
 import InputPassword from '../../../components/ui/InputPassword';
 import Button from '../../../components/ui/Button';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<DispatchMap, 'setAuthPassword'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'setAuthPassword'>;
 
 // TODO Support `authError`.
 const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword }) => {
@@ -42,7 +41,7 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
       <div id="monkey" className={`password${showPassword ? ' shown' : ''}`} />
       <h2>Enter a Password</h2>
       <p className="note">
-        Your account is protected width
+        Your account is protected with
         <br />an additional password.
       </p>
       <form action="" method="post" onSubmit={handleSubmit}>

@@ -1,20 +1,20 @@
 import { UIEvent } from 'react';
 import React, { FC, useEffect } from '../../../../lib/teact';
-import { DispatchMap, getGlobal, withGlobal } from '../../../../lib/teactn';
+import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
+import { GlobalActions } from '../../../../store/types';
 import { ApiMessage } from '../../../../api/tdlib/types';
 import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/tdlib/selectors';
 import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatChatDateHeader } from '../../../../util/dateFormat';
-
 import { MessageDateGroup, groupMessages } from './util/messages';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import './MessageList.scss';
 
-type IProps = Pick<DispatchMap, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
+type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
   areMessagesLoaded: boolean;
   chatId: number;
   messages?: Record<number, ApiMessage>;
@@ -94,7 +94,7 @@ const MessageList: FC<IProps> = ({
 function handleScroll(
   e: UIEvent,
   chatId: number,
-  setChatScrollOffset: DispatchMap['setChatScrollOffset'],
+  setChatScrollOffset: GlobalActions['setChatScrollOffset'],
 ) {
   const target = e.target as HTMLElement;
 

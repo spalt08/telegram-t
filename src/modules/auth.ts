@@ -1,4 +1,6 @@
-import { addReducer, GlobalState } from '../lib/teactn';
+import { addReducer } from '../lib/teactn';
+
+import { GlobalState } from '../store/types';
 
 addReducer('returnToAuthPhoneNumber', (global: GlobalState) => {
   return {
@@ -7,11 +9,18 @@ addReducer('returnToAuthPhoneNumber', (global: GlobalState) => {
   };
 });
 
-addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+addReducer('setAuthRememberMe', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
   return {
     ...global,
     authPhoneNumber: phoneNumber,
+  };
+});
+
+addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+  return {
+    ...global,
+    authShouldRememberMe: Boolean(payload),
   };
 });

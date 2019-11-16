@@ -1,6 +1,7 @@
 import React, { FC } from '../../lib/teact';
-import { GlobalState, withGlobal } from '../../lib/teactn';
+import { withGlobal } from '../../lib/teactn';
 
+import { GlobalState } from '../../store/types';
 import AuthPhoneNumber from './components/AuthPhoneNumber';
 import AuthCode from './components/AuthCode';
 import AuthRegister from './components/AuthRegister';
