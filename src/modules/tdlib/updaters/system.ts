@@ -2,6 +2,7 @@ import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
+import { TDLIB_SESSION_ID_KEY } from '../../../config';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
@@ -39,6 +40,9 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
     case 'authorizationStateWaitRegistration':
       break;
     case 'authorizationStateReady':
+      // TODO Respect "Remember Me" and get session from TdLib.
+      localStorage.setItem(TDLIB_SESSION_ID_KEY, 'STORED IN TDLIB');
+
       setGlobal({
         ...getGlobal(),
         isLoggingOut: false,

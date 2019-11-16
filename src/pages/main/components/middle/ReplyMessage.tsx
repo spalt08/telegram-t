@@ -26,7 +26,7 @@ const ReplyMessage: FC<IProps> = ({
   } = buildMessageContent(message);
 
   return (
-    <div className="ReplyMessage">
+    <div className="ReplyMessage not-implemented">
       {renderMessagePhoto(photo)}
       <div className="reply-text">
         <div className="sender-name">{getUserFullName(sender)}</div>

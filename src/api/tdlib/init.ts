@@ -1,4 +1,4 @@
-import { TdLibUpdate } from './types/updates';
+import { TdLibUpdate } from './types';
 import { DEBUG } from '../../config';
 import { getBrowser, getOsName } from './utils';
 import legacyTdLibController from './LegacyTdLibController';
@@ -12,7 +12,8 @@ const INIT_OPTIONS = {
   prefix: 'tdlib',
   readOnly: false,
   isBackground: false,
-  useDatabase: true,
+  useDatabase: false,
+  fastUpdating: true,
 };
 
 const TD_PARAMETERS = {
@@ -24,7 +25,7 @@ const TD_PARAMETERS = {
   application_version: '0.0.1',
   use_secret_chats: false,
   use_message_database: true,
-  use_file_database: true,
+  use_file_database: false,
   database_directory: '/db',
   files_directory: '/',
 };

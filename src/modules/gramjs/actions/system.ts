@@ -3,12 +3,12 @@ import {
 } from '../../../lib/teactn';
 
 import { GlobalState } from '../../../store/types';
-import { GRAM_JS_SESSION_ID_KEY } from '../../../config';
+import { GRAMJS_SESSION_ID_KEY } from '../../../config';
 import { init, provideAuthPhoneNumber, provideAuthCode } from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
-  const sessionId = localStorage.getItem(GRAM_JS_SESSION_ID_KEY) || '';
+  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || '';
   init(onUpdate, sessionId);
 
   return {
@@ -60,7 +60,7 @@ async function setAuthPhoneNumber(phoneNumber: string) {
 // });
 
 addReducer('signOut', () => {
-  localStorage.removeItem(GRAM_JS_SESSION_ID_KEY);
+  localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 
   getDispatch().init();
 });

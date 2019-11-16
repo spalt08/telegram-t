@@ -23,7 +23,7 @@ export function getLastMessageText(message: ApiMessage) {
     return `Sticker ${sticker.emoji}`;
   }
 
-  return '%CONTENT_NOT_IMPLEMENTED%';
+  return '%MEDIA_CONTENT%';
 }
 
 export function getMessageText(message: ApiMessage) {
@@ -45,7 +45,7 @@ export function getMessageText(message: ApiMessage) {
     return undefined;
   }
 
-  return '%CONTENT_NOT_IMPLEMENTED%';
+  return '%MEDIA_CONTENT%';
 }
 
 export function getMessagePhoto(message: ApiMessage) {

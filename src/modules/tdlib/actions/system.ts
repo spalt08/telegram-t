@@ -1,15 +1,18 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
+import { TDLIB_SESSION_ID_KEY } from '../../../config';
 import { GlobalState } from '../../../store/types';
 import * as TdLib from '../../../api/tdlib';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
+  const sessionId = localStorage.getItem(TDLIB_SESSION_ID_KEY) || '';
   TdLib.init(onUpdate);
 
   return {
     ...global,
     isInitialized: true,
+    authIsSessionRemembered: Boolean(sessionId),
   };
 });
 
@@ -40,9 +43,7 @@ addReducer('signUp', (global, actions, payload) => {
 addReducer('signOut', () => {
   void TdLib.send({ '@type': 'logOut' });
 
-  return {
-    ...getGlobal(),
-  };
+  localStorage.removeItem(TDLIB_SESSION_ID_KEY);
 });
 
 async function setAuthPhoneNumber(phoneNumber: string) {

@@ -25,11 +25,9 @@ const App: FC<IProps> = ({ authState, authIsSessionRemembered }) => {
       case 'authorizationStateReady':
         return <Main />;
     }
-  } else if (authIsSessionRemembered) {
-    return <Main />;
   }
 
-  return <Loading />;
+  return authIsSessionRemembered ? <Main /> : <Loading />;
 };
 
 export default withGlobal(

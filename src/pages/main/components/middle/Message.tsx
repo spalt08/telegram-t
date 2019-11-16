@@ -115,7 +115,7 @@ function renderMessagePhoto(photo?: ApiPhoto) {
   }
 
   return (
-    <div className="photo-content message-photo-thumbnail">
+    <div className="photo-content message-photo-thumbnail not-implemented">
       <img src={`data:image/jpeg;base64, ${thumbnail.data}`} alt="" />
       <div className="message-photo-loading">
         <Spinner color="white" />

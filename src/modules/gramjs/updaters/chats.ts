@@ -1,7 +1,7 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiChat } from '../../../api/tdlib/types';
-import { loadChatPhoto } from '../../../api/tdlib/files';
+import { loadChatPhoto } from '../../../api/tdlib';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
