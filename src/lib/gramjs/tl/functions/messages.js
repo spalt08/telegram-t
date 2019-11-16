@@ -80,7 +80,7 @@ class GetDialogsRequest extends TLRequest {
             (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             struct.pack('<i', this.offsetDate),
             struct.pack('<i', this.offsetId),
-            this.offsetPeer.bytes,
+            this.offset_peer.bytes,
             struct.pack('<i', this.limit),
             struct.pack('<i', this.hash),
             ])

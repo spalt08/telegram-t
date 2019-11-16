@@ -14,13 +14,22 @@ export function init(_sendToClient: SendToWorker, _onUpdate: OnUpdate) {
 
 // TODO Own chat should be loaded first.
 
-export async function fetchChats(args: {
+export async function fetchChats({
+  limit,
+  offsetId,
+}: {
   limit: number;
+  offsetId?: number;
 }): Promise<{ chat_ids: number[] } | null> {
   const result = await sendToClient({
     type: 'invokeRequest',
     name: 'GetDialogsRequest',
-    args,
+    args: {
+      limit,
+    },
+    enhancers: {
+      peerOffset: ['buildPeerByApiChatId', offsetId],
+    },
   }, true) as MTP.messages$Dialogs;
 
   if (!result || !result.dialogs) {
@@ -79,19 +88,3 @@ function preparePeers(result: MTP.messages$Dialogs) {
 
   return store;
 }
-
-// const getPeerName = (peerType: MTP.PeerType, peerData: MTP.User | MTP.Chat) => {
-//   switch (peerType) {
-//     case 'peerUser': {
-//       const { firstName = '', username = '', lastName = '' } = peerData as MTP.user;
-//       return `${firstName} ${lastName}`;
-//     }
-//     case 'peerChat':
-//     case 'peerChannel': {
-//       const { title = '' } = peerData as MTP.chat;
-//       return title;
-//     }
-//     default:
-//       throw new TypeError(`Unknown peer type ${peerType}`);
-//   }
-// };

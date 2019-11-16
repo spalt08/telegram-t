@@ -4,8 +4,6 @@ import {
 
 import { fetchChats } from '../../../api/gramjs';
 
-// https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1get_chats.html
-const OFFSET_ORDER = '9223372036854775807';
 const LOAD_CHATS_LIMIT = 50;
 
 addReducer('loadChats', () => {
@@ -14,8 +12,7 @@ addReducer('loadChats', () => {
 
 addReducer('loadMoreChats', (global) => {
   const lastChatId = global.chats.ids[global.chats.ids.length - 1];
-  const lastOrder = global.chats.byId[lastChatId].order;
-  void loadChats(lastChatId, lastOrder);
+  void loadChats(lastChatId);
 });
 
 addReducer('setChatScrollOffset', (global, actions, payload) => {
@@ -33,11 +30,10 @@ addReducer('setChatScrollOffset', (global, actions, payload) => {
   });
 });
 
-// TODO Support offsetOrder
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function loadChats(offsetChatId: number | null = null, offsetOrder = OFFSET_ORDER) {
+async function loadChats(offsetId?: number) {
   const result = await fetchChats({
     limit: LOAD_CHATS_LIMIT,
+    offsetId,
   });
 
   if (!result) {
@@ -46,7 +42,7 @@ async function loadChats(offsetChatId: number | null = null, offsetOrder = OFFSE
 
   const { chat_ids } = result;
 
-  if (chat_ids.length > 0 && chat_ids[0] === offsetChatId) {
+  if (chat_ids.length > 0 && chat_ids[0] === offsetId) {
     chat_ids.shift();
   }
 
