@@ -140,6 +140,10 @@ function hasAttribute(element: HTMLElement, key: string) {
 }
 
 function addAttribute(element: HTMLElement, key: string, value: any) {
+  if (value === false || value === null || value === undefined) {
+    return;
+  }
+
   if (key === 'className') {
     element.className = value;
   } else if (key === 'value') {

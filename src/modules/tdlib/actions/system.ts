@@ -15,10 +15,8 @@ addReducer('init', (global: GlobalState) => {
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
-  const { authRememberMe } = global;
 
-
-  void setAuthPhoneNumber(phoneNumber, authRememberMe);
+  void setAuthPhoneNumber(phoneNumber);
 });
 
 addReducer('setAuthCode', (global, actions, payload) => {
