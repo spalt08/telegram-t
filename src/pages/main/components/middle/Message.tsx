@@ -42,21 +42,43 @@ const Message: FC<IProps> = ({
   } = buildMessageContent(message);
   const isText = contentClassName && contentClassName.includes('text');
 
-  return (
-    <div className={className}>
-      {showAvatar && sender && (
-        <Avatar size="small" user={sender} />
-      )}
-      <div className={contentClassName}>
-        {showSenderName && sender && isText && !photo && (
-          <div className="sender-name">{getUserFullName(sender)}</div>
-        )}
+  function renderSenderName() {
+    if (
+      (!showSenderName && !message.forward_info)
+      || (!sender || !isText || photo)
+    ) {
+      return null;
+    }
+
+    return (
+      <div className="sender-name">{getUserFullName(sender)}</div>
+    );
+  }
+
+  function renderMessageContent() {
+    return (
+      <div className={message.forward_info ? 'forwarded-message' : ''}>
+        {renderSenderName()}
         {replyMessage && <ReplyMessage message={replyMessage} />}
         {renderMessagePhoto(photo)}
         {renderMessageSticker(sticker)}
         {text && (
           <p>{text}</p>
         )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {showAvatar && sender && !message.forward_info && (
+        <Avatar size="small" user={sender} />
+      )}
+      <div className={contentClassName}>
+        {message.forward_info && (
+          <div className="sender-name">Forwarded message</div>
+        )}
+        {renderMessageContent()}
         <MessageMeta message={message} />
       </div>
     </div>
@@ -116,12 +138,14 @@ function renderMessageSticker(sticker?: ApiSticker) {
 export default withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
     const replyMessage = selectChatMessage(global, message.chat_id, message.reply_to_message_id);
-    if (!showSenderName && !showAvatar) {
+    if (!showSenderName && !showAvatar && !message.forward_info) {
       return { replyMessage };
     }
 
+    const userId = message.forward_info ? message.forward_info.origin.sender_user_id : message.sender_user_id;
+
     return {
-      sender: selectUser(global, message.sender_user_id),
+      sender: selectUser(global, userId),
       replyMessage,
     };
   },

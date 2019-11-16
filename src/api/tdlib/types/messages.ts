@@ -30,6 +30,16 @@ export interface ApiSticker {
   thumbnail: ApiPhotoSize;
 }
 
+export interface ApiMessageForwardInfo {
+  '@type': 'messageForwardInfo';
+  from_chat_id: number;
+  from_message_id: number;
+  origin: {
+    '@type': 'messageForwardOriginUser';
+    sender_user_id: number;
+  };
+}
+
 export interface ApiMessage {
   id: number;
   chat_id: number;
@@ -52,5 +62,6 @@ export interface ApiMessage {
   sending_state?: {
     '@type': 'messageSendingStateFailed';
   };
+  forward_info?: ApiMessageForwardInfo;
   views: number;
 }

@@ -238,6 +238,12 @@
     }
   }
 
+  .forwarded-message {
+    margin-top: 0.25rem;
+    border-left: 0.125rem solid var(--color-primary);
+    padding-left: 0.5rem;
+  }
+
   &.own {
     .text {
       background-color: #EEFEDF;
@@ -249,6 +255,14 @@
 
     .content {
       max-width: 30rem;
+    }
+
+    .sender-name {
+      color: var(--color-text-green);
+    }
+
+    .forwarded-message {
+      border-color: var(--color-text-green);
     }
   }
 }
