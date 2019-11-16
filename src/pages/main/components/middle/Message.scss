@@ -11,7 +11,7 @@
     position: relative;
     max-width: 29rem;
 
-    &:not(.emoji-only-1):not(.emoji-only-2):not(.emoji-only-3) {
+    &:not(.sticker) {
       border-radius: var(--border-radius-messages);
     }
 
@@ -169,8 +169,13 @@
     }
   }
 
-  .emoji-only-1, .emoji-only-2, .emoji-only-3 {
+  .sticker {
     line-height: 1.2;
+    font-size: 10rem;
+
+    p {
+      margin-bottom: 1rem;
+    }
 
     &.emoji-only-1 {
       font-size: 5rem;

@@ -1,30 +1,42 @@
 import { ApiMessage, ApiPhoto } from '../../../api/tdlib/types';
 
 export function getLastMessageText(message: ApiMessage) {
-  if (message.content.text) {
-    return message.content.text.text;
+  const {
+    text,
+    photo,
+    sticker,
+    caption,
+  } = message.content;
+
+  if (text) {
+    return text.text;
   }
 
-  if (message.content.photo) {
-    if (message.content.caption && message.content.caption.text.length) {
-      return `(Photo) ${message.content.caption.text}`;
+  if (photo) {
+    if (caption && caption.text.length) {
+      return `(Photo) ${caption.text}`;
     }
     return 'Photo';
+  }
+
+  if (sticker) {
+    return `Sticker ${sticker.emoji}`;
   }
 
   return '%CONTENT_NOT_IMPLEMENTED%';
 }
 
 export function getMessageText(message: ApiMessage) {
-  if (message.content.text) {
-    return message.content.text.text;
+  const { text, photo, caption } = message.content;
+  if (text) {
+    return text.text;
   }
 
-  if (message.content.photo && message.content.caption) {
-    return message.content.caption.text;
+  if (photo && caption) {
+    return caption.text;
   }
 
-  return '%CONTENT_NOT_IMPLEMENTED%';
+  return undefined;
 }
 
 export function getMessagePhoto(message: ApiMessage) {
@@ -33,6 +45,10 @@ export function getMessagePhoto(message: ApiMessage) {
   }
 
   return message.content.photo;
+}
+
+export function getMessageSticker(message: ApiMessage) {
+  return message.content.sticker;
 }
 
 export function getPhotoUrl(photo: ApiPhoto) {

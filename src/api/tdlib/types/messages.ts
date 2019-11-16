@@ -1,6 +1,7 @@
 import { ApiFile } from './files';
 
 export interface ApiPhotoSize {
+  '@type': 'photoSize';
   photo: ApiFile;
   type: string;
   width: number;
@@ -19,6 +20,16 @@ export interface ApiPhoto {
   sizes: ApiPhotoSize[];
 }
 
+export interface ApiSticker {
+  '@type': 'sticker';
+  emoji: string;
+  width: number;
+  height: number;
+  is_animated: boolean;
+  sticker: ApiPhotoSize;
+  thumbnail: ApiPhotoSize;
+}
+
 export interface ApiMessage {
   id: number;
   chat_id: number;
@@ -32,6 +43,7 @@ export interface ApiMessage {
       '@type': 'formattedText';
       text: string;
     };
+    sticker?: ApiSticker;
   };
   date: number;
   is_outgoing: boolean;

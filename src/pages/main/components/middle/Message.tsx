@@ -1,13 +1,19 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiMessage, ApiPhoto } from '../../../../api/tdlib/types';
+import {
+  ApiUser,
+  ApiMessage,
+  ApiPhoto,
+  ApiSticker,
+} from '../../../../api/tdlib/types';
 import {
   getMessageText,
   getMessagePhoto,
   isOwnMessage,
   getUserFullName,
   getPhotoUrl,
+  getMessageSticker,
 } from '../../../../modules/tdlib/helpers';
 import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
@@ -31,7 +37,12 @@ const Message: FC<IProps> = ({
   message, showAvatar, showSenderName, sender,
 }) => {
   const className = buildClassName(message);
-  const { text, photo, className: contentClassName } = buildContent(message);
+  const {
+    text,
+    photo,
+    sticker,
+    className: contentClassName,
+  } = buildContent(message);
   const isText = contentClassName && contentClassName.includes('text');
 
   return (
@@ -44,7 +55,10 @@ const Message: FC<IProps> = ({
           <div className="sender-name">{getUserFullName(sender)}</div>
         )}
         {renderMessagePhoto(photo)}
-        <p>{text}</p>
+        {renderMessageSticker(sticker)}
+        {text && (
+          <p>{text}</p>
+        )}
         <MessageMeta message={message} />
       </div>
     </div>
@@ -64,12 +78,14 @@ function buildClassName(message: ApiMessage) {
 interface MessageContent {
   text?: TextPart | TextPart[];
   photo?: ApiPhoto;
+  sticker?: ApiSticker;
   className?: string;
 }
 
 function buildContent(message: ApiMessage): MessageContent {
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
+  const sticker = getMessageSticker(message);
   const classNames = ['content'];
   let contentParts: TextPart | TextPart[] | undefined;
 
@@ -77,7 +93,7 @@ function buildContent(message: ApiMessage): MessageContent {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
     if (!photo && emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
-      classNames.push(`emoji-only-${emojiOnlyCount}`);
+      classNames.push(`sticker emoji-only-${emojiOnlyCount}`);
       contentParts = text;
     } else {
       classNames.push('text');
@@ -89,11 +105,16 @@ function buildContent(message: ApiMessage): MessageContent {
     classNames.push('photo');
   }
 
+  if (sticker) {
+    classNames.push('sticker');
+  }
+
   classNames.push('status-read');
 
   return {
     text: contentParts,
     photo,
+    sticker,
     className: classNames.join(' '),
   };
 }
@@ -213,6 +234,17 @@ function renderMessagePhoto(photo?: ApiPhoto) {
         <Spinner color="white" />
       </div>
     </div>
+  );
+}
+
+function renderMessageSticker(sticker?: ApiSticker) {
+  if (!sticker) {
+    return null;
+  }
+
+  // TODO @mockup
+  return (
+    <p>{sticker.emoji}</p>
   );
 }
 
