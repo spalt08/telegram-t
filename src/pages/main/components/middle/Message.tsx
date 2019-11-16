@@ -1,42 +1,84 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiMessage } from '../../../../api/tdlib/types';
-import { getMessageText, isOwnMessage, getUserFullName } from '../../../../modules/tdlib/helpers';
-import { selectUser } from '../../../../modules/tdlib/selectors';
-import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
+import {
+  ApiUser,
+  ApiMessage,
+  ApiPhoto,
+  ApiSticker,
+} from '../../../../api/tdlib/types';
+import {
+  isOwnMessage,
+  getUserFullName,
+  getPhotoUrl,
+} from '../../../../modules/tdlib/helpers';
+import { selectUser, selectChatMessage } from '../../../../modules/tdlib/selectors';
+
 import Avatar from '../../../../components/Avatar';
+import Spinner from '../../../../components/Spinner';
+
+import { buildMessageContent } from './util/messages';
 import MessageMeta from './MessageMeta';
+import ReplyMessage from './ReplyMessage';
 import './Message.scss';
 
 type IProps = {
   message: ApiMessage;
+  replyMessage?: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
   sender?: ApiUser;
 };
 
-type TextPart = string | Element;
-
-const MAX_EMOJI_COUNT = 3;
-
 const Message: FC<IProps> = ({
-  message, showAvatar, showSenderName, sender,
+  message, replyMessage, showAvatar, showSenderName, sender,
 }) => {
   const className = buildClassName(message);
-  const [contentParts, contentClassName] = buildContent(message);
+  const {
+    text,
+    photo,
+    sticker,
+    className: contentClassName,
+  } = buildMessageContent(message);
   const isText = contentClassName && contentClassName.includes('text');
+
+  function renderSenderName() {
+    if (
+      (!showSenderName && !message.forward_info)
+      || (!sender || !isText || photo)
+    ) {
+      return null;
+    }
+
+    return (
+      <div className="sender-name">{getUserFullName(sender)}</div>
+    );
+  }
+
+  function renderMessageContent() {
+    return (
+      <div className={message.forward_info ? 'forwarded-message' : ''}>
+        {renderSenderName()}
+        {replyMessage && <ReplyMessage message={replyMessage} />}
+        {renderMessagePhoto(photo)}
+        {renderMessageSticker(sticker)}
+        {text && (
+          <p>{text}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
-      {showAvatar && sender && (
+      {showAvatar && sender && !message.forward_info && (
         <Avatar size="small" user={sender} />
       )}
       <div className={contentClassName}>
-        {showSenderName && sender && isText && (
-          <div className="sender-name">{getUserFullName(sender)}</div>
+        {message.forward_info && (
+          <div className="sender-name">Forwarded message</div>
         )}
-        <p>{contentParts}</p>
+        {renderMessageContent()}
         <MessageMeta message={message} />
       </div>
     </div>
@@ -53,125 +95,61 @@ function buildClassName(message: ApiMessage) {
   return classNames.join(' ');
 }
 
-function buildContent(message: ApiMessage): [TextPart | TextPart[] | undefined, string | undefined] {
-  const text = getMessageText(message);
-  const classNames = ['content'];
-  let contentParts: TextPart | TextPart[] | undefined;
-
-  if (text) {
-    const emojiOnlyCount = parseEmojiOnlyString(text);
-
-    if (emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
-      classNames.push(`emoji-only-${emojiOnlyCount}`);
-      contentParts = text;
-    } else {
-      classNames.push('text');
-      contentParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
-    }
+function renderMessagePhoto(photo?: ApiPhoto) {
+  if (!photo) {
+    return null;
   }
 
-  classNames.push('status-read');
-
-  return [contentParts, classNames.join(' ')];
-}
-
-function enhanceTextParts(text: string, enhancers: ((part: TextPart) => TextPart[])[]) {
-  let parts: TextPart[] = [text];
-
-  for (let i = 0, l = enhancers.length; i < l; i++) {
-    parts = parts.reduce((enhancedParts: TextPart[], part) => {
-      const newParts = enhancers[i](part);
-
-      return [
-        ...enhancedParts,
-        ...newParts,
-      ];
-    }, []);
+  const photoUrl = getPhotoUrl(photo);
+  if (photoUrl) {
+    return (
+      <div className="photo-content">
+        <img src={photoUrl} alt="" />
+      </div>
+    );
   }
 
-  return parts.length === 1 ? parts[0] : parts;
-}
-
-function addLineBreaks(part: TextPart): TextPart[] {
-  if (typeof part !== 'string') {
-    return [part];
+  const thumbnail = photo.minithumbnail;
+  if (!thumbnail) {
+    return null;
   }
 
-  return part
-    .split(/\r\n|\r|\n/g)
-    .reduce((parts: TextPart[], line: string, i, source) => {
-      parts.push(line);
-
-      if (i !== source.length - 1) {
-        parts.push(<br />);
-      }
-
-      return parts;
-    }, []);
-}
-
-function addLinks(part: TextPart): TextPart[] {
-  return replaceWordsWithElements(
-    part,
-    (word) => word.startsWith('http:') || word.startsWith('https:'),
-    (word) => (
-      <a href={word} target="_blank" rel="noopener noreferrer">{word}</a>
-    ),
+  return (
+    <div className="photo-content message-photo-thumbnail">
+      <img src={`data:image/jpeg;base64, ${thumbnail.data}`} alt="" />
+      <div className="message-photo-loading">
+        <Spinner color="white" />
+      </div>
+    </div>
   );
 }
 
-function addBreaksToLongWords(part: TextPart): TextPart[] {
-  return replaceWordsWithElements(
-    part,
-    (word) => word.length > 50,
-    (word) => (
-      <div className="long-word-break-all">{word}</div>
-    ),
-  );
-}
-
-function replaceWordsWithElements(
-  part: TextPart,
-  testFn: (word: string) => boolean,
-  replaceFn: (word: string) => Element,
-): TextPart[] {
-  if (typeof part !== 'string') {
-    return [part];
+function renderMessageSticker(sticker?: ApiSticker) {
+  if (!sticker) {
+    return null;
   }
 
-  let wasLastTag = false;
-
-  return part
-    .split(' ')
-    .reduce((parts: TextPart[], word: string) => {
-      if (testFn(word)) {
-        if (parts.length > 0 && !wasLastTag) {
-          parts[parts.length - 1] += ' ';
-        }
-        parts.push(replaceFn(word));
-        wasLastTag = true;
-      } else {
-        if (parts.length > 0 && !wasLastTag) {
-          parts[parts.length - 1] += ` ${word}`;
-        } else {
-          parts.push(wasLastTag ? ` ${word}` : word);
-        }
-
-        wasLastTag = false;
-      }
-
-      return parts;
-    }, []);
+  // TODO @mockup
+  return (
+    <p>{sticker.emoji}</p>
+  );
 }
 
 export default withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
-    if (!showSenderName && !showAvatar) {
-      return null;
+    // TODO: Works for only recent messages that are already loaded in the store
+    const replyMessage = message.reply_to_message_id
+      ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
+      : undefined;
+    if (!showSenderName && !showAvatar && !message.forward_info) {
+      return { replyMessage };
     }
 
+    const userId = message.forward_info ? message.forward_info.origin.sender_user_id : message.sender_user_id;
+
     return {
-      sender: selectUser(global, message.sender_user_id),
+      sender: selectUser(global, userId),
+      replyMessage,
     };
   },
 )(Message);

@@ -1,7 +1,72 @@
-import { ApiMessage } from '../../../api/tdlib/types/messages';
+import { ApiMessage, ApiPhoto } from '../../../api/tdlib/types';
+
+export function getLastMessageText(message: ApiMessage) {
+  const {
+    text,
+    photo,
+    sticker,
+    caption,
+  } = message.content;
+
+  if (text) {
+    return text.text;
+  }
+
+  if (photo) {
+    if (caption && caption.text.length) {
+      return `(Photo) ${caption.text}`;
+    }
+    return 'Photo';
+  }
+
+  if (sticker) {
+    return `Sticker ${sticker.emoji}`;
+  }
+
+  return '%CONTENT_NOT_IMPLEMENTED%';
+}
 
 export function getMessageText(message: ApiMessage) {
-  return message.content.text ? message.content.text.text : '%RICH_CONTENT_NOT_IMPLEMENTED%';
+  const {
+    text,
+    photo,
+    sticker,
+    caption,
+  } = message.content;
+  if (text) {
+    return text.text;
+  }
+
+  if (photo && caption) {
+    return caption.text;
+  }
+
+  if (sticker) {
+    return undefined;
+  }
+
+  return '%CONTENT_NOT_IMPLEMENTED%';
+}
+
+export function getMessagePhoto(message: ApiMessage) {
+  if (!message.content.photo) {
+    return undefined;
+  }
+
+  return message.content.photo;
+}
+
+export function getMessageSticker(message: ApiMessage) {
+  return message.content.sticker;
+}
+
+export function getPhotoUrl(photo: ApiPhoto) {
+  const mediumSize = photo.sizes.find((size) => size.type === 'm');
+  if (!mediumSize || !mediumSize.photo.local.is_downloading_completed) {
+    return undefined;
+  }
+
+  return mediumSize.photo.local.path;
 }
 
 export function isOwnMessage(message: ApiMessage) {

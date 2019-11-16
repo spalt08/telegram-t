@@ -1,10 +1,37 @@
-import { ApiMessage } from '../../../../../api/tdlib/types';
 import { isSameDay } from '../../../../../util/dateFormat';
+import parseEmojiOnlyString from '../../../../../util/parseEmojiOnlyString';
+import {
+  getMessageText,
+  getMessagePhoto,
+  getMessageSticker,
+} from '../../../../../modules/tdlib/helpers';
+import {
+  ApiMessage,
+  ApiPhoto,
+  ApiSticker,
+} from '../../../../../api/tdlib/types';
+
+import {
+  TextPart,
+  enhanceTextParts,
+  addLineBreaks,
+  addBreaksToLongWords,
+  addLinks,
+} from './enhanceText';
 
 export type MessageDateGroup = {
   datetime: number;
   messageGroups: ApiMessage[][];
 };
+
+export interface MessageContent {
+  text?: TextPart | TextPart[];
+  photo?: ApiPhoto;
+  sticker?: ApiSticker;
+  className?: string;
+}
+
+const MAX_EMOJI_COUNT = 3;
 
 export function groupMessages(messages: ApiMessage[]) {
   const messageDateGroups: MessageDateGroup[] = [
@@ -55,4 +82,41 @@ export function groupMessages(messages: ApiMessage[]) {
   }
 
   return messageDateGroups;
+}
+
+export function buildMessageContent(message: ApiMessage): MessageContent {
+  const text = getMessageText(message);
+  const photo = getMessagePhoto(message);
+  const sticker = getMessageSticker(message);
+  const classNames = ['content'];
+  let contentParts: TextPart | TextPart[] | undefined;
+
+  if (text) {
+    const emojiOnlyCount = parseEmojiOnlyString(text);
+
+    if (!photo && emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
+      classNames.push(`sticker emoji-only-${emojiOnlyCount}`);
+      contentParts = text;
+    } else {
+      classNames.push('text');
+      contentParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
+    }
+  }
+
+  if (photo) {
+    classNames.push('photo');
+  }
+
+  if (sticker) {
+    classNames.push('sticker');
+  }
+
+  classNames.push('status-read');
+
+  return {
+    text: contentParts,
+    photo,
+    sticker,
+    className: classNames.join(' '),
+  };
 }

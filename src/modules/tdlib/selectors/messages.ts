@@ -9,6 +9,12 @@ export function selectChatMessages(global: GlobalState, chatId: number) {
   return byChatId ? byChatId.byId : null;
 }
 
+export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
+  const chatMessages = selectChatMessages(global, chatId);
+
+  return chatMessages ? chatMessages[messageId] : null;
+}
+
 export function selectIsUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 
