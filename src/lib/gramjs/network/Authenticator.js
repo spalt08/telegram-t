@@ -2,6 +2,7 @@ const AES = require('../crypto/AES')
 const AuthKey = require('../crypto/AuthKey')
 const Factorizator = require('../crypto/FactorizatorLeemon')
 const RSA = require('../crypto/RSA')
+const modExp = require('../crypto/modPowLeemon');
 const Helpers = require('../Helpers')
 const { ServerDHParamsFail } = require('../tl/types')
 const { ServerDHParamsOk } = require('../tl/types')
@@ -129,20 +130,18 @@ async function doAuthentication(sender, log) {
     if (JSBI.notEqual(serverDhInner.serverNonce, resPQ.serverNonce)) {
         throw new SecurityError('Step 3 Invalid server nonce in encrypted answer')
     }
-    const dhPrime = Helpers.readBigIntFromBuffer(serverDhInner.dhPrime, false, false)
-    const ga = Helpers.readBigIntFromBuffer(serverDhInner.gA, false, false)
     const timeOffset = serverDhInner.serverTime - Math.floor(new Date().getTime() / 1000)
 
-    const b = Helpers.readBigIntFromBuffer(Helpers.generateRandomBytes(256), false, false)
-    const gb = Helpers.modExp(JSBI.BigInt(serverDhInner.g), b, dhPrime)
-    const gab = Helpers.modExp(ga, b, dhPrime)
+    const bBytes = Helpers.generateRandomBytes(256);
+    const gb = modExp(getByteArray(serverDhInner.g), bBytes, serverDhInner.dhPrime)
+    const gab = modExp(serverDhInner.gA, bBytes, serverDhInner.dhPrime)
 
     // Prepare client DH Inner Data
     const { bytes: clientDhInner } = new ClientDHInnerData({
         nonce: resPQ.nonce,
         serverNonce: resPQ.serverNonce,
         retryId: 0, // TODO Actual retry ID
-        gB: getByteArray(gb, false),
+        gB: Buffer.from(gb),
     })
 
     const clientDdhInnerHashed = Buffer.concat([Helpers.sha1(clientDhInner), clientDhInner])
@@ -166,7 +165,7 @@ async function doAuthentication(sender, log) {
     if (JSBI.notEqual(dhGen.serverNonce, resPQ.serverNonce)) {
         throw new SecurityError(`Step 3 invalid ${name} server nonce from server`)
     }
-    const authKey = new AuthKey(getByteArray(gab))
+    const authKey = new AuthKey(Buffer.from(gab))
     const nonceNumber = 1 + nonceTypes.indexOf(dhGen.constructor)
 
     const newNonceHash = authKey.calcNewNonceHash(newNonce, nonceNumber)
