@@ -45,6 +45,16 @@ export function onUpdate(update: TdLibUpdate) {
 
       break;
     }
+
+    case 'updateChatIsPinned': {
+      const { chat_id, is_pinned } = update;
+
+      updateChat(chat_id, {
+        is_pinned,
+      });
+
+      break;
+    }
   }
 }
 

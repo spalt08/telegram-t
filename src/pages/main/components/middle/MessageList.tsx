@@ -33,7 +33,7 @@ const MessageList: FC<IProps> = ({
     loadMoreChatMessagesThrottled = throttle(loadMoreChatMessages as (...args: any) => void, SCROLL_THROTTLE_MS, true);
   }
 
-  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date', 'desc') : undefined;
+  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : undefined;
 
   if (!areMessagesLoaded) {
     loadChatMessages({ chatId });

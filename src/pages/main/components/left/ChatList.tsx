@@ -59,7 +59,7 @@ function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
   const filtered = toArray(chats)
     .filter((chat) => Boolean(chat.last_message) && loadedChatIds.includes(chat.id));
 
-  return orderBy(filtered, (chat: ApiChat) => chat.last_message!.date);
+  return orderBy(filtered, ['is_pinned', (chat) => chat.last_message!.date], ['desc', 'desc']);
 }
 
 export default withGlobal(

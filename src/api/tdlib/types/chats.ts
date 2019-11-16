@@ -13,6 +13,7 @@ export interface ApiChat {
   unread_count: number;
   unread_mention_count: number;
   order: string;
+  is_pinned: boolean;
   photo?: {
     small: ApiFile;
     big: ApiFile;
