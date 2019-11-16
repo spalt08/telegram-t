@@ -1,5 +1,6 @@
 .input-group {
   position: relative;
+  margin-bottom: 1.5rem;
 
   label {
     display: block;
@@ -41,7 +42,6 @@
   width: 100%;
   height: 3.375rem;
   padding: calc(0.75rem - var(--border-width)) calc(.9rem - var(--border-width));
-  margin-bottom: 1.5rem;
   border: var(--border-width) solid var(--color-borders);
   border-radius: var(--border-radius-default);
   color: var(--color-text);
@@ -97,6 +97,59 @@ select.form-control {
     font-size: 1.5rem;
 
     &:hover, &:focus {
+      opacity: 1;
+    }
+  }
+}
+
+.checkbox-input {
+  display: block;
+  position: relative;
+  padding-left: 4.5rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  line-height: 1.5rem;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+  }
+
+  span {
+    &::before, &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 1.1875rem;
+      top: 0.1875rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+
+    &::before {
+      border: 1px solid var(--color-borders);
+      border-radius: .25rem;
+      background-color: white;
+      transition: border-color .1s ease;
+    }
+
+    &::after {
+      background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjAgMjAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDIwIDIwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PHN0eWxlIHR5cGU9InRleHQvY3NzIj4uc3Qwe2ZpbGw6IzRFQTRGNjt9PC9zdHlsZT48Zz48cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYuNywwQzE4LjUsMCwyMCwxLjUsMjAsMy4zdjEzLjNjMCwxLjgtMS41LDMuMy0zLjMsMy4zSDMuM0MxLjUsMjAsMCwxOC41LDAsMTYuN1YzLjNDMCwxLjUsMS41LDAsMy4zLDBIMTYuN3ogTTE1LjksNC44bC04LjEsOC4xTDQuMSw5LjJDMy43LDguOCwzLDguOCwyLjUsOS4yYy0wLjQsMC40LTAuNCwxLjEsMCwxLjZMNywxNS4yYzAuNCwwLjQsMS4xLDAuNCwxLjYsMGw4LjktOC45YzAuNC0wLjQsMC40LTEuMSwwLTEuNkMxNyw0LjMsMTYuMyw0LjMsMTUuOSw0Ljh6Ii8+PC9nPjwvc3ZnPg==);
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity .1s ease;
+    }
+  }
+
+  input:checked ~ span {
+    &::before {
+      border-color: var(--color-primary);
+    }
+
+    &::after {
       opacity: 1;
     }
   }

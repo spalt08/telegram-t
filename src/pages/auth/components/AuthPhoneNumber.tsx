@@ -8,6 +8,7 @@ import formatPhoneNumber from '../../../util/formatPhoneNumber';
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 import CountryCodeInput from '../../../components/ui/CountryCodeInput';
+import Checkbox from '../../../components/ui/Checkbox';
 
 import './Auth.scss';
 
@@ -20,6 +21,7 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
   const [country, setCountry] = useState(currentCountry);
   const [code, setCode] = useState(currentCountry ? currentCountry.code : undefined);
   const [phone, setPhone] = useState('');
+  const [keepSession, setKeepSession] = useState(true);
 
   function onCodeChange(newCountry: Country) {
     setCode(newCountry.code);
@@ -34,6 +36,11 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
     setPhone(phoneNumber);
     target.value = `${code} ${phoneNumber}`;
     setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 11);
+  }
+
+  function onKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
+    const { target } = e;
+    setKeepSession(target.checked);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -67,6 +74,12 @@ const AuthPhoneNumber: FC<IProps> = ({ authIsLoading, authError, setAuthPhoneNum
           onChange={onPhoneNumberChange}
           value={`${code} ${phone}`}
           error={authError}
+        />
+        <Checkbox
+          id="sign-in-keep-session"
+          label="Keep me signed in"
+          checked={keepSession}
+          onChange={onKeepSessionChange}
         />
         {isButtonShown && (
           <Button type="submit" isLoading={authIsLoading}>Next</Button>
