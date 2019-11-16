@@ -131,7 +131,6 @@
   }
 
   .sender-name {
-    // TODO @pixel-perfect
     font-size: 0.9rem;
     font-weight: bold;
     color: var(--color-primary);
@@ -144,7 +143,6 @@
   .text {
     background: white;
     padding: .35rem .5rem;
-    // padding-right: 3rem;
     font-size: 0.9375rem;
 
     .long-word-break-all {

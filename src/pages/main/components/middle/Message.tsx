@@ -137,7 +137,10 @@ function renderMessageSticker(sticker?: ApiSticker) {
 
 export default withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
-    const replyMessage = selectChatMessage(global, message.chat_id, message.reply_to_message_id);
+    // TODO: Works for only recent messages that are already loaded in the store
+    const replyMessage = message.reply_to_message_id
+      ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
+      : undefined;
     if (!showSenderName && !showAvatar && !message.forward_info) {
       return { replyMessage };
     }

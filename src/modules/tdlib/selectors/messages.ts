@@ -9,10 +9,7 @@ export function selectChatMessages(global: GlobalState, chatId: number) {
   return byChatId ? byChatId.byId : null;
 }
 
-export function selectChatMessage(global: GlobalState, chatId: number, messageId?: number) {
-  if (!messageId) {
-    return null;
-  }
+export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
   const chatMessages = selectChatMessages(global, chatId);
 
   return chatMessages ? chatMessages[messageId] : null;

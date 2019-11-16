@@ -27,7 +27,12 @@ export function getLastMessageText(message: ApiMessage) {
 }
 
 export function getMessageText(message: ApiMessage) {
-  const { text, photo, caption } = message.content;
+  const {
+    text,
+    photo,
+    sticker,
+    caption,
+  } = message.content;
   if (text) {
     return text.text;
   }
@@ -36,7 +41,11 @@ export function getMessageText(message: ApiMessage) {
     return caption.text;
   }
 
-  return undefined;
+  if (sticker) {
+    return undefined;
+  }
+
+  return '%CONTENT_NOT_IMPLEMENTED%';
 }
 
 export function getMessagePhoto(message: ApiMessage) {
