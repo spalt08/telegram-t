@@ -27,16 +27,13 @@ class StringSession extends MemorySession {
                 throw new Error('Not a valid string')
             }
             session = session.slice(1)
-            const ipLen = session.length === 352 ? 4 : 16
             const r = StringSession.decode(session)
             const reader = new BinaryReader(r)
             this._dcId = reader.read(1).readUInt8(0)
-            const ip = reader.read(ipLen)
+            const serverAddressLen = reader.read(2).readInt16BE(0)
+            this._serverAddress = String(reader.read(serverAddressLen))
             this._port = reader.read(2).readInt16BE(0)
             const key = reader.read(-1)
-            this._serverAddress = ip.readUInt8(0) + '.' +
-                ip.readUInt8(1) + '.' + ip.readUInt8(2) +
-                '.' + ip.readUInt8(3)
             if (key) {
                 this._authKey = new AuthKey(key)
             }
@@ -63,20 +60,17 @@ class StringSession extends MemorySession {
         if (!this.authKey) {
             return ''
         }
-        const ip = this.serverAddress.split('.')
         const dcBuffer = Buffer.from([this.dcId])
-        const ipBuffer = Buffer.alloc(4)
+        const addressBuffer = Buffer.from(this.serverAddress)
+        const addressLengthBuffer = Buffer.alloc(2)
+        addressLengthBuffer.writeInt16BE(addressBuffer.length, 0)
         const portBuffer = Buffer.alloc(2)
-
         portBuffer.writeInt16BE(this.port, 0)
-        for (let i = 0; i < ip.length; i++) {
-            ipBuffer.writeUInt8(parseInt(ip[i]), i)
-        }
-
 
         return CURRENT_VERSION + StringSession.encode(Buffer.concat([
             dcBuffer,
-            ipBuffer,
+            addressLengthBuffer,
+            addressBuffer,
             portBuffer,
             this.authKey.key,
         ]))

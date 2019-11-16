@@ -6,11 +6,6 @@ import { TelegramClient, session } from '../../lib/gramjs';
 import * as apiRequests from '../../lib/gramjs/tl/functions/messages';
 import { DEBUG } from '../../config';
 
-// TODO Persist session.
-// eslint-disable-next-line max-len
-// const SESSION_NAME = '1BJWapzMBu0q/yYxDzGuy8O/vg3kG0FTOVruUQYob5PfbVVk+/5anYS/an286a4p1iAocF4Bp61LD0c4ELbv3ZX5iHl1e11r1MYfFkLZsXMDH7L+GNjf4uFwcT+l4cNHoEU2u/TD7NWW6eRO56H0lwoP5mg78xYXG6gtmlc8sd+UhHSct2tAqS0NtTVeWWHARa0EvWQqmuEIE7Xqr94bITZdNwwDmL0bAE0aDufydP8YI/XHivyZWZ25WIjdIle/n/kxc1DyOT64PT/YbRZAckMkdvzFTU3nqrnPVk//x5qopiPNAiBm1RdywZHc/BjjUuyr64sMwdK02n9ZoQt+x/djADm+LW9U=';
-const SESSION_NAME = '';
-
 let client: any;
 
 const authPromiseResolvers: {
@@ -28,7 +23,7 @@ onmessage = (async (message: OriginMessageEvent) => {
   const { data } = message;
 
   if (data.type === 'init') {
-    init();
+    init(data.sessionId);
   } else if (client) {
     switch (data.type) {
       case 'invokeRequest': {
@@ -123,10 +118,10 @@ function sendToOrigin(message: WorkerMessageData) {
   postMessage(message);
 }
 
-export async function init() {
+export async function init(sessionId: string) {
   const { StringSession } = session;
 
-  const stringSession = new StringSession(SESSION_NAME);
+  const stringSession = new StringSession(sessionId);
   client = new TelegramClient(
     stringSession,
     process.env.REACT_APP_TELEGRAM_API_ID,
@@ -139,7 +134,7 @@ export async function init() {
   try {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log('[GramJs/worker] CONNECTING', stringSession.save());
+      console.log('[GramJs/worker] CONNECTING');
     }
 
     await client.start({
@@ -148,12 +143,14 @@ export async function init() {
       password: onRequestPassword,
     } as any);
 
+    const newSessionId = stringSession.save();
+
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log('[GramJs/worker] CONNECTED as ', stringSession.save());
+      console.log('[GramJs/worker] CONNECTED as ', newSessionId);
     }
 
-    onAuthReady();
+    onAuthReady(newSessionId);
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -198,7 +195,9 @@ function onRequestPassword() {
   });
 }
 
-function onAuthReady() {
+function onAuthReady(sessionId: string) {
+  sendToOrigin({ type: 'setSessionId', sessionId });
+
   if (!onApiUpdate) {
     return;
   }

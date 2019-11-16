@@ -14,6 +14,8 @@ type WorkerPromiseStore = {
   reject: Function;
 };
 
+const SESSION_ID_KEY = 'GramJs:sessionId';
+
 const worker = new Worker('./gramjs.worker.ts');
 const workerPromises: Record<string, WorkerPromiseStore> = {};
 
@@ -48,7 +50,10 @@ function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false)
 }
 
 export function init(onUpdate: OnUpdate) {
-  sendToWorker({ type: 'init' });
+  sendToWorker({
+    type: 'init',
+    sessionId: localStorage.getItem(SESSION_ID_KEY) || '',
+  });
 
   worker.onmessage = (({ data }: WorkerMessageEvent) => {
     if (data.type === 'apiUpdate') {
@@ -63,6 +68,8 @@ export function init(onUpdate: OnUpdate) {
           workerPromises[data.messageId].reject(data.error);
         }
       }
+    } else if (data.type === 'setSessionId') {
+      localStorage.setItem(SESSION_ID_KEY, data.sessionId);
     }
   });
 

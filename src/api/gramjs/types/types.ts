@@ -8,6 +8,7 @@ type EnhancerName = 'buildPeerByApiChatId';
 
 export type OriginMessageData = ({
   type: 'init';
+  sessionId: string;
 } | {
   type: 'invokeRequest';
   name: SupportedRequests;
@@ -49,7 +50,13 @@ export type WorkerMessageResponse = {
   error?: AnyLiteral;
 };
 
-export type WorkerMessageData = WorkerMessageGramJsUpdate | WorkerMessageApiUpdate | WorkerMessageResponse;
+export type WorkerMessageSessionId = {
+  type: 'setSessionId';
+  sessionId: string;
+};
+
+export type WorkerMessageData = WorkerMessageGramJsUpdate | WorkerMessageApiUpdate |
+WorkerMessageResponse | WorkerMessageSessionId;
 
 export interface WorkerMessageEvent extends MessageEvent {
   data: WorkerMessageData;
