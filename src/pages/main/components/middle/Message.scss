@@ -132,7 +132,7 @@
 
   .sender-name {
     // TODO @pixel-perfect
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: var(--color-primary);
   }
@@ -161,6 +161,7 @@
     a {
       color: var(--color-links);
       text-decoration: none;
+      word-break: break-all;
 
       &:hover, &:active, &:visited {
         color: var(--color-links-hover);
