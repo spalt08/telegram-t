@@ -34,7 +34,7 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
       break;
     case 'authorizationStateReady': {
       const { sessionId } = update;
-      if (sessionId && getGlobal().authShouldRememberMe) {
+      if (sessionId && getGlobal().authRememberMe) {
         localStorage.setItem(GRAM_JS_SESSION_ID_KEY, sessionId);
       }
 

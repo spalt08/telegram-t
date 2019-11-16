@@ -33,7 +33,7 @@ export type GlobalState = {
   authPhoneNumber?: string;
   authIsLoading?: boolean;
   authError?: string;
-  authShouldRememberMe?: boolean;
+  authRememberMe?: boolean;
   authIsSessionRemembered?: boolean;
 };
 

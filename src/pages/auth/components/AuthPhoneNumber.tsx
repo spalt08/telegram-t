@@ -13,11 +13,13 @@ import Checkbox from '../../../components/ui/Checkbox';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authShouldRememberMe'> &
-Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe'>;
+type IProps = (
+  Pick<GlobalState, 'authIsLoading' | 'authError' | 'authRememberMe'> &
+  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe'>
+);
 
 const AuthPhoneNumber: FC<IProps> = ({
-  authIsLoading, authError, authShouldRememberMe, setAuthPhoneNumber, setAuthRememberMe,
+  authIsLoading, authError, authRememberMe, setAuthPhoneNumber, setAuthRememberMe,
 }) => {
   const currentCountry = countryList.find((c) => c.id === 'RU');
 
@@ -81,7 +83,7 @@ const AuthPhoneNumber: FC<IProps> = ({
         <Checkbox
           id="sign-in-keep-session"
           label="Keep me signed in"
-          checked={Boolean(authShouldRememberMe)}
+          checked={Boolean(authRememberMe)}
           onChange={onKeepSessionChange}
         />
         {isButtonShown && (
@@ -94,8 +96,8 @@ const AuthPhoneNumber: FC<IProps> = ({
 
 export default withGlobal(
   (global) => {
-    const { authIsLoading, authError, authShouldRememberMe } = global;
-    return { authIsLoading, authError, authShouldRememberMe };
+    const { authIsLoading, authError, authRememberMe } = global;
+    return { authIsLoading, authError, authRememberMe };
   },
   (setGlobal, actions) => {
     const { setAuthPhoneNumber, setAuthRememberMe } = actions;

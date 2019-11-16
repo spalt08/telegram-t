@@ -9,7 +9,7 @@ addReducer('returnToAuthPhoneNumber', (global: GlobalState) => {
   };
 });
 
-addReducer('setAuthRememberMe', (global, actions, payload) => {
+addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
   return {
@@ -18,9 +18,9 @@ addReducer('setAuthRememberMe', (global, actions, payload) => {
   };
 });
 
-addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+addReducer('setAuthRememberMe', (global, actions, payload) => {
   return {
     ...global,
-    authShouldRememberMe: Boolean(payload),
+    authRememberMe: Boolean(payload),
   };
 });

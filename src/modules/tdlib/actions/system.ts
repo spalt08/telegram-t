@@ -15,10 +15,10 @@ addReducer('init', (global: GlobalState) => {
 
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
-  const { authShouldRememberMe } = global;
+  const { authRememberMe } = global;
 
 
-  void setAuthPhoneNumber(phoneNumber, authShouldRememberMe);
+  void setAuthPhoneNumber(phoneNumber, authRememberMe);
 });
 
 addReducer('setAuthCode', (global, actions, payload) => {
@@ -47,7 +47,7 @@ addReducer('signOut', () => {
   };
 });
 
-async function setAuthPhoneNumber(phoneNumber: string, authShouldRememberMe = false) {
+async function setAuthPhoneNumber(phoneNumber: string) {
   setGlobal({
     ...getGlobal(),
     authIsLoading: true,
@@ -57,8 +57,6 @@ async function setAuthPhoneNumber(phoneNumber: string, authShouldRememberMe = fa
   await TdLib.send({
     '@type': 'setAuthenticationPhoneNumber',
     phone_number: phoneNumber,
-    // TODO Not implemented.
-    authShouldRememberMe,
   }, () => {
     setGlobal({
       ...getGlobal(),
