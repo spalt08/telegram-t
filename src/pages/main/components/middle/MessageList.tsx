@@ -22,6 +22,7 @@ type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
 const SCROLL_THROTTLE_MS = 1000;
+const LOAD_MORE_WHEN_LESS_THAN = 50;
 
 let loadMoreChatMessagesThrottled: Function | undefined;
 
@@ -32,11 +33,14 @@ const MessageList: FC<IProps> = ({
     loadMoreChatMessagesThrottled = throttle(loadMoreChatMessages as (...args: any) => void, SCROLL_THROTTLE_MS, true);
   }
 
+  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date', 'desc') : undefined;
+
   if (!areMessagesLoaded) {
     loadChatMessages({ chatId });
+  } else if (messagesArray && messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+    loadMoreChatMessagesThrottled({ chatId });
   }
 
-  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date', 'desc') : undefined;
   const isPrivate = isPrivateChat(chatId);
 
   useEffect(() => {
