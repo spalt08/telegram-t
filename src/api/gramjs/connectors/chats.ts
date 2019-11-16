@@ -1,13 +1,13 @@
 import { isPeerChat, isPeerUser } from './peers';
 
-export function buildApiChatFromDialog(dialog: MTP.dialog) {
+export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat) {
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
       '@type': getApiChatTypeFromMtpPeer(dialog.peer),
       ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
-    title: getApiChatTitleFromMtpPeer(dialog.peer),
+    title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
     last_read_outbox_message_id: dialog.readOutboxMaxId,
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,
@@ -41,15 +41,24 @@ export function getApiChatTypeFromMtpPeer(peer: MTP.Peer) {
   }
 }
 
-export function getApiChatTitleFromMtpPeer(peer: MTP.Peer) {
-  const id = getApiChatIdFromMtpPeer(peer);
-
+export function getPeerKey(peer: MTP.Peer) {
   if (isPeerUser(peer)) {
-    return `User #${id}`;
+    return `user${peer.userId}`;
   } else if (isPeerChat(peer)) {
-    return `Chat #${id}`;
+    return `chat${peer.chatId}`;
   } else {
-    // TODO Support channels, supergroups, etc.
-    return `Channel #${id}`;
+    return `chat${peer.channelId}`;
   }
+}
+
+export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user | MTP.chat) {
+  if (isPeerUser(peer)) {
+    return getUserName(peerEntity as MTP.user);
+  } else {
+    return (peerEntity as MTP.chat).title;
+  }
+}
+
+function getUserName(user: MTP.user) {
+  return `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`;
 }

@@ -1,6 +1,6 @@
 import { OnUpdate, SendToWorker } from '../types/types';
 
-import { buildApiChatFromDialog } from '../connectors/chats';
+import { buildApiChatFromDialog, getPeerKey } from '../connectors/chats';
 import { buildApiMessage } from '../connectors/messages';
 import { buildApiUser } from '../connectors/users';
 
@@ -27,10 +27,12 @@ export async function fetchChats(args: {
     return null;
   }
 
+  const peersByKey = preparePeers(result);
   const chatIds: number[] = [];
 
   result.dialogs.forEach((dialog) => {
-    const chat = buildApiChatFromDialog(dialog);
+    const peerEntity = peersByKey[getPeerKey(dialog.peer)];
+    const chat = buildApiChatFromDialog(dialog, peerEntity);
 
     chatIds.push(chat.id);
 
@@ -62,6 +64,20 @@ export async function fetchChats(args: {
   return {
     chat_ids: chatIds,
   };
+}
+
+function preparePeers(result: MTP.messages$Dialogs) {
+  const store: Record<string, MTP.chat | MTP.user> = {};
+
+  result.chats.forEach((chat) => {
+    store[`chat${chat.id}`] = chat as MTP.chat;
+  });
+
+  result.users.forEach((user) => {
+    store[`user${user.id}`] = user as MTP.user;
+  });
+
+  return store;
 }
 
 // const getPeerName = (peerType: MTP.PeerType, peerData: MTP.User | MTP.Chat) => {
