@@ -7,6 +7,7 @@ import {
   getMessagePhoto,
   isOwnMessage,
   getUserFullName,
+  getPhotoUrl,
 } from '../../../../modules/tdlib/helpers';
 import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
@@ -191,8 +192,16 @@ function renderMessagePhoto(photo?: ApiPhoto) {
     return null;
   }
 
-  const thumbnail = photo.minithumbnail;
+  const photoUrl = getPhotoUrl(photo);
+  if (photoUrl) {
+    return (
+      <div className="photo-content">
+        <img src={photoUrl} alt="" />
+      </div>
+    );
+  }
 
+  const thumbnail = photo.minithumbnail;
   if (!thumbnail) {
     return null;
   }

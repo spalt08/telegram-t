@@ -1,4 +1,4 @@
-import { ApiMessage } from '../../../api/tdlib/types/messages';
+import { ApiMessage, ApiPhoto } from '../../../api/tdlib/types';
 
 export function getLastMessageText(message: ApiMessage) {
   if (message.content.text) {
@@ -33,6 +33,15 @@ export function getMessagePhoto(message: ApiMessage) {
   }
 
   return message.content.photo;
+}
+
+export function getPhotoUrl(photo: ApiPhoto) {
+  const mediumSize = photo.sizes[1].photo;
+  if (!mediumSize || !mediumSize.local.is_downloading_completed) {
+    return undefined;
+  }
+
+  return mediumSize.local.path;
 }
 
 export function isOwnMessage(message: ApiMessage) {
