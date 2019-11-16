@@ -52,12 +52,12 @@ export function getMessageSticker(message: ApiMessage) {
 }
 
 export function getPhotoUrl(photo: ApiPhoto) {
-  const mediumSize = photo.sizes[1].photo;
-  if (!mediumSize || !mediumSize.local.is_downloading_completed) {
+  const mediumSize = photo.sizes.find((size) => size.type === 'm');
+  if (!mediumSize || !mediumSize.photo.local.is_downloading_completed) {
     return undefined;
   }
 
-  return mediumSize.local.path;
+  return mediumSize.photo.local.path;
 }
 
 export function isOwnMessage(message: ApiMessage) {

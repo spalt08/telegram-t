@@ -3,7 +3,7 @@ import { ApiFile } from './files';
 export interface ApiPhotoSize {
   '@type': 'photoSize';
   photo: ApiFile;
-  type: string;
+  type: 'm' | 'x' | 'y';
   width: number;
   height: number;
 }
