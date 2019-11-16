@@ -1,11 +1,17 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiMessage } from '../../../../api/tdlib/types';
-import { getMessageText, isOwnMessage, getUserFullName } from '../../../../modules/tdlib/helpers';
+import { ApiUser, ApiMessage, ApiPhoto } from '../../../../api/tdlib/types';
+import {
+  getMessageText,
+  getMessagePhoto,
+  isOwnMessage,
+  getUserFullName,
+} from '../../../../modules/tdlib/helpers';
 import { selectUser } from '../../../../modules/tdlib/selectors';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import Avatar from '../../../../components/Avatar';
+import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
 import './Message.scss';
 
@@ -24,7 +30,7 @@ const Message: FC<IProps> = ({
   message, showAvatar, showSenderName, sender,
 }) => {
   const className = buildClassName(message);
-  const [contentParts, contentClassName] = buildContent(message);
+  const { text, photo, className: contentClassName } = buildContent(message);
   const isText = contentClassName && contentClassName.includes('text');
 
   return (
@@ -36,7 +42,8 @@ const Message: FC<IProps> = ({
         {showSenderName && sender && isText && (
           <div className="sender-name">{getUserFullName(sender)}</div>
         )}
-        <p>{contentParts}</p>
+        {renderMessagePhoto(photo)}
+        <p>{text}</p>
         <MessageMeta message={message} />
       </div>
     </div>
@@ -53,15 +60,22 @@ function buildClassName(message: ApiMessage) {
   return classNames.join(' ');
 }
 
-function buildContent(message: ApiMessage): [TextPart | TextPart[] | undefined, string | undefined] {
+interface MessageContent {
+  text?: TextPart | TextPart[];
+  photo?: ApiPhoto;
+  className?: string;
+}
+
+function buildContent(message: ApiMessage): MessageContent {
   const text = getMessageText(message);
+  const photo = getMessagePhoto(message);
   const classNames = ['content'];
   let contentParts: TextPart | TextPart[] | undefined;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
-    if (emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
+    if (!photo && emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
       classNames.push(`emoji-only-${emojiOnlyCount}`);
       contentParts = text;
     } else {
@@ -70,9 +84,17 @@ function buildContent(message: ApiMessage): [TextPart | TextPart[] | undefined, 
     }
   }
 
+  if (photo) {
+    classNames.push('photo');
+  }
+
   classNames.push('status-read');
 
-  return [contentParts, classNames.join(' ')];
+  return {
+    text: contentParts,
+    photo,
+    className: classNames.join(' '),
+  };
 }
 
 function enhanceTextParts(text: string, enhancers: ((part: TextPart) => TextPart[])[]) {
@@ -162,6 +184,27 @@ function replaceWordsWithElements(
 
       return parts;
     }, []);
+}
+
+function renderMessagePhoto(photo?: ApiPhoto) {
+  if (!photo) {
+    return null;
+  }
+
+  const thumbnail = photo.minithumbnail;
+
+  if (!thumbnail) {
+    return null;
+  }
+
+  return (
+    <div className="photo-content message-photo-thumbnail">
+      <img src={`data:image/jpeg;base64, ${thumbnail.data}`} alt="" />
+      <div className="message-photo-loading">
+        <Spinner color="white" />
+      </div>
+    </div>
+  );
 }
 
 export default withGlobal(

@@ -5,7 +5,7 @@ import { GlobalActions } from '../../../../store/types';
 import { ApiChat, ApiUser } from '../../../../api/tdlib/types';
 import {
   getChatTitle,
-  getMessageText,
+  getLastMessageText,
   getUserFirstName,
   isPrivateChat,
   isGroupChat,
@@ -44,7 +44,7 @@ const Chat: FC<IProps> = ({
               {isGroupChat(chat.id) && getUserFirstName(lastMessageSender) && (
                 <span className="sender-name">{getUserFirstName(lastMessageSender)}</span>
               )}
-              {getMessageText(chat.last_message)}
+              {getLastMessageText(chat.last_message)}
             </p>
           )}
           <Badge chat={chat} />

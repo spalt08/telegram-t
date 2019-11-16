@@ -4,7 +4,7 @@
   position: absolute;
   height: 1.1rem;
   bottom: 0;
-  right: 0rem;
+  right: 0;
   display: flex;
   align-items: center;
   background: rgba(#999999, 0.6);
@@ -23,6 +23,13 @@
     background: none;
   }
 
+  .photo:not(.text) & {
+    background: rgba(0,0,0, 0.2);
+    color: white !important;
+    bottom: 0.25rem;
+    right: 0.25rem;
+  }
+
   .emoji-only-1 &, .emoji-only-2 &, .emoji-only-3 & {
     right: 0;
   }
@@ -36,7 +43,7 @@
     height: 1.1rem;
     font-size: 1.1rem;
 
-    .text & {
+    .text &, .photo & {
       @include icon-styles() {
         position: relative;
         top: -0.2rem;
