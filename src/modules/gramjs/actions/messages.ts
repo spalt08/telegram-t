@@ -87,5 +87,5 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
 }
 
 function sendTextMessage(chatId: number, text: string) {
-  void sendMessage(chatId, text);
+  sendMessage(chatId, text);
 }

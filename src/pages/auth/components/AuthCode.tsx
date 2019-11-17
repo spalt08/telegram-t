@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { FormEvent } from 'react';
 import React, { FC, useState } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
@@ -14,8 +14,8 @@ const AuthCode: FC<IProps> = ({
 }) => {
   const [code, setCode] = useState(undefined);
 
-  function onCodeChange(e: ChangeEvent<HTMLInputElement>) {
-    const { target } = e;
+  function onCodeChange(e: FormEvent<HTMLInputElement>) {
+    const { currentTarget: target } = e;
 
     target.value = target.value.replace(/[^\d]+/, '').substr(0, 5);
 
@@ -47,7 +47,7 @@ const AuthCode: FC<IProps> = ({
       <InputText
         id="sign-in-code"
         label="Code"
-        onChange={onCodeChange}
+        onInput={onCodeChange}
         value={code}
         error={authError}
       />

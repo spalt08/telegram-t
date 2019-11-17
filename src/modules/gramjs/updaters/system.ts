@@ -12,12 +12,24 @@ export function onUpdate(update: TdLibUpdate) {
 }
 
 function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
+  const currentState = getGlobal().authState;
+  const authState = update.authorization_state['@type'];
+  let authError;
+
+  if (currentState === 'authorizationStateWaitCode' && authState === 'authorizationStateWaitCode') {
+    authError = 'Invalid Code';
+  } else if (currentState === 'authorizationStateWaitPassword' && authState === 'authorizationStateWaitPassword') {
+    authError = 'Invalid Password';
+  }
+
   setGlobal({
     ...getGlobal(),
-    authState: update.authorization_state['@type'],
+    authState,
+    authIsLoading: false,
+    authError,
   });
 
-  switch (update.authorization_state['@type']) {
+  switch (authState) {
     case 'authorizationStateLoggingOut':
       setGlobal({
         ...getGlobal(),

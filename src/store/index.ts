@@ -22,6 +22,8 @@ const INITIAL_STATE: GlobalState = {
   files: {
     byId: {},
   },
+
+  authRememberMe: true,
 };
 
 addReducer('init', () => {

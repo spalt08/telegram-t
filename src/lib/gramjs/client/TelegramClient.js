@@ -423,6 +423,7 @@ class TelegramClient {
                     result = await this.invoke(new functions.auth.CheckPasswordRequest({
                         password: computeCheck(pwd, args.password),
                     }))
+                    break;
                 } catch (err) {
                     console.error(`Password check attempt ${i + 1} of 5 failed. Reason: `, err);
                 }

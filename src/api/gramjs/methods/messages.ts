@@ -50,7 +50,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   };
 }
 
-export async function sendMessage(chatId: number, message: string) {
+export function sendMessage(chatId: number, message: string) {
   void sendToClient({
     type: 'invokeRequest',
     namespace: 'messages',

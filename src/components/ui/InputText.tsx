@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, FormEvent } from 'react';
 import React, { FC } from '../../lib/teact';
 
 interface IProps {
@@ -8,6 +8,7 @@ interface IProps {
   error?: string;
   placeholder?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onInput?: (e: FormEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
@@ -18,6 +19,7 @@ const InputText: FC<IProps> = ({
   error,
   placeholder,
   onChange,
+  onInput,
   onKeyPress,
 }) => {
   let className = 'input-group';
@@ -36,6 +38,7 @@ const InputText: FC<IProps> = ({
         id={id}
         value={value || ''}
         onChange={onChange}
+        onInput={onInput}
         onKeyPress={onKeyPress}
         placeholder={placeholder || label}
       />
