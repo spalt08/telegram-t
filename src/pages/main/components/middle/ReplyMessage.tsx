@@ -15,7 +15,7 @@ import './ReplyMessage.scss';
 
 type IProps = {
   message: ApiMessage;
-  sender?: ApiUser;
+  sender: ApiUser;
 };
 
 const ReplyMessage: FC<IProps> = ({
@@ -30,9 +30,7 @@ const ReplyMessage: FC<IProps> = ({
     <div className="ReplyMessage not-implemented">
       {renderMessagePhoto(photo)}
       <div className="reply-text">
-        {sender && (
-          <div className="sender-name">{getUserFullName(sender)}</div>
-        )}
+        <div className="sender-name">{getUserFullName(sender)}</div>
         <p>{text}</p>
       </div>
     </div>

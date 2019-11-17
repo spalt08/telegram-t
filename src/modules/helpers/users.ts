@@ -23,7 +23,11 @@ export function getUserFirstName(user?: ApiUser) {
   return null;
 }
 
-export function getUserFullName(user: ApiUser) {
+export function getUserFullName(user?: ApiUser) {
+  if (!user) {
+    return null;
+  }
+
   switch (user.type['@type']) {
     case 'userTypeBot':
     case 'userTypeRegular': {
