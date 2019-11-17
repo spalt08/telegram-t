@@ -1,3 +1,4 @@
+// General styles
 .Message {
   display: flex;
   align-items: flex-end;
@@ -7,76 +8,35 @@
     margin-bottom: 0;
   }
 
+  &.own {
+    flex-direction: row-reverse;
+  }
+
+  .Avatar {
+    margin-right: 0.3rem;
+  }
+}
+
+// Border-radius styles
+.Message {
   .content {
-    position: relative;
-    max-width: 29rem;
+    border-radius: var(--border-radius-messages);
 
-    &:not(.sticker) {
-      border-radius: var(--border-radius-messages);
-    }
-
-    .photo-content {
-      border-top-left-radius: var(--border-radius-messages);
-      border-top-right-radius: var(--border-radius-messages);
-    }
-
-    &.photo:not(.text) {
-      .photo-content {
-        margin: 0;
-        border-bottom-left-radius: var(--border-radius-messages);
-        border-bottom-right-radius: var(--border-radius-messages);
-      }
-    }
-
-    p {
-      margin: 0;
+    &.sticker {
+      border-radius: 0 !important;
     }
   }
 
+  &:not(.own),
   &.own {
-    flex-direction: row-reverse;
-
-    &:first-child:not(:only-child) .content {
-      border-bottom-right-radius: var(--border-radius-messages-small);
-
-      &, &.photo:not(.text) .photo-content {
-        border-bottom-right-radius: var(--border-radius-messages-small);
+    .content {
+      .photo-content {
+        border-radius: var(--border-radius-messages);
       }
-    }
 
-    &:not(:first-child):not(:last-child):not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-right-radius: var(--border-radius-messages-small);
-        border-bottom-right-radius: var(--border-radius-messages-small);
-      }
-    }
-
-    &:last-child:not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-right-radius: var(--border-radius-messages-small);
-      }
-    }
-
-    &:last-child .content {
-      &.text {
+      &.text .photo-content {
+        border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-
-        &.text::before {
-          content: '';
-          display: block;
-          position: absolute;
-          right: -.66rem;
-          bottom: -4px;
-          width: .7rem;
-          height: 1.2rem;
-          // background-image: url('../../../../assets/chat-bubble-green.svg');
-          background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDYiIGhlaWdodD0iMzkiIHZpZXdCb3g9IjAgMCA0NiAzOSI+ICA8ZGVmcz4gICAgPGZpbHRlciBpZD0iQnViYmxlIiB4PSIwIiB5PSIwIiB3aWR0aD0iNDYiIGhlaWdodD0iMzkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+ICAgICAgPGZlT2Zmc2V0IGR5PSIxIiBpbnB1dD0iU291cmNlQWxwaGEiLz4gICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxIiByZXN1bHQ9ImJsdXIiLz4gICAgICA8ZmVGbG9vZCBmbG9vZC1jb2xvcj0iIzEwMjMyZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNDkiLz4gICAgICA8ZmVDb21wb3NpdGUgb3BlcmF0b3I9ImluIiBpbjI9ImJsdXIiLz4gICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiLz4gICAgPC9maWx0ZXI+ICA8L2RlZnM+ICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLCAwLCAwLCAxLCAwLCAwKSIgZmlsdGVyPSJ1cmwoI0J1YmJsZSkiPiAgICA8cGF0aCBpZD0iQnViYmxlLTIiIGRhdGEtbmFtZT0iQnViYmxlIiBkPSJNMzMsMzNIMTJBMTIsMTIsMCwwLDEsMCwyMVYxMkExMiwxMiwwLDAsMSwxMiwwSDI3YTYsNiwwLDAsMSw2LDZWMTZhMjkuNzU5LDI5Ljc1OSwwLDAsMCwyLjA0OSw4Ljc4MiwxNy40LDE3LjQsMCwwLDAsNC42MjYsNi40OEExLDEsMCwwLDEsMzksMzNaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzIDIpIiBmaWxsPSIjZWVmZmRlIi8+ICA8L2c+PC9zdmc+);
-          background-position: bottom right;
-        }
-      }
-
-      &.photo:not(.text) .photo-content {
-        border-bottom-right-radius: var(--border-radius-messages-small);
       }
     }
   }
@@ -88,7 +48,7 @@
       }
     }
 
-    &:not(:first-child):not(:last-child):not(:only-child) .content  {
+    &:not(:first-child):not(:last-child) .content {
       &, &.photo:not(.text) .photo-content {
         border-top-left-radius: var(--border-radius-messages-small);
         border-bottom-left-radius: var(--border-radius-messages-small);
@@ -102,32 +62,89 @@
     }
 
     &:last-child .content {
-      &.text {
-        border-bottom-left-radius: 0;
-
-        &.text::before {
-          content: '';
-          display: block;
-          position: absolute;
-          bottom: -4px;
-          left: -.68rem;
-          width: .75rem;
-          height: 1.2rem;
-          // background-image: url('../../../../assets/chat-bubble-white.svg');
-          background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDYuNjc3IiBoZWlnaHQ9IjM5IiB2aWV3Qm94PSIwIDAgNDYuNjc3IDM5Ij4gIDxkZWZzPiAgICA8ZmlsdGVyIGlkPSJCdWJibGUiIHg9IjAiIHk9IjAiIHdpZHRoPSI0Ni42NzciIGhlaWdodD0iMzkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+ICAgICAgPGZlT2Zmc2V0IGR5PSIxIiBpbnB1dD0iU291cmNlQWxwaGEiLz4gICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxIiByZXN1bHQ9ImJsdXIiLz4gICAgICA8ZmVGbG9vZCBmbG9vZC1jb2xvcj0iIzEwMjMyZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNDkiLz4gICAgICA8ZmVDb21wb3NpdGUgb3BlcmF0b3I9ImluIiBpbjI9ImJsdXIiLz4gICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiLz4gICAgPC9maWx0ZXI+ICA8L2RlZnM+ICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLCAwLCAwLCAxLCAwLCAwKSIgZmlsdGVyPSJ1cmwoI0J1YmJsZSkiPiAgICA8cGF0aCBpZD0iQnViYmxlLTIiIGRhdGEtbmFtZT0iQnViYmxlIiBkPSJNNywzM1Y2YTYsNiwwLDAsMSw2LTZIMjhBMTIsMTIsMCwwLDEsNDAsMTJ2OUExMiwxMiwwLDAsMSwyOCwzM1pNLjMyNCwzM2ExLDEsMCwwLDEtLjc3My0xLjYzNGw1LjQtNi41ODNBMzMuMzg3LDMzLjM4NywwLDAsMCw3LDE2VjMzWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMy42OCAyKSIgZmlsbD0iI2ZmZiIvPiAgPC9nPjwvc3ZnPg==);
-          background-size: auto;
-          background-position: bottom left;
-        }
-      }
-
       &.photo:not(.text) .photo-content {
         border-bottom-left-radius: var(--border-radius-messages-small);
       }
     }
   }
 
-  .Avatar {
-    margin-right: 0.3rem;
+  &.own {
+    &:first-child:not(:only-child) .content {
+      &, &.photo:not(.text) .photo-content {
+        border-bottom-right-radius: var(--border-radius-messages-small);
+      }
+    }
+
+    &:not(:first-child):not(:last-child) .content {
+      &, &.photo:not(.text) .photo-content {
+        border-top-right-radius: var(--border-radius-messages-small);
+        border-bottom-right-radius: var(--border-radius-messages-small);
+      }
+    }
+
+    &:last-child:not(:only-child) .content {
+      &, &.photo:not(.text) .photo-content {
+        border-top-right-radius: var(--border-radius-messages-small);
+      }
+    }
+
+    &:last-child .content {
+      &.photo:not(.text) .photo-content {
+        border-bottom-right-radius: var(--border-radius-messages-small);
+      }
+    }
+  }
+}
+
+// Bubble appendix styles
+.Message {
+  &.own:last-child {
+    .text, .is-forwarded {
+      border-bottom-right-radius: 0;
+
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        right: -.66rem;
+        bottom: -4px;
+        width: .7rem;
+        height: 1.2rem;
+        // background-image: url('../../../../assets/chat-bubble-green.svg');
+        background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDYiIGhlaWdodD0iMzkiIHZpZXdCb3g9IjAgMCA0NiAzOSI+ICA8ZGVmcz4gICAgPGZpbHRlciBpZD0iQnViYmxlIiB4PSIwIiB5PSIwIiB3aWR0aD0iNDYiIGhlaWdodD0iMzkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+ICAgICAgPGZlT2Zmc2V0IGR5PSIxIiBpbnB1dD0iU291cmNlQWxwaGEiLz4gICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxIiByZXN1bHQ9ImJsdXIiLz4gICAgICA8ZmVGbG9vZCBmbG9vZC1jb2xvcj0iIzEwMjMyZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNDkiLz4gICAgICA8ZmVDb21wb3NpdGUgb3BlcmF0b3I9ImluIiBpbjI9ImJsdXIiLz4gICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiLz4gICAgPC9maWx0ZXI+ICA8L2RlZnM+ICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLCAwLCAwLCAxLCAwLCAwKSIgZmlsdGVyPSJ1cmwoI0J1YmJsZSkiPiAgICA8cGF0aCBpZD0iQnViYmxlLTIiIGRhdGEtbmFtZT0iQnViYmxlIiBkPSJNMzMsMzNIMTJBMTIsMTIsMCwwLDEsMCwyMVYxMkExMiwxMiwwLDAsMSwxMiwwSDI3YTYsNiwwLDAsMSw2LDZWMTZhMjkuNzU5LDI5Ljc1OSwwLDAsMCwyLjA0OSw4Ljc4MiwxNy40LDE3LjQsMCwwLDAsNC42MjYsNi40OEExLDEsMCwwLDEsMzksMzNaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzIDIpIiBmaWxsPSIjZWVmZmRlIi8+ICA8L2c+PC9zdmc+);
+        background-position: bottom right;
+      }
+    }
+  }
+
+  &:not(.own):last-child {
+    .text, .is-forwarded {
+      border-bottom-left-radius: 0;
+
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        bottom: -4px;
+        left: -.68rem;
+        width: .75rem;
+        height: 1.2rem;
+        // background-image: url('../../../../assets/chat-bubble-white.svg');
+        background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDYuNjc3IiBoZWlnaHQ9IjM5IiB2aWV3Qm94PSIwIDAgNDYuNjc3IDM5Ij4gIDxkZWZzPiAgICA8ZmlsdGVyIGlkPSJCdWJibGUiIHg9IjAiIHk9IjAiIHdpZHRoPSI0Ni42NzciIGhlaWdodD0iMzkiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+ICAgICAgPGZlT2Zmc2V0IGR5PSIxIiBpbnB1dD0iU291cmNlQWxwaGEiLz4gICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxIiByZXN1bHQ9ImJsdXIiLz4gICAgICA8ZmVGbG9vZCBmbG9vZC1jb2xvcj0iIzEwMjMyZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNDkiLz4gICAgICA8ZmVDb21wb3NpdGUgb3BlcmF0b3I9ImluIiBpbjI9ImJsdXIiLz4gICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiLz4gICAgPC9maWx0ZXI+ICA8L2RlZnM+ICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLCAwLCAwLCAxLCAwLCAwKSIgZmlsdGVyPSJ1cmwoI0J1YmJsZSkiPiAgICA8cGF0aCBpZD0iQnViYmxlLTIiIGRhdGEtbmFtZT0iQnViYmxlIiBkPSJNNywzM1Y2YTYsNiwwLDAsMSw2LTZIMjhBMTIsMTIsMCwwLDEsNDAsMTJ2OUExMiwxMiwwLDAsMSwyOCwzM1pNLjMyNCwzM2ExLDEsMCwwLDEtLjc3My0xLjYzNGw1LjQtNi41ODNBMzMuMzg3LDMzLjM4NywwLDAsMCw3LDE2VjMzWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMy42OCAyKSIgZmlsbD0iI2ZmZiIvPiAgPC9nPjwvc3ZnPg==);
+        background-size: auto;
+        background-position: bottom left;
+      }
+    }
+  }
+}
+
+// Content type styles
+.Message .content {
+  position: relative;
+  max-width: 29rem;
+
+  p {
+    margin: 0;
   }
 
   .sender-name {
@@ -136,11 +153,11 @@
     color: var(--color-primary);
   }
 
-  .text, .photo {
+  &.text, &.photo, &.is-forwarded {
     box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
   }
 
-  .text {
+  &.text, &.is-forwarded {
     background: white;
     padding: .35rem .5rem;
     font-size: 0.9375rem;
@@ -168,7 +185,7 @@
     }
   }
 
-  .sticker {
+  &.sticker {
     line-height: 1.2;
     font-size: 10rem;
 
@@ -201,17 +218,17 @@
     }
   }
 
-  .photo {
+  &.photo {
     width: 100%;
 
     .photo-content {
-      margin: -0.35rem -0.5rem 0.35rem;
-
       img {
         display: block;
-        width: 100%;
-        height: auto;
       }
+    }
+
+    &.text .photo-content {
+      margin: -0.35rem -0.5rem 0.35rem;
     }
 
     .message-photo-thumbnail {
@@ -240,27 +257,32 @@
     margin-top: 0.25rem;
     border-left: 0.125rem solid var(--color-primary);
     padding-left: 0.5rem;
+
+    .photo-content {
+      margin: 0 !important;
+      margin-bottom: 0.25rem !important;
+      border-radius: var(--border-radius-messages-small) !important;
+    }
+  }
+}
+
+// Own message content styles
+.Message.own .content {
+  max-width: 30rem;
+
+  .sender-name {
+    color: var(--color-text-green);
   }
 
-  &.own {
-    .text {
-      background-color: #EEFEDF;
+  &.text, &.is-forwarded {
+    background-color: #EEFEDF;
 
-      p::after {
-        width: 3.5rem;
-      }
+    p::after {
+      width: 3.5rem;
     }
+  }
 
-    .content {
-      max-width: 30rem;
-    }
-
-    .sender-name {
-      color: var(--color-text-green);
-    }
-
-    .forwarded-message {
-      border-color: var(--color-text-green);
-    }
+  .forwarded-message {
+    border-color: var(--color-text-green);
   }
 }

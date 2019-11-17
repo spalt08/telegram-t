@@ -9,5 +9,7 @@ export function buildApiUser(mtpUser: MTP.user): ApiUser {
     },
     first_name: mtpUser.firstName,
     last_name: mtpUser.lastName,
+    username: mtpUser.username || '',
+    phone_number: mtpUser.phone || '',
   };
 }

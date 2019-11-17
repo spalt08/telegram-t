@@ -30,6 +30,11 @@
     right: 0.25rem;
   }
 
+  .is-forwarded.photo:not(.text) & {
+    bottom: 0.9rem;
+    right: 0.8rem;
+  }
+
   .emoji-only-1 &, .emoji-only-2 &, .emoji-only-3 & {
     right: 0;
   }

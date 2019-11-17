@@ -3,7 +3,7 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiGroup } from '../../../../api/tdlib/types';
 import { selectChat, selectChatGroupId, selectGroup } from '../../../../modules/selectors';
-import { getGroupLink } from '../../../../modules/helpers';
+import { getGroupDescription, getGroupLink } from '../../../../modules/helpers';
 
 type IProps = {
   chatId: number;
@@ -13,8 +13,8 @@ type IProps = {
 const GroupChatInfo: FC<IProps> = ({
   group,
 }) => {
-  const { description } = group;
-  const link = getGroupLink(group);
+  const description = (group && getGroupDescription(group)) || '';
+  const link = (group && getGroupLink(group)) || '';
   const url = link.indexOf('http') === 0 ? link : `http://${link}`;
 
   return (

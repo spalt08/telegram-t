@@ -103,6 +103,10 @@ export function buildMessageContent(message: ApiMessage): MessageContent {
     }
   }
 
+  if (message.forward_info) {
+    classNames.push('is-forwarded');
+  }
+
   if (photo) {
     classNames.push('photo');
   }

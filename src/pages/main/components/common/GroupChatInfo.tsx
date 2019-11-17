@@ -21,10 +21,7 @@ const GroupChatInfo: FC<IProps> = ({
   onlineMembers,
   avatarSize = 'medium',
 }) => {
-  const groupStatus = group && group.member_count
-    ? `${group.member_count} ${isChannel(group) ? 'subscribers' : 'members'}`
-    : getGroupTypeString(group);
-
+  const groupStatus = getGroupStatus(group);
   const onlineStatus = onlineMembers ? `, ${onlineMembers} online` : '';
 
   return (
@@ -40,6 +37,16 @@ const GroupChatInfo: FC<IProps> = ({
     </div>
   );
 };
+
+function getGroupStatus(group?: ApiGroup) {
+  if (!group) {
+    return 'Group Chat';
+  }
+
+  return group.member_count
+    ? `${group.member_count} ${isChannel(group) ? 'subscribers' : 'members'}`
+    : getGroupTypeString(group);
+}
 
 export default withGlobal(
   (global, { chatId }: IProps) => {

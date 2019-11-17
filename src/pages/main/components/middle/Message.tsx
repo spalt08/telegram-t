@@ -13,6 +13,7 @@ import {
   getPhotoUrl,
 } from '../../../../modules/helpers';
 import { selectUser, selectChatMessage } from '../../../../modules/selectors';
+import { getImageDimensions } from '../../../../util/imageDimensions';
 
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
@@ -60,7 +61,7 @@ const Message: FC<IProps> = ({
       <div className={message.forward_info ? 'forwarded-message' : ''}>
         {renderSenderName()}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {renderMessagePhoto(photo)}
+        {renderMessagePhoto(photo, isOwnMessage(message), !!message.forward_info)}
         {renderMessageSticker(sticker)}
         {text && (
           <p>{text}</p>
@@ -95,16 +96,18 @@ function buildClassName(message: ApiMessage) {
   return classNames.join(' ');
 }
 
-function renderMessagePhoto(photo?: ApiPhoto) {
+function renderMessagePhoto(photo: ApiPhoto | undefined, fromOwnMessage: boolean, isForwarded: boolean) {
   if (!photo) {
     return null;
   }
+
+  const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
 
   const photoUrl = getPhotoUrl(photo);
   if (photoUrl) {
     return (
       <div className="photo-content">
-        <img src={photoUrl} alt="" />
+        <img src={photoUrl} width={width} height={height} alt="" />
       </div>
     );
   }
@@ -116,7 +119,7 @@ function renderMessagePhoto(photo?: ApiPhoto) {
 
   return (
     <div className="photo-content message-photo-thumbnail not-implemented">
-      <img src={`data:image/jpeg;base64, ${thumbnail.data}`} alt="" />
+      <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
       <div className="message-photo-loading">
         <Spinner color="white" />
       </div>

@@ -8,6 +8,7 @@ import {
 } from '../../../../api/tdlib/types';
 import { getUserFullName } from '../../../../modules/helpers';
 import { selectUser } from '../../../../modules/selectors';
+import { getReplyImageDimensions } from '../../../../util/imageDimensions';
 
 import { buildMessageContent } from './util/messages';
 import './ReplyMessage.scss';
@@ -46,8 +47,10 @@ function renderMessagePhoto(photo?: ApiPhoto) {
     return null;
   }
 
+  const { width, height } = getReplyImageDimensions();
+
   return (
-    <img src={`data:image/jpeg;base64, ${thumbnail.data}`} alt="" />
+    <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
   );
 }
 

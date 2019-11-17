@@ -46,8 +46,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 0.875rem;
-      line-height: 1.125rem;
-      height: 1.125rem;
+      line-height: 1.25rem;
+      height: 1.25rem;
+      margin-bottom: -0.125rem;
 
       &::after {
         content: none;

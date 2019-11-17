@@ -1,7 +1,7 @@
 import { ApiGroup } from '../../api/tdlib/types';
 
 export function isChannel(group: ApiGroup) {
-  return group.is_channel;
+  return group.is_channel || false;
 }
 
 export function getGroupTypeString(group: ApiGroup) {
@@ -14,6 +14,10 @@ export function getGroupTypeString(group: ApiGroup) {
   }
 
   return 'Group Chat';
+}
+
+export function getGroupDescription(group: ApiGroup) {
+  return group.description;
 }
 
 export function getGroupLink(group: ApiGroup) {
