@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "build:gh": "./deploy/github.sh",
+    "build:github": "./deploy/github.sh",
     "build:contest:tdlib": "./deploy/contest-tdlib.sh",
     "build:contest:gramjs": "./deploy/contest-gramjs.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
