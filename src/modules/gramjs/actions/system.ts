@@ -4,7 +4,9 @@ import {
 
 import { GlobalState } from '../../../store/types';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
-import { init, provideAuthPhoneNumber, provideAuthCode } from '../../../api/gramjs';
+import {
+  init, provideAuthPhoneNumber, provideAuthCode, provideAuthPassword,
+} from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
@@ -28,6 +30,12 @@ addReducer('setAuthCode', (global, actions, payload) => {
   const { code } = payload!;
 
   void provideAuthCode(code);
+});
+
+addReducer('setAuthPassword', (global, actions, payload) => {
+  const { password } = payload!;
+
+  void provideAuthPassword(password);
 });
 
 async function setAuthPhoneNumber(phoneNumber: string) {

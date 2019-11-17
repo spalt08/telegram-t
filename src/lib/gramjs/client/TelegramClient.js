@@ -417,11 +417,16 @@ class TelegramClient {
                 phoneCode: args.code.toString(),
             }))
         } else if (args.password) {
-            const pwd = await this.invoke(new functions.account.GetPasswordRequest())
-            result = await this.invoke(new functions.auth.CheckPasswordRequest({
-                    password: computeCheck(pwd, args.password),
-                },
-            ))
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const pwd = await this.invoke(new functions.account.GetPasswordRequest())
+                    result = await this.invoke(new functions.auth.CheckPasswordRequest({
+                        password: computeCheck(pwd, args.password),
+                    }))
+                } catch (err) {
+                    console.error(`Password check attempt ${i + 1} of 5 failed. Reason: `, err);
+                }
+            }
         } else if (args.botToken) {
             result = await this.invoke(new functions.auth.ImportBotAuthorizationRequest(
                 {

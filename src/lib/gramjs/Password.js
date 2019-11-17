@@ -12,6 +12,8 @@ const JSBI = require('jsbi')
  * @param g{JSBI.BigInt}
  */
 function checkPrimeAndGoodCheck(prime, g) {
+    console.error('Unsupported function `checkPrimeAndGoodCheck` call. Arguments:', prime, g);
+
     const goodPrimeBitsCount = 2048
     if (prime < 0 || prime.toString('2').length !== goodPrimeBitsCount) {
         throw new Error(`bad prime count ${prime.toString('2').length},expected ${goodPrimeBitsCount}`)
@@ -91,7 +93,7 @@ function checkPrimeAndGood(primeBytes, g) {
  * @returns {boolean}
  */
 function isGoodLarge(number, p) {
-    return (number > JSBI.BigInt(0) && (p - number) > JSBI.BigInt(0))
+    return (JSBI.greaterThan(number, JSBI.BigInt(0)) && JSBI.greaterThan(JSBI.subtract(p, number), JSBI.BigInt(0)))
 }
 
 /**
@@ -119,12 +121,12 @@ function bigNumForHash(g) {
  * @returns {Boolean}
  */
 function isGoodModExpFirst(modexp, prime) {
-    const diff = prime - modexp
+    const diff = JSBI.subtract(prime, modexp)
 
     const minDiffBitsCount = 2048 - 64
     const maxModExpSize = 256
 
-    return !(diff < 0 || diff.toString('2').length < minDiffBitsCount ||
+    return !(JSBI.lessThan(diff, JSBI.BigInt(0)) || diff.toString('2').length < minDiffBitsCount ||
         modexp.toString('2').length < minDiffBitsCount ||
         Math.floor((modexp.toString('2').length + 7) / 8) > maxModExpSize)
 }
@@ -210,7 +212,7 @@ function computeCheck(request, password) {
     const bForHash = numBytesForHash(request.srp_B)
     const gX = modExp(JSBI.BigInt(g), x, p)
     const k = readBigIntFromBuffer(sha256(Buffer.concat([pForHash, gForHash])), false)
-    const kgX = (k * gX) % p
+    const kgX = JSBI.remainder(JSBI.multiply(k, gX), p)
     const generateAndCheckRandom = () => {
         const randomSize = 256
         // eslint-disable-next-line no-constant-condition
@@ -221,20 +223,20 @@ function computeCheck(request, password) {
             if (isGoodModExpFirst(A, p)) {
                 const aForHash = bigNumForHash(A)
                 const u = readBigIntFromBuffer(sha256(Buffer.concat([aForHash, bForHash])), false)
-                if (u > JSBI.BigInt(0)) {
+                if (JSBI.greaterThan(u, JSBI.BigInt(0))) {
                     return [a, aForHash, u]
                 }
             }
         }
     }
     const [a, aForHash, u] = generateAndCheckRandom()
-    const gB = (B - kgX) % p
+    const gB = JSBI.remainder(JSBI.subtract(B, kgX), p)
     if (!isGoodModExpFirst(gB, p)) {
         throw new Error('bad gB')
     }
 
-    const ux = u * x
-    const aUx = a + ux
+    const ux = JSBI.multiply(u, x)
+    const aUx = JSBI.add(a, ux)
     const S = modExp(gB, aUx, p)
     const K = sha256(bigNumForHash(S))
     const M1 = sha256(Buffer.concat([
