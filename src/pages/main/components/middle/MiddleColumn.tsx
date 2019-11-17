@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { isPrivateChat } from '../../../../modules/tdlib/helpers';
+import { isPrivateChat } from '../../../../modules/helpers';
 import Button from '../../../../components/ui/Button';
 import PrivateChatHeader from './PrivateChatHeader';
 import GroupHeader from './GroupHeader';

@@ -1,5 +1,5 @@
-import { ApiUser } from '../../../api/tdlib/types';
-import { GlobalState } from '../../../store/types';
+import { ApiUser } from '../../api/tdlib/types';
+import { GlobalState } from '../../store/types';
 import { getUserPhotoId } from '../helpers';
 
 export function selectUser(global: GlobalState, userId: number) {

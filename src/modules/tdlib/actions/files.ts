@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import { ApiChat, ApiUser } from '../../../api/tdlib/types';
-import { getChatPhotoId, getUserPhotoId } from '../helpers';
+import { getChatPhotoId, getUserPhotoId } from '../../helpers';
 
 addReducer('loadChatPhoto', (global, actions, payload) => {
   const { chat } = payload!;

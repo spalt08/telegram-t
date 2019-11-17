@@ -19,13 +19,14 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 }): Promise<{ messages: ApiMessage[] } | null> {
   const result = await sendToClient({
     type: 'invokeRequest',
+    namespace: 'messages',
     name: 'GetHistoryRequest',
     args: {
       offsetId: fromMessageId,
       limit,
     },
     enhancers: {
-      peer: ['buildPeerByApiChatId', chatId],
+      peer: ['buildInputPeerByApiChatId', chatId],
     },
   }, true) as MTP.messages$Messages;
 

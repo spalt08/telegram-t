@@ -4,7 +4,7 @@ import {
   getMessageText,
   getMessagePhoto,
   getMessageSticker,
-} from '../../../../../modules/tdlib/helpers';
+} from '../../../../../modules/helpers';
 import {
   ApiMessage,
   ApiPhoto,

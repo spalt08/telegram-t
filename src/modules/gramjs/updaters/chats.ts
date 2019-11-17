@@ -1,14 +1,14 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiChat } from '../../../api/tdlib/types';
-import { loadChatPhoto } from '../../../api/tdlib';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
     case 'updateNewChat': {
       updateChat(update.chat.id, update.chat);
 
-      loadChatPhoto(update.chat);
+      // TODO This blocks other requests.
+      // getDispatch().loadChatPhoto({ chat: update.chat });
 
       break;
     }

@@ -1,14 +1,21 @@
 import { getApiChatIdFromMtpPeer } from './chats';
 import { ApiMessage } from '../../tdlib/types';
+import { isPeerUser } from './peers';
+
+const DEFAULT_CHAT_ID = 0;
 
 export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
-  const chatId = getApiChatIdFromMtpPeer(mtpMessage.toId);
+  const isPrivateToMe = isPeerUser(mtpMessage.toId);
+  const chatId = isPrivateToMe
+    ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
+    : getApiChatIdFromMtpPeer(mtpMessage.toId);
 
   return {
     id: mtpMessage.id,
     chat_id: chatId,
     is_outgoing: mtpMessage.out === true,
     content: {
+      '@type': 'message',
       ...(mtpMessage.message && {
         text: {
           text: mtpMessage.message,
@@ -16,7 +23,7 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
       }),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || -1, // TODO
+    sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID, // TODO
   };
 }
 
@@ -27,6 +34,7 @@ export function buildApiMessageFromUpdate(chatId: number, mtpMessage: UpdateShor
     chat_id: chatId,
     is_outgoing: mtpMessage.out === true,
     content: {
+      '@type': 'message',
       ...(mtpMessage.message && {
         text: {
           text: mtpMessage.message,

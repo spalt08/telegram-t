@@ -3,7 +3,7 @@ import { withGlobal } from '../lib/teactn';
 import { GlobalState } from '../store/types';
 
 import { ApiMessage } from '../api/tdlib/types';
-import { selectOutgoingStatus } from '../modules/tdlib/selectors';
+import { selectOutgoingStatus } from '../modules/selectors';
 
 type IProps = {
   message: ApiMessage;

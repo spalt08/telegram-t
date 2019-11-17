@@ -11,8 +11,8 @@ import {
   isOwnMessage,
   getUserFullName,
   getPhotoUrl,
-} from '../../../../modules/tdlib/helpers';
-import { selectUser, selectChatMessage } from '../../../../modules/tdlib/selectors';
+} from '../../../../modules/helpers';
+import { selectUser, selectChatMessage } from '../../../../modules/selectors';
 
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';

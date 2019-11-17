@@ -23,12 +23,15 @@ export async function fetchChats({
 }): Promise<{ chat_ids: number[] } | null> {
   const result = await sendToClient({
     type: 'invokeRequest',
+    namespace: 'messages',
     name: 'GetDialogsRequest',
     args: {
+      flags: 1,
+      excludePinned: false,
       limit,
     },
     enhancers: {
-      peerOffset: ['buildPeerByApiChatId', offsetId],
+      offsetPeer: ['buildInputPeerByApiChatId', offsetId],
     },
   }, true) as MTP.messages$Dialogs;
 

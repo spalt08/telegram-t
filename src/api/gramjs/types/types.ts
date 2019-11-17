@@ -1,17 +1,25 @@
-import { TdLibUpdate } from '../../tdlib/types/index';
+import { TdLibUpdate } from '../../tdlib/types';
 
 export type OnUpdate = (update: TdLibUpdate) => void;
 
-type SupportedRequests = 'GetDialogsRequest' | 'GetHistoryRequest';
+export type SupportedMessageRequests = 'GetDialogsRequest' | 'GetHistoryRequest';
+export type SupportedUploadRequests = 'GetFileRequest';
 
-type EnhancerName = 'buildPeerByApiChatId';
+type EnhancerName = 'buildInputPeerByApiChatId' | 'buildInputPeerPhotoFileLocation';
 
 export type OriginMessageData = ({
   type: 'init';
   sessionId: string;
 } | {
   type: 'invokeRequest';
-  name: SupportedRequests;
+  namespace: 'messages';
+  name: SupportedMessageRequests;
+  args: AnyLiteral;
+  enhancers?: Record<string, [EnhancerName, any]>;
+} | {
+  type: 'invokeRequest';
+  namespace: 'upload';
+  name: SupportedUploadRequests;
   args: AnyLiteral;
   enhancers?: Record<string, [EnhancerName, any]>;
 } | {
@@ -46,7 +54,7 @@ export type WorkerMessageApiUpdate = {
 export type WorkerMessageResponse = {
   messageId: number;
   type: 'invokeResponse';
-  name: SupportedRequests;
+  name: SupportedMessageRequests | SupportedUploadRequests;
   result?: AnyLiteral;
   error?: AnyLiteral;
 };

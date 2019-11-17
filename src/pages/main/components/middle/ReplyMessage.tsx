@@ -6,8 +6,8 @@ import {
   ApiMessage,
   ApiPhoto,
 } from '../../../../api/tdlib/types';
-import { getUserFullName } from '../../../../modules/tdlib/helpers';
-import { selectUser } from '../../../../modules/tdlib/selectors';
+import { getUserFullName } from '../../../../modules/helpers';
+import { selectUser } from '../../../../modules/selectors';
 
 import { buildMessageContent } from './util/messages';
 import './ReplyMessage.scss';

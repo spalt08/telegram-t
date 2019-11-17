@@ -2,10 +2,10 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser, ApiPrivateChat } from '../../../../api/tdlib/types';
-import { selectChat, selectUser } from '../../../../modules/tdlib/selectors';
+import { selectChat, selectUser } from '../../../../modules/selectors';
 import {
   getPrivateChatUserId, getUserFullName, getUserStatus, isUserOnline,
-} from '../../../../modules/tdlib/helpers';
+} from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
 
 type IProps = {

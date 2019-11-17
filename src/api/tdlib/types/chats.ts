@@ -1,5 +1,5 @@
 import { ApiMessage } from './messages';
-import { ApiFile } from './files';
+import { ApiFile, ApiFileLocation } from './files';
 
 export interface ApiChat {
   id: number;
@@ -17,6 +17,10 @@ export interface ApiChat {
   photo?: {
     small: ApiFile;
     big: ApiFile;
+  };
+  photo_locations?: {
+    small: ApiFileLocation;
+    big: ApiFileLocation;
   };
 }
 

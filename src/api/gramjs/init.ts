@@ -5,6 +5,7 @@ import {
 import { init as initAuth } from './methods/auth';
 import { init as initChats } from './methods/chats';
 import { init as initMessages } from './methods/messages';
+import { init as initFiles } from './methods/files';
 import { onGramJsUpdate } from './updaters';
 import generateIdFor from '../../util/generateIdFor';
 
@@ -72,4 +73,5 @@ export function init(onUpdate: OnUpdate, sessionId = '') {
   initAuth(sendToWorker);
   initChats(sendToWorker, onUpdate);
   initMessages(sendToWorker, onUpdate);
+  initFiles(sendToWorker);
 }

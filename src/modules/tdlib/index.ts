@@ -1,3 +1,3 @@
 import './actions';
-import './helpers';
-import './selectors';
+import '../helpers';
+import '../selectors';

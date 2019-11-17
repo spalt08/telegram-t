@@ -1,4 +1,4 @@
-import { ApiChat, ApiPrivateChat } from '../../../api/tdlib/types';
+import { ApiChat, ApiPrivateChat } from '../../api/tdlib/types/index';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;
@@ -21,11 +21,13 @@ export function getChatTitle(chat: ApiChat) {
 }
 
 export function getChatPhotoId(chat: ApiChat): number | null {
-  const { photo } = chat;
+  const { photo, photo_locations } = chat;
 
-  if (!photo) {
-    return null;
+  if (photo) {
+    return photo.small.id;
+  } else if (photo_locations) {
+    return chat.id;
   }
 
-  return photo.small.id;
+  return null;
 }

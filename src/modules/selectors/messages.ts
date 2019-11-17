@@ -1,5 +1,5 @@
-import { GlobalState } from '../../../store/types';
-import { ApiMessage } from '../../../api/tdlib/types';
+import { GlobalState } from '../../store/types';
+import { ApiMessage } from '../../api/tdlib/types';
 import { selectChat } from './chats';
 import { getSendingState } from '../helpers';
 

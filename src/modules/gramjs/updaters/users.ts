@@ -1,16 +1,14 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiUser } from '../../../api/tdlib/types';
-import { loadUserPhoto } from '../../../api/tdlib/files';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
     case 'updateUser': {
-      const { user } = update;
+      updateUser(update.user.id, update.user);
 
-      updateUser(user.id, user);
-
-      loadUserPhoto(user);
+      // TODO This is not yet supported and will block other requests.
+      // getDispatch().loadUserPhoto({ user: update.user });
 
       break;
     }

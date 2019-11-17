@@ -21,3 +21,11 @@ export interface ApiFile {
   blob?: Blob;
   blobUrl?: string;
 }
+
+type bytes = string | Uint8Array;
+type long = number[] | string;
+
+export interface ApiFileLocation {
+  volumeId: long;
+  localId: int;
+}

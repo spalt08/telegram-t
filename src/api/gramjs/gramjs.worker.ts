@@ -1,9 +1,26 @@
-import { PeerUser, PeerChat, PeerChannel } from '../../lib/gramjs/tl/types';
-import { OriginMessageEvent, WorkerMessageData } from './types/types';
-import { TdLibUpdate, TdLibUpdateAuthorizationState, UpdateAuthorizationStateType } from '../tdlib/types';
+import JSBI from 'jsbi';
+import {
+  InputPeerUser,
+  InputPeerChat,
+  InputPeerChannel,
+  InputPeerPhotoFileLocation,
+} from '../../lib/gramjs/tl/types';
+import {
+  OriginMessageData,
+  OriginMessageEvent,
+  SupportedMessageRequests,
+  SupportedUploadRequests,
+  WorkerMessageData,
+} from './types/types';
+import {
+  ApiChat,
+  TdLibUpdate,
+  TdLibUpdateAuthorizationState,
+  UpdateAuthorizationStateType,
+} from '../tdlib/types';
 
 import { TelegramClient, session } from '../../lib/gramjs';
-import * as apiRequests from '../../lib/gramjs/tl/functions/messages';
+import * as apiRequests from '../../lib/gramjs/tl/functions';
 import { DEBUG } from '../../config';
 
 let client: any;
@@ -18,70 +35,18 @@ const authPromiseResolvers: {
   resolvePassword: null,
 };
 
+const db: { chats: Record<number, MTP.chat | MTP.channel>; users: Record<number, MTP.user> } = { chats: {}, users: {} };
+
 // @ts-ignore
-onmessage = (async (message: OriginMessageEvent) => {
+onmessage = (message: OriginMessageEvent) => {
   const { data } = message;
 
   if (data.type === 'init') {
-    init(data.sessionId);
+    void init(data.sessionId);
   } else if (client) {
     switch (data.type) {
       case 'invokeRequest': {
-        const {
-          name, args, enhancers = {}, messageId,
-        } = data;
-
-        const enhancedArgs = { ...args };
-
-        Object.keys(enhancers).forEach((key) => {
-          const [enhancerName, argument] = enhancers[key];
-          switch (enhancerName) {
-            case 'buildPeerByApiChatId':
-              Object.assign(enhancedArgs, {
-                [key]: buildPeerByApiChatId(argument),
-              });
-              break;
-          }
-        });
-
-        const RequestClass = apiRequests[name];
-        const request = new RequestClass(enhancedArgs);
-
-        try {
-          if (DEBUG) {
-            // eslint-disable-next-line no-console
-            console.log(`[GramJs/worker] INVOKE ${name}`, enhancedArgs);
-          }
-          const result = await client.invoke(request);
-          if (DEBUG) {
-            // eslint-disable-next-line no-console
-            console.log(`[GramJs/worker] INVOKE RESPONSE ${name}`, result);
-          }
-
-          if (messageId) {
-            sendToOrigin({
-              messageId,
-              type: 'invokeResponse',
-              name: data.name,
-              result,
-            });
-          }
-        } catch (error) {
-          if (DEBUG) {
-            // eslint-disable-next-line no-console
-            console.log(`[GramJs/worker] INVOKE ERROR ${name}`, error);
-          }
-
-          if (messageId) {
-            sendToOrigin({
-              messageId,
-              type: 'invokeResponse',
-              name: data.name,
-              error,
-            });
-          }
-        }
-
+        void invokeRequest(data);
         break;
       }
       case 'provideAuthPhoneNumber':
@@ -95,7 +60,108 @@ onmessage = (async (message: OriginMessageEvent) => {
         break;
     }
   }
-}) as Worker['onmessage'];
+};
+
+async function invokeRequest(data: OriginMessageData) {
+  if (data.type !== 'invokeRequest') {
+    return;
+  }
+
+  const {
+    namespace, name, args, enhancers = {}, messageId,
+  } = data;
+
+  const enhancedArgs = { ...args };
+
+  Object.keys(enhancers).forEach((key) => {
+    const [enhancerName, arg] = enhancers[key];
+    switch (enhancerName) {
+      case 'buildInputPeerByApiChatId':
+        Object.assign(enhancedArgs, {
+          [key]: buildInputPeerByApiChatId(arg),
+        });
+        break;
+      case 'buildInputPeerPhotoFileLocation':
+        Object.assign(enhancedArgs, {
+          [key]: buildInputPeerPhotoFileLocation(arg),
+        });
+        break;
+    }
+  });
+
+  let RequestClass;
+
+  // For some reason these types are not working automatically.
+  switch (namespace) {
+    case 'messages':
+      RequestClass = apiRequests.messages[name as SupportedMessageRequests];
+      break;
+    case 'upload':
+      RequestClass = apiRequests.upload[name as SupportedUploadRequests];
+      break;
+    default:
+      return;
+  }
+
+  const request = new RequestClass(enhancedArgs);
+
+  try {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/worker] INVOKE ${name}`, enhancedArgs);
+    }
+
+    const result = await client.invoke(request);
+
+    postProcess(name, result);
+
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/worker] INVOKE RESPONSE ${name}`, result);
+    }
+
+    if (messageId) {
+      sendToOrigin({
+        messageId,
+        type: 'invokeResponse',
+        name: data.name,
+        result,
+      });
+    }
+  } catch (error) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/worker] INVOKE ERROR ${name}`, error);
+    }
+
+    if (messageId) {
+      sendToOrigin({
+        messageId,
+        type: 'invokeResponse',
+        name: data.name,
+        error,
+      });
+    }
+  }
+}
+
+function postProcess(name: string, result: MTP.messages$Dialogs) {
+  if (name !== 'GetDialogsRequest') {
+    return;
+  }
+
+  if (!result || !result.dialogs) {
+    return;
+  }
+
+  result.users.forEach((user) => {
+    db.users[user.id] = user as MTP.user;
+  });
+
+  result.chats.forEach((chat) => {
+    db.chats[chat.id] = chat as MTP.chat | MTP.channel;
+  });
+}
 
 function onApiUpdate(update: TdLibUpdate) {
   sendToOrigin({
@@ -239,18 +305,41 @@ function provideAuthPassword(password: string) {
   authPromiseResolvers.resolvePassword(password);
 }
 
-export function buildPeerByApiChatId(chatId: number): MTP.Peer {
+function buildInputPeerByApiChatId(chatId: number): MTP.Peer {
   if (chatId > 0) {
-    return new PeerUser({
+    const user = db.users[chatId] as MTP.user;
+
+    return new InputPeerUser({
       userId: chatId,
+      ...(user && { accessHash: user.accessHash }),
     });
   } else if (chatId <= -1000000000) {
-    return new PeerChannel({
+    const channel = db.chats[-chatId] as MTP.channel;
+
+    return new InputPeerChannel({
       channelId: -chatId,
+      ...(channel && { accessHash: channel.accessHash }),
     });
   } else {
-    return new PeerChat({
+    return new InputPeerChat({
       chatId: -chatId,
     });
   }
+}
+
+function buildInputPeerPhotoFileLocation(chat: ApiChat): MTP.inputPeerPhotoFileLocation {
+  const fileLocation = chat.photo_locations && chat.photo_locations.small;
+
+  if (!fileLocation) {
+    throw new Error('Missing file location');
+  }
+
+  const peer = buildInputPeerByApiChatId(chat.id);
+  const { volumeId, localId } = fileLocation;
+
+  return new InputPeerPhotoFileLocation({
+    peer,
+    volumeId: JSBI.BigInt(volumeId),
+    localId,
+  });
 }

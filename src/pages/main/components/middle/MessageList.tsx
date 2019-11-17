@@ -4,8 +4,8 @@ import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import { ApiMessage } from '../../../../api/tdlib/types';
-import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/tdlib/selectors';
-import { isOwnMessage, isPrivateChat } from '../../../../modules/tdlib/helpers';
+import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/selectors';
+import { isOwnMessage, isPrivateChat } from '../../../../modules/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatChatDateHeader } from '../../../../util/dateFormat';

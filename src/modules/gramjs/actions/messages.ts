@@ -2,7 +2,6 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 import { ApiMessage } from '../../../api/tdlib/types';
 
 import { fetchMessages } from '../../../api/gramjs';
-import * as TdLib from '../../../api/tdlib';
 import { buildCollectionById } from '../../../util/iteratees';
 
 const MESSAGE_SLICE_LIMIT = 50;
@@ -23,11 +22,11 @@ addReducer('loadMoreChatMessages', (global, actions, payload) => {
   void loadChatMessages(chatId, lowestMessageId || undefined);
 });
 
-addReducer('sendTextMessage', (global, actions, payload) => {
-  const { chatId, text, fromMessageId } = payload!;
-
-  void sendTextMessage(chatId, text, fromMessageId);
-});
+// addReducer('sendTextMessage', (global, actions, payload) => {
+//   const { chatId, text, fromMessageId } = payload!;
+//
+//   void sendTextMessage(chatId, text, fromMessageId);
+// });
 
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
   let messages = await loadChatMessagesPart(chatId, fromMessageId);
@@ -86,20 +85,5 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   return result.messages;
 }
 
-async function sendTextMessage(chatId: number, text: string, replyToMessageId?: number) {
-  await TdLib.send({
-    '@type': 'sendMessage',
-    chat_id: chatId,
-    input_message_content: {
-      '@type': 'inputMessageText',
-      text: {
-        '@type': 'formattedText',
-        text,
-        entities: [],
-      },
-      disable_web_page_preview: false,
-      clear_draft: true,
-    },
-    reply_to_message_id: replyToMessageId,
-  });
-}
+// async function sendTextMessage(chatId: number, text: string, replyToMessageId?: number) {
+// }

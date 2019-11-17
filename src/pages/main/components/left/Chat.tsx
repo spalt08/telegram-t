@@ -9,8 +9,8 @@ import {
   getUserFirstName,
   isPrivateChat,
   isGroupChat,
-} from '../../../../modules/tdlib/helpers';
-import { selectUser } from '../../../../modules/tdlib/selectors';
+} from '../../../../modules/helpers';
+import { selectUser } from '../../../../modules/selectors';
 import Avatar from '../../../../components/Avatar';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';

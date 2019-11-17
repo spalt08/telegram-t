@@ -4,8 +4,8 @@ import { withGlobal } from '../lib/teactn';
 import { ApiUser, ApiChat } from '../api/tdlib/types';
 import {
   getChatTitle, getUserFullName, isPrivateChat, isUserOnline,
-} from '../modules/tdlib/helpers';
-import { selectChatPhotoUrl, selectUserPhotoUrl } from '../modules/tdlib/selectors';
+} from '../modules/helpers';
+import { selectChatPhotoUrl, selectUserPhotoUrl } from '../modules/selectors';
 
 import './Avatar.scss';
 

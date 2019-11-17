@@ -1,4 +1,5 @@
 import { isPeerChat, isPeerUser } from './peers';
+import { ApiChat } from '../../tdlib/types';
 
 export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat) {
   return {
@@ -8,6 +9,7 @@ export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user 
       ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
+    ...buildApiChatPhotoFromMtpPeer(dialog.peer, peerEntity),
     last_read_outbox_message_id: dialog.readOutboxMaxId,
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,
@@ -57,6 +59,21 @@ export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user 
   } else {
     return (peerEntity as MTP.chat).title;
   }
+}
+
+export function buildApiChatPhotoFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user | MTP.chat) {
+  if (!peerEntity.photo) {
+    return null;
+  }
+
+  const { photoSmall, photoBig } = peerEntity.photo as (MTP.userProfilePhoto | MTP.chatPhoto);
+
+  return <Pick<ApiChat, 'photo_locations'>> {
+    photo_locations: {
+      small: photoSmall as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
+      big: photoBig as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
+    },
+  };
 }
 
 function getUserName(user: MTP.user) {

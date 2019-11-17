@@ -44,6 +44,7 @@ export interface ApiMessage {
   id: number;
   chat_id: number;
   content: {
+    // TODO Enum
     '@type': string;
     text?: {
       text: string;
@@ -58,10 +59,9 @@ export interface ApiMessage {
   date: number;
   is_outgoing: boolean;
   sender_user_id: number;
-  reply_to_message_id: number;
+  reply_to_message_id?: number;
   sending_state?: {
     '@type': 'messageSendingStateFailed';
   };
   forward_info?: ApiMessageForwardInfo;
-  views: number;
 }
