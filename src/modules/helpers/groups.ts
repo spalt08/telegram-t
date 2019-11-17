@@ -6,14 +6,10 @@ export function isChannel(group: ApiGroup) {
 
 export function getGroupTypeString(group: ApiGroup) {
   if (isChannel(group)) {
-    return 'Channel';
+    return 'channel';
   }
 
-  if (group['@type'] === 'supergroup') {
-    return 'Supergroup Chat';
-  }
-
-  return 'Group Chat';
+  return 'group chat';
 }
 
 export function getGroupDescription(group: ApiGroup) {
