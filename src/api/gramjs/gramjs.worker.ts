@@ -20,6 +20,7 @@ import {
 } from '../tdlib/types';
 
 import { TelegramClient, session } from '../../lib/gramjs';
+import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
 import * as apiRequests from '../../lib/gramjs/tl/functions';
 import { DEBUG } from '../../config';
 
@@ -86,6 +87,11 @@ async function invokeRequest(data: OriginMessageData) {
           [key]: buildInputPeerPhotoFileLocation(arg),
         });
         break;
+      case 'generateRandomBigInt':
+        Object.assign(enhancedArgs, {
+          [key]: generateRandomBigInt(),
+        });
+        break;
     }
   });
 
@@ -145,22 +151,36 @@ async function invokeRequest(data: OriginMessageData) {
   }
 }
 
-function postProcess(name: string, result: MTP.messages$Dialogs) {
-  if (name !== 'GetDialogsRequest') {
-    return;
+function postProcess(name: string, anyResult: any) {
+  switch (name) {
+    case 'GetDialogsRequest': {
+      const result: MTP.messages$Dialogs = anyResult;
+
+      if (!result || !result.dialogs) {
+        return;
+      }
+
+      result.users.forEach((user) => {
+        db.users[user.id] = user as MTP.user;
+      });
+
+      result.chats.forEach((chat) => {
+        db.chats[chat.id] = chat as MTP.chat | MTP.channel;
+      });
+
+      break;
+    }
+
+    case 'SendMessageRequest': {
+      const result: { updates: MTP.Updates[] } = anyResult;
+
+      if (!result || !result.updates) {
+        return;
+      }
+
+      result.updates.forEach(onGramJsUpdate);
+    }
   }
-
-  if (!result || !result.dialogs) {
-    return;
-  }
-
-  result.users.forEach((user) => {
-    db.users[user.id] = user as MTP.user;
-  });
-
-  result.chats.forEach((chat) => {
-    db.chats[chat.id] = chat as MTP.chat | MTP.channel;
-  });
 }
 
 function onApiUpdate(update: TdLibUpdate) {
@@ -342,4 +362,8 @@ function buildInputPeerPhotoFileLocation(chat: ApiChat): MTP.inputPeerPhotoFileL
     volumeId: JSBI.BigInt(volumeId),
     localId,
   });
+}
+
+function generateRandomBigInt() {
+  return readBigIntFromBuffer(generateRandomBytes(8), false);
 }

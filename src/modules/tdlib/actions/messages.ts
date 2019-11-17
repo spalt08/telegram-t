@@ -23,9 +23,9 @@ addReducer('loadMoreChatMessages', (global, actions, payload) => {
 });
 
 addReducer('sendTextMessage', (global, actions, payload) => {
-  const { chatId, text, fromMessageId } = payload!;
+  const { chatId, text } = payload!;
 
-  void sendTextMessage(chatId, text, fromMessageId);
+  void sendTextMessage(chatId, text);
 });
 
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
@@ -89,7 +89,7 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   return result.messages;
 }
 
-async function sendTextMessage(chatId: number, text: string, replyToMessageId?: number) {
+async function sendTextMessage(chatId: number, text: string) {
   await TdLib.send({
     '@type': 'sendMessage',
     chat_id: chatId,
@@ -103,6 +103,5 @@ async function sendTextMessage(chatId: number, text: string, replyToMessageId?: 
       disable_web_page_preview: false,
       clear_draft: true,
     },
-    reply_to_message_id: replyToMessageId,
   });
 }

@@ -2,10 +2,10 @@ import { TdLibUpdate } from '../../tdlib/types';
 
 export type OnUpdate = (update: TdLibUpdate) => void;
 
-export type SupportedMessageRequests = 'GetDialogsRequest' | 'GetHistoryRequest';
+export type SupportedMessageRequests = 'GetDialogsRequest' | 'GetHistoryRequest' | 'SendMessageRequest';
 export type SupportedUploadRequests = 'GetFileRequest';
 
-type EnhancerName = 'buildInputPeerByApiChatId' | 'buildInputPeerPhotoFileLocation';
+type EnhancerName = 'buildInputPeerByApiChatId' | 'buildInputPeerPhotoFileLocation' | 'generateRandomBigInt';
 
 export type OriginMessageData = ({
   type: 'init';
@@ -15,7 +15,7 @@ export type OriginMessageData = ({
   namespace: 'messages';
   name: SupportedMessageRequests;
   args: AnyLiteral;
-  enhancers?: Record<string, [EnhancerName, any]>;
+  enhancers?: Record<string, [EnhancerName, any?]>;
 } | {
   type: 'invokeRequest';
   namespace: 'upload';

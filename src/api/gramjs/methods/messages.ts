@@ -49,3 +49,18 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     messages,
   };
 }
+
+export async function sendMessage(chatId: number, message: string) {
+  void sendToClient({
+    type: 'invokeRequest',
+    namespace: 'messages',
+    name: 'SendMessageRequest',
+    args: {
+      message,
+    },
+    enhancers: {
+      peer: ['buildInputPeerByApiChatId', chatId],
+      randomId: ['generateRandomBigInt'],
+    },
+  });
+}

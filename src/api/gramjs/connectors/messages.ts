@@ -21,14 +21,41 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
           text: mtpMessage.message,
         },
       }),
+      // ...(mtpMessage.media && buildPhoto(mtpMessage)),
     },
     date: mtpMessage.date,
     sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID, // TODO
   };
 }
 
+// function buildPhoto(mtpMessage: MTP.message): Pick<ApiMessage['content'], 'photo' | 'caption'> | null {
+//   const mtpMedia = mtpMessage.media as MTP.messageMediaPhoto;
+//
+//   if (!mtpMedia.photo) {
+//     return null;
+//   }
+//
+//   const { photo, caption } = mtpMedia;
+//
+//   return {
+//     photo: {
+//       has_stickers: photo.hasStickers,
+//       minithumbnail: {
+//         '@type': 'minithumbnail',
+//         data: string,
+//         height: number,
+//         width: number,
+//       },
+//     },
+//     ...(caption && {
+//       '@type': 'formattedText',
+//       text: caption,
+//     }),
+//   };
+// }
+
 // @ts-ignore
-export function buildApiMessageFromUpdate(chatId: number, mtpMessage: UpdateShortMessage): ApiMessage {
+export function buildApiMessageFromShortUpdate(chatId: number, mtpMessage: UpdateShortMessage): ApiMessage {
   return {
     id: mtpMessage.id,
     chat_id: chatId,

@@ -3,6 +3,7 @@ import { ApiMessage } from '../../../api/tdlib/types';
 
 import { fetchMessages } from '../../../api/gramjs';
 import { buildCollectionById } from '../../../util/iteratees';
+import { sendMessage } from '../../../api/gramjs/methods/messages';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
@@ -22,11 +23,11 @@ addReducer('loadMoreChatMessages', (global, actions, payload) => {
   void loadChatMessages(chatId, lowestMessageId || undefined);
 });
 
-// addReducer('sendTextMessage', (global, actions, payload) => {
-//   const { chatId, text, fromMessageId } = payload!;
-//
-//   void sendTextMessage(chatId, text, fromMessageId);
-// });
+addReducer('sendTextMessage', (global, actions, payload) => {
+  const { chatId, text } = payload!;
+
+  void sendTextMessage(chatId, text);
+});
 
 async function loadChatMessages(chatId: number, fromMessageId = 0) {
   let messages = await loadChatMessagesPart(chatId, fromMessageId);
@@ -85,5 +86,6 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   return result.messages;
 }
 
-// async function sendTextMessage(chatId: number, text: string, replyToMessageId?: number) {
-// }
+function sendTextMessage(chatId: number, text: string) {
+  void sendMessage(chatId, text);
+}
