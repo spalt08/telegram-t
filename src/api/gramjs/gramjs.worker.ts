@@ -210,8 +210,8 @@ export async function init(sessionId: string) {
   const stringSession = new StringSession(sessionId);
   client = new TelegramClient(
     stringSession,
-    process.env.REACT_APP_TELEGRAM_API_ID,
-    process.env.REACT_APP_TELEGRAM_API_HASH,
+    process.env.TELEGRAM_T_API_ID,
+    process.env.TELEGRAM_T_API_HASH,
     { useWSS: true } as any,
   );
 

@@ -54,11 +54,11 @@ export async function init(onUpdate: Function) {
 }
 
 export function sendParameters() {
-  const apiId = process.env.REACT_APP_TELEGRAM_API_ID;
-  const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
+  const apiId = process.env.TELEGRAM_T_API_ID;
+  const apiHash = process.env.TELEGRAM_T_API_HASH;
 
   if (!apiId || !apiHash) {
-    throw new Error('Provide `REACT_APP_TELEGRAM_API_ID` and `REACT_APP_TELEGRAM_API_HASH` env vars.');
+    throw new Error('Provide `TELEGRAM_T_API_ID` and `TELEGRAM_T_API_HASH` env vars.');
   }
 
   send({
