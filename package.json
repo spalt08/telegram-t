@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "prod": "./build.sh",
-    "build:gramjs": "parcel build src/lib/gramjs/index.js -d src/lib/gramjs/build",
+    "build:gh": "./deploy/github.sh",
+    "build:contest:tdlib": "./deploy/contest-tdlib.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"

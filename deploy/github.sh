@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-
 if ! git diff-index --quiet HEAD --; then
     echo "[ERR] Please commit changes first"
     exit 1
