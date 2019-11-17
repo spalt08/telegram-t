@@ -10,14 +10,15 @@ import Avatar from '../../../../components/Avatar';
 
 type IProps = {
   chatId: number;
+  avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   chat: ApiPrivateChat;
   user: ApiUser;
 };
 
-const PrivateChatHeader: FC<IProps> = ({ user }) => {
+const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium' }) => {
   return (
-    <div className="DialogHeader">
-      <Avatar size="medium" user={user} />
+    <div className="ChatInfo">
+      <Avatar size={avatarSize} user={user} />
       <div>
         <div className="title">{getUserFullName(user)}</div>
         <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>{getUserStatus(user)}</div>
@@ -29,12 +30,12 @@ const PrivateChatHeader: FC<IProps> = ({ user }) => {
 export default withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId) as ApiPrivateChat;
-    const userId = getPrivateChatUserId(chat);
-    const user = selectUser(global, userId);
+    const userId = chat && getPrivateChatUserId(chat);
+    const user = userId && selectUser(global, userId);
 
     return {
       chat,
       user,
     };
   },
-)(PrivateChatHeader);
+)(PrivateChatInfo);

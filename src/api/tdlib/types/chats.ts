@@ -5,6 +5,10 @@ export interface ApiChat {
   id: number;
   type: {
     '@type': 'chatTypePrivate' | 'chatTypeSecret' | 'chatTypeBasicGroup' | 'chatTypeSupergroup';
+    basic_group_id?: number;
+    user_id?: number;
+    supergroup_id?: number;
+    is_channel?: boolean;
   };
   title?: string;
   last_message?: ApiMessage;

@@ -25,3 +25,7 @@ export function selectChatPhotoUrl(global: GlobalState, chat: ApiChat) {
 
   return file && file.blobUrl ? file.blobUrl : null;
 }
+
+export function selectChatGroupId(chat: ApiChat) {
+  return chat.type.basic_group_id || chat.type.supergroup_id;
+}

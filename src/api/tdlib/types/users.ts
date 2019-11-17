@@ -22,4 +22,9 @@ export interface ApiUser {
     small: ApiFileLocation;
     big: ApiFileLocation;
   };
+  username: string;
+  phone_number: string;
+
+  // Obtained from UserFullInfo
+  bio?: string;
 }

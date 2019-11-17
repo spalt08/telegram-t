@@ -1,9 +1,10 @@
 import {
-  ApiChat, ApiFile, ApiMessage, ApiUser, UpdateAuthorizationStateType,
+  ApiChat, ApiFile, ApiMessage, ApiUser, UpdateAuthorizationStateType, ApiGroup,
 } from '../api/tdlib/types';
 
 export type GlobalState = {
   isInitialized: boolean;
+  showRightColumn: boolean;
 
   users: {
     byId: Record<number, ApiUser>;
@@ -14,6 +15,11 @@ export type GlobalState = {
     ids: number[];
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
+  };
+
+  groups: {
+    ids: number[];
+    byId: Record<number, ApiGroup>;
   };
 
   messages: {
@@ -40,7 +46,7 @@ export type GlobalState = {
 export type ActionTypes = (
   // system
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' |
+  'setAuthRememberMe' | 'toggleRightColumn' |
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages

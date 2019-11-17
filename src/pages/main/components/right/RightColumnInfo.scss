@@ -1,0 +1,60 @@
+.RightColumnInfo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 0 1.5rem;
+
+  .ChatInfo {
+    margin-bottom: 1rem;
+
+    .Avatar {
+      margin: 0 auto 1.5rem;
+    }
+
+    .title {
+      font-weight: bold;
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: #868e96;
+
+      &.online {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  .ChatExtra {
+    .item {
+      display: flex;
+      // margin-bottom: 1rem;
+      padding: 1rem 0;
+      text-align: left;
+
+      i {
+        font-size: 1.5rem;
+        color: var(--color-text-secondary);
+        margin-right: 2rem;
+      }
+
+      .title {
+        font-size: 1rem;
+        line-height: 1.4rem;
+        margin-bottom: 0;
+        font-weight: 400;
+      }
+
+      a.title {
+        color: var(--color-text);
+      }
+
+      .subtitle {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+    }
+  }
+}

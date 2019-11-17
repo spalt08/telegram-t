@@ -10,14 +10,15 @@ import { selectChatPhotoUrl, selectUserPhotoUrl } from '../modules/selectors';
 import './Avatar.scss';
 
 interface IProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'jumbo';
+  showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
   imageUrl?: string;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, imageUrl,
+  size = 'large', chat, user, imageUrl, showOnlineStatus,
 }) => {
   let content: string | null = '';
   const isOnline = user && isUserOnline(user);
@@ -35,7 +36,7 @@ const Avatar: FC<IProps> = ({
   }
 
   return (
-    <div className={`Avatar size-${size} ${isOnline ? 'online' : ''}`}>
+    <div className={`Avatar size-${size} ${showOnlineStatus && isOnline ? 'online' : ''}`}>
       {content}
     </div>
   );

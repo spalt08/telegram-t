@@ -1,14 +1,11 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { isPrivateChat } from '../../../../modules/helpers';
 import Button from '../../../../components/ui/Button';
-import PrivateChatHeader from './PrivateChatHeader';
-import GroupHeader from './GroupHeader';
 import MessageList from './MessageList';
 import MiddleFooter from './MiddleFooter';
+import MiddleHeader from './MiddleHeader';
 import './MiddleColumn.scss';
-import './MiddleHeader.scss';
 
 type IProps = {
   selectedChatId: number;
@@ -33,11 +30,7 @@ function renderSelectedChat(props: IProps) {
 
   return (
     <div className="messages-layout">
-      {isPrivateChat(selectedChatId) ? (
-        <PrivateChatHeader chatId={selectedChatId} />
-      ) : (
-        <GroupHeader chatId={selectedChatId} />
-      )}
+      <MiddleHeader chatId={selectedChatId} />
       <MessageList key={selectedChatId} />
       <MiddleFooter />
     </div>

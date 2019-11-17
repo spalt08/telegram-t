@@ -26,6 +26,12 @@
     font-size: 1rem;
   }
 
+  &.size-jumbo {
+    width: 7.5rem;
+    height: 7.5rem;
+    font-size: 4rem;
+  }
+
   &.online {
     position: relative;
 
@@ -40,6 +46,7 @@
       border-radius: 50%;
       border: 2px solid white;
       background-color: #0ac630;
+      flex-shrink: 0;
     }
   }
 

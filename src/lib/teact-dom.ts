@@ -58,6 +58,7 @@ function getActualPrevElement($element: VirtualElementChild): VirtualElementChil
   return isComponentElement($element) ? $element.componentInstance.$prevElement : $element;
 }
 
+// TODO Support `null` return value for empty elements
 function createNode($element: VirtualElementChild, parentEl: HTMLElement, childIndex: number): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');

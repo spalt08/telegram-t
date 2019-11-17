@@ -1,29 +1,48 @@
-//TODO @pixel-perfect
-
-.DialogHeader, .GroupHeader {
+.MiddleHeader {
   display: flex;
   align-items: center;
   width: 100%;
   border-bottom: 1px solid #ECEDEF;
   background: #ffffff;
-  padding: .5rem 1.2rem;
+  padding: 0.5rem 1.2rem;
+
+  .ChatInfo {
+    display: flex;
+    align-items: center;
+  }
 
   .Avatar {
     margin-right: 1rem;
   }
 
   .title {
-    padding-top: 5px;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 1rem;
   }
 
   .status {
-    font-size: 0.8em;
+    font-size: 0.9rem;
     color: #868e96;
 
     &.online {
       color: var(--color-primary);
+    }
+  }
+
+  .HeaderActions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+
+    .Button {
+      margin-left: 0.25rem;
+    }
+
+    .toggle-right-pane-button {
+      &.active {
+        color: var(--color-primary);
+        opacity: 1;
+      }
     }
   }
 }

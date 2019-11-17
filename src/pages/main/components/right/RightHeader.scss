@@ -1,0 +1,15 @@
+.RightHeader {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+
+  h3 {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+    margin-left: 1.2rem;
+  }
+
+  .actions {
+    margin-left: auto;
+  }
+}

@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teactn';
 import { GlobalState } from '../../store/types';
 import LeftColumn from './components/left/LeftColumn';
 import MiddleColumn from './components/middle/MiddleColumn';
-// import RightColumn from './components/right/RightColumn';
+import RightColumn from './components/right/RightColumn';
 
 import './Main.scss';
 
@@ -15,7 +15,7 @@ const Main: FC<IProps> = () => {
     <div id="Main">
       <LeftColumn />
       <MiddleColumn />
-      {/* <RightColumn /> */}
+      <RightColumn />
     </div>
   );
 };

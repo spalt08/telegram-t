@@ -4,6 +4,7 @@ import { GlobalState } from './types';
 
 const INITIAL_STATE: GlobalState = {
   isInitialized: false,
+  showRightColumn: true,
 
   users: {
     byId: {},
@@ -13,6 +14,11 @@ const INITIAL_STATE: GlobalState = {
     ids: [],
     byId: {},
     scrollOffsetById: {},
+  },
+
+  groups: {
+    ids: [],
+    byId: {},
   },
 
   messages: {
@@ -28,4 +34,11 @@ const INITIAL_STATE: GlobalState = {
 
 addReducer('init', () => {
   setGlobal(INITIAL_STATE);
+});
+
+addReducer('toggleRightColumn', (global) => {
+  return {
+    ...global,
+    showRightColumn: !global.showRightColumn,
+  };
 });

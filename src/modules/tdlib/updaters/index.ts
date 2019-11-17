@@ -5,6 +5,7 @@ import * as users from './users';
 import * as chats from './chats';
 import * as messages from './messages';
 import * as files from './files';
+import * as groups from './groups';
 
 export default function onUpdate(update: TdLibUpdate) {
   if (DEBUG) {
@@ -17,4 +18,5 @@ export default function onUpdate(update: TdLibUpdate) {
   chats.onUpdate(update);
   messages.onUpdate(update);
   files.onUpdate(update);
+  groups.onUpdate(update);
 }

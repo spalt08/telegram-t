@@ -18,19 +18,21 @@ import './Chat.scss';
 
 type IProps = {
   chat: ApiChat;
+  privateChatUser?: ApiUser;
   lastMessageSender?: ApiUser;
   selected: boolean;
 } & Pick<GlobalActions, 'selectChat'>;
 
 const Chat: FC<IProps> = ({
   chat,
+  privateChatUser,
   lastMessageSender,
   selected,
   selectChat,
 }) => {
   return (
     <div className={buildClassNames(chat, selected)} onClick={() => selectChat({ id: chat.id })}>
-      <Avatar chat={chat} />
+      <Avatar chat={chat} user={privateChatUser} showOnlineStatus />
       <div className="info">
         <div className="title">
           <h3>{getChatTitle(chat)}</h3>
@@ -72,8 +74,11 @@ export default withGlobal(
       return null;
     }
 
+    const privateChatUserId = isPrivateChat(chat.id) && chat.type.user_id;
+
     return {
       lastMessageSender: selectUser(global, chat.last_message.sender_user_id),
+      privateChatUser: privateChatUserId && selectUser(global, privateChatUserId),
     };
   },
   (setGlobal, actions) => {
