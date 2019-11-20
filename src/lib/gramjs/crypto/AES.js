@@ -12,9 +12,9 @@ class AES {
     static decryptIge(cipherText, key, iv) {
         let iv1 = iv.slice(0, Math.floor(iv.length / 2))
         let iv2 = iv.slice(Math.floor(iv.length / 2))
-        let plainText = new Array(cipherText.length).fill(0)
+        let plainText = []
         const aes = new aesjs.AES(key)
-        const blocksCount = Math.floor(plainText.length / 16)
+        const blocksCount = Math.floor(cipherText.length / 16)
         const cipherTextBlock = new Array(16).fill(0)
 
         for (let blockIndex = 0; blockIndex < blocksCount; blockIndex++) {
@@ -28,11 +28,8 @@ class AES {
 
             iv1 = cipherText.slice(blockIndex * 16, blockIndex * 16 + 16)
             iv2 = plainTextBlock.slice(0, 16)
-            plainText = new Uint8Array([
-                ...plainText.slice(0, blockIndex * 16),
-                ...plainTextBlock.slice(0, 16),
-                ...plainText.slice(blockIndex * 16 + 16),
-            ])
+
+            Array.prototype.push.apply(plainText, iv2)
         }
         return Buffer.from(plainText)
     }
