@@ -1,4 +1,4 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiChat } from '../../../api/tdlib/types';
 
@@ -8,7 +8,7 @@ export function onUpdate(update: TdLibUpdate) {
       updateChat(update.chat.id, update.chat);
 
       // TODO This blocks other requests.
-      // getDispatch().loadChatPhoto({ chat: update.chat });
+      getDispatch().loadChatPhoto({ chat: update.chat });
 
       break;
     }
