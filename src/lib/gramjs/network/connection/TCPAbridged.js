@@ -1,6 +1,7 @@
 const struct = require('python-struct')
 const { readBufferFromBigInt } = require('../../Helpers')
 const { Connection, PacketCodec } = require('./Connection')
+const JSBI = require('jsbi')
 
 class AbridgedPacketCodec extends PacketCodec {
     static tag = Buffer.from('ef', 'hex')
@@ -17,7 +18,7 @@ class AbridgedPacketCodec extends PacketCodec {
         if (length < 127) {
             length = struct.pack('B', length)
         } else {
-            length = Buffer.from('7f', 'hex') + readBufferFromBigInt(JSBI.BigInt(length), 3)
+            length = Buffer.concat([Buffer.from('7f', 'hex'), readBufferFromBigInt(JSBI.BigInt(length), 3)])
         }
         return Buffer.concat([length, data])
     }
