@@ -158,11 +158,13 @@ export function isUserOnline(user: ApiUser) {
 }
 
 export function getUserPhotoId(user: ApiUser): number | null {
-  const { profile_photo } = user;
+  const { profile_photo, profile_photo_locations } = user;
 
-  if (!profile_photo) {
-    return null;
+  if (profile_photo) {
+    return profile_photo.small.id;
+  } else if (profile_photo_locations) {
+    return user.id;
   }
 
-  return profile_photo.small.id;
+  return null;
 }

@@ -14,6 +14,7 @@ export interface ApiUser {
     );
     was_online?: number;
   };
+  // Only in TDLib, remove.
   profile_photo?: {
     small: ApiFile;
     big: ApiFile;

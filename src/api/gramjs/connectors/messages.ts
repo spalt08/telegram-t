@@ -1,74 +1,63 @@
-import { getApiChatIdFromMtpPeer } from './chats';
 import { ApiMessage } from '../../tdlib/types';
-import { isPeerUser } from './peers';
+import { OnUpdate } from '../types/types';
 
-const DEFAULT_CHAT_ID = 0;
+import { invokeRequest } from '../client';
+import { buildApiMessage } from '../builders/messages';
+import { buildApiUser } from '../builders/users';
 
-export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
-  const isPrivateToMe = isPeerUser(mtpMessage.toId);
-  const chatId = isPrivateToMe
-    ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
-    : getApiChatIdFromMtpPeer(mtpMessage.toId);
+let onUpdate: OnUpdate;
+
+export function init(_onUpdate: OnUpdate) {
+  onUpdate = _onUpdate;
+}
+
+export async function fetchMessages({ chatId, fromMessageId, limit }: {
+  chatId: number;
+  fromMessageId: number;
+  limit: number;
+}): Promise<{ messages: ApiMessage[] } | null> {
+  const result = await invokeRequest({
+    namespace: 'messages',
+    name: 'GetHistoryRequest',
+    args: {
+      offsetId: fromMessageId,
+      limit,
+    },
+    enhancers: {
+      peer: ['buildInputPeer', chatId],
+    },
+  }) as MTP.messages$Messages;
+
+  if (!result || !result.messages) {
+    return null;
+  }
+
+  (result.users as MTP.user[]).forEach((mtpUser) => {
+    const user = buildApiUser(mtpUser);
+
+    onUpdate({
+      '@type': 'updateUser',
+      user,
+    });
+  });
+
+  const messages = (result.messages as MTP.message[]).map(buildApiMessage);
 
   return {
-    id: mtpMessage.id,
-    chat_id: chatId,
-    is_outgoing: mtpMessage.out === true,
-    content: {
-      '@type': 'message',
-      ...(mtpMessage.message && {
-        text: {
-          text: mtpMessage.message,
-        },
-      }),
-      // ...(mtpMessage.media && buildPhoto(mtpMessage)),
-    },
-    date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID, // TODO
+    messages,
   };
 }
 
-// function buildPhoto(mtpMessage: MTP.message): Pick<ApiMessage['content'], 'photo' | 'caption'> | null {
-//   const mtpMedia = mtpMessage.media as MTP.messageMediaPhoto;
-//
-//   if (!mtpMedia.photo) {
-//     return null;
-//   }
-//
-//   const { photo, caption } = mtpMedia;
-//
-//   return {
-//     photo: {
-//       has_stickers: photo.hasStickers,
-//       minithumbnail: {
-//         '@type': 'minithumbnail',
-//         data: string,
-//         height: number,
-//         width: number,
-//       },
-//     },
-//     ...(caption && {
-//       '@type': 'formattedText',
-//       text: caption,
-//     }),
-//   };
-// }
-
-// @ts-ignore
-export function buildApiMessageFromShortUpdate(chatId: number, mtpMessage: UpdateShortMessage): ApiMessage {
-  return {
-    id: mtpMessage.id,
-    chat_id: chatId,
-    is_outgoing: mtpMessage.out === true,
-    content: {
-      '@type': 'message',
-      ...(mtpMessage.message && {
-        text: {
-          text: mtpMessage.message,
-        },
-      }),
+export function sendMessage(chatId: number, message: string) {
+  void invokeRequest({
+    namespace: 'messages',
+    name: 'SendMessageRequest',
+    args: {
+      message,
     },
-    date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || -1,
-  };
+    enhancers: {
+      peer: ['buildInputPeer', chatId],
+      randomId: ['generateRandomBigInt'],
+    },
+  });
 }

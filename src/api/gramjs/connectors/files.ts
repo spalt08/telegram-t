@@ -1,15 +1,11 @@
-import { SendToWorker } from '../types/types';
-import { ApiChat } from '../../tdlib/types';
+import { invokeRequest } from '../client';
+import { ApiFileLocation } from '../../tdlib/types';
 
-let sendToClient: SendToWorker;
-
-export function init(_sendToClient: SendToWorker) {
-  sendToClient = _sendToClient;
+export function init() {
 }
 
-export async function loadFile(chat: ApiChat): Promise<string | null> {
-  const result = await sendToClient({
-    type: 'invokeRequest',
+export async function loadFile(id: number, fileLocation: ApiFileLocation): Promise<string | null> {
+  const result = await invokeRequest({
     namespace: 'upload',
     name: 'GetFileRequest',
     args: {
@@ -18,9 +14,9 @@ export async function loadFile(chat: ApiChat): Promise<string | null> {
       limit: 1024 * 1024,
     },
     enhancers: {
-      location: ['buildInputPeerPhotoFileLocation', chat],
+      location: ['buildInputPeerPhotoFileLocation', { id, fileLocation }],
     },
-  }, true);
+  });
 
   // eslint-disable-next-line no-underscore-dangle
   return result && result._bytes ? bytesToUrl(result._bytes) : null;

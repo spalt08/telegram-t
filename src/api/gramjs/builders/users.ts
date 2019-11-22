@@ -1,4 +1,5 @@
 import { ApiUser } from '../../tdlib/types';
+import { buildPhoto } from './common';
 
 export function buildApiUser(mtpUser: MTP.user): ApiUser {
   return {
@@ -11,5 +12,6 @@ export function buildApiUser(mtpUser: MTP.user): ApiUser {
     last_name: mtpUser.lastName,
     username: mtpUser.username || '',
     phone_number: mtpUser.phone || '',
+    profile_photo_locations: buildPhoto(mtpUser),
   };
 }

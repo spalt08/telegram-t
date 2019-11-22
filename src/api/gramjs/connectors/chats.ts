@@ -1,81 +1,81 @@
-import { isPeerChat, isPeerUser } from './peers';
-import { ApiChat } from '../../tdlib/types';
+import { OnUpdate } from '../types/types';
 
-export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat) {
-  return {
-    id: getApiChatIdFromMtpPeer(dialog.peer),
-    type: {
-      '@type': getApiChatTypeFromMtpPeer(dialog.peer),
-      ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
+import { invokeRequest } from '../client';
+import { buildApiChatFromDialog, getPeerKey } from '../builders/chats';
+import { buildApiMessage } from '../builders/messages';
+import { buildApiUser } from '../builders/users';
+import { buildCollectionByKey } from '../../../util/iteratees';
+
+let onUpdate: OnUpdate;
+
+export function init(_onUpdate: OnUpdate) {
+  onUpdate = _onUpdate;
+}
+
+export async function fetchChats(
+  {
+    limit,
+    offsetId,
+  }: {
+    limit: number;
+    offsetId?: number;
+  },
+): Promise<{ chat_ids: number[] } | null> {
+  const result = await invokeRequest({
+    namespace: 'messages',
+    name: 'GetDialogsRequest',
+    args: {
+      flags: 1,
+      excludePinned: false,
+      limit,
     },
-    title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
-    ...buildApiChatPhotoFromMtpPeer(dialog.peer, peerEntity),
-    last_read_outbox_message_id: dialog.readOutboxMaxId,
-    last_read_inbox_message_id: dialog.readInboxMaxId,
-    unread_count: dialog.unreadCount,
-    unread_mention_count: 0, // TODO
-    order: '1', // TODO
-    // photo: {// TODO
-    //   small: {},
-    //   big: {},
-    // },
-  };
-}
+    enhancers: {
+      offsetPeer: ['buildInputPeer', offsetId],
+    },
+  }) as MTP.messages$Dialogs;
 
-export function getApiChatIdFromMtpPeer(peer: MTP.Peer) {
-  if (isPeerUser(peer)) {
-    return peer.userId;
-  } else if (isPeerChat(peer)) {
-    return -peer.chatId;
-  } else {
-    return -peer.channelId;
-  }
-}
-
-export function getApiChatTypeFromMtpPeer(peer: MTP.Peer) {
-  if (isPeerUser(peer)) {
-    return 'chatTypePrivate';
-  } else if (isPeerChat(peer)) {
-    return 'chatTypeBasicGroup';
-  } else {
-    // TODO Support channels, supergroups, etc.
-    return 'chatTypeBasicGroup';
-  }
-}
-
-export function getPeerKey(peer: MTP.Peer) {
-  if (isPeerUser(peer)) {
-    return `user${peer.userId}`;
-  } else if (isPeerChat(peer)) {
-    return `chat${peer.chatId}`;
-  } else {
-    return `chat${peer.channelId}`;
-  }
-}
-
-export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user | MTP.chat) {
-  if (isPeerUser(peer)) {
-    return getUserName(peerEntity as MTP.user);
-  } else {
-    return (peerEntity as MTP.chat).title;
-  }
-}
-
-export function buildApiChatPhotoFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user | MTP.chat) {
-  if (!peerEntity.photo) {
+  if (!result || !result.dialogs) {
     return null;
   }
 
-  const { photoSmall, photoBig } = peerEntity.photo as (MTP.userProfilePhoto | MTP.chatPhoto);
+  const lastMessagesByChatId = buildCollectionByKey((result.messages as MTP.message[]).map(buildApiMessage), 'chat_id');
 
-  return <Pick<ApiChat, 'photo_locations'>> {
-    photo_locations: {
-      small: photoSmall as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
-      big: photoBig as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
-    },
+  const peersByKey = preparePeers(result);
+  const chats = result.dialogs.map((dialog) => {
+    const peerEntity = peersByKey[getPeerKey(dialog.peer)];
+    const chat = buildApiChatFromDialog(dialog, peerEntity);
+    chat.last_message = lastMessagesByChatId[chat.id];
+    return chat;
+  });
+
+  onUpdate({
+    '@type': 'chats',
+    chats,
+  });
+
+  const users = (result.users as MTP.user[]).map(buildApiUser);
+  onUpdate({
+    '@type': 'users',
+    users,
+  });
+
+  const chatIds = chats.map((chat) => chat.id);
+
+  return {
+    chat_ids: chatIds,
   };
 }
 
-function getUserName(user: MTP.user) {
-  return `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`;
+function preparePeers(result: MTP.messages$Dialogs) {
+  const store: Record<string, MTP.chat | MTP.user> = {};
+
+  result.chats.forEach((chat) => {
+    store[`chat${chat.id}`] = chat as MTP.chat;
+  });
+
+  result.users.forEach((user) => {
+    store[`user${user.id}`] = user as MTP.user;
+  });
+
+  return store;
 }

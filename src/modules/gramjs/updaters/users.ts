@@ -1,14 +1,24 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiUser } from '../../../api/tdlib/types';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
+    case 'users': {
+      setUsers(update.users);
+
+      update.users.forEach((user: ApiUser) => {
+        getDispatch().loadUserPhoto({ user });
+      });
+
+      break;
+    }
+
     case 'updateUser': {
       updateUser(update.user.id, update.user);
 
-      // TODO This is not yet supported and will block other requests.
-      // getDispatch().loadUserPhoto({ user: update.user });
+      getDispatch().loadUserPhoto({ user: update.user });
 
       break;
     }
@@ -29,6 +39,23 @@ export function onUpdate(update: TdLibUpdate) {
       break;
     }
   }
+}
+
+function setUsers(users: ApiUser[]) {
+  const global = getGlobal();
+
+  const byId = buildCollectionByKey(users, 'id');
+
+  setGlobal({
+    ...global,
+    users: {
+      ...global.users,
+      byId: {
+        ...global.users.byId,
+        ...byId,
+      },
+    },
+  });
 }
 
 function updateUser(userId: number, userUpdate: Partial<ApiUser>) {

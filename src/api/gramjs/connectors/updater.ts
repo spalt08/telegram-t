@@ -1,9 +1,16 @@
-import { OnUpdate, WorkerMessageGramJsUpdate } from './types/types';
+import { OnUpdate } from '../types/types';
 
-import { buildApiMessage, buildApiMessageFromShortUpdate } from './connectors/messages';
-import { getApiChatIdFromMtpPeer } from './connectors/chats';
+import { buildApiMessage, buildApiMessageFromShortUpdate } from '../builders/messages';
+import { getApiChatIdFromMtpPeer } from '../builders/chats';
 
-export function onGramJsUpdate({ constructorName, update }: WorkerMessageGramJsUpdate, onUpdate: OnUpdate) {
+let onUpdate: OnUpdate;
+
+export function init(_onUpdate: OnUpdate) {
+  onUpdate = _onUpdate;
+}
+
+export function onGramJsUpdate(update: AnyLiteral) {
+  const { constructorName } = update;
   if (
     constructorName === 'UpdateShortMessage'
     || constructorName === 'UpdateShortChatMessage'

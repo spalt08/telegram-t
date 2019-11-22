@@ -1,20 +1,20 @@
 declare namespace MTP {
   // @ajaxy
   export type PeerType = peerUser['_'] | peerChat['_'] | peerChannel['_'];
-
+  
   type int = number;
   type double = number;
   type bytes = string | Uint8Array;
   type long = number[] | string;
   type int128 = number;
   type int256 = number;
-
+  
   type InvokeOptions = {
     dcID: number;
     createNetworker: boolean;
     noErrorBox: boolean;
   };
-
+  
   export type resPQ = {
     _?: 'resPQ';
     nonce: int128;
@@ -79,15 +79,15 @@ declare namespace MTP {
   };
   export type destroyAuthKeyOk = {
     _?: 'destroyAuthKeyOk';
-
+    
   };
   export type destroyAuthKeyNone = {
     _?: 'destroyAuthKeyNone';
-
+    
   };
   export type destroyAuthKeyFail = {
     _?: 'destroyAuthKeyFail';
-
+    
   };
   export type msgsAck = {
     _?: 'msgsAck';
@@ -144,11 +144,11 @@ declare namespace MTP {
   };
   export type rpcAnswerUnknown = {
     _?: 'rpcAnswerUnknown';
-
+    
   };
   export type rpcAnswerDroppedRunning = {
     _?: 'rpcAnswerDroppedRunning';
-
+    
   };
   export type rpcAnswerDropped = {
     _?: 'rpcAnswerDropped';
@@ -201,11 +201,11 @@ declare namespace MTP {
   };
   export type inputPeerEmpty = {
     _?: 'inputPeerEmpty';
-
+    
   };
   export type inputPeerSelf = {
     _?: 'inputPeerSelf';
-
+    
   };
   export type inputPeerChat = {
     _?: 'inputPeerChat';
@@ -223,11 +223,11 @@ declare namespace MTP {
   };
   export type inputUserEmpty = {
     _?: 'inputUserEmpty';
-
+    
   };
   export type inputUserSelf = {
     _?: 'inputUserSelf';
-
+    
   };
   export type inputUser = {
     _?: 'inputUser';
@@ -256,7 +256,7 @@ declare namespace MTP {
   };
   export type inputMediaEmpty = {
     _?: 'inputMediaEmpty';
-
+    
   };
   export type inputMediaUploadedPhoto = {
     _?: 'inputMediaUploadedPhoto';
@@ -344,7 +344,7 @@ declare namespace MTP {
   };
   export type inputChatPhotoEmpty = {
     _?: 'inputChatPhotoEmpty';
-
+    
   };
   export type inputChatUploadedPhoto = {
     _?: 'inputChatUploadedPhoto';
@@ -356,7 +356,7 @@ declare namespace MTP {
   };
   export type inputGeoPointEmpty = {
     _?: 'inputGeoPointEmpty';
-
+    
   };
   export type inputGeoPoint = {
     _?: 'inputGeoPoint';
@@ -365,7 +365,7 @@ declare namespace MTP {
   };
   export type inputPhotoEmpty = {
     _?: 'inputPhotoEmpty';
-
+    
   };
   export type inputPhoto = {
     _?: 'inputPhoto';
@@ -410,43 +410,43 @@ declare namespace MTP {
   };
   export type storage$fileUnknown = {
     _?: 'storage.fileUnknown';
-
+    
   };
   export type storage$filePartial = {
     _?: 'storage.filePartial';
-
+    
   };
   export type storage$fileJpeg = {
     _?: 'storage.fileJpeg';
-
+    
   };
   export type storage$fileGif = {
     _?: 'storage.fileGif';
-
+    
   };
   export type storage$filePng = {
     _?: 'storage.filePng';
-
+    
   };
   export type storage$filePdf = {
     _?: 'storage.filePdf';
-
+    
   };
   export type storage$fileMp3 = {
     _?: 'storage.fileMp3';
-
+    
   };
   export type storage$fileMov = {
     _?: 'storage.fileMov';
-
+    
   };
   export type storage$fileMp4 = {
     _?: 'storage.fileMp4';
-
+    
   };
   export type storage$fileWebp = {
     _?: 'storage.fileWebp';
-
+    
   };
   export type fileLocationUnavailable = {
     _?: 'fileLocationUnavailable';
@@ -494,7 +494,7 @@ declare namespace MTP {
   };
   export type userProfilePhotoEmpty = {
     _?: 'userProfilePhotoEmpty';
-
+    
   };
   export type userProfilePhoto = {
     _?: 'userProfilePhoto';
@@ -504,7 +504,7 @@ declare namespace MTP {
   };
   export type userStatusEmpty = {
     _?: 'userStatusEmpty';
-
+    
   };
   export type userStatusOnline = {
     _?: 'userStatusOnline';
@@ -516,15 +516,15 @@ declare namespace MTP {
   };
   export type userStatusRecently = {
     _?: 'userStatusRecently';
-
+    
   };
   export type userStatusLastWeek = {
     _?: 'userStatusLastWeek';
-
+    
   };
   export type userStatusLastMonth = {
     _?: 'userStatusLastMonth';
-
+    
   };
   export type chatEmpty = {
     _?: 'chatEmpty';
@@ -645,7 +645,7 @@ declare namespace MTP {
   };
   export type chatPhotoEmpty = {
     _?: 'chatPhotoEmpty';
-
+    
   };
   export type chatPhoto = {
     _?: 'chatPhoto';
@@ -695,7 +695,7 @@ declare namespace MTP {
   };
   export type messageMediaEmpty = {
     _?: 'messageMediaEmpty';
-
+    
   };
   export type messageMediaPhoto = {
     _?: 'messageMediaPhoto';
@@ -715,7 +715,7 @@ declare namespace MTP {
   };
   export type messageMediaUnsupported = {
     _?: 'messageMediaUnsupported';
-
+    
   };
   export type messageMediaDocument = {
     _?: 'messageMediaDocument';
@@ -753,7 +753,7 @@ declare namespace MTP {
   };
   export type messageActionEmpty = {
     _?: 'messageActionEmpty';
-
+    
   };
   export type messageActionChatCreate = {
     _?: 'messageActionChatCreate';
@@ -770,7 +770,7 @@ declare namespace MTP {
   };
   export type messageActionChatDeletePhoto = {
     _?: 'messageActionChatDeletePhoto';
-
+    
   };
   export type messageActionChatAddUser = {
     _?: 'messageActionChatAddUser';
@@ -799,11 +799,11 @@ declare namespace MTP {
   };
   export type messageActionPinMessage = {
     _?: 'messageActionPinMessage';
-
+    
   };
   export type messageActionHistoryClear = {
     _?: 'messageActionHistoryClear';
-
+    
   };
   export type messageActionGameScore = {
     _?: 'messageActionGameScore';
@@ -880,7 +880,7 @@ declare namespace MTP {
   };
   export type geoPointEmpty = {
     _?: 'geoPointEmpty';
-
+    
   };
   export type geoPoint = {
     _?: 'geoPoint';
@@ -917,23 +917,23 @@ declare namespace MTP {
   };
   export type inputNotifyUsers = {
     _?: 'inputNotifyUsers';
-
+    
   };
   export type inputNotifyChats = {
     _?: 'inputNotifyChats';
-
+    
   };
   export type inputNotifyAll = {
     _?: 'inputNotifyAll';
-
+    
   };
   export type inputPeerNotifyEventsEmpty = {
     _?: 'inputPeerNotifyEventsEmpty';
-
+    
   };
   export type inputPeerNotifyEventsAll = {
     _?: 'inputPeerNotifyEventsAll';
-
+    
   };
   export type inputPeerNotifySettings = {
     _?: 'inputPeerNotifySettings';
@@ -945,15 +945,15 @@ declare namespace MTP {
   };
   export type peerNotifyEventsEmpty = {
     _?: 'peerNotifyEventsEmpty';
-
+    
   };
   export type peerNotifyEventsAll = {
     _?: 'peerNotifyEventsAll';
-
+    
   };
   export type peerNotifySettingsEmpty = {
     _?: 'peerNotifySettingsEmpty';
-
+    
   };
   export type peerNotifySettings = {
     _?: 'peerNotifySettings';
@@ -984,15 +984,15 @@ declare namespace MTP {
   };
   export type inputReportReasonSpam = {
     _?: 'inputReportReasonSpam';
-
+    
   };
   export type inputReportReasonViolence = {
     _?: 'inputReportReasonViolence';
-
+    
   };
   export type inputReportReasonPornography = {
     _?: 'inputReportReasonPornography';
-
+    
   };
   export type inputReportReasonOther = {
     _?: 'inputReportReasonOther';
@@ -1040,7 +1040,7 @@ declare namespace MTP {
   };
   export type contacts$contactsNotModified = {
     _?: 'contacts.contactsNotModified';
-
+    
   };
   export type contacts$contacts = {
     _?: 'contacts.contacts';
@@ -1124,47 +1124,47 @@ declare namespace MTP {
   };
   export type inputMessagesFilterEmpty = {
     _?: 'inputMessagesFilterEmpty';
-
+    
   };
   export type inputMessagesFilterPhotos = {
     _?: 'inputMessagesFilterPhotos';
-
+    
   };
   export type inputMessagesFilterVideo = {
     _?: 'inputMessagesFilterVideo';
-
+    
   };
   export type inputMessagesFilterPhotoVideo = {
     _?: 'inputMessagesFilterPhotoVideo';
-
+    
   };
   export type inputMessagesFilterPhotoVideoDocuments = {
     _?: 'inputMessagesFilterPhotoVideoDocuments';
-
+    
   };
   export type inputMessagesFilterDocument = {
     _?: 'inputMessagesFilterDocument';
-
+    
   };
   export type inputMessagesFilterUrl = {
     _?: 'inputMessagesFilterUrl';
-
+    
   };
   export type inputMessagesFilterGif = {
     _?: 'inputMessagesFilterGif';
-
+    
   };
   export type inputMessagesFilterVoice = {
     _?: 'inputMessagesFilterVoice';
-
+    
   };
   export type inputMessagesFilterMusic = {
     _?: 'inputMessagesFilterMusic';
-
+    
   };
   export type inputMessagesFilterChatPhotos = {
     _?: 'inputMessagesFilterChatPhotos';
-
+    
   };
   export type inputMessagesFilterPhoneCalls = {
     _?: 'inputMessagesFilterPhoneCalls';
@@ -1173,11 +1173,11 @@ declare namespace MTP {
   };
   export type inputMessagesFilterRoundVoice = {
     _?: 'inputMessagesFilterRoundVoice';
-
+    
   };
   export type inputMessagesFilterRoundVideo = {
     _?: 'inputMessagesFilterRoundVideo';
-
+    
   };
   export type updateNewMessage = {
     _?: 'updateNewMessage';
@@ -1394,11 +1394,11 @@ declare namespace MTP {
   };
   export type updateStickerSets = {
     _?: 'updateStickerSets';
-
+    
   };
   export type updateSavedGifs = {
     _?: 'updateSavedGifs';
-
+    
   };
   export type updateBotInlineQuery = {
     _?: 'updateBotInlineQuery';
@@ -1468,19 +1468,19 @@ declare namespace MTP {
   };
   export type updateReadFeaturedStickers = {
     _?: 'updateReadFeaturedStickers';
-
+    
   };
   export type updateRecentStickers = {
     _?: 'updateRecentStickers';
-
+    
   };
   export type updateConfig = {
     _?: 'updateConfig';
-
+    
   };
   export type updatePtsChanged = {
     _?: 'updatePtsChanged';
-
+    
   };
   export type updateChannelWebPage = {
     _?: 'updateChannelWebPage';
@@ -1534,7 +1534,7 @@ declare namespace MTP {
   };
   export type updateLangPackTooLong = {
     _?: 'updateLangPackTooLong';
-
+    
   };
   export type updateLangPack = {
     _?: 'updateLangPack';
@@ -1577,7 +1577,7 @@ declare namespace MTP {
   };
   export type updatesTooLong = {
     _?: 'updatesTooLong';
-
+    
   };
   export type updateShortMessage = {
     _?: 'updateShortMessage';
@@ -1740,7 +1740,7 @@ declare namespace MTP {
   };
   export type help$noAppUpdate = {
     _?: 'help.noAppUpdate';
-
+    
   };
   export type help$inviteText = {
     _?: 'help.inviteText';
@@ -1788,7 +1788,7 @@ declare namespace MTP {
   };
   export type encryptedFileEmpty = {
     _?: 'encryptedFileEmpty';
-
+    
   };
   export type encryptedFile = {
     _?: 'encryptedFile';
@@ -1800,7 +1800,7 @@ declare namespace MTP {
   };
   export type inputEncryptedFileEmpty = {
     _?: 'inputEncryptedFileEmpty';
-
+    
   };
   export type inputEncryptedFileUploaded = {
     _?: 'inputEncryptedFileUploaded';
@@ -1857,7 +1857,7 @@ declare namespace MTP {
   };
   export type inputDocumentEmpty = {
     _?: 'inputDocumentEmpty';
-
+    
   };
   export type inputDocument = {
     _?: 'inputDocument';
@@ -1891,27 +1891,27 @@ declare namespace MTP {
   };
   export type notifyUsers = {
     _?: 'notifyUsers';
-
+    
   };
   export type notifyChats = {
     _?: 'notifyChats';
-
+    
   };
   export type notifyAll = {
     _?: 'notifyAll';
-
+    
   };
   export type sendMessageTypingAction = {
     _?: 'sendMessageTypingAction';
-
+    
   };
   export type sendMessageCancelAction = {
     _?: 'sendMessageCancelAction';
-
+    
   };
   export type sendMessageRecordVideoAction = {
     _?: 'sendMessageRecordVideoAction';
-
+    
   };
   export type sendMessageUploadVideoAction = {
     _?: 'sendMessageUploadVideoAction';
@@ -1919,7 +1919,7 @@ declare namespace MTP {
   };
   export type sendMessageRecordAudioAction = {
     _?: 'sendMessageRecordAudioAction';
-
+    
   };
   export type sendMessageUploadAudioAction = {
     _?: 'sendMessageUploadAudioAction';
@@ -1935,19 +1935,19 @@ declare namespace MTP {
   };
   export type sendMessageGeoLocationAction = {
     _?: 'sendMessageGeoLocationAction';
-
+    
   };
   export type sendMessageChooseContactAction = {
     _?: 'sendMessageChooseContactAction';
-
+    
   };
   export type sendMessageGamePlayAction = {
     _?: 'sendMessageGamePlayAction';
-
+    
   };
   export type sendMessageRecordRoundAction = {
     _?: 'sendMessageRecordRoundAction';
-
+    
   };
   export type sendMessageUploadRoundAction = {
     _?: 'sendMessageUploadRoundAction';
@@ -1961,35 +1961,35 @@ declare namespace MTP {
   };
   export type inputPrivacyKeyStatusTimestamp = {
     _?: 'inputPrivacyKeyStatusTimestamp';
-
+    
   };
   export type inputPrivacyKeyChatInvite = {
     _?: 'inputPrivacyKeyChatInvite';
-
+    
   };
   export type inputPrivacyKeyPhoneCall = {
     _?: 'inputPrivacyKeyPhoneCall';
-
+    
   };
   export type privacyKeyStatusTimestamp = {
     _?: 'privacyKeyStatusTimestamp';
-
+    
   };
   export type privacyKeyChatInvite = {
     _?: 'privacyKeyChatInvite';
-
+    
   };
   export type privacyKeyPhoneCall = {
     _?: 'privacyKeyPhoneCall';
-
+    
   };
   export type inputPrivacyValueAllowContacts = {
     _?: 'inputPrivacyValueAllowContacts';
-
+    
   };
   export type inputPrivacyValueAllowAll = {
     _?: 'inputPrivacyValueAllowAll';
-
+    
   };
   export type inputPrivacyValueAllowUsers = {
     _?: 'inputPrivacyValueAllowUsers';
@@ -1997,11 +1997,11 @@ declare namespace MTP {
   };
   export type inputPrivacyValueDisallowContacts = {
     _?: 'inputPrivacyValueDisallowContacts';
-
+    
   };
   export type inputPrivacyValueDisallowAll = {
     _?: 'inputPrivacyValueDisallowAll';
-
+    
   };
   export type inputPrivacyValueDisallowUsers = {
     _?: 'inputPrivacyValueDisallowUsers';
@@ -2009,11 +2009,11 @@ declare namespace MTP {
   };
   export type privacyValueAllowContacts = {
     _?: 'privacyValueAllowContacts';
-
+    
   };
   export type privacyValueAllowAll = {
     _?: 'privacyValueAllowAll';
-
+    
   };
   export type privacyValueAllowUsers = {
     _?: 'privacyValueAllowUsers';
@@ -2021,11 +2021,11 @@ declare namespace MTP {
   };
   export type privacyValueDisallowContacts = {
     _?: 'privacyValueDisallowContacts';
-
+    
   };
   export type privacyValueDisallowAll = {
     _?: 'privacyValueDisallowAll';
-
+    
   };
   export type privacyValueDisallowUsers = {
     _?: 'privacyValueDisallowUsers';
@@ -2047,7 +2047,7 @@ declare namespace MTP {
   };
   export type documentAttributeAnimated = {
     _?: 'documentAttributeAnimated';
-
+    
   };
   export type documentAttributeSticker = {
     _?: 'documentAttributeSticker';
@@ -2080,11 +2080,11 @@ declare namespace MTP {
   };
   export type documentAttributeHasStickers = {
     _?: 'documentAttributeHasStickers';
-
+    
   };
   export type messages$stickersNotModified = {
     _?: 'messages.stickersNotModified';
-
+    
   };
   export type messages$stickers = {
     _?: 'messages.stickers';
@@ -2098,7 +2098,7 @@ declare namespace MTP {
   };
   export type messages$allStickersNotModified = {
     _?: 'messages.allStickersNotModified';
-
+    
   };
   export type messages$allStickers = {
     _?: 'messages.allStickers';
@@ -2117,19 +2117,19 @@ declare namespace MTP {
   };
   export type contactLinkUnknown = {
     _?: 'contactLinkUnknown';
-
+    
   };
   export type contactLinkNone = {
     _?: 'contactLinkNone';
-
+    
   };
   export type contactLinkHasPhone = {
     _?: 'contactLinkHasPhone';
-
+    
   };
   export type contactLinkContact = {
     _?: 'contactLinkContact';
-
+    
   };
   export type webPageEmpty = {
     _?: 'webPageEmpty';
@@ -2163,7 +2163,7 @@ declare namespace MTP {
   };
   export type webPageNotModified = {
     _?: 'webPageNotModified';
-
+    
   };
   export type authorization = {
     _?: 'authorization';
@@ -2221,7 +2221,7 @@ declare namespace MTP {
   };
   export type chatInviteEmpty = {
     _?: 'chatInviteEmpty';
-
+    
   };
   export type chatInviteExported = {
     _?: 'chatInviteExported';
@@ -2245,7 +2245,7 @@ declare namespace MTP {
   };
   export type inputStickerSetEmpty = {
     _?: 'inputStickerSetEmpty';
-
+    
   };
   export type inputStickerSetID = {
     _?: 'inputStickerSetID';
@@ -2422,7 +2422,7 @@ declare namespace MTP {
   };
   export type inputChannelEmpty = {
     _?: 'inputChannelEmpty';
-
+    
   };
   export type inputChannel = {
     _?: 'inputChannel';
@@ -2474,7 +2474,7 @@ declare namespace MTP {
   };
   export type channelMessagesFilterEmpty = {
     _?: 'channelMessagesFilterEmpty';
-
+    
   };
   export type channelMessagesFilter = {
     _?: 'channelMessagesFilter';
@@ -2517,31 +2517,31 @@ declare namespace MTP {
   };
   export type channelParticipantsRecent = {
     _?: 'channelParticipantsRecent';
-
+    
   };
   export type channelParticipantsAdmins = {
     _?: 'channelParticipantsAdmins';
-
+    
   };
   export type channelParticipantsKicked = {
     _?: 'channelParticipantsKicked';
-
+    
   };
   export type channelParticipantsBots = {
     _?: 'channelParticipantsBots';
-
+    
   };
   export type channelRoleEmpty = {
     _?: 'channelRoleEmpty';
-
+    
   };
   export type channelRoleModerator = {
     _?: 'channelRoleModerator';
-
+    
   };
   export type channelRoleEditor = {
     _?: 'channelRoleEditor';
-
+    
   };
   export type channels$channelParticipants = {
     _?: 'channels.channelParticipants';
@@ -2580,7 +2580,7 @@ declare namespace MTP {
   };
   export type messages$savedGifsNotModified = {
     _?: 'messages.savedGifsNotModified';
-
+    
   };
   export type messages$savedGifs = {
     _?: 'messages.savedGifs';
@@ -2758,15 +2758,15 @@ declare namespace MTP {
   };
   export type auth$codeTypeSms = {
     _?: 'auth.codeTypeSms';
-
+    
   };
   export type auth$codeTypeCall = {
     _?: 'auth.codeTypeCall';
-
+    
   };
   export type auth$codeTypeFlashCall = {
     _?: 'auth.codeTypeFlashCall';
-
+    
   };
   export type auth$sentCodeTypeApp = {
     _?: 'auth.sentCodeTypeApp';
@@ -2824,23 +2824,23 @@ declare namespace MTP {
   };
   export type topPeerCategoryBotsPM = {
     _?: 'topPeerCategoryBotsPM';
-
+    
   };
   export type topPeerCategoryBotsInline = {
     _?: 'topPeerCategoryBotsInline';
-
+    
   };
   export type topPeerCategoryCorrespondents = {
     _?: 'topPeerCategoryCorrespondents';
-
+    
   };
   export type topPeerCategoryGroups = {
     _?: 'topPeerCategoryGroups';
-
+    
   };
   export type topPeerCategoryChannels = {
     _?: 'topPeerCategoryChannels';
-
+    
   };
   export type topPeerCategoryPeers = {
     _?: 'topPeerCategoryPeers';
@@ -2850,7 +2850,7 @@ declare namespace MTP {
   };
   export type contacts$topPeersNotModified = {
     _?: 'contacts.topPeersNotModified';
-
+    
   };
   export type contacts$topPeers = {
     _?: 'contacts.topPeers';
@@ -2860,7 +2860,7 @@ declare namespace MTP {
   };
   export type draftMessageEmpty = {
     _?: 'draftMessageEmpty';
-
+    
   };
   export type draftMessage = {
     _?: 'draftMessage';
@@ -2873,7 +2873,7 @@ declare namespace MTP {
   };
   export type messages$featuredStickersNotModified = {
     _?: 'messages.featuredStickersNotModified';
-
+    
   };
   export type messages$featuredStickers = {
     _?: 'messages.featuredStickers';
@@ -2883,7 +2883,7 @@ declare namespace MTP {
   };
   export type messages$recentStickersNotModified = {
     _?: 'messages.recentStickersNotModified';
-
+    
   };
   export type messages$recentStickers = {
     _?: 'messages.recentStickers';
@@ -2897,7 +2897,7 @@ declare namespace MTP {
   };
   export type messages$stickerSetInstallResultSuccess = {
     _?: 'messages.stickerSetInstallResultSuccess';
-
+    
   };
   export type messages$stickerSetInstallResultArchive = {
     _?: 'messages.stickerSetInstallResultArchive';
@@ -2962,7 +2962,7 @@ declare namespace MTP {
   };
   export type textEmpty = {
     _?: 'textEmpty';
-
+    
   };
   export type textPlain = {
     _?: 'textPlain';
@@ -3005,7 +3005,7 @@ declare namespace MTP {
   };
   export type pageBlockUnsupported = {
     _?: 'pageBlockUnsupported';
-
+    
   };
   export type pageBlockTitle = {
     _?: 'pageBlockTitle';
@@ -3043,7 +3043,7 @@ declare namespace MTP {
   };
   export type pageBlockDivider = {
     _?: 'pageBlockDivider';
-
+    
   };
   export type pageBlockAnchor = {
     _?: 'pageBlockAnchor';
@@ -3131,19 +3131,19 @@ declare namespace MTP {
   };
   export type phoneCallDiscardReasonMissed = {
     _?: 'phoneCallDiscardReasonMissed';
-
+    
   };
   export type phoneCallDiscardReasonDisconnect = {
     _?: 'phoneCallDiscardReasonDisconnect';
-
+    
   };
   export type phoneCallDiscardReasonHangup = {
     _?: 'phoneCallDiscardReasonHangup';
-
+    
   };
   export type phoneCallDiscardReasonBusy = {
     _?: 'phoneCallDiscardReasonBusy';
-
+    
   };
   export type dataJSON = {
     _?: 'dataJSON';
@@ -3462,26 +3462,83 @@ declare namespace MTP {
   export type InputUser = inputUserEmpty | inputUserSelf | inputUser;
   export type InputContact = inputPhoneContact;
   export type InputFile = inputFile | inputFileBig;
-  export type InputMedia = inputMediaEmpty | inputMediaUploadedPhoto | inputMediaPhoto | inputMediaGeoPoint | inputMediaContact | inputMediaUploadedDocument | inputMediaUploadedThumbDocument | inputMediaDocument | inputMediaVenue | inputMediaGifExternal | inputMediaPhotoExternal | inputMediaDocumentExternal | inputMediaGame | inputMediaInvoice;
+  export type InputMedia =
+    inputMediaEmpty
+    | inputMediaUploadedPhoto
+    | inputMediaPhoto
+    | inputMediaGeoPoint
+    | inputMediaContact
+    | inputMediaUploadedDocument
+    | inputMediaUploadedThumbDocument
+    | inputMediaDocument
+    | inputMediaVenue
+    | inputMediaGifExternal
+    | inputMediaPhotoExternal
+    | inputMediaDocumentExternal
+    | inputMediaGame
+    | inputMediaInvoice;
   export type InputChatPhoto = inputChatPhotoEmpty | inputChatUploadedPhoto | inputChatPhoto;
   export type InputGeoPoint = inputGeoPointEmpty | inputGeoPoint;
   export type InputPhoto = inputPhotoEmpty | inputPhoto;
   export type InputFileLocation = inputFileLocation | inputEncryptedFileLocation | inputDocumentFileLocation;
   export type InputAppEvent = inputAppEvent;
   export type Peer = peerUser | peerChat | peerChannel;
-  export type storage$FileType = storage$fileUnknown | storage$filePartial | storage$fileJpeg | storage$fileGif | storage$filePng | storage$filePdf | storage$fileMp3 | storage$fileMov | storage$fileMp4 | storage$fileWebp;
+  export type storage$FileType =
+    storage$fileUnknown
+    | storage$filePartial
+    | storage$fileJpeg
+    | storage$fileGif
+    | storage$filePng
+    | storage$filePdf
+    | storage$fileMp3
+    | storage$fileMov
+    | storage$fileMp4
+    | storage$fileWebp;
   export type FileLocation = fileLocationUnavailable | fileLocation;
   export type User = userEmpty | user;
   export type UserProfilePhoto = userProfilePhotoEmpty | userProfilePhoto;
-  export type UserStatus = userStatusEmpty | userStatusOnline | userStatusOffline | userStatusRecently | userStatusLastWeek | userStatusLastMonth;
+  export type UserStatus =
+    userStatusEmpty
+    | userStatusOnline
+    | userStatusOffline
+    | userStatusRecently
+    | userStatusLastWeek
+    | userStatusLastMonth;
   export type Chat = chatEmpty | chat | chatForbidden | channel | channelForbidden;
   export type ChatFull = chatFull | channelFull;
   export type ChatParticipant = chatParticipant | chatParticipantCreator | chatParticipantAdmin;
   export type ChatParticipants = chatParticipantsForbidden | chatParticipants;
   export type ChatPhoto = chatPhotoEmpty | chatPhoto;
   export type Message = messageEmpty | message | messageService;
-  export type MessageMedia = messageMediaEmpty | messageMediaPhoto | messageMediaGeo | messageMediaContact | messageMediaUnsupported | messageMediaDocument | messageMediaWebPage | messageMediaVenue | messageMediaGame | messageMediaInvoice;
-  export type MessageAction = messageActionEmpty | messageActionChatCreate | messageActionChatEditTitle | messageActionChatEditPhoto | messageActionChatDeletePhoto | messageActionChatAddUser | messageActionChatDeleteUser | messageActionChatJoinedByLink | messageActionChannelCreate | messageActionChatMigrateTo | messageActionChannelMigrateFrom | messageActionPinMessage | messageActionHistoryClear | messageActionGameScore | messageActionPaymentSentMe | messageActionPaymentSent | messageActionPhoneCall;
+  export type MessageMedia =
+    messageMediaEmpty
+    | messageMediaPhoto
+    | messageMediaGeo
+    | messageMediaContact
+    | messageMediaUnsupported
+    | messageMediaDocument
+    | messageMediaWebPage
+    | messageMediaVenue
+    | messageMediaGame
+    | messageMediaInvoice;
+  export type MessageAction =
+    messageActionEmpty
+    | messageActionChatCreate
+    | messageActionChatEditTitle
+    | messageActionChatEditPhoto
+    | messageActionChatDeletePhoto
+    | messageActionChatAddUser
+    | messageActionChatDeleteUser
+    | messageActionChatJoinedByLink
+    | messageActionChannelCreate
+    | messageActionChatMigrateTo
+    | messageActionChannelMigrateFrom
+    | messageActionPinMessage
+    | messageActionHistoryClear
+    | messageActionGameScore
+    | messageActionPaymentSentMe
+    | messageActionPaymentSent
+    | messageActionPhoneCall;
   export type Dialog = dialog;
   export type Photo = photoEmpty | photo;
   export type PhotoSize = photoSizeEmpty | photoSize | photoCachedSize;
@@ -3497,7 +3554,11 @@ declare namespace MTP {
   export type PeerNotifySettings = peerNotifySettingsEmpty | peerNotifySettings;
   export type PeerSettings = peerSettings;
   export type WallPaper = wallPaper | wallPaperSolid;
-  export type ReportReason = inputReportReasonSpam | inputReportReasonViolence | inputReportReasonPornography | inputReportReasonOther;
+  export type ReportReason =
+    inputReportReasonSpam
+    | inputReportReasonViolence
+    | inputReportReasonPornography
+    | inputReportReasonOther;
   export type UserFull = userFull;
   export type Contact = contact;
   export type ImportedContact = importedContact;
@@ -3512,11 +3573,98 @@ declare namespace MTP {
   export type messages$Chats = messages$chats | messages$chatsSlice;
   export type messages$ChatFull = messages$chatFull;
   export type messages$AffectedHistory = messages$affectedHistory;
-  export type MessagesFilter = inputMessagesFilterEmpty | inputMessagesFilterPhotos | inputMessagesFilterVideo | inputMessagesFilterPhotoVideo | inputMessagesFilterPhotoVideoDocuments | inputMessagesFilterDocument | inputMessagesFilterUrl | inputMessagesFilterGif | inputMessagesFilterVoice | inputMessagesFilterMusic | inputMessagesFilterChatPhotos | inputMessagesFilterPhoneCalls | inputMessagesFilterRoundVoice | inputMessagesFilterRoundVideo;
-  export type Update = updateNewMessage | updateMessageID | updateDeleteMessages | updateUserTyping | updateChatUserTyping | updateChatParticipants | updateUserStatus | updateUserName | updateUserPhoto | updateContactRegistered | updateContactLink | updateNewEncryptedMessage | updateEncryptedChatTyping | updateEncryption | updateEncryptedMessagesRead | updateChatParticipantAdd | updateChatParticipantDelete | updateDcOptions | updateUserBlocked | updateNotifySettings | updateServiceNotification | updatePrivacy | updateUserPhone | updateReadHistoryInbox | updateReadHistoryOutbox | updateWebPage | updateReadMessagesContents | updateChannelTooLong | updateChannel | updateNewChannelMessage | updateReadChannelInbox | updateDeleteChannelMessages | updateChannelMessageViews | updateChatAdmins | updateChatParticipantAdmin | updateNewStickerSet | updateStickerSetsOrder | updateStickerSets | updateSavedGifs | updateBotInlineQuery | updateBotInlineSend | updateEditChannelMessage | updateChannelPinnedMessage | updateBotCallbackQuery | updateEditMessage | updateInlineBotCallbackQuery | updateReadChannelOutbox | updateDraftMessage | updateReadFeaturedStickers | updateRecentStickers | updateConfig | updatePtsChanged | updateChannelWebPage | updateDialogPinned | updatePinnedDialogs | updateBotWebhookJSON | updateBotWebhookJSONQuery | updateBotShippingQuery | updateBotPrecheckoutQuery | updatePhoneCall | updateLangPackTooLong | updateLangPack;
+  export type MessagesFilter =
+    inputMessagesFilterEmpty
+    | inputMessagesFilterPhotos
+    | inputMessagesFilterVideo
+    | inputMessagesFilterPhotoVideo
+    | inputMessagesFilterPhotoVideoDocuments
+    | inputMessagesFilterDocument
+    | inputMessagesFilterUrl
+    | inputMessagesFilterGif
+    | inputMessagesFilterVoice
+    | inputMessagesFilterMusic
+    | inputMessagesFilterChatPhotos
+    | inputMessagesFilterPhoneCalls
+    | inputMessagesFilterRoundVoice
+    | inputMessagesFilterRoundVideo;
+  export type Update =
+    updateNewMessage
+    | updateMessageID
+    | updateDeleteMessages
+    | updateUserTyping
+    | updateChatUserTyping
+    | updateChatParticipants
+    | updateUserStatus
+    | updateUserName
+    | updateUserPhoto
+    | updateContactRegistered
+    | updateContactLink
+    | updateNewEncryptedMessage
+    | updateEncryptedChatTyping
+    | updateEncryption
+    | updateEncryptedMessagesRead
+    | updateChatParticipantAdd
+    | updateChatParticipantDelete
+    | updateDcOptions
+    | updateUserBlocked
+    | updateNotifySettings
+    | updateServiceNotification
+    | updatePrivacy
+    | updateUserPhone
+    | updateReadHistoryInbox
+    | updateReadHistoryOutbox
+    | updateWebPage
+    | updateReadMessagesContents
+    | updateChannelTooLong
+    | updateChannel
+    | updateNewChannelMessage
+    | updateReadChannelInbox
+    | updateDeleteChannelMessages
+    | updateChannelMessageViews
+    | updateChatAdmins
+    | updateChatParticipantAdmin
+    | updateNewStickerSet
+    | updateStickerSetsOrder
+    | updateStickerSets
+    | updateSavedGifs
+    | updateBotInlineQuery
+    | updateBotInlineSend
+    | updateEditChannelMessage
+    | updateChannelPinnedMessage
+    | updateBotCallbackQuery
+    | updateEditMessage
+    | updateInlineBotCallbackQuery
+    | updateReadChannelOutbox
+    | updateDraftMessage
+    | updateReadFeaturedStickers
+    | updateRecentStickers
+    | updateConfig
+    | updatePtsChanged
+    | updateChannelWebPage
+    | updateDialogPinned
+    | updatePinnedDialogs
+    | updateBotWebhookJSON
+    | updateBotWebhookJSONQuery
+    | updateBotShippingQuery
+    | updateBotPrecheckoutQuery
+    | updatePhoneCall
+    | updateLangPackTooLong
+    | updateLangPack;
   export type updates$State = updates$state;
-  export type updates$Difference = updates$differenceEmpty | updates$difference | updates$differenceSlice | updates$differenceTooLong;
-  export type Updates = updatesTooLong | updateShortMessage | updateShortChatMessage | updateShort | updatesCombined | updates | updateShortSentMessage;
+  export type updates$Difference =
+    updates$differenceEmpty
+    | updates$difference
+    | updates$differenceSlice
+    | updates$differenceTooLong;
+  export type Updates =
+    updatesTooLong
+    | updateShortMessage
+    | updateShortChatMessage
+    | updateShort
+    | updatesCombined
+    | updates
+    | updateShortSentMessage;
   export type photos$Photos = photos$photos | photos$photosSlice;
   export type photos$Photo = photos$photo;
   export type upload$File = upload$file | upload$fileCdnRedirect;
@@ -3525,10 +3673,19 @@ declare namespace MTP {
   export type NearestDc = nearestDc;
   export type help$AppUpdate = help$appUpdate | help$noAppUpdate;
   export type help$InviteText = help$inviteText;
-  export type EncryptedChat = encryptedChatEmpty | encryptedChatWaiting | encryptedChatRequested | encryptedChat | encryptedChatDiscarded;
+  export type EncryptedChat =
+    encryptedChatEmpty
+    | encryptedChatWaiting
+    | encryptedChatRequested
+    | encryptedChat
+    | encryptedChatDiscarded;
   export type InputEncryptedChat = inputEncryptedChat;
   export type EncryptedFile = encryptedFileEmpty | encryptedFile;
-  export type InputEncryptedFile = inputEncryptedFileEmpty | inputEncryptedFileUploaded | inputEncryptedFile | inputEncryptedFileBigUploaded;
+  export type InputEncryptedFile =
+    inputEncryptedFileEmpty
+    | inputEncryptedFileUploaded
+    | inputEncryptedFile
+    | inputEncryptedFileBigUploaded;
   export type EncryptedMessage = encryptedMessage | encryptedMessageService;
   export type messages$DhConfig = messages$dhConfigNotModified | messages$dhConfig;
   export type messages$SentEncryptedMessage = messages$sentEncryptedMessage | messages$sentEncryptedFile;
@@ -3536,15 +3693,47 @@ declare namespace MTP {
   export type Document = documentEmpty | document;
   export type help$Support = help$support;
   export type NotifyPeer = notifyPeer | notifyUsers | notifyChats | notifyAll;
-  export type SendMessageAction = sendMessageTypingAction | sendMessageCancelAction | sendMessageRecordVideoAction | sendMessageUploadVideoAction | sendMessageRecordAudioAction | sendMessageUploadAudioAction | sendMessageUploadPhotoAction | sendMessageUploadDocumentAction | sendMessageGeoLocationAction | sendMessageChooseContactAction | sendMessageGamePlayAction | sendMessageRecordRoundAction | sendMessageUploadRoundAction;
+  export type SendMessageAction =
+    sendMessageTypingAction
+    | sendMessageCancelAction
+    | sendMessageRecordVideoAction
+    | sendMessageUploadVideoAction
+    | sendMessageRecordAudioAction
+    | sendMessageUploadAudioAction
+    | sendMessageUploadPhotoAction
+    | sendMessageUploadDocumentAction
+    | sendMessageGeoLocationAction
+    | sendMessageChooseContactAction
+    | sendMessageGamePlayAction
+    | sendMessageRecordRoundAction
+    | sendMessageUploadRoundAction;
   export type contacts$Found = contacts$found;
   export type InputPrivacyKey = inputPrivacyKeyStatusTimestamp | inputPrivacyKeyChatInvite | inputPrivacyKeyPhoneCall;
   export type PrivacyKey = privacyKeyStatusTimestamp | privacyKeyChatInvite | privacyKeyPhoneCall;
-  export type InputPrivacyRule = inputPrivacyValueAllowContacts | inputPrivacyValueAllowAll | inputPrivacyValueAllowUsers | inputPrivacyValueDisallowContacts | inputPrivacyValueDisallowAll | inputPrivacyValueDisallowUsers;
-  export type PrivacyRule = privacyValueAllowContacts | privacyValueAllowAll | privacyValueAllowUsers | privacyValueDisallowContacts | privacyValueDisallowAll | privacyValueDisallowUsers;
+  export type InputPrivacyRule =
+    inputPrivacyValueAllowContacts
+    | inputPrivacyValueAllowAll
+    | inputPrivacyValueAllowUsers
+    | inputPrivacyValueDisallowContacts
+    | inputPrivacyValueDisallowAll
+    | inputPrivacyValueDisallowUsers;
+  export type PrivacyRule =
+    privacyValueAllowContacts
+    | privacyValueAllowAll
+    | privacyValueAllowUsers
+    | privacyValueDisallowContacts
+    | privacyValueDisallowAll
+    | privacyValueDisallowUsers;
   export type account$PrivacyRules = account$privacyRules;
   export type AccountDaysTTL = accountDaysTTL;
-  export type DocumentAttribute = documentAttributeImageSize | documentAttributeAnimated | documentAttributeSticker | documentAttributeVideo | documentAttributeAudio | documentAttributeFilename | documentAttributeHasStickers;
+  export type DocumentAttribute =
+    documentAttributeImageSize
+    | documentAttributeAnimated
+    | documentAttributeSticker
+    | documentAttributeVideo
+    | documentAttributeAudio
+    | documentAttributeFilename
+    | documentAttributeHasStickers;
   export type messages$Stickers = messages$stickersNotModified | messages$stickers;
   export type StickerPack = stickerPack;
   export type messages$AllStickers = messages$allStickersNotModified | messages$allStickers;
@@ -3566,17 +3755,51 @@ declare namespace MTP {
   export type messages$StickerSet = messages$stickerSet;
   export type BotCommand = botCommand;
   export type BotInfo = botInfo;
-  export type KeyboardButton = keyboardButton | keyboardButtonUrl | keyboardButtonCallback | keyboardButtonRequestPhone | keyboardButtonRequestGeoLocation | keyboardButtonSwitchInline | keyboardButtonGame | keyboardButtonBuy;
+  export type KeyboardButton =
+    keyboardButton
+    | keyboardButtonUrl
+    | keyboardButtonCallback
+    | keyboardButtonRequestPhone
+    | keyboardButtonRequestGeoLocation
+    | keyboardButtonSwitchInline
+    | keyboardButtonGame
+    | keyboardButtonBuy;
   export type KeyboardButtonRow = keyboardButtonRow;
   export type ReplyMarkup = replyKeyboardHide | replyKeyboardForceReply | replyKeyboardMarkup | replyInlineMarkup;
-  export type MessageEntity = messageEntityUnknown | messageEntityMention | messageEntityHashtag | messageEntityBotCommand | messageEntityUrl | messageEntityEmail | messageEntityBold | messageEntityItalic | messageEntityCode | messageEntityPre | messageEntityTextUrl | messageEntityMentionName | inputMessageEntityMentionName;
+  export type MessageEntity =
+    messageEntityUnknown
+    | messageEntityMention
+    | messageEntityHashtag
+    | messageEntityBotCommand
+    | messageEntityUrl
+    | messageEntityEmail
+    | messageEntityBold
+    | messageEntityItalic
+    | messageEntityCode
+    | messageEntityPre
+    | messageEntityTextUrl
+    | messageEntityMentionName
+    | inputMessageEntityMentionName;
   export type InputChannel = inputChannelEmpty | inputChannel;
   export type contacts$ResolvedPeer = contacts$resolvedPeer;
   export type MessageRange = messageRange;
-  export type updates$ChannelDifference = updates$channelDifferenceEmpty | updates$channelDifferenceTooLong | updates$channelDifference;
+  export type updates$ChannelDifference =
+    updates$channelDifferenceEmpty
+    | updates$channelDifferenceTooLong
+    | updates$channelDifference;
   export type ChannelMessagesFilter = channelMessagesFilterEmpty | channelMessagesFilter;
-  export type ChannelParticipant = channelParticipant | channelParticipantSelf | channelParticipantModerator | channelParticipantEditor | channelParticipantKicked | channelParticipantCreator;
-  export type ChannelParticipantsFilter = channelParticipantsRecent | channelParticipantsAdmins | channelParticipantsKicked | channelParticipantsBots;
+  export type ChannelParticipant =
+    channelParticipant
+    | channelParticipantSelf
+    | channelParticipantModerator
+    | channelParticipantEditor
+    | channelParticipantKicked
+    | channelParticipantCreator;
+  export type ChannelParticipantsFilter =
+    channelParticipantsRecent
+    | channelParticipantsAdmins
+    | channelParticipantsKicked
+    | channelParticipantsBots;
   export type ChannelParticipantRole = channelRoleEmpty | channelRoleModerator | channelRoleEditor;
   export type channels$ChannelParticipants = channels$channelParticipants;
   export type channels$ChannelParticipant = channels$channelParticipant;
@@ -3584,29 +3807,55 @@ declare namespace MTP {
   export type FoundGif = foundGif | foundGifCached;
   export type messages$FoundGifs = messages$foundGifs;
   export type messages$SavedGifs = messages$savedGifsNotModified | messages$savedGifs;
-  export type InputBotInlineMessage = inputBotInlineMessageMediaAuto | inputBotInlineMessageText | inputBotInlineMessageMediaGeo | inputBotInlineMessageMediaVenue | inputBotInlineMessageMediaContact | inputBotInlineMessageGame;
-  export type InputBotInlineResult = inputBotInlineResult | inputBotInlineResultPhoto | inputBotInlineResultDocument | inputBotInlineResultGame;
-  export type BotInlineMessage = botInlineMessageMediaAuto | botInlineMessageText | botInlineMessageMediaGeo | botInlineMessageMediaVenue | botInlineMessageMediaContact;
+  export type InputBotInlineMessage =
+    inputBotInlineMessageMediaAuto
+    | inputBotInlineMessageText
+    | inputBotInlineMessageMediaGeo
+    | inputBotInlineMessageMediaVenue
+    | inputBotInlineMessageMediaContact
+    | inputBotInlineMessageGame;
+  export type InputBotInlineResult =
+    inputBotInlineResult
+    | inputBotInlineResultPhoto
+    | inputBotInlineResultDocument
+    | inputBotInlineResultGame;
+  export type BotInlineMessage =
+    botInlineMessageMediaAuto
+    | botInlineMessageText
+    | botInlineMessageMediaGeo
+    | botInlineMessageMediaVenue
+    | botInlineMessageMediaContact;
   export type BotInlineResult = botInlineResult | botInlineMediaResult;
   export type messages$BotResults = messages$botResults;
   export type ExportedMessageLink = exportedMessageLink;
   export type MessageFwdHeader = messageFwdHeader;
   export type auth$CodeType = auth$codeTypeSms | auth$codeTypeCall | auth$codeTypeFlashCall;
-  export type auth$SentCodeType = auth$sentCodeTypeApp | auth$sentCodeTypeSms | auth$sentCodeTypeCall | auth$sentCodeTypeFlashCall;
+  export type auth$SentCodeType =
+    auth$sentCodeTypeApp
+    | auth$sentCodeTypeSms
+    | auth$sentCodeTypeCall
+    | auth$sentCodeTypeFlashCall;
   export type messages$BotCallbackAnswer = messages$botCallbackAnswer;
   export type messages$MessageEditData = messages$messageEditData;
   export type InputBotInlineMessageID = inputBotInlineMessageID;
   export type InlineBotSwitchPM = inlineBotSwitchPM;
   export type messages$PeerDialogs = messages$peerDialogs;
   export type TopPeer = topPeer;
-  export type TopPeerCategory = topPeerCategoryBotsPM | topPeerCategoryBotsInline | topPeerCategoryCorrespondents | topPeerCategoryGroups | topPeerCategoryChannels;
+  export type TopPeerCategory =
+    topPeerCategoryBotsPM
+    | topPeerCategoryBotsInline
+    | topPeerCategoryCorrespondents
+    | topPeerCategoryGroups
+    | topPeerCategoryChannels;
   export type TopPeerCategoryPeers = topPeerCategoryPeers;
   export type contacts$TopPeers = contacts$topPeersNotModified | contacts$topPeers;
   export type DraftMessage = draftMessageEmpty | draftMessage;
   export type messages$FeaturedStickers = messages$featuredStickersNotModified | messages$featuredStickers;
   export type messages$RecentStickers = messages$recentStickersNotModified | messages$recentStickers;
   export type messages$ArchivedStickers = messages$archivedStickers;
-  export type messages$StickerSetInstallResult = messages$stickerSetInstallResultSuccess | messages$stickerSetInstallResultArchive;
+  export type messages$StickerSetInstallResult =
+    messages$stickerSetInstallResultSuccess
+    | messages$stickerSetInstallResultArchive;
   export type StickerSetCovered = stickerSetCovered | stickerSetMultiCovered;
   export type MaskCoords = maskCoords;
   export type InputStickeredMedia = inputStickeredMediaPhoto | inputStickeredMediaDocument;
@@ -3614,10 +3863,46 @@ declare namespace MTP {
   export type InputGame = inputGameID | inputGameShortName;
   export type HighScore = highScore;
   export type messages$HighScores = messages$highScores;
-  export type RichText = textEmpty | textPlain | textBold | textItalic | textUnderline | textStrike | textFixed | textUrl | textEmail | textConcat;
-  export type PageBlock = pageBlockUnsupported | pageBlockTitle | pageBlockSubtitle | pageBlockAuthorDate | pageBlockHeader | pageBlockSubheader | pageBlockParagraph | pageBlockPreformatted | pageBlockFooter | pageBlockDivider | pageBlockAnchor | pageBlockList | pageBlockBlockquote | pageBlockPullquote | pageBlockPhoto | pageBlockVideo | pageBlockCover | pageBlockEmbed | pageBlockEmbedPost | pageBlockCollage | pageBlockSlideshow | pageBlockChannel;
+  export type RichText =
+    textEmpty
+    | textPlain
+    | textBold
+    | textItalic
+    | textUnderline
+    | textStrike
+    | textFixed
+    | textUrl
+    | textEmail
+    | textConcat;
+  export type PageBlock =
+    pageBlockUnsupported
+    | pageBlockTitle
+    | pageBlockSubtitle
+    | pageBlockAuthorDate
+    | pageBlockHeader
+    | pageBlockSubheader
+    | pageBlockParagraph
+    | pageBlockPreformatted
+    | pageBlockFooter
+    | pageBlockDivider
+    | pageBlockAnchor
+    | pageBlockList
+    | pageBlockBlockquote
+    | pageBlockPullquote
+    | pageBlockPhoto
+    | pageBlockVideo
+    | pageBlockCover
+    | pageBlockEmbed
+    | pageBlockEmbedPost
+    | pageBlockCollage
+    | pageBlockSlideshow
+    | pageBlockChannel;
   export type Page = pagePart | pageFull;
-  export type PhoneCallDiscardReason = phoneCallDiscardReasonMissed | phoneCallDiscardReasonDisconnect | phoneCallDiscardReasonHangup | phoneCallDiscardReasonBusy;
+  export type PhoneCallDiscardReason =
+    phoneCallDiscardReasonMissed
+    | phoneCallDiscardReasonDisconnect
+    | phoneCallDiscardReasonHangup
+    | phoneCallDiscardReasonBusy;
   export type DataJSON = dataJSON;
   export type LabeledPrice = labeledPrice;
   export type Invoice = invoice;
@@ -3639,7 +3924,13 @@ declare namespace MTP {
   export type ShippingOption = shippingOption;
   export type InputStickerSetItem = inputStickerSetItem;
   export type InputPhoneCall = inputPhoneCall;
-  export type PhoneCall = phoneCallEmpty | phoneCallWaiting | phoneCallRequested | phoneCallAccepted | phoneCall | phoneCallDiscarded;
+  export type PhoneCall =
+    phoneCallEmpty
+    | phoneCallWaiting
+    | phoneCallRequested
+    | phoneCallAccepted
+    | phoneCall
+    | phoneCallDiscarded;
   export type PhoneConnection = phoneConnection;
   export type PhoneCallProtocol = phoneCallProtocol;
   export type phone$PhoneCall = phone$phoneCall;
@@ -3649,13 +3940,13 @@ declare namespace MTP {
   export type LangPackString = langPackString | langPackStringPluralized | langPackStringDeleted;
   export type LangPackDifference = langPackDifference;
   export type LangPackLanguage = langPackLanguage;
-
+  
   export type InvokeType = {
-
+    
     (method: 'reqPq', params: {
       nonce: int128;
     }, options?: InvokeOptions): Promise<ResPQ>;
-
+    
     (method: 'reqDHParams', params: {
       nonce: int128;
       serverNonce: int128;
@@ -3664,38 +3955,36 @@ declare namespace MTP {
       publicKeyFingerprint: long;
       encryptedData: string;
     }, options?: InvokeOptions): Promise<ServerDHParams>;
-
+    
     (method: 'setClientDHParams', params: {
       nonce: int128;
       serverNonce: int128;
       encryptedData: string;
     }, options?: InvokeOptions): Promise<SetClientDHParamsAnswer>;
-
-    (method: 'destroyAuthKey', params?: {
-
-    }, options?: InvokeOptions): Promise<DestroyAuthKeyRes>;
-
+    
+    (method: 'destroyAuthKey', params?: {}, options?: InvokeOptions): Promise<DestroyAuthKeyRes>;
+    
     (method: 'rpcDropAnswer', params: {
       reqMsgId: long;
     }, options?: InvokeOptions): Promise<RpcDropAnswer>;
-
+    
     (method: 'getFutureSalts', params: {
       num: int;
     }, options?: InvokeOptions): Promise<FutureSalts>;
-
+    
     (method: 'ping', params: {
       pingId: long;
     }, options?: InvokeOptions): Promise<Pong>;
-
+    
     (method: 'pingDelayDisconnect', params: {
       pingId: long;
       disconnectDelay: int;
     }, options?: InvokeOptions): Promise<Pong>;
-
+    
     (method: 'destroySession', params: {
       sessionId: long;
     }, options?: InvokeOptions): Promise<DestroySessionRes>;
-
+    
     (method: 'contest.saveDeveloperInfo', params: {
       vkId: int;
       name: string;
@@ -3703,17 +3992,17 @@ declare namespace MTP {
       age: int;
       city: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     <X>(method: 'invokeAfterMsg', params: {
       msgId: long;
       query: X;
     }, options?: InvokeOptions): Promise<X>;
-
+    
     <X>(method: 'invokeAfterMsgs', params: {
       msgIds: Vector<long>;
       query: X;
     }, options?: InvokeOptions): Promise<X>;
-
+    
     <X>(method: 'initConnection', params: {
       apiId: int;
       deviceModel: string;
@@ -3724,20 +4013,20 @@ declare namespace MTP {
       langCode: string;
       query: X;
     }, options?: InvokeOptions): Promise<X>;
-
+    
     <X>(method: 'invokeWithLayer', params: {
       layer: int;
       query: X;
     }, options?: InvokeOptions): Promise<X>;
-
+    
     <X>(method: 'invokeWithoutUpdates', params: {
       query: X;
     }, options?: InvokeOptions): Promise<X>;
-
+    
     (method: 'auth.checkPhone', params: {
       phoneNumber: string;
     }, options?: InvokeOptions): Promise<auth$CheckedPhone>;
-
+    
     (method: 'auth.sendCode', params: {
       allowFlashcall?: true;
       phoneNumber: string;
@@ -3745,7 +4034,7 @@ declare namespace MTP {
       apiId: int;
       apiHash: string;
     }, options?: InvokeOptions): Promise<auth$SentCode>;
-
+    
     (method: 'auth.signUp', params: {
       phoneNumber: string;
       phoneCodeHash: string;
@@ -3753,257 +4042,237 @@ declare namespace MTP {
       firstName: string;
       lastName: string;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
+    
     (method: 'auth.signIn', params: {
       phoneNumber: string;
       phoneCodeHash: string;
       phoneCode: string;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
-    (method: 'auth.logOut', params?: {
-
-    }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'auth.resetAuthorizations', params?: {
-
-    }, options?: InvokeOptions): Promise<boolean>;
-
+    
+    (method: 'auth.logOut', params?: {}, options?: InvokeOptions): Promise<boolean>;
+    
+    (method: 'auth.resetAuthorizations', params?: {}, options?: InvokeOptions): Promise<boolean>;
+    
     (method: 'auth.sendInvites', params: {
       phoneNumbers: Vector<string>;
       message: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'auth.exportAuthorization', params: {
       dcId: int;
     }, options?: InvokeOptions): Promise<auth$ExportedAuthorization>;
-
+    
     (method: 'auth.importAuthorization', params: {
       id: int;
       bytes: bytes;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
+    
     (method: 'auth.bindTempAuthKey', params: {
       permAuthKeyId: long;
       nonce: long;
       expiresAt: int;
       encryptedMessage: bytes;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'auth.importBotAuthorization', params: {
       apiId: int;
       apiHash: string;
       botAuthToken: string;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
+    
     (method: 'auth.checkPassword', params: {
       passwordHash: bytes;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
-    (method: 'auth.requestPasswordRecovery', params?: {
-
-    }, options?: InvokeOptions): Promise<auth$PasswordRecovery>;
-
+    
+    (method: 'auth.requestPasswordRecovery', params?: {}, options?: InvokeOptions): Promise<auth$PasswordRecovery>;
+    
     (method: 'auth.recoverPassword', params: {
       code: string;
     }, options?: InvokeOptions): Promise<auth$Authorization>;
-
+    
     (method: 'auth.resendCode', params: {
       phoneNumber: string;
       phoneCodeHash: string;
     }, options?: InvokeOptions): Promise<auth$SentCode>;
-
+    
     (method: 'auth.cancelCode', params: {
       phoneNumber: string;
       phoneCodeHash: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'auth.dropTempAuthKeys', params: {
       exceptAuthKeys: Vector<long>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.registerDevice', params: {
       tokenType: int;
       token: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.unregisterDevice', params: {
       tokenType: int;
       token: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.updateNotifySettings', params: {
       peer: InputNotifyPeer;
       settings: InputPeerNotifySettings;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.getNotifySettings', params: {
       peer: InputNotifyPeer;
     }, options?: InvokeOptions): Promise<PeerNotifySettings>;
-
-    (method: 'account.resetNotifySettings', params?: {
-
-    }, options?: InvokeOptions): Promise<boolean>;
-
+    
+    (method: 'account.resetNotifySettings', params?: {}, options?: InvokeOptions): Promise<boolean>;
+    
     (method: 'account.updateProfile', params: {
       firstName?: string;
       lastName?: string;
       about?: string;
     }, options?: InvokeOptions): Promise<User>;
-
+    
     (method: 'account.updateStatus', params: {
       offline: boolean;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'account.getWallPapers', params?: {
-
-    }, options?: InvokeOptions): Promise<Vector<WallPaper>>;
-
+    
+    (method: 'account.getWallPapers', params?: {}, options?: InvokeOptions): Promise<Vector<WallPaper>>;
+    
     (method: 'account.reportPeer', params: {
       peer: InputPeer;
       reason: ReportReason;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.checkUsername', params: {
       username: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.updateUsername', params: {
       username: string;
     }, options?: InvokeOptions): Promise<User>;
-
+    
     (method: 'account.getPrivacy', params: {
       key: InputPrivacyKey;
     }, options?: InvokeOptions): Promise<account$PrivacyRules>;
-
+    
     (method: 'account.setPrivacy', params: {
       key: InputPrivacyKey;
       rules: Vector<InputPrivacyRule>;
     }, options?: InvokeOptions): Promise<account$PrivacyRules>;
-
+    
     (method: 'account.deleteAccount', params: {
       reason: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'account.getAccountTTL', params?: {
-
-    }, options?: InvokeOptions): Promise<AccountDaysTTL>;
-
+    
+    (method: 'account.getAccountTTL', params?: {}, options?: InvokeOptions): Promise<AccountDaysTTL>;
+    
     (method: 'account.setAccountTTL', params: {
       ttl: AccountDaysTTL;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.sendChangePhoneCode', params: {
       allowFlashcall?: true;
       phoneNumber: string;
       currentNumber?: boolean;
     }, options?: InvokeOptions): Promise<auth$SentCode>;
-
+    
     (method: 'account.changePhone', params: {
       phoneNumber: string;
       phoneCodeHash: string;
       phoneCode: string;
     }, options?: InvokeOptions): Promise<User>;
-
+    
     (method: 'account.updateDeviceLocked', params: {
       period: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'account.getAuthorizations', params?: {
-
-    }, options?: InvokeOptions): Promise<account$Authorizations>;
-
+    
+    (method: 'account.getAuthorizations', params?: {}, options?: InvokeOptions): Promise<account$Authorizations>;
+    
     (method: 'account.resetAuthorization', params: {
       hash: long;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'account.getPassword', params?: {
-
-    }, options?: InvokeOptions): Promise<account$Password>;
-
+    
+    (method: 'account.getPassword', params?: {}, options?: InvokeOptions): Promise<account$Password>;
+    
     (method: 'account.getPasswordSettings', params: {
       currentPasswordHash: bytes;
     }, options?: InvokeOptions): Promise<account$PasswordSettings>;
-
+    
     (method: 'account.updatePasswordSettings', params: {
       currentPasswordHash: bytes;
       newSettings: account$PasswordInputSettings;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.sendConfirmPhoneCode', params: {
       allowFlashcall?: true;
       hash: string;
       currentNumber?: boolean;
     }, options?: InvokeOptions): Promise<auth$SentCode>;
-
+    
     (method: 'account.confirmPhone', params: {
       phoneCodeHash: string;
       phoneCode: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'account.getTmpPassword', params: {
       passwordHash: bytes;
       period: int;
     }, options?: InvokeOptions): Promise<account$TmpPassword>;
-
+    
     (method: 'users.getUsers', params: {
       id: Vector<InputUser>;
     }, options?: InvokeOptions): Promise<Vector<User>>;
-
+    
     (method: 'users.getFullUser', params: {
       id: InputUser;
     }, options?: InvokeOptions): Promise<UserFull>;
-
-    (method: 'contacts.getStatuses', params?: {
-
-    }, options?: InvokeOptions): Promise<Vector<ContactStatus>>;
-
+    
+    (method: 'contacts.getStatuses', params?: {}, options?: InvokeOptions): Promise<Vector<ContactStatus>>;
+    
     (method: 'contacts.getContacts', params: {
       hash: string;
     }, options?: InvokeOptions): Promise<contacts$Contacts>;
-
+    
     (method: 'contacts.importContacts', params: {
       contacts: Vector<InputContact>;
       replace: boolean;
     }, options?: InvokeOptions): Promise<contacts$ImportedContacts>;
-
+    
     (method: 'contacts.deleteContact', params: {
       id: InputUser;
     }, options?: InvokeOptions): Promise<contacts$Link>;
-
+    
     (method: 'contacts.deleteContacts', params: {
       id: Vector<InputUser>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'contacts.block', params: {
       id: InputUser;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'contacts.unblock', params: {
       id: InputUser;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'contacts.getBlocked', params: {
       offset: int;
       limit: int;
     }, options?: InvokeOptions): Promise<contacts$Blocked>;
-
-    (method: 'contacts.exportCard', params?: {
-
-    }, options?: InvokeOptions): Promise<Vector<int>>;
-
+    
+    (method: 'contacts.exportCard', params?: {}, options?: InvokeOptions): Promise<Vector<int>>;
+    
     (method: 'contacts.importCard', params: {
       exportCard: Vector<int>;
     }, options?: InvokeOptions): Promise<User>;
-
+    
     (method: 'contacts.search', params: {
       q: string;
       limit: int;
     }, options?: InvokeOptions): Promise<contacts$Found>;
-
+    
     (method: 'contacts.resolveUsername', params: {
       username: string;
     }, options?: InvokeOptions): Promise<contacts$ResolvedPeer>;
-
+    
     (method: 'contacts.getTopPeers', params: {
       correspondents?: true;
       botsPm?: true;
@@ -4014,16 +4283,16 @@ declare namespace MTP {
       limit: int;
       hash: int;
     }, options?: InvokeOptions): Promise<contacts$TopPeers>;
-
+    
     (method: 'contacts.resetTopPeerRating', params: {
       category: TopPeerCategory;
       peer: InputPeer;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getMessages', params: {
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$Messages>;
-
+    
     (method: 'messages.getDialogs', params: {
       excludePinned?: true;
       offsetDate: int;
@@ -4031,7 +4300,7 @@ declare namespace MTP {
       offsetPeer: InputPeer;
       limit: int;
     }, options?: InvokeOptions): Promise<messages$Dialogs>;
-
+    
     (method: 'messages.getHistory', params: {
       peer: InputPeer;
       offsetId: int;
@@ -4041,7 +4310,7 @@ declare namespace MTP {
       maxId: int;
       minId: int;
     }, options?: InvokeOptions): Promise<messages$Messages>;
-
+    
     (method: 'messages.search', params: {
       peer: InputPeer;
       q: string;
@@ -4052,32 +4321,32 @@ declare namespace MTP {
       maxId: int;
       limit: int;
     }, options?: InvokeOptions): Promise<messages$Messages>;
-
+    
     (method: 'messages.readHistory', params: {
       peer: InputPeer;
       maxId: int;
     }, options?: InvokeOptions): Promise<messages$AffectedMessages>;
-
+    
     (method: 'messages.deleteHistory', params: {
       justClear?: true;
       peer: InputPeer;
       maxId: int;
     }, options?: InvokeOptions): Promise<messages$AffectedHistory>;
-
+    
     (method: 'messages.deleteMessages', params: {
       revoke?: true;
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$AffectedMessages>;
-
+    
     (method: 'messages.receivedMessages', params: {
       maxId: int;
     }, options?: InvokeOptions): Promise<Vector<ReceivedNotifyMessage>>;
-
+    
     (method: 'messages.setTyping', params: {
       peer: InputPeer;
       action: SendMessageAction;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.sendMessage', params: {
       noWebpage?: true;
       silent?: true;
@@ -4090,7 +4359,7 @@ declare namespace MTP {
       replyMarkup?: ReplyMarkup;
       entities?: Vector<MessageEntity>;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.sendMedia', params: {
       silent?: true;
       background?: true;
@@ -4101,7 +4370,7 @@ declare namespace MTP {
       randomId: long;
       replyMarkup?: ReplyMarkup;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.forwardMessages', params: {
       silent?: true;
       background?: true;
@@ -4111,182 +4380,182 @@ declare namespace MTP {
       randomId: Vector<long>;
       toPeer: InputPeer;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.reportSpam', params: {
       peer: InputPeer;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.hideReportSpam', params: {
       peer: InputPeer;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getPeerSettings', params: {
       peer: InputPeer;
     }, options?: InvokeOptions): Promise<PeerSettings>;
-
+    
     (method: 'messages.getChats', params: {
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$Chats>;
-
+    
     (method: 'messages.getFullChat', params: {
       chatId: int;
     }, options?: InvokeOptions): Promise<messages$ChatFull>;
-
+    
     (method: 'messages.editChatTitle', params: {
       chatId: int;
       title: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.editChatPhoto', params: {
       chatId: int;
       photo: InputChatPhoto;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.addChatUser', params: {
       chatId: int;
       userId: InputUser;
       fwdLimit: int;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.deleteChatUser', params: {
       chatId: int;
       userId: InputUser;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.createChat', params: {
       users: Vector<InputUser>;
       title: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.forwardMessage', params: {
       peer: InputPeer;
       id: int;
       randomId: long;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.getDhConfig', params: {
       version: int;
       randomLength: int;
     }, options?: InvokeOptions): Promise<messages$DhConfig>;
-
+    
     (method: 'messages.requestEncryption', params: {
       userId: InputUser;
       randomId: int;
       gA: bytes;
     }, options?: InvokeOptions): Promise<EncryptedChat>;
-
+    
     (method: 'messages.acceptEncryption', params: {
       peer: InputEncryptedChat;
       gB: bytes;
       keyFingerprint: long;
     }, options?: InvokeOptions): Promise<EncryptedChat>;
-
+    
     (method: 'messages.discardEncryption', params: {
       chatId: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.setEncryptedTyping', params: {
       peer: InputEncryptedChat;
       typing: boolean;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.readEncryptedHistory', params: {
       peer: InputEncryptedChat;
       maxDate: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.sendEncrypted', params: {
       peer: InputEncryptedChat;
       randomId: long;
       data: bytes;
     }, options?: InvokeOptions): Promise<messages$SentEncryptedMessage>;
-
+    
     (method: 'messages.sendEncryptedFile', params: {
       peer: InputEncryptedChat;
       randomId: long;
       data: bytes;
       file: InputEncryptedFile;
     }, options?: InvokeOptions): Promise<messages$SentEncryptedMessage>;
-
+    
     (method: 'messages.sendEncryptedService', params: {
       peer: InputEncryptedChat;
       randomId: long;
       data: bytes;
     }, options?: InvokeOptions): Promise<messages$SentEncryptedMessage>;
-
+    
     (method: 'messages.receivedQueue', params: {
       maxQts: int;
     }, options?: InvokeOptions): Promise<Vector<long>>;
-
+    
     (method: 'messages.reportEncryptedSpam', params: {
       peer: InputEncryptedChat;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.readMessageContents', params: {
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$AffectedMessages>;
-
+    
     (method: 'messages.getAllStickers', params: {
       hash: int;
     }, options?: InvokeOptions): Promise<messages$AllStickers>;
-
+    
     (method: 'messages.getWebPagePreview', params: {
       message: string;
     }, options?: InvokeOptions): Promise<MessageMedia>;
-
+    
     (method: 'messages.exportChatInvite', params: {
       chatId: int;
     }, options?: InvokeOptions): Promise<ExportedChatInvite>;
-
+    
     (method: 'messages.checkChatInvite', params: {
       hash: string;
     }, options?: InvokeOptions): Promise<ChatInvite>;
-
+    
     (method: 'messages.importChatInvite', params: {
       hash: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.getStickerSet', params: {
       stickerset: InputStickerSet;
     }, options?: InvokeOptions): Promise<messages$StickerSet>;
-
+    
     (method: 'messages.installStickerSet', params: {
       stickerset: InputStickerSet;
       archived: boolean;
     }, options?: InvokeOptions): Promise<messages$StickerSetInstallResult>;
-
+    
     (method: 'messages.uninstallStickerSet', params: {
       stickerset: InputStickerSet;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.startBot', params: {
       bot: InputUser;
       peer: InputPeer;
       randomId: long;
       startParam: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.getMessagesViews', params: {
       peer: InputPeer;
       id: Vector<int>;
       increment: boolean;
     }, options?: InvokeOptions): Promise<Vector<int>>;
-
+    
     (method: 'messages.toggleChatAdmins', params: {
       chatId: int;
       enabled: boolean;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.editChatAdmin', params: {
       chatId: int;
       userId: InputUser;
       isAdmin: boolean;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.migrateChat', params: {
       chatId: int;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.searchGlobal', params: {
       q: string;
       offsetDate: int;
@@ -4294,32 +4563,32 @@ declare namespace MTP {
       offsetId: int;
       limit: int;
     }, options?: InvokeOptions): Promise<messages$Messages>;
-
+    
     (method: 'messages.reorderStickerSets', params: {
       masks?: true;
       order: Vector<long>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getDocumentByHash', params: {
       sha256: bytes;
       size: int;
       mimeType: string;
     }, options?: InvokeOptions): Promise<Document>;
-
+    
     (method: 'messages.searchGifs', params: {
       q: string;
       offset: int;
     }, options?: InvokeOptions): Promise<messages$FoundGifs>;
-
+    
     (method: 'messages.getSavedGifs', params: {
       hash: int;
     }, options?: InvokeOptions): Promise<messages$SavedGifs>;
-
+    
     (method: 'messages.saveGif', params: {
       id: InputDocument;
       unsave: boolean;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getInlineBotResults', params: {
       bot: InputUser;
       peer: InputPeer;
@@ -4327,7 +4596,7 @@ declare namespace MTP {
       query: string;
       offset: string;
     }, options?: InvokeOptions): Promise<messages$BotResults>;
-
+    
     (method: 'messages.setInlineBotResults', params: {
       gallery?: true;
       private?: true;
@@ -4337,7 +4606,7 @@ declare namespace MTP {
       nextOffset?: string;
       switchPm?: InlineBotSwitchPM;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.sendInlineBotResult', params: {
       silent?: true;
       background?: true;
@@ -4348,12 +4617,12 @@ declare namespace MTP {
       queryId: long;
       id: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.getMessageEditData', params: {
       peer: InputPeer;
       id: int;
     }, options?: InvokeOptions): Promise<messages$MessageEditData>;
-
+    
     (method: 'messages.editMessage', params: {
       noWebpage?: true;
       peer: InputPeer;
@@ -4362,7 +4631,7 @@ declare namespace MTP {
       replyMarkup?: ReplyMarkup;
       entities?: Vector<MessageEntity>;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.editInlineBotMessage', params: {
       noWebpage?: true;
       id: InputBotInlineMessageID;
@@ -4370,14 +4639,14 @@ declare namespace MTP {
       replyMarkup?: ReplyMarkup;
       entities?: Vector<MessageEntity>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getBotCallbackAnswer', params: {
       game?: true;
       peer: InputPeer;
       msgId: int;
       data?: bytes;
     }, options?: InvokeOptions): Promise<messages$BotCallbackAnswer>;
-
+    
     (method: 'messages.setBotCallbackAnswer', params: {
       alert?: true;
       queryId: long;
@@ -4385,11 +4654,11 @@ declare namespace MTP {
       url?: string;
       cacheTime: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getPeerDialogs', params: {
       peers: Vector<InputPeer>;
     }, options?: InvokeOptions): Promise<messages$PeerDialogs>;
-
+    
     (method: 'messages.saveDraft', params: {
       noWebpage?: true;
       replyToMsgId?: int;
@@ -4397,48 +4666,46 @@ declare namespace MTP {
       message: string;
       entities?: Vector<MessageEntity>;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'messages.getAllDrafts', params?: {
-
-    }, options?: InvokeOptions): Promise<Updates>;
-
+    
+    (method: 'messages.getAllDrafts', params?: {}, options?: InvokeOptions): Promise<Updates>;
+    
     (method: 'messages.getFeaturedStickers', params: {
       hash: int;
     }, options?: InvokeOptions): Promise<messages$FeaturedStickers>;
-
+    
     (method: 'messages.readFeaturedStickers', params: {
       id: Vector<long>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getRecentStickers', params: {
       attached?: true;
       hash: int;
     }, options?: InvokeOptions): Promise<messages$RecentStickers>;
-
+    
     (method: 'messages.saveRecentSticker', params: {
       attached?: true;
       id: InputDocument;
       unsave: boolean;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.clearRecentStickers', params: {
       attached?: true;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getArchivedStickers', params: {
       masks?: true;
       offsetId: long;
       limit: int;
     }, options?: InvokeOptions): Promise<messages$ArchivedStickers>;
-
+    
     (method: 'messages.getMaskStickers', params: {
       hash: int;
     }, options?: InvokeOptions): Promise<messages$AllStickers>;
-
+    
     (method: 'messages.getAttachedStickers', params: {
       media: InputStickeredMedia;
     }, options?: InvokeOptions): Promise<Vector<StickerSetCovered>>;
-
+    
     (method: 'messages.setGameScore', params: {
       editMessage?: true;
       force?: true;
@@ -4447,7 +4714,7 @@ declare namespace MTP {
       userId: InputUser;
       score: int;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'messages.setInlineGameScore', params: {
       editMessage?: true;
       force?: true;
@@ -4455,75 +4722,71 @@ declare namespace MTP {
       userId: InputUser;
       score: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.getGameHighScores', params: {
       peer: InputPeer;
       id: int;
       userId: InputUser;
     }, options?: InvokeOptions): Promise<messages$HighScores>;
-
+    
     (method: 'messages.getInlineGameHighScores', params: {
       id: InputBotInlineMessageID;
       userId: InputUser;
     }, options?: InvokeOptions): Promise<messages$HighScores>;
-
+    
     (method: 'messages.getCommonChats', params: {
       userId: InputUser;
       maxId: int;
       limit: int;
     }, options?: InvokeOptions): Promise<messages$Chats>;
-
+    
     (method: 'messages.getAllChats', params: {
       exceptIds: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$Chats>;
-
+    
     (method: 'messages.getWebPage', params: {
       url: string;
       hash: int;
     }, options?: InvokeOptions): Promise<WebPage>;
-
+    
     (method: 'messages.toggleDialogPin', params: {
       pinned?: true;
       peer: InputPeer;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.reorderPinnedDialogs', params: {
       force?: true;
       order: Vector<InputPeer>;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'messages.getPinnedDialogs', params?: {
-
-    }, options?: InvokeOptions): Promise<messages$PeerDialogs>;
-
+    
+    (method: 'messages.getPinnedDialogs', params?: {}, options?: InvokeOptions): Promise<messages$PeerDialogs>;
+    
     (method: 'messages.setBotShippingResults', params: {
       queryId: long;
       error?: string;
       shippingOptions?: Vector<ShippingOption>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.setBotPrecheckoutResults', params: {
       success?: true;
       queryId: long;
       error?: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'messages.uploadMedia', params: {
       peer: InputPeer;
       media: InputMedia;
     }, options?: InvokeOptions): Promise<MessageMedia>;
-
-    (method: 'updates.getState', params?: {
-
-    }, options?: InvokeOptions): Promise<updates$State>;
-
+    
+    (method: 'updates.getState', params?: {}, options?: InvokeOptions): Promise<updates$State>;
+    
     (method: 'updates.getDifference', params: {
       pts: int;
       ptsTotalLimit?: int;
       date: int;
       qts: int;
     }, options?: InvokeOptions): Promise<updates$Difference>;
-
+    
     (method: 'updates.getChannelDifference', params: {
       force?: true;
       channel: InputChannel;
@@ -4531,279 +4794,261 @@ declare namespace MTP {
       pts: int;
       limit: int;
     }, options?: InvokeOptions): Promise<updates$ChannelDifference>;
-
+    
     (method: 'photos.updateProfilePhoto', params: {
       id: InputPhoto;
     }, options?: InvokeOptions): Promise<UserProfilePhoto>;
-
+    
     (method: 'photos.uploadProfilePhoto', params: {
       file: InputFile;
     }, options?: InvokeOptions): Promise<photos$Photo>;
-
+    
     (method: 'photos.deletePhotos', params: {
       id: Vector<InputPhoto>;
     }, options?: InvokeOptions): Promise<Vector<long>>;
-
+    
     (method: 'photos.getUserPhotos', params: {
       userId: InputUser;
       offset: int;
       maxId: long;
       limit: int;
     }, options?: InvokeOptions): Promise<photos$Photos>;
-
+    
     (method: 'upload.saveFilePart', params: {
       fileId: long;
       filePart: int;
       bytes: bytes;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'upload.getFile', params: {
       location: InputFileLocation;
       offset: int;
       limit: int;
     }, options?: InvokeOptions): Promise<upload$File>;
-
+    
     (method: 'upload.saveBigFilePart', params: {
       fileId: long;
       filePart: int;
       fileTotalParts: int;
       bytes: bytes;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'upload.getWebFile', params: {
       location: InputWebFileLocation;
       offset: int;
       limit: int;
     }, options?: InvokeOptions): Promise<upload$WebFile>;
-
+    
     (method: 'upload.getCdnFile', params: {
       fileToken: bytes;
       offset: int;
       limit: int;
     }, options?: InvokeOptions): Promise<upload$CdnFile>;
-
+    
     (method: 'upload.reuploadCdnFile', params: {
       fileToken: bytes;
       requestToken: bytes;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'help.getConfig', params?: {
-
-    }, options?: InvokeOptions): Promise<Config>;
-
-    (method: 'help.getNearestDc', params?: {
-
-    }, options?: InvokeOptions): Promise<NearestDc>;
-
-    (method: 'help.getAppUpdate', params?: {
-
-    }, options?: InvokeOptions): Promise<help$AppUpdate>;
-
+    
+    (method: 'help.getConfig', params?: {}, options?: InvokeOptions): Promise<Config>;
+    
+    (method: 'help.getNearestDc', params?: {}, options?: InvokeOptions): Promise<NearestDc>;
+    
+    (method: 'help.getAppUpdate', params?: {}, options?: InvokeOptions): Promise<help$AppUpdate>;
+    
     (method: 'help.saveAppLog', params: {
       events: Vector<InputAppEvent>;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'help.getInviteText', params?: {
-
-    }, options?: InvokeOptions): Promise<help$InviteText>;
-
-    (method: 'help.getSupport', params?: {
-
-    }, options?: InvokeOptions): Promise<help$Support>;
-
+    
+    (method: 'help.getInviteText', params?: {}, options?: InvokeOptions): Promise<help$InviteText>;
+    
+    (method: 'help.getSupport', params?: {}, options?: InvokeOptions): Promise<help$Support>;
+    
     (method: 'help.getAppChangelog', params: {
       prevAppVersion: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
-    (method: 'help.getTermsOfService', params?: {
-
-    }, options?: InvokeOptions): Promise<help$TermsOfService>;
-
+    
+    (method: 'help.getTermsOfService', params?: {}, options?: InvokeOptions): Promise<help$TermsOfService>;
+    
     (method: 'help.setBotUpdatesStatus', params: {
       pendingUpdatesCount: int;
       message: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'help.getCdnConfig', params?: {
-
-    }, options?: InvokeOptions): Promise<CdnConfig>;
-
+    
+    (method: 'help.getCdnConfig', params?: {}, options?: InvokeOptions): Promise<CdnConfig>;
+    
     (method: 'channels.readHistory', params: {
       channel: InputChannel;
       maxId: int;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'channels.deleteMessages', params: {
       channel: InputChannel;
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$AffectedMessages>;
-
+    
     (method: 'channels.deleteUserHistory', params: {
       channel: InputChannel;
       userId: InputUser;
     }, options?: InvokeOptions): Promise<messages$AffectedHistory>;
-
+    
     (method: 'channels.reportSpam', params: {
       channel: InputChannel;
       userId: InputUser;
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'channels.getMessages', params: {
       channel: InputChannel;
       id: Vector<int>;
     }, options?: InvokeOptions): Promise<messages$Messages>;
-
+    
     (method: 'channels.getParticipants', params: {
       channel: InputChannel;
       filter: ChannelParticipantsFilter;
       offset: int;
       limit: int;
     }, options?: InvokeOptions): Promise<channels$ChannelParticipants>;
-
+    
     (method: 'channels.getParticipant', params: {
       channel: InputChannel;
       userId: InputUser;
     }, options?: InvokeOptions): Promise<channels$ChannelParticipant>;
-
+    
     (method: 'channels.getChannels', params: {
       id: Vector<InputChannel>;
     }, options?: InvokeOptions): Promise<messages$Chats>;
-
+    
     (method: 'channels.getFullChannel', params: {
       channel: InputChannel;
     }, options?: InvokeOptions): Promise<messages$ChatFull>;
-
+    
     (method: 'channels.createChannel', params: {
       broadcast?: true;
       megagroup?: true;
       title: string;
       about: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.editAbout', params: {
       channel: InputChannel;
       about: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'channels.editAdmin', params: {
       channel: InputChannel;
       userId: InputUser;
       role: ChannelParticipantRole;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.editTitle', params: {
       channel: InputChannel;
       title: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.editPhoto', params: {
       channel: InputChannel;
       photo: InputChatPhoto;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.checkUsername', params: {
       channel: InputChannel;
       username: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'channels.updateUsername', params: {
       channel: InputChannel;
       username: string;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'channels.joinChannel', params: {
       channel: InputChannel;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.leaveChannel', params: {
       channel: InputChannel;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.inviteToChannel', params: {
       channel: InputChannel;
       users: Vector<InputUser>;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.kickFromChannel', params: {
       channel: InputChannel;
       userId: InputUser;
       kicked: boolean;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.exportInvite', params: {
       channel: InputChannel;
     }, options?: InvokeOptions): Promise<ExportedChatInvite>;
-
+    
     (method: 'channels.deleteChannel', params: {
       channel: InputChannel;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.toggleInvites', params: {
       channel: InputChannel;
       enabled: boolean;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.exportMessageLink', params: {
       channel: InputChannel;
       id: int;
     }, options?: InvokeOptions): Promise<ExportedMessageLink>;
-
+    
     (method: 'channels.toggleSignatures', params: {
       channel: InputChannel;
       enabled: boolean;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'channels.updatePinnedMessage', params: {
       silent?: true;
       channel: InputChannel;
       id: int;
     }, options?: InvokeOptions): Promise<Updates>;
-
-    (method: 'channels.getAdminedPublicChannels', params?: {
-
-    }, options?: InvokeOptions): Promise<messages$Chats>;
-
+    
+    (method: 'channels.getAdminedPublicChannels', params?: {}, options?: InvokeOptions): Promise<messages$Chats>;
+    
     (method: 'bots.sendCustomRequest', params: {
       customMethod: string;
       params: DataJSON;
     }, options?: InvokeOptions): Promise<DataJSON>;
-
+    
     (method: 'bots.answerWebhookJSONQuery', params: {
       queryId: long;
       data: DataJSON;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'payments.getPaymentForm', params: {
       msgId: int;
     }, options?: InvokeOptions): Promise<payments$PaymentForm>;
-
+    
     (method: 'payments.getPaymentReceipt', params: {
       msgId: int;
     }, options?: InvokeOptions): Promise<payments$PaymentReceipt>;
-
+    
     (method: 'payments.validateRequestedInfo', params: {
       save?: true;
       msgId: int;
       info: PaymentRequestedInfo;
     }, options?: InvokeOptions): Promise<payments$ValidatedRequestedInfo>;
-
+    
     (method: 'payments.sendPaymentForm', params: {
       msgId: int;
       requestedInfoId?: string;
       shippingOptionId?: string;
       credentials: InputPaymentCredentials;
     }, options?: InvokeOptions): Promise<payments$PaymentResult>;
-
-    (method: 'payments.getSavedInfo', params?: {
-
-    }, options?: InvokeOptions): Promise<payments$SavedInfo>;
-
+    
+    (method: 'payments.getSavedInfo', params?: {}, options?: InvokeOptions): Promise<payments$SavedInfo>;
+    
     (method: 'payments.clearSavedInfo', params: {
       credentials?: true;
       info?: true;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'stickers.createStickerSet', params: {
       masks?: true;
       userId: InputUser;
@@ -4811,68 +5056,64 @@ declare namespace MTP {
       shortName: string;
       stickers: Vector<InputStickerSetItem>;
     }, options?: InvokeOptions): Promise<boolean>;
-
-    (method: 'phone.getCallConfig', params?: {
-
-    }, options?: InvokeOptions): Promise<DataJSON>;
-
+    
+    (method: 'phone.getCallConfig', params?: {}, options?: InvokeOptions): Promise<DataJSON>;
+    
     (method: 'phone.requestCall', params: {
       userId: InputUser;
       randomId: int;
       gAHash: bytes;
       protocol: PhoneCallProtocol;
     }, options?: InvokeOptions): Promise<phone$PhoneCall>;
-
+    
     (method: 'phone.acceptCall', params: {
       peer: InputPhoneCall;
       gB: bytes;
       protocol: PhoneCallProtocol;
     }, options?: InvokeOptions): Promise<phone$PhoneCall>;
-
+    
     (method: 'phone.confirmCall', params: {
       peer: InputPhoneCall;
       gA: bytes;
       keyFingerprint: long;
       protocol: PhoneCallProtocol;
     }, options?: InvokeOptions): Promise<phone$PhoneCall>;
-
+    
     (method: 'phone.receivedCall', params: {
       peer: InputPhoneCall;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'phone.discardCall', params: {
       peer: InputPhoneCall;
       duration: int;
       reason: PhoneCallDiscardReason;
       connectionId: long;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'phone.setCallRating', params: {
       peer: InputPhoneCall;
       rating: int;
       comment: string;
     }, options?: InvokeOptions): Promise<Updates>;
-
+    
     (method: 'phone.saveCallDebug', params: {
       peer: InputPhoneCall;
       debug: DataJSON;
     }, options?: InvokeOptions): Promise<boolean>;
-
+    
     (method: 'langpack.getLangPack', params: {
       langCode: string;
     }, options?: InvokeOptions): Promise<LangPackDifference>;
-
+    
     (method: 'langpack.getStrings', params: {
       langCode: string;
       keys: Vector<string>;
     }, options?: InvokeOptions): Promise<Vector<LangPackString>>;
-
+    
     (method: 'langpack.getDifference', params: {
       fromVersion: int;
     }, options?: InvokeOptions): Promise<LangPackDifference>;
-
-    (method: 'langpack.getLanguages', params?: {
-
-    }, options?: InvokeOptions): Promise<Vector<LangPackLanguage>>;
+    
+    (method: 'langpack.getLanguages', params?: {}, options?: InvokeOptions): Promise<Vector<LangPackLanguage>>;
   };
 }

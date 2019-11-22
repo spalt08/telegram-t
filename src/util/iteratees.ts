@@ -1,11 +1,10 @@
-type Member = { id: number };
-type CollectionById<Member> = Record<number, Member>;
+type CollectionByKey<Member> = Record<number | string, Member>;
 
-export function buildCollectionById<T extends Member>(collection: T[]) {
-  return collection.reduce((byId: CollectionById<T>, member: T) => {
-    byId[member.id] = member;
+export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key: keyof T) {
+  return collection.reduce((byKey: CollectionByKey<T>, member: T) => {
+    byKey[member[key]] = member;
 
-    return byId;
+    return byKey;
   }, {});
 }
 

@@ -1,14 +1,16 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { TdLibUpdate, ApiChat } from '../../../api/tdlib/types';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 export function onUpdate(update: TdLibUpdate) {
   switch (update['@type']) {
-    case 'updateNewChat': {
-      updateChat(update.chat.id, update.chat);
+    case 'chats': {
+      setChats(update.chats);
 
-      // TODO This blocks other requests.
-      getDispatch().loadChatPhoto({ chat: update.chat });
+      update.chats.forEach((chat: ApiChat) => {
+        getDispatch().loadChatPhoto({ chat });
+      });
 
       break;
     }
@@ -47,6 +49,23 @@ export function onUpdate(update: TdLibUpdate) {
       break;
     }
   }
+}
+
+function setChats(chats: ApiChat[]) {
+  const global = getGlobal();
+
+  const byId = buildCollectionByKey(chats, 'id');
+
+  setGlobal({
+    ...global,
+    chats: {
+      ...global.chats,
+      byId: {
+        ...global.chats.byId,
+        ...byId,
+      },
+    },
+  });
 }
 
 function updateChat(chatId: number, chatUpdate: Partial<ApiChat>) {

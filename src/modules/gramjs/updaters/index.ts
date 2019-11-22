@@ -1,4 +1,3 @@
-
 import { TdLibUpdate } from '../../../api/tdlib/types';
 import { DEBUG } from '../../../config';
 import * as system from './system';

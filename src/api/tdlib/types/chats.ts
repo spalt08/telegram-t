@@ -18,6 +18,7 @@ export interface ApiChat {
   unread_mention_count: number;
   order: string;
   is_pinned: boolean;
+  // Only in TDLib, remove.
   photo?: {
     small: ApiFile;
     big: ApiFile;
