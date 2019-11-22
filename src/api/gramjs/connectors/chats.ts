@@ -15,10 +15,10 @@ export function init(_onUpdate: OnUpdate) {
 export async function fetchChats(
   {
     limit,
-    offsetId,
+    offsetDate,
   }: {
     limit: number;
-    offsetId?: number;
+    offsetDate?: number;
   },
 ): Promise<{ chat_ids: number[] } | null> {
   const result = await invokeRequest({
@@ -28,9 +28,7 @@ export async function fetchChats(
       flags: 1,
       excludePinned: false,
       limit,
-    },
-    enhancers: {
-      offsetPeer: ['buildInputPeer', offsetId],
+      offsetDate,
     },
   }) as MTP.messages$Dialogs;
 

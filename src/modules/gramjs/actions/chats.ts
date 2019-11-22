@@ -11,8 +11,9 @@ addReducer('loadChats', () => {
 });
 
 addReducer('loadMoreChats', (global) => {
-  const lastChatId = global.chats.ids[global.chats.ids.length - 1];
-  void loadChats(lastChatId);
+  const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
+  const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
+  void loadChats(lastChat.id, lastChat.last_message!.date);
 });
 
 addReducer('setChatScrollOffset', (global, actions, payload) => {
@@ -30,10 +31,10 @@ addReducer('setChatScrollOffset', (global, actions, payload) => {
   });
 });
 
-async function loadChats(offsetId?: number) {
+async function loadChats(offsetId?: number, offsetDate?: number) {
   const result = await fetchChats({
     limit: LOAD_CHATS_LIMIT,
-    offsetId,
+    offsetDate,
   });
 
   if (!result) {

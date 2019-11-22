@@ -5,7 +5,7 @@ import { isPeerUser } from './peers';
 const DEFAULT_CHAT_ID = 0;
 
 export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
-  const isPrivateToMe = isPeerUser(mtpMessage.toId);
+  const isPrivateToMe = mtpMessage.out !== true && isPeerUser(mtpMessage.toId);
   const chatId = isPrivateToMe
     ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
     : getApiChatIdFromMtpPeer(mtpMessage.toId);

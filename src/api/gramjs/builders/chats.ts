@@ -60,5 +60,5 @@ export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user 
 }
 
 function getUserName(user: MTP.user) {
-  return `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`;
+  return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : null;
 }
