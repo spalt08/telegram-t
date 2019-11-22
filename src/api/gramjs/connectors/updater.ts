@@ -10,7 +10,9 @@ export function init(_onUpdate: OnUpdate) {
 }
 
 export function onGramJsUpdate(update: AnyLiteral) {
-  const { constructorName } = update;
+  // TODO Support minified version.
+  const constructorName = update.constructor.name;
+
   if (
     constructorName === 'UpdateShortMessage'
     || constructorName === 'UpdateShortChatMessage'

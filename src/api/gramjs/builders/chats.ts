@@ -16,7 +16,7 @@ export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user 
     unread_count: dialog.unreadCount,
     unread_mention_count: 0, // TODO
     order: '1', // TODO
-    is_pinned: false, // TODO
+    is_pinned: false, // TODO,
   };
 }
 
@@ -60,5 +60,5 @@ export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user 
 }
 
 function getUserName(user: MTP.user) {
-  return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : null;
+  return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
 }
