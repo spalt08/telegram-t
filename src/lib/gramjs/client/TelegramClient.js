@@ -256,7 +256,6 @@ class TelegramClient {
                     if (shouldRaise && await this.isUserAuthorized()) {
                         throw e
                     }
-                    await sleep(1000)
                     await this._switchDC(e.newDc)
                 } else {
                     throw e
@@ -392,7 +391,7 @@ class TelegramClient {
 
         }
         const name = utils.getDisplayName(me)
-        console.log('Signed in successfully as'+ name)
+        console.log('Signed in successfully as', name)
         return this
     }
 
@@ -460,7 +459,7 @@ class TelegramClient {
 
     // endregion
     async isUserAuthorized() {
-        if (!this._authorized) {
+        if (this._authorized===undefined || this._authorized===null) {
             try {
                 await this.invoke(new functions.updates.GetStateRequest())
                 this._authorized = true

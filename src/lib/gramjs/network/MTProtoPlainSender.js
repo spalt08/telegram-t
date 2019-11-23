@@ -36,7 +36,7 @@ class MTProtoPlainSender {
 
         await this._connection.send(res)
         body = await this._connection.recv()
-        if (body.length < 9) {
+        if (body.length < 8) {
             throw new InvalidBufferError(body)
         }
         const reader = new BinaryReader(body)
