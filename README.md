@@ -2,7 +2,7 @@
 
 ## Demo
 
-https://ajaxy.github.io/telegram-t
+https://telegram-t-a4e1e3.netlify.com
 
 ## Local setup
 
