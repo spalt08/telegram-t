@@ -1,7 +1,7 @@
 import * as gramJsApi from '../../../lib/gramjs/tl/types';
 import { OnApiUpdate } from '../types/types';
 
-import { buildApiMessage, buildApiMessageFromShortUpdate } from '../builders/messages';
+import { buildApiMessage, buildApiMessageFromShort } from '../builders/messages';
 import { getApiChatIdFromMtpPeer } from '../builders/chats';
 import { buildApiUserStatus } from '../builders/users';
 
@@ -15,7 +15,6 @@ export function onGramJsUpdate(update: AnyLiteral) {
   if (
     update instanceof gramJsApi.UpdateNewMessage
     || update instanceof gramJsApi.UpdateShortMessage
-    || update instanceof gramJsApi.UpdateShortChatMessage
   ) {
     let message;
 
@@ -23,7 +22,7 @@ export function onGramJsUpdate(update: AnyLiteral) {
       message = buildApiMessage(update.message);
     } else {
       const chatId = getApiChatIdFromMtpPeer(update as MTP.Peer);
-      message = buildApiMessageFromShortUpdate(chatId, update);
+      message = buildApiMessageFromShort(chatId, update);
     }
 
     onUpdate({
@@ -81,7 +80,7 @@ export function onGramJsUpdate(update: AnyLiteral) {
         status: buildApiUserStatus(update.status),
       },
     });
-  // TODO This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
+  // TODO @gramjs This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
   // } else if (update instanceof gramJsApi.UpdateDialogPinned) {
   //   onUpdate({
   //     '@type': 'updateChat',

@@ -1,7 +1,8 @@
 import { getApiChatIdFromMtpPeer } from './chats';
-import { ApiMessage } from '../../types';
+import { ApiMessage, ApiMessageForwardInfo } from '../../types';
 import { isPeerUser } from './peers';
 
+// TODO Maybe we do not need it.
 const DEFAULT_CHAT_ID = 0;
 
 export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
@@ -10,6 +11,23 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
     ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
 
+  return buildApiMessageWithChatId(chatId, mtpMessage);
+}
+
+export function buildApiMessageFromShort(
+  chatId: number, mtpMessage: Omit<MTP.updateShortMessage, 'flags'>,
+): ApiMessage {
+  return buildApiMessageWithChatId(chatId, {
+    ...mtpMessage,
+    // TODO Current user ID needed here.
+    fromId: mtpMessage.out ? DEFAULT_CHAT_ID : mtpMessage.userId,
+  });
+}
+
+export function buildApiMessageWithChatId(
+  chatId: number,
+  mtpMessage: Pick<MTP.message, 'id' | 'out' | 'message' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId'>,
+): ApiMessage {
   return {
     id: mtpMessage.id,
     chat_id: chatId,
@@ -21,10 +39,25 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
           text: mtpMessage.message,
         },
       }),
-      // ...(mtpMessage.media && buildPhoto(mtpMessage)),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID, // TODO
+    sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID,
+    reply_to_message_id: mtpMessage.replyToMsgId,
+    ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
+  };
+}
+
+function buildApiMessageForwardInfo(fwdFrom: MTP.messageFwdHeader): ApiMessageForwardInfo {
+  return {
+    '@type': 'messageForwardInfo',
+    from_chat_id: fwdFrom.fromId,
+    origin: {
+      '@type': 'messageForwardOriginUser',
+      // TODO Handle when empty `fromId`.
+      sender_user_id: fwdFrom.fromId!,
+      // TODO @gramjs Not supported?
+      // sender_user_name: fwdFrom.fromName,
+    },
   };
 }
 
@@ -53,22 +86,3 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
 //     }),
 //   };
 // }
-
-// @ts-ignore
-export function buildApiMessageFromShortUpdate(chatId: number, mtpMessage: UpdateShortMessage): ApiMessage {
-  return {
-    id: mtpMessage.id,
-    chat_id: chatId,
-    is_outgoing: mtpMessage.out === true,
-    content: {
-      '@type': 'message',
-      ...(mtpMessage.message && {
-        text: {
-          text: mtpMessage.message,
-        },
-      }),
-    },
-    date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || -1,
-  };
-}

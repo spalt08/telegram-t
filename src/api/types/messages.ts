@@ -32,11 +32,13 @@ export interface ApiSticker {
 
 export interface ApiMessageForwardInfo {
   '@type': 'messageForwardInfo';
-  from_chat_id: number;
-  from_message_id: number;
+  from_chat_id?: number;
+  from_message_id?: number;
   origin: {
     '@type': 'messageForwardOriginUser';
     sender_user_id: number;
+    // GramJS only.
+    sender_user_name?: string;
   };
 }
 
