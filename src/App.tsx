@@ -4,7 +4,6 @@ import React, { withGlobal } from './lib/teactn';
 import { GlobalState } from './store/types';
 import Auth from './pages/auth/Auth';
 import Main from './pages/main/Main';
-import Loading from './components/Loading';
 // import Test from './pages/test/Test';
 
 type IProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
@@ -27,7 +26,7 @@ const App: FC<IProps> = ({ authState, authIsSessionRemembered }) => {
     }
   }
 
-  return authIsSessionRemembered ? <Main /> : <Loading />;
+  return authIsSessionRemembered ? <Main /> : <Auth />;
 };
 
 export default withGlobal(

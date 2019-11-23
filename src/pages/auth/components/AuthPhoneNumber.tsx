@@ -10,16 +10,17 @@ import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
 import CountryCodeInput from '../../../components/ui/CountryCodeInput';
 import Checkbox from '../../../components/ui/Checkbox';
+import Loading from '../../../components/Loading';
 
 import './Auth.scss';
 
 type IProps = (
-  Pick<GlobalState, 'authIsLoading' | 'authError' | 'authRememberMe'> &
+  Pick<GlobalState, 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe'> &
   Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe'>
 );
 
 const AuthPhoneNumber: FC<IProps> = ({
-  authIsLoading, authError, authRememberMe, setAuthPhoneNumber, setAuthRememberMe,
+  authState, authIsLoading, authError, authRememberMe, setAuthPhoneNumber, setAuthRememberMe,
 }) => {
   const currentCountry = countryList.find((c) => c.id === 'RU');
 
@@ -87,7 +88,11 @@ const AuthPhoneNumber: FC<IProps> = ({
           onChange={onKeepSessionChange}
         />
         {isButtonShown && (
-          <Button type="submit" isLoading={authIsLoading}>Next</Button>
+          authState === 'authorizationStateWaitPhoneNumber' ? (
+            <Button type="submit" isLoading={authIsLoading}>Next</Button>
+          ) : (
+            <Loading />
+          )
         )}
       </form>
     </div>
@@ -96,8 +101,12 @@ const AuthPhoneNumber: FC<IProps> = ({
 
 export default withGlobal(
   (global) => {
-    const { authIsLoading, authError, authRememberMe } = global;
-    return { authIsLoading, authError, authRememberMe };
+    const {
+      authState, authIsLoading, authError, authRememberMe,
+    } = global;
+    return {
+      authState, authIsLoading, authError, authRememberMe,
+    };
   },
   (setGlobal, actions) => {
     const { setAuthPhoneNumber, setAuthRememberMe } = actions;
