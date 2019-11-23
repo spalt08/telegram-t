@@ -1,5 +1,5 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
-import { ApiMessage } from '../../../api/tdlib/types';
+import { ApiMessage } from '../../../api/types';
 
 import { fetchMessages, sendMessage } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';

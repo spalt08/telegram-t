@@ -1,4 +1,4 @@
-import { ApiGroup } from '../../api/tdlib/types';
+import { ApiGroup } from '../../api/types';
 
 export function isChannel(group: ApiGroup) {
   return group.is_channel || false;

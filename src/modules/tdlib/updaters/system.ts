@@ -1,10 +1,12 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
+import { ApiUpdate } from '../../../api/types';
+import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types/updates';
+
 import * as TdLib from '../../../api/tdlib';
-import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
 import { TDLIB_SESSION_ID_KEY } from '../../../config';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateAuthorizationState':
       onUpdateAuthorizationState(update);

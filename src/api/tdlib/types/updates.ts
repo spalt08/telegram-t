@@ -1,4 +1,6 @@
-export type UpdateAuthorizationStateType = (
+import { ApiMessage, ApiUser } from '../../types';
+
+export type TdLibUpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
   'authorizationStateWaitTdlibParameters' |
   'authorizationStateWaitEncryptionKey' |
@@ -14,21 +16,28 @@ export type UpdateAuthorizationStateType = (
 export type TdLibUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState';
   authorization_state: {
-    '@type': UpdateAuthorizationStateType;
-  };
-  sessionId?: string;
-};
-
-export type TdLibUpdateFile = {
-  '@type': 'updateFile';
-};
-
-export type TdLibUpdateNewChat = {
-  '@type': 'updateNewChat';
-  chat: {
-    '@type': 'chat';
-    [k: string]: any;
+    '@type': TdLibUpdateAuthorizationStateType;
   };
 };
 
-export type TdLibUpdate = TdLibUpdateAuthorizationState | TdLibUpdateFile | TdLibUpdateNewChat | any;
+export type TdLibUpdateUser = {
+  '@type': 'updateUser';
+  user: Pick<ApiUser, 'id'> | Partial<ApiUser> & { id: number };
+};
+
+export type TdLibUpdateNewMessage = {
+  '@type': 'updateNewMessage';
+  message: Pick<ApiMessage, 'id' | 'chat_id'> & Partial<ApiMessage>;
+};
+
+export type TdLibAnyUpdate = AnyLiteral & {
+  '@type': (
+    'updateUserFullInfo' | 'updateUserStatus' |
+    'updateNewChat' | 'updateChatLastMessage' | 'updateChatReadInbox' | 'updateChatReadOutbox' | 'updateChatIsPinned' |
+    'updateBasicGroup' | 'updateBasicGroupFullInfo' | 'updateSupergroup' | 'updateSupergroupFullInfo' |
+    'updateMessageSendSucceeded' |
+    'updateFile'
+  );
+};
+
+export type TdLibUpdate = TdLibUpdateAuthorizationState | TdLibUpdateUser | TdLibUpdateNewMessage | TdLibAnyUpdate;

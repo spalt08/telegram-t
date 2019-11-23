@@ -5,7 +5,7 @@ import {
   ApiUser,
   ApiMessage,
   ApiPhoto,
-} from '../../../../api/tdlib/types';
+} from '../../../../api/types';
 import { getUserFullName } from '../../../../modules/helpers';
 import { selectUser } from '../../../../modules/selectors';
 import { getReplyImageDimensions } from '../../../../util/imageDimensions';

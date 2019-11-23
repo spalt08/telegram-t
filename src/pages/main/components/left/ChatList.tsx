@@ -3,7 +3,7 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../../store/types';
-import { ApiChat } from '../../../../api/tdlib/types';
+import { ApiChat } from '../../../../api/types';
 import { toArray, orderBy } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import Chat from './Chat';

@@ -1,6 +1,6 @@
 import {
-  ApiChat, ApiFile, ApiMessage, ApiUser, UpdateAuthorizationStateType, ApiGroup,
-} from '../api/tdlib/types';
+  ApiChat, ApiFile, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup,
+} from '../api/types';
 
 export type GlobalState = {
   isInitialized: boolean;
@@ -35,7 +35,7 @@ export type GlobalState = {
 
   // TODO Move to `auth`.
   isLoggingOut?: boolean;
-  authState?: UpdateAuthorizationStateType;
+  authState?: ApiUpdateAuthorizationStateType;
   authPhoneNumber?: string;
   authIsLoading?: boolean;
   authError?: string;

@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { ApiChat, ApiUser } from '../../../api/tdlib/types';
+import { ApiChat, ApiUser } from '../../../api/types';
 import { loadFile } from '../../../api/gramjs';
 
 // Wait for other requests to complete + fix GramJS sync requests bug.

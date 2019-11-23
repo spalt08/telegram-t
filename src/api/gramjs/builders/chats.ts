@@ -1,5 +1,5 @@
 import { isPeerChat, isPeerUser } from './peers';
-import { ApiChat } from '../../tdlib/types';
+import { ApiChat } from '../../types';
 import { buildPhoto } from './common';
 
 export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat): ApiChat {
@@ -15,8 +15,7 @@ export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user 
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,
     unread_mention_count: 0, // TODO
-    order: '1', // TODO
-    is_pinned: false, // TODO,
+    is_pinned: dialog.pinned || false,
   };
 }
 

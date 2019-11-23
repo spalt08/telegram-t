@@ -1,5 +1,5 @@
-import { TdLibUpdateAuthorizationState, UpdateAuthorizationStateType } from '../../tdlib/types';
-import { OnUpdate } from '../types/types';
+import { ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType } from '../../types';
+import { OnApiUpdate } from '../types/types';
 
 const authPromiseResolvers: {
   resolvePhoneNumber: null | Function;
@@ -11,9 +11,9 @@ const authPromiseResolvers: {
   resolvePassword: null,
 };
 
-let onUpdate: OnUpdate;
+let onUpdate: OnApiUpdate;
 
-export function init(_onUpdate: OnUpdate) {
+export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
@@ -60,11 +60,11 @@ export function onAuthReady(sessionId: string) {
 
   onUpdate({
     ...buildAuthState('authorizationStateReady'),
-    sessionId,
+    session_id: sessionId,
   });
 }
 
-export function buildAuthState(authState: UpdateAuthorizationStateType): TdLibUpdateAuthorizationState {
+export function buildAuthState(authState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
   return {
     '@type': 'updateAuthorizationState',
     authorization_state: {

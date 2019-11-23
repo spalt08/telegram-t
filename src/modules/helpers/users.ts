@@ -1,4 +1,4 @@
-import { ApiUser } from '../../api/tdlib/types/index';
+import { ApiUser } from '../../api/types/index';
 import { formatDate, formatTime } from '../../util/dateFormat';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;

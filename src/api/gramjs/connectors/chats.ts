@@ -1,4 +1,4 @@
-import { OnUpdate } from '../types/types';
+import { OnApiUpdate } from '../types/types';
 
 import { invokeRequest } from '../client';
 import { buildApiChatFromDialog, getPeerKey } from '../builders/chats';
@@ -6,9 +6,9 @@ import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
-let onUpdate: OnUpdate;
+let onUpdate: OnApiUpdate;
 
-export function init(_onUpdate: OnUpdate) {
+export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 

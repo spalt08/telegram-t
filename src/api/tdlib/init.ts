@@ -1,4 +1,4 @@
-import { TdLibUpdate } from './types';
+import { ApiUpdate } from '../types';
 import { DEBUG } from '../../config';
 import { getBrowser, getOsName } from './utils';
 import legacyTdLibController from './LegacyTdLibController';
@@ -45,7 +45,7 @@ export async function init(onUpdate: Function) {
   }
 
   client = new TdClient(INIT_OPTIONS);
-  client.onUpdate = (update: TdLibUpdate) => {
+  client.onUpdate = (update: ApiUpdate) => {
     onUpdate(update);
     legacyTdLibController.onUpdate(update);
   };

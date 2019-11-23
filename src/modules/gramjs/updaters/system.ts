@@ -1,17 +1,17 @@
-import { TdLibUpdate, TdLibUpdateAuthorizationState } from '../../../api/tdlib/types';
+import { ApiUpdate, ApiUpdateAuthorizationState } from '../../../api/types';
 
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
     case 'updateAuthorizationState':
-      onUpdateAuthorizationState(update as TdLibUpdateAuthorizationState);
+      onUpdateAuthorizationState(update);
       break;
   }
 }
 
-function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
+function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
   const currentState = getGlobal().authState;
   const authState = update.authorization_state['@type'];
   let authError;
@@ -45,9 +45,9 @@ function onUpdateAuthorizationState(update: TdLibUpdateAuthorizationState) {
     case 'authorizationStateWaitRegistration':
       break;
     case 'authorizationStateReady': {
-      const { sessionId } = update;
-      if (sessionId && getGlobal().authRememberMe) {
-        localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
+      const { session_id } = update;
+      if (session_id && getGlobal().authRememberMe) {
+        localStorage.setItem(GRAMJS_SESSION_ID_KEY, session_id);
       }
 
       setGlobal({

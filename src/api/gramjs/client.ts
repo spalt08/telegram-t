@@ -11,7 +11,7 @@ import {
 } from './types/types';
 import {
   ApiFileLocation,
-} from '../tdlib/types';
+} from '../types';
 
 import { TelegramClient, session } from '../../lib/gramjs';
 import * as apiRequests from '../../lib/gramjs/tl/functions';

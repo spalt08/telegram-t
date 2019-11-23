@@ -1,13 +1,13 @@
-import { ApiMessage } from '../../tdlib/types';
-import { OnUpdate } from '../types/types';
+import { ApiMessage } from '../../types';
+import { OnApiUpdate } from '../types/types';
 
 import { invokeRequest } from '../client';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 
-let onUpdate: OnUpdate;
+let onUpdate: OnApiUpdate;
 
-export function init(_onUpdate: OnUpdate) {
+export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
@@ -37,6 +37,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 
     onUpdate({
       '@type': 'updateUser',
+      id: user.id,
       user,
     });
   });

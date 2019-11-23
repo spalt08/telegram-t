@@ -7,13 +7,7 @@ export interface ApiUser {
   };
   first_name?: string;
   last_name?: string;
-  status?: {
-    '@type': (
-      'userStatusEmpty' | 'userStatusLastMonth' | 'userStatusLastWeek' |
-      'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
-    );
-    was_online?: number;
-  };
+  status?: ApiUserStatus;
   // Only in TDLib, remove.
   profile_photo?: {
     small: ApiFile;
@@ -28,4 +22,12 @@ export interface ApiUser {
 
   // Obtained from UserFullInfo
   bio?: string;
+}
+
+export interface ApiUserStatus {
+  '@type': (
+    'userStatusEmpty' | 'userStatusLastMonth' | 'userStatusLastWeek' |
+    'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
+  );
+  was_online?: number;
 }

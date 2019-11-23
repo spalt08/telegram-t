@@ -1,4 +1,4 @@
-import { ApiPhoto } from '../api/tdlib/types';
+import { ApiPhoto } from '../api/types';
 
 function getRemValue() {
   return window.innerWidth > 1440 ? 16 : 14;

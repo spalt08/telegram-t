@@ -16,17 +16,17 @@ export interface ApiChat {
   last_read_inbox_message_id: number;
   unread_count: number;
   unread_mention_count: number;
-  order: string;
   is_pinned: boolean;
-  // Only in TDLib, remove.
-  photo?: {
-    small: ApiFile;
-    big: ApiFile;
-  };
   photo_locations?: {
     small: ApiFileLocation;
     big: ApiFileLocation;
   };
+  // Only in TDLib.
+  photo?: {
+    small: ApiFile;
+    big: ApiFile;
+  };
+  order?: string;
 }
 
 export interface ApiPrivateChat extends ApiChat {

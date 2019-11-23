@@ -1,6 +1,6 @@
 import React, { FC } from '../../../../lib/teact';
 
-import { ApiChat } from '../../../../api/tdlib/types';
+import { ApiChat } from '../../../../api/types';
 import './Badge.scss';
 
 type IProps = {

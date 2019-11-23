@@ -1,8 +1,9 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate, ApiChat } from '../../../api/tdlib/types';
+import { ApiChat, ApiUpdate } from '../../../api/types';
+import { TdLibUpdate } from '../../../api/tdlib/types/updates';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateNewChat': {
       updateChat(update.chat.id, update.chat);

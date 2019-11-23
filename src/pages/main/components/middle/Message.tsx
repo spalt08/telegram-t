@@ -6,7 +6,7 @@ import {
   ApiMessage,
   ApiPhoto,
   ApiSticker,
-} from '../../../../api/tdlib/types';
+} from '../../../../api/types';
 import {
   isOwnMessage,
   getUserFullName,

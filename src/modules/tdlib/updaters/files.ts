@@ -1,10 +1,12 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
-import { ApiFile, TdLibUpdate } from '../../../api/tdlib/types';
 
-import { onNextTick } from '../../../util/schedulers';
+import { ApiFile, ApiUpdate } from '../../../api/types';
+import { TdLibUpdate } from '../../../api/tdlib/types/updates';
+
 import * as TdLib from '../../../api/tdlib';
+import { onNextTick } from '../../../util/schedulers';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateFile': {
       const { file } = update;

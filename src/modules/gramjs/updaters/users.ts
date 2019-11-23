@@ -1,9 +1,9 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate, ApiUser } from '../../../api/tdlib/types';
+import { ApiUpdate, ApiUser } from '../../../api/types';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
     case 'users': {
       setUsers(update.users);
@@ -16,25 +16,9 @@ export function onUpdate(update: TdLibUpdate) {
     }
 
     case 'updateUser': {
-      updateUser(update.user.id, update.user);
+      updateUser(update.id, update.user);
 
       getDispatch().loadUserPhoto({ user: update.user });
-
-      break;
-    }
-
-    case 'updateUserFullInfo': {
-      const { user_id, user_full_info } = update;
-
-      updateUser(user_id, user_full_info);
-
-      break;
-    }
-
-    case 'updateUserStatus': {
-      const { user_id, status } = update;
-
-      updateUser(user_id, { status });
 
       break;
     }

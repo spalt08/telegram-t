@@ -2,7 +2,7 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
-import { ApiChat, ApiUser } from '../../../../api/tdlib/types';
+import { ApiChat, ApiUser } from '../../../../api/types';
 import {
   getChatTitle,
   getLastMessageText,

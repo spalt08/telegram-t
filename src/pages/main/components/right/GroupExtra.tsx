@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiGroup } from '../../../../api/tdlib/types';
+import { ApiGroup } from '../../../../api/types';
 import { selectChat, selectChatGroupId, selectGroup } from '../../../../modules/selectors';
 import { getGroupDescription, getGroupLink } from '../../../../modules/helpers';
 

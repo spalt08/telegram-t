@@ -1,4 +1,4 @@
-import { ApiChat, ApiFile, ApiUser } from './types';
+import { ApiChat, ApiFile, ApiUser } from '../types';
 import FileStore from './legacy/Stores/FileStore';
 
 // @magic

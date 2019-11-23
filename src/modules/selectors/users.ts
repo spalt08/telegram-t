@@ -1,4 +1,4 @@
-import { ApiUser } from '../../api/tdlib/types';
+import { ApiUser } from '../../api/types';
 import { GlobalState } from '../../store/types';
 import { getUserPhotoId } from '../helpers';
 

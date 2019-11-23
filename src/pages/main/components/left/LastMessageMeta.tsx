@@ -1,6 +1,6 @@
 import React, { FC } from '../../../../lib/teact';
 
-import { ApiMessage } from '../../../../api/tdlib/types';
+import { ApiMessage } from '../../../../api/types';
 import { formatPastTimeShort } from '../../../../util/dateFormat';
 import MessageOutgoingStatus from '../../../../components/MessageOutgoingStatus';
 import './LastMessageMeta.scss';

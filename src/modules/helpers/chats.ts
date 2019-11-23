@@ -1,4 +1,4 @@
-import { ApiChat, ApiPrivateChat } from '../../api/tdlib/types/index';
+import { ApiChat, ApiPrivateChat } from '../../api/types/index';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;

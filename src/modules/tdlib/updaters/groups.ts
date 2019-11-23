@@ -1,8 +1,9 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate, ApiGroup } from '../../../api/tdlib/types';
+import { ApiGroup, ApiUpdate } from '../../../api/types';
+import { TdLibUpdate } from '../../../api/tdlib/types/updates';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateBasicGroup': {
       updateGroup(update.basic_group.id, update.basic_group);

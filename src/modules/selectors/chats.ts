@@ -1,4 +1,4 @@
-import { ApiChat } from '../../api/tdlib/types';
+import { ApiChat } from '../../api/types';
 import { GlobalState } from '../../store/types';
 import { getChatPhotoId } from '../helpers';
 

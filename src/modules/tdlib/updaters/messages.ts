@@ -1,11 +1,12 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate, ApiMessage } from '../../../api/tdlib/types';
+import { ApiUpdate, ApiMessage } from '../../../api/types';
+import { TdLibUpdate, TdLibUpdateNewMessage } from '../../../api/tdlib/types/updates';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateNewMessage': {
-      const { message } = update;
+      const { message } = update as TdLibUpdateNewMessage;
 
       updateMessage(message.chat_id, message.id, message);
 

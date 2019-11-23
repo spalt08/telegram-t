@@ -1,7 +1,7 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat, ApiGroup } from '../../../../api/tdlib/types';
+import { ApiChat, ApiGroup } from '../../../../api/types';
 import { isChannel, getGroupTypeString } from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
 import { selectChat, selectChatGroupId, selectGroupOnlineCount } from '../../../../modules/selectors';

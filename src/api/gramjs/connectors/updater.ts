@@ -1,24 +1,30 @@
-import { OnUpdate } from '../types/types';
+import * as gramJsApi from '../../../lib/gramjs/tl/types';
+import { OnApiUpdate } from '../types/types';
 
 import { buildApiMessage, buildApiMessageFromShortUpdate } from '../builders/messages';
 import { getApiChatIdFromMtpPeer } from '../builders/chats';
+import { buildApiUserStatus } from '../builders/users';
 
-let onUpdate: OnUpdate;
+let onUpdate: OnApiUpdate;
 
-export function init(_onUpdate: OnUpdate) {
+export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
 export function onGramJsUpdate(update: AnyLiteral) {
-  // TODO Support minified version.
-  const constructorName = update.constructor.name;
-
   if (
-    constructorName === 'UpdateShortMessage'
-    || constructorName === 'UpdateShortChatMessage'
+    update instanceof gramJsApi.UpdateNewMessage
+    || update instanceof gramJsApi.UpdateShortMessage
+    || update instanceof gramJsApi.UpdateShortChatMessage
   ) {
-    const chatId = getApiChatIdFromMtpPeer(update as MTP.Peer);
-    const message = buildApiMessageFromShortUpdate(chatId, update);
+    let message;
+
+    if (update instanceof gramJsApi.UpdateNewMessage) {
+      message = buildApiMessage(update.message);
+    } else {
+      const chatId = getApiChatIdFromMtpPeer(update as MTP.Peer);
+      message = buildApiMessageFromShortUpdate(chatId, update);
+    }
 
     onUpdate({
       '@type': 'updateNewMessage',
@@ -27,25 +33,62 @@ export function onGramJsUpdate(update: AnyLiteral) {
     });
 
     onUpdate({
-      '@type': 'updateChatLastMessage',
-      chat_id: message.chat_id,
-      last_message: message,
+      '@type': 'updateChat',
+      id: message.chat_id,
+      chat: {
+        last_message: message,
+      },
     });
-  } else if (
-    constructorName === 'UpdateNewMessage'
-  ) {
-    const message = buildApiMessage(update.message);
-
+  } else if (update instanceof gramJsApi.UpdateReadHistoryInbox) {
     onUpdate({
-      '@type': 'updateNewMessage',
-      chat_id: message.chat_id,
-      message,
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer),
+      chat: {
+        last_read_inbox_message_id: update.maxId,
+        unread_count: update.stillUnreadCount,
+      },
     });
-
+  } else if (update instanceof gramJsApi.UpdateReadHistoryOutbox) {
     onUpdate({
-      '@type': 'updateChatLastMessage',
-      chat_id: message.chat_id,
-      last_message: message,
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer),
+      chat: {
+        last_read_outbox_message_id: update.maxId,
+      },
     });
+  } else if (update instanceof gramJsApi.UpdateReadChannelInbox) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer({ channelId: update.channelId }),
+      chat: {
+        last_read_inbox_message_id: update.maxId,
+        unread_count: update.stillUnreadCount,
+      },
+    });
+  } else if (update instanceof gramJsApi.UpdateReadChannelOutbox) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer({ channelId: update.channelId }),
+      chat: {
+        last_read_outbox_message_id: update.maxId,
+      },
+    });
+  } else if (update instanceof gramJsApi.UpdateUserStatus) {
+    onUpdate({
+      '@type': 'updateUser',
+      id: update.userId,
+      user: {
+        status: buildApiUserStatus(update.status),
+      },
+    });
+  // TODO This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
+  // } else if (update instanceof gramJsApi.UpdateDialogPinned) {
+  //   onUpdate({
+  //     '@type': 'updateChat',
+  //     id: getApiChatIdFromMtpPeer(update.peer),
+  //     chat: {
+  //       is_pinned: update.pinned || false,
+  //     },
+  //   });
   }
 }

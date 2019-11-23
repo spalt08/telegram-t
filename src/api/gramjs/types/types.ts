@@ -1,6 +1,6 @@
-import { TdLibUpdate } from '../../tdlib/types';
+import { ApiUpdate } from '../../types';
 
-export type OnUpdate = (update: TdLibUpdate) => void;
+export type OnApiUpdate = (update: ApiUpdate) => void;
 
 export type SupportedMessageRequests = 'GetDialogsRequest' | 'GetHistoryRequest' | 'SendMessageRequest';
 export type SupportedUploadRequests = 'GetFileRequest';

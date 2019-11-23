@@ -1,14 +1,14 @@
 import EventEmitter from 'events';
 
-import { TdLibUpdate } from './types';
+import { ApiUpdate } from '../types';
 
-type TdLibClientUpdate = TdLibUpdate;
+type TdLibClientUpdate = ApiUpdate;
 
 class LegacyTdLibController extends EventEmitter {
   // This will be overloaded.
   send: any;
 
-  onUpdate(update: TdLibUpdate) {
+  onUpdate(update: ApiUpdate) {
     this.emit('update', update);
   }
 

@@ -1,4 +1,4 @@
-import { ApiMessage, ApiPhoto } from '../../api/tdlib/types/index';
+import { ApiMessage, ApiPhoto } from '../../api/types';
 
 export function getLastMessageText(message: ApiMessage) {
   const {

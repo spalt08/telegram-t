@@ -1,5 +1,5 @@
 import { getApiChatIdFromMtpPeer } from './chats';
-import { ApiMessage } from '../../tdlib/types';
+import { ApiMessage } from '../../types';
 import { isPeerUser } from './peers';
 
 const DEFAULT_CHAT_ID = 0;

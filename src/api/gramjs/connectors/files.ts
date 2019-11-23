@@ -1,5 +1,5 @@
 import { invokeRequest } from '../client';
-import { ApiFileLocation } from '../../tdlib/types';
+import { ApiFileLocation } from '../../types';
 
 export function init() {
 }

@@ -1,5 +1,5 @@
 import { GlobalState } from '../../store/types';
-import { ApiGroup } from '../../api/tdlib/types';
+import { ApiGroup } from '../../api/types';
 import { isChannel, isUserOnline } from '../helpers';
 
 export function selectGroup(global: GlobalState, groupId: number) {

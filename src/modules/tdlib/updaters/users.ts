@@ -1,11 +1,12 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { TdLibUpdate, ApiUser } from '../../../api/tdlib/types';
+import { ApiUpdate, ApiUser } from '../../../api/types';
+import { TdLibUpdate, TdLibUpdateUser } from '../../../api/tdlib/types/updates';
 
-export function onUpdate(update: TdLibUpdate) {
+export function onUpdate(update: ApiUpdate | TdLibUpdate) {
   switch (update['@type']) {
     case 'updateUser': {
-      const { user } = update;
+      const { user } = update as TdLibUpdateUser;
 
       updateUser(user.id, user);
 
