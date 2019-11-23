@@ -1,31 +1,20 @@
-import {
-  InputPeerUser,
-  InputPeerChat,
-  InputPeerChannel,
-  InputPeerPhotoFileLocation,
-} from '../../lib/gramjs/tl/types';
+import * as gramJsApi from '../../lib/gramjs/tl/types';
 import {
   InvokeRequestPayload,
   SupportedMessageRequests,
   SupportedUploadRequests,
 } from './types/types';
-import {
-  ApiFileLocation,
-} from '../types';
+import * as apiRequests from '../../lib/gramjs/tl/functions';
 
 import { TelegramClient, session } from '../../lib/gramjs';
-import * as apiRequests from '../../lib/gramjs/tl/functions';
-import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
-
 import { DEBUG } from '../../config';
 import {
   onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber,
 } from './connectors/auth';
-import { onGramJsUpdate } from './connectors/updater';
+import { onGramJsUpdate } from './onGramJsUpdate';
+import localDb from './localDb';
 
 let client: any;
-
-const db: { chats: Record<number, MTP.chat | MTP.channel>; users: Record<number, MTP.user> } = { chats: {}, users: {} };
 
 export async function init(sessionId: string) {
   const { StringSession } = session;
@@ -71,32 +60,7 @@ export async function init(sessionId: string) {
 }
 
 export async function invokeRequest(data: InvokeRequestPayload) {
-  const {
-    namespace, name, args, enhancers = {},
-  } = data;
-
-  const enhancedArgs = { ...args };
-
-  Object.keys(enhancers).forEach((key) => {
-    const [enhancerName, arg] = enhancers[key];
-    switch (enhancerName) {
-      case 'buildInputPeer':
-        Object.assign(enhancedArgs, {
-          [key]: buildInputPeer(arg),
-        });
-        break;
-      case 'buildInputPeerPhotoFileLocation':
-        Object.assign(enhancedArgs, {
-          [key]: buildInputPeerPhotoFileLocation(arg),
-        });
-        break;
-      case 'generateRandomBigInt':
-        Object.assign(enhancedArgs, {
-          [key]: generateRandomBigInt(),
-        });
-        break;
-    }
-  });
+  const { namespace, name, args } = data;
 
   let RequestClass;
 
@@ -112,16 +76,16 @@ export async function invokeRequest(data: InvokeRequestPayload) {
       return null;
   }
 
-  const request = new RequestClass(enhancedArgs);
+  const request = new RequestClass(args);
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log(`[GramJs/worker] INVOKE ${name}`, enhancedArgs);
+    console.log(`[GramJs/worker] INVOKE ${name}`, args);
   }
 
   const result = await client.invoke(request);
 
-  postProcess(name, result);
+  postProcess(name, result, args);
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -131,7 +95,7 @@ export async function invokeRequest(data: InvokeRequestPayload) {
   return result;
 }
 
-function postProcess(name: string, anyResult: any) {
+function postProcess(name: string, anyResult: any, args: AnyLiteral) {
   switch (name) {
     case 'GetDialogsRequest': {
       const result: MTP.messages$Dialogs = anyResult;
@@ -141,63 +105,32 @@ function postProcess(name: string, anyResult: any) {
       }
 
       result.users.forEach((user) => {
-        db.users[user.id] = user as MTP.user;
+        localDb.users[user.id] = user as MTP.user;
       });
 
       result.chats.forEach((chat) => {
-        db.chats[chat.id] = chat as MTP.chat | MTP.channel;
+        localDb.chats[chat.id] = chat as MTP.chat | MTP.channel;
       });
 
       break;
     }
 
     case 'SendMessageRequest': {
-      const result: { updates: MTP.Updates[] } = anyResult;
+      const result = anyResult;
 
-      if (!result || !result.updates) {
+      if (!result) {
         return;
       }
 
-      result.updates.forEach(onGramJsUpdate);
+      // TODO Support this.
+      if (result instanceof gramJsApi.UpdatesTooLong) {
+        return;
+      }
+
+      const updates = result.hasOwnProperty('updates') ? result.updates as MTP.Updates[] : [result as MTP.Updates];
+
+      const originRequest = { name, args };
+      updates.forEach((update) => onGramJsUpdate(update, originRequest));
     }
   }
-}
-
-function buildInputPeer(chatOrUserId: number): MTP.Peer {
-  if (chatOrUserId > 0) {
-    const user = db.users[chatOrUserId] as MTP.user;
-
-    return new InputPeerUser({
-      userId: chatOrUserId,
-      ...(user && { accessHash: user.accessHash }),
-    });
-  } else if (chatOrUserId <= -1000000000) {
-    const channel = db.chats[-chatOrUserId] as MTP.channel;
-
-    return new InputPeerChannel({
-      channelId: -chatOrUserId,
-      ...(channel && { accessHash: channel.accessHash }),
-    });
-  } else {
-    return new InputPeerChat({
-      chatId: -chatOrUserId,
-    });
-  }
-}
-
-function buildInputPeerPhotoFileLocation(
-  { id, fileLocation }: { id: number; fileLocation: ApiFileLocation },
-): MTP.inputPeerPhotoFileLocation {
-  const peer = buildInputPeer(id);
-  const { volumeId, localId } = fileLocation;
-
-  return new InputPeerPhotoFileLocation({
-    peer,
-    volumeId,
-    localId,
-  });
-}
-
-function generateRandomBigInt() {
-  return readBigIntFromBuffer(generateRandomBytes(8), false);
 }

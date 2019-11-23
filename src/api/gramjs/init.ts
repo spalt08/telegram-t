@@ -1,6 +1,6 @@
 import { OnApiUpdate } from './types/types';
 
-import { init as initUpdater } from './connectors/updater';
+import { init as initUpdater } from './onGramJsUpdate';
 import { init as initAuth } from './connectors/auth';
 import { init as initChats } from './connectors/chats';
 import { init as initMessages } from './connectors/messages';

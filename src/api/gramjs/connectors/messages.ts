@@ -4,8 +4,12 @@ import { OnApiUpdate } from '../types/types';
 import { invokeRequest } from '../client';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
+import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
+import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
+// We only support 100000 local pending messages here and expect it will not interfere with real IDs.
+let localMessageCounter = -1;
 
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
@@ -22,9 +26,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     args: {
       offsetId: fromMessageId,
       limit,
-    },
-    enhancers: {
-      peer: ['buildInputPeer', chatId],
+      peer: buildInputPeer(chatId),
     },
   }) as MTP.messages$Messages;
 
@@ -49,16 +51,53 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   };
 }
 
-export function sendMessage(chatId: number, message: string) {
+export function sendMessage(chatId: number, text: string) {
+  const localMessage = buildLocalMessage(chatId, text);
+  onUpdate({
+    '@type': 'updateMessage',
+    id: localMessage.id,
+    chat_id: chatId,
+    message: localMessage,
+  });
+
+  onUpdate({
+    '@type': 'updateChat',
+    id: chatId,
+    chat: {
+      last_message: localMessage,
+    },
+  });
+
+  const randomId = generateRandomBigInt();
+
+  localDb.localMessages[randomId.toString()] = localMessage;
+
   void invokeRequest({
     namespace: 'messages',
     name: 'SendMessageRequest',
     args: {
-      message,
-    },
-    enhancers: {
-      peer: ['buildInputPeer', chatId],
-      randomId: ['generateRandomBigInt'],
+      message: text,
+      peer: buildInputPeer(chatId),
+      randomId,
     },
   });
+}
+
+function buildLocalMessage(chatId: number, text: string): ApiMessage {
+  const localId = localMessageCounter--;
+
+  return {
+    id: localId,
+    chat_id: chatId,
+    content: {
+      '@type': 'textContent',
+      text: { text },
+    },
+    date: Math.round(Date.now() / 1000),
+    is_outgoing: true,
+    sender_user_id: -1, // TODO
+    sending_state: {
+      '@type': 'messageSendingStatePending',
+    },
+  };
 }

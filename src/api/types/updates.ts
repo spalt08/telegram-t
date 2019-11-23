@@ -28,21 +28,33 @@ export type ApiUpdateChats = {
   chats: ApiChat[];
 };
 
-export type ApiUpdateNewChat = {
-  '@type': 'updateNewChat';
-  chat: Partial<ApiChat>;
-};
-
 export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: number;
   chat: Partial<ApiChat>;
 };
 
-export type ApiUpdateNewMessage = {
-  '@type': 'updateNewMessage';
+export type ApiUpdateMessage = {
+  '@type': 'updateMessage';
   chat_id: number;
-  message: Pick<ApiMessage, 'id'> & Partial<ApiMessage>;
+  id: number;
+  message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateMessageSendSucceeded = {
+  '@type': 'updateMessageSendSucceeded';
+  chat_id: number;
+  old_message_id: number;
+  message: ApiMessage;
+};
+
+export type ApiUpdateMessageSendFailed = {
+  '@type': 'updateMessageSendFailed';
+  chat_id: number;
+  old_message_id: number;
+  sending_state: {
+    '@type': 'messageSendingStateFailed';
+  };
 };
 
 export type ApiUpdateUsers = {
@@ -56,7 +68,9 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
-export type ApiUpdate = ApiUpdateAuthorizationState |
-ApiUpdateChats | ApiUpdateNewChat | ApiUpdateChat |
-ApiUpdateNewMessage |
-ApiUpdateUsers | ApiUpdateUser;
+export type ApiUpdate = (
+  ApiUpdateAuthorizationState |
+  ApiUpdateChats | ApiUpdateChat |
+  ApiUpdateMessage | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
+  ApiUpdateUsers | ApiUpdateUser
+);

@@ -80,3 +80,7 @@ export function getSendingState(message: ApiMessage) {
 
   return message.sending_state['@type'] === 'messageSendingStateFailed' ? 'failed' : 'pending';
 }
+
+export function isMessageLocal(message: ApiMessage) {
+  return message.id < 0;
+}

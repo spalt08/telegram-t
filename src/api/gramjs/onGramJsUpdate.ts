@@ -1,9 +1,10 @@
-import * as gramJsApi from '../../../lib/gramjs/tl/types';
-import { OnApiUpdate } from '../types/types';
+import * as gramJsApi from '../../lib/gramjs/tl/types/index';
+import { OnApiUpdate } from './types/types';
 
-import { buildApiMessage, buildApiMessageFromShort } from '../builders/messages';
-import { getApiChatIdFromMtpPeer } from '../builders/chats';
-import { buildApiUserStatus } from '../builders/users';
+import { buildApiMessage, buildApiMessageFromShort } from './builders/messages';
+import { getApiChatIdFromMtpPeer } from './builders/chats';
+import { buildApiUserStatus } from './builders/users';
+import localDb from './localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -11,10 +12,11 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function onGramJsUpdate(update: AnyLiteral) {
+export function onGramJsUpdate(update: AnyLiteral, originRequest?: { name: string; args: AnyLiteral }) {
   if (
     update instanceof gramJsApi.UpdateNewMessage
     || update instanceof gramJsApi.UpdateShortMessage
+  // TODO UpdateNewChannelMessage
   ) {
     let message;
 
@@ -26,7 +28,8 @@ export function onGramJsUpdate(update: AnyLiteral) {
     }
 
     onUpdate({
-      '@type': 'updateNewMessage',
+      '@type': 'updateMessage',
+      id: message.id,
       chat_id: message.chat_id,
       message,
     });
@@ -36,6 +39,26 @@ export function onGramJsUpdate(update: AnyLiteral) {
       id: message.chat_id,
       chat: {
         last_message: message,
+      },
+    });
+  } else if (
+    update instanceof gramJsApi.UpdateMessageID
+    || update instanceof gramJsApi.UpdateShortSentMessage
+  ) {
+    const randomId = originRequest && originRequest.args.randomId;
+    const localMessage = localDb.localMessages[randomId.toString()];
+    if (!localMessage) {
+      throw new Error('Local message not found');
+    }
+
+    onUpdate({
+      '@type': 'updateMessageSendSucceeded',
+      chat_id: localMessage.chat_id,
+      old_message_id: localMessage.id,
+      message: {
+        ...localMessage,
+        id: update.id,
+        sending_state: undefined,
       },
     });
   } else if (update instanceof gramJsApi.UpdateReadHistoryInbox) {
@@ -80,14 +103,14 @@ export function onGramJsUpdate(update: AnyLiteral) {
         status: buildApiUserStatus(update.status),
       },
     });
-  // TODO @gramjs This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
-  // } else if (update instanceof gramJsApi.UpdateDialogPinned) {
-  //   onUpdate({
-  //     '@type': 'updateChat',
-  //     id: getApiChatIdFromMtpPeer(update.peer),
-  //     chat: {
-  //       is_pinned: update.pinned || false,
-  //     },
-  //   });
+    // TODO @gramjs This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
+    // } else if (update instanceof gramJsApi.UpdateDialogPinned) {
+    //   onUpdate({
+    //     '@type': 'updateChat',
+    //     id: getApiChatIdFromMtpPeer(update.peer),
+    //     chat: {
+    //       is_pinned: update.pinned || false,
+    //     },
+    //   });
   }
 }

@@ -1,5 +1,7 @@
-import { invokeRequest } from '../client';
 import { ApiFileLocation } from '../../types';
+
+import { invokeRequest } from '../client';
+import { buildInputPeerPhotoFileLocation } from '../inputHelpers';
 
 export function init() {
 }
@@ -12,9 +14,7 @@ export async function loadFile(id: number, fileLocation: ApiFileLocation): Promi
       flags: 0,
       offset: 0,
       limit: 1024 * 1024,
-    },
-    enhancers: {
-      location: ['buildInputPeerPhotoFileLocation', { id, fileLocation }],
+      location: buildInputPeerPhotoFileLocation({ id, fileLocation }),
     },
   });
 

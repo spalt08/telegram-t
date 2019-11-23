@@ -21,7 +21,7 @@ export function onUpdate(update: ApiUpdate) {
       break;
     }
 
-    case 'updateNewMessage': {
+    case 'updateMessage': {
       if (update.message.is_outgoing) {
         return;
       }
@@ -30,6 +30,23 @@ export function onUpdate(update: ApiUpdate) {
 
       updateChat(update.chat_id, {
         unread_count: currentUnreadCount + 1,
+      });
+
+      break;
+    }
+
+    case 'updateMessageSendSucceeded': {
+      const global = getGlobal();
+
+      const { chat_id, old_message_id, message } = update;
+      const currentLastMessage = global.chats.byId[chat_id].last_message;
+
+      if (currentLastMessage && currentLastMessage.id !== old_message_id) {
+        return;
+      }
+
+      updateChat(update.chat_id, {
+        last_message: message,
       });
 
       break;

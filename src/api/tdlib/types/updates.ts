@@ -35,7 +35,7 @@ export type TdLibAnyUpdate = AnyLiteral & {
     'updateUserFullInfo' | 'updateUserStatus' |
     'updateNewChat' | 'updateChatLastMessage' | 'updateChatReadInbox' | 'updateChatReadOutbox' | 'updateChatIsPinned' |
     'updateBasicGroup' | 'updateBasicGroupFullInfo' | 'updateSupergroup' | 'updateSupergroupFullInfo' |
-    'updateMessageSendSucceeded' |
+    'updateNewMessage' | 'updateMessageSendSucceeded' |
     'updateFile'
   );
 };

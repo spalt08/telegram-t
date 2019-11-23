@@ -63,7 +63,7 @@ export interface ApiMessage {
   sender_user_id: number;
   reply_to_message_id?: number;
   sending_state?: {
-    '@type': 'messageSendingStateFailed';
+    '@type': 'messageSendingStatePending' | 'messageSendingStateFailed';
   };
   forward_info?: ApiMessageForwardInfo;
 }

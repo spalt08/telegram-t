@@ -1,33 +1,34 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
+import { GlobalState } from '../../../store/types';
 
 export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
-    case 'updateNewMessage': {
-      const { message } = update;
+    case 'updateMessage': {
+      const { chat_id, id, message } = update;
 
-      updateMessage(update.chat_id, message.id, message);
+      updateMessage(chat_id, id, message);
 
       break;
     }
 
-    // TODO
-    // case 'updateMessageSendSucceeded': {
-    //   const { message, old_message_id } = update;
-    //
-    //   replaceMessage(update.chat_id, old_message_id, message);
-    //
-    //   break;
-    // }
+    case 'updateMessageSendSucceeded': {
+      const { chat_id, old_message_id, message } = update;
 
-    // case 'updateMessageSendFailed': {
-    //   const { message, old_message_id } = update;
-    //
-    //   updateMessage(message.chat_id, old_message_id, message);
-    //
-    //   break;
-    // }
+      replaceMessage(chat_id, old_message_id, message);
+
+      break;
+    }
+
+    // TODO Never sent from `api`.
+    case 'updateMessageSendFailed': {
+      const { chat_id, old_message_id, sending_state } = update;
+
+      updateMessage(chat_id, old_message_id, { sending_state });
+
+      break;
+    }
   }
 }
 
@@ -52,4 +53,36 @@ function updateMessage(chatId: number, messageId: number, messageUpdate: Partial
       },
     },
   });
+}
+
+function replaceMessage(chatId: number, oldMessageId: number, message: Pick<ApiMessage, 'id'> & Partial<ApiMessage>) {
+  const global = getGlobal();
+
+  const currentMessage = global.messages.byChatId[chatId].byId[oldMessageId];
+  if (!currentMessage) {
+    throw new Error('Local message not found');
+  }
+
+  const newGlobal: GlobalState = {
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {
+        ...global.messages.byChatId,
+        [chatId]: {
+          byId: {
+            ...(global.messages.byChatId[chatId] || {}).byId,
+            [message.id]: {
+              ...currentMessage,
+              ...message,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  delete newGlobal.messages.byChatId[chatId].byId[oldMessageId];
+
+  setGlobal(newGlobal);
 }

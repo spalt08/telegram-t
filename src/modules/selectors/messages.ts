@@ -1,7 +1,7 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage } from '../../api/types';
 import { selectChat } from './chats';
-import { getSendingState } from '../helpers';
+import { getSendingState, isMessageLocal } from '../helpers';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
   const byChatId = global.messages.byChatId[chatId];
@@ -18,7 +18,7 @@ export function selectChatMessage(global: GlobalState, chatId: number, messageId
 export function selectIsUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 
-  return chat.last_read_outbox_message_id < message.id;
+  return isMessageLocal(message) || chat.last_read_outbox_message_id < message.id;
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage) {
