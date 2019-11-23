@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
-    "build:github": "./deploy/github.sh",
+    "build:staging:gramjs": "parcel build src/index.html --public-url ./",
     "build:contest:tdlib": "./deploy/contest-tdlib.sh",
     "build:contest:gramjs": "./deploy/contest-gramjs.sh",
+    "build:github:all": "./deploy/github.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
