@@ -3,7 +3,7 @@ const { TypeNotFoundError } = require('../errors/Common')
 const { coreObjects } = require('../tl/core')
 const { tlobjects } = require('../tl/AllTLObjects')
 const { readBigIntFromBuffer } = require('../Helpers')
-const JSBI = require('jsbi')
+const BigInt = require('big-integer')
 
 class BinaryReader {
     /**
@@ -45,7 +45,7 @@ class BinaryReader {
     /**
      * Reads a long integer (8 bytes or 64 bits) value.
      * @param signed
-     * @returns {bigint}
+     * @returns {BigInteger}
      */
     readLong(signed = true) {
         return this.readLargeInt(64, signed)
@@ -61,7 +61,7 @@ class BinaryReader {
 
     /**
      * Reads a real floating point (8 bytes) value.
-     * @returns {JSBI.BigInt}
+     * @returns {BigInteger}
      */
     readDouble() {
         return unpack('<f', this.read(8))[0]

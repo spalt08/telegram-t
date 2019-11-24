@@ -3,10 +3,10 @@ const Helpers = require('../Helpers')
 const AES = require('../crypto/AES')
 const BinaryReader = require('../extensions/BinaryReader')
 const GZIPPacked = require('../tl/core/GZIPPacked')
-const { TLMessage } = require('../tl/core')
-const { SecurityError, InvalidBufferError } = require('../errors/Common')
-const { InvokeAfterMsgRequest } = require('../tl/functions')
-const JSBI = require('jsbi')
+const {TLMessage} = require('../tl/core')
+const {SecurityError, InvalidBufferError} = require('../errors/Common')
+const {InvokeAfterMsgRequest} = require('../tl/functions')
+const BigInt = require('big-integer')
 
 class MTProtoState {
     /**
@@ -51,7 +51,7 @@ class MTProtoState {
         // Session IDs can be random on every connection
         this.id = Helpers.generateRandomLong(true)
         this._sequence = 0
-        this._lastMsgId = 0
+        this._lastMsgId = BigInt(0)
     }
 
     /**
@@ -77,7 +77,7 @@ class MTProtoState {
 
         const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)])
         const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)])
-        return { key, iv }
+        return {key, iv}
     }
 
     /**
@@ -116,7 +116,7 @@ class MTProtoState {
         // "msg_key = substr (msg_key_large, 8, 16)"
         const msgKey = msgKeyLarge.slice(8, 24)
 
-        const { iv, key } = this._calcKey(this.authKey.key, msgKey, true)
+        const {iv, key} = this._calcKey(this.authKey.key, msgKey, true)
 
         const keyId = Helpers.readBufferFromBigInt(this.authKey.keyId, 8)
         return Buffer.concat([keyId, msgKey, AES.encryptIge(Buffer.concat([data, padding]), key, iv)])
@@ -134,12 +134,12 @@ class MTProtoState {
         // TODO Check salt,sessionId, and sequenceNumber
         const keyId = Helpers.readBigIntFromBuffer(body.slice(0, 8))
 
-        if (JSBI.notEqual(keyId, this.authKey.keyId)) {
+        if (keyId.neq(this.authKey.keyId)) {
             throw new SecurityError('Server replied with an invalid auth key')
         }
 
         const msgKey = body.slice(8, 24)
-        const { iv, key } = this._calcKey(this.authKey.key, msgKey, false)
+        const {iv, key} = this._calcKey(this.authKey.key, msgKey, false)
         body = AES.decryptIge(body.slice(24), key, iv)
 
         // https://core.telegram.org/mtproto/security_guidelines
@@ -178,12 +178,9 @@ class MTProtoState {
     _getNewMsgId() {
         const now = new Date().getTime() / 1000 + this.timeOffset
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9)
-        let newMsgId = JSBI.bitwiseOr(
-            JSBI.leftShift(JSBI.BigInt(Math.floor(now)), JSBI.BigInt(32)),
-            JSBI.leftShift(JSBI.BigInt(nanoseconds), JSBI.BigInt(2))
-        )
-        if (JSBI.greaterThanOrEqual(this._lastMsgId, newMsgId)) {
-            newMsgId = JSBI.add(this._lastMsgId, JSBI.BigInt(4))
+        let newMsgId = (BigInt(Math.floor(now)).shiftLeft(BigInt(32))).or(BigInt(nanoseconds).shiftLeft(BigInt(2)))
+        if (this._lastMsgId.greaterOrEquals(newMsgId)) {
+            newMsgId = this._lastMsgId.add(BigInt(4))
         }
         this._lastMsgId = newMsgId
         return newMsgId
@@ -192,17 +189,17 @@ class MTProtoState {
     /**
      * Updates the time offset to the correct
      * one given a known valid message ID.
-     * @param correctMsgId
+     * @param correctMsgId {BigInteger}
      */
     updateTimeOffset(correctMsgId) {
         const bad = this._getNewMsgId()
         const old = this.timeOffset
         const now = Math.floor(new Date().getTime() / 1000)
-        const correct = correctMsgId >> JSBI.BigInt(32)
+        const correct = correctMsgId.shiftRight(BigInt(32))
         this.timeOffset = correct - now
 
         if (this.timeOffset !== old) {
-            this._lastMsgId = 0
+            this._lastMsgId = BigInt(0)
             this._log.debug(
                 `Updated time offset (old offset ${old}, bad ${bad}, good ${correctMsgId}, new ${this.timeOffset})`,
             )

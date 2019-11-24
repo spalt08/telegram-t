@@ -1,92 +1,92 @@
-const { getRandomInt } = require('../Helpers')
-const JSBI = require('jsbi')
+const {getRandomInt} = require('../Helpers')
+const BigInt = require('big-integer')
 
 class Factorizator {
     /**
      * Finds the small multiplier by using Lopatin's method
-     * @param what {JSBI.BigInt}
-     * @return {JSBI.BigInt}
+     * @param what {BigInteger}
+     * @return {BigInteger}
      */
     static findSmallMultiplierLopatin(what) {
-        let g = JSBI.BigInt(0)
-        for (let i = JSBI.BigInt(0); JSBI.lessThan(i, JSBI.BigInt(3)); i = JSBI.add(i, JSBI.BigInt(1))) {
-            const q = JSBI.BigInt(30) || JSBI.BigInt((getRandomInt(0, 127) & 15) + 17)
-            let x = JSBI.BigInt(40) || JSBI.BigInt(getRandomInt(0, 1000000000) + 1)
+        let g = BigInt(0)
+        for (let i = BigInt(0); i.lesser(BigInt(3)); i = i.add(BigInt(1))) {
+            const q = BigInt(30) || BigInt((getRandomInt(0, 127) & 15) + 17)
+            let x = BigInt(40) || BigInt(getRandomInt(0, 1000000000) + 1)
 
             let y = x
-            const lim = JSBI.leftShift(JSBI.BigInt(1), JSBI.add(i, JSBI.BigInt(18)))
-            for (let j = JSBI.BigInt(1); JSBI.lessThan(j, lim); j = JSBI.add(j, JSBI.BigInt(1))) {
+            const lim = BigInt(1).shiftLeft(i.add(BigInt(18)))
+            for (let j = BigInt(1); j.lesser(lim); j = j.add(BigInt(1))) {
                 let a = x
                 let b = x
 
                 let c = q
-                while (JSBI.notEqual(b, JSBI.BigInt(0))) {
-                    if (JSBI.notEqual(JSBI.bitwiseAnd(b, JSBI.BigInt(1)), JSBI.BigInt(0))) {
-                        c = JSBI.add(c, a)
-                        if (JSBI.greaterThanOrEqual(c, what)) {
-                            c = JSBI.subtract(c, what)
+                while (b.neq(BigInt(0))) {
+                    if ((b.and(BigInt(1))).neq(BigInt(0))) {
+                        c = c.add(a)
+                        if (c.greaterOrEquals(what)) {
+                            c = c.subtract(what)
                         }
                     }
-                    a = JSBI.add(a, a)
-                    if (JSBI.greaterThanOrEqual(a, what)) {
-                        a = JSBI.subtract(a, what)
+                    a = a.add(a)
+                    if (a.greaterOrEquals(what)) {
+                        a = a.subtract(what)
                     }
-                    b = JSBI.signedRightShift(b, JSBI.BigInt(1))
+                    b = b.shiftRight(BigInt(1))
                 }
 
                 x = c
-                const z = JSBI.BigInt(JSBI.lessThan(x, y) ? JSBI.subtract(y, x) : JSBI.subtract(x, y))
+                const z = BigInt(x.lesser(y) ? y.subtract(x) : x.subtract(y))
                 g = this.gcd(z, what)
 
-                if (JSBI.notEqual(g, JSBI.BigInt(1))) {
+                if (g.neq(BigInt(1))) {
                     break
                 }
 
-                if (JSBI.equal(JSBI.bitwiseAnd(j, JSBI.subtract(j, JSBI.BigInt(1))), JSBI.BigInt(0))) {
+                if ((j.and(j.subtract(BigInt(1)))).neq(BigInt(0))) {
                     y = x
                 }
             }
 
-            if (JSBI.greaterThan(g, JSBI.BigInt(1))) {
+            if (g.greater(BigInt(1))) {
                 break
             }
         }
-        const p = JSBI.divide(what, g)
+        const p = what.divide(g)
 
-        return JSBI.lessThan(p, g) ? p : g
+        return p.lesser(g) ? p : g
     }
 
     /**
      * Calculates the greatest common divisor
-     * @param a {JSBI.BigInt}
-     * @param b {JSBI.BigInt}
-     * @returns {JSBI.BigInt}
+     * @param a {BigInteger}
+     * @param b {BigInteger}
+     * @returns {BigInteger}
      */
     static gcd(a, b) {
-        while (JSBI.notEqual(a, JSBI.BigInt(0)) && JSBI.notEqual(b, JSBI.BigInt(0))) {
-            while (JSBI.equal(JSBI.bitwiseAnd(b, JSBI.BigInt(1)), JSBI.BigInt(0))) {
-                b = JSBI.signedRightShift(b, JSBI.BigInt(1))
+        while (a.neq(BigInt(0)) && (b.neq(BigInt(0)))) {
+            while (b.and(BigInt(1)).neq(BigInt(0))) {
+                b = b.shiftRight(BigInt(1))
             }
-            while (JSBI.equal(JSBI.bitwiseAnd(a, JSBI.BigInt(1)), JSBI.BigInt(0))) {
-                a = JSBI.signedRightShift(a, JSBI.BigInt(1))
+            while (a.and(BigInt(1)).eq(BigInt(0))) {
+                a = a.shiftRight(BigInt(1))
             }
-            if (JSBI.greaterThan(a, b)) {
-                a = JSBI.subtract(a, b)
+            if (a.greater(b)) {
+                a = a.subtract(b)
             } else {
-                b = JSBI.subtract(b, a)
+                b = b.subtract(a)
             }
         }
-        return JSBI.equal(b, JSBI.BigInt(0)) ? a : b
+        return b.equals(BigInt(0)) ? a : b
     }
 
     /**
      * Factorizes the given number and returns both the divisor and the number divided by the divisor
-     * @param pq {JSBI.BigInt}
-     * @returns {{p: JSBI.BigInt, q: JSBI.BigInt}}
+     * @param pq {BigInteger}
+     * @returns {{p: BigInteger, q: BigInteger}}
      */
     static factorize(pq) {
         const divisor = this.findSmallMultiplierLopatin(pq)
-        return { p: divisor, q: JSBI.divide(pq, divisor) }
+        return {p: divisor, q: pq.divide(divisor)}
     }
 }
 

@@ -5,13 +5,13 @@ const AuthKey = require('../crypto/AuthKey')
 const { TLObject } = require('../tl/tlobject')
 const utils = require('../Utils')
 const types = require('../tl/types')
-const JSBI = require('jsbi')
+const BigInt = require('big-integer')
 
-JSBI.BigInt.toJSON = function() {
+BigInt.toJSON = function () {
     return { fool: this.fool.toString('hex') }
 }
-JSBI.BigInt.parseJson = function() {
-    return { fool: JSBI.BigInt('0x' + this.fool) }
+BigInt.parseJson = function () {
+    return { fool: BigInt(this.fool, 16) }
 }
 
 class Session {
@@ -25,9 +25,9 @@ class Session {
         this.authKey = undefined
         this.id = generateRandomLong(false)
         this.sequence = 0
-        this.salt = JSBI.BigInt(0) // Unsigned long
-        this.timeOffset = JSBI.BigInt(0)
-        this.lastMessageId = JSBI.BigInt(0)
+        this.salt = BigInt(0) // Unsigned long
+        this.timeOffset = BigInt(0)
+        this.lastMessageId = BigInt(0)
         this.user = undefined
         this._files = {}
         this._entities = new Set()
@@ -39,8 +39,8 @@ class Session {
      */
     async save() {
         if (this.sessionUserId) {
-            const str = JSON.stringify(this, function(key, value) {
-                if (value instanceof JSBI) {
+            const str = JSON.stringify(this, function (key, value) {
+                if (value instanceof BigInt) {
                     return value.toString() + 'n'
                 } else {
                     return value
@@ -86,7 +86,7 @@ class Session {
         // While this is a simple implementation it might be overrode by,
         // other classes so they don't need to implement the plural form
         // of the method. Don't remove.
-        return [id, hash, username, phone, name]
+        return [ id, hash, username, phone, name ]
     }
 
     _entityToRow(e) {
@@ -159,9 +159,9 @@ class Session {
 
         if (existsSync(filepath)) {
             try {
-                const ob = JSON.parse(readFileSync(filepath, 'utf-8'), function(key, value) {
+                const ob = JSON.parse(readFileSync(filepath, 'utf-8'), function (key, value) {
                     if (typeof value == 'string' && value.match(/(\d+)n/)) {
-                        return JSBI.BigInt(value.slice(0, -1))
+                        return BigInt(value.slice(0, -1))
                     } else {
                         return value
                     }
@@ -194,12 +194,12 @@ class Session {
     getNewMsgId() {
         const msTime = new Date().getTime()
         let newMessageId =
-            (JSBI.BigInt(JSBI.BigInt(Math.floor(msTime / 1000)) + this.timeOffset) << JSBI.BigInt(32)) |
-            (JSBI.BigInt(msTime % 1000) << JSBI.BigInt(22)) |
-            (JSBI.BigInt(getRandomInt(0, 524288)) << JSBI.BigInt(2)) // 2^19
+            (BigInt(BigInt(Math.floor(msTime / 1000)) + this.timeOffset) << BigInt(32)) |
+            (BigInt(msTime % 1000) << BigInt(22)) |
+            (BigInt(getRandomInt(0, 524288)) << BigInt(2)) // 2^19
 
         if (this.lastMessageId >= newMessageId) {
-            newMessageId = this.lastMessageId + JSBI.BigInt(4)
+            newMessageId = this.lastMessageId + BigInt(4)
         }
         this.lastMessageId = newMessageId
         return newMessageId
@@ -215,7 +215,7 @@ class Session {
     getEntityRowsByPhone(phone) {
         for (const e of this._entities) { // id, hash, username, phone, name
             if (e[3] === phone) {
-                return [e[0], e[1]]
+                return [ e[0], e[1] ]
             }
         }
     }
@@ -223,7 +223,7 @@ class Session {
     getEntityRowsByName(name) {
         for (const e of this._entities) { // id, hash, username, phone, name
             if (e[4] === name) {
-                return [e[0], e[1]]
+                return [ e[0], e[1] ]
             }
         }
     }
@@ -231,7 +231,7 @@ class Session {
     getEntityRowsByUsername(username) {
         for (const e of this._entities) { // id, hash, username, phone, name
             if (e[2] === username) {
-                return [e[0], e[1]]
+                return [ e[0], e[1] ]
             }
         }
     }
@@ -240,17 +240,17 @@ class Session {
         if (exact) {
             for (const e of this._entities) { // id, hash, username, phone, name
                 if (e[0] === id) {
-                    return [e[0], e[1]]
+                    return [ e[0], e[1] ]
                 }
             }
         } else {
-            const ids = [utils.getPeerId(new types.PeerUser({ userId: id })),
+            const ids = [ utils.getPeerId(new types.PeerUser({ userId: id })),
                 utils.getPeerId(new types.PeerChat({ chatId: id })),
                 utils.getPeerId(new types.PeerChannel({ channelId: id })),
             ]
             for (const e of this._entities) { // id, hash, username, phone, name
                 if (ids.includes(e[0])) {
-                    return [e[0], e[1]]
+                    return [ e[0], e[1] ]
                 }
             }
         }
@@ -259,7 +259,7 @@ class Session {
     getInputEntity(key) {
         let exact
         if (key.SUBCLASS_OF_ID !== undefined) {
-            if ([0xc91c90b6, 0xe669bf46, 0x40f202fd].includes(key.SUBCLASS_OF_ID)) {
+            if ([ 0xc91c90b6, 0xe669bf46, 0x40f202fd ].includes(key.SUBCLASS_OF_ID)) {
                 // hex(crc32(b'InputPeer', b'InputUser' and b'InputChannel'))
                 // We already have an Input version, so nothing else required
                 return key

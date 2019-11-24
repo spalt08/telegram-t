@@ -1,20 +1,21 @@
 const NodeRSA = require('node-rsa')
 const { TLObject } = require('../tl/tlobject')
 const { readBigIntFromBuffer, sha1, readBufferFromBigInt, generateRandomBytes } = require('../Helpers')
-const modExp = require('./modPowLeemon');
+const modExp = require('./modPowLeemon')
 const _serverKeys = {}
-const JSBI = require('jsbi')
+const BigInt = require('big-integer')
 
 /**
  * Gets the arbitrary-length byte array corresponding to the given integer
- * @param integer {number,JSBI.BigInt}
+ * @param integer {number,BigInteger}
  * @param signed {boolean}
  * @returns {Buffer}
  */
 function getByteArray(integer, signed = false) {
-    const { length: bits } = integer.toString(2)
-    const byteLength = Math.floor((bits + 8 - 1) / 8)
-    return readBufferFromBigInt(JSBI.BigInt(integer), byteLength, false, signed)
+    console.log("the integer is ", integer)
+    integer = BigInt(integer)
+    const byteLength = Math.floor((integer.bitLength() + 8 - 1) / 8)
+    return readBufferFromBigInt(integer, byteLength, false, signed)
 }
 
 function _computeFingerprint(key) {
@@ -24,7 +25,7 @@ function _computeFingerprint(key) {
     const n = TLObject.serializeBytes(nArray)
     const e = TLObject.serializeBytes(getByteArray(key.keyPair.e))
     // Telegram uses the last 8 bytes as the fingerprint
-    const sh = sha1(Buffer.concat([n, e]))
+    const sh = sha1(Buffer.concat([ n, e ]))
     return readBigIntFromBuffer(sh.slice(-8), true, true)
 }
 
@@ -39,8 +40,8 @@ function encrypt(fingerprint, data) {
         return undefined
     }
     const rand = generateRandomBytes(235 - data.length)
-    const toEncrypt = Buffer.concat([sha1(data), data, rand])
-    const encrypted = modExp(toEncrypt, getByteArray(JSBI.BigInt(key.keyPair.e)), key.keyPair.n.toBuffer())
+    const toEncrypt = Buffer.concat([ sha1(data), data, rand ])
+    const encrypted = modExp(toEncrypt, getByteArray(BigInt(key.keyPair.e)), key.keyPair.n.toBuffer())
     const block = Buffer.from(encrypted, undefined, 256)
     return block
 }

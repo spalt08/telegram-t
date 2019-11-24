@@ -1,22 +1,13 @@
 const crypto = require('crypto')
-const JSBI = require('jsbi')
+const BigInt = require('big-integer')
 
-/**
- * use this instead of ** because of webpack
- * @param a {bigint}
- * @param b {bigint}
- * @returns {bigint}
- */
-function bigIntPower(a, b) {
-    return JSBI.exponentiate(a, b)
-}
 
 /**
  * converts a buffer to big int
  * @param buffer
  * @param little
  * @param signed
- * @returns {bigint}
+ * @returns {bigInt.BigInteger}
  */
 function readBigIntFromBuffer(buffer, little = true, signed = false) {
     let randBuffer = Buffer.from(buffer)
@@ -24,35 +15,36 @@ function readBigIntFromBuffer(buffer, little = true, signed = false) {
     if (little) {
         randBuffer = randBuffer.reverse()
     }
-    let bigInt = JSBI.BigInt('0x' + randBuffer.toString('hex'))
+    let bigInt = BigInt(randBuffer.toString('hex'), 16)
     if (signed && Math.floor(bigInt.toString('2').length / 8) >= bytesNumber) {
-        bigInt = JSBI.subtract(bigInt, bigIntPower(JSBI.BigInt(2), JSBI.BigInt(bytesNumber * 8)))
+        bigInt = bigInt.subtract(BigInt(2).pow(BigInt(bytesNumber * 8)))
     }
     return bigInt
 }
 
 /**
  * converts a big int to a buffer
- * @param bigInt
+ * @param bigInt {BigInteger}
  * @param bytesNumber
  * @param little
  * @param signed
  * @returns {Buffer}
  */
 function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-    const bitLength = bigInt.toString('2').length
+    console.log("will read ", BigInt)
+    const bitLength = bigInt.bitLength()
 
     const bytes = Math.ceil(bitLength / 8)
     if (bytesNumber < bytes) {
         throw new Error('OverflowError: int too big to convert')
     }
-    if (!signed && JSBI.lessThan(bigInt, JSBI.BigInt(0))) {
+    if (!signed && bigInt.lesser(BigInt(0))) {
         throw new Error('Cannot convert to unsigned')
     }
     let below = false
-    if (JSBI.lessThan(bigInt, JSBI.BigInt(0))) {
+    if (bigInt.lesser(BigInt(0))) {
         below = true
-        bigInt = JSBI.unaryMinus(bigInt)
+        bigInt = bigInt.subtract(bigInt.add(bigInt))
     }
 
     const hex = bigInt.toString('16').padStart(bytesNumber * 2, '0')
@@ -79,7 +71,7 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
 
 /**
  * Generates a random long integer (8 bytes), which is optionally signed
- * @returns {JSBI.BigInt}
+ * @returns {BigInteger}
  */
 function generateRandomLong(signed = true) {
     return readBigIntFromBuffer(generateRandomBytes(8), true, signed)
@@ -115,14 +107,14 @@ function generateRandomBytes(count) {
 
 function calcKey(sharedKey, msgKey, client) {
     const x = client === true ? 0 : 8
-    const sha1a = sha1(Buffer.concat([msgKey, sharedKey.slice(x, x + 32)]))
+    const sha1a = sha1(Buffer.concat([ msgKey, sharedKey.slice(x, x + 32) ]))
     const sha1b = sha1(
-        Buffer.concat([sharedKey.slice(x + 32, x + 48), msgKey, sharedKey.slice(x + 48, x + 64)]),
+        Buffer.concat([ sharedKey.slice(x + 32, x + 48), msgKey, sharedKey.slice(x + 48, x + 64) ]),
     )
-    const sha1c = sha1(Buffer.concat([sharedKey.slice(x + 64, x + 96), msgKey]))
-    const sha1d = sha1(Buffer.concat([msgKey, sharedKey.slice(x + 96, x + 128)]))
-    const key = Buffer.concat([sha1a.slice(0, 8), sha1b.slice(8, 20), sha1c.slice(4, 16)])
-    const iv = Buffer.concat([sha1a.slice(8, 20), sha1b.slice(0, 8), sha1c.slice(16, 20), sha1d.slice(0, 8)])
+    const sha1c = sha1(Buffer.concat([ sharedKey.slice(x + 64, x + 96), msgKey ]))
+    const sha1d = sha1(Buffer.concat([ msgKey, sharedKey.slice(x + 96, x + 128) ]))
+    const key = Buffer.concat([ sha1a.slice(0, 8), sha1b.slice(8, 20), sha1c.slice(4, 16) ])
+    const iv = Buffer.concat([ sha1a.slice(8, 20), sha1b.slice(0, 8), sha1c.slice(16, 20), sha1d.slice(0, 8) ])
     return { key, iv }
 }
 
@@ -144,11 +136,11 @@ function calcMsgKey(data) {
 function generateKeyDataFromNonce(serverNonce, newNonce) {
     serverNonce = readBufferFromBigInt(serverNonce, 16, true, true)
     newNonce = readBufferFromBigInt(newNonce, 32, true, true)
-    const hash1 = sha1(Buffer.concat([newNonce, serverNonce]))
-    const hash2 = sha1(Buffer.concat([serverNonce, newNonce]))
-    const hash3 = sha1(Buffer.concat([newNonce, newNonce]))
-    const keyBuffer = Buffer.concat([hash1, hash2.slice(0, 12)])
-    const ivBuffer = Buffer.concat([hash2.slice(12, 20), hash3, newNonce.slice(0, 4)])
+    const hash1 = sha1(Buffer.concat([ newNonce, serverNonce ]))
+    const hash2 = sha1(Buffer.concat([ serverNonce, newNonce ]))
+    const hash3 = sha1(Buffer.concat([ newNonce, newNonce ]))
+    const keyBuffer = Buffer.concat([ hash1, hash2.slice(0, 12) ])
+    const ivBuffer = Buffer.concat([ hash2.slice(12, 20), hash3, newNonce.slice(0, 4) ])
     return { key: keyBuffer, iv: ivBuffer }
 }
 
@@ -179,21 +171,21 @@ function sha256(data) {
  * @param a
  * @param b
  * @param n
- * @returns {bigint}
+ * @returns {BigInteger}
  */
 function modExp(a, b, n) {
-    a = JSBI.remainder(a, n)
-    let result = JSBI.BigInt(1)
+    a = a.remainder(n)
+    let result = BigInt(1)
     let x = a
-    while (JSBI.greaterThan(b, JSBI.BigInt(0))) {
-        const leastSignificantBit = JSBI.remainder(b, JSBI.BigInt(2))
-        b = JSBI.divide(b, JSBI.BigInt(2))
-        if (JSBI.equal(leastSignificantBit, JSBI.BigInt(1))) {
-            result = JSBI.multiply(result, x)
-            result = JSBI.remainder(result, n)
+    while (b.greater(BigInt(0))) {
+        const leastSignificantBit = b.remainder(BigInt(2))
+        b = b.divide(BigInt(2))
+        if (leastSignificantBit.eq(BigInt(1))) {
+            result = result.multiply(x)
+            result = result.remainder(n)
         }
-        x = JSBI.multiply(x, x)
-        x = JSBI.remainder(x, n)
+        x = x.multiply(x)
+        x = x.remainder(n)
     }
     return result
 }
