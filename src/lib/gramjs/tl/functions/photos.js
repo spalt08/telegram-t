@@ -24,10 +24,10 @@ class UpdateProfilePhotoRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputPhoto(this.id)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5251bbf0","hex"),
-            this.id.bytes,
+            this.id.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -55,10 +55,10 @@ class UploadProfilePhotoRequest extends TLRequest {
 
         this.file = args.file;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("98c0324f","hex"),
-            this.file.bytes,
+            this.file.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -92,10 +92,10 @@ class DeletePhotosRequest extends TLRequest {
         }
         this.id = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2f7fcf87","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -144,10 +144,10 @@ class GetUserPhotosRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a832cd91","hex"),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.offset),
             readBufferFromBigInt(this.maxId,8,true,true),
             struct.pack('<i', this.limit),

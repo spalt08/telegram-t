@@ -28,14 +28,14 @@ class CreateStickerSetRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6a6ed89b","hex"),
             struct.pack('<I', (this.masks === undefined || this.masks === false || this.masks === null) ? 0 : 1),
-            this.userId.bytes,
+            this.userId.getBytes(),
             TLObject.serializeBytes(this.title),
             TLObject.serializeBytes(this.shortName),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.stickers.length),Buffer.concat(this.stickers.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.stickers.length),Buffer.concat(this.stickers.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -87,10 +87,10 @@ class RemoveStickerFromSetRequest extends TLRequest {
     async resolve(client, utils) {
         this.sticker = utils.getInputDocument(this.sticker)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("510f76f7","hex"),
-            this.sticker.bytes,
+            this.sticker.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -122,10 +122,10 @@ class ChangeStickerPositionRequest extends TLRequest {
     async resolve(client, utils) {
         this.sticker = utils.getInputDocument(this.sticker)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cad4b6ff","hex"),
-            this.sticker.bytes,
+            this.sticker.getBytes(),
             struct.pack('<i', this.position),
             ])
         }
@@ -158,11 +158,11 @@ class AddStickerToSetRequest extends TLRequest {
         this.stickerset = args.stickerset;
         this.sticker = args.sticker;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("befe5386","hex"),
-            this.stickerset.bytes,
-            this.sticker.bytes,
+            this.stickerset.getBytes(),
+            this.sticker.getBytes(),
             ])
         }
     static fromReader(reader) {

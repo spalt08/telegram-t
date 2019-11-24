@@ -21,7 +21,7 @@ class GetPaymentFormRequest extends TLRequest {
 
         this.msgId = args.msgId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4597f099","hex"),
             struct.pack('<i', this.msgId),
@@ -52,7 +52,7 @@ class GetPaymentReceiptRequest extends TLRequest {
 
         this.msgId = args.msgId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("80a992a0","hex"),
             struct.pack('<i', this.msgId),
@@ -85,12 +85,12 @@ class ValidateRequestedInfoRequest extends TLRequest {
         this.msgId = args.msgId;
         this.info = args.info;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("748e0a77","hex"),
             struct.pack('<I', (this.save === undefined || this.save === false || this.save === null) ? 0 : 1),
             struct.pack('<i', this.msgId),
-            this.info.bytes,
+            this.info.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -130,14 +130,14 @@ class SendPaymentFormRequest extends TLRequest {
         this.shippingOptionId = args.shippingOptionId || null;
         this.credentials = args.credentials;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b379882b","hex"),
             struct.pack('<I', (this.requestedInfoId === undefined || this.requestedInfoId === false || this.requestedInfoId === null) ? 0 : 1 | (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId === null) ? 0 : 2),
             struct.pack('<i', this.msgId),
             (this.requestedInfoId === undefined || this.requestedInfoId === false || this.requestedInfoId ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.requestedInfoId)],
             (this.shippingOptionId === undefined || this.shippingOptionId === false || this.shippingOptionId ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.shippingOptionId)],
-            this.credentials.bytes,
+            this.credentials.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -182,7 +182,7 @@ class GetSavedInfoRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xad3cf146;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4b827d22","hex"),
             ])
@@ -211,7 +211,7 @@ class ClearSavedInfoRequest extends TLRequest {
         this.credentials = args.credentials || null;
         this.info = args.info || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c1703dd8","hex"),
             struct.pack('<I', (this.credentials === undefined || this.credentials === false || this.credentials === null) ? 0 : 1 | (this.info === undefined || this.info === false || this.info === null) ? 0 : 2),

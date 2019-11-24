@@ -1,25 +1,14 @@
 import { ApiFileLocation } from '../../types';
 
-import { invokeRequest } from '../client';
-import { buildInputPeerPhotoFileLocation } from '../inputHelpers';
+import { downloadFile } from '../client';
 
 export function init() {
 }
 
-export async function loadFile(id: number, fileLocation: ApiFileLocation): Promise<string | null> {
-  const result = await invokeRequest({
-    namespace: 'upload',
-    name: 'GetFileRequest',
-    args: {
-      flags: 0,
-      offset: 0,
-      limit: 1024 * 1024,
-      location: buildInputPeerPhotoFileLocation({ id, fileLocation }),
-    },
-  });
-
+export async function loadFile(id: any, fileLocation: ApiFileLocation): Promise<string | null> {
+  const result = await downloadFile(id, fileLocation);
   // eslint-disable-next-line no-underscore-dangle
-  return result && result._bytes ? bytesToUrl(result._bytes) : null;
+  return result ? bytesToUrl(result) : null;
 }
 
 function bytesToUrl(bytes: Uint8Array, mimeType?: string) {

@@ -22,11 +22,11 @@ class InvokeAfterMsgRequest extends TLRequest {
         this.msgId = args.msgId;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2d379fcb","hex"),
             readBufferFromBigInt(this.msgId,8,true,true),
-            this.query.bytes,
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -59,11 +59,11 @@ class InvokeAfterMsgsRequest extends TLRequest {
         this.msgIds = args.msgIds;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f0b4c43d","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.msgIds.length),Buffer.concat(this.msgIds.map(x => readBufferFromBigInt(x,8,true,true))),
-            this.query.bytes,
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -109,7 +109,7 @@ class InitConnectionRequest extends TLRequest {
         this.proxy = args.proxy || null;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b8885178","hex"),
             struct.pack('<I', (this.proxy === undefined || this.proxy === false || this.proxy === null) ? 0 : 1),
@@ -120,8 +120,8 @@ class InitConnectionRequest extends TLRequest {
             TLObject.serializeBytes(this.systemLangCode),
             TLObject.serializeBytes(this.langPack),
             TLObject.serializeBytes(this.langCode),
-            (this.proxy === undefined || this.proxy === false || this.proxy ===null) ? Buffer.alloc(0) : [this.proxy.bytes],
-            this.query.bytes,
+            (this.proxy === undefined || this.proxy === false || this.proxy ===null) ? Buffer.alloc(0) : [this.proxy.getBytes()],
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -183,11 +183,11 @@ class InvokeWithLayerRequest extends TLRequest {
         this.layer = args.layer;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0d0d9bda","hex"),
             struct.pack('<i', this.layer),
-            this.query.bytes,
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -219,10 +219,10 @@ class InvokeWithoutUpdatesRequest extends TLRequest {
 
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b75994bf","hex"),
-            this.query.bytes,
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -252,11 +252,11 @@ class InvokeWithMessagesRangeRequest extends TLRequest {
         this.range = args.range;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f2755236","hex"),
-            this.range.bytes,
-            this.query.bytes,
+            this.range.getBytes(),
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -289,11 +289,11 @@ class InvokeWithTakeoutRequest extends TLRequest {
         this.takeoutId = args.takeoutId;
         this.query = args.query;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2efda9ac","hex"),
             readBufferFromBigInt(this.takeoutId,8,true,true),
-            this.query.bytes,
+            this.query.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -325,7 +325,7 @@ class ReqPqRequest extends TLRequest {
 
         this.nonce = args.nonce;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("78974660","hex"),
             readBufferFromBigInt(this.nonce,16,true,true),
@@ -356,7 +356,7 @@ class ReqPqMultiRequest extends TLRequest {
 
         this.nonce = args.nonce;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f18e7ebe","hex"),
             readBufferFromBigInt(this.nonce,16,true,true),
@@ -392,7 +392,7 @@ class ReqDHParamsRequest extends TLRequest {
         this.publicKeyFingerprint = args.publicKeyFingerprint;
         this.encryptedData = args.encryptedData;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("bee412d7","hex"),
             readBufferFromBigInt(this.nonce,16,true,true),
@@ -445,7 +445,7 @@ class SetClientDHParamsRequest extends TLRequest {
         this.serverNonce = args.serverNonce;
         this.encryptedData = args.encryptedData;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1f5f04f5","hex"),
             readBufferFromBigInt(this.nonce,16,true,true),
@@ -479,7 +479,7 @@ class DestroyAuthKeyRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x8291e68e;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("605143d1","hex"),
             ])
@@ -507,7 +507,7 @@ class RpcDropAnswerRequest extends TLRequest {
 
         this.reqMsgId = args.reqMsgId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("40a7e458","hex"),
             readBufferFromBigInt(this.reqMsgId,8,true,true),
@@ -538,7 +538,7 @@ class GetFutureSaltsRequest extends TLRequest {
 
         this.num = args.num;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("04bd21b9","hex"),
             struct.pack('<i', this.num),
@@ -569,7 +569,7 @@ class PingRequest extends TLRequest {
 
         this.pingId = args.pingId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ec77be7a","hex"),
             readBufferFromBigInt(this.pingId,8,true,true),
@@ -601,7 +601,7 @@ class PingDelayDisconnectRequest extends TLRequest {
         this.pingId = args.pingId;
         this.disconnectDelay = args.disconnectDelay;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8c7b42f3","hex"),
             readBufferFromBigInt(this.pingId,8,true,true),
@@ -636,7 +636,7 @@ class DestroySessionRequest extends TLRequest {
 
         this.sessionId = args.sessionId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("262151e7","hex"),
             readBufferFromBigInt(this.sessionId,8,true,true),

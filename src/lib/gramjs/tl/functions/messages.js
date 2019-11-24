@@ -2,9 +2,10 @@
 const { TLObject } = require('../tlobject');
 const { TLRequest } = require('../tlobject');
 const struct = require('python-struct');
+const {InputPeerEmpty} = require("../types")
 const { readBigIntFromBuffer,
-        readBufferFromBigInt, generateRandomBytes } = require('../../Helpers');
-const { InputPeerEmpty } = require('../types');
+        readBufferFromBigInt, generateRandomBytes } = require('../../Helpers')
+
 
 class GetMessagesRequest extends TLRequest {
     static CONSTRUCTOR_ID = 0x63c66506;
@@ -27,10 +28,10 @@ class GetMessagesRequest extends TLRequest {
         }
         this.id = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0665c663","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -73,14 +74,14 @@ class GetDialogsRequest extends TLRequest {
     async resolve(client, utils) {
         this.offset_peer = utils.getInputPeer(await client.getInputEntity(this.offsetPeer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("733beea0","hex"),
             struct.pack('<I', (this.excludePinned === undefined || this.excludePinned === false || this.excludePinned === null) ? 0 : 1 | (this.folderId === undefined || this.folderId === false || this.folderId === null) ? 0 : 2),
             (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             struct.pack('<i', this.offsetDate),
             struct.pack('<i', this.offsetId),
-            this.offset_peer.bytes,
+            this.offsetPeer.getBytes(),
             struct.pack('<i', this.limit),
             struct.pack('<i', this.hash),
             ])
@@ -146,10 +147,10 @@ class GetHistoryRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6082bbdc","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.offsetId),
             struct.pack('<i', this.offsetDate),
             struct.pack('<i', this.addOffset),
@@ -222,14 +223,14 @@ class SearchRequest extends TLRequest {
             this.from_id = utils.getInputUser(await client.getInputEntity(this.fromId))
         }
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("68ef1486","hex"),
             struct.pack('<I', (this.fromId === undefined || this.fromId === false || this.fromId === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.q),
-            (this.fromId === undefined || this.fromId === false || this.fromId ===null) ? Buffer.alloc(0) : [this.fromId.bytes],
-            this.filter.bytes,
+            (this.fromId === undefined || this.fromId === false || this.fromId ===null) ? Buffer.alloc(0) : [this.fromId.getBytes()],
+            this.filter.getBytes(),
             struct.pack('<i', this.minDate),
             struct.pack('<i', this.maxDate),
             struct.pack('<i', this.offsetId),
@@ -310,10 +311,10 @@ class ReadHistoryRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3a6d300e","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.maxId),
             ])
         }
@@ -351,11 +352,11 @@ class DeleteHistoryRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("095b011c","hex"),
             struct.pack('<I', (this.justClear === undefined || this.justClear === false || this.justClear === null) ? 0 : 1 | (this.revoke === undefined || this.revoke === false || this.revoke === null) ? 0 : 2),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.maxId),
             ])
         }
@@ -397,7 +398,7 @@ class DeleteMessagesRequest extends TLRequest {
         this.revoke = args.revoke || null;
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d2958ee5","hex"),
             struct.pack('<I', (this.revoke === undefined || this.revoke === false || this.revoke === null) ? 0 : 1),
@@ -441,7 +442,7 @@ class ReceivedMessagesRequest extends TLRequest {
 
         this.maxId = args.maxId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c054a905","hex"),
             struct.pack('<i', this.maxId),
@@ -476,11 +477,11 @@ class SetTypingRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("505e82a3","hex"),
-            this.peer.bytes,
-            this.action.bytes,
+            this.peer.getBytes(),
+            this.action.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -524,16 +525,16 @@ class SendMessageRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("70380c52","hex"),
             struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
-            this.peer.bytes,
+            this.peer.getBytes(),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             TLObject.serializeBytes(this.message),
             readBufferFromBigInt(this.randomId,8,true,true),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.getBytes()],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
@@ -635,17 +636,17 @@ class SendMediaRequest extends TLRequest {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
         this.media = utils.getInputMedia(this.media)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a9eb9134","hex"),
             struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
-            this.peer.bytes,
+            this.peer.getBytes(),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
-            this.media.bytes,
+            this.media.getBytes(),
             TLObject.serializeBytes(this.message),
             readBufferFromBigInt(this.randomId,8,true,true),
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.getBytes()],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
@@ -745,14 +746,14 @@ class ForwardMessagesRequest extends TLRequest {
         this.from_peer = utils.getInputPeer(await client.getInputEntity(this.fromPeer))
         this.to_peer = utils.getInputPeer(await client.getInputEntity(this.toPeer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0ee6fed9","hex"),
             struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.withMyScore === undefined || this.withMyScore === false || this.withMyScore === null) ? 0 : 256 | (this.grouped === undefined || this.grouped === false || this.grouped === null) ? 0 : 512 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
-            this.fromPeer.bytes,
+            this.fromPeer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.randomId.length),Buffer.concat(this.randomId.map(x => readBufferFromBigInt(x,8,true,true))),
-            this.toPeer.bytes,
+            this.toPeer.getBytes(),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
@@ -828,10 +829,10 @@ class ReportSpamRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("db9215cf","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -862,10 +863,10 @@ class GetPeerSettingsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9ce07236","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -898,12 +899,12 @@ class ReportRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("58b682bd","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
-            this.reason.bytes,
+            this.reason.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -943,7 +944,7 @@ class GetChatsRequest extends TLRequest {
 
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("87a16a3c","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
@@ -980,7 +981,7 @@ class GetFullChatRequest extends TLRequest {
 
         this.chatId = args.chatId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("661c833b","hex"),
             struct.pack('<i', this.chatId),
@@ -1012,7 +1013,7 @@ class EditChatTitleRequest extends TLRequest {
         this.chatId = args.chatId;
         this.title = args.title;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("552845dc","hex"),
             struct.pack('<i', this.chatId),
@@ -1052,11 +1053,11 @@ class EditChatPhotoRequest extends TLRequest {
         this.chat_id = await client.getPeerId(this.chatId, add_mark=False)
         this.photo = utils.getInputChatPhoto(this.photo)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d8794cca","hex"),
             struct.pack('<i', this.chatId),
-            this.photo.bytes,
+            this.photo.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1093,11 +1094,11 @@ class AddChatUserRequest extends TLRequest {
         this.chat_id = await client.getPeerId(this.chatId, add_mark=False)
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("09aaa0f9","hex"),
             struct.pack('<i', this.chatId),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.fwdLimit),
             ])
         }
@@ -1137,11 +1138,11 @@ class DeleteChatUserRequest extends TLRequest {
         this.chat_id = await client.getPeerId(this.chatId, add_mark=False)
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("161f61e0","hex"),
             struct.pack('<i', this.chatId),
-            this.userId.bytes,
+            this.userId.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1179,10 +1180,10 @@ class CreateChatRequest extends TLRequest {
         }
         this.users = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6e12cb09","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             TLObject.serializeBytes(this.title),
             ])
         }
@@ -1221,7 +1222,7 @@ class GetDhConfigRequest extends TLRequest {
         this.version = args.version;
         this.randomLength = args.randomLength;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5089cf26","hex"),
             struct.pack('<i', this.version),
@@ -1261,10 +1262,10 @@ class RequestEncryptionRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("43af4df6","hex"),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.randomId),
             TLObject.serializeBytes(this.gA),
             ])
@@ -1302,10 +1303,10 @@ class AcceptEncryptionRequest extends TLRequest {
         this.gB = args.gB;
         this.keyFingerprint = args.keyFingerprint;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1504bc3d","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.gB),
             readBufferFromBigInt(this.keyFingerprint,8,true,true),
             ])
@@ -1341,7 +1342,7 @@ class DiscardEncryptionRequest extends TLRequest {
 
         this.chatId = args.chatId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c523d9ed","hex"),
             struct.pack('<i', this.chatId),
@@ -1373,10 +1374,10 @@ class SetEncryptedTypingRequest extends TLRequest {
         this.peer = args.peer;
         this.typing = args.typing;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ed511479","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             this.typing ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -1409,10 +1410,10 @@ class ReadEncryptedHistoryRequest extends TLRequest {
         this.peer = args.peer;
         this.maxDate = args.maxDate;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0a694b7f","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.maxDate),
             ])
         }
@@ -1446,10 +1447,10 @@ class SendEncryptedRequest extends TLRequest {
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
         this.data = args.data;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("736777a9","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             readBufferFromBigInt(this.randomId,8,true,true),
             TLObject.serializeBytes(this.data),
             ])
@@ -1488,13 +1489,13 @@ class SendEncryptedFileRequest extends TLRequest {
         this.data = args.data;
         this.file = args.file;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("661b909a","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             readBufferFromBigInt(this.randomId,8,true,true),
             TLObject.serializeBytes(this.data),
-            this.file.bytes,
+            this.file.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1533,10 +1534,10 @@ class SendEncryptedServiceRequest extends TLRequest {
         this.randomId = args.randomId !== undefined ? args.randomId : readBigIntFromBuffer(generateRandomBytes(8),false,true);
         this.data = args.data;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a439d432","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             readBufferFromBigInt(this.randomId,8,true,true),
             TLObject.serializeBytes(this.data),
             ])
@@ -1572,7 +1573,7 @@ class ReceivedQueueRequest extends TLRequest {
 
         this.maxQts = args.maxQts;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("66bba555","hex"),
             struct.pack('<i', this.maxQts),
@@ -1612,10 +1613,10 @@ class ReportEncryptedSpamRequest extends TLRequest {
 
         this.peer = args.peer;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0f8c0c4b","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1643,7 +1644,7 @@ class ReadMessageContentsRequest extends TLRequest {
 
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("773fa736","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
@@ -1681,7 +1682,7 @@ class GetStickersRequest extends TLRequest {
         this.emoticon = args.emoticon;
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2c4f3d04","hex"),
             TLObject.serializeBytes(this.emoticon),
@@ -1716,7 +1717,7 @@ class GetAllStickersRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b118961c","hex"),
             struct.pack('<i', this.hash),
@@ -1748,12 +1749,12 @@ class GetWebPagePreviewRequest extends TLRequest {
         this.message = args.message;
         this.entities = args.entities || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ccb0688b","hex"),
             struct.pack('<I', (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8),
             TLObject.serializeBytes(this.message),
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -1801,10 +1802,10 @@ class ExportChatInviteRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4c53f70d","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1832,7 +1833,7 @@ class CheckChatInviteRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("bbb1ad3e","hex"),
             TLObject.serializeBytes(this.hash),
@@ -1863,7 +1864,7 @@ class ImportChatInviteRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1c05506c","hex"),
             TLObject.serializeBytes(this.hash),
@@ -1894,10 +1895,10 @@ class GetStickerSetRequest extends TLRequest {
 
         this.stickerset = args.stickerset;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0ea91926","hex"),
-            this.stickerset.bytes,
+            this.stickerset.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1926,10 +1927,10 @@ class InstallStickerSetRequest extends TLRequest {
         this.stickerset = args.stickerset;
         this.archived = args.archived;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("60e48fc7","hex"),
-            this.stickerset.bytes,
+            this.stickerset.getBytes(),
             this.archived ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -1961,10 +1962,10 @@ class UninstallStickerSetRequest extends TLRequest {
 
         this.stickerset = args.stickerset;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("de556ef9","hex"),
-            this.stickerset.bytes,
+            this.stickerset.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1999,11 +2000,11 @@ class StartBotRequest extends TLRequest {
         this.bot = utils.getInputUser(await client.getInputEntity(this.bot))
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7873dfe6","hex"),
-            this.bot.bytes,
-            this.peer.bytes,
+            this.bot.getBytes(),
+            this.peer.getBytes(),
             readBufferFromBigInt(this.randomId,8,true,true),
             TLObject.serializeBytes(this.startParam),
             ])
@@ -2047,10 +2048,10 @@ class GetMessagesViewsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5da5c8c4","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
             this.increment ? 0xb5757299 : 0x379779bc,
             ])
@@ -2107,11 +2108,11 @@ class EditChatAdminRequest extends TLRequest {
         this.chat_id = await client.getPeerId(this.chatId, add_mark=False)
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2e9fe6a9","hex"),
             struct.pack('<i', this.chatId),
-            this.userId.bytes,
+            this.userId.getBytes(),
             this.isAdmin ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -2146,7 +2147,7 @@ class MigrateChatRequest extends TLRequest {
 
         this.chatId = args.chatId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e3b8a315","hex"),
             struct.pack('<i', this.chatId),
@@ -2185,14 +2186,14 @@ class SearchGlobalRequest extends TLRequest {
     async resolve(client, utils) {
         this.offset_peer = utils.getInputPeer(await client.getInputEntity(this.offsetPeer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a42572bf","hex"),
             struct.pack('<I', (this.folderId === undefined || this.folderId === false || this.folderId === null) ? 0 : 1),
             (this.folderId === undefined || this.folderId === false || this.folderId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.folderId)],
             TLObject.serializeBytes(this.q),
             struct.pack('<i', this.offsetRate),
-            this.offsetPeer.bytes,
+            this.offsetPeer.getBytes(),
             struct.pack('<i', this.offsetId),
             struct.pack('<i', this.limit),
             ])
@@ -2246,7 +2247,7 @@ class ReorderStickerSetsRequest extends TLRequest {
         this.masks = args.masks || null;
         this.order = args.order;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("39773378","hex"),
             struct.pack('<I', (this.masks === undefined || this.masks === false || this.masks === null) ? 0 : 1),
@@ -2292,7 +2293,7 @@ class GetDocumentByHashRequest extends TLRequest {
         this.size = args.size;
         this.mimeType = args.mimeType;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("64248e33","hex"),
             TLObject.serializeBytes(this.sha256),
@@ -2332,7 +2333,7 @@ class SearchGifsRequest extends TLRequest {
         this.q = args.q;
         this.offset = args.offset;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6b779abf","hex"),
             TLObject.serializeBytes(this.q),
@@ -2367,7 +2368,7 @@ class GetSavedGifsRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("523dbf83","hex"),
             struct.pack('<i', this.hash),
@@ -2402,10 +2403,10 @@ class SaveGifRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputDocument(this.id)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cb307a32","hex"),
-            this.id.bytes,
+            this.id.getBytes(),
             this.unsave ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -2445,13 +2446,13 @@ class GetInlineBotResultsRequest extends TLRequest {
         this.bot = utils.getInputUser(await client.getInputEntity(this.bot))
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9d994e51","hex"),
             struct.pack('<I', (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint === null) ? 0 : 1),
-            this.bot.bytes,
-            this.peer.bytes,
-            (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint ===null) ? Buffer.alloc(0) : [this.geoPoint.bytes],
+            this.bot.getBytes(),
+            this.peer.getBytes(),
+            (this.geoPoint === undefined || this.geoPoint === false || this.geoPoint ===null) ? Buffer.alloc(0) : [this.geoPoint.getBytes()],
             TLObject.serializeBytes(this.query),
             TLObject.serializeBytes(this.offset),
             ])
@@ -2507,15 +2508,15 @@ class SetInlineBotResultsRequest extends TLRequest {
         this.nextOffset = args.nextOffset || null;
         this.switchPm = args.switchPm || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("06a25eeb","hex"),
             struct.pack('<I', (this.gallery === undefined || this.gallery === false || this.gallery === null) ? 0 : 1 | (this.private === undefined || this.private === false || this.private === null) ? 0 : 2 | (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset === null) ? 0 : 4 | (this.switchPm === undefined || this.switchPm === false || this.switchPm === null) ? 0 : 8),
             readBufferFromBigInt(this.queryId,8,true,true),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.results.length),Buffer.concat(this.results.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.results.length),Buffer.concat(this.results.map(x => x.getBytes())),
             struct.pack('<i', this.cacheTime),
             (this.nextOffset === undefined || this.nextOffset === false || this.nextOffset ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nextOffset)],
-            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.bytes],
+            (this.switchPm === undefined || this.switchPm === false || this.switchPm ===null) ? Buffer.alloc(0) : [this.switchPm.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -2592,11 +2593,11 @@ class SendInlineBotResultRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b0150822","hex"),
             struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.hideVia === undefined || this.hideVia === false || this.hideVia === null) ? 0 : 2048 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
-            this.peer.bytes,
+            this.peer.getBytes(),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
             readBufferFromBigInt(this.randomId,8,true,true),
             readBufferFromBigInt(this.queryId,8,true,true),
@@ -2673,10 +2674,10 @@ class GetMessageEditDataRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("368da6fd","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.id),
             ])
         }
@@ -2721,16 +2722,16 @@ class EditMessageRequest extends TLRequest {
             this.media = utils.getInputMedia(this.media)
         }
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7817f748","hex"),
             struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 32768),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.id),
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
-            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.getBytes()],
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.getBytes()],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
@@ -2824,15 +2825,15 @@ class EditInlineBotMessageRequest extends TLRequest {
             this.media = utils.getInputMedia(this.media)
         }
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ba7d5583","hex"),
             struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 2048 | (this.media === undefined || this.media === false || this.media === null) ? 0 : 16384 | (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup === null) ? 0 : 4 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8),
-            this.id.bytes,
+            this.id.getBytes(),
             (this.message === undefined || this.message === false || this.message ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.message)],
-            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.bytes],
-            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.bytes],
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.media === undefined || this.media === false || this.media ===null) ? Buffer.alloc(0) : [this.media.getBytes()],
+            (this.replyMarkup === undefined || this.replyMarkup === false || this.replyMarkup ===null) ? Buffer.alloc(0) : [this.replyMarkup.getBytes()],
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -2910,11 +2911,11 @@ class GetBotCallbackAnswerRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ec9f0a81","hex"),
             struct.pack('<I', (this.game === undefined || this.game === false || this.game === null) ? 0 : 2 | (this.data === undefined || this.data === false || this.data === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.msgId),
             (this.data === undefined || this.data === false || this.data ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.data)],
             ])
@@ -2965,7 +2966,7 @@ class SetBotCallbackAnswerRequest extends TLRequest {
         this.url = args.url || null;
         this.cacheTime = args.cacheTime;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0a138fd5","hex"),
             struct.pack('<I', (this.alert === undefined || this.alert === false || this.alert === null) ? 0 : 2 | (this.message === undefined || this.message === false || this.message === null) ? 0 : 1 | (this.url === undefined || this.url === false || this.url === null) ? 0 : 4),
@@ -3031,10 +3032,10 @@ class GetPeerDialogsRequest extends TLRequest {
         }
         this.peers = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fdbc70e4","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.peers.length),Buffer.concat(this.peers.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.peers.length),Buffer.concat(this.peers.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -3075,14 +3076,14 @@ class SaveDraftRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4be139bc","hex"),
             struct.pack('<I', (this.noWebpage === undefined || this.noWebpage === false || this.noWebpage === null) ? 0 : 2 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 8),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.message),
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -3136,7 +3137,7 @@ class GetAllDraftsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x8af52aac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("658d3f6a","hex"),
             ])
@@ -3164,7 +3165,7 @@ class GetFeaturedStickersRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4fcaac2d","hex"),
             struct.pack('<i', this.hash),
@@ -3195,7 +3196,7 @@ class ReadFeaturedStickersRequest extends TLRequest {
 
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2681115b","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => readBufferFromBigInt(x,8,true,true))),
@@ -3233,7 +3234,7 @@ class GetRecentStickersRequest extends TLRequest {
         this.attached = args.attached || null;
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c992a15e","hex"),
             struct.pack('<I', (this.attached === undefined || this.attached === false || this.attached === null) ? 0 : 1),
@@ -3276,11 +3277,11 @@ class SaveRecentStickerRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputDocument(this.id)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f8182739","hex"),
             struct.pack('<I', (this.attached === undefined || this.attached === false || this.attached === null) ? 0 : 1),
-            this.id.bytes,
+            this.id.getBytes(),
             this.unsave ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -3318,7 +3319,7 @@ class ClearRecentStickersRequest extends TLRequest {
 
         this.attached = args.attached || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2d609989","hex"),
             struct.pack('<I', (this.attached === undefined || this.attached === false || this.attached === null) ? 0 : 1),
@@ -3354,7 +3355,7 @@ class GetArchivedStickersRequest extends TLRequest {
         this.offsetId = args.offsetId;
         this.limit = args.limit;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9276f157","hex"),
             struct.pack('<I', (this.masks === undefined || this.masks === false || this.masks === null) ? 0 : 1),
@@ -3396,7 +3397,7 @@ class GetMaskStickersRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9fc7b865","hex"),
             struct.pack('<i', this.hash),
@@ -3427,10 +3428,10 @@ class GetAttachedStickersRequest extends TLRequest {
 
         this.media = args.media;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cc675bcc","hex"),
-            this.media.bytes,
+            this.media.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -3467,13 +3468,13 @@ class SetGameScoreRequest extends TLRequest {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c0ecf88e","hex"),
             struct.pack('<I', (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1 | (this.force === undefined || this.force === false || this.force === null) ? 0 : 2),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.id),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.score),
             ])
         }
@@ -3527,12 +3528,12 @@ class SetInlineGameScoreRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("649fad15","hex"),
             struct.pack('<I', (this.editMessage === undefined || this.editMessage === false || this.editMessage === null) ? 0 : 1 | (this.force === undefined || this.force === false || this.force === null) ? 0 : 2),
-            this.id.bytes,
-            this.userId.bytes,
+            this.id.getBytes(),
+            this.userId.getBytes(),
             struct.pack('<i', this.score),
             ])
         }
@@ -3582,12 +3583,12 @@ class GetGameHighScoresRequest extends TLRequest {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9d6422e8","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.id),
-            this.userId.bytes,
+            this.userId.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -3625,11 +3626,11 @@ class GetInlineGameHighScoresRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1b5e630f","hex"),
-            this.id.bytes,
-            this.userId.bytes,
+            this.id.getBytes(),
+            this.userId.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -3665,10 +3666,10 @@ class GetCommonChatsRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c4480a0d","hex"),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.maxId),
             struct.pack('<i', this.limit),
             ])
@@ -3704,7 +3705,7 @@ class GetAllChatsRequest extends TLRequest {
 
         this.exceptIds = args.exceptIds;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f00fa8eb","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.exceptIds.length),Buffer.concat(this.exceptIds.map(x => struct.pack('<i', x))),
@@ -3742,7 +3743,7 @@ class GetWebPageRequest extends TLRequest {
         this.url = args.url;
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("918fca32","hex"),
             TLObject.serializeBytes(this.url),
@@ -3781,11 +3782,11 @@ class ToggleDialogPinRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = await client._getInputDialog(this.peer)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("57e231a7","hex"),
             struct.pack('<I', (this.pinned === undefined || this.pinned === false || this.pinned === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -3827,12 +3828,12 @@ class ReorderPinnedDialogsRequest extends TLRequest {
         }
         this.order = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("37df1a3b","hex"),
             struct.pack('<I', (this.force === undefined || this.force === false || this.force === null) ? 0 : 1),
             struct.pack('<i', this.folderId),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.order.length),Buffer.concat(this.order.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.order.length),Buffer.concat(this.order.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -3875,7 +3876,7 @@ class GetPinnedDialogsRequest extends TLRequest {
 
         this.folderId = args.folderId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f24db9d6","hex"),
             struct.pack('<i', this.folderId),
@@ -3908,13 +3909,13 @@ class SetBotShippingResultsRequest extends TLRequest {
         this.error = args.error || null;
         this.shippingOptions = args.shippingOptions || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fa72f6e5","hex"),
             struct.pack('<I', (this.error === undefined || this.error === false || this.error === null) ? 0 : 1 | (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2),
             readBufferFromBigInt(this.queryId,8,true,true),
             (this.error === undefined || this.error === false || this.error ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.error)],
-            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
+            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -3969,7 +3970,7 @@ class SetBotPrecheckoutResultsRequest extends TLRequest {
         this.queryId = args.queryId;
         this.error = args.error || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("95ddc209","hex"),
             struct.pack('<I', (this.success === undefined || this.success === false || this.success === null) ? 0 : 2 | (this.error === undefined || this.error === false || this.error === null) ? 0 : 1),
@@ -4021,11 +4022,11 @@ class UploadMediaRequest extends TLRequest {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
         this.media = utils.getInputMedia(this.media)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b1c29b51","hex"),
-            this.peer.bytes,
-            this.media.bytes,
+            this.peer.getBytes(),
+            this.media.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4061,10 +4062,10 @@ class SendScreenshotNotificationRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("20f07dc9","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.replyToMsgId),
             readBufferFromBigInt(this.randomId,8,true,true),
             ])
@@ -4100,7 +4101,7 @@ class GetFavedStickersRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0e0bce21","hex"),
             struct.pack('<i', this.hash),
@@ -4135,10 +4136,10 @@ class FaveStickerRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputDocument(this.id)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5bc5ffb9","hex"),
-            this.id.bytes,
+            this.id.getBytes(),
             this.unfave ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -4178,10 +4179,10 @@ class GetUnreadMentionsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("72845746","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.offsetId),
             struct.pack('<i', this.addOffset),
             struct.pack('<i', this.limit),
@@ -4232,10 +4233,10 @@ class ReadMentionsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d389010f","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4268,10 +4269,10 @@ class GetRecentLocationsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("095bc4bb","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.limit),
             struct.pack('<i', this.hash),
             ])
@@ -4316,13 +4317,13 @@ class SendMultiMediaRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cb1001cc","hex"),
             struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 32 | (this.background === undefined || this.background === false || this.background === null) ? 0 : 64 | (this.clearDraft === undefined || this.clearDraft === false || this.clearDraft === null) ? 0 : 128 | (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId === null) ? 0 : 1 | (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate === null) ? 0 : 1024),
-            this.peer.bytes,
+            this.peer.getBytes(),
             (this.replyToMsgId === undefined || this.replyToMsgId === false || this.replyToMsgId ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.replyToMsgId)],
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.multiMedia.length),Buffer.concat(this.multiMedia.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.multiMedia.length),Buffer.concat(this.multiMedia.map(x => x.getBytes())),
             (this.scheduleDate === undefined || this.scheduleDate === false || this.scheduleDate ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.scheduleDate)],
             ])
         }
@@ -4389,11 +4390,11 @@ class UploadEncryptedFileRequest extends TLRequest {
         this.peer = args.peer;
         this.file = args.file;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("97c45750","hex"),
-            this.peer.bytes,
-            this.file.bytes,
+            this.peer.getBytes(),
+            this.file.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4426,7 +4427,7 @@ class SearchStickerSetsRequest extends TLRequest {
         this.q = args.q;
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8bd0b7c2","hex"),
             struct.pack('<I', (this.excludeFeatured === undefined || this.excludeFeatured === false || this.excludeFeatured === null) ? 0 : 1),
@@ -4463,7 +4464,7 @@ class GetSplitRangesRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x5ba52504;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("087eff1c","hex"),
             ])
@@ -4495,11 +4496,11 @@ class MarkDialogUnreadRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = await client._getInputDialog(this.peer)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8fd986c2","hex"),
             struct.pack('<I', (this.unread === undefined || this.unread === false || this.unread === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4528,7 +4529,7 @@ class GetDialogUnreadMarksRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xbec64ad9;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("224ee222","hex"),
             ])
@@ -4551,7 +4552,7 @@ class ClearAllDraftsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9cee587e","hex"),
             ])
@@ -4584,11 +4585,11 @@ class UpdatePinnedMessageRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ecf7aad2","hex"),
             struct.pack('<I', (this.silent === undefined || this.silent === false || this.silent === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.id),
             ])
         }
@@ -4631,10 +4632,10 @@ class SendVoteRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8461ea10","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.msgId),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.options.length),Buffer.concat(this.options.map(x => TLObject.serializeBytes(x))),
             ])
@@ -4680,10 +4681,10 @@ class GetPollResultsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3b64bb73","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.msgId),
             ])
         }
@@ -4718,10 +4719,10 @@ class GetOnlinesRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("50e02b6e","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4754,11 +4755,11 @@ class GetStatsURLRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e62a2c81","hex"),
             struct.pack('<I', (this.dark === undefined || this.dark === false || this.dark === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.params),
             ])
         }
@@ -4800,10 +4801,10 @@ class EditChatAboutRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9707f6de","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.about),
             ])
         }
@@ -4839,11 +4840,11 @@ class EditChatDefaultBannedRightsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("416b86a5","hex"),
-            this.peer.bytes,
-            this.bannedRights.bytes,
+            this.peer.getBytes(),
+            this.bannedRights.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -4874,7 +4875,7 @@ class GetEmojiKeywordsRequest extends TLRequest {
 
         this.langCode = args.langCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("62e0a035","hex"),
             TLObject.serializeBytes(this.langCode),
@@ -4906,7 +4907,7 @@ class GetEmojiKeywordsDifferenceRequest extends TLRequest {
         this.langCode = args.langCode;
         this.fromVersion = args.fromVersion;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("afb60815","hex"),
             TLObject.serializeBytes(this.langCode),
@@ -4941,7 +4942,7 @@ class GetEmojiKeywordsLanguagesRequest extends TLRequest {
 
         this.langCodes = args.langCodes;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b263994e","hex"),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.langCodes.length),Buffer.concat(this.langCodes.map(x => TLObject.serializeBytes(x))),
@@ -4978,7 +4979,7 @@ class GetEmojiURLRequest extends TLRequest {
 
         this.langCode = args.langCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("260cb1d5","hex"),
             TLObject.serializeBytes(this.langCode),
@@ -5013,11 +5014,11 @@ class GetSearchCountersRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("00ef2e73","hex"),
-            this.peer.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.filters.length),Buffer.concat(this.filters.map(x => x.bytes)),
+            this.peer.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.filters.length),Buffer.concat(this.filters.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -5059,10 +5060,10 @@ class RequestUrlAuthRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("13563fe3","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.msgId),
             struct.pack('<i', this.buttonId),
             ])
@@ -5104,11 +5105,11 @@ class AcceptUrlAuthRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("98ea29f7","hex"),
             struct.pack('<I', (this.writeAllowed === undefined || this.writeAllowed === false || this.writeAllowed === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.msgId),
             struct.pack('<i', this.buttonId),
             ])
@@ -5153,10 +5154,10 @@ class HidePeerSettingsBarRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("38b1ac4f","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -5188,10 +5189,10 @@ class GetScheduledHistoryRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5b68c2e2","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.hash),
             ])
         }
@@ -5227,10 +5228,10 @@ class GetScheduledMessagesRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6404bbbd","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
             ])
         }
@@ -5272,10 +5273,10 @@ class SendScheduledMessagesRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0a8538bd","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
             ])
         }
@@ -5317,10 +5318,10 @@ class DeleteScheduledMessagesRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("162bae59","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => struct.pack('<i', x))),
             ])
         }

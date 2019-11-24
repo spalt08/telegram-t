@@ -13,6 +13,8 @@ import {
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 import localDb from './localDb';
+import { buildInputPeerPhotoFileLocation } from './inputHelpers';
+import { ApiFileLocation } from '../types';
 
 let client: any;
 
@@ -40,7 +42,13 @@ export async function init(sessionId: string) {
       code: onRequestCode,
       password: onRequestPassword,
     } as any);
-
+    for (let x = 1; x <= 5; x++) {
+      if (x !== client.session.dcId) {
+        // Todo Better logic
+        // eslint-disable-next-line no-underscore-dangle
+        await client._borrowExportedSender(x);
+      }
+    }
     const newSessionId = stringSession.save();
 
     if (DEBUG) {
@@ -57,6 +65,15 @@ export async function init(sessionId: string) {
 
     throw err;
   }
+}
+
+export function downloadFile(id: number, fileLocation: ApiFileLocation, args = {
+  partSizeKb: null,
+  fileSize: null,
+  progressCallback: null,
+  dcId: null,
+}) {
+  return client.downloadFile(buildInputPeerPhotoFileLocation({ id, fileLocation }), Buffer, args);
 }
 
 export async function invokeRequest(data: InvokeRequestPayload) {

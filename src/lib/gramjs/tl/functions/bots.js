@@ -22,11 +22,11 @@ class SendCustomRequestRequest extends TLRequest {
         this.customMethod = args.customMethod;
         this.params = args.params;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ed6927aa","hex"),
             TLObject.serializeBytes(this.customMethod),
-            this.params.bytes,
+            this.params.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -58,11 +58,11 @@ class AnswerWebhookJSONQueryRequest extends TLRequest {
         this.queryId = args.queryId;
         this.data = args.data;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4d3f21e6","hex"),
             readBufferFromBigInt(this.queryId,8,true,true),
-            this.data.bytes,
+            this.data.getBytes(),
             ])
         }
     static fromReader(reader) {

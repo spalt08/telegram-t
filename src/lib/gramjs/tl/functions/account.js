@@ -26,7 +26,7 @@ class RegisterDeviceRequest extends TLRequest {
         this.secret = args.secret;
         this.otherUids = args.otherUids;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6f6c9768","hex"),
             struct.pack('<I', (this.noMuted === undefined || this.noMuted === false || this.noMuted === null) ? 0 : 1),
@@ -88,7 +88,7 @@ class UnregisterDeviceRequest extends TLRequest {
         this.token = args.token;
         this.otherUids = args.otherUids;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("bfc47630","hex"),
             struct.pack('<i', this.tokenType),
@@ -137,11 +137,11 @@ class UpdateNotifySettingsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = await client._getInputNotify(this.peer)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("935bbe84","hex"),
-            this.peer.bytes,
-            this.settings.bytes,
+            this.peer.getBytes(),
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -175,10 +175,10 @@ class GetNotifySettingsRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = await client._getInputNotify(this.peer)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("31adb312","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -201,7 +201,7 @@ class ResetNotifySettingsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("47177edb","hex"),
             ])
@@ -231,7 +231,7 @@ class UpdateProfileRequest extends TLRequest {
         this.lastName = args.lastName || null;
         this.about = args.about || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("75575178","hex"),
             struct.pack('<I', (this.firstName === undefined || this.firstName === false || this.firstName === null) ? 0 : 1 | (this.lastName === undefined || this.lastName === false || this.lastName === null) ? 0 : 2 | (this.about === undefined || this.about === false || this.about === null) ? 0 : 4),
@@ -289,7 +289,7 @@ class UpdateStatusRequest extends TLRequest {
 
         this.offline = args.offline;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2c562866","hex"),
             this.offline ? 0xb5757299 : 0x379779bc,
@@ -320,7 +320,7 @@ class GetWallPapersRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6317bbaa","hex"),
             struct.pack('<i', this.hash),
@@ -355,11 +355,11 @@ class ReportPeerRequest extends TLRequest {
     async resolve(client, utils) {
         this.peer = utils.getInputPeer(await client.getInputEntity(this.peer))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5f9d18ae","hex"),
-            this.peer.bytes,
-            this.reason.bytes,
+            this.peer.getBytes(),
+            this.reason.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -390,7 +390,7 @@ class CheckUsernameRequest extends TLRequest {
 
         this.username = args.username;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6cd81427","hex"),
             TLObject.serializeBytes(this.username),
@@ -421,7 +421,7 @@ class UpdateUsernameRequest extends TLRequest {
 
         this.username = args.username;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7cdd0b3e","hex"),
             TLObject.serializeBytes(this.username),
@@ -452,10 +452,10 @@ class GetPrivacyRequest extends TLRequest {
 
         this.key = args.key;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("50c9dbda","hex"),
-            this.key.bytes,
+            this.key.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -484,11 +484,11 @@ class SetPrivacyRequest extends TLRequest {
         this.key = args.key;
         this.rules = args.rules;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e81cf8c9","hex"),
-            this.key.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.bytes)),
+            this.key.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -525,7 +525,7 @@ class DeleteAccountRequest extends TLRequest {
 
         this.reason = args.reason;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0b4e8d41","hex"),
             TLObject.serializeBytes(this.reason),
@@ -551,7 +551,7 @@ class GetAccountTTLRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xbaa39d88;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1d71fc08","hex"),
             ])
@@ -579,10 +579,10 @@ class SetAccountTTLRequest extends TLRequest {
 
         this.ttl = args.ttl;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5e484224","hex"),
-            this.ttl.bytes,
+            this.ttl.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -611,11 +611,11 @@ class SendChangePhoneCodeRequest extends TLRequest {
         this.phoneNumber = args.phoneNumber;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e54a5782","hex"),
             TLObject.serializeBytes(this.phoneNumber),
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -648,7 +648,7 @@ class ChangePhoneRequest extends TLRequest {
         this.phoneCodeHash = args.phoneCodeHash;
         this.phoneCode = args.phoneCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("db2ec370","hex"),
             TLObject.serializeBytes(this.phoneNumber),
@@ -687,7 +687,7 @@ class UpdateDeviceLockedRequest extends TLRequest {
 
         this.period = args.period;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3235df38","hex"),
             struct.pack('<i', this.period),
@@ -713,7 +713,7 @@ class GetAuthorizationsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xbf5e0ff;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("58c120e3","hex"),
             ])
@@ -741,7 +741,7 @@ class ResetAuthorizationRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("bcf377df","hex"),
             readBufferFromBigInt(this.hash,8,true,true),
@@ -767,7 +767,7 @@ class GetPasswordRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x53a211a3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f5308a54","hex"),
             ])
@@ -795,10 +795,10 @@ class GetPasswordSettingsRequest extends TLRequest {
 
         this.password = args.password;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f9ead49c","hex"),
-            this.password.bytes,
+            this.password.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -827,11 +827,11 @@ class UpdatePasswordSettingsRequest extends TLRequest {
         this.password = args.password;
         this.newSettings = args.newSettings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2f109ba5","hex"),
-            this.password.bytes,
-            this.newSettings.bytes,
+            this.password.getBytes(),
+            this.newSettings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -863,11 +863,11 @@ class SendConfirmPhoneCodeRequest extends TLRequest {
         this.hash = args.hash;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("88aa3f1b","hex"),
             TLObject.serializeBytes(this.hash),
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -899,7 +899,7 @@ class ConfirmPhoneRequest extends TLRequest {
         this.phoneCodeHash = args.phoneCodeHash;
         this.phoneCode = args.phoneCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c378215f","hex"),
             TLObject.serializeBytes(this.phoneCodeHash),
@@ -935,10 +935,10 @@ class GetTmpPasswordRequest extends TLRequest {
         this.password = args.password;
         this.period = args.period;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("510b9e44","hex"),
-            this.password.bytes,
+            this.password.getBytes(),
             struct.pack('<i', this.period),
             ])
         }
@@ -965,7 +965,7 @@ class GetWebAuthorizationsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x9a365b32;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6f6d2e18","hex"),
             ])
@@ -993,7 +993,7 @@ class ResetWebAuthorizationRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("efb9012d","hex"),
             readBufferFromBigInt(this.hash,8,true,true),
@@ -1019,7 +1019,7 @@ class ResetWebAuthorizationsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("94252d68","hex"),
             ])
@@ -1042,7 +1042,7 @@ class GetAllSecureValuesRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xe82e4121;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7dbc88b2","hex"),
             ])
@@ -1070,10 +1070,10 @@ class GetSecureValueRequest extends TLRequest {
 
         this.types = args.types;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c25b6673","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.types.length),Buffer.concat(this.types.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.types.length),Buffer.concat(this.types.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -1108,10 +1108,10 @@ class SaveSecureValueRequest extends TLRequest {
         this.value = args.value;
         this.secureSecretId = args.secureSecretId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("1de39f89","hex"),
-            this.value.bytes,
+            this.value.getBytes(),
             readBufferFromBigInt(this.secureSecretId,8,true,true),
             ])
         }
@@ -1143,10 +1143,10 @@ class DeleteSecureValueRequest extends TLRequest {
 
         this.types = args.types;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4bbc80b8","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.types.length),Buffer.concat(this.types.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.types.length),Buffer.concat(this.types.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -1182,7 +1182,7 @@ class GetAuthorizationFormRequest extends TLRequest {
         this.scope = args.scope;
         this.publicKey = args.publicKey;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e1a86bb8","hex"),
             struct.pack('<i', this.botId),
@@ -1225,14 +1225,14 @@ class AcceptAuthorizationRequest extends TLRequest {
         this.valueHashes = args.valueHashes;
         this.credentials = args.credentials;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("947c02e7","hex"),
             struct.pack('<i', this.botId),
             TLObject.serializeBytes(this.scope),
             TLObject.serializeBytes(this.publicKey),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.valueHashes.length),Buffer.concat(this.valueHashes.map(x => x.bytes)),
-            this.credentials.bytes,
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.valueHashes.length),Buffer.concat(this.valueHashes.map(x => x.getBytes())),
+            this.credentials.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1279,11 +1279,11 @@ class SendVerifyPhoneCodeRequest extends TLRequest {
         this.phoneNumber = args.phoneNumber;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f956a3a5","hex"),
             TLObject.serializeBytes(this.phoneNumber),
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1316,7 +1316,7 @@ class VerifyPhoneRequest extends TLRequest {
         this.phoneCodeHash = args.phoneCodeHash;
         this.phoneCode = args.phoneCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f6a7d34d","hex"),
             TLObject.serializeBytes(this.phoneNumber),
@@ -1355,7 +1355,7 @@ class SendVerifyEmailCodeRequest extends TLRequest {
 
         this.email = args.email;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9f501170","hex"),
             TLObject.serializeBytes(this.email),
@@ -1387,7 +1387,7 @@ class VerifyEmailRequest extends TLRequest {
         this.email = args.email;
         this.code = args.code;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("db39baec","hex"),
             TLObject.serializeBytes(this.email),
@@ -1428,7 +1428,7 @@ class InitTakeoutSessionRequest extends TLRequest {
         this.files = args.files || null;
         this.fileMaxSize = args.fileMaxSize || null;
     }
-    get bytes() {
+    getBytes() {
         if (!((this.files || this.files!==null && this.file_max_size || this.file_max_size!==null) && (this.files===null || this.files===false && this.file_max_size===null || this.file_max_size===false)))
 	 throw new Error('files, file_max_size paramaters must all be false-y or all true')
         return Buffer.concat([
@@ -1488,7 +1488,7 @@ class FinishTakeoutSessionRequest extends TLRequest {
 
         this.success = args.success || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ee52261d","hex"),
             struct.pack('<I', (this.success === undefined || this.success === false || this.success === null) ? 0 : 1),
@@ -1522,7 +1522,7 @@ class ConfirmPasswordEmailRequest extends TLRequest {
 
         this.code = args.code;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2019df8f","hex"),
             TLObject.serializeBytes(this.code),
@@ -1548,7 +1548,7 @@ class ResendPasswordEmailRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("152a7f7a","hex"),
             ])
@@ -1571,7 +1571,7 @@ class CancelPasswordEmailRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b6d5cbc1","hex"),
             ])
@@ -1594,7 +1594,7 @@ class GetContactSignUpNotificationRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("28c7079f","hex"),
             ])
@@ -1622,7 +1622,7 @@ class SetContactSignUpNotificationRequest extends TLRequest {
 
         this.silent = args.silent;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("613ff4cf","hex"),
             this.silent ? 0xb5757299 : 0x379779bc,
@@ -1659,11 +1659,11 @@ class GetNotifyExceptionsRequest extends TLRequest {
             this.peer = await client._getInputNotify(this.peer)
         }
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("79745753","hex"),
             struct.pack('<I', (this.compareSound === undefined || this.compareSound === false || this.compareSound === null) ? 0 : 2 | (this.peer === undefined || this.peer === false || this.peer === null) ? 0 : 1),
-            (this.peer === undefined || this.peer === false || this.peer ===null) ? Buffer.alloc(0) : [this.peer.bytes],
+            (this.peer === undefined || this.peer === false || this.peer ===null) ? Buffer.alloc(0) : [this.peer.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -1702,10 +1702,10 @@ class GetWallPaperRequest extends TLRequest {
 
         this.wallpaper = args.wallpaper;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("eadb8dfc","hex"),
-            this.wallpaper.bytes,
+            this.wallpaper.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1735,12 +1735,12 @@ class UploadWallPaperRequest extends TLRequest {
         this.mimeType = args.mimeType;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("613685dd","hex"),
-            this.file.bytes,
+            this.file.getBytes(),
             TLObject.serializeBytes(this.mimeType),
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1776,12 +1776,12 @@ class SaveWallPaperRequest extends TLRequest {
         this.unsave = args.unsave;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("375b5a6c","hex"),
-            this.wallpaper.bytes,
+            this.wallpaper.getBytes(),
             this.unsave ? 0xb5757299 : 0x379779bc,
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1816,11 +1816,11 @@ class InstallWallPaperRequest extends TLRequest {
         this.wallpaper = args.wallpaper;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6957edfe","hex"),
-            this.wallpaper.bytes,
-            this.settings.bytes,
+            this.wallpaper.getBytes(),
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1846,7 +1846,7 @@ class ResetWallPapersRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xf5b399ac;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("04983bbb","hex"),
             ])
@@ -1869,7 +1869,7 @@ class GetAutoDownloadSettingsRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x2fb85921;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3f0bda56","hex"),
             ])
@@ -1899,11 +1899,11 @@ class SaveAutoDownloadSettingsRequest extends TLRequest {
         this.high = args.high || null;
         this.settings = args.settings;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3362f376","hex"),
             struct.pack('<I', (this.low === undefined || this.low === false || this.low === null) ? 0 : 1 | (this.high === undefined || this.high === false || this.high === null) ? 0 : 2),
-            this.settings.bytes,
+            this.settings.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -1943,12 +1943,12 @@ class UploadThemeRequest extends TLRequest {
         this.fileName = args.fileName;
         this.mimeType = args.mimeType;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("33b33d1c","hex"),
             struct.pack('<I', (this.thumb === undefined || this.thumb === false || this.thumb === null) ? 0 : 1),
-            this.file.bytes,
-            (this.thumb === undefined || this.thumb === false || this.thumb ===null) ? Buffer.alloc(0) : [this.thumb.bytes],
+            this.file.getBytes(),
+            (this.thumb === undefined || this.thumb === false || this.thumb ===null) ? Buffer.alloc(0) : [this.thumb.getBytes()],
             TLObject.serializeBytes(this.fileName),
             TLObject.serializeBytes(this.mimeType),
             ])
@@ -2000,12 +2000,12 @@ class CreateThemeRequest extends TLRequest {
     async resolve(client, utils) {
         this.document = utils.getInputDocument(this.document)
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7ffd7f2b","hex"),
             TLObject.serializeBytes(this.slug),
             TLObject.serializeBytes(this.title),
-            this.document.bytes,
+            this.document.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -2048,15 +2048,15 @@ class UpdateThemeRequest extends TLRequest {
             this.document = utils.getInputDocument(this.document)
         }
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("02a28e3b","hex"),
             struct.pack('<I', (this.slug === undefined || this.slug === false || this.slug === null) ? 0 : 1 | (this.title === undefined || this.title === false || this.title === null) ? 0 : 2 | (this.document === undefined || this.document === false || this.document === null) ? 0 : 4),
             TLObject.serializeBytes(this.format),
-            this.theme.bytes,
+            this.theme.getBytes(),
             (this.slug === undefined || this.slug === false || this.slug ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.slug)],
             (this.title === undefined || this.title === false || this.title ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.title)],
-            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.bytes],
+            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -2115,10 +2115,10 @@ class SaveThemeRequest extends TLRequest {
         this.theme = args.theme;
         this.unsave = args.unsave;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6c1057f2","hex"),
-            this.theme.bytes,
+            this.theme.getBytes(),
             this.unsave ? 0xb5757299 : 0x379779bc,
             ])
         }
@@ -2152,14 +2152,14 @@ class InstallThemeRequest extends TLRequest {
         this.format = args.format || null;
         this.theme = args.theme || null;
     }
-    get bytes() {
+    getBytes() {
         if (!((this.format || this.format!==null && this.theme || this.theme!==null) && (this.format===null || this.format===false && this.theme===null || this.theme===false)))
 	 throw new Error('format, theme paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("3737e47a","hex"),
             struct.pack('<I', (this.dark === undefined || this.dark === false || this.dark === null) ? 0 : 1 | (this.format === undefined || this.format === false || this.format === null) ? 0 : 2 | (this.theme === undefined || this.theme === false || this.theme === null) ? 0 : 2),
             (this.format === undefined || this.format === false || this.format ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.format)],
-            (this.theme === undefined || this.theme === false || this.theme ===null) ? Buffer.alloc(0) : [this.theme.bytes],
+            (this.theme === undefined || this.theme === false || this.theme ===null) ? Buffer.alloc(0) : [this.theme.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -2208,11 +2208,11 @@ class GetThemeRequest extends TLRequest {
         this.theme = args.theme;
         this.documentId = args.documentId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2b749d8d","hex"),
             TLObject.serializeBytes(this.format),
-            this.theme.bytes,
+            this.theme.getBytes(),
             readBufferFromBigInt(this.documentId,8,true,true),
             ])
         }
@@ -2248,7 +2248,7 @@ class GetThemesRequest extends TLRequest {
         this.format = args.format;
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f8465928","hex"),
             TLObject.serializeBytes(this.format),

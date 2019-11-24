@@ -22,12 +22,12 @@ class ChannelParticipants extends TLObject {
         this.participants = args.participants;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a8e26ef5","hex"),
             struct.pack('<i', this.count),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.participants.length),Buffer.concat(this.participants.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.participants.length),Buffer.concat(this.participants.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -68,7 +68,7 @@ class ChannelParticipantsNotModified extends TLObject {
         this.SUBCLASS_OF_ID = 0xe60a6e64;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e93f17f0","hex"),
             ])
@@ -97,11 +97,11 @@ class ChannelParticipant extends TLObject {
         this.participant = args.participant;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("63b1d9d0","hex"),
-            this.participant.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            this.participant.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -140,12 +140,12 @@ class AdminLogResults extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4df78aed","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.events.length),Buffer.concat(this.events.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.events.length),Buffer.concat(this.events.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

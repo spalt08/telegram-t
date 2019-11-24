@@ -16,7 +16,7 @@ class GetCallConfigRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xad0352e8;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a91f4555","hex"),
             ])
@@ -51,14 +51,14 @@ class RequestCallRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ed96ff42","hex"),
             struct.pack('<I', (this.video === undefined || this.video === false || this.video === null) ? 0 : 1),
-            this.userId.bytes,
+            this.userId.getBytes(),
             struct.pack('<i', this.randomId),
             TLObject.serializeBytes(this.gAHash),
-            this.protocol.bytes,
+            this.protocol.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -103,12 +103,12 @@ class AcceptCallRequest extends TLRequest {
         this.gB = args.gB;
         this.protocol = args.protocol;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a0b4d23b","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.gB),
-            this.protocol.bytes,
+            this.protocol.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -145,13 +145,13 @@ class ConfirmCallRequest extends TLRequest {
         this.keyFingerprint = args.keyFingerprint;
         this.protocol = args.protocol;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2217fe2e","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             TLObject.serializeBytes(this.gA),
             readBufferFromBigInt(this.keyFingerprint,8,true,true),
-            this.protocol.bytes,
+            this.protocol.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -188,10 +188,10 @@ class ReceivedCallRequest extends TLRequest {
 
         this.peer = args.peer;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("614fd517","hex"),
-            this.peer.bytes,
+            this.peer.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -223,13 +223,13 @@ class DiscardCallRequest extends TLRequest {
         this.reason = args.reason;
         this.connectionId = args.connectionId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c0c1cbb2","hex"),
             struct.pack('<I', (this.video === undefined || this.video === false || this.video === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.duration),
-            this.reason.bytes,
+            this.reason.getBytes(),
             readBufferFromBigInt(this.connectionId,8,true,true),
             ])
         }
@@ -276,11 +276,11 @@ class SetCallRatingRequest extends TLRequest {
         this.rating = args.rating;
         this.comment = args.comment;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("27d6ea59","hex"),
             struct.pack('<I', (this.userInitiative === undefined || this.userInitiative === false || this.userInitiative === null) ? 0 : 1),
-            this.peer.bytes,
+            this.peer.getBytes(),
             struct.pack('<i', this.rating),
             TLObject.serializeBytes(this.comment),
             ])
@@ -323,11 +323,11 @@ class SaveCallDebugRequest extends TLRequest {
         this.peer = args.peer;
         this.debug = args.debug;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7edd7a27","hex"),
-            this.peer.bytes,
-            this.debug.bytes,
+            this.peer.getBytes(),
+            this.debug.getBytes(),
             ])
         }
     static fromReader(reader) {

@@ -15,7 +15,7 @@ class FileUnknown extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("053b96aa","hex"),
             ])
@@ -38,7 +38,7 @@ class FilePartial extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("526fbc40","hex"),
             ])
@@ -61,7 +61,7 @@ class FileJpeg extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0efe7e00","hex"),
             ])
@@ -84,7 +84,7 @@ class FileGif extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("dfaae1ca","hex"),
             ])
@@ -107,7 +107,7 @@ class FilePng extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c0634f0a","hex"),
             ])
@@ -130,7 +130,7 @@ class FilePdf extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8d501eae","hex"),
             ])
@@ -153,7 +153,7 @@ class FileMp3 extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("77068a52","hex"),
             ])
@@ -176,7 +176,7 @@ class FileMov extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("bceb094b","hex"),
             ])
@@ -199,7 +199,7 @@ class FileMp4 extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e4a0ceb3","hex"),
             ])
@@ -222,7 +222,7 @@ class FileWebp extends TLObject {
         this.SUBCLASS_OF_ID = 0xf3a1e6f3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4c468110","hex"),
             ])

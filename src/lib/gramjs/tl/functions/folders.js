@@ -21,10 +21,10 @@ class EditPeerFoldersRequest extends TLRequest {
 
         this.folderPeers = args.folderPeers;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("abd04768","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.folderPeers.length),Buffer.concat(this.folderPeers.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.folderPeers.length),Buffer.concat(this.folderPeers.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -58,7 +58,7 @@ class DeleteFolderRequest extends TLRequest {
 
         this.folderId = args.folderId;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8158291c","hex"),
             struct.pack('<i', this.folderId),

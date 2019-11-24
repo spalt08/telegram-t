@@ -30,21 +30,21 @@ class PaymentForm extends TLObject {
         this.savedCredentials = args.savedCredentials || null;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         if (!((this.native_provider || this.native_provider!==null && this.native_params || this.native_params!==null) && (this.native_provider===null || this.native_provider===false && this.native_params===null || this.native_params===false)))
 	 throw new Error('native_provider, native_params paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("a3ae563f","hex"),
             struct.pack('<I', (this.canSaveCredentials === undefined || this.canSaveCredentials === false || this.canSaveCredentials === null) ? 0 : 4 | (this.passwordMissing === undefined || this.passwordMissing === false || this.passwordMissing === null) ? 0 : 8 | (this.nativeProvider === undefined || this.nativeProvider === false || this.nativeProvider === null) ? 0 : 16 | (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams === null) ? 0 : 16 | (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1 | (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials === null) ? 0 : 2),
             struct.pack('<i', this.botId),
-            this.invoice.bytes,
+            this.invoice.getBytes(),
             struct.pack('<i', this.providerId),
             TLObject.serializeBytes(this.url),
             (this.nativeProvider === undefined || this.nativeProvider === false || this.nativeProvider ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.nativeProvider)],
-            (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams ===null) ? Buffer.alloc(0) : [this.nativeParams.bytes],
-            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.bytes],
-            (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials ===null) ? Buffer.alloc(0) : [this.savedCredentials.bytes],
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            (this.nativeParams === undefined || this.nativeParams === false || this.nativeParams ===null) ? Buffer.alloc(0) : [this.nativeParams.getBytes()],
+            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.getBytes()],
+            (this.savedCredentials === undefined || this.savedCredentials === false || this.savedCredentials ===null) ? Buffer.alloc(0) : [this.savedCredentials.getBytes()],
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -132,12 +132,12 @@ class ValidatedRequestedInfo extends TLObject {
         this.id = args.id || null;
         this.shippingOptions = args.shippingOptions || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("831845d1","hex"),
             struct.pack('<I', (this.id === undefined || this.id === false || this.id === null) ? 0 : 1 | (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions === null) ? 0 : 2),
             (this.id === undefined || this.id === false || this.id ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.id)],
-            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.bytes))]),
+            (this.shippingOptions === undefined || this.shippingOptions === false || this.shippingOptions ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.shippingOptions.length),Buffer.concat(this.shippingOptions.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -187,10 +187,10 @@ class PaymentResult extends TLObject {
 
         this.updates = args.updates;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0d815f4e","hex"),
-            this.updates.bytes,
+            this.updates.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -218,7 +218,7 @@ class PaymentVerificationNeeded extends TLObject {
 
         this.url = args.url;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("391141d8","hex"),
             TLObject.serializeBytes(this.url),
@@ -258,20 +258,20 @@ class PaymentReceipt extends TLObject {
         this.credentialsTitle = args.credentialsTitle;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e1110950","hex"),
             struct.pack('<I', (this.info === undefined || this.info === false || this.info === null) ? 0 : 1 | (this.shipping === undefined || this.shipping === false || this.shipping === null) ? 0 : 2),
             struct.pack('<i', this.date),
             struct.pack('<i', this.botId),
-            this.invoice.bytes,
+            this.invoice.getBytes(),
             struct.pack('<i', this.providerId),
-            (this.info === undefined || this.info === false || this.info ===null) ? Buffer.alloc(0) : [this.info.bytes],
-            (this.shipping === undefined || this.shipping === false || this.shipping ===null) ? Buffer.alloc(0) : [this.shipping.bytes],
+            (this.info === undefined || this.info === false || this.info ===null) ? Buffer.alloc(0) : [this.info.getBytes()],
+            (this.shipping === undefined || this.shipping === false || this.shipping ===null) ? Buffer.alloc(0) : [this.shipping.getBytes()],
             TLObject.serializeBytes(this.currency),
             readBufferFromBigInt(this.totalAmount,8,true,true),
             TLObject.serializeBytes(this.credentialsTitle),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -346,11 +346,11 @@ class SavedInfo extends TLObject {
         this.hasSavedCredentials = args.hasSavedCredentials || null;
         this.savedInfo = args.savedInfo || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3ce48ffb","hex"),
             struct.pack('<I', (this.hasSavedCredentials === undefined || this.hasSavedCredentials === false || this.hasSavedCredentials === null) ? 0 : 2 | (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo === null) ? 0 : 1),
-            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.bytes],
+            (this.savedInfo === undefined || this.savedInfo === false || this.savedInfo ===null) ? Buffer.alloc(0) : [this.savedInfo.getBytes()],
             ])
         }
     static fromReader(reader) {

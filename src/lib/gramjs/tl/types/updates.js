@@ -24,7 +24,7 @@ class State extends TLObject {
         this.seq = args.seq;
         this.unreadCount = args.unreadCount;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3e2a6ca5","hex"),
             struct.pack('<i', this.pts),
@@ -72,7 +72,7 @@ class DifferenceEmpty extends TLObject {
         this.date = args.date;
         this.seq = args.seq;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("38a1755d","hex"),
             struct.pack('<i', this.date),
@@ -112,15 +112,15 @@ class Difference extends TLObject {
         this.users = args.users;
         this.state = args.state;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a09cf400","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newEncryptedMessages.length),Buffer.concat(this.newEncryptedMessages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            this.state.bytes,
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newEncryptedMessages.length),Buffer.concat(this.newEncryptedMessages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
+            this.state.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -198,15 +198,15 @@ class DifferenceSlice extends TLObject {
         this.users = args.users;
         this.intermediateState = args.intermediateState;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8119fba8","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newEncryptedMessages.length),Buffer.concat(this.newEncryptedMessages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
-            this.intermediateState.bytes,
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newEncryptedMessages.length),Buffer.concat(this.newEncryptedMessages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
+            this.intermediateState.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -279,7 +279,7 @@ class DifferenceTooLong extends TLObject {
 
         this.pts = args.pts;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6d8ffe4a","hex"),
             struct.pack('<i', this.pts),
@@ -312,7 +312,7 @@ class ChannelDifferenceEmpty extends TLObject {
         this.pts = args.pts;
         this.timeout = args.timeout || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fbaf113e","hex"),
             struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
@@ -364,15 +364,15 @@ class ChannelDifferenceTooLong extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fec6bca4","hex"),
             struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
             (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
-            this.dialog.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.messages.length),Buffer.concat(this.messages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            this.dialog.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.messages.length),Buffer.concat(this.messages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -447,16 +447,16 @@ class ChannelDifference extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4e676420","hex"),
             struct.pack('<I', (this.final === undefined || this.final === false || this.final === null) ? 0 : 1 | (this.timeout === undefined || this.timeout === false || this.timeout === null) ? 0 : 2),
             struct.pack('<i', this.pts),
             (this.timeout === undefined || this.timeout === false || this.timeout ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.timeout)],
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.newMessages.length),Buffer.concat(this.newMessages.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.otherUpdates.length),Buffer.concat(this.otherUpdates.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

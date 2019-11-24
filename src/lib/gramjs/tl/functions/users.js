@@ -27,10 +27,10 @@ class GetUsersRequest extends TLRequest {
         }
         this.id = _tmp;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("48a5910d","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.id.length),Buffer.concat(this.id.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -67,10 +67,10 @@ class GetFullUserRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputUser(await client.getInputEntity(this.id))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b1a530ca","hex"),
-            this.id.bytes,
+            this.id.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -102,11 +102,11 @@ class SetSecureValueErrorsRequest extends TLRequest {
     async resolve(client, utils) {
         this.id = utils.getInputUser(await client.getInputEntity(this.id))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b594c890","hex"),
-            this.id.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.errors.length),Buffer.concat(this.errors.map(x => x.bytes)),
+            this.id.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.errors.length),Buffer.concat(this.errors.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

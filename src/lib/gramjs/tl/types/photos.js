@@ -21,11 +21,11 @@ class Photos extends TLObject {
         this.photos = args.photos;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a56aca8d","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.photos.length),Buffer.concat(this.photos.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.photos.length),Buffer.concat(this.photos.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -70,12 +70,12 @@ class PhotosSlice extends TLObject {
         this.photos = args.photos;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("541f0515","hex"),
             struct.pack('<i', this.count),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.photos.length),Buffer.concat(this.photos.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.photos.length),Buffer.concat(this.photos.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -122,11 +122,11 @@ class Photo extends TLObject {
         this.photo = args.photo;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a82c2120","hex"),
-            this.photo.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            this.photo.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

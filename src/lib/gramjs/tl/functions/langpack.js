@@ -22,7 +22,7 @@ class GetLangPackRequest extends TLRequest {
         this.langPack = args.langPack;
         this.langCode = args.langCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0a33f2f2","hex"),
             TLObject.serializeBytes(this.langPack),
@@ -59,7 +59,7 @@ class GetStringsRequest extends TLRequest {
         this.langCode = args.langCode;
         this.keys = args.keys;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0338eaef","hex"),
             TLObject.serializeBytes(this.langPack),
@@ -106,7 +106,7 @@ class GetDifferenceRequest extends TLRequest {
         this.langCode = args.langCode;
         this.fromVersion = args.fromVersion;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a54a98cd","hex"),
             TLObject.serializeBytes(this.langPack),
@@ -145,7 +145,7 @@ class GetLanguagesRequest extends TLRequest {
 
         this.langPack = args.langPack;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8f97c642","hex"),
             TLObject.serializeBytes(this.langPack),
@@ -177,7 +177,7 @@ class GetLanguageRequest extends TLRequest {
         this.langPack = args.langPack;
         this.langCode = args.langCode;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0265596a","hex"),
             TLObject.serializeBytes(this.langPack),

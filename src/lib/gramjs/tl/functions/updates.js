@@ -16,7 +16,7 @@ class GetStateRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x23df1a01;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2a88d4ed","hex"),
             ])
@@ -47,7 +47,7 @@ class GetDifferenceRequest extends TLRequest {
         this.date = args.date;
         this.qts = args.qts;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("51969325","hex"),
             struct.pack('<I', (this.ptsTotalLimit === undefined || this.ptsTotalLimit === false || this.ptsTotalLimit === null) ? 0 : 1),
@@ -106,12 +106,12 @@ class GetChannelDifferenceRequest extends TLRequest {
     async resolve(client, utils) {
         this.channel = utils.getInputChannel(await client.getInputEntity(this.channel))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("783d1703","hex"),
             struct.pack('<I', (this.force === undefined || this.force === false || this.force === null) ? 0 : 1),
-            this.channel.bytes,
-            this.filter.bytes,
+            this.channel.getBytes(),
+            this.filter.getBytes(),
             struct.pack('<i', this.pts),
             struct.pack('<i', this.limit),
             ])

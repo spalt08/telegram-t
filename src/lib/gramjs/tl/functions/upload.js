@@ -2,7 +2,7 @@
 const { TLObject } = require('../tlobject');
 const { TLRequest } = require('../tlobject');
 const struct = require('python-struct');
-const { readBigIntFromBuffer,
+const { readBigIntFromBuffer, 
         readBufferFromBigInt, generateRandomBytes } = require('../../Helpers')
 
 
@@ -21,14 +21,14 @@ class SaveFilePartRequest extends TLRequest {
 
         this.fileId = args.fileId;
         this.filePart = args.filePart;
-        this._bytes = args.bytes;
+        this.bytes = args.bytes;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("21a604b3","hex"),
             readBufferFromBigInt(this.fileId,8,true,true),
             struct.pack('<i', this.filePart),
-            TLObject.serializeBytes(this._bytes),
+            TLObject.serializeBytes(this.bytes),
             ])
         }
     static fromReader(reader) {
@@ -65,11 +65,11 @@ class GetFileRequest extends TLRequest {
         this.offset = args.offset;
         this.limit = args.limit;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fc9a5ab1","hex"),
             struct.pack('<I', (this.precise === undefined || this.precise === false || this.precise === null) ? 0 : 1),
-            this.location.bytes,
+            this.location.getBytes(),
             struct.pack('<i', this.offset),
             struct.pack('<i', this.limit),
             ])
@@ -112,15 +112,15 @@ class SaveBigFilePartRequest extends TLRequest {
         this.fileId = args.fileId;
         this.filePart = args.filePart;
         this.fileTotalParts = args.fileTotalParts;
-        this._bytes = args.bytes;
+        this.bytes = args.bytes;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3d677bde","hex"),
             readBufferFromBigInt(this.fileId,8,true,true),
             struct.pack('<i', this.filePart),
             struct.pack('<i', this.fileTotalParts),
-            TLObject.serializeBytes(this._bytes),
+            TLObject.serializeBytes(this.bytes),
             ])
         }
     static fromReader(reader) {
@@ -159,10 +159,10 @@ class GetWebFileRequest extends TLRequest {
         this.offset = args.offset;
         this.limit = args.limit;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8d81e624","hex"),
-            this.location.bytes,
+            this.location.getBytes(),
             struct.pack('<i', this.offset),
             struct.pack('<i', this.limit),
             ])
@@ -200,7 +200,7 @@ class GetCdnFileRequest extends TLRequest {
         this.offset = args.offset;
         this.limit = args.limit;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c3bc0020","hex"),
             TLObject.serializeBytes(this.fileToken),
@@ -240,7 +240,7 @@ class ReuploadCdnFileRequest extends TLRequest {
         this.fileToken = args.fileToken;
         this.requestToken = args.requestToken;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a854279b","hex"),
             TLObject.serializeBytes(this.fileToken),
@@ -276,7 +276,7 @@ class GetCdnFileHashesRequest extends TLRequest {
         this.fileToken = args.fileToken;
         this.offset = args.offset;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("3142a54d","hex"),
             TLObject.serializeBytes(this.fileToken),
@@ -312,10 +312,10 @@ class GetFileHashesRequest extends TLRequest {
         this.location = args.location;
         this.offset = args.offset;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("315902c7","hex"),
-            this.location.bytes,
+            this.location.getBytes(),
             struct.pack('<i', this.offset),
             ])
         }

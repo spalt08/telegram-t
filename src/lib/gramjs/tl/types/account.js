@@ -22,12 +22,12 @@ class PrivacyRules extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("454ea050","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -79,10 +79,10 @@ class Authorizations extends TLObject {
 
         this.authorizations = args.authorizations;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("deab5012","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.authorizations.length),Buffer.concat(this.authorizations.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.authorizations.length),Buffer.concat(this.authorizations.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -126,19 +126,19 @@ class Password extends TLObject {
         this.newSecureAlgo = args.newSecureAlgo;
         this.secureRandom = args.secureRandom;
     }
-    get bytes() {
+    getBytes() {
         if (!((this.has_password || this.has_password!==null && this.current_algo || this.current_algo!==null && this.srp_B || this.srp_B!==null && this.srp_id || this.srp_id!==null) && (this.has_password===null || this.has_password===false && this.current_algo===null || this.current_algo===false && this.srp_B===null || this.srp_B===false && this.srp_id===null || this.srp_id===false)))
 	 throw new Error('has_password, current_algo, srp_B, srp_id paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("f84126ad","hex"),
             struct.pack('<I', (this.hasRecovery === undefined || this.hasRecovery === false || this.hasRecovery === null) ? 0 : 1 | (this.hasSecureValues === undefined || this.hasSecureValues === false || this.hasSecureValues === null) ? 0 : 2 | (this.hasPassword === undefined || this.hasPassword === false || this.hasPassword === null) ? 0 : 4 | (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo === null) ? 0 : 4 | (this.srp_B === undefined || this.srp_B === false || this.srp_B === null) ? 0 : 4 | (this.srpId === undefined || this.srpId === false || this.srpId === null) ? 0 : 4 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 8 | (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern === null) ? 0 : 16),
-            (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo ===null) ? Buffer.alloc(0) : [this.currentAlgo.bytes],
+            (this.currentAlgo === undefined || this.currentAlgo === false || this.currentAlgo ===null) ? Buffer.alloc(0) : [this.currentAlgo.getBytes()],
             (this.srp_B === undefined || this.srp_B === false || this.srp_B ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.srp_B)],
             (this.srpId === undefined || this.srpId === false || this.srpId ===null) ? Buffer.alloc(0) : [readBufferFromBigInt(this.srpId,8,true,true)],
             (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
             (this.emailUnconfirmedPattern === undefined || this.emailUnconfirmedPattern === false || this.emailUnconfirmedPattern ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.emailUnconfirmedPattern)],
-            this.newAlgo.bytes,
-            this.newSecureAlgo.bytes,
+            this.newAlgo.getBytes(),
+            this.newSecureAlgo.getBytes(),
             TLObject.serializeBytes(this.secureRandom),
             ])
         }
@@ -226,12 +226,12 @@ class PasswordSettings extends TLObject {
         this.email = args.email || null;
         this.secureSettings = args.secureSettings || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e5335c9a","hex"),
             struct.pack('<I', (this.email === undefined || this.email === false || this.email === null) ? 0 : 1 | (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings === null) ? 0 : 2),
             (this.email === undefined || this.email === false || this.email ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.email)],
-            (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings ===null) ? Buffer.alloc(0) : [this.secureSettings.bytes],
+            (this.secureSettings === undefined || this.secureSettings === false || this.secureSettings ===null) ? Buffer.alloc(0) : [this.secureSettings.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -279,17 +279,17 @@ class PasswordInputSettings extends TLObject {
         this.email = args.email || null;
         this.newSecureSettings = args.newSecureSettings || null;
     }
-    get bytes() {
+    getBytes() {
         if (!((this.new_algo || this.new_algo!==null && this.new_password_hash || this.new_password_hash!==null && this.hint || this.hint!==null) && (this.new_algo===null || this.new_algo===false && this.new_password_hash===null || this.new_password_hash===false && this.hint===null || this.hint===false)))
 	 throw new Error('new_algo, new_password_hash, hint paramaters must all be false-y or all true')
         return Buffer.concat([
             Buffer.from("c92737c2","hex"),
             struct.pack('<I', (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo === null) ? 0 : 1 | (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash === null) ? 0 : 1 | (this.hint === undefined || this.hint === false || this.hint === null) ? 0 : 1 | (this.email === undefined || this.email === false || this.email === null) ? 0 : 2 | (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings === null) ? 0 : 4),
-            (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo ===null) ? Buffer.alloc(0) : [this.newAlgo.bytes],
+            (this.newAlgo === undefined || this.newAlgo === false || this.newAlgo ===null) ? Buffer.alloc(0) : [this.newAlgo.getBytes()],
             (this.newPasswordHash === undefined || this.newPasswordHash === false || this.newPasswordHash ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.newPasswordHash)],
             (this.hint === undefined || this.hint === false || this.hint ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.hint)],
             (this.email === undefined || this.email === false || this.email ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.email)],
-            (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings ===null) ? Buffer.alloc(0) : [this.newSecureSettings.bytes],
+            (this.newSecureSettings === undefined || this.newSecureSettings === false || this.newSecureSettings ===null) ? Buffer.alloc(0) : [this.newSecureSettings.getBytes()],
             ])
         }
     static fromReader(reader) {
@@ -358,7 +358,7 @@ class TmpPassword extends TLObject {
         this.tmpPassword = args.tmpPassword;
         this.validUntil = args.validUntil;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("34fd64db","hex"),
             TLObject.serializeBytes(this.tmpPassword),
@@ -394,11 +394,11 @@ class WebAuthorizations extends TLObject {
         this.authorizations = args.authorizations;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("fcc956ed","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.authorizations.length),Buffer.concat(this.authorizations.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.authorizations.length),Buffer.concat(this.authorizations.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -445,14 +445,14 @@ class AuthorizationForm extends TLObject {
         this.users = args.users;
         this.privacyPolicyUrl = args.privacyPolicyUrl || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d81c2ead","hex"),
             struct.pack('<I', (this.privacyPolicyUrl === undefined || this.privacyPolicyUrl === false || this.privacyPolicyUrl === null) ? 0 : 1),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.requiredTypes.length),Buffer.concat(this.requiredTypes.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.values.length),Buffer.concat(this.values.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.errors.length),Buffer.concat(this.errors.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.requiredTypes.length),Buffer.concat(this.requiredTypes.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.values.length),Buffer.concat(this.values.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.errors.length),Buffer.concat(this.errors.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             (this.privacyPolicyUrl === undefined || this.privacyPolicyUrl === false || this.privacyPolicyUrl ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.privacyPolicyUrl)],
             ])
         }
@@ -526,7 +526,7 @@ class SentEmailCode extends TLObject {
         this.emailPattern = args.emailPattern;
         this.length = args.length;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4f851f81","hex"),
             TLObject.serializeBytes(this.emailPattern),
@@ -561,7 +561,7 @@ class Takeout extends TLObject {
 
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("0145ba4d","hex"),
             readBufferFromBigInt(this.id,8,true,true),
@@ -587,7 +587,7 @@ class WallPapersNotModified extends TLObject {
         this.SUBCLASS_OF_ID = 0xa2c548fd;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8391191c","hex"),
             ])
@@ -616,11 +616,11 @@ class WallPapers extends TLObject {
         this.hash = args.hash;
         this.wallpapers = args.wallpapers;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("a9652b70","hex"),
             struct.pack('<i', this.hash),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.wallpapers.length),Buffer.concat(this.wallpapers.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.wallpapers.length),Buffer.concat(this.wallpapers.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -659,12 +659,12 @@ class AutoDownloadSettings extends TLObject {
         this.medium = args.medium;
         this.high = args.high;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("26cfca63","hex"),
-            this.low.bytes,
-            this.medium.bytes,
-            this.high.bytes,
+            this.low.getBytes(),
+            this.medium.getBytes(),
+            this.high.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -693,7 +693,7 @@ class ThemesNotModified extends TLObject {
         this.SUBCLASS_OF_ID = 0x7fc52204;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("22b61ef4","hex"),
             ])
@@ -722,11 +722,11 @@ class Themes extends TLObject {
         this.hash = args.hash;
         this.themes = args.themes;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2164677f","hex"),
             struct.pack('<i', this.hash),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.themes.length),Buffer.concat(this.themes.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.themes.length),Buffer.concat(this.themes.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

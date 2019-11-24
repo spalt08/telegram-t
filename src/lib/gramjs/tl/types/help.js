@@ -26,15 +26,15 @@ class AppUpdate extends TLObject {
         this.document = args.document || null;
         this.url = args.url || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("8f15a71d","hex"),
             struct.pack('<I', (this.canNotSkip === undefined || this.canNotSkip === false || this.canNotSkip === null) ? 0 : 1 | (this.document === undefined || this.document === false || this.document === null) ? 0 : 2 | (this.url === undefined || this.url === false || this.url === null) ? 0 : 4),
             struct.pack('<i', this.id),
             TLObject.serializeBytes(this.version),
             TLObject.serializeBytes(this.text),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
-            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.bytes],
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes())),
+            (this.document === undefined || this.document === false || this.document ===null) ? Buffer.alloc(0) : [this.document.getBytes()],
             (this.url === undefined || this.url === false || this.url ===null) ? Buffer.alloc(0) : [TLObject.serializeBytes(this.url)],
             ])
         }
@@ -95,7 +95,7 @@ class NoAppUpdate extends TLObject {
         this.SUBCLASS_OF_ID = 0x5897069e;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("36655ac4","hex"),
             ])
@@ -123,7 +123,7 @@ class InviteText extends TLObject {
 
         this.message = args.message;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("789fcb18","hex"),
             TLObject.serializeBytes(this.message),
@@ -155,11 +155,11 @@ class Support extends TLObject {
         this.phoneNumber = args.phoneNumber;
         this.user = args.user;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("f6b5c617","hex"),
             TLObject.serializeBytes(this.phoneNumber),
-            this.user.bytes,
+            this.user.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -194,13 +194,13 @@ class TermsOfService extends TLObject {
         this.entities = args.entities;
         this.minAgeConfirm = args.minAgeConfirm || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("10030a78","hex"),
             struct.pack('<I', (this.popup === undefined || this.popup === false || this.popup === null) ? 0 : 1 | (this.minAgeConfirm === undefined || this.minAgeConfirm === false || this.minAgeConfirm === null) ? 0 : 2),
-            this.id.bytes,
+            this.id.getBytes(),
             TLObject.serializeBytes(this.text),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes())),
             (this.minAgeConfirm === undefined || this.minAgeConfirm === false || this.minAgeConfirm ===null) ? Buffer.alloc(0) : [struct.pack('<i', this.minAgeConfirm)],
             ])
         }
@@ -257,12 +257,12 @@ class RecentMeUrls extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d710030e","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.urls.length),Buffer.concat(this.urls.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.urls.length),Buffer.concat(this.urls.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -314,7 +314,7 @@ class ProxyDataEmpty extends TLObject {
 
         this.expires = args.expires;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("b81f9ee0","hex"),
             struct.pack('<i', this.expires),
@@ -348,13 +348,13 @@ class ProxyDataPromo extends TLObject {
         this.chats = args.chats;
         this.users = args.users;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("23eef72b","hex"),
             struct.pack('<i', this.expires),
-            this.peer.bytes,
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.bytes)),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.bytes)),
+            this.peer.getBytes(),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.chats.length),Buffer.concat(this.chats.map(x => x.getBytes())),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.users.length),Buffer.concat(this.users.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -403,7 +403,7 @@ class TermsOfServiceUpdateEmpty extends TLObject {
 
         this.expires = args.expires;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7f9f30e3","hex"),
             struct.pack('<i', this.expires),
@@ -435,11 +435,11 @@ class TermsOfServiceUpdate extends TLObject {
         this.expires = args.expires;
         this.termsOfService = args.termsOfService;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("61f9ec28","hex"),
             struct.pack('<i', this.expires),
-            this.termsOfService.bytes,
+            this.termsOfService.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -465,7 +465,7 @@ class DeepLinkInfoEmpty extends TLObject {
         this.SUBCLASS_OF_ID = 0x984aac38;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("66a1af66","hex"),
             ])
@@ -495,12 +495,12 @@ class DeepLinkInfo extends TLObject {
         this.message = args.message;
         this.entities = args.entities || null;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("32e84e6a","hex"),
             struct.pack('<I', (this.updateApp === undefined || this.updateApp === false || this.updateApp === null) ? 0 : 1 | (this.entities === undefined || this.entities === false || this.entities === null) ? 0 : 2),
             TLObject.serializeBytes(this.message),
-            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes))]),
+            (this.entities === undefined || this.entities === false || this.entities ===null) ? Buffer.alloc(0) :Buffer.concat([Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes()))]),
             ])
         }
     static fromReader(reader) {
@@ -543,7 +543,7 @@ class PassportConfigNotModified extends TLObject {
         this.SUBCLASS_OF_ID = 0xc666c0ad;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("57f4b9bf","hex"),
             ])
@@ -572,11 +572,11 @@ class PassportConfig extends TLObject {
         this.hash = args.hash;
         this.countriesLangs = args.countriesLangs;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("afd698a0","hex"),
             struct.pack('<i', this.hash),
-            this.countriesLangs.bytes,
+            this.countriesLangs.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -607,7 +607,7 @@ class SupportName extends TLObject {
 
         this.name = args.name;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("c9f1058c","hex"),
             TLObject.serializeBytes(this.name),
@@ -633,7 +633,7 @@ class UserInfoEmpty extends TLObject {
         this.SUBCLASS_OF_ID = 0x5c53d7d8;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("ed2eaef3","hex"),
             ])
@@ -664,11 +664,11 @@ class UserInfo extends TLObject {
         this.author = args.author;
         this.date = args.date;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5837eb01","hex"),
             TLObject.serializeBytes(this.message),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes())),
             TLObject.serializeBytes(this.author),
             struct.pack('<i', this.date),
             ])
@@ -715,12 +715,12 @@ class ConfigSimple extends TLObject {
         this.expires = args.expires;
         this.rules = args.rules;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6c2a595a","hex"),
             struct.pack('<i', this.date),
             struct.pack('<i', this.expires),
-            struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.bytes)),
+            struct.pack('<i', this.rules.length),Buffer.concat(this.rules.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {

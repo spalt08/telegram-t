@@ -16,7 +16,7 @@ class GetConfigRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xd3262a4a;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6b18f9c4","hex"),
             ])
@@ -39,7 +39,7 @@ class GetNearestDcRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x3877045f;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2630b31f","hex"),
             ])
@@ -67,7 +67,7 @@ class GetAppUpdateRequest extends TLRequest {
 
         this.source = args.source;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("7d5a2d52","hex"),
             TLObject.serializeBytes(this.source),
@@ -93,7 +93,7 @@ class GetInviteTextRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xcf70aa35;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("4323394d","hex"),
             ])
@@ -116,7 +116,7 @@ class GetSupportRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x7159bceb;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cd08df9c","hex"),
             ])
@@ -144,7 +144,7 @@ class GetAppChangelogRequest extends TLRequest {
 
         this.prevAppVersion = args.prevAppVersion;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("6fef1090","hex"),
             TLObject.serializeBytes(this.prevAppVersion),
@@ -176,7 +176,7 @@ class SetBotUpdatesStatusRequest extends TLRequest {
         this.pendingUpdatesCount = args.pendingUpdatesCount;
         this.message = args.message;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("cdcf22ec","hex"),
             struct.pack('<i', this.pendingUpdatesCount),
@@ -206,7 +206,7 @@ class GetCdnConfigRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xecda397c;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("42930252","hex"),
             ])
@@ -234,7 +234,7 @@ class GetRecentMeUrlsRequest extends TLRequest {
 
         this.referer = args.referer;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("14f1c03d","hex"),
             TLObject.serializeBytes(this.referer),
@@ -260,7 +260,7 @@ class GetProxyDataRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x21e2a448;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("e158773d","hex"),
             ])
@@ -283,7 +283,7 @@ class GetTermsOfServiceUpdateRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x293c2977;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d11fa52c","hex"),
             ])
@@ -311,10 +311,10 @@ class AcceptTermsOfServiceRequest extends TLRequest {
 
         this.id = args.id;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("9af772ee","hex"),
-            this.id.bytes,
+            this.id.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -342,7 +342,7 @@ class GetDeepLinkInfoRequest extends TLRequest {
 
         this.path = args.path;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("5fc7ed3f","hex"),
             TLObject.serializeBytes(this.path),
@@ -368,7 +368,7 @@ class GetAppConfigRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0xeb9987b3;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("10419198","hex"),
             ])
@@ -396,10 +396,10 @@ class SaveAppLogRequest extends TLRequest {
 
         this.events = args.events;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("48f7026f","hex"),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.events.length),Buffer.concat(this.events.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.events.length),Buffer.concat(this.events.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
@@ -433,7 +433,7 @@ class GetPassportConfigRequest extends TLRequest {
 
         this.hash = args.hash;
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("08ad61c6","hex"),
             struct.pack('<i', this.hash),
@@ -459,7 +459,7 @@ class GetSupportNameRequest extends TLRequest {
         this.SUBCLASS_OF_ID = 0x7f50b7c2;
 
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("2ce760d3","hex"),
             ])
@@ -490,10 +490,10 @@ class GetUserInfoRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("d3088a03","hex"),
-            this.userId.bytes,
+            this.userId.getBytes(),
             ])
         }
     static fromReader(reader) {
@@ -526,12 +526,12 @@ class EditUserInfoRequest extends TLRequest {
     async resolve(client, utils) {
         this.user_id = utils.getInputUser(await client.getInputEntity(this.userId))
     }
-    get bytes() {
+    getBytes() {
         return Buffer.concat([
             Buffer.from("701bb966","hex"),
-            this.userId.bytes,
+            this.userId.getBytes(),
             TLObject.serializeBytes(this.message),
-            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.bytes)),
+            Buffer.from('15c4b51c', 'hex'),struct.pack('<i', this.entities.length),Buffer.concat(this.entities.map(x => x.getBytes())),
             ])
         }
     static fromReader(reader) {
