@@ -1,3 +1,4 @@
+const BigInt = require('big-integer')
 const Factorizator = require('./crypto/Factorizator')
 const { types } = require('./tl')
 const { readBigIntFromBuffer, readBufferFromBigInt, sha256, modExp, generateRandomBytes } = require('./Helpers')
