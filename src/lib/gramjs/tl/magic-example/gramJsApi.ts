@@ -128,6 +128,8 @@ function createClasses(classesType: 'constructor' | 'request', params: any[]) {
     
     classes[name] = VirtualClass;
   }
+  
+  return classes;
 }
 
 // Here we are forcing the "magic" function to "return" pre-defined types with `as` keywords.
