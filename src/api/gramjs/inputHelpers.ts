@@ -1,5 +1,4 @@
 import * as gramJsApi from '../../lib/gramjs/tl/types';
-import { ApiFileLocation } from '../types';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
 
@@ -28,11 +27,11 @@ export function buildInputPeer(chatOrUserId: number): MTP.Peer {
 }
 
 export function buildInputPeerPhotoFileLocation(
-  { id, fileLocation }: { id: number; fileLocation: ApiFileLocation },
-): MTP.inputPeerPhotoFileLocation {
-  const peer = buildInputPeer(id);
-  const { volumeId, localId } = fileLocation;
-
+  chatOrUserId: number,
+  volumeId: MTP.long,
+  localId: number,
+): MTPNext.InputPeerPhotoFileLocation {
+  const peer = buildInputPeer(chatOrUserId);
   return new gramJsApi.InputPeerPhotoFileLocation({
     peer,
     volumeId,

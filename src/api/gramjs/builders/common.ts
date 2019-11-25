@@ -3,10 +3,16 @@ export function buildPhoto(entity: MTP.user | MTP.chat) {
     return undefined;
   }
 
-  const { photoSmall, photoBig } = entity.photo as (MTP.userProfilePhoto | MTP.chatPhoto);
+  const { photoSmall, photoBig, dcId } = entity.photo as (MTPNext.UserProfilePhoto | MTPNext.ChatPhoto);
 
   return {
-    small: photoSmall as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
-    big: photoBig as MTP.FileLocationNext as MTP.fileLocationToBeDeprecated,
+    small: {
+      ...photoSmall,
+      dcId,
+    },
+    big: {
+      ...photoBig,
+      dcId,
+    },
   };
 }

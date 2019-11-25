@@ -1,17 +1,34 @@
 import { ApiFileLocation } from '../../types';
 
 import { downloadFile } from '../client';
+import localDb from '../localDb';
 
 export function init() {
 }
 
-export async function loadFile(id: any, fileLocation: ApiFileLocation): Promise<string | null> {
-  const fileBuffer = await downloadFile(id, fileLocation);
+export function loadAvatar(chatOrUserId: any, fileLocation: ApiFileLocation): Promise<string | null> {
+  if (!localDb.avatarRequests[chatOrUserId]) {
+    localDb.avatarRequests[chatOrUserId] = downloadFile(chatOrUserId, fileLocation)
+      .then(
+        (fileBuffer: Buffer) => {
+          if (fileBuffer) {
+            return bytesToDataUri(fileBuffer);
+          } else {
+            delete localDb.avatarRequests[chatOrUserId];
+            return null;
+          }
+        },
+        () => {
+          delete localDb.avatarRequests[chatOrUserId];
+          return null;
+        },
+      );
+  }
 
-  return fileBuffer ? bytesToUrl(fileBuffer) : null;
+  return localDb.avatarRequests[chatOrUserId];
 }
 
-function bytesToUrl(bytes: Uint8Array, mimeType?: string) {
+function bytesToDataUri(bytes: Uint8Array, mimeType?: string) {
   if (!mimeType) {
     mimeType = 'image/jpg';
   }

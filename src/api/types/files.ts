@@ -22,10 +22,8 @@ export interface ApiFile {
   blobUrl?: string;
 }
 
-type bytes = string | Uint8Array;
-type long = number[] | string;
-
 export interface ApiFileLocation {
-  volumeId: long;
-  localId: int;
+  dcId: int;
+  volumeId: MTP.long;
+  localId: number;
 }

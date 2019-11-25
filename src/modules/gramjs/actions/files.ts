@@ -1,7 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
-import { loadFile } from '../../../api/gramjs';
+import { loadAvatar } from '../../../api/gramjs';
 
 // Wait for other requests to complete + fix GramJS sync requests bug.
 const FILE_REQUEST_DELAY = 500;
@@ -26,7 +26,7 @@ function loadChatPhoto(chat: ApiChat) {
   }
 
   setTimeout(async () => {
-    const dataUrl = await loadFile(chat.id, fileLocation);
+    const dataUrl = await loadAvatar(chat.id, fileLocation);
 
     if (!dataUrl) {
       return;
@@ -45,7 +45,7 @@ function loadUserPhoto(user: ApiUser) {
 
   // `requestAnimationFrame` is a workaround for some unknown bug in GramJS.
   setTimeout(async () => {
-    const dataUrl = await loadFile(user.id, fileLocation);
+    const dataUrl = await loadAvatar(user.id, fileLocation);
 
     if (!dataUrl) {
       return;

@@ -97,9 +97,11 @@ export async function invokeRequest(data: InvokeRequestPayload) {
   return result;
 }
 
-export function downloadFile(id: number, fileLocation: ApiFileLocation, dcId?: number) {
+export function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
+  const { dcId, volumeId, localId } = fileLocation;
+
   return client.downloadFile(
-    buildInputPeerPhotoFileLocation({ id, fileLocation }),
+    buildInputPeerPhotoFileLocation(chatOrUserId, volumeId, localId),
     true,
     { dcId },
   );

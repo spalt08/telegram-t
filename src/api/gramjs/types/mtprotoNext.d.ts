@@ -5,13 +5,26 @@ type double = number;
 type bytes = string | Uint8Array;
 type long = number[] | string;
 
-declare namespace MTP {
-  export type fileLocationToBeDeprecated = {
+declare namespace MTPNext {
+  type FileLocationToBeDeprecated = {
     volumeId: long;
     localId: int;
   };
 
-  export type inputPeerPhotoFileLocation = {
+  export type UserProfilePhoto = {
+    photoSmall: FileLocationToBeDeprecated;
+    photoBig: FileLocationToBeDeprecated;
+    dcId: int;
+    photoId: long;
+  };
+
+  export type ChatPhoto = {
+    photoSmall: FileLocationToBeDeprecated;
+    photoBig: FileLocationToBeDeprecated;
+    dcId: int;
+  };
+
+  export type InputPeerPhotoFileLocation = {
     _?: 'inputPeerPhotoFileLocation';
     // flags: number;
     big?: true;
@@ -19,6 +32,4 @@ declare namespace MTP {
     volumeId: long;
     localId: int;
   };
-
-  export type FileLocationNext = MTP.FileLocation | fileLocationToBeDeprecated;
 }
