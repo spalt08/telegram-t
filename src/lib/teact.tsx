@@ -222,7 +222,7 @@ function getUpdatedChild(
   if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
       currentChild.componentInstance.props = newChild.componentInstance.props;
-      // TODO Support new children
+      currentChild.componentInstance.children = newChild.componentInstance.children;
       return currentChild.componentInstance.render();
     } else {
       newChild.children = getUpdatedChildren(currentChild, newChild.children);
