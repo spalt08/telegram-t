@@ -2,7 +2,16 @@ import { ApiFile } from './files';
 
 export interface ApiPhotoSize {
   '@type': 'photoSize';
-  photo: ApiFile;
+  type: 'm' | 'x' | 'y';
+  width: number;
+  height: number;
+  // TdLib only.
+  photo?: ApiFile;
+}
+
+export interface ApiPhotoCachedSize {
+  '@type': 'photoCachedSize';
+  dataUri: string;
   type: 'm' | 'x' | 'y';
   width: number;
   height: number;
@@ -26,8 +35,9 @@ export interface ApiSticker {
   width: number;
   height: number;
   is_animated: boolean;
-  sticker: ApiPhotoSize;
-  thumbnail: ApiPhotoSize;
+  thumbnail: ApiPhotoCachedSize;
+  // TdLib only.
+  sticker?: ApiPhotoSize;
 }
 
 export interface ApiMessageForwardInfo {
@@ -49,6 +59,7 @@ export interface ApiMessage {
     // TODO Enum
     '@type': string;
     text?: {
+      '@type': 'formattedText';
       text: string;
     };
     photo?: ApiPhoto;

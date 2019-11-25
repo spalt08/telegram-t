@@ -160,8 +160,10 @@ export function isUserOnline(user: ApiUser) {
 export function getUserPhotoId(user: ApiUser): number | null {
   const { profile_photo, profile_photo_locations } = user;
 
+  // TdLib way.
   if (profile_photo) {
     return profile_photo.small.id;
+  // GramJs way.
   } else if (profile_photo_locations) {
     return user.id;
   }

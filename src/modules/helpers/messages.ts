@@ -1,4 +1,4 @@
-import { ApiMessage, ApiPhoto } from '../../api/types';
+import { ApiMessage } from '../../api/types';
 
 export function getLastMessageText(message: ApiMessage) {
   const {
@@ -37,8 +37,8 @@ export function getMessageText(message: ApiMessage) {
     return text.text;
   }
 
-  if (photo && caption) {
-    return caption.text;
+  if (photo) {
+    return caption ? caption.text : undefined;
   }
 
   if (sticker) {
@@ -60,13 +60,36 @@ export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
 
-export function getPhotoUrl(photo: ApiPhoto) {
-  const mediumSize = photo.sizes.find((size) => size.type === 'm');
-  if (!mediumSize || !mediumSize.photo.local.is_downloading_completed) {
-    return undefined;
+export function getMessageFileId(message: ApiMessage): number | null {
+  const { photo, sticker } = message.content;
+
+  if (photo) {
+    const mSize = photo.sizes.find((size) => size.type === 'm');
+
+    if (!mSize) {
+      throw new Error('mSize not found');
+    }
+
+    if (mSize.photo) {
+      // TdLib way.
+      return mSize.photo.id;
+    } else {
+      // GramJs way.
+      return message.id;
+    }
   }
 
-  return mediumSize.photo.local.path;
+  if (sticker) {
+    if (sticker.sticker && sticker.sticker.photo) {
+      // TdLib way.
+      return sticker.sticker.photo.id;
+    } else {
+      // GramJs way.
+      return message.id;
+    }
+  }
+
+  return null;
 }
 
 export function isOwnMessage(message: ApiMessage) {

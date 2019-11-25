@@ -1,6 +1,11 @@
-export function buildPhoto(entity: MTP.user | MTP.chat) {
+import { ApiFileLocation } from '../../types';
+
+export function buildApiPhotoLocations(entity: MTP.user | MTP.chat): {
+  small: ApiFileLocation;
+  big: ApiFileLocation;
+} | null {
   if (!entity.photo) {
-    return undefined;
+    return null;
   }
 
   const { photoSmall, photoBig, dcId } = entity.photo as (MTPNext.UserProfilePhoto | MTPNext.ChatPhoto);
@@ -15,4 +20,14 @@ export function buildPhoto(entity: MTP.user | MTP.chat) {
       dcId,
     },
   };
+}
+
+export function bytesToDataUri(bytes: Uint8Array, shouldOmitPrefix = false, mimeType: string = 'image/jpg') {
+  const prefix = shouldOmitPrefix ? '' : `data:${mimeType};base64,`;
+
+  return `${prefix}${btoa(
+    bytes.reduce((data, byte) => {
+      return data + String.fromCharCode(byte);
+    }, ''),
+  )}`;
 }

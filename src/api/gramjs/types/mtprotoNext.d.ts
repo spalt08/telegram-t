@@ -32,4 +32,6 @@ declare namespace MTPNext {
     volumeId: long;
     localId: int;
   };
+
+  export type PhotoStrippedSize = Omit<MTP.photoCachedSize, 'w' | 'h'>;
 }

@@ -1,6 +1,6 @@
 import { isPeerChat, isPeerUser } from './peers';
 import { ApiChat } from '../../types';
-import { buildPhoto } from './common';
+import { buildApiPhotoLocations } from './common';
 
 export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat): ApiChat {
   return {
@@ -10,7 +10,7 @@ export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user 
       ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
-    photo_locations: buildPhoto(peerEntity),
+    photo_locations: buildApiPhotoLocations(peerEntity),
     last_read_outbox_message_id: dialog.readOutboxMaxId,
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,

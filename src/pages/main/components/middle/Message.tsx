@@ -7,33 +7,30 @@ import {
   ApiPhoto,
   ApiSticker,
 } from '../../../../api/types';
-import {
-  isOwnMessage,
-  getUserFullName,
-  getPhotoUrl,
-} from '../../../../modules/helpers';
-import { selectUser, selectChatMessage } from '../../../../modules/selectors';
+import { selectUser, selectChatMessage, selectMessageFileUrl } from '../../../../modules/selectors';
+import { isOwnMessage, getUserFullName } from '../../../../modules/helpers';
 import { getImageDimensions } from '../../../../util/imageDimensions';
-
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
-
-import { buildMessageContent } from './util/messages';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
+import { buildMessageContent } from './util/messages';
 import './Message.scss';
 
 type IProps = {
   message: ApiMessage;
-  replyMessage?: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
+  replyMessage?: ApiMessage;
+  fileDataUri?: string;
   sender?: ApiUser;
 };
 
-const Message: FC<IProps> = ({
-  message, replyMessage, showAvatar, showSenderName, sender,
-}) => {
+const Message: FC<IProps> = (
+  {
+    message, showAvatar, showSenderName, replyMessage, fileDataUri, sender,
+  },
+) => {
   const className = buildClassName(message);
   const {
     text,
@@ -57,12 +54,14 @@ const Message: FC<IProps> = ({
   }
 
   function renderMessageContent() {
+    const isForwarded = Boolean(message.forward_info);
+
     return (
-      <div className={message.forward_info ? 'forwarded-message' : ''}>
+      <div className={isForwarded ? 'forwarded-message' : ''}>
         {renderSenderName()}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {renderMessagePhoto(photo, isOwnMessage(message), !!message.forward_info)}
-        {renderMessageSticker(sticker)}
+        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, fileDataUri)}
+        {sticker && renderMessageSticker(sticker, fileDataUri)}
         {text && (
           <p>{text}</p>
         )}
@@ -96,18 +95,13 @@ function buildClassName(message: ApiMessage) {
   return classNames.join(' ');
 }
 
-function renderMessagePhoto(photo: ApiPhoto | undefined, fromOwnMessage: boolean, isForwarded: boolean) {
-  if (!photo) {
-    return null;
-  }
-
+function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded: boolean, dataUri?: string) {
   const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
 
-  const photoUrl = getPhotoUrl(photo);
-  if (photoUrl) {
+  if (dataUri) {
     return (
       <div className="photo-content">
-        <img src={photoUrl} width={width} height={height} alt="" />
+        <img src={dataUri} width={width} height={height} alt="" />
       </div>
     );
   }
@@ -127,14 +121,13 @@ function renderMessagePhoto(photo: ApiPhoto | undefined, fromOwnMessage: boolean
   );
 }
 
-function renderMessageSticker(sticker?: ApiSticker) {
-  if (!sticker) {
-    return null;
-  }
+function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
+  const { width, height, thumbnail } = sticker;
 
-  // TODO @mockup
   return (
-    <p>{sticker.emoji}</p>
+    <div className="photo-content">
+      <img src={dataUri || thumbnail.dataUri} width={width} height={height} alt="" />
+    </div>
   );
 }
 
@@ -144,15 +137,20 @@ export default withGlobal(
     const replyMessage = message.reply_to_message_id
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
-    if (!showSenderName && !showAvatar && !message.forward_info) {
-      return { replyMessage };
+
+    const fileDataUri = selectMessageFileUrl(global, message);
+
+    let userId;
+    if (message.forward_info) {
+      userId = message.forward_info.origin.sender_user_id;
+    } else if (showSenderName || showAvatar) {
+      userId = message.sender_user_id;
     }
 
-    const userId = message.forward_info ? message.forward_info.origin.sender_user_id : message.sender_user_id;
-
     return {
-      sender: selectUser(global, userId),
       replyMessage,
+      fileDataUri,
+      ...(userId && { sender: selectUser(global, userId) }),
     };
   },
 )(Message);

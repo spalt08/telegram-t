@@ -2,6 +2,7 @@ import { ApiFileLocation } from '../../types';
 
 import { downloadFile } from '../client';
 import localDb from '../localDb';
+import { bytesToDataUri } from '../builders/common';
 
 export function init() {
 }
@@ -26,16 +27,4 @@ export function loadAvatar(chatOrUserId: any, fileLocation: ApiFileLocation): Pr
   }
 
   return localDb.avatarRequests[chatOrUserId];
-}
-
-function bytesToDataUri(bytes: Uint8Array, mimeType?: string) {
-  if (!mimeType) {
-    mimeType = 'image/jpg';
-  }
-
-  return `data:${mimeType};base64,${btoa(
-    bytes.reduce((data, byte) => {
-      return data + String.fromCharCode(byte);
-    }, ''),
-  )}`;
 }

@@ -1,7 +1,9 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage } from '../../api/types';
 import { selectChat } from './chats';
-import { getSendingState, isMessageLocal } from '../helpers';
+import {
+  getMessageFileId, getSendingState, isMessageLocal,
+} from '../helpers';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
   const byChatId = global.messages.byChatId[chatId];
@@ -27,4 +29,20 @@ export function selectOutgoingStatus(global: GlobalState, message: ApiMessage) {
   }
 
   return getSendingState(message);
+}
+
+export function selectMessageFileUrl(global: GlobalState, message: ApiMessage) {
+  const fileId = getMessageFileId(message);
+
+  if (!fileId) {
+    return null;
+  }
+
+  const file = global.files.byId[fileId];
+
+  if (!file || !file.blobUrl) {
+    return null;
+  }
+
+  return file && file.blobUrl ? file.blobUrl : null;
 }

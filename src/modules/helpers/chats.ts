@@ -23,8 +23,10 @@ export function getChatTitle(chat: ApiChat) {
 export function getChatPhotoId(chat: ApiChat): number | null {
   const { photo, photo_locations } = chat;
 
+  // TdLib way.
   if (photo) {
     return photo.small.id;
+  // GramJs way.
   } else if (photo_locations) {
     return chat.id;
   }
