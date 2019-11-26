@@ -24,6 +24,7 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 // Chunk sizes for upload.getFile must be multiples of the smallest size
 const MIN_CHUNK_SIZE = 4096
 const MAX_CHUNK_SIZE = 512 * 1024
+const DEFAULT_CHUNK_SIZE = 64 // kb
 
 
 class TelegramClient {
@@ -208,7 +209,7 @@ class TelegramClient {
         this.session.authKey = null
         await this.session.save()
         await this.disconnect()
-        return await this.connect()
+        return this.connect()
     }
 
     async _authKeyCallback(authKey) {
@@ -218,18 +219,6 @@ class TelegramClient {
 
     // endregion
     // export region
-
-    _onAuth() {
-        this._setupAdditionalDcConnections()
-    }
-
-    _setupAdditionalDcConnections() {
-        for (let i = 1; i <= 5; i++) {
-            if (i !== this.session.dcId) {
-                this._borrowExportedSender(i)
-            }
-        }
-    }
 
     async _borrowExportedSender(dcId, retries = 5) {
         let sender = this._borrowedSenderPromises[dcId]
@@ -288,9 +277,9 @@ class TelegramClient {
 
         if (!partSizeKb) {
             if (!fileSize) {
-                partSizeKb = 64
+                partSizeKb = DEFAULT_CHUNK_SIZE;
             } else {
-                partSizeKb = utils.getAppropriatedPartSize(partSizeKb)
+                partSizeKb = utils.getAppropriatedPartSize(fileSize)
             }
         }
         const partSize = parseInt(partSizeKb * 1024)
@@ -400,13 +389,13 @@ class TelegramClient {
             }
         }
         if (media instanceof types.MessageMediaPhoto || media instanceof types.Photo) {
-            return await this._downloadPhoto(media, saveToMemory, date, args.thumb, args.progressCallback)
+            return this._downloadPhoto(media, saveToMemory, date, args.thumb, args.progressCallback)
         } else if (media instanceof types.MessageMediaDocument || media instanceof types.Document) {
-            return await this._downloadDocument(media, saveToMemory, date, args.thumb, args.progressCallback, media.dcId)
+            return this._downloadDocument(media, saveToMemory, date, args.thumb, args.progressCallback, media.dcId)
         } else if (media instanceof types.MessageMediaContact && args.thumb == null) {
             return this._downloadContact(media, saveToMemory)
         } else if ((media instanceof types.WebDocument || media instanceof types.WebDocumentNoProxy) && args.thumb == null) {
-            return await this._downloadWebDocument(media, saveToMemory, args.progressCallback)
+            return this._downloadWebDocument(media, saveToMemory, args.progressCallback)
         }
     }
 
@@ -427,7 +416,7 @@ class TelegramClient {
                     return null
                 }
 
-                return await this._downloadPhoto(
+                return this._downloadPhoto(
                     entity.chatPhoto, saveToMemory, null, thumb, null,
                 )
             }
@@ -455,10 +444,9 @@ class TelegramClient {
             return null
         }
         try {
-            const result = await this.downloadFile(loc, saveToMemory, {
+            return this.downloadFile(loc, saveToMemory, {
                 dcId: dcId,
             })
-            return result
         } catch (e) {
             if (e instanceof errors.LocationInvalidError) {
                 const ie = await this.getInputEntity(entity)
@@ -466,7 +454,7 @@ class TelegramClient {
                     const full = await this.invoke(new functions.channels.GetFullChannelRequest({
                         channel: ie,
                     }))
-                    return await this._downloadPhoto(full.fullChat.chatPhoto, saveToMemory, null, null, thumb)
+                    return this._downloadPhoto(full.fullChat.chatPhoto, saveToMemory, null, null, thumb)
                 } else {
                     return null
                 }
@@ -515,12 +503,11 @@ class TelegramClient {
             return
         }
 
-
         if (size instanceof types.PhotoCachedSize || size instanceof types.PhotoStrippedSize) {
             return this._downloadCachedPhotoSize(size, saveToMemory)
         }
 
-        const result = await this.downloadFile(
+        return this.downloadFile(
             new types.InputPhotoFileLocation({
                 id: photo.id,
                 accessHash: photo.accessHash,
@@ -534,12 +521,11 @@ class TelegramClient {
                 progressCallback: progressCallback,
             },
         )
-        return result
     }
 
     async _downloadDocument(doc, saveToMemory, date, thumb, progressCallback, dcId) {
-        if (doc instanceof types.MessageMediaPhoto) {
-            doc = document.document
+        if (doc instanceof types.MessageMediaDocument) {
+            doc = doc.document
         }
         if (!(doc instanceof types.Document)) {
             return
@@ -554,7 +540,7 @@ class TelegramClient {
                 return this._downloadCachedPhotoSize(size, saveToMemory)
             }
         }
-        const result = await this.downloadFile(
+        return this.downloadFile(
             new types.InputDocumentFileLocation({
                 id: doc.id,
                 accessHash: doc.accessHash,
@@ -568,7 +554,6 @@ class TelegramClient {
                 dcId,
             },
         )
-        return result
     }
 
     _downloadContact(media, saveToMemory) {
@@ -704,8 +689,6 @@ class TelegramClient {
             await this.connect()
         }
         if (await this.isUserAuthorized()) {
-            this._onAuth()
-
             return this
         }
         if (args.code == null && !args.botToken) {
@@ -813,8 +796,6 @@ class TelegramClient {
         const name = utils.getDisplayName(me)
         console.log('Signed in successfully as', name)
 
-        this._onAuth()
-
         return this
     }
 
@@ -827,7 +808,7 @@ class TelegramClient {
     }) {
         let result
         if (args.phone && !args.code && !args.password) {
-            return await this.sendCodeRequest(args.phone)
+            return this.sendCodeRequest(args.phone)
         } else if (args.code) {
             const [ phone, phoneCodeHash ] =
                 this._parsePhoneAndHash(args.phone, args.phoneCodeHash)
@@ -920,7 +901,7 @@ class TelegramClient {
                 }))
             } catch (e) {
                 if (e instanceof errors.AuthRestartError) {
-                    return await this.sendCodeRequest(phone, forceSMS)
+                    return this.sendCodeRequest(phone, forceSMS)
                 }
                 throw e
             }
@@ -1021,7 +1002,7 @@ class TelegramClient {
                 throw e
             }
         } else if ([ 'me', 'this' ].includes(string.toLowerCase())) {
-            return await this.getMe()
+            return this.getMe()
         } else {
             const { username, isJoinChat } = utils.parseUsername(string)
             if (isJoinChat) {
