@@ -1,5 +1,5 @@
 import {
-  ApiChat, ApiFile, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup,
+  ApiChat, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup, ApiFileSource,
 } from '../api/types';
 
 export type GlobalState = {
@@ -30,7 +30,7 @@ export type GlobalState = {
   };
 
   files: {
-    byId: Record<number, ApiFile>;
+    byKey: Record<string, ApiFileSource>;
   };
 
   // TODO Move to `auth`.

@@ -32,6 +32,7 @@
     .content {
       .photo-content {
         border-radius: var(--border-radius-messages);
+        overflow: hidden;
       }
 
       &.text .photo-content {

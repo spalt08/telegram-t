@@ -22,6 +22,10 @@ export interface ApiFile {
   blobUrl?: string;
 }
 
+export interface ApiFileSource {
+  dataUri: string;
+}
+
 export interface ApiFileLocation {
   dcId: int;
   volumeId: MTP.long;

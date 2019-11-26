@@ -60,7 +60,7 @@ export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
 
-export function getMessageFileId(message: ApiMessage): number | null {
+export function getMessageFileKey(message: ApiMessage): string | null {
   const { photo, sticker } = message.content;
 
   if (photo) {
@@ -72,20 +72,20 @@ export function getMessageFileId(message: ApiMessage): number | null {
 
     if (mSize.photo) {
       // TdLib way.
-      return mSize.photo.id;
+      return `msg${mSize.photo.id}`;
     } else {
       // GramJs way.
-      return message.id;
+      return `msg${message.id}`;
     }
   }
 
   if (sticker) {
     if (sticker.sticker && sticker.sticker.photo) {
       // TdLib way.
-      return sticker.sticker.photo.id;
+      return `msg${sticker.sticker.photo.id}`;
     } else {
       // GramJs way.
-      return message.id;
+      return `msg${message.id}`;
     }
   }
 

@@ -1,6 +1,6 @@
 import { ApiChat } from '../../api/types';
 import { GlobalState } from '../../store/types';
-import { getChatPhotoId } from '../helpers';
+import { getChatPhotoKey } from '../helpers';
 
 export function selectChat(global: GlobalState, chatId: number) {
   return global.chats.byId[chatId];
@@ -11,19 +11,19 @@ export function selectChatScrollOffset(global: GlobalState, chatId: number) {
 }
 
 export function selectChatPhotoUrl(global: GlobalState, chat: ApiChat) {
-  const fileId = getChatPhotoId(chat);
+  const fileKey = getChatPhotoKey(chat);
 
-  if (!fileId) {
+  if (!fileKey) {
     return null;
   }
 
-  const file = global.files.byId[fileId];
+  const file = global.files.byKey[fileKey];
 
-  if (!file || !file.blobUrl) {
+  if (!file || !file.dataUri) {
     return null;
   }
 
-  return file && file.blobUrl ? file.blobUrl : null;
+  return file && file.dataUri ? file.dataUri : null;
 }
 
 export function selectChatGroupId(chat: ApiChat) {

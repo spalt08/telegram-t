@@ -157,15 +157,15 @@ export function isUserOnline(user: ApiUser) {
   return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-export function getUserPhotoId(user: ApiUser): number | null {
+export function getUserPhotoKey(user: ApiUser): string | null {
   const { profile_photo, profile_photo_locations } = user;
 
   // TdLib way.
   if (profile_photo) {
-    return profile_photo.small.id;
+    return `user${profile_photo.small.id}`;
   // GramJs way.
   } else if (profile_photo_locations) {
-    return user.id;
+    return `user${user.id}`;
   }
 
   return null;

@@ -6,6 +6,7 @@ import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
+import { loadMessageMedia } from './files';
 
 let onUpdate: OnApiUpdate;
 // We only support 100000 local pending messages here and expect it will not interfere with real IDs.
@@ -44,7 +45,24 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     });
   });
 
-  const messages = (result.messages as MTP.message[]).map(buildApiMessage);
+  const messages = (result.messages as MTP.message[])
+    .map((mtpMessage) => {
+      if (mtpMessage.media) {
+        loadMessageMedia(mtpMessage).then((dataUri) => {
+          if (!dataUri) {
+            return;
+          }
+
+          onUpdate({
+            '@type': 'updateMessageMedia',
+            message_id: mtpMessage.id,
+            data_uri: dataUri,
+          });
+        });
+      }
+
+      return buildApiMessage(mtpMessage);
+    });
 
   return {
     messages,
@@ -90,8 +108,11 @@ function buildLocalMessage(chatId: number, text: string): ApiMessage {
     id: localId,
     chat_id: chatId,
     content: {
-      '@type': 'textContent',
-      text: { text },
+      '@type': 'message',
+      text: {
+        '@type': 'formattedText',
+        text,
+      },
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,

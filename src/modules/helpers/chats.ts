@@ -1,4 +1,4 @@
-import { ApiChat, ApiPrivateChat } from '../../api/types/index';
+import { ApiChat, ApiPrivateChat } from '../../api/types';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;
@@ -20,15 +20,15 @@ export function getChatTitle(chat: ApiChat) {
   return chat.title || 'Deleted account';
 }
 
-export function getChatPhotoId(chat: ApiChat): number | null {
+export function getChatPhotoKey(chat: ApiChat): string | null {
   const { photo, photo_locations } = chat;
 
   // TdLib way.
   if (photo) {
-    return photo.small.id;
+    return `chat${photo.small.id}`;
   // GramJs way.
   } else if (photo_locations) {
-    return chat.id;
+    return `chat${chat.id}`;
   }
 
   return null;

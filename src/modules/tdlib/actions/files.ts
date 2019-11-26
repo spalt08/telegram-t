@@ -2,7 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import { ApiChat, ApiUser } from '../../../api/types';
-import { getChatPhotoId, getUserPhotoId } from '../../helpers';
+import { getChatPhotoKey, getUserPhotoKey } from '../../helpers';
 
 addReducer('loadChatPhoto', (global, actions, payload) => {
   const { chat } = payload!;
@@ -17,9 +17,9 @@ addReducer('loadUserPhoto', (global, actions, payload) => {
 });
 
 async function loadChatPhoto(chat: ApiChat) {
-  const fileId = getChatPhotoId(chat);
+  const fileKey = getChatPhotoKey(chat);
 
-  if (!fileId) {
+  if (!fileKey) {
     return;
   }
 
@@ -29,13 +29,13 @@ async function loadChatPhoto(chat: ApiChat) {
     return;
   }
 
-  updateFile(fileId, blob);
+  updateFile(fileKey, blob);
 }
 
 async function loadUserPhoto(user: ApiUser) {
-  const fileId = getUserPhotoId(user);
+  const fileKey = getUserPhotoKey(user);
 
-  if (!fileId) {
+  if (!fileKey) {
     return;
   }
 
@@ -45,23 +45,22 @@ async function loadUserPhoto(user: ApiUser) {
     return;
   }
 
-  updateFile(fileId, blob);
+  updateFile(fileKey, blob);
 }
 
-function updateFile(fileId: number, blob: Blob) {
-  const blobUrl = URL.createObjectURL(blob);
+function updateFile(fileKey: string, blob: Blob) {
+  const dataUri = URL.createObjectURL(blob);
   const global = getGlobal();
 
   setGlobal({
     ...global,
     files: {
       ...global.files,
-      byId: {
-        ...global.files.byId,
-        [fileId]: {
-          ...(global.files.byId[fileId] || {}),
-          blob,
-          blobUrl,
+      byKey: {
+        ...global.files.byKey,
+        [fileKey]: {
+          ...(global.files.byKey[fileKey] || {}),
+          dataUri,
         },
       },
     },

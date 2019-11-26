@@ -99,3 +99,7 @@ export function onNextTick(cb: NoArgsFunction) {
 function runNow(fn: NoArgsFunction) {
   fn();
 }
+
+export const pause = (ms: number) => new Promise((resolve) => {
+  setTimeout(() => resolve(), ms);
+});

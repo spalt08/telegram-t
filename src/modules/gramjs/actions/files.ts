@@ -3,9 +3,6 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { loadAvatar } from '../../../api/gramjs';
 
-// Wait for other requests to complete + fix GramJS sync requests bug.
-const FILE_REQUEST_DELAY = 500;
-
 addReducer('loadChatPhoto', (global, actions, payload) => {
   const { chat } = payload!;
 
@@ -18,56 +15,52 @@ addReducer('loadUserPhoto', (global, actions, payload) => {
   void loadUserPhoto(user);
 });
 
-function loadChatPhoto(chat: ApiChat) {
+async function loadChatPhoto(chat: ApiChat) {
   const fileLocation = chat.photo_locations && chat.photo_locations.small;
 
   if (!fileLocation) {
     return;
   }
 
-  setTimeout(async () => {
-    const dataUrl = await loadAvatar(chat.id, fileLocation);
+  const dataUri = await loadAvatar(chat.id, fileLocation);
 
-    if (!dataUrl) {
-      return;
-    }
+  if (!dataUri) {
+    return;
+  }
 
-    updateFile(chat.id, dataUrl);
-  }, FILE_REQUEST_DELAY);
+  const fileKey = `chat${chat.id}`;
+  updateFile(fileKey, dataUri);
 }
 
-function loadUserPhoto(user: ApiUser) {
+async function loadUserPhoto(user: ApiUser) {
   const fileLocation = user.profile_photo_locations && user.profile_photo_locations.small;
 
   if (!fileLocation) {
     return;
   }
 
-  // `requestAnimationFrame` is a workaround for some unknown bug in GramJS.
-  setTimeout(async () => {
-    const dataUrl = await loadAvatar(user.id, fileLocation);
+  const dataUri = await loadAvatar(user.id, fileLocation);
 
-    if (!dataUrl) {
-      return;
-    }
+  if (!dataUri) {
+    return;
+  }
 
-    updateFile(user.id, dataUrl);
-  }, FILE_REQUEST_DELAY);
+  const fileKey = `user${user.id}`;
+  updateFile(fileKey, dataUri);
 }
 
-
-function updateFile(fileId: number, dataUrl: string) {
+function updateFile(fileKey: string, dataUri: string) {
   const global = getGlobal();
 
   setGlobal({
     ...global,
     files: {
       ...global.files,
-      byId: {
-        ...global.files.byId,
-        [fileId]: {
-          ...(global.files.byId[fileId] || {}),
-          blobUrl: dataUrl,
+      byKey: {
+        ...global.files.byKey,
+        [fileKey]: {
+          ...(global.files.byKey[fileKey] || {}),
+          dataUri,
         },
       },
     },

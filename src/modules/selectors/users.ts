@@ -1,23 +1,23 @@
 import { ApiUser } from '../../api/types';
 import { GlobalState } from '../../store/types';
-import { getUserPhotoId } from '../helpers';
+import { getUserPhotoKey } from '../helpers';
 
 export function selectUser(global: GlobalState, userId: number) {
   return global.users.byId[userId];
 }
 
 export function selectUserPhotoUrl(global: GlobalState, user: ApiUser) {
-  const fileId = getUserPhotoId(user);
+  const fileKey = getUserPhotoKey(user);
 
-  if (!fileId) {
+  if (!fileKey) {
     return null;
   }
 
-  const file = global.files.byId[fileId];
+  const file = global.files.byKey[fileKey];
 
-  if (!file || !file.blobUrl) {
+  if (!file || !file.dataUri) {
     return null;
   }
 
-  return file && file.blobUrl ? file.blobUrl : null;
+  return file && file.dataUri ? file.dataUri : null;
 }

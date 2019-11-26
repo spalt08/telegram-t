@@ -68,9 +68,16 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
+export type ApiUpdateMessageMedia = {
+  '@type': 'updateMessageMedia';
+  message_id: number;
+  data_uri: string;
+};
+
 export type ApiUpdate = (
   ApiUpdateAuthorizationState |
   ApiUpdateChats | ApiUpdateChat |
   ApiUpdateMessage | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateUsers | ApiUpdateUser
+  ApiUpdateUsers | ApiUpdateUser |
+  ApiUpdateMessageMedia
 );

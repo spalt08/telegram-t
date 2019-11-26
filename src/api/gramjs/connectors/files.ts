@@ -1,6 +1,6 @@
 import { ApiFileLocation } from '../../types';
 
-import { downloadFile } from '../client';
+import { downloadFile, downloadMessageMedia } from '../client';
 import localDb from '../localDb';
 import { bytesToDataUri } from '../builders/common';
 
@@ -27,4 +27,28 @@ export function loadAvatar(chatOrUserId: any, fileLocation: ApiFileLocation): Pr
   }
 
   return localDb.avatarRequests[chatOrUserId];
+}
+
+export function loadMessageMedia(message: MTP.message): Promise<string | null> {
+  const messageId = message.id;
+
+  if (!localDb.mediaRequests[messageId]) {
+    localDb.mediaRequests[messageId] = downloadMessageMedia(message)
+      .then(
+        (fileBuffer: Buffer) => {
+          if (fileBuffer) {
+            return bytesToDataUri(fileBuffer);
+          } else {
+            delete localDb.mediaRequests[messageId];
+            return null;
+          }
+        },
+        () => {
+          delete localDb.mediaRequests[messageId];
+          return null;
+        },
+      );
+  }
+
+  return localDb.mediaRequests[messageId];
 }

@@ -26,7 +26,7 @@ const INITIAL_STATE: GlobalState = {
   },
 
   files: {
-    byId: {},
+    byKey: {},
   },
 
   authRememberMe: true,

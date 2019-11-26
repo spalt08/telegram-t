@@ -15,6 +15,10 @@ import { onGramJsUpdate } from './onGramJsUpdate';
 import localDb from './localDb';
 import { buildInputPeerPhotoFileLocation } from './inputHelpers';
 import { ApiFileLocation } from '../types';
+import { pause } from '../../util/schedulers';
+
+// Wait for other requests to complete + fix GramJS sync requests bug.
+const FILE_REQUEST_DELAY = 2000;
 
 let client: any;
 
@@ -97,14 +101,22 @@ export async function invokeRequest(data: InvokeRequestPayload) {
   return result;
 }
 
-export function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
+export async function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
   const { dcId, volumeId, localId } = fileLocation;
+
+  await pause(FILE_REQUEST_DELAY + FILE_REQUEST_DELAY * Math.random());
 
   return client.downloadFile(
     buildInputPeerPhotoFileLocation(chatOrUserId, volumeId, localId),
     true,
     { dcId },
   );
+}
+
+export async function downloadMessageMedia(message: MTP.message) {
+  await pause(FILE_REQUEST_DELAY + FILE_REQUEST_DELAY * Math.random());
+
+  return client.downloadMedia(message, true);
 }
 
 function postProcess(name: string, anyResult: any, args: AnyLiteral) {
