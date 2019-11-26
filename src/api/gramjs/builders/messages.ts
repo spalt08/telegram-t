@@ -3,6 +3,7 @@ import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 import {
   ApiMessage, ApiMessageForwardInfo, ApiPhoto, ApiPhotoCachedSize, ApiPhotoSize, ApiSticker,
 } from '../../types';
+import { OmitFlags } from '../types/types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
@@ -11,7 +12,7 @@ import { bytesToDataUri } from './common';
 // TODO Maybe we do not need it.
 const DEFAULT_CHAT_ID = 0;
 
-export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
+export function buildApiMessage(mtpMessage: OmitFlags<MTP.message>): ApiMessage {
   const isPrivateToMe = mtpMessage.out !== true && isPeerUser(mtpMessage.toId);
   const chatId = isPrivateToMe
     ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
@@ -21,13 +22,23 @@ export function buildApiMessage(mtpMessage: MTP.message): ApiMessage {
 }
 
 export function buildApiMessageFromShort(
-  chatId: number, mtpMessage: Omit<MTP.updateShortMessage, 'flags'>,
+  mtpMessage: OmitFlags<MTP.updateShortMessage>,
 ): ApiMessage {
+  const chatId = getApiChatIdFromMtpPeer({ userId: mtpMessage.userId });
+
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
     // TODO Current user ID needed here.
     fromId: mtpMessage.out ? DEFAULT_CHAT_ID : mtpMessage.userId,
   });
+}
+
+export function buildApiMessageFromShortChat(
+  mtpMessage: OmitFlags<MTP.updateShortChatMessage>,
+): ApiMessage {
+  const chatId = getApiChatIdFromMtpPeer({ chatId: mtpMessage.chatId });
+
+  return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
 export function buildApiMessageWithChatId(

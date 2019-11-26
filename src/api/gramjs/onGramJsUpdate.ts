@@ -1,7 +1,7 @@
 import * as gramJsApi from '../../lib/gramjs/tl/types/index';
 import { OnApiUpdate } from './types/types';
 
-import { buildApiMessage, buildApiMessageFromShort } from './builders/messages';
+import { buildApiMessage, buildApiMessageFromShort, buildApiMessageFromShortChat } from './builders/messages';
 import { getApiChatIdFromMtpPeer } from './builders/chats';
 import { buildApiUserStatus } from './builders/users';
 import localDb from './localDb';
@@ -15,6 +15,7 @@ export function init(_onUpdate: OnApiUpdate) {
 export function onGramJsUpdate(update: AnyLiteral, originRequest?: { name: string; args: AnyLiteral }) {
   if (
     update instanceof gramJsApi.UpdateNewMessage
+    || update instanceof gramJsApi.UpdateShortChatMessage
     || update instanceof gramJsApi.UpdateShortMessage
   // TODO UpdateNewChannelMessage
   ) {
@@ -22,9 +23,10 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: { name: strin
 
     if (update instanceof gramJsApi.UpdateNewMessage) {
       message = buildApiMessage(update.message);
+    } else if (update instanceof gramJsApi.UpdateShortChatMessage) {
+      message = buildApiMessageFromShortChat(update);
     } else {
-      const chatId = getApiChatIdFromMtpPeer(update as MTP.Peer);
-      message = buildApiMessageFromShort(chatId, update);
+      message = buildApiMessageFromShort(update);
     }
 
     onUpdate({

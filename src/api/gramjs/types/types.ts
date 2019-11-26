@@ -14,3 +14,5 @@ export type InvokeRequestPayload = ({
   name: SupportedUploadRequests;
   args: AnyLiteral;
 });
+
+export type OmitFlags<T> = Omit<T, 'flags'>;
