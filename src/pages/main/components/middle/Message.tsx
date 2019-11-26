@@ -124,10 +124,12 @@ function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarde
 function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
   const { width, height, thumbnail } = sticker;
 
-  return (
+  return dataUri || thumbnail ? (
     <div className="photo-content">
-      <img src={dataUri || thumbnail.dataUri} width={width} height={height} alt="" />
+      <img src={dataUri || (thumbnail && thumbnail.dataUri)} width={width} height={height} alt="" />
     </div>
+  ) : (
+    <p>{sticker.emoji}</p>
   );
 }
 

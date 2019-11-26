@@ -32,10 +32,10 @@ export interface ApiPhoto {
 export interface ApiSticker {
   '@type': 'sticker';
   emoji: string;
-  width: number;
-  height: number;
   is_animated: boolean;
-  thumbnail: ApiPhotoCachedSize;
+  width?: number;
+  height?: number;
+  thumbnail?: ApiPhotoCachedSize;
   // TdLib only.
   sticker?: ApiPhotoSize;
 }

@@ -89,8 +89,9 @@ function buildSticker(media: MTP.MessageMedia): ApiSticker | null {
 
   const emoji = stickerAttribute.alt;
   const isAnimated = media.document.mimeType === 'application/x-tgsticker';
-  const thumbnail = buildApiPhotoCachedSize(media.document.thumbs[0]);
-  const { width, height } = thumbnail;
+  const thumb = media.document.thumbs.find((s: any) => s instanceof gramJsApi.PhotoCachedSize);
+  const thumbnail = thumb && buildApiPhotoCachedSize(thumb);
+  const { width, height } = thumbnail || {};
 
   return {
     '@type': 'sticker',
