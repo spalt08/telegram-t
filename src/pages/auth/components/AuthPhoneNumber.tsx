@@ -3,8 +3,7 @@ import React, { FC, useState } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../store/types';
-import countryList from '../../../../public/countries.json';
-import formatPhoneNumber from '../../../util/formatPhoneNumber';
+import { formatPhoneNumber, getCountryFromPhoneNumber } from '../../../util/formatPhoneNumber';
 
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
@@ -22,25 +21,35 @@ type IProps = (
 const AuthPhoneNumber: FC<IProps> = ({
   authState, authIsLoading, authError, authRememberMe, setAuthPhoneNumber, setAuthRememberMe,
 }) => {
-  const currentCountry = countryList.find((c) => c.id === 'RU');
+  // TODO: Add automatic country detection
+  // const currentCountry = countryList.find((c) => c.id === 'RU');
 
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [country, setCountry] = useState(currentCountry);
-  const [code, setCode] = useState(currentCountry ? currentCountry.code : undefined);
+  const [country, setCountry] = useState(undefined);
   const [phone, setPhone] = useState('');
 
-  function onCodeChange(newCountry: Country) {
-    setCode(newCountry.code);
+  function onCountryChange(newCountry: Country) {
     setCountry(newCountry);
   }
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
 
-    const phoneNumber = formatPhoneNumber(target.value, country);
+    const suggestedCountry = getCountryFromPhoneNumber(target.value);
+    const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
+      ? suggestedCountry
+      : country;
 
+    const phoneNumber = formatPhoneNumber(target.value, selectedCountry);
+
+    if (
+      !country
+      || (selectedCountry && selectedCountry.id !== country.id)
+    ) {
+      onCountryChange(selectedCountry);
+    }
     setPhone(phoneNumber);
-    target.value = `${code} ${phoneNumber}`;
+    target.value = getNumberWithCode(phoneNumber, suggestedCountry);
     setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 11);
   }
 
@@ -56,7 +65,7 @@ const AuthPhoneNumber: FC<IProps> = ({
       return;
     }
 
-    const phoneNumber = `${code} ${phone}`;
+    const phoneNumber = getNumberWithCode(phone, country);
     setAuthPhoneNumber({ phoneNumber });
   }
 
@@ -72,13 +81,13 @@ const AuthPhoneNumber: FC<IProps> = ({
         <CountryCodeInput
           id="sign-in-phone-code"
           value={country}
-          onChange={onCodeChange}
+          onChange={onCountryChange}
         />
         <InputText
           id="sign-in-phone-number"
           label="Phone Number"
           onChange={onPhoneNumberChange}
-          value={`${code} ${phone}`}
+          value={getNumberWithCode(phone, country)}
           error={authError}
         />
         <Checkbox
@@ -98,6 +107,13 @@ const AuthPhoneNumber: FC<IProps> = ({
     </div>
   );
 };
+
+function getNumberWithCode(phoneNumber: string, country?: Country) {
+  if (!country) {
+    return phoneNumber;
+  }
+  return `${country.code} ${phoneNumber}`;
+}
 
 export default withGlobal(
   (global) => {

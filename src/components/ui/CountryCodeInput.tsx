@@ -1,8 +1,9 @@
-import React, { FC } from '../../lib/teact';
+import React, { FC, useState, useEffect } from '../../lib/teact';
 
-import countryList from '../../../public/countries.json';
+import { countryList } from '../../util/formatPhoneNumber';
 import getPlatform from '../../util/getPlatform';
-import getEventTarget from '../../util/getEventTarget';
+import { getElementIndex } from '../../util/domUtils';
+import searchWords from '../../util/searchWords';
 
 import DropdownMenu from './DropdownMenu';
 import DropdownMenuItem from './DropdownMenuItem';
@@ -17,6 +18,13 @@ type IProps = {
 
 const CountryCodeInput: FC<IProps> = (props) => {
   const { id, value, onChange } = props;
+  const [filter, setFilter] = useState(undefined);
+  const [filteredList, setFilteredList] = useState(countryList);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+
+  useEffect(() => {
+    updateFilter(undefined);
+  }, [value]);
 
   let className = 'input-group';
   if (value) {
@@ -27,8 +35,14 @@ const CountryCodeInput: FC<IProps> = (props) => {
     ? 'country-flag sprite'
     : 'country-flag';
 
+  function updateFilter(filterValue?: string) {
+    setFilter(filterValue);
+    setFilteredList(getFilteredList(filterValue));
+    setFocusedIndex(-1);
+  }
+
   function handleChange(e: React.MouseEvent<HTMLElement, MouseEvent>) {
-    const target = getEventTarget(e, 'BUTTON') as HTMLButtonElement;
+    const target = e.currentTarget as HTMLButtonElement;
     const input = target.querySelector('input');
 
     const country: Country | undefined = countryList.find((c) => input && c.id === input.value);
@@ -37,28 +51,85 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
   }
 
-  const CodeInput: FC<{ onClick: () => void }> = ({ onClick }) => (
-    <div className={className}>
-      <input
-        className="form-control"
-        type="text"
-        id={id}
-        value={(value && value.name) || ''}
-        placeholder="Country"
-        readOnly
-        onClick={onClick}
-        onFocus={onClick}
-      />
-      <label>Country</label>
-    </div>
-  );
+  function onInput(e: React.FormEvent<HTMLInputElement>) {
+    const target = e.target as HTMLInputElement;
+    updateFilter(target.value);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<any>) {
+    const dropdown = document.querySelector('.CountryCodeInput ul') as Element;
+    if (e.keyCode !== 38 && e.keyCode !== 40) {
+      return;
+    }
+
+    let newIndex = focusedIndex;
+    if (e.keyCode === 38 && newIndex > 0) {
+      newIndex--;
+    } else if (e.keyCode === 40 && newIndex < dropdown.childNodes.length - 1) {
+      newIndex++;
+    } else {
+      return;
+    }
+
+    const item = dropdown.childNodes[newIndex].firstChild as HTMLElement;
+    if (item) {
+      setFocusedIndex(newIndex);
+      item.focus();
+    }
+  }
+
+  function focusSelectedItem() {
+    if (!value) {
+      return;
+    }
+
+    const selectedItem = document.querySelector('.CountryCodeInput li.selected') as HTMLElement;
+    const selectedIndex = getElementIndex(selectedItem);
+
+    if (selectedItem && (focusedIndex < 0 || focusedIndex === selectedIndex)) {
+      setFocusedIndex(getElementIndex(selectedItem));
+      window.requestAnimationFrame(() => {
+        const button = selectedItem.firstChild as HTMLElement;
+        button.focus();
+      });
+    }
+  }
+
+  const CodeInput: FC<{ onClick: () => void }> = ({ onClick }) => {
+    const handleClick = () => {
+      onClick();
+      focusSelectedItem();
+    };
+
+    const inputValue = filter !== undefined
+      ? filter
+      : (value && value.name) || '';
+
+    return (
+      <div className={className}>
+        <input
+          className="form-control"
+          type="text"
+          id={id}
+          value={inputValue}
+          placeholder="Country"
+          autoComplete="off"
+          onClick={handleClick}
+          onFocus={handleClick}
+          onInput={onInput}
+        />
+        <label>Country</label>
+      </div>
+    );
+  };
 
   return (
     <DropdownMenu
       className="CountryCodeInput"
       trigger={CodeInput}
+      onKeyDown={onKeyDown}
     >
-      {countryList.map((country) => (
+      {filteredList.map((country: Country) => (
         <DropdownMenuItem
           key={country.id}
           className={value && country.id === value.id ? 'selected' : ''}
@@ -73,5 +144,11 @@ const CountryCodeInput: FC<IProps> = (props) => {
     </DropdownMenu>
   );
 };
+
+function getFilteredList(filter = ''): Country[] {
+  return filter.length
+    ? countryList.filter((country) => searchWords(country.name, filter))
+    : countryList;
+}
 
 export default CountryCodeInput;

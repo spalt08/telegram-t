@@ -8,6 +8,7 @@ interface IProps {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   children: JsxChildren;
+  onKeyDown?: (e: React.KeyboardEvent<any>) => void;
 }
 
 const DropdownMenu: FC<IProps> = (props) => {
@@ -17,6 +18,7 @@ const DropdownMenu: FC<IProps> = (props) => {
     children,
     positionX = 'left',
     positionY = 'top',
+    onKeyDown,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
@@ -41,8 +43,16 @@ const DropdownMenu: FC<IProps> = (props) => {
     setIsOpen(!isOpen);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!onKeyDown || !isOpen) {
+      return;
+    }
+
+    onKeyDown(e);
+  };
+
   return (
-    <div className={`DropdownMenu ${className || ''}`}>
+    <div className={`DropdownMenu ${className || ''}`} onKeyDown={handleKeyDown}>
       {trigger({ onClick: toggleIsOpen })}
       {isOpen && (
         <div className="backdrop" onClick={toggleIsOpen} />

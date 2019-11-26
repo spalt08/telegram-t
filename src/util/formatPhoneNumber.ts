@@ -1,3 +1,5 @@
+import countryList from '../../public/countries.json';
+
 function getPhoneNumberFormat(country?: Country) {
   const id = country ? country.id : 'UNKNOWN';
 
@@ -14,10 +16,27 @@ function getPhoneNumberFormat(country?: Country) {
   }
 }
 
-export default function formatPhoneNumber(input: string, country?: Country) {
+function getCountryFromPhoneNumber(input: string) {
+  const phoneNumber = input.replace(/[^\d+]+/g, '');
+  if (!phoneNumber.startsWith('+')) {
+    return undefined;
+  }
+
+  const possibleCountries = countryList
+    .filter((country: Country) => phoneNumber.startsWith(country.code))
+    .sort((a, b) => a.code.length - b.code.length);
+
+  return possibleCountries[possibleCountries.length - 1];
+}
+
+function formatPhoneNumber(input: string, country?: Country) {
   let phoneNumber = input.replace(/[^\d]+/g, '');
   if (country) {
     phoneNumber = phoneNumber.substr(country.code.length - 1);
+  }
+
+  if (!country && input.startsWith('+')) {
+    return input;
   }
 
   phoneNumber = phoneNumber.replace(getPhoneNumberFormat(country), (_, p1, p2, p3, p4, p5) => {
@@ -32,3 +51,9 @@ export default function formatPhoneNumber(input: string, country?: Country) {
 
   return phoneNumber;
 }
+
+export {
+  countryList,
+  getCountryFromPhoneNumber,
+  formatPhoneNumber,
+};
