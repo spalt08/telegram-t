@@ -1,7 +1,8 @@
 const BigInt = require('big-integer')
 const Factorizator = require('./crypto/Factorizator')
 const { types } = require('./tl')
-const { readBigIntFromBuffer, readBufferFromBigInt, sha256, modExp, generateRandomBytes } = require('./Helpers')
+const { readBigIntFromBuffer, readBufferFromBigInt, sha256, bigIntMod, modExp,
+    generateRandomBytes } = require('./Helpers')
 const crypto = require('crypto')
 const SIZE_FOR_HASH = 256
 
@@ -212,7 +213,7 @@ function computeCheck(request, password) {
     const bForHash = numBytesForHash(request.srp_B)
     const gX = modExp(BigInt(g), x, p)
     const k = readBigIntFromBuffer(sha256(Buffer.concat([ pForHash, gForHash ])), false)
-    const kgX = (k.multiply(gX)).remainder(p)
+    const kgX = bigIntMod(k.multiply(gX),p)
     const generateAndCheckRandom = () => {
         const randomSize = 256
         // eslint-disable-next-line no-constant-condition
@@ -230,7 +231,7 @@ function computeCheck(request, password) {
         }
     }
     const [ a, aForHash, u ] = generateAndCheckRandom()
-    const gB = (B.subtract(kgX)).remainder(p)
+    const gB = bigIntMod(B.subtract(kgX),p)
     if (!isGoodModExpFirst(gB, p)) {
         throw new Error('bad gB')
     }
