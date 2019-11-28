@@ -100,6 +100,14 @@ select.form-control {
   }
 }
 
+textarea.form-control {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5rem;
+  padding-top: calc(1rem - var(--border-width));
+  padding-bottom: calc(1rem - var(--border-width));
+}
+
 .input-group.password-input {
   position: relative;
 
