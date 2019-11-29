@@ -1,6 +1,3 @@
-require('regenerator-runtime/runtime')
-require('regenerator-runtime')
-
 const TelegramClient = require('./client/TelegramClient')
 const connection = require('./network')
 const tl = require('./tl')

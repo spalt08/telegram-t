@@ -1,10 +1,10 @@
 // TODO @size Make target es7, check file size.
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es7",
     "lib": [
       "dom",
-      "es2016"
+      "es7"
     ],
     "allowJs": true,
     "skipLibCheck": true,
