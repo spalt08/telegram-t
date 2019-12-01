@@ -1,10 +1,11 @@
 import { OnApiUpdate } from '../types/types';
 
 import { invokeRequest } from '../client';
-import { buildApiChatFromDialog, getPeerKey } from '../builders/chats';
+import { buildApiChatFromDialog, getApiChatIdFromMtpPeer, getPeerKey } from '../builders/chats';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { loadAvatar } from './files';
 
 let onUpdate: OnApiUpdate;
 
@@ -45,17 +46,19 @@ export async function fetchChats(
     chat.last_message = lastMessagesByChatId[chat.id];
     return chat;
   });
-
   onUpdate({
     '@type': 'chats',
     chats,
   });
 
   const users = (result.users as MTP.user[]).map(buildApiUser);
+
   onUpdate({
     '@type': 'users',
     users,
   });
+
+  loadAvatars(result);
 
   const chatIds = chats.map((chat) => chat.id);
 
@@ -76,4 +79,34 @@ function preparePeers(result: MTP.messages$Dialogs) {
   });
 
   return store;
+}
+
+function loadAvatars(result: MTP.messages$Dialogs) {
+  result.users.forEach((user) => {
+    loadAvatar(user as MTP.user).then((dataUri) => {
+      if (!dataUri) {
+        return;
+      }
+
+      onUpdate({
+        '@type': 'updateAvatar',
+        chat_id: getApiChatIdFromMtpPeer({ userId: user.id }),
+        data_uri: dataUri,
+      });
+    });
+  });
+
+  result.chats.forEach((chat) => {
+    loadAvatar(chat as MTP.chat).then((dataUri) => {
+      if (!dataUri) {
+        return;
+      }
+
+      onUpdate({
+        '@type': 'updateAvatar',
+        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id }),
+        data_uri: dataUri,
+      });
+    });
+  });
 }

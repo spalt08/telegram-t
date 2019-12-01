@@ -28,7 +28,7 @@ export function getChatPhotoKey(chat: ApiChat): string | null {
     return `chat${photo.small.id}`;
   // GramJs way.
   } else if (photo_locations) {
-    return `chat${chat.id}`;
+    return `avatar${chat.id}`;
   }
 
   return null;

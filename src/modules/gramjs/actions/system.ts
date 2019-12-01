@@ -51,12 +51,6 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   };
 });
 
-// addReducer('setPassword', (global, actions, payload) => {
-//   const { code } = payload!;
-//
-//   void provideAuthPassword(code);
-// });
-
 addReducer('signOut', () => {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 

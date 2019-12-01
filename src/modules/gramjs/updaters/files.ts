@@ -4,6 +4,15 @@ import { ApiUpdate } from '../../../api/types';
 
 export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
+    case 'updateAvatar': {
+      const { chat_id, data_uri } = update;
+
+      const fileKey = `avatar${chat_id}`;
+      updateFile(fileKey, data_uri);
+
+      break;
+    }
+
     case 'updateMessageImage': {
       const { message_id, data_uri } = update;
 

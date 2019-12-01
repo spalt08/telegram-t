@@ -1,32 +1,32 @@
-import { ApiFileLocation } from '../../types';
-
-import { downloadFile, downloadMessageImage } from '../client';
+import { downloadAvatar, downloadMessageImage } from '../client';
 import localDb from '../localDb';
 import { bytesToDataUri } from '../builders/common';
 
 export function init() {
 }
 
-export function loadAvatar(chatOrUserId: any, fileLocation: ApiFileLocation): Promise<string | null> {
-  if (!localDb.avatarRequests[chatOrUserId]) {
-    localDb.avatarRequests[chatOrUserId] = downloadFile(chatOrUserId, fileLocation)
+export function loadAvatar(entity: MTP.user | MTP.chat): Promise<string | null> {
+  const entityId = entity.id;
+
+  if (!localDb.avatarRequests[entityId]) {
+    localDb.avatarRequests[entityId] = downloadAvatar(entity)
       .then(
         (fileBuffer: Buffer) => {
           if (fileBuffer) {
             return bytesToDataUri(fileBuffer);
           } else {
-            delete localDb.avatarRequests[chatOrUserId];
+            delete localDb.avatarRequests[entityId];
             return null;
           }
         },
         () => {
-          delete localDb.avatarRequests[chatOrUserId];
+          delete localDb.avatarRequests[entityId];
           return null;
         },
       );
   }
 
-  return localDb.avatarRequests[chatOrUserId];
+  return localDb.avatarRequests[entityId];
 }
 
 export function loadMessageMedia(message: MTP.message): Promise<string | null> {

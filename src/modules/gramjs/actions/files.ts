@@ -22,7 +22,7 @@ async function loadChatPhoto(chat: ApiChat) {
     return;
   }
 
-  const dataUri = await loadAvatar(chat.id, fileLocation);
+  const dataUri = await loadAvatar(chat);
 
   if (!dataUri) {
     return;
@@ -39,7 +39,7 @@ async function loadUserPhoto(user: ApiUser) {
     return;
   }
 
-  const dataUri = await loadAvatar(user.id, fileLocation);
+  const dataUri = await loadAvatar(user);
 
   if (!dataUri) {
     return;

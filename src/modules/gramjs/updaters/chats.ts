@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
+import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiUpdate, ApiChat } from '../../../api/types';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -8,15 +8,14 @@ export function onUpdate(update: ApiUpdate) {
     case 'chats': {
       setChats(update.chats);
 
-      update.chats.forEach((chat: ApiChat) => {
-        getDispatch().loadChatPhoto({ chat });
-      });
-
       break;
     }
 
     case 'updateChat': {
       updateChat(update.id, update.chat);
+
+      // TODO Only watch for new chats and avatar updates
+      // getDispatch().loadChatPhoto({ chat: update.chat });
 
       break;
     }

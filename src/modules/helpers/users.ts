@@ -165,7 +165,7 @@ export function getUserPhotoKey(user: ApiUser): string | null {
     return `user${profile_photo.small.id}`;
   // GramJs way.
   } else if (profile_photo_locations) {
-    return `user${user.id}`;
+    return `avatar${user.id}`;
   }
 
   return null;

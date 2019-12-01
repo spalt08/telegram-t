@@ -47,20 +47,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 
   const messages = (result.messages as MTP.message[])
     .map((mtpMessage) => {
-      if (isMessageWithImage(mtpMessage)) {
-        loadMessageMedia(mtpMessage).then((dataUri) => {
-          if (!dataUri) {
-            return;
-          }
-
-          onUpdate({
-            '@type': 'updateMessageImage',
-            message_id: mtpMessage.id,
-            data_uri: dataUri,
-          });
-        });
-      }
-
+      loadImage(mtpMessage);
       return buildApiMessage(mtpMessage);
     });
 
@@ -98,6 +85,24 @@ export function sendMessage(chatId: number, text: string) {
       peer: buildInputPeer(chatId),
       randomId,
     },
+  });
+}
+
+function loadImage(mtpMessage: MTP.message) {
+  if (!isMessageWithImage(mtpMessage)) {
+    return;
+  }
+
+  loadMessageMedia(mtpMessage).then((dataUri) => {
+    if (!dataUri) {
+      return;
+    }
+
+    onUpdate({
+      '@type': 'updateMessageImage',
+      message_id: mtpMessage.id,
+      data_uri: dataUri,
+    });
   });
 }
 

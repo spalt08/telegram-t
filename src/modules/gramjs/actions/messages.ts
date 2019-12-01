@@ -4,7 +4,6 @@ import { ApiMessage } from '../../../api/types';
 import { fetchMessages, sendMessage } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
-
 const MESSAGE_SLICE_LIMIT = 50;
 
 addReducer('loadChatMessages', (global, actions, payload) => {

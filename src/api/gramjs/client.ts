@@ -14,8 +14,6 @@ import {
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 import localDb from './localDb';
-import { buildInputPeerPhotoFileLocation } from './inputHelpers';
-import { ApiFileLocation } from '../types';
 
 GramJsLogger.getLogger().level = 'debug';
 
@@ -100,13 +98,8 @@ export async function invokeRequest(data: InvokeRequestPayload) {
   return result;
 }
 
-export function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
-  const { dcId, volumeId, localId } = fileLocation;
-
-  return client.downloadFile(
-    buildInputPeerPhotoFileLocation(chatOrUserId, volumeId, localId),
-    { dcId },
-  );
+export function downloadAvatar(entity: MTP.chat | MTP.user, isBig = false) {
+  return client.downloadProfilePhoto(entity, isBig);
 }
 
 export function downloadMessageImage(message: MTP.message) {

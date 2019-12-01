@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
+import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiUpdate, ApiUser } from '../../../api/types';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -8,17 +8,14 @@ export function onUpdate(update: ApiUpdate) {
     case 'users': {
       setUsers(update.users);
 
-      update.users.forEach((user: ApiUser) => {
-        getDispatch().loadUserPhoto({ user });
-      });
-
       break;
     }
 
     case 'updateUser': {
       updateUser(update.id, update.user);
 
-      getDispatch().loadUserPhoto({ user: update.user });
+      // TODO Only watch for new users and avatar updates
+      // getDispatch().loadUserPhoto({ user: update.user });
 
       break;
     }
