@@ -24,7 +24,7 @@ const ReplyMessage: FC<IProps> = ({
   const {
     text,
     photo,
-  } = buildMessageContent(message);
+  } = buildMessageContent(message, { noEnhancedText: true });
 
   return (
     <div className="ReplyMessage not-implemented">

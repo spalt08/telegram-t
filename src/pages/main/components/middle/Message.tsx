@@ -9,7 +9,7 @@ import {
 } from '../../../../api/types';
 import { selectUser, selectChatMessage, selectMessageFileUrl } from '../../../../modules/selectors';
 import { isOwnMessage, getUserFullName } from '../../../../modules/helpers';
-import { getImageDimensions } from '../../../../util/imageDimensions';
+import { getImageDimensions, getStickerDimensions } from '../../../../util/imageDimensions';
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
@@ -24,11 +24,12 @@ type IProps = {
   replyMessage?: ApiMessage;
   fileDataUri?: string;
   sender?: ApiUser;
+  originSender?: ApiUser;
 };
 
 const Message: FC<IProps> = (
   {
-    message, showAvatar, showSenderName, replyMessage, fileDataUri, sender,
+    message, showAvatar, showSenderName, replyMessage, fileDataUri, sender, originSender,
   },
 ) => {
   const className = buildClassName(message);
@@ -39,26 +40,35 @@ const Message: FC<IProps> = (
     className: contentClassName,
   } = buildMessageContent(message);
   const isText = contentClassName && contentClassName.includes('text');
+  const isSticker = contentClassName && contentClassName.includes('sticker');
 
-  function renderSenderName() {
+  function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
-      || (!sender || !isText || photo)
+      || (!user || !isText || photo)
     ) {
       return null;
     }
 
     return (
-      <div className="sender-name">{getUserFullName(sender)}</div>
+      <div className="sender-name">{getUserFullName(user)}</div>
     );
   }
 
   function renderMessageContent() {
     const isForwarded = Boolean(message.forward_info);
 
+    const classNames = ['content-inner'];
+    if (isForwarded) {
+      classNames.push('forwarded-message');
+    }
+    if (replyMessage) {
+      classNames.push('is-reply');
+    }
+
     return (
-      <div className={isForwarded ? 'forwarded-message' : ''}>
-        {renderSenderName()}
+      <div className={classNames.join(' ')}>
+        {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
         {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, fileDataUri)}
         {sticker && renderMessageSticker(sticker, fileDataUri)}
@@ -71,11 +81,11 @@ const Message: FC<IProps> = (
 
   return (
     <div className={className}>
-      {showAvatar && sender && !message.forward_info && (
+      {showAvatar && sender && (
         <Avatar size="small" user={sender} />
       )}
       <div className={contentClassName}>
-        {message.forward_info && (
+        {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
         )}
         {renderMessageContent()}
@@ -122,7 +132,8 @@ function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarde
 }
 
 function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
-  const { width, height, thumbnail } = sticker;
+  const { thumbnail } = sticker;
+  const { width, height } = getStickerDimensions(sticker);
 
   return dataUri || thumbnail ? (
     <div className="photo-content">
@@ -143,16 +154,19 @@ export default withGlobal(
     const fileDataUri = selectMessageFileUrl(global, message);
 
     let userId;
-    if (message.forward_info) {
-      userId = message.forward_info.origin.sender_user_id;
-    } else if (showSenderName || showAvatar) {
+    let originUserId;
+    if (showSenderName || showAvatar) {
       userId = message.sender_user_id;
+    }
+    if (message.forward_info) {
+      originUserId = message.forward_info.origin.sender_user_id;
     }
 
     return {
       replyMessage,
       fileDataUri,
       ...(userId && { sender: selectUser(global, userId) }),
+      ...(originUserId && { originSender: selectUser(global, originUserId) }),
     };
   },
 )(Message);

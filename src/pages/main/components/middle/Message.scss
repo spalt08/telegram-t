@@ -20,78 +20,80 @@
 // Border-radius styles
 .Message {
   .content {
-    border-radius: var(--border-radius-messages);
+    --border-top-left-radius: var(--border-radius-messages);
+    --border-top-right-radius: var(--border-radius-messages);
+    --border-bottom-left-radius: var(--border-radius-messages);
+    --border-bottom-right-radius: var(--border-radius-messages);
 
     &.sticker {
       border-radius: 0 !important;
     }
-  }
 
-  &:not(.own),
-  &.own {
-    .content {
-      .photo-content {
-        border-radius: var(--border-radius-messages);
-        overflow: hidden;
-      }
+    &,
+    .photo-content,
+    .message-photo-loading {
+      border-top-left-radius: var(--border-top-left-radius);
+      border-top-right-radius: var(--border-top-right-radius);
+      border-bottom-left-radius: var(--border-bottom-left-radius);
+      border-bottom-right-radius: var(--border-bottom-right-radius);
+    }
 
-      &.text .photo-content {
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
+    .photo-content,
+    .message-photo-loading {
+      overflow: hidden;
+    }
+
+    &.text {
+      .photo-content,
+      .message-photo-loading {
+        --border-bottom-left-radius: 0;
+        --border-bottom-right-radius: 0;
       }
     }
   }
 
   &:not(.own) {
     &:first-child:not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-bottom-left-radius: var(--border-radius-messages-small);
-      }
+      --border-bottom-left-radius: var(--border-radius-messages-small);
     }
 
     &:not(:first-child):not(:last-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-left-radius: var(--border-radius-messages-small);
-        border-bottom-left-radius: var(--border-radius-messages-small);
-      }
+      --border-top-left-radius: var(--border-radius-messages-small);
+      --border-bottom-left-radius: var(--border-radius-messages-small);
     }
 
     &:last-child:not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-left-radius: var(--border-radius-messages-small);
-      }
+      --border-top-left-radius: var(--border-radius-messages-small);
     }
 
     &:last-child .content {
-      &.photo:not(.text) .photo-content {
-        border-bottom-left-radius: var(--border-radius-messages-small);
+      --border-bottom-left-radius: var(--border-radius-messages-small);
+
+      &.text, &.is-forwarded {
+        --border-bottom-left-radius: 0;
       }
     }
   }
 
   &.own {
     &:first-child:not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-bottom-right-radius: var(--border-radius-messages-small);
-      }
+      --border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
     &:not(:first-child):not(:last-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-right-radius: var(--border-radius-messages-small);
-        border-bottom-right-radius: var(--border-radius-messages-small);
-      }
+      --border-top-right-radius: var(--border-radius-messages-small);
+      --border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
     &:last-child:not(:only-child) .content {
-      &, &.photo:not(.text) .photo-content {
-        border-top-right-radius: var(--border-radius-messages-small);
-      }
+      --border-top-right-radius: var(--border-radius-messages-small);
     }
 
     &:last-child .content {
-      &.photo:not(.text) .photo-content {
-        border-bottom-right-radius: var(--border-radius-messages-small);
+      --border-bottom-right-radius: var(--border-radius-messages-small);
+
+      &.text, &.is-forwarded {
+        --border-bottom-right-radius: 0;
       }
     }
   }
@@ -101,8 +103,6 @@
 .Message {
   &.own:last-child {
     .text, .is-forwarded {
-      border-bottom-right-radius: 0;
-
       &::before {
         content: '';
         display: block;
@@ -120,8 +120,6 @@
 
   &:not(.own):last-child {
     .text, .is-forwarded {
-      border-bottom-left-radius: 0;
-
       &::before {
         content: '';
         display: block;
@@ -144,7 +142,7 @@
   position: relative;
   max-width: 29rem;
 
-  p {
+  .content-inner > p {
     margin: 0;
   }
 
@@ -167,7 +165,7 @@
       word-break: break-all;
     }
 
-    p::after {
+    .content-inner > p::after {
       content: '';
       display: inline-block;
       width: 2rem;
@@ -190,14 +188,32 @@
     line-height: 1.2;
     font-size: 10rem;
 
-    p {
+    .content-inner.is-reply {
+      display: flex;
+      align-items: flex-start;
+
+      .ReplyMessage {
+        order: 2;
+      }
+    }
+
+    .content-inner > p {
       margin-bottom: 1rem;
+    }
+
+    .photo-content {
+      line-height: 1;
+      font-size: 1rem;
+    }
+
+    .forwarded-message {
+      border-left: none;
     }
 
     &.emoji-only-1 {
       font-size: 5rem;
 
-      p {
+      .content-inner > p {
         margin-bottom: 1rem;
       }
     }
@@ -205,7 +221,7 @@
     &.emoji-only-2 {
       font-size: 4rem;
 
-      p {
+      .content-inner > p {
         margin-bottom: 1.1rem;
       }
     }
@@ -213,14 +229,14 @@
     &.emoji-only-3 {
       font-size: 3rem;
 
-      p {
+      .content-inner > p {
         margin-bottom: 1.1rem;
       }
     }
   }
 
   &.photo {
-    width: 100%;
+    max-width: 100%;
 
     .photo-content {
       img {
@@ -259,10 +275,14 @@
     border-left: 0.125rem solid var(--color-primary);
     padding-left: 0.5rem;
 
+    --border-top-left-radius: var(--border-radius-messages-small);
+    --border-top-right-radius: var(--border-radius-messages-small);
+    --border-bottom-left-radius: var(--border-radius-messages-small);
+    --border-bottom-right-radius: var(--border-radius-messages-small);
+
     .photo-content {
       margin: 0 !important;
       margin-bottom: 0.25rem !important;
-      border-radius: var(--border-radius-messages-small) !important;
     }
   }
 }
@@ -278,7 +298,7 @@
   &.text, &.is-forwarded {
     background-color: #EEFEDF;
 
-    p::after {
+    .content-inner > p::after {
       width: 3.5rem;
     }
   }

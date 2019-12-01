@@ -84,7 +84,11 @@ export function groupMessages(messages: ApiMessage[]) {
   return messageDateGroups;
 }
 
-export function buildMessageContent(message: ApiMessage): MessageContent {
+interface BuildMessageContentOptions {
+  noEnhancedText?: boolean;
+}
+
+export function buildMessageContent(message: ApiMessage, options: BuildMessageContentOptions = {}): MessageContent {
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
   const sticker = getMessageSticker(message);
@@ -95,16 +99,16 @@ export function buildMessageContent(message: ApiMessage): MessageContent {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
     if (!photo && emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
-      classNames.push(`sticker emoji-only-${emojiOnlyCount}`);
+      classNames.push('sticker');
+      classNames.push(`emoji-only-${emojiOnlyCount}`);
       contentParts = text;
     } else {
       classNames.push('text');
-      contentParts = enhanceTextParts(text, [addLineBreaks, addBreaksToLongWords, addLinks]);
+      contentParts = enhanceTextParts(
+        text,
+        options.noEnhancedText ? [] : [addLineBreaks, addBreaksToLongWords, addLinks],
+      );
     }
-  }
-
-  if (message.forward_info) {
-    classNames.push('is-forwarded');
   }
 
   if (photo) {
@@ -113,6 +117,10 @@ export function buildMessageContent(message: ApiMessage): MessageContent {
 
   if (sticker) {
     classNames.push('sticker');
+  }
+
+  if (message.forward_info && !classNames.includes('sticker')) {
+    classNames.push('is-forwarded');
   }
 
   classNames.push('status-read');
