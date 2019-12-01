@@ -3,8 +3,11 @@ import React, { FC, useState } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../store/types';
+
+import { insertImage } from '../../../util/image';
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
+import CropModal from './CropModal';
 
 import './Auth.scss';
 
@@ -12,34 +15,15 @@ type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActi
 
 const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
+  const [avatar, setAvatar] = useState(undefined);
+  const [selectedFile, setSelectedFile] = useState(undefined);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [avatar, setAvatar] = useState(undefined);
 
-  function onFirstNameChange(event: ChangeEvent<HTMLInputElement>) {
-    const { target } = event;
-
-    setFirstName(target.value);
-    setIsButtonShown(target.value.length > 0);
-  }
-
-  function onLastNameChange(event: ChangeEvent<HTMLInputElement>) {
-    const { target } = event;
-
-    setLastName(target.value);
-  }
-
-  function openFileSelector() {
-    const fileInput = document.getElementById('registration-avatar');
-    if (fileInput) {
-      fileInput.click();
-    }
-  }
-
-  function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
     const target = event.target as HTMLInputElement;
 
-    if (!target || !target.files) {
+    if (!target || !target.files || !target.files[0]) {
       return;
     }
 
@@ -54,27 +38,32 @@ const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
       return;
     }
 
-    setAvatar(imgFile);
-    const previousImg = document.querySelector('#avatar img');
-    if (previousImg) {
-      previousImg.remove();
-    }
-    const img = document.createElement('img');
-    const avatarContainer = document.querySelector('#avatar');
-    if (!avatarContainer) {
-      return;
-    }
-    avatarContainer.appendChild(img);
+    setSelectedFile(imgFile);
+    target.value = '';
+  }
 
-    const reader = new FileReader();
-    reader.onload = ((aImg) => (e: ProgressEvent<FileReader>) => {
-      const { target: eTarget } = e;
-      if (!eTarget || typeof eTarget.result !== 'string') {
-        return;
-      }
-      aImg.src = eTarget.result;
-    })(img);
-    reader.readAsDataURL(imgFile);
+  function handleFirstNameChange(event: ChangeEvent<HTMLInputElement>) {
+    const { target } = event;
+
+    setFirstName(target.value);
+    setIsButtonShown(target.value.length > 0);
+  }
+
+  function handleLastNameChange(event: ChangeEvent<HTMLInputElement>) {
+    const { target } = event;
+
+    setLastName(target.value);
+  }
+
+  async function handleAvatarCrop(croppedImg: File) {
+    setSelectedFile(null);
+    setAvatar(croppedImg);
+
+    await insertImage(croppedImg, 'avatar');
+  }
+
+  function handleModalDismiss() {
+    setSelectedFile(null);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -86,17 +75,21 @@ const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
   return (
     <div id="auth-registration-form" className="auth-form">
       <form action="" method="post" onSubmit={handleSubmit}>
-        <div
+        <label
           id="avatar"
-          onClick={openFileSelector}
           className={avatar ? 'filled' : ''}
           role="button"
           tabIndex={0}
           title="Change your profile picture"
         >
-          <input type="file" id="registration-avatar" onChange={onAvatarChange} accept="image/png, image/jpeg" />
+          <input
+            type="file"
+            id="registration-avatar"
+            onChange={handleSelectFile}
+            accept="image/png, image/jpeg"
+          />
           <i className="icon-camera-add" />
-        </div>
+        </label>
         <h2>Your Name</h2>
         <p className="note">
           Enter your name and add
@@ -105,19 +98,20 @@ const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
         <InputText
           id="registration-first-name"
           label="Name"
-          onChange={onFirstNameChange}
+          onChange={handleFirstNameChange}
           value={firstName}
         />
         <InputText
           id="registration-last-name"
           label="Last Name (optional)"
-          onChange={onLastNameChange}
+          onChange={handleLastNameChange}
           value={lastName}
           error={authError}
         />
         {isButtonShown && (
           <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
         )}
+        <CropModal file={selectedFile} onDismiss={handleModalDismiss} onChange={handleAvatarCrop} />
       </form>
     </div>
   );

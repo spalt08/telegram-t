@@ -24,6 +24,7 @@
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@types/croppie": "^2.5.4",
     "@babel/core": "^7.7.2",
     "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/plugin-transform-runtime": "^7.6.2",
@@ -54,6 +55,7 @@
   "dependencies": {
     "aes-js": "^3.1.2",
     "crc": "^3.8.0",
+    "croppie": "^2.6.4",
     "crypto": "^1.0.1",
     "emoji-regex": "^8.0.0",
     "events": "^3.0.0",
