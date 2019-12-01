@@ -1,6 +1,6 @@
 import { ApiFileLocation } from '../../types';
 
-import { downloadFile, downloadMessageMedia } from '../client';
+import { downloadFile, downloadMessageImage } from '../client';
 import localDb from '../localDb';
 import { bytesToDataUri } from '../builders/common';
 
@@ -33,7 +33,7 @@ export function loadMessageMedia(message: MTP.message): Promise<string | null> {
   const messageId = message.id;
 
   if (!localDb.mediaRequests[messageId]) {
-    localDb.mediaRequests[messageId] = downloadMessageMedia(message)
+    localDb.mediaRequests[messageId] = downloadMessageImage(message)
       .then(
         (fileBuffer: Buffer) => {
           if (fileBuffer) {

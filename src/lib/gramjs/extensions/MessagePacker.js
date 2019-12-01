@@ -38,7 +38,7 @@ class MessagePacker {
             await this._ready
         }
         let data
-        const buffer = new BinaryWriter(Buffer.alloc(0))
+        let buffer = new BinaryWriter(Buffer.alloc(0))
 
         const batch = []
         let size = 0
@@ -76,7 +76,7 @@ class MessagePacker {
             data = Buffer.concat([struct.pack(
                 '<Ii', MessageContainer.CONSTRUCTOR_ID, batch.length,
             ), buffer.getValue()])
-
+            buffer = new BinaryWriter(Buffer.alloc(0))
             const containerId = await this._state.writeDataAsMessage(
                 buffer, data, false,
             )

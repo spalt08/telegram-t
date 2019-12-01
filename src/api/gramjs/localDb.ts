@@ -5,8 +5,8 @@ export default <{
   users: Record<number, MTP.user>;
   localMessages: Record<string, ApiMessage>;
   // TODO Replace with persistent storage for all downloads.
-  avatarRequests: Record<number, Promise<string>>;
-  mediaRequests: Record<number, Promise<string>>;
+  avatarRequests: Record<number, Promise<string | null>>;
+  mediaRequests: Record<number, Promise<string | null>>;
 }> {
   chats: {},
   users: {},

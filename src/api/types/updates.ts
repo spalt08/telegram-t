@@ -68,8 +68,8 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
-export type ApiUpdateMessageMedia = {
-  '@type': 'updateMessageMedia';
+export type ApiUpdateMessageImage = {
+  '@type': 'updateMessageImage';
   message_id: number;
   data_uri: string;
 };
@@ -79,5 +79,5 @@ export type ApiUpdate = (
   ApiUpdateChats | ApiUpdateChat |
   ApiUpdateMessage | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUsers | ApiUpdateUser |
-  ApiUpdateMessageMedia
+  ApiUpdateMessageImage
 );

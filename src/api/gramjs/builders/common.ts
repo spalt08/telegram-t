@@ -3,9 +3,9 @@ import { ApiFileLocation } from '../../types';
 export function buildApiPhotoLocations(entity: MTP.user | MTP.chat): {
   small: ApiFileLocation;
   big: ApiFileLocation;
-} | null {
+} | undefined {
   if (!entity.photo) {
-    return null;
+    return undefined;
   }
 
   const { photoSmall, photoBig, dcId } = entity.photo as (MTPNext.UserProfilePhoto | MTPNext.ChatPhoto);

@@ -4,7 +4,7 @@ import { ApiUpdate } from '../../../api/types';
 
 export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
-    case 'updateMessageMedia': {
+    case 'updateMessageImage': {
       const { message_id, data_uri } = update;
 
       const fileKey = `msg${message_id}`;

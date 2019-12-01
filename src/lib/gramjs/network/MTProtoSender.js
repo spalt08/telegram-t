@@ -5,6 +5,7 @@ const AuthKey = require('../crypto/AuthKey')
 const doAuthentication = require('./Authenticator')
 const RPCResult = require('../tl/core/RPCResult')
 const MessageContainer = require('../tl/core/MessageContainer')
+const { TLRequest } = require('../tl/tlobject')
 const GZIPPacked = require('../tl/core/GZIPPacked')
 const RequestState = require('./RequestState')
 const format = require('string-format')
@@ -235,12 +236,13 @@ class MTProtoSender {
              * switch to different data centers.
              */
             if (this._authKeyCallback) {
-                this._authKeyCallback(this.authKey)
+                await this._authKeyCallback(this.authKey)
             }
         } else {
             this._log.debug('Already have an auth key ...')
         }
         this._user_connected = true
+        this._reconnecting = false
 
         this._log.debug('Starting send loop')
         this._send_loop_handle = this._sendLoop()
@@ -281,12 +283,16 @@ class MTProtoSender {
                 this._last_acks.push(ack)
                 this._pending_ack.clear()
             }
-            // this._log.debug('Waiting for messages to send...');
             this._log.debug('Waiting for messages to send...')
             // TODO Wait for the connection send queue to be empty?
             // This means that while it's not empty we can wait for
             // more messages to be added to the send queue.
             const res = await this._send_queue.get()
+
+            if (this._reconnecting) {
+                return;
+            }
+
             if (!res) {
                 continue
             }
@@ -304,7 +310,17 @@ class MTProtoSender {
                 return
             }
             for (const state of batch) {
-                this._pending_state[state.msgId] = state
+                if (!Array.isArray(state)) {
+                    if (state.request instanceof TLRequest) {
+                        this._pending_state[state.msgId] = state
+                    }
+                } else {
+                    for (const s of state) {
+                        if (s.request instanceof TLRequest) {
+                            this._pending_state[s.msgId] = s
+                        }
+                    }
+                }
             }
             this._log.debug('Encrypted messages put in a queue to be sent')
         }
@@ -337,15 +353,22 @@ class MTProtoSender {
                     // A step while decoding had the incorrect data. This message
                     // should not be considered safe and it should be ignored.
                     this._log.warn(`Security error while unpacking a received message: ${e}`)
-                    continue
+
+                    // TODO Reconnecting does not work properly: all subsequent requests hang.
+                    // this.authKey.key = null
+                    // if (this._authKeyCallback) {
+                    //     await this._authKeyCallback(null)
+                    // }
+                    // this._startReconnect()
+                    // return
                 } else if (e instanceof InvalidBufferError) {
                     this._log.info('Broken authorization key; resetting')
                     this.authKey.key = null
                     if (this._authKeyCallback) {
-                        this._authKeyCallback(null)
+                        await this._authKeyCallback(null)
                     }
-                    this._startReconnect(e)
 
+                    this._startReconnect()
                     return
                 } else {
                     this._log.error('Unhandled error while receiving data')
@@ -705,17 +728,22 @@ class MTProtoSender {
     async _handleMsgAll(message) {
     }
 
-    _startReconnect(e) {
+    async _startReconnect() {
         if (this._user_connected && !this._reconnecting) {
             this._reconnecting = true
-            this._reconnect(e)
+            // TODO Should we set this?
+            // this._user_connected = false
+            await this._reconnect()
         }
     }
 
-    async _reconnect(e) {
+    async _reconnect() {
         this._log.debug('Closing current connection...')
-        await this._connection.disconnect()
-        this._reconnecting = false
+        try {
+            await this._connection.disconnect()
+        } catch (err) {
+            console.warn(err)
+        }
         this._state.reset()
         const retries = this._retries
         for (let attempt = 0; attempt < retries; attempt++) {
@@ -724,7 +752,7 @@ class MTProtoSender {
                 this._send_queue.extend(Object.values(this._pending_state))
                 this._pending_state = {}
                 if (this._autoReconnectCallback) {
-                    this._autoReconnectCallback()
+                    await this._autoReconnectCallback()
                 }
                 break
             } catch (e) {

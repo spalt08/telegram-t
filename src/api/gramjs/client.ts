@@ -5,6 +5,7 @@ import {
   SupportedUploadRequests,
 } from './types/types';
 import * as apiRequests from '../../lib/gramjs/tl/functions';
+import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { TelegramClient, session } from '../../lib/gramjs';
 import { DEBUG } from '../../config';
@@ -15,10 +16,8 @@ import { onGramJsUpdate } from './onGramJsUpdate';
 import localDb from './localDb';
 import { buildInputPeerPhotoFileLocation } from './inputHelpers';
 import { ApiFileLocation } from '../types';
-import { pause } from '../../util/schedulers';
 
-// Wait for other requests to complete + fix GramJS sync requests bug.
-const FILE_REQUEST_DELAY = 2000;
+GramJsLogger.getLogger().level = 'debug';
 
 let client: any;
 
@@ -101,22 +100,17 @@ export async function invokeRequest(data: InvokeRequestPayload) {
   return result;
 }
 
-export async function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
+export function downloadFile(chatOrUserId: number, fileLocation: ApiFileLocation) {
   const { dcId, volumeId, localId } = fileLocation;
-
-  await pause(FILE_REQUEST_DELAY + FILE_REQUEST_DELAY * Math.random());
 
   return client.downloadFile(
     buildInputPeerPhotoFileLocation(chatOrUserId, volumeId, localId),
-    true,
     { dcId },
   );
 }
 
-export async function downloadMessageMedia(message: MTP.message) {
-  await pause(FILE_REQUEST_DELAY + FILE_REQUEST_DELAY * Math.random());
-
-  return client.downloadMedia(message, true);
+export function downloadMessageImage(message: MTP.message) {
+  return client.downloadMedia(message, { sizeType: 'x' });
 }
 
 function postProcess(name: string, anyResult: any, args: AnyLiteral) {

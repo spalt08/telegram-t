@@ -1,16 +1,16 @@
+import * as gramJsApi from '../../../lib/gramjs/tl/types';
+
 import { ApiMessage } from '../../types';
 import { OnApiUpdate } from '../types/types';
 
 import { invokeRequest } from '../client';
-import { buildApiMessage } from '../builders/messages';
+import { buildApiMessage, buildLocalMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
 import { loadMessageMedia } from './files';
 
 let onUpdate: OnApiUpdate;
-// We only support 100000 local pending messages here and expect it will not interfere with real IDs.
-let localMessageCounter = -1;
 
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
@@ -47,14 +47,14 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 
   const messages = (result.messages as MTP.message[])
     .map((mtpMessage) => {
-      if (mtpMessage.media) {
+      if (isMessageWithImage(mtpMessage)) {
         loadMessageMedia(mtpMessage).then((dataUri) => {
           if (!dataUri) {
             return;
           }
 
           onUpdate({
-            '@type': 'updateMessageMedia',
+            '@type': 'updateMessageImage',
             message_id: mtpMessage.id,
             data_uri: dataUri,
           });
@@ -101,24 +101,20 @@ export function sendMessage(chatId: number, text: string) {
   });
 }
 
-function buildLocalMessage(chatId: number, text: string): ApiMessage {
-  const localId = localMessageCounter--;
+function isMessageWithImage(message: MTP.message) {
+  const { media } = message;
 
-  return {
-    id: localId,
-    chat_id: chatId,
-    content: {
-      '@type': 'message',
-      text: {
-        '@type': 'formattedText',
-        text,
-      },
-    },
-    date: Math.round(Date.now() / 1000),
-    is_outgoing: true,
-    sender_user_id: -1, // TODO
-    sending_state: {
-      '@type': 'messageSendingStatePending',
-    },
-  };
+  if (!media) {
+    return false;
+  }
+
+  if (media instanceof gramJsApi.MessageMediaPhoto) {
+    return true;
+  }
+
+  if (media instanceof gramJsApi.MessageMediaDocument) {
+    return media.document.attributes.some((attr: any) => attr instanceof gramJsApi.DocumentAttributeSticker);
+  }
+
+  return false;
 }

@@ -10,12 +10,12 @@ import { isPeerUser } from './peers';
 import { bytesToDataUri } from './common';
 
 // TODO Maybe we do not need it.
-const DEFAULT_CHAT_ID = 0;
+const DEFAULT_USER_ID = 0;
 
 export function buildApiMessage(mtpMessage: OmitFlags<MTP.message>): ApiMessage {
   const isPrivateToMe = mtpMessage.out !== true && isPeerUser(mtpMessage.toId);
   const chatId = isPrivateToMe
-    ? (mtpMessage.fromId || DEFAULT_CHAT_ID)
+    ? (mtpMessage.fromId || DEFAULT_USER_ID)
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
@@ -29,7 +29,7 @@ export function buildApiMessageFromShort(
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
     // TODO Current user ID needed here.
-    fromId: mtpMessage.out ? DEFAULT_CHAT_ID : mtpMessage.userId,
+    fromId: mtpMessage.out ? DEFAULT_USER_ID : mtpMessage.userId,
   });
 }
 
@@ -66,7 +66,7 @@ export function buildApiMessageWithChatId(
       ...(caption && { caption }),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || DEFAULT_CHAT_ID,
+    sender_user_id: mtpMessage.fromId || DEFAULT_USER_ID,
     reply_to_message_id: mtpMessage.replyToMsgId,
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
   };
@@ -162,5 +162,29 @@ function buildApiPhotoSize(photoSize: MTP.photoSize): ApiPhotoSize {
     width: w,
     height: h,
     type: type as ('m' | 'x' | 'y'),
+  };
+}
+
+// We only support 100000 local pending messages here and expect it will not interfere with real IDs.
+let localMessageCounter = -1;
+export function buildLocalMessage(chatId: number, text: string): ApiMessage {
+  const localId = localMessageCounter--;
+
+  return {
+    id: localId,
+    chat_id: chatId,
+    content: {
+      '@type': 'message',
+      text: {
+        '@type': 'formattedText',
+        text,
+      },
+    },
+    date: Math.round(Date.now() / 1000),
+    is_outgoing: true,
+    sender_user_id: DEFAULT_USER_ID, // TODO
+    sending_state: {
+      '@type': 'messageSendingStatePending',
+    },
   };
 }
