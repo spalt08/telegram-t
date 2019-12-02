@@ -1,26 +1,28 @@
-import * as gramJsApi from '../../lib/gramjs/tl/types';
+import { BigInteger } from 'big-integer';
+import { gramJsApi, MTProto } from '../../lib/gramjs';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
-
 import localDb from './localDb';
 
-export function buildInputPeer(chatOrUserId: number): MTP.Peer {
-  if (chatOrUserId > 0) {
-    const user = localDb.users[chatOrUserId] as MTP.user;
+const ctors = gramJsApi.constructors;
 
-    return new gramJsApi.InputPeerUser({
+export function buildInputPeer(chatOrUserId: number): MTProto.Peer {
+  if (chatOrUserId > 0) {
+    const user = localDb.users[chatOrUserId] as MTProto.user;
+
+    return user && new ctors.InputPeerUser({
       userId: chatOrUserId,
-      ...(user && { accessHash: user.accessHash }),
+      accessHash: user.accessHash as BigInteger,
     });
   } else if (chatOrUserId <= -1000000000) {
-    const channel = localDb.chats[-chatOrUserId] as MTP.channel;
+    const channel = localDb.chats[-chatOrUserId] as MTProto.channel;
 
-    return new gramJsApi.InputPeerChannel({
+    return channel && new ctors.InputPeerChannel({
       channelId: -chatOrUserId,
-      ...(channel && { accessHash: channel.accessHash }),
+      accessHash: channel.accessHash as BigInteger,
     });
   } else {
-    return new gramJsApi.InputPeerChat({
+    return new ctors.InputPeerChat({
       chatId: -chatOrUserId,
     });
   }
@@ -28,11 +30,11 @@ export function buildInputPeer(chatOrUserId: number): MTP.Peer {
 
 export function buildInputPeerPhotoFileLocation(
   chatOrUserId: number,
-  volumeId: MTP.long,
+  volumeId: MTProto.long,
   localId: number,
-): MTPNext.InputPeerPhotoFileLocation {
+): MTProto.inputPeerPhotoFileLocation {
   const peer = buildInputPeer(chatOrUserId);
-  return new gramJsApi.InputPeerPhotoFileLocation({
+  return new ctors.InputPeerPhotoFileLocation({
     peer,
     volumeId,
     localId,

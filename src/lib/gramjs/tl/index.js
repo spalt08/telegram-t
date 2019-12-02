@@ -1,13 +1,11 @@
-const types = require('./types')
-const functions = require('./functions')
-const custom = require('./custom')
+const { constructors, requests } = require('./gramJsApi')
+const { serializeBytes, serializeDate } = require('./generationHelpers')
 const patched = null
-const { TLObject, TLRequest } = require('./tlobject')
+
 module.exports = {
-    types,
-    functions,
-    custom,
+    constructors,
+    requests,
     patched,
-    TLObject,
-    TLRequest,
+    serializeBytes,
+    serializeDate
 }

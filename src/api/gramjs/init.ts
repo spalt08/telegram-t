@@ -1,4 +1,4 @@
-import { OnApiUpdate } from './types/types';
+import { OnApiUpdate } from './types';
 
 import { init as initUpdater } from './onGramJsUpdate';
 import { init as initAuth } from './connectors/auth';

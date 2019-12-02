@@ -1,11 +1,16 @@
-import { OnApiUpdate } from '../types/types';
+import { gramJsApi, MTProto } from '../../../lib/gramjs';
 
+import { OnApiUpdate } from '../types';
 import { invokeRequest } from '../client';
 import { buildApiChatFromDialog, getApiChatIdFromMtpPeer, getPeerKey } from '../builders/chats';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { loadAvatar } from './files';
+import localDb from '../localDb';
+import { UNSUPPORTED_RESPONSE } from '../utils';
+
+const { constructors: ctors, requests } = gramJsApi;
 
 let onUpdate: OnApiUpdate;
 
@@ -22,37 +27,33 @@ export async function fetchChats(
     offsetDate?: number;
   },
 ): Promise<{ chat_ids: number[] } | null> {
-  const result = await invokeRequest({
-    namespace: 'messages',
-    name: 'GetDialogsRequest',
-    args: {
-      flags: 1,
-      excludePinned: false,
-      limit,
-      offsetDate,
-    },
-  }) as MTP.messages$Dialogs;
+  const result = await invokeRequest(new requests.messages.GetDialogsRequest({
+    offsetPeer: new ctors.InputPeerEmpty({}),
+    limit,
+    offsetDate,
+  }));
 
-  if (!result || !result.dialogs) {
-    return null;
+  if (!result || !(result instanceof ctors.messages.DialogsSlice) || !result.dialogs.length) {
+    throw new Error(UNSUPPORTED_RESPONSE);
   }
 
-  const lastMessagesByChatId = buildCollectionByKey((result.messages as MTP.message[]).map(buildApiMessage), 'chat_id');
+  updateLocalDb(result);
 
+  const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
   const peersByKey = preparePeers(result);
   const chats = result.dialogs.map((dialog) => {
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
-    const chat = buildApiChatFromDialog(dialog, peerEntity);
+    const chat = buildApiChatFromDialog(dialog as MTProto.dialog, peerEntity);
     chat.last_message = lastMessagesByChatId[chat.id];
     return chat;
   });
+
   onUpdate({
     '@type': 'chats',
     chats,
   });
 
-  const users = (result.users as MTP.user[]).map(buildApiUser);
-
+  const users = (result.users as MTProto.user[]).map(buildApiUser);
   onUpdate({
     '@type': 'users',
     users,
@@ -67,44 +68,54 @@ export async function fetchChats(
   };
 }
 
-function preparePeers(result: MTP.messages$Dialogs) {
-  const store: Record<string, MTP.chat | MTP.user> = {};
+function preparePeers(result: MTProto.messages_dialogsSlice) {
+  const store: Record<string, MTProto.chat | MTProto.user> = {};
 
   result.chats.forEach((chat) => {
-    store[`chat${chat.id}`] = chat as MTP.chat;
+    store[`chat${chat.id}`] = chat as MTProto.chat;
   });
 
   result.users.forEach((user) => {
-    store[`user${user.id}`] = user as MTP.user;
+    store[`user${user.id}`] = user as MTProto.user;
   });
 
   return store;
 }
 
-function loadAvatars(result: MTP.messages$Dialogs) {
+function updateLocalDb(result: MTProto.messages_dialogsSlice) {
   result.users.forEach((user) => {
-    loadAvatar(user as MTP.user).then((dataUri) => {
+    localDb.users[user.id] = user as MTProto.user;
+  });
+
+  result.chats.forEach((chat) => {
+    localDb.chats[chat.id] = chat as MTProto.chat | MTProto.channel;
+  });
+}
+
+function loadAvatars(result: MTProto.messages_dialogsSlice) {
+  result.users.forEach((user) => {
+    loadAvatar(user as MTProto.user).then((dataUri) => {
       if (!dataUri) {
         return;
       }
 
       onUpdate({
         '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ userId: user.id }),
+        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as MTProto.Peer),
         data_uri: dataUri,
       });
     });
   });
 
   result.chats.forEach((chat) => {
-    loadAvatar(chat as MTP.chat).then((dataUri) => {
+    loadAvatar(chat as MTProto.chat).then((dataUri) => {
       if (!dataUri) {
         return;
       }
 
       onUpdate({
         '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id }),
+        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id } as MTProto.Peer),
         data_uri: dataUri,
       });
     });

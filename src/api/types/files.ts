@@ -28,6 +28,6 @@ export interface ApiFileSource {
 
 export interface ApiFileLocation {
   dcId: int;
-  volumeId: MTP.long;
+  volumeId: MTProto.long;
   localId: number;
 }

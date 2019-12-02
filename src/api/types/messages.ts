@@ -20,7 +20,7 @@ export interface ApiPhotoCachedSize {
 export interface ApiPhoto {
   '@type': 'photo';
   has_stickers: boolean;
-  minithumbnail: {
+  minithumbnail?: {
     '@type': 'minithumbnail';
     data: string;
     height: number;

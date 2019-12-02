@@ -1,8 +1,9 @@
-import { isPeerChat, isPeerUser } from './peers';
+import { MTProto } from '../../../lib/gramjs';
 import { ApiChat } from '../../types';
+import { isPeerChat, isPeerUser } from './peers';
 import { buildApiPhotoLocations } from './common';
 
-export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user | MTP.chat): ApiChat {
+export function buildApiChatFromDialog(dialog: MTProto.dialog, peerEntity: MTProto.user | MTProto.chat): ApiChat {
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
@@ -19,7 +20,7 @@ export function buildApiChatFromDialog(dialog: MTP.dialog, peerEntity: MTP.user 
   };
 }
 
-export function getApiChatIdFromMtpPeer(peer: MTP.Peer) {
+export function getApiChatIdFromMtpPeer(peer: MTProto.Peer) {
   if (isPeerUser(peer)) {
     return peer.userId;
   } else if (isPeerChat(peer)) {
@@ -29,7 +30,7 @@ export function getApiChatIdFromMtpPeer(peer: MTP.Peer) {
   }
 }
 
-export function getApiChatTypeFromMtpPeer(peer: MTP.Peer) {
+export function getApiChatTypeFromMtpPeer(peer: MTProto.Peer) {
   if (isPeerUser(peer)) {
     return 'chatTypePrivate';
   } else if (isPeerChat(peer)) {
@@ -40,7 +41,7 @@ export function getApiChatTypeFromMtpPeer(peer: MTP.Peer) {
   }
 }
 
-export function getPeerKey(peer: MTP.Peer) {
+export function getPeerKey(peer: MTProto.Peer) {
   if (isPeerUser(peer)) {
     return `user${peer.userId}`;
   } else if (isPeerChat(peer)) {
@@ -50,14 +51,14 @@ export function getPeerKey(peer: MTP.Peer) {
   }
 }
 
-export function getApiChatTitleFromMtpPeer(peer: MTP.Peer, peerEntity: MTP.user | MTP.chat) {
+export function getApiChatTitleFromMtpPeer(peer: MTProto.Peer, peerEntity: MTProto.user | MTProto.chat) {
   if (isPeerUser(peer)) {
-    return getUserName(peerEntity as MTP.user);
+    return getUserName(peerEntity as MTProto.user);
   } else {
-    return (peerEntity as MTP.chat).title;
+    return (peerEntity as MTProto.chat).title;
   }
 }
 
-function getUserName(user: MTP.user) {
+function getUserName(user: MTProto.user) {
   return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
 }

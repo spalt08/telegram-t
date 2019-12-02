@@ -1,6 +1,5 @@
-const { TLObject } = require('../tl/tlobject')
 const utils = require('../Utils')
-const types = require('../tl/types')
+const types = require('../tl').constructors
 const Session = require('./Abstract')
 
 class MemorySession extends Session {
@@ -77,7 +76,7 @@ class MemorySession extends Session {
     }
 
     _entityToRow(e) {
-        if (!(e instanceof TLObject)) {
+        if (!(e.classType==="constructor")) {
             return
         }
         let p
@@ -112,7 +111,7 @@ class MemorySession extends Session {
 
     _entitiesToRows(tlo) {
         let entities = []
-        if (tlo instanceof TLObject && utils.isListLike(tlo)) {
+        if (tlo.classType==="constructor" && utils.isListLike(tlo)) {
             // This may be a list of users already for instance
             entities = tlo
         } else {
@@ -199,7 +198,7 @@ class MemorySession extends Session {
             return utils.getInputPeer(key)
         } else {
             // Not a TLObject or can't be cast into InputPeer
-            if (key instanceof TLObject) {
+            if (key.classType==='constructor') {
                 key = utils.getPeerId(key)
                 exact = true
             } else {

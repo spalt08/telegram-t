@@ -1,5 +1,5 @@
 const { EventBuilder, EventCommon } = require('./common')
-const { types } = require('../tl')
+const { constructors } = require('../tl')
 
 class NewMessage extends EventBuilder {
     constructor(args = {
@@ -20,13 +20,13 @@ class NewMessage extends EventBuilder {
 
     build(update, others = null, thisId = null) {
         let event
-        if (update instanceof types.UpdateNewMessage || update instanceof types.UpdateNewChannelMessage) {
-            if (!(update.message instanceof types.Message)) {
+        if (update instanceof constructors.UpdateNewMessage || update instanceof constructors.UpdateNewChannelMessage) {
+            if (!(update.message instanceof constructors.Message)) {
                 return
             }
             event = new Event(update.message)
-        } else if (update instanceof types.UpdateShortMessage) {
-            event = new Event(new types.Message({
+        } else if (update instanceof constructors.UpdateShortMessage) {
+            event = new Event(new constructors.Message({
                 out: update.out,
                 mentioned: update.mentioned,
                 mediaUnread: update.mediaUnread,
@@ -34,7 +34,7 @@ class NewMessage extends EventBuilder {
                 id: update.id,
                 // Note that to_id/from_id complement each other in private
                 // messages, depending on whether the message was outgoing.
-                toId: new types.PeerUser(update.out ? update.userId : thisId),
+                toId: new constructors.PeerUser(update.out ? update.userId : thisId),
                 fromId: update.out ? thisId : update.userId,
                 message: update.message,
                 date: update.date,
@@ -43,14 +43,14 @@ class NewMessage extends EventBuilder {
                 replyToMsgId: update.replyToMsgId,
                 entities: update.entities,
             }))
-        } else if (update instanceof types.UpdateShortChatMessage) {
-            event = new this.Event(new types.Message({
+        } else if (update instanceof constructors.UpdateShortChatMessage) {
+            event = new this.Event(new constructors.Message({
                 out: update.out,
                 mentioned: update.mentioned,
                 mediaUnread: update.mediaUnread,
                 silent: update.silent,
                 id: update.id,
-                toId: new types.PeerChat(update.chatId),
+                toId: new constructors.PeerChat(update.chatId),
                 fromId: update.fromId,
                 message: update.message,
                 date: update.date,
@@ -66,7 +66,7 @@ class NewMessage extends EventBuilder {
         // Make messages sent to ourselves outgoing unless they're forwarded.
         // This makes it consistent with official client's appearance.
         const ori = event.message
-        if (ori.toId instanceof types.PeerUser) {
+        if (ori.toId instanceof constructors.PeerUser) {
             if (ori.fromId === ori.toId.userId && !ori.fwdFrom) {
                 event.message.out = true
             }

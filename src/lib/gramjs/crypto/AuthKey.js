@@ -1,6 +1,7 @@
 const { sha1, readBufferFromBigInt, readBigIntFromBuffer } = require('../Helpers')
 const BinaryReader = require('../extensions/BinaryReader')
 const struct = require('python-struct')
+const { sleep } = require("../Helpers")
 
 class AuthKey {
     constructor(data) {
@@ -23,6 +24,12 @@ class AuthKey {
         this.auxHash = reader.readLong(false)
         reader.read(4)
         this.keyId = reader.readLong(false)
+    }
+
+    async waitForKey(){
+        while (!this.key){
+            await sleep(20)
+        }
     }
 
     get key() {
