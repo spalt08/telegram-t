@@ -20,7 +20,7 @@ async function doAuthentication(sender, log) {
 
     const nonce = Helpers.readBigIntFromBuffer(bytes, false, true)
 
-    const resPQ = await sender.send(new requests.ReqPqMultiRequest({ nonce: nonce }))
+    const resPQ = await sender.send(new requests.ReqPqMulti({ nonce: nonce }))
     log.debug('Starting authKey generation step 1')
 
     if (!(resPQ instanceof constructors.ResPQ)) {
@@ -66,7 +66,7 @@ async function doAuthentication(sender, log) {
     }
 
     const serverDhParams = await sender.send(
-        new requests.ReqDHParamsRequest({
+        new requests.ReqDHParams({
             nonce: resPQ.nonce,
             serverNonce: resPQ.serverNonce,
             p: p,
@@ -138,7 +138,7 @@ async function doAuthentication(sender, log) {
     // Encryption
     const clientDhEncrypted = AES.encryptIge(clientDdhInnerHashed, key, iv)
     const dhGen = await sender.send(
-        new requests.SetClientDHParamsRequest({
+        new requests.SetClientDHParams({
             nonce: resPQ.nonce,
             serverNonce: resPQ.serverNonce,
             encryptedData: clientDhEncrypted,

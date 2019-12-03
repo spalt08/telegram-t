@@ -25,7 +25,7 @@ const {
 } = require('../tl').constructors
 const { SecurityError } = require('../errors/Common')
 const { InvalidBufferError } = require('../errors/Common')
-const { LogOutRequest } = require('../tl').requests.auth
+const { LogOut } = require('../tl').requests.auth
 const { RPCMessageToError } = require('../errors')
 const { TypeNotFoundError } = require('../errors/Common')
 
@@ -676,7 +676,7 @@ class MTProtoSender {
         this._log.debug(`Handling acknowledge for ${ack.msgIds}`)
         for (const msgId of ack.msgIds) {
             const state = this._pending_state[msgId]
-            if (state && state.request instanceof LogOutRequest) {
+            if (state && state.request instanceof LogOut) {
                 delete this._pending_state[msgId]
                 state.resolve(true)
             }

@@ -5,7 +5,7 @@ const BinaryReader = require('../extensions/BinaryReader')
 const GZIPPacked = require('../tl/core/GZIPPacked')
 const { TLMessage } = require('../tl/core')
 const { SecurityError, InvalidBufferError } = require('../errors/Common')
-const { InvokeAfterMsgRequest } = require('../tl').requests
+const { InvokeAfterMsg } = require('../tl').requests
 const BigInt = require('big-integer')
 
 class MTProtoState {
@@ -95,7 +95,7 @@ class MTProtoState {
         if (!afterId) {
             body = await GZIPPacked.gzipIfSmaller(contentRelated, data)
         } else {
-            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsgRequest(afterId, data).getBytes())
+            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, data).getBytes())
         }
         buffer.write(struct.pack('<qii', msgId.toString(), seqNo, body.length))
         buffer.write(body)

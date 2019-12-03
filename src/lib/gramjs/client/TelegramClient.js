@@ -100,9 +100,9 @@ class TelegramClient {
         this._floodWaitedRequests = {}
 
         this._initWith = (x) => {
-            return new requests.InvokeWithLayerRequest({
+            return new requests.InvokeWithLayer({
                 layer: LAYER,
-                query: new requests.InitConnectionRequest({
+                query: new requests.InitConnection({
                     apiId: this.apiId,
                     deviceModel: args.deviceModel || os.type().toString() || 'Unknown',
                     systemVersion: args.systemVersion || os.release().toString() || '1.0',
@@ -149,7 +149,7 @@ class TelegramClient {
         this.session.authKey = this._sender.authKey
         await this.session.save()
         await this._sender.send(this._initWith(
-            new requests.help.GetConfigRequest({}),
+            new requests.help.GetConfig({}),
         ))
         this._updateLoop()
     }
@@ -161,7 +161,7 @@ class TelegramClient {
             // We don't care about the result we just want to send it every
             // 60 seconds so telegram doesn't stop the connection
             try {
-                this._sender.send(new requests.PingRequest({
+                this._sender.send(new requests.Ping({
                     pingId: rnd,
                 }))
             } catch (e) {
@@ -177,7 +177,7 @@ class TelegramClient {
             // TODO Call getDifference instead since it's more relevant
             if (new Date().getTime() - this._lastRequest > 30 * 60 * 1000) {
                 try {
-                    await this.invoke(new requests.updates.GetStateRequest())
+                    await this.invoke(new requests.updates.GetState())
                 } catch (e) {
                     console.log('err is ', e)
                 }
@@ -240,8 +240,8 @@ class TelegramClient {
                 ))
                 if (this.session.dcId !== dcId) {
                     this._log.info(`Exporting authorization for data center ${dc.ipAddress}`)
-                    const auth = await this.invoke(new requests.auth.ExportAuthorizationRequest({ dcId: dcId }))
-                    const req = this._initWith(new requests.auth.ImportAuthorizationRequest({
+                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId: dcId }))
+                    const req = this._initWith(new requests.auth.ImportAuthorization({
                             id: auth.id, bytes: auth.bytes,
                         },
                     ))
@@ -315,7 +315,7 @@ class TelegramClient {
             while (true) {
                 let result
                 try {
-                    result = await sender.send(new requests.upload.GetFileRequest({
+                    result = await sender.send(new requests.upload.GetFile({
                         location: res.inputLocation,
                         offset: offset,
                         limit: partSize,
@@ -438,7 +438,7 @@ class TelegramClient {
             if (e.message==='LOCATION_INVALID') {
                 const ie = await this.getInputEntity(entity)
                 if (ie instanceof constructors.InputPeerChannel) {
-                    const full = await this.invoke(new requests.channels.GetFullChannelRequest({
+                    const full = await this.invoke(new requests.channels.GetFullChannel({
                         channel: ie,
                     }))
                     return this._downloadPhoto(full.fullChat.chatPhoto, { sizeType })
@@ -563,10 +563,10 @@ class TelegramClient {
         // TODO chose based on current connection method
         /*
         if (!this._config) {
-            this._config = await this.invoke(new requests.help.GetConfigRequest())
+            this._config = await this.invoke(new requests.help.GetConfig())
         }
         if (cdn && !this._cdnConfig) {
-            this._cdnConfig = await this.invoke(new requests.help.GetCdnConfigRequest())
+            this._cdnConfig = await this.invoke(new requests.help.GetCdnConfig())
             for (const pk of this._cdnConfig.publicKeys) {
                 addKey(pk.publicKey)
             }
@@ -648,7 +648,7 @@ class TelegramClient {
 
     async getMe() {
         const me = (await this.invoke(new requests.users
-            .GetUsersRequest({ id: [new constructors.InputUserSelf()] })))[0]
+            .GetUsers({ id: [new constructors.InputUserSelf()] })))[0]
         return me
     }
 
@@ -791,7 +791,7 @@ class TelegramClient {
                 this._parsePhoneAndHash(args.phone, args.phoneCodeHash)
             // May raise PhoneCodeEmptyError, PhoneCodeExpiredError,
             // PhoneCodeHashEmptyError or PhoneCodeInvalidError.
-            result = await this.invoke(new requests.auth.SignInRequest({
+            result = await this.invoke(new requests.auth.SignIn({
                 phoneNumber: phone,
                 phoneCodeHash: phoneCodeHash,
                 phoneCode: args.code.toString(),
@@ -799,8 +799,8 @@ class TelegramClient {
         } else if (args.password) {
             for (let i = 0; i < 5; i++) {
                 try {
-                    const pwd = await this.invoke(new requests.account.GetPasswordRequest())
-                    result = await this.invoke(new requests.auth.CheckPasswordRequest({
+                    const pwd = await this.invoke(new requests.account.GetPassword())
+                    result = await this.invoke(new requests.auth.CheckPassword({
                         password: computeCheck(pwd, args.password),
                     }))
                     break
@@ -809,7 +809,7 @@ class TelegramClient {
                 }
             }
         } else if (args.botToken) {
-            result = await this.invoke(new requests.auth.ImportBotAuthorizationRequest(
+            result = await this.invoke(new requests.auth.ImportBotAuthorization(
                 {
                     flags: 0,
                     botAuthToken: args.botToken,
@@ -842,7 +842,7 @@ class TelegramClient {
     async isUserAuthorized() {
         if (this._authorized === undefined || this._authorized === null) {
             try {
-                await this.invoke(new requests.updates.GetStateRequest())
+                await this.invoke(new requests.updates.GetState())
                 this._authorized = true
             } catch (e) {
                 this._authorized = false
@@ -870,7 +870,7 @@ class TelegramClient {
 
         if (!phoneHash) {
             try {
-                result = await this.invoke(new requests.auth.SendCodeRequest({
+                result = await this.invoke(new requests.auth.SendCode({
                     phoneNumber: phone,
                     apiId: this.apiId,
                     apiHash: this.apiHash,
@@ -895,7 +895,7 @@ class TelegramClient {
         }
         this._phone = phone
         if (forceSMS) {
-            result = await this.invoke(new requests.auth.ResendCodeRequest({
+            result = await this.invoke(new requests.auth.ResendCode({
                 phone: phone,
                 phoneHash: phoneHash,
             }))
@@ -966,7 +966,7 @@ class TelegramClient {
         if (phone) {
             try {
                 for (const user of (await this.invoke(
-                    new requests.contacts.GetContactsRequest(0))).users) {
+                    new requests.contacts.GetContacts(0))).users) {
                     if (user.phone === phone) {
                         return user
                     }
@@ -983,7 +983,7 @@ class TelegramClient {
         } else {
             const { username, isJoinChat } = utils.parseUsername(string)
             if (isJoinChat) {
-                const invite = await this.invoke(new requests.messages.CheckChatInviteRequest({
+                const invite = await this.invoke(new requests.messages.CheckChatInvite({
                     'hash': username,
                 }))
                 if (invite instanceof constructors.ChatInvite) {
@@ -996,7 +996,7 @@ class TelegramClient {
             } else if (username) {
                 try {
                     const result = await this.invoke(
-                        new requests.contacts.ResolveUsernameRequest(username))
+                        new requests.contacts.ResolveUsername(username))
                     const pid = utils.getPeerId(result.peer, false)
                     if (result.peer instanceof constructors.PeerUser) {
                         for (const x of result.users) {
@@ -1128,7 +1128,7 @@ class TelegramClient {
         // regardless. These are the only two special-cased requests.
         peer = utils.getPeer(peer)
         if (peer instanceof constructors.PeerUser) {
-            const users = await this.invoke(new requests.users.GetUsersRequest({
+            const users = await this.invoke(new requests.users.GetUsers({
                 id: [new constructors.InputUser({
                     userId: peer.userId, accessHash: 0,
                 })],
@@ -1149,7 +1149,7 @@ class TelegramClient {
             })
         } else if (peer instanceof constructors.PeerChannel) {
             try {
-                const channels = await this.invoke(new requests.channels.GetChannelsRequest({
+                const channels = await this.invoke(new requests.channels.GetChannels({
                     id: [new constructors.InputChannel({
                         channelId: peer.channelId,
                         accessHash: 0,

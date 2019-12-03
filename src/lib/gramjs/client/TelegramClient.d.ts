@@ -1,9 +1,9 @@
-import { GramJsApi } from '..';
+import { Api } from '..';
 
 declare class TelegramClient {
     constructor(...args: any)
 
-    async invoke<I extends InstanceType<GramJsApi.AnyRequest>>(request: I): Promise<I['__response']>;
+    async invoke<R extends Api.AnyRequest>(request: R): Promise<R['__response']>;
 
     [prop: string]: any;
 }

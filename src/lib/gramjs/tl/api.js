@@ -1,12 +1,11 @@
-//const { readFileSync } = require('fs')
-import { readFileSync } from 'fs'
-
-
+const struct = require('python-struct')
+const { readFileSync } = require('fs')
 const {
     parseTl,
     serializeBytes,
     serializeDate
 } = require('./generationHelpers')
+const { readBufferFromBigInt } = require('../Helpers')
 
 const NAMED_AUTO_CASTS = new Set([
     'chatId,int'
@@ -24,25 +23,35 @@ const AUTO_CASTS = new Set([
     'InputPhoto',
     'InputMessage',
     'InputDocument',
-    'InputChatPhoto',
+    'InputChatPhoto'
 ])
-const struct = require('python-struct')
-
-const { readBufferFromBigInt } = require('../Helpers')
 
 function buildApiFromTlSchema() {
     const tlContent = readFileSync('./static/api.tl', 'utf-8')
     const [constructorParamsApi, functionParamsApi] = extractParams(tlContent)
     const schemeContent = readFileSync('./static/schema.tl', 'utf-8')
     const [constructorParamsSchema, functionParamsSchema] = extractParams(schemeContent)
-    const constructors = [...constructorParamsApi, ...constructorParamsSchema]
-    const requests = [...functionParamsApi, ...functionParamsSchema]
-    return {
-        constructors: createClasses('constructor', constructors),
-        requests: createClasses('request', requests),
-    }
+    const constructors = [].concat(constructorParamsApi, constructorParamsSchema)
+    const requests = [].concat(functionParamsApi, functionParamsSchema)
+    return mergeWithNamespaces(
+        createClasses('constructor', constructors),
+        createClasses('request', requests)
+    )
 }
 
+function mergeWithNamespaces(obj1, obj2) {
+    const result = { ...obj1 }
+
+    Object.keys(obj2).forEach((key) => {
+        if (typeof obj2[key] === 'function' || !result[key]) {
+            result[key] = obj2[key]
+        } else {
+            Object.assign(result[key], obj2[key])
+        }
+    })
+
+    return result
+}
 
 function extractParams(fileContent) {
     const f = parseTl(fileContent, 105)
@@ -53,7 +62,6 @@ function extractParams(fileContent) {
     }
     return [constructors, functions]
 }
-
 
 function argToBytes(x, type) {
     switch (type) {
@@ -78,7 +86,7 @@ function argToBytes(x, type) {
         case 'date':
             return serializeDate(x)
         default:
-            throw new Error("unsupported")
+            throw new Error('unsupported')
     }
 }
 
@@ -108,9 +116,7 @@ async function getInputFromResolve(utils, client, peer, peerType) {
             return await client.getPeerId(peer, false)
         default:
             throw new Error('unsupported peer type : ' + peerType)
-
     }
-
 }
 
 function getArgFromReader(reader, arg) {
@@ -151,21 +157,19 @@ function getArgFromReader(reader, arg) {
             case 'date':
                 return reader.tgReadDate()
             default:
-
                 if (!arg.skipConstructorId) {
                     return reader.tgReadObject()
                 } else {
-                    return gramJsApi.constructors[arg.type].fromReader(reader)
+                    return api.constructors[arg.type].fromReader(reader)
                 }
         }
     }
-
 }
 
 function createClasses(classesType, params) {
     const classes = {}
     for (const classParams of params) {
-        const { name, constructorId, subclassOfId, argsConfig, namespace ,result} = classParams
+        const { name, constructorId, subclassOfId, argsConfig, namespace, result } = classParams
 
         class VirtualClass {
             static CONSTRUCTOR_ID = constructorId
@@ -350,7 +354,7 @@ function createClasses(classesType, params) {
                             }
                             this[arg] = temp
                         } else {
-                            this[arg] =await getInputFromResolve(utils, client, this[arg], argsConfig[arg].type)
+                            this[arg] = await getInputFromResolve(utils, client, this[arg], argsConfig[arg].type)
                         }
                     }
                 }
@@ -366,12 +370,10 @@ function createClasses(classesType, params) {
 
         } else {
             classes[name] = VirtualClass
-
         }
     }
 
     return classes
 }
 
-const gramJsApi = buildApiFromTlSchema()
-module.exports = gramJsApi
+module.exports = buildApiFromTlSchema()

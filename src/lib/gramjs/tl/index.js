@@ -1,10 +1,11 @@
-const { constructors, requests } = require('./gramJsApi')
+const api = require('./api')
 const { serializeBytes, serializeDate } = require('./generationHelpers')
 const patched = null
 
 module.exports = {
-    constructors,
-    requests,
+    // TODO Refactor internal usages to always use `api`.
+    constructors: api,
+    requests: api,
     patched,
     serializeBytes,
     serializeDate
