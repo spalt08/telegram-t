@@ -1,7 +1,14 @@
 import {
   hasElementChanged,
-  isComponentElement, isEmptyElement, isRealElement, isTextElement, isTagElement, VIRTUAL_ELEMENT_EMPTY,
-  VirtualElement, VirtualElementChild, VirtualElementComponent,
+  isComponentElement,
+  isEmptyElement,
+  isRealElement,
+  isTagElement,
+  isTextElement,
+  VirtualElement,
+  VirtualElementComponent,
+  VirtualElementTypesEnum,
+  VirtualRealElement,
 } from './teact';
 
 let $currentRoot: VirtualElementComponent;
@@ -19,8 +26,8 @@ function render($element: VirtualElementComponent, parentEl: HTMLElement | null)
 function renderWithVirtual(
   parentEl: HTMLElement,
   childIndex: number,
-  $current: VirtualElementChild | undefined,
-  $new: VirtualElementChild,
+  $current: VirtualElement | undefined,
+  $new: VirtualElement,
 ) {
   const currentEl = parentEl.childNodes[childIndex];
 
@@ -54,23 +61,23 @@ function initComponentElement($element: VirtualElementComponent, parentEl: HTMLE
 }
 
 // Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
-function getActualPrevElement($element: VirtualElementChild): VirtualElementChild {
+function getActualPrevElement($element: VirtualElement): VirtualElement {
   return isComponentElement($element) ? $element.componentInstance.$prevElement : $element;
 }
 
 // TODO Support `null` return value for empty elements
-function createNode($element: VirtualElementChild, parentEl: HTMLElement, childIndex: number): Node {
+function createNode($element: VirtualElement, parentEl: HTMLElement, childIndex: number): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');
   }
 
   if (isTextElement($element)) {
-    return document.createTextNode($element);
+    return document.createTextNode($element.value);
   }
 
   if (isComponentElement($element)) {
     $element = initComponentElement($element, parentEl, childIndex);
-    return createNode($element.children[0] as VirtualElementChild, parentEl, childIndex);
+    return createNode($element.children[0] as VirtualElement, parentEl, childIndex);
   }
 
   const { tag, props, children = [] } = $element;
@@ -89,24 +96,24 @@ function createNode($element: VirtualElementChild, parentEl: HTMLElement, childI
   return element;
 }
 
-function renderChildren($current: VirtualElement, $new: VirtualElement, currentEl: HTMLElement) {
+function renderChildren($current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement) {
   const currentLength = isRealElement($current) ? $current.children.length : 0;
   const newLength = isRealElement($new) ? $new.children.length : 0;
   const maxLength = Math.max(currentLength, newLength);
 
   for (let i = 0; i < maxLength; i++) {
-    const $currentChild = getActualPrevElement($current.children[i]);
+    const $currentChild = $current.children[i] && getActualPrevElement($current.children[i]);
 
     renderWithVirtual(
       currentEl,
       i,
       $currentChild,
-      isRealElement($new) ? $new.children[i] : VIRTUAL_ELEMENT_EMPTY,
+      isRealElement($new) ? $new.children[i] : { type: VirtualElementTypesEnum.Empty },
     );
   }
 }
 
-function updateAttributes($current: VirtualElement, $new: VirtualElement, element: HTMLElement) {
+function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement, element: HTMLElement) {
   const currentKeys = Object.keys($current.props);
   const newKeys = Object.keys($new.props);
 

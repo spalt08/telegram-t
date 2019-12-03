@@ -5,17 +5,26 @@ export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent | null;
 
 export enum VirtualElementTypesEnum {
+  Empty,
+  Text,
   Tag,
   Component,
 }
 
-export const VIRTUAL_ELEMENT_EMPTY = Symbol('VirtualElementEmpty');
-export type VirtualElementEmpty = typeof VIRTUAL_ELEMENT_EMPTY;
+interface VirtualElementEmpty {
+  type: VirtualElementTypesEnum.Empty;
+  target?: Node;
+}
 
-export type VirtualElementText = string;
+interface VirtualElementText {
+  type: VirtualElementTypesEnum.Text;
+  target?: Node;
+  value: string;
+}
 
 export interface VirtualElementTag {
   type: VirtualElementTypesEnum.Tag;
+  target?: Node;
   tag: string;
   props: Props;
   children: VirtualElementChildren;
@@ -23,6 +32,7 @@ export interface VirtualElementTag {
 
 export interface VirtualElementComponent {
   type: VirtualElementTypesEnum.Component;
+  target?: Node;
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
@@ -44,11 +54,11 @@ interface ComponentInstance {
   isUnmounted: boolean;
 }
 
-export type VirtualElement = VirtualElementTag | VirtualElementComponent;
-export type VirtualElementChild = VirtualElement | VirtualElementEmpty | VirtualElementText;
-export type VirtualElementChildren = VirtualElementChild[];
+export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
+export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
+export type VirtualElementChildren = VirtualElement[];
 // Fix for default JSX type error.
-export type JsxChildren = VirtualElementChildren | VirtualElementChild;
+export type JsxChildren = VirtualElementChildren | VirtualElement;
 
 interface ComponentInstanceState {
   cursor: number;
@@ -76,23 +86,23 @@ interface ComponentInstanceRefs {
 // Used for memoization.
 let renderingInstance: ComponentInstance;
 
-export function isEmptyElement($element: VirtualElementChild): $element is VirtualElementEmpty {
-  return $element === VIRTUAL_ELEMENT_EMPTY;
+export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
+  return $element.type === VirtualElementTypesEnum.Empty;
 }
 
-export function isTextElement($element: VirtualElementChild): $element is VirtualElementText {
-  return typeof $element === 'string';
+export function isTextElement($element: VirtualElement): $element is VirtualElementText {
+  return $element.type === VirtualElementTypesEnum.Text;
 }
 
-export function isTagElement($element: VirtualElementChild): $element is VirtualElementTag {
-  return typeof $element === 'object' && $element.type === VirtualElementTypesEnum.Tag;
+export function isTagElement($element: VirtualElement): $element is VirtualElementTag {
+  return $element.type === VirtualElementTypesEnum.Tag;
 }
 
-export function isComponentElement($element: VirtualElementChild): $element is VirtualElementComponent {
-  return typeof $element === 'object' && $element.type === VirtualElementTypesEnum.Component;
+export function isComponentElement($element: VirtualElement): $element is VirtualElementComponent {
+  return $element.type === VirtualElementTypesEnum.Component;
 }
 
-export function isRealElement($element: VirtualElementChild): $element is VirtualElement {
+export function isRealElement($element: VirtualElement): $element is VirtualRealElement {
   return isTagElement($element) || isComponentElement($element);
 }
 
@@ -100,7 +110,7 @@ function createElement(
   tag: string | FC,
   props: Props,
   ...children: any[]
-): VirtualElement {
+): VirtualRealElement {
   if (!props) {
     props = {};
   }
@@ -162,16 +172,26 @@ function createElement(
     type: VirtualElementTypesEnum.Tag,
     tag,
     props,
-    children: flatten(children).map((child: any): VirtualElementChild => {
+    children: flatten(children).map((child: any): VirtualElement => {
       if (child === false || child === null || child === undefined) {
-        // Support for `&&` operators.
-        return VIRTUAL_ELEMENT_EMPTY;
+        return createEmptyElement();
       } else if (isRealElement(child)) {
         return child;
       } else {
-        return String(child);
+        return createTextElement(child);
       }
     }),
+  };
+}
+
+function createEmptyElement(): VirtualElementEmpty {
+  return { type: VirtualElementTypesEnum.Empty };
+}
+
+function createTextElement(value: string): VirtualElementText {
+  return {
+    type: VirtualElementTypesEnum.Text,
+    value,
   };
 }
 
@@ -201,25 +221,29 @@ function renderComponent(componentInstance: ComponentInstance) {
   });
 }
 
-function getUpdatedChildren($element: VirtualElement, newChildren: VirtualElementChildren) {
+function getUpdatedChildren($element: VirtualRealElement, newChildren: VirtualElementChildren) {
   const currentLength = $element.children.length;
   const newLength = newChildren.length;
   const maxLength = Math.max(currentLength, newLength);
 
   const children: VirtualElementChildren = [];
   for (let i = 0; i < maxLength; i++) {
-    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]) || VIRTUAL_ELEMENT_EMPTY);
+    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]) || createEmptyElement());
   }
   return children;
 }
 
 function getUpdatedChild(
-  $element: VirtualElement,
+  $element: VirtualRealElement,
   childIndex: number,
-  currentChild: VirtualElementChild,
-  newChild: VirtualElementChild,
+  currentChild?: VirtualElement,
+  newChild?: VirtualElement,
 ) {
-  if (isRealElement(currentChild) && isRealElement(newChild) && !hasElementChanged(currentChild, newChild)) {
+  if (
+    currentChild && isRealElement(currentChild)
+    && newChild && isRealElement(newChild)
+    && !hasElementChanged(currentChild, newChild)
+  ) {
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
       currentChild.componentInstance.props = newChild.componentInstance.props;
       currentChild.componentInstance.children = newChild.componentInstance.children;
@@ -228,11 +252,11 @@ function getUpdatedChild(
       newChild.children = getUpdatedChildren(currentChild, newChild.children);
     }
   } else {
-    if (isComponentElement(currentChild)) {
+    if (currentChild && isComponentElement(currentChild)) {
       unmountComponent(currentChild.componentInstance);
     }
 
-    if (isComponentElement(newChild)) {
+    if (newChild && isComponentElement(newChild)) {
       return newChild.componentInstance.render();
     }
   }
@@ -240,7 +264,7 @@ function getUpdatedChild(
   return newChild;
 }
 
-export function hasElementChanged($old: VirtualElementChild, $new: VirtualElementChild) {
+export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   if (typeof $old !== typeof $new) {
     return true;
   } else if (!isRealElement($old) || !isRealElement($new)) {
