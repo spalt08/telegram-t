@@ -18,43 +18,44 @@ function render($element: VirtualElementComponent, parentEl: HTMLElement | null)
     return;
   }
 
-  renderWithVirtual(parentEl, 0, $currentRoot, $element);
+  renderWithVirtual(parentEl, $currentRoot, $element);
 
   $currentRoot = $element;
 }
 
 function renderWithVirtual(
   parentEl: HTMLElement,
-  childIndex: number,
   $current: VirtualElement | undefined,
   $new: VirtualElement,
 ) {
-  const currentEl = parentEl.childNodes[childIndex];
-
   if ($current === undefined && $new !== undefined) {
-    parentEl.appendChild(createNode($new, parentEl, childIndex));
+    $new.target = createNode($new, parentEl);
+    parentEl.appendChild($new.target);
   } else if ($current !== undefined && $new === undefined) {
-    parentEl.removeChild(currentEl);
+    parentEl.removeChild($current.target!);
   } else if ($current !== undefined && $new !== undefined) {
     if (hasElementChanged($current, $new)) {
-      parentEl.replaceChild(createNode($new, parentEl, childIndex), currentEl);
+      $new.target = createNode($new, parentEl);
+      parentEl.replaceChild($new.target, $current.target!);
     } else if (isRealElement($current) && isRealElement($new)) {
+      $new.target = $current.target;
+
       if (isTagElement($current)) {
-        updateAttributes($current, $new, currentEl as HTMLElement);
+        updateAttributes($current, $new, $current.target! as HTMLElement);
       }
 
       if (isComponentElement($new)) {
-        renderWithVirtual(parentEl, childIndex, getActualPrevElement($current.children[0]), $new.children[0]);
+        renderWithVirtual(parentEl, getActualPrevElement($current.children[0]), $new.children[0]);
       } else {
-        renderChildren($current, $new, currentEl as HTMLElement);
+        renderChildren($current, $new, $current.target! as HTMLElement);
       }
     }
   }
 }
 
-function initComponentElement($element: VirtualElementComponent, parentEl: HTMLElement, childIndex: number) {
+function initComponentElement($element: VirtualElementComponent, parentEl: HTMLElement) {
   $element.componentInstance.onUpdate = ($previous: VirtualElementComponent, $updated: VirtualElementComponent) => {
-    renderWithVirtual(parentEl, childIndex, $previous, $updated);
+    renderWithVirtual(parentEl, $previous, $updated);
   };
 
   return $element.children.length ? $element : $element.componentInstance.render();
@@ -62,11 +63,16 @@ function initComponentElement($element: VirtualElementComponent, parentEl: HTMLE
 
 // Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
 function getActualPrevElement($element: VirtualElement): VirtualElement {
-  return isComponentElement($element) ? $element.componentInstance.$prevElement : $element;
+  if (isComponentElement($element)) {
+    $element.componentInstance.$prevElement.target = $element.target;
+    return $element.componentInstance.$prevElement;
+  }
+
+  return $element;
 }
 
 // TODO Support `null` return value for empty elements
-function createNode($element: VirtualElement, parentEl: HTMLElement, childIndex: number): Node {
+function createNode($element: VirtualElement, parentEl: HTMLElement): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');
   }
@@ -76,8 +82,10 @@ function createNode($element: VirtualElement, parentEl: HTMLElement, childIndex:
   }
 
   if (isComponentElement($element)) {
-    $element = initComponentElement($element, parentEl, childIndex);
-    return createNode($element.children[0] as VirtualElement, parentEl, childIndex);
+    $element = initComponentElement($element, parentEl);
+    const target = createNode($element.children[0] as VirtualElement, parentEl);
+    $element.children[0].target = target;
+    return target;
   }
 
   const { tag, props, children = [] } = $element;
@@ -89,8 +97,8 @@ function createNode($element: VirtualElement, parentEl: HTMLElement, childIndex:
     });
   }
 
-  children.forEach(($child, i) => {
-    renderWithVirtual(element, i, undefined, $child);
+  children.forEach(($child) => {
+    renderWithVirtual(element, undefined, $child);
   });
 
   return element;
@@ -106,7 +114,6 @@ function renderChildren($current: VirtualRealElement, $new: VirtualRealElement, 
 
     renderWithVirtual(
       currentEl,
-      i,
       $currentChild,
       isRealElement($new) ? $new.children[i] : { type: VirtualElementTypesEnum.Empty },
     );
