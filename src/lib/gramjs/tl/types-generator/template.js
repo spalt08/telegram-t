@@ -87,7 +87,7 @@ ${indent}};`.trim())
         let resType
 
         if (typeof type === 'string' && isTlType) {
-            resType = `Type${type}`
+            resType = renderTypeName(type)
         } else {
             resType = type
         }
@@ -97,6 +97,10 @@ ${indent}};`.trim())
         }
 
         return resType
+    }
+
+    function renderTypeName(typeName) {
+        return typeName.includes('.') ? typeName.replace('.', '.Type') : `Type${typeName}`
     }
 
     function upperFirst(str) {
