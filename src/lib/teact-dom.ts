@@ -117,27 +117,13 @@ function updateAttributes($current: VirtualElement, $new: VirtualElement, elemen
   });
 
   newKeys.forEach((key) => {
-    if (hasAttribute(element, key)) {
-      if ($current.props[key] !== $new.props[key]) {
-        removeAttribute(element, key, $current.props[key]);
-      }
+    if (!$current.props.hasOwnProperty(key)) {
+      addAttribute(element, key, $new.props[key]);
+    } else if ($current.props[key] !== $new.props[key]) {
+      removeAttribute(element, key, $current.props[key]);
+      addAttribute(element, key, $new.props[key]);
     }
-
-    addAttribute(element, key, $new.props[key]);
   });
-}
-
-function hasAttribute(element: HTMLElement, key: string) {
-  if (key === 'className') {
-    return element.className !== undefined && element.className !== '';
-  } else if (key === 'className') {
-    return (element as HTMLInputElement).value !== undefined && (element as HTMLInputElement).value !== '';
-  } else if (key.startsWith('on')) {
-    // There is no way to check event listener, so there will be some redundant removes, but it is fine.
-    return true;
-  } else {
-    return element.hasAttribute(key);
-  }
 }
 
 function addAttribute(element: HTMLElement, key: string, value: any) {
