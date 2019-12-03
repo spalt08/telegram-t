@@ -2,12 +2,12 @@
  * Base class for all Remote Procedure Call errors.
  */
 class RPCError extends Error {
-    constructor(request, message, code = null) {
+    constructor(message,request, code = null) {
         super(
             'RPCError {0}: {1}{2}'
                 .replace('{0}', code)
                 .replace('{1}', message)
-                .replace('{2}', RPCError._fmtRequest(request)),
+                .replace('{2}', RPCError._fmtRequest(request))
         )
         this.code = code
         this.message = message
@@ -24,7 +24,7 @@ class RPCError extends Error {
  */
 class InvalidDCError extends RPCError {
     constructor(request, message, code) {
-        super(request, message, code)
+        super( message,request, code)
         this.code = code || 303
         this.message = message || 'ERROR_SEE_OTHER'
     }
