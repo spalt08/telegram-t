@@ -1,13 +1,10 @@
-import { GramJsApi, gramJsApi, MTProto } from '../../lib/gramjs';
+import { Api as GramJs } from '../../lib/gramjs';
 import { OnApiUpdate } from './types';
 
 import { buildApiMessage, buildApiMessageFromShort, buildApiMessageFromShortChat } from './builders/messages';
 import { getApiChatIdFromMtpPeer } from './builders/chats';
 import { buildApiUserStatus } from './builders/users';
 import localDb from './localDb';
-import { UNSUPPORTED_RESPONSE } from './utils';
-
-const { constructors: ctors, requests } = gramJsApi;
 
 let onUpdate: OnApiUpdate;
 
@@ -15,23 +12,21 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<GramJsApi.AnyRequest>) {
+export function onGramJsUpdate(update: AnyLiteral, originRequest?: GramJs.AnyRequest) {
   if (
-    update instanceof ctors.UpdateNewMessage
-    || update instanceof ctors.UpdateShortChatMessage
-    || update instanceof ctors.UpdateShortMessage
+    update instanceof GramJs.UpdateNewMessage
+    || update instanceof GramJs.UpdateShortChatMessage
+    || update instanceof GramJs.UpdateShortMessage
     // TODO UpdateNewChannelMessage
   ) {
     let message;
 
-    if (update instanceof ctors.UpdateNewMessage) {
+    if (update instanceof GramJs.UpdateNewMessage) {
       message = buildApiMessage(update.message);
-    } else if (update instanceof ctors.UpdateShortChatMessage) {
+    } else if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);
-    } else if (update instanceof ctors.UpdateShortMessage) {
-      message = buildApiMessageFromShort(update);
     } else {
-      throw new Error(UNSUPPORTED_RESPONSE);
+      message = buildApiMessageFromShort(update);
     }
 
     onUpdate({
@@ -49,14 +44,14 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<
       },
     });
   } else if (
-    (originRequest instanceof requests.messages.SendMessageRequest)
+    (originRequest instanceof GramJs.messages.SendMessage)
     && (
-      update instanceof ctors.UpdateMessageID
-      || update instanceof ctors.UpdateShortSentMessage
+      update instanceof GramJs.UpdateMessageID
+      || update instanceof GramJs.UpdateShortSentMessage
     )
   ) {
     const { randomId } = originRequest;
-    const localMessage = localDb.localMessages[randomId!.toString()];
+    const localMessage = localDb.localMessages[randomId.toString()];
     if (!localMessage) {
       throw new Error('Local message not found');
     }
@@ -71,7 +66,7 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<
         sending_state: undefined,
       },
     });
-  } else if (update instanceof ctors.UpdateReadHistoryInbox) {
+  } else if (update instanceof GramJs.UpdateReadHistoryInbox) {
     onUpdate({
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer(update.peer),
@@ -80,7 +75,7 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<
         unread_count: update.stillUnreadCount,
       },
     });
-  } else if (update instanceof ctors.UpdateReadHistoryOutbox) {
+  } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
     onUpdate({
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer(update.peer),
@@ -88,24 +83,24 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<
         last_read_outbox_message_id: update.maxId,
       },
     });
-  } else if (update instanceof ctors.UpdateReadChannelInbox) {
+  } else if (update instanceof GramJs.UpdateReadChannelInbox) {
     onUpdate({
       '@type': 'updateChat',
-      id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as MTProto.Peer),
+      id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.TypePeer),
       chat: {
         last_read_inbox_message_id: update.maxId,
         unread_count: update.stillUnreadCount,
       },
     });
-  } else if (update instanceof ctors.UpdateReadChannelOutbox) {
+  } else if (update instanceof GramJs.UpdateReadChannelOutbox) {
     onUpdate({
       '@type': 'updateChat',
-      id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as MTProto.Peer),
+      id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.TypePeer),
       chat: {
         last_read_outbox_message_id: update.maxId,
       },
     });
-  } else if (update instanceof ctors.UpdateUserStatus) {
+  } else if (update instanceof GramJs.UpdateUserStatus) {
     onUpdate({
       '@type': 'updateUser',
       id: update.userId,
@@ -114,7 +109,7 @@ export function onGramJsUpdate(update: AnyLiteral, originRequest?: InstanceType<
       },
     });
     // TODO @gramjs This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
-    // } else if (update instanceof ctors.UpdateDialogPinned) {
+    // } else if (update instanceof GramJs.UpdateDialogPinned) {
     //   onUpdate({
     //     '@type': 'updateChat',
     //     id: getApiChatIdFromMtpPeer(update.peer),

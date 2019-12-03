@@ -1,9 +1,9 @@
-import { MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiChat } from '../../types';
 import { isPeerChat, isPeerUser } from './peers';
 import { buildApiPhotoLocations } from './common';
 
-export function buildApiChatFromDialog(dialog: MTProto.dialog, peerEntity: MTProto.user | MTProto.chat): ApiChat {
+export function buildApiChatFromDialog(dialog: GramJs.Dialog, peerEntity: GramJs.User | GramJs.Chat): ApiChat {
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
@@ -20,7 +20,7 @@ export function buildApiChatFromDialog(dialog: MTProto.dialog, peerEntity: MTPro
   };
 }
 
-export function getApiChatIdFromMtpPeer(peer: MTProto.Peer) {
+export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer) {
   if (isPeerUser(peer)) {
     return peer.userId;
   } else if (isPeerChat(peer)) {
@@ -30,7 +30,7 @@ export function getApiChatIdFromMtpPeer(peer: MTProto.Peer) {
   }
 }
 
-export function getApiChatTypeFromMtpPeer(peer: MTProto.Peer) {
+export function getApiChatTypeFromMtpPeer(peer: GramJs.TypePeer) {
   if (isPeerUser(peer)) {
     return 'chatTypePrivate';
   } else if (isPeerChat(peer)) {
@@ -41,7 +41,7 @@ export function getApiChatTypeFromMtpPeer(peer: MTProto.Peer) {
   }
 }
 
-export function getPeerKey(peer: MTProto.Peer) {
+export function getPeerKey(peer: GramJs.TypePeer) {
   if (isPeerUser(peer)) {
     return `user${peer.userId}`;
   } else if (isPeerChat(peer)) {
@@ -51,14 +51,14 @@ export function getPeerKey(peer: MTProto.Peer) {
   }
 }
 
-export function getApiChatTitleFromMtpPeer(peer: MTProto.Peer, peerEntity: MTProto.user | MTProto.chat) {
+export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: GramJs.User | GramJs.Chat) {
   if (isPeerUser(peer)) {
-    return getUserName(peerEntity as MTProto.user);
+    return getUserName(peerEntity as GramJs.User);
   } else {
-    return (peerEntity as MTProto.chat).title;
+    return (peerEntity as GramJs.Chat).title;
   }
 }
 
-function getUserName(user: MTProto.user) {
+function getUserName(user: GramJs.User) {
   return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
 }

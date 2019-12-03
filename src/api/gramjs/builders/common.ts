@@ -1,7 +1,7 @@
-import { MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiFileLocation } from '../../types';
 
-export function buildApiPhotoLocations(entity: MTProto.user | MTProto.chat): {
+export function buildApiPhotoLocations(entity: GramJs.User | GramJs.Chat): {
   small: ApiFileLocation;
   big: ApiFileLocation;
 } | undefined {
@@ -9,7 +9,7 @@ export function buildApiPhotoLocations(entity: MTProto.user | MTProto.chat): {
     return undefined;
   }
 
-  const { photoSmall, photoBig, dcId } = entity.photo as (MTProto.userProfilePhoto | MTProto.chatPhoto);
+  const { photoSmall, photoBig, dcId } = entity.photo as (GramJs.UserProfilePhoto | GramJs.ChatPhoto);
 
   return {
     small: {

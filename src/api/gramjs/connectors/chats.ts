@@ -1,4 +1,4 @@
-import { gramJsApi, MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
 import { OnApiUpdate } from '../types';
 import { invokeRequest } from '../client';
@@ -9,8 +9,6 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { loadAvatar } from './files';
 import localDb from '../localDb';
 import { UNSUPPORTED_RESPONSE } from '../utils';
-
-const { constructors: ctors, requests } = gramJsApi;
 
 let onUpdate: OnApiUpdate;
 
@@ -27,13 +25,13 @@ export async function fetchChats(
     offsetDate?: number;
   },
 ): Promise<{ chat_ids: number[] } | null> {
-  const result = await invokeRequest(new requests.messages.GetDialogsRequest({
-    offsetPeer: new ctors.InputPeerEmpty({}),
+  const result = await invokeRequest(new GramJs.messages.GetDialogs({
+    offsetPeer: new GramJs.InputPeerEmpty({}),
     limit,
     offsetDate,
   }));
 
-  if (!result || !(result instanceof ctors.messages.DialogsSlice) || !result.dialogs.length) {
+  if (!result || !(result instanceof GramJs.messages.DialogsSlice) || !result.dialogs.length) {
     throw new Error(UNSUPPORTED_RESPONSE);
   }
 
@@ -43,7 +41,7 @@ export async function fetchChats(
   const peersByKey = preparePeers(result);
   const chats = result.dialogs.map((dialog) => {
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
-    const chat = buildApiChatFromDialog(dialog as MTProto.dialog, peerEntity);
+    const chat = buildApiChatFromDialog(dialog as GramJs.Dialog, peerEntity);
     chat.last_message = lastMessagesByChatId[chat.id];
     return chat;
   });
@@ -53,7 +51,7 @@ export async function fetchChats(
     chats,
   });
 
-  const users = (result.users as MTProto.user[]).map(buildApiUser);
+  const users = (result.users as GramJs.User[]).map(buildApiUser);
   onUpdate({
     '@type': 'users',
     users,
@@ -68,54 +66,54 @@ export async function fetchChats(
   };
 }
 
-function preparePeers(result: MTProto.messages_dialogsSlice) {
-  const store: Record<string, MTProto.chat | MTProto.user> = {};
+function preparePeers(result: GramJs.messages.DialogsSlice) {
+  const store: Record<string, GramJs.Chat | GramJs.User> = {};
 
   result.chats.forEach((chat) => {
-    store[`chat${chat.id}`] = chat as MTProto.chat;
+    store[`chat${chat.id}`] = chat as GramJs.Chat;
   });
 
   result.users.forEach((user) => {
-    store[`user${user.id}`] = user as MTProto.user;
+    store[`user${user.id}`] = user as GramJs.User;
   });
 
   return store;
 }
 
-function updateLocalDb(result: MTProto.messages_dialogsSlice) {
+function updateLocalDb(result: GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
-    localDb.users[user.id] = user as MTProto.user;
+    localDb.users[user.id] = user as GramJs.User;
   });
 
   result.chats.forEach((chat) => {
-    localDb.chats[chat.id] = chat as MTProto.chat | MTProto.channel;
+    localDb.chats[chat.id] = chat as GramJs.Chat | GramJs.Channel;
   });
 }
 
-function loadAvatars(result: MTProto.messages_dialogsSlice) {
+function loadAvatars(result: GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
-    loadAvatar(user as MTProto.user).then((dataUri) => {
+    loadAvatar(user as GramJs.User).then((dataUri) => {
       if (!dataUri) {
         return;
       }
 
       onUpdate({
         '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as MTProto.Peer),
+        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as GramJs.TypePeer),
         data_uri: dataUri,
       });
     });
   });
 
   result.chats.forEach((chat) => {
-    loadAvatar(chat as MTProto.chat).then((dataUri) => {
+    loadAvatar(chat as GramJs.Chat).then((dataUri) => {
       if (!dataUri) {
         return;
       }
 
       onUpdate({
         '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id } as MTProto.Peer),
+        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id } as GramJs.TypePeer),
         data_uri: dataUri,
       });
     });

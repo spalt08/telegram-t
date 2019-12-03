@@ -1,4 +1,4 @@
-import { gramJsApi, MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
 import { ApiMessage } from '../../types';
 import { OnApiUpdate } from '../types';
@@ -12,8 +12,6 @@ import { loadMessageMedia } from './files';
 import { UNSUPPORTED_RESPONSE } from '../utils';
 import { onGramJsUpdate } from '../onGramJsUpdate';
 
-const { constructors: ctors, requests } = gramJsApi;
-
 let onUpdate: OnApiUpdate;
 
 export function init(_onUpdate: OnApiUpdate) {
@@ -25,7 +23,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   fromMessageId: number;
   limit: number;
 }): Promise<{ messages: ApiMessage[] } | null> {
-  const result = await invokeRequest(new requests.messages.GetHistoryRequest({
+  const result = await invokeRequest(new GramJs.messages.GetHistory({
     offsetId: fromMessageId,
     limit,
     peer: buildInputPeer(chatId),
@@ -33,13 +31,13 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 
   if (
     !result
-    || !(result instanceof ctors.messages.MessagesSlice || result instanceof ctors.messages.ChannelMessages)
+    || !(result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages)
     || !result.messages
   ) {
     throw new Error(UNSUPPORTED_RESPONSE);
   }
 
-  (result.users as MTProto.user[]).forEach((mtpUser) => {
+  (result.users as GramJs.User[]).forEach((mtpUser) => {
     const user = buildApiUser(mtpUser);
 
     onUpdate({
@@ -49,7 +47,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     });
   });
 
-  const messages = (result.messages as MTProto.message[])
+  const messages = (result.messages as GramJs.Message[])
     .map((mtpMessage) => {
       loadImage(mtpMessage);
       return buildApiMessage(mtpMessage);
@@ -60,7 +58,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   };
 }
 
-export function sendMessage(chatId: number, text: string) {
+export async function sendMessage(chatId: number, text: string) {
   const localMessage = buildLocalMessage(chatId, text);
   onUpdate({
     '@type': 'updateMessage',
@@ -79,25 +77,25 @@ export function sendMessage(chatId: number, text: string) {
 
   const randomId = generateRandomBigInt();
   localDb.localMessages[randomId.toString()] = localMessage;
-  const request = new requests.messages.SendMessageRequest({
+  const request = new GramJs.messages.SendMessage({
     message: text,
     peer: buildInputPeer(chatId),
     randomId,
   });
-  const result = invokeRequest(request);
+  const result = await invokeRequest(request);
 
-  if (result instanceof ctors.UpdatesTooLong) {
+  if (result instanceof GramJs.UpdatesTooLong) {
     throw new Error(UNSUPPORTED_RESPONSE);
   }
 
-  if (result instanceof ctors.Updates) {
+  if (result instanceof GramJs.Updates) {
     result.updates.forEach((update) => onGramJsUpdate(update, request));
   } else {
     onGramJsUpdate(result, request);
   }
 }
 
-function loadImage(mtpMessage: MTProto.message) {
+function loadImage(mtpMessage: GramJs.Message) {
   if (!isMessageWithImage(mtpMessage)) {
     return;
   }
@@ -115,20 +113,20 @@ function loadImage(mtpMessage: MTProto.message) {
   });
 }
 
-function isMessageWithImage(message: MTProto.message) {
+function isMessageWithImage(message: GramJs.Message) {
   const { media } = message;
 
   if (!media) {
     return false;
   }
 
-  if (media instanceof ctors.MessageMediaPhoto) {
+  if (media instanceof GramJs.MessageMediaPhoto) {
     return true;
   }
 
-  if (media instanceof ctors.MessageMediaDocument && media.document) {
+  if (media instanceof GramJs.MessageMediaDocument && media.document) {
     return ('attributes' in media.document) && media.document.attributes
-      .some((attr: any) => attr instanceof ctors.DocumentAttributeSticker);
+      .some((attr: any) => attr instanceof GramJs.DocumentAttributeSticker);
   }
 
   return false;

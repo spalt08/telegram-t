@@ -1,9 +1,9 @@
 import { ApiMessage } from '../types';
-import { MTProto } from '../../lib/gramjs';
+import { Api as GramJs } from '../../lib/gramjs';
 
 export default <{
-  chats: Record<number, MTProto.chat | MTProto.channel>;
-  users: Record<number, MTProto.user>;
+  chats: Record<number, GramJs.Chat | GramJs.Channel>;
+  users: Record<number, GramJs.User>;
   localMessages: Record<string, ApiMessage>;
   // TODO Replace with persistent storage for all downloads.
   avatarRequests: Record<number, Promise<string | null>>;

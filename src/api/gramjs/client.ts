@@ -1,6 +1,4 @@
-import {
-  TelegramClient, session, GramJsApi, MTProto,
-} from '../../lib/gramjs';
+import { TelegramClient, session, Api as GramJs } from '../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { DEBUG } from '../../config';
@@ -56,26 +54,26 @@ export async function init(sessionId: string) {
   }
 }
 
-export async function invokeRequest<T extends InstanceType<GramJsApi.AnyRequest>>(request: T) {
+export async function invokeRequest<T extends GramJs.AnyRequest>(request: T) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE ${request.className}`);
+    console.log(`[GramJs/client] INVOKE ${request}`);
   }
 
   const result = await client.invoke(request);
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
+    console.log(`[GramJs/client] INVOKE RESPONSE ${request}`, result);
   }
 
   return result;
 }
 
-export function downloadAvatar(entity: MTProto.chat | MTProto.user, isBig = false) {
+export function downloadAvatar(entity: GramJs.Chat | GramJs.User, isBig = false) {
   return client.downloadProfilePhoto(entity, isBig);
 }
 
-export function downloadMessageImage(message: MTProto.message) {
+export function downloadMessageImage(message: GramJs.Message) {
   return client.downloadMedia(message, { sizeType: 'x' });
 }

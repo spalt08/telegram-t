@@ -1,10 +1,8 @@
-import { gramJsApi, MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus } from '../../types';
 import { buildApiPhotoLocations } from './common';
 
-const ctors = gramJsApi.constructors;
-
-export function buildApiUser(mtpUser: MTProto.user): ApiUser {
+export function buildApiUser(mtpUser: GramJs.User): ApiUser {
   return {
     id: mtpUser.id,
     type: {
@@ -20,20 +18,18 @@ export function buildApiUser(mtpUser: MTProto.user): ApiUser {
   };
 }
 
-export function buildApiUserStatus(mtpStatus?: MTProto.UserStatus): ApiUserStatus | undefined {
-  if (!mtpStatus || mtpStatus instanceof ctors.UserStatusEmpty) {
+export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus | undefined {
+  if (!mtpStatus || mtpStatus instanceof GramJs.UserStatusEmpty) {
     return { '@type': 'userStatusEmpty' };
-  } else if (mtpStatus instanceof ctors.UserStatusOnline) {
+  } else if (mtpStatus instanceof GramJs.UserStatusOnline) {
     return { '@type': 'userStatusOnline' };
-  } else if (mtpStatus instanceof ctors.UserStatusOffline) {
+  } else if (mtpStatus instanceof GramJs.UserStatusOffline) {
     return { '@type': 'userStatusOffline', was_online: mtpStatus.wasOnline };
-  } else if (mtpStatus instanceof ctors.UserStatusRecently) {
+  } else if (mtpStatus instanceof GramJs.UserStatusRecently) {
     return { '@type': 'userStatusRecently' };
-  } else if (mtpStatus instanceof ctors.UserStatusLastWeek) {
+  } else if (mtpStatus instanceof GramJs.UserStatusLastWeek) {
     return { '@type': 'userStatusLastWeek' };
-  } else if (mtpStatus instanceof ctors.UserStatusLastMonth) {
+  } else {
     return { '@type': 'userStatusLastMonth' };
   }
-
-  return undefined;
 }

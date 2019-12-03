@@ -1,4 +1,4 @@
-import { MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 import { downloadAvatar, downloadMessageImage } from '../client';
 import localDb from '../localDb';
 import { bytesToDataUri } from '../builders/common';
@@ -6,7 +6,7 @@ import { bytesToDataUri } from '../builders/common';
 export function init() {
 }
 
-export function loadAvatar(entity: MTProto.user | MTProto.chat): Promise<string | null> {
+export function loadAvatar(entity: GramJs.User | GramJs.Chat): Promise<string | null> {
   const entityId = entity.id;
 
   if (!localDb.avatarRequests[entityId]) {
@@ -30,7 +30,7 @@ export function loadAvatar(entity: MTProto.user | MTProto.chat): Promise<string 
   return localDb.avatarRequests[entityId];
 }
 
-export function loadMessageMedia(message: MTProto.message): Promise<string | null> {
+export function loadMessageMedia(message: GramJs.Message): Promise<string | null> {
   const messageId = message.id;
 
   if (!localDb.mediaRequests[messageId]) {

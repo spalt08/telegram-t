@@ -1,4 +1,4 @@
-import { gramJsApi, MTProto } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 import {
   ApiMessage, ApiMessageForwardInfo, ApiPhoto, ApiPhotoCachedSize, ApiPhotoSize, ApiSticker,
@@ -8,15 +8,13 @@ import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
 import { bytesToDataUri } from './common';
 
-const ctors = gramJsApi.constructors;
-
 // TODO Maybe we do not need it.
 const DEFAULT_USER_ID = 0;
 
-export function buildApiMessage(mtpMessage: MTProto.Message): ApiMessage {
+export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   if (
-    !(mtpMessage instanceof ctors.Message)
-    && !(mtpMessage instanceof ctors.MessageService)) {
+    !(mtpMessage instanceof GramJs.Message)
+    && !(mtpMessage instanceof GramJs.MessageService)) {
     throw new Error('Not supported');
   }
 
@@ -29,9 +27,9 @@ export function buildApiMessage(mtpMessage: MTProto.Message): ApiMessage {
 }
 
 export function buildApiMessageFromShort(
-  mtpMessage: MTProto.updateShortMessage,
+  mtpMessage: GramJs.UpdateShortMessage,
 ): ApiMessage {
-  const chatId = getApiChatIdFromMtpPeer({ userId: mtpMessage.userId } as MTProto.Peer);
+  const chatId = getApiChatIdFromMtpPeer({ userId: mtpMessage.userId } as GramJs.TypePeer);
 
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
@@ -41,16 +39,16 @@ export function buildApiMessageFromShort(
 }
 
 export function buildApiMessageFromShortChat(
-  mtpMessage: MTProto.updateShortChatMessage,
+  mtpMessage: GramJs.UpdateShortChatMessage,
 ): ApiMessage {
-  const chatId = getApiChatIdFromMtpPeer({ chatId: mtpMessage.chatId } as MTProto.Peer);
+  const chatId = getApiChatIdFromMtpPeer({ chatId: mtpMessage.chatId } as GramJs.TypePeer);
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
 export function buildApiMessageWithChatId(
   chatId: number,
-  mtpMessage: Pick<MTProto.message, (
+  mtpMessage: Pick<Partial<GramJs.Message>, (
     'id' | 'out' | 'message' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media'
   )>,
 ): ApiMessage {
@@ -81,7 +79,7 @@ export function buildApiMessageWithChatId(
   };
 }
 
-function buildApiMessageForwardInfo(fwdFrom: MTProto.messageFwdHeader): ApiMessageForwardInfo {
+function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessageForwardInfo {
   return {
     '@type': 'messageForwardInfo',
     from_chat_id: fwdFrom.fromId,
@@ -95,18 +93,18 @@ function buildApiMessageForwardInfo(fwdFrom: MTProto.messageFwdHeader): ApiMessa
   };
 }
 
-function buildSticker(media: MTProto.MessageMedia): ApiSticker | null {
+function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
   if (
-    !(media instanceof ctors.MessageMediaDocument)
+    !(media instanceof GramJs.MessageMediaDocument)
     || !media.document
-    || !(media.document instanceof ctors.Document)
+    || !(media.document instanceof GramJs.Document)
   ) {
     return null;
   }
 
   const stickerAttribute = media.document.attributes
-    .find((attr: any): attr is MTProto.documentAttributeSticker => (
-      attr instanceof ctors.DocumentAttributeSticker
+    .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
+      attr instanceof GramJs.DocumentAttributeSticker
     ));
 
   if (!stickerAttribute) {
@@ -115,8 +113,8 @@ function buildSticker(media: MTProto.MessageMedia): ApiSticker | null {
 
   const emoji = stickerAttribute.alt;
   const isAnimated = media.document.mimeType === 'application/x-tgsticker';
-  const thumb = media.document.thumbs && media.document.thumbs.find((s: any) => s instanceof ctors.PhotoCachedSize);
-  const thumbnail = thumb && buildApiPhotoCachedSize(thumb as MTProto.photoCachedSize);
+  const thumb = media.document.thumbs && media.document.thumbs.find((s: any) => s instanceof GramJs.PhotoCachedSize);
+  const thumbnail = thumb && buildApiPhotoCachedSize(thumb as GramJs.PhotoCachedSize);
   const { width, height } = thumbnail || {};
 
   return {
@@ -129,21 +127,21 @@ function buildSticker(media: MTProto.MessageMedia): ApiSticker | null {
   };
 }
 
-function buildPhoto(media: MTProto.MessageMedia): ApiPhoto | null {
-  if (!(media instanceof ctors.MessageMediaPhoto) || !media.photo || !(media.photo instanceof ctors.Photo)) {
+function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | null {
+  if (!(media instanceof GramJs.MessageMediaPhoto) || !media.photo || !(media.photo instanceof GramJs.Photo)) {
     return null;
   }
 
   const hasStickers = Boolean(media.photo.hasStickers);
-  const thumb = media.photo.sizes.find((s: any) => s instanceof ctors.PhotoStrippedSize);
+  const thumb = media.photo.sizes.find((s: any) => s instanceof GramJs.PhotoStrippedSize);
   const sizes = media.photo.sizes
-    .filter((s: any): s is MTProto.photoSize => s instanceof ctors.PhotoSize)
+    .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
     .map(buildApiPhotoSize);
   const mSize = sizes.find((s: any) => s.type === 'm');
   const { width, height } = mSize as ApiPhotoSize;
   const minithumbnail: ApiPhoto['minithumbnail'] = thumb && {
     '@type': 'minithumbnail',
-    data: bytesToDataUri(strippedPhotoToJpg((thumb as MTProto.photoStrippedSize).bytes as Buffer), true),
+    data: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer), true),
     width,
     height,
   };
@@ -156,7 +154,7 @@ function buildPhoto(media: MTProto.MessageMedia): ApiPhoto | null {
   };
 }
 
-function buildApiPhotoCachedSize(photoSize: MTProto.photoCachedSize): ApiPhotoCachedSize {
+function buildApiPhotoCachedSize(photoSize: GramJs.PhotoCachedSize): ApiPhotoCachedSize {
   const {
     w, h, type, bytes,
   } = photoSize;
@@ -171,7 +169,7 @@ function buildApiPhotoCachedSize(photoSize: MTProto.photoCachedSize): ApiPhotoCa
   };
 }
 
-function buildApiPhotoSize(photoSize: MTProto.photoSize): ApiPhotoSize {
+function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   const { w, h, type } = photoSize;
 
   return {
