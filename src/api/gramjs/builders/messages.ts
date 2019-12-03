@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 import {
-  ApiMessage, ApiMessageForwardInfo, ApiPhoto, ApiPhotoCachedSize, ApiPhotoSize, ApiSticker,
+  ApiMessage, ApiMessageForwardInfo, ApiPhoto, ApiPhotoCachedSize, ApiPhotoSize, ApiSticker, ApiVideo, ApiDocument,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -10,6 +10,7 @@ import { bytesToDataUri } from './common';
 
 // TODO Maybe we do not need it.
 const DEFAULT_USER_ID = 0;
+const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   if (
@@ -54,12 +55,14 @@ export function buildApiMessageWithChatId(
 ): ApiMessage {
   const sticker = mtpMessage.media && buildSticker(mtpMessage.media);
   const photo = mtpMessage.media && buildPhoto(mtpMessage.media);
+  const video = mtpMessage.media && buildVideo(mtpMessage.media);
+  const document = mtpMessage.media && buildDocument(mtpMessage.media);
   const textContent = mtpMessage.message && {
-    '@type': 'formattedText' as 'formattedText',
+    '@type': 'formattedText' as const,
     text: mtpMessage.message,
   };
-  const caption = textContent && photo ? textContent : null;
-  const text = textContent && !photo ? textContent : null;
+  const caption = textContent && (photo || video) ? textContent : null;
+  const text = textContent && !document && !(photo || video) ? textContent : null;
 
   return {
     id: mtpMessage.id,
@@ -70,6 +73,8 @@ export function buildApiMessageWithChatId(
       ...(text && { text }),
       ...(sticker && { sticker }),
       ...(photo && { photo }),
+      ...(video && { video }),
+      ...(document && { document }),
       ...(caption && { caption }),
     },
     date: mtpMessage.date,
@@ -133,24 +138,37 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | null {
   }
 
   const hasStickers = Boolean(media.photo.hasStickers);
-  const thumb = media.photo.sizes.find((s: any) => s instanceof GramJs.PhotoStrippedSize);
   const sizes = media.photo.sizes
     .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
     .map(buildApiPhotoSize);
-  const mSize = sizes.find((s: any) => s.type === 'm');
-  const { width, height } = mSize as ApiPhotoSize;
-  const minithumbnail: ApiPhoto['minithumbnail'] = thumb && {
-    '@type': 'minithumbnail',
-    data: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer), true),
-    width,
-    height,
-  };
 
   return {
     '@type': 'photo',
     has_stickers: hasStickers,
-    minithumbnail,
+    minithumbnail: buildApiPhotoMiniThumbnail(media.photo.sizes),
     sizes,
+  };
+}
+
+function buildApiPhotoMiniThumbnail(sizes?: GramJs.TypePhotoSize[]): ApiPhoto['minithumbnail'] {
+  if (!sizes || !sizes.length) {
+    return undefined;
+  }
+
+  const thumb = sizes.find((s: any) => s instanceof GramJs.PhotoStrippedSize);
+
+  if (!thumb) {
+    return undefined;
+  }
+
+  const realSizes = sizes.filter((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
+  const { w: width, h: height } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
+
+  return {
+    '@type': 'minithumbnail',
+    data: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer), true),
+    width,
+    height,
   };
 }
 
@@ -177,6 +195,46 @@ function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
     width: w,
     height: h,
     type: type as ('m' | 'x' | 'y'),
+  };
+}
+
+function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | null {
+  if (
+    !(media instanceof GramJs.MessageMediaDocument)
+    || !(media.document instanceof GramJs.Document)
+    || !media.document.mimeType.startsWith('video')
+  ) {
+    return null;
+  }
+
+  const videoAttr = media.document.attributes
+    .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
+
+  return {
+    '@type': 'video',
+    duration: videoAttr && videoAttr.duration,
+    minithumbnail: buildApiPhotoMiniThumbnail(media.document.thumbs),
+  };
+}
+
+function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | null {
+  if (
+    !(media instanceof GramJs.MessageMediaDocument)
+    || !(media.document instanceof GramJs.Document)
+    || !media.document
+  ) {
+    return null;
+  }
+
+  const { size, mimeType } = media.document;
+  const docAttr = media.document.attributes
+    .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
+
+  return {
+    '@type': 'document',
+    size,
+    mimeType,
+    fileName: (docAttr && docAttr.fileName) || 'File',
   };
 }
 

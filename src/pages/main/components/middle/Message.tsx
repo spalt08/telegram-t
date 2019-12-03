@@ -6,16 +6,20 @@ import {
   ApiMessage,
   ApiPhoto,
   ApiSticker,
+  ApiVideo,
+  ApiDocument,
 } from '../../../../api/types';
 import { selectUser, selectChatMessage, selectMessageFileUrl } from '../../../../modules/selectors';
 import { isOwnMessage, getUserFullName } from '../../../../modules/helpers';
-import { getImageDimensions, getStickerDimensions } from '../../../../util/imageDimensions';
+import { getImageDimensions, getVideoDimensions, getStickerDimensions } from '../../../../util/imageDimensions';
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
 import { buildMessageContent } from './util/messages';
 import './Message.scss';
+import { formatMediaDuration } from '../../../../util/dateFormat';
+import { getDocumentInfo } from '../../../../util/documentInfo';
 
 type IProps = {
   message: ApiMessage;
@@ -36,11 +40,14 @@ const Message: FC<IProps> = (
   const {
     text,
     photo,
+    video,
+    document,
     sticker,
     className: contentClassName,
   } = buildMessageContent(message);
   const isText = contentClassName && contentClassName.includes('text');
   const isSticker = contentClassName && contentClassName.includes('sticker');
+  const isForwarded = Boolean(message.forward_info);
 
   function renderSenderName(user?: ApiUser) {
     if (
@@ -56,14 +63,9 @@ const Message: FC<IProps> = (
   }
 
   function renderMessageContent() {
-    const isForwarded = Boolean(message.forward_info);
-
     const classNames = ['content-inner'];
     if (isForwarded) {
       classNames.push('forwarded-message');
-    }
-    if (replyMessage) {
-      classNames.push('is-reply');
     }
 
     return (
@@ -71,6 +73,8 @@ const Message: FC<IProps> = (
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
         {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, fileDataUri)}
+        {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
+        {document && renderMessageDocument(document)}
         {sticker && renderMessageSticker(sticker, fileDataUri)}
         {text && (
           <p>{text}</p>
@@ -79,12 +83,22 @@ const Message: FC<IProps> = (
     );
   }
 
+  let style = '';
+  if (photo || video) {
+    const { width } = photo
+      ? getImageDimensions(photo, isOwnMessage(message), isForwarded)
+      : (video && getVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
+
+    style = `width: ${width}px`;
+  }
+
   return (
     <div className={className}>
       {showAvatar && sender && (
         <Avatar size="small" user={sender} />
       )}
-      <div className={contentClassName}>
+      {/* eslint-disable-next-line */}
+      <div className={contentClassName} style={style}>
         {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
         )}
@@ -110,7 +124,7 @@ function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarde
 
   if (dataUri) {
     return (
-      <div className="photo-content">
+      <div className="media-content">
         <img src={dataUri} width={width} height={height} alt="" />
       </div>
     );
@@ -122,10 +136,50 @@ function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarde
   }
 
   return (
-    <div className="photo-content message-photo-thumbnail not-implemented">
+    <div className="media-content message-media-thumbnail not-implemented">
       <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
-      <div className="message-photo-loading">
+      <div className="message-media-loading">
         <Spinner color="white" />
+      </div>
+    </div>
+  );
+}
+
+function renderMessageVideo(video: ApiVideo, fromOwnMessage: boolean, isForwarded: boolean) {
+  const { width, height } = getVideoDimensions(video, fromOwnMessage, isForwarded);
+
+  const { minithumbnail, duration } = video;
+  if (!minithumbnail) {
+    return null;
+  }
+
+  return (
+    <div className="media-content message-media-thumbnail not-implemented">
+      <img src={`data:image/jpeg;base64, ${minithumbnail.data}`} width={width} height={height} alt="" />
+      <div className="message-media-loading">
+        <div className="message-media-play-button">
+          <i className="icon-large-play" />
+        </div>
+      </div>
+      <div className="message-media-duration">{formatMediaDuration(duration)}</div>
+    </div>
+  );
+}
+
+function renderMessageDocument(document: ApiDocument) {
+  const { size, extension, color } = getDocumentInfo(document);
+  const { fileName } = document;
+
+  return (
+    <div className="document-content not-implemented">
+      <div className={`document-icon ${color}`}>
+        {extension.length <= 4 && (
+          <span className="document-ext">{extension}</span>
+        )}
+      </div>
+      <div className="document-info">
+        <div className="document-filename">{fileName}</div>
+        <div className="document-size">{size}</div>
       </div>
     </div>
   );
@@ -136,7 +190,7 @@ function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
   const { width, height } = getStickerDimensions(sticker);
 
   return dataUri || thumbnail ? (
-    <div className="photo-content">
+    <div className="media-content">
       <img src={dataUri || (thumbnail && thumbnail.dataUri)} width={width} height={height} alt="" />
     </div>
   ) : (

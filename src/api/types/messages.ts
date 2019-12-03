@@ -2,7 +2,7 @@ import { ApiFile } from './files';
 
 export interface ApiPhotoSize {
   '@type': 'photoSize';
-  type: 'm' | 'x' | 'y';
+  type: 's' | 'm' | 'x' | 'y';
   width: number;
   height: number;
   // TdLib only.
@@ -17,15 +17,17 @@ export interface ApiPhotoCachedSize {
   height: number;
 }
 
+export interface ApiMiniThumbnail {
+  '@type': 'minithumbnail';
+  data: string;
+  height: number;
+  width: number;
+}
+
 export interface ApiPhoto {
   '@type': 'photo';
   has_stickers: boolean;
-  minithumbnail?: {
-    '@type': 'minithumbnail';
-    data: string;
-    height: number;
-    width: number;
-  };
+  minithumbnail?: ApiMiniThumbnail;
   sizes: ApiPhotoSize[];
 }
 
@@ -38,6 +40,19 @@ export interface ApiSticker {
   thumbnail?: ApiPhotoCachedSize;
   // TdLib only.
   sticker?: ApiPhotoSize;
+}
+
+export interface ApiVideo {
+  '@type': 'video';
+  duration: number;
+  minithumbnail?: ApiMiniThumbnail;
+}
+
+export interface ApiDocument {
+  '@type': 'document';
+  fileName: string;
+  size: number;
+  mimeType: string;
 }
 
 export interface ApiMessageForwardInfo {
@@ -63,6 +78,8 @@ export interface ApiMessage {
       text: string;
     };
     photo?: ApiPhoto;
+    video?: ApiVideo;
+    document?: ApiDocument;
     caption?: {
       '@type': 'formattedText';
       text: string;

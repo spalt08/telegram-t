@@ -4,11 +4,16 @@ import {
   getMessageText,
   getMessagePhoto,
   getMessageSticker,
+  getMessageVideo,
+  getMessageDocument,
 } from '../../../../../modules/helpers';
 import {
   ApiMessage,
   ApiPhoto,
   ApiSticker,
+  ApiVideo,
+  ApiDocument,
+  ApiMiniThumbnail,
 } from '../../../../../api/types';
 
 import {
@@ -27,7 +32,10 @@ export type MessageDateGroup = {
 export interface MessageContent {
   text?: TextPart | TextPart[];
   photo?: ApiPhoto;
+  video?: ApiVideo;
+  document?: ApiDocument;
   sticker?: ApiSticker;
+  replyThumbnail?: ApiMiniThumbnail;
   className?: string;
 }
 
@@ -85,15 +93,18 @@ export function groupMessages(messages: ApiMessage[]) {
 }
 
 interface BuildMessageContentOptions {
-  noEnhancedText?: boolean;
+  isReply?: boolean;
 }
 
 export function buildMessageContent(message: ApiMessage, options: BuildMessageContentOptions = {}): MessageContent {
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
+  const video = getMessageVideo(message);
+  const document = getMessageDocument(message);
   const sticker = getMessageSticker(message);
   const classNames = ['content'];
   let contentParts: TextPart | TextPart[] | undefined;
+  let replyThumbnail: ApiMiniThumbnail | undefined;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
@@ -106,21 +117,36 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       classNames.push('text');
       contentParts = enhanceTextParts(
         text,
-        options.noEnhancedText ? [] : [addLineBreaks, addBreaksToLongWords, addLinks],
+        options.isReply ? [] : [addLineBreaks, addBreaksToLongWords, addLinks],
       );
     }
   }
 
-  if (photo) {
-    classNames.push('photo');
+  if (photo || video) {
+    classNames.push('media');
+    if (options.isReply) {
+      contentParts = photo ? 'Photo' : 'Video';
+      replyThumbnail = getReplyThumbnail(photo || video);
+    }
   }
 
   if (sticker) {
     classNames.push('sticker');
   }
 
+  if (document) {
+    classNames.push('document');
+    if (options.isReply) {
+      contentParts = document.fileName;
+    }
+  }
+
   if (message.forward_info && !classNames.includes('sticker')) {
     classNames.push('is-forwarded');
+  }
+
+  if (message.reply_to_message_id && !classNames.includes('sticker')) {
+    classNames.push('is-reply');
   }
 
   classNames.push('status-read');
@@ -128,7 +154,18 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   return {
     text: contentParts,
     photo,
+    video,
+    document,
     sticker,
+    replyThumbnail,
     className: classNames.join(' '),
   };
+}
+
+function getReplyThumbnail(media?: ApiPhoto | ApiVideo) {
+  if (!media) {
+    return undefined;
+  }
+  const { minithumbnail } = media;
+  return minithumbnail;
 }

@@ -1,9 +1,11 @@
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiPhoto } from '../../api/types';
 
 export function getLastMessageText(message: ApiMessage) {
   const {
     text,
     photo,
+    video,
+    document,
     sticker,
     caption,
   } = message.content;
@@ -19,17 +21,30 @@ export function getLastMessageText(message: ApiMessage) {
     return 'Photo';
   }
 
+  if (video) {
+    if (caption && caption.text.length) {
+      return `(Video) ${caption.text}`;
+    }
+    return 'Video';
+  }
+
   if (sticker) {
     return `Sticker ${sticker.emoji}`;
   }
 
-  return '%MEDIA_CONTENT%';
+  if (document) {
+    return document.fileName;
+  }
+
+  return '%UNSUPPORTED_CONTENT%';
 }
 
 export function getMessageText(message: ApiMessage) {
   const {
     text,
     photo,
+    video,
+    document,
     sticker,
     caption,
   } = message.content;
@@ -37,15 +52,15 @@ export function getMessageText(message: ApiMessage) {
     return text.text;
   }
 
-  if (photo) {
+  if (photo || video) {
     return caption ? caption.text : undefined;
   }
 
-  if (sticker) {
+  if (sticker || document) {
     return undefined;
   }
 
-  return '%MEDIA_CONTENT%';
+  return '%UNSUPPORTED_CONTENT%';
 }
 
 export function getMessagePhoto(message: ApiMessage) {
@@ -56,6 +71,26 @@ export function getMessagePhoto(message: ApiMessage) {
   return message.content.photo;
 }
 
+export function getMessageVideo(message: ApiMessage) {
+  if (!message.content.video) {
+    return undefined;
+  }
+
+  return message.content.video;
+}
+
+export function getMessageDocument(message: ApiMessage) {
+  if (
+    !message.content.document
+    || getMessageSticker(message)
+    || getMessageVideo(message)
+  ) {
+    return undefined;
+  }
+
+  return message.content.document;
+}
+
 export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
@@ -64,15 +99,11 @@ export function getMessageFileKey(message: ApiMessage): string | null {
   const { photo, sticker } = message.content;
 
   if (photo) {
-    const mSize = photo.sizes.find((size) => size.type === 'm');
+    const size = getMessagePhotoInlineSize(photo);
 
-    if (!mSize) {
-      throw new Error('mSize not found');
-    }
-
-    if (mSize.photo) {
+    if (size && size.hasOwnProperty('photo')) {
       // TdLib way.
-      return `msg${mSize.photo.id}`;
+      return `msg${size.photo.id}`;
     } else {
       // GramJs way.
       return `msg${message.id}`;
@@ -90,6 +121,14 @@ export function getMessageFileKey(message: ApiMessage): string | null {
   }
 
   return null;
+}
+
+export function getMessagePhotoInlineSize(photo: ApiPhoto) {
+  return (
+    photo.sizes.find((size) => size.type === 'm')
+    || photo.sizes.find((size) => size.type === 's')
+    || photo.minithumbnail
+  );
 }
 
 export function isOwnMessage(message: ApiMessage) {

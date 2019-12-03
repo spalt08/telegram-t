@@ -4,7 +4,7 @@ import { withGlobal } from '../../../../lib/teactn';
 import {
   ApiUser,
   ApiMessage,
-  ApiPhoto,
+  ApiMiniThumbnail,
 } from '../../../../api/types';
 import { getUserFullName } from '../../../../modules/helpers';
 import { selectUser } from '../../../../modules/selectors';
@@ -23,12 +23,12 @@ const ReplyMessage: FC<IProps> = ({
 }) => {
   const {
     text,
-    photo,
-  } = buildMessageContent(message, { noEnhancedText: true });
+    replyThumbnail,
+  } = buildMessageContent(message, { isReply: true });
 
   return (
     <div className="ReplyMessage not-implemented">
-      {renderMessagePhoto(photo)}
+      {renderMessagePhoto(replyThumbnail)}
       <div className="reply-text">
         <div className="sender-name">{getUserFullName(sender)}</div>
         <p>{text}</p>
@@ -37,12 +37,7 @@ const ReplyMessage: FC<IProps> = ({
   );
 };
 
-function renderMessagePhoto(photo?: ApiPhoto) {
-  if (!photo) {
-    return null;
-  }
-
-  const thumbnail = photo.minithumbnail;
+function renderMessagePhoto(thumbnail?: ApiMiniThumbnail) {
   if (!thumbnail) {
     return null;
   }

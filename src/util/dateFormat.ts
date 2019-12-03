@@ -143,3 +143,18 @@ export function isSameDay(datetime1: number | Date, datetime2: number | Date) {
 
   return date1.valueOf() === date2.valueOf();
 }
+
+export function formatMediaDuration(duration: number) {
+  const hours = Math.floor(duration / 3600);
+  const minutes = Math.floor((duration % 3600) / 60);
+  const seconds = Math.floor(duration % 3600 % 60);
+
+  let string = '';
+  if (hours > 0) {
+    string += `${padStart(String(hours), 2, '0')}:`;
+  }
+  string += `${padStart(String(minutes), 2, '0')}:`;
+  string += padStart(String(seconds), 2, '0');
+
+  return string;
+}

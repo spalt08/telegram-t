@@ -1,4 +1,7 @@
-import { ApiPhoto, ApiSticker } from '../api/types';
+import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
+import { getMessagePhotoInlineSize } from '../modules/helpers';
+
+const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 
 function getRemValue() {
   return window.innerWidth > 1440 ? 16 : 14;
@@ -18,9 +21,7 @@ function getAvailableHeight() {
   return 27 * rem;
 }
 
-export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const mediumSize = photo.sizes.find((size) => size.type === 'm');
-  const { width, height } = mediumSize || photo.minithumbnail;
+function calculateDimensions(width: number, height: number, fromOwnMessage: boolean, isForwarded?: boolean) {
   const aspectRatio = height / width;
   const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded);
   const calculatedHeight = Math.round(availableWidth * aspectRatio);
@@ -33,10 +34,22 @@ export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isF
     };
   }
 
+  const resultWidth = Math.min(width, availableWidth);
+
   return {
-    width: availableWidth,
-    height: Math.round(availableWidth * aspectRatio),
+    width: resultWidth,
+    height: Math.round(resultWidth * aspectRatio),
   };
+}
+
+export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
+  const { width, height } = getMessagePhotoInlineSize(photo) || DEFAULT_MEDIA_DIMENSIONS;
+  return calculateDimensions(width, height, fromOwnMessage, isForwarded);
+}
+
+export function getVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isForwarded?: boolean) {
+  const { width, height } = video.minithumbnail || DEFAULT_MEDIA_DIMENSIONS;
+  return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
 export function getReplyImageDimensions() {
