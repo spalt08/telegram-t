@@ -1,10 +1,13 @@
-let logger = null
+let _level = null
 
 class Logger {
     static levels = ['error', 'warn', 'info', 'debug']
 
     constructor(level) {
-        this.level = level || 'debug'
+        if (!_level) {
+            _level = level || 'debug'
+        }
+
         this.isBrowser = typeof process === 'undefined' ||
             process.type === 'renderer' ||
             process.browser === true ||
@@ -37,7 +40,7 @@ class Logger {
      * @returns {boolean}
      */
     canSend(level) {
-        return (Logger.levels.indexOf(this.level) >= Logger.levels.indexOf(level))
+        return (Logger.levels.indexOf(_level) >= Logger.levels.indexOf(level))
     }
 
     /**
@@ -74,11 +77,8 @@ class Logger {
             .replace('%m', message)
     }
 
-    static getLogger() {
-        if (!logger) {
-            logger = new Logger('debug')
-        }
-        return logger
+    static setLevel(level) {
+        _level = level;
     }
 
     /**
@@ -87,7 +87,7 @@ class Logger {
      * @param color {string}
      */
     _log(level, message, color) {
-        if (!logger){
+        if (!_level){
             return
         }
         if (this.canSend(level)) {

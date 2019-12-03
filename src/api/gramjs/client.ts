@@ -7,7 +7,7 @@ import {
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 
-GramJsLogger.getLogger().level = 'debug';
+GramJsLogger.setLevel('warn');
 
 let client: TelegramClient;
 
