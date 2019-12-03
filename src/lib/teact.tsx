@@ -1,5 +1,6 @@
 import { onNextTick, throttleWithRaf } from '../util/schedulers';
 import { flatten } from '../util/iteratees';
+import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent | null;
@@ -83,6 +84,8 @@ interface ComponentInstanceRefs {
   }[];
 }
 
+const EMPTY_CHILDREN: any[] = [];
+
 // Used for memoization.
 let renderingInstance: ComponentInstance;
 
@@ -116,13 +119,19 @@ function createElement(
   }
 
   if (typeof tag === 'function') {
+    children = flatten(children);
+
+    if (!children.length) {
+      children = EMPTY_CHILDREN;
+    }
+
     const componentInstance: ComponentInstance = {
       $element: {} as VirtualElementComponent,
       $prevElement: {} as VirtualElementComponent,
       Component: tag,
       name: tag.name,
       props,
-      children: flatten(children),
+      children,
       isUnmounted: false,
       state: {
         cursor: 0,
@@ -143,6 +152,8 @@ function createElement(
           const renderedChildren = getUpdatedChildren(componentInstance.$element, [rendered]);
           componentInstance.$prevElement = componentInstance.$element;
           componentInstance.$element = createComponentElement(componentInstance, renderedChildren);
+        } else {
+          componentInstance.$prevElement = componentInstance.$element;
         }
 
         return componentInstance.$element;
@@ -267,10 +278,10 @@ function getUpdatedChild(
 export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   if (typeof $old !== typeof $new) {
     return true;
-  } else if (!isRealElement($old) || !isRealElement($new)) {
-    return $old !== $new;
   } else if ($old.type !== $new.type) {
     return true;
+  } else if (isTextElement($old) && isTextElement($new)) {
+    return $old.value !== $new.value;
   } else if (isTagElement($old) && isTagElement($new)) {
     return ($old.tag !== $new.tag) || ($old.props.key !== $new.props.key);
   } else if (isComponentElement($old) && isComponentElement($new)) {
@@ -352,21 +363,21 @@ export function useRef(initial: any) {
   return byCursor[cursor];
 }
 
-// TODO Not working, breaks DOM rendering, debug and fix needed.
 // TODO Support `areEqual` argument.
-// export function memo(Component: FC): FC {
-//   return function memoWrapper(props: Props) {
-//     const propsRef = useRef({});
-//
-//     if (arePropsShallowEqual(propsRef.current, props)) {
-//       return null;
-//     }
-//
-//     propsRef.current = props;
-//
-//     return createElement(Component, props) as VirtualElementComponent;
-//   };
-// }
+export function memo(Component: FC): FC {
+  return function MemoWrapper(props: Props) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const propsRef = useRef({});
+
+    if (arePropsShallowEqual(propsRef.current, props)) {
+      return null;
+    }
+
+    propsRef.current = props;
+
+    return createElement(Component, props) as VirtualElementComponent;
+  };
+}
 
 // We need to keep it here for JSX.
 export default {

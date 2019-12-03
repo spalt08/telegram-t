@@ -28,18 +28,22 @@ function renderWithVirtual(
   $current: VirtualElement | undefined,
   $new: VirtualElement,
 ) {
+  if ($current === $new) {
+    return;
+  }
+
   if ($current === undefined && $new !== undefined) {
     $new.target = createNode($new, parentEl);
     parentEl.appendChild($new.target);
   } else if ($current !== undefined && $new === undefined) {
     parentEl.removeChild($current.target!);
   } else if ($current !== undefined && $new !== undefined) {
+    $new.target = $current.target;
+
     if (hasElementChanged($current, $new)) {
       $new.target = createNode($new, parentEl);
       parentEl.replaceChild($new.target, $current.target!);
     } else if (isRealElement($current) && isRealElement($new)) {
-      $new.target = $current.target;
-
       if (isTagElement($current)) {
         updateAttributes($current, $new, $current.target! as HTMLElement);
       }
@@ -62,8 +66,8 @@ function initComponentElement($element: VirtualElementComponent, parentEl: HTMLE
 }
 
 // Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
-function getActualPrevElement($element: VirtualElement): VirtualElement {
-  if (isComponentElement($element)) {
+function getActualPrevElement($element: VirtualElement) {
+  if ($element && isComponentElement($element)) {
     $element.componentInstance.$prevElement.target = $element.target;
     return $element.componentInstance.$prevElement;
   }
