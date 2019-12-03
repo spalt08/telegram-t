@@ -12,10 +12,17 @@ type IProps = Pick<GlobalActions, 'sendTextMessage'> & {
 
 const MAX_INPUT_HEIGHT = 240;
 
+let isJustSent = false;
+
 const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   const [messageText, setMessageText] = useState('');
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
+    if (isJustSent) {
+      isJustSent = false;
+      return;
+    }
+
     const { currentTarget } = e;
     const value = currentTarget.value.trim();
     setMessageText(value);
@@ -37,11 +44,13 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
         text: value,
       });
 
-      // Make sure to clear the text after the latest `onChange`.
-      // Using setTimeout as `onNextTick` somehow doesn't work here.
+      setMessageText('');
+      currentTarget.removeAttribute('style');
+
+      // Disable `onChange` following immediately after `onKeyPress`.
+      isJustSent = true;
       setTimeout(() => {
-        setMessageText('');
-        currentTarget.removeAttribute('style');
+        isJustSent = false;
       }, 0);
     }
   }
