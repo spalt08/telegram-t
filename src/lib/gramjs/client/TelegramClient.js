@@ -414,7 +414,6 @@ class TelegramClient {
         let dcId
         let loc
         if (photo instanceof constructors.UserProfilePhoto || photo instanceof constructors.ChatPhoto) {
-            console.log('i am ere')
             dcId = photo.dcId
             const size = isBig ? photo.photoBig : photo.photoSmall
             loc = new constructors.InputPeerPhotoFileLocation({
