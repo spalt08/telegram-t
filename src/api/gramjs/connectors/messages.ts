@@ -31,10 +31,10 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
 
   if (
     !result
-    || !(result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages)
+    || result instanceof GramJs.messages.MessagesNotModified
     || !result.messages
   ) {
-    throw new Error(UNSUPPORTED_RESPONSE);
+    return null;
   }
 
   (result.users as GramJs.User[]).forEach((mtpUser) => {
