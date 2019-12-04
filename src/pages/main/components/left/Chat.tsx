@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
@@ -68,7 +68,7 @@ function buildClassNames(chat: ApiChat, isSelected: boolean) {
   return classNames.join(' ');
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   (global, { chat }: IProps) => {
     if (!chat || !chat.last_message) {
       return null;
@@ -85,4 +85,4 @@ export default withGlobal(
     const { selectChat } = actions;
     return { selectChat };
   },
-)(Chat);
+)(Chat));

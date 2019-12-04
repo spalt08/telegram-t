@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import {
@@ -198,7 +198,7 @@ function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
   );
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
     // TODO: Works for only recent messages that are already loaded in the store
     const replyMessage = message.reply_to_message_id
@@ -223,4 +223,4 @@ export default withGlobal(
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
     };
   },
-)(Message);
+)(Message));
