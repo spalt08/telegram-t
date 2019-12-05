@@ -28,51 +28,50 @@ function renderWithVirtual(
   $current: VirtualElement | undefined,
   $new: VirtualElement,
 ) {
+  if ($current && isComponentElement($current)) {
+    $current = hasElementChanged($current, $new)
+      ? $current.componentInstance.$element
+      : $current.componentInstance.$prevElement;
+  }
+
   if ($current === $new) {
     return;
   }
 
   if ($current === undefined && $new !== undefined) {
+    $new = initComponent($new, parentEl);
     $new.target = createNode($new, parentEl);
     parentEl.appendChild($new.target);
   } else if ($current !== undefined && $new === undefined) {
     parentEl.removeChild($current.target!);
   } else if ($current !== undefined && $new !== undefined) {
-    $new.target = $current.target;
-
     if (hasElementChanged($current, $new)) {
+      $new = initComponent($new, parentEl);
       $new.target = createNode($new, parentEl);
       parentEl.replaceChild($new.target, $current.target!);
-    } else if (isRealElement($current) && isRealElement($new)) {
-      if (isTagElement($current)) {
-        updateAttributes($current, $new, $current.target! as HTMLElement);
-      }
+    } else {
+      $new.target = $current.target;
 
-      if (isComponentElement($new)) {
-        renderWithVirtual(parentEl, getActualPrevElement($current.children[0]), $new.children[0]);
-      } else {
+      if (isTagElement($current) && isTagElement($new)) {
+        updateAttributes($current, $new, $current.target! as HTMLElement);
         renderChildren($current, $new, $current.target! as HTMLElement);
+      } else if (isComponentElement($current) && isComponentElement($new)) {
+        renderWithVirtual(parentEl, $current.children[0], $new.children[0]);
       }
     }
   }
 }
 
-function initComponentElement($element: VirtualElementComponent, parentEl: HTMLElement) {
+function initComponent($element: VirtualElement, parentEl: HTMLElement) {
+  if (!isComponentElement($element)) {
+    return $element;
+  }
+
   $element.componentInstance.onUpdate = ($previous: VirtualElementComponent, $updated: VirtualElementComponent) => {
     renderWithVirtual(parentEl, $previous, $updated);
   };
 
   return $element.children.length ? $element : $element.componentInstance.render();
-}
-
-// Child components tree is always changed on each render so we need to get updated reference for `prevElement`.
-function getActualPrevElement($element: VirtualElement) {
-  if ($element && isComponentElement($element)) {
-    $element.componentInstance.$prevElement.target = $element.target;
-    return $element.componentInstance.$prevElement;
-  }
-
-  return $element;
 }
 
 // TODO Support `null` return value for empty elements
@@ -86,10 +85,7 @@ function createNode($element: VirtualElement, parentEl: HTMLElement): Node {
   }
 
   if (isComponentElement($element)) {
-    $element = initComponentElement($element, parentEl);
-    const target = createNode($element.children[0] as VirtualElement, parentEl);
-    $element.children[0].target = target;
-    return target;
+    return createNode($element.children[0] as VirtualElement, parentEl);
   }
 
   const { tag, props, children = [] } = $element;
@@ -114,11 +110,9 @@ function renderChildren($current: VirtualRealElement, $new: VirtualRealElement, 
   const maxLength = Math.max(currentLength, newLength);
 
   for (let i = 0; i < maxLength; i++) {
-    const $currentChild = $current.children[i] && getActualPrevElement($current.children[i]);
-
     renderWithVirtual(
       currentEl,
-      $currentChild,
+      $current.children[i],
       isRealElement($new) ? $new.children[i] : { type: VirtualElementTypesEnum.Empty },
     );
   }

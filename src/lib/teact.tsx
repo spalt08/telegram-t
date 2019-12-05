@@ -217,6 +217,12 @@ function createComponentElement(
     type: VirtualElementTypesEnum.Component,
     props,
     children,
+    get target() {
+      return this.children[0].target;
+    },
+    set target(value) {
+      this.children[0].target = value;
+    },
   };
 }
 
