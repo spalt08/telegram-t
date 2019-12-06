@@ -1,4 +1,6 @@
-import React, { FC, Props, useState } from './teact';
+import React, {
+  FC, Props, useEffect, useState,
+} from './teact';
 
 import { DEBUG } from '../config';
 import useForceUpdate from '../hooks/useForceUpdate';
@@ -122,8 +124,12 @@ export function withGlobal(
     return function Container(props: Props) {
       const [id] = useState(generateIdFor(containers));
       const forceUpdate = useForceUpdate();
+      useEffect(() => {
+        return () => {
+          delete containers[id];
+        };
+      }, [id]);
 
-      // TODO Support unmount.
       if (!containers[id]) {
         containers[id] = {
           mapStateToProps,

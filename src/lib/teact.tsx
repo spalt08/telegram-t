@@ -74,6 +74,7 @@ interface ComponentInstanceEffects {
   byCursor: {
     effect: () => void;
     dependencies?: any[];
+    cleanup?: Function;
   }[];
 }
 
@@ -269,8 +270,8 @@ function getUpdatedChild(
       newChild.children = getUpdatedChildren(currentChild, newChild.children);
     }
   } else {
-    if (currentChild && isComponentElement(currentChild)) {
-      unmountComponent(currentChild.componentInstance);
+    if (currentChild) {
+      unmountTree(currentChild);
     }
 
     if (newChild && isComponentElement(newChild)) {
@@ -301,14 +302,27 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   return false;
 }
 
+function unmountTree($element: VirtualElement) {
+  if (isComponentElement($element)) {
+    unmountComponent($element.componentInstance);
+    $element = $element.componentInstance.$element;
+  }
+
+  if ('children' in $element) {
+    $element.children.forEach(unmountTree);
+  }
+}
+
 function unmountComponent(componentInstance: ComponentInstance) {
-  // TODO Remove hooks.
-  componentInstance.isUnmounted = true;
-  componentInstance.$element.children.forEach((child) => {
-    if (isComponentElement(child)) {
-      unmountComponent(child.componentInstance);
+  componentInstance.effects.byCursor.forEach(({ cleanup }) => {
+    if (typeof cleanup === 'function') {
+      cleanup();
     }
   });
+  delete componentInstance.state;
+  delete componentInstance.effects;
+  delete componentInstance.refs;
+  componentInstance.isUnmounted = true;
 }
 
 export function useState(initial: any) {
@@ -334,21 +348,30 @@ export function useState(initial: any) {
   ];
 }
 
-// TODO Support cleanup.
-export function useEffect(effect: () => void, dependencies?: any[]) {
+export function useEffect(effect: () => Function | void, dependencies?: any[]) {
   const { cursor, byCursor } = renderingInstance.effects;
+  const { cleanup } = byCursor[cursor] || {};
+
+  const exec = () => {
+    if (typeof cleanup === 'function') {
+      cleanup();
+    }
+
+    byCursor[cursor].cleanup = effect() as Function;
+  };
 
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
-      onNextTick(effect);
+      onNextTick(exec);
     }
   } else {
-    onNextTick(effect);
+    onNextTick(exec);
   }
 
   byCursor[cursor] = {
     effect,
     dependencies,
+    cleanup,
   };
 
   renderingInstance.state.cursor++;
