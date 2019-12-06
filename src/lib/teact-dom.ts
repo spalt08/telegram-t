@@ -80,7 +80,6 @@ function initComponent($element: VirtualElement, parentEl: HTMLElement) {
   return $newElement;
 }
 
-// TODO Support `null` return value for empty elements
 function createNode($element: VirtualElement, parentEl: HTMLElement): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');

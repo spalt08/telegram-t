@@ -3,7 +3,7 @@ import { flatten } from '../util/iteratees';
 import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
-export type FC<P extends Props = any> = (props: P) => VirtualElementComponent | null;
+export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -147,10 +147,10 @@ function createElement(
         byCursor: [],
       },
       render() {
-        const rendered = renderComponent(componentInstance);
+        const child = renderComponent(componentInstance);
 
-        if (rendered) {
-          const renderedChildren = getUpdatedChildren(componentInstance.$element, [rendered]);
+        if (componentInstance.$element.children[0] !== child) {
+          const renderedChildren = getUpdatedChildren(componentInstance.$element, [child]);
           componentInstance.$prevElement = componentInstance.$element;
           componentInstance.$element = createComponentElement(componentInstance, renderedChildren);
         } else {
@@ -392,19 +392,18 @@ export function useRef(initial: any) {
   return byCursor[cursor];
 }
 
-// TODO Support `areEqual` argument.
-export function memo(Component: FC): FC {
+export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
   return function MemoWrapper(props: Props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const propsRef = useRef({});
+    const renderRef = useRef({});
 
-    if (arePropsShallowEqual(propsRef.current, props)) {
-      return null;
+    if (!renderRef.current || !areEqual(propsRef.current, props)) {
+      propsRef.current = props;
+      renderRef.current = createElement(Component, props) as VirtualElementComponent;
     }
 
-    propsRef.current = props;
-
-    return createElement(Component, props) as VirtualElementComponent;
+    return renderRef.current;
   };
 }
 
