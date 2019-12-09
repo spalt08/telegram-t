@@ -1,4 +1,3 @@
-const struct = require('python-struct')
 const { readFileSync } = require('fs')
 const {
     parseTl,
@@ -66,19 +65,21 @@ function extractParams(fileContent) {
 function argToBytes(x, type) {
     switch (type) {
         case 'int':
-            return (struct.pack('<i', x))
+            const i = Buffer.alloc(4)
+            return i.writeInt32LE(x, 0)
         case 'long':
-            return (readBufferFromBigInt(x, 8, true, true))
+            return readBufferFromBigInt(x, 8, true, true)
         case 'int128':
-            return (readBufferFromBigInt(x, 16, true, true))
+            return readBufferFromBigInt(x, 16, true, true)
         case 'int256':
-            return (readBufferFromBigInt(x, 32, true, true))
+            return readBufferFromBigInt(x, 32, true, true)
         case 'double':
-            return (struct.pack('<d', x.toString()))
+            const d = Buffer.alloc(8)
+            return d.writeDoubleLE(x, 0)
         case 'string':
             return serializeBytes(x)
         case 'Bool':
-            return (x ? Buffer.from('b5757299', 'hex') : Buffer.from('379779bc', 'hex'))
+            return x ? Buffer.from('b5757299', 'hex') : Buffer.from('379779bc', 'hex')
         case 'true':
             return Buffer.alloc(0)
         case 'bytes':
@@ -221,7 +222,9 @@ function createClasses(classesType, params) {
             getBytes() {
                 // The next is pseudo-code:
                 const idForBytes = this.CONSTRUCTOR_ID
-                const buffers = [struct.pack('<I', idForBytes)]
+                const c = Buffer.alloc(4)
+                c.writeUInt32LE(idForBytes, 0)
+                const buffers = [c]
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
@@ -232,14 +235,18 @@ function createClasses(classesType, params) {
                                 if (argsConfig[arg].useVectorId) {
                                     tempBuffers.push(Buffer.from('15c4b51c', 'hex'))
                                 }
+                                const l = Buffer.alloc(4)
+                                l.writeInt32LE(this[arg].length, 0)
                                 buffers.push((!this[arg] ? Buffer.alloc(0) : Buffer.concat([...tempBuffers,
-                                    struct.pack('<i', this[arg].length), Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type)))])))
+                                    l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type)))])))
                             }
                         } else if (argsConfig[arg].isVector && !argsConfig[arg].isFlag) {
                             if (argsConfig[arg].isVector) {
                                 buffers.push(Buffer.from('15c4b51c', 'hex'))
                             }
-                            buffers.push(struct.pack('<i', this[arg].length), Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type))))
+                            const l = Buffer.alloc(4)
+                            l.writeInt32LE(this[arg].length, 0)
+                            buffers.push(l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type))))
                         } else if (argsConfig[arg].flagIndicator) {
                             // @ts-ignore
                             if (!Object.values(argsConfig)
@@ -256,13 +263,17 @@ function createClasses(classesType, params) {
                                         }
                                     }
                                 }
-                                buffers.push(struct.pack('<I', flagCalculate))
+                                const f = Buffer.alloc(4)
+                                f.writeUInt32LE(flagCalculate, 0)
+                                buffers.push(f)
                             }
                         } else {
 
                             switch (argsConfig[arg].type) {
                                 case 'int':
-                                    buffers.push(struct.pack('<i', this[arg]))
+                                    const i = Buffer.alloc(4)
+                                    i.writeInt32LE(this[arg], 0)
+                                    buffers.push(i)
                                     break
                                 case 'long':
                                     buffers.push(readBufferFromBigInt(this[arg], 8, true, true))
@@ -274,7 +285,9 @@ function createClasses(classesType, params) {
                                     buffers.push(readBufferFromBigInt(this[arg], 32, true, true))
                                     break
                                 case 'double':
-                                    buffers.push(struct.pack('<d', this[arg].toString()))
+                                    const d = Buffer.alloc(8)
+                                    d.writeDoubleLE(this[arg].toString(), 0)
+                                    buffers.push(d)
                                     break
                                 case 'string':
                                     buffers.push(serializeBytes(this[arg]))
@@ -377,3 +390,4 @@ function createClasses(classesType, params) {
 }
 
 module.exports = buildApiFromTlSchema()
+console.log(module.exports)

@@ -1,6 +1,5 @@
 const { Connection, PacketCodec } = require('./Connection')
-const struct = require('python-struct')
-const { crc32 } = require('crc')
+const { crc32 } = require('../../Helpers')
 const { InvalidChecksumError } = require('../../errors/Common')
 
 class FullPacketCodec extends PacketCodec {
@@ -13,8 +12,12 @@ class FullPacketCodec extends PacketCodec {
         // https://core.telegram.org/mtproto#tcp-transport
         // total length, sequence number, packet and checksum (CRC32)
         const length = data.length + 12
-        data = Buffer.concat([struct.pack('<ii', length, this._sendCounter), data])
-        const crc = struct.pack('<I', crc32(data))
+        const e = Buffer.alloc(8)
+        e.writeInt32LE(length,0)
+        e.writeInt32LE(this._sendCounter,4)
+        data = Buffer.concat([e, data])
+        const crc =  Buffer.alloc(4)
+        crc.writeUInt32LE(crc32(data),0)
         this._sendCounter += 1
         return Buffer.concat([data, crc])
     }
@@ -30,11 +33,9 @@ class FullPacketCodec extends PacketCodec {
         if (packetLenSeq === undefined) {
             return false
         }
-
-        const res = struct.unpack('<ii', packetLenSeq)
-        const [packetLen] = res
+        const packetLen = packetLenSeq.readInt32LE(0)
         let body = await reader.read(packetLen - 8)
-        const [checksum] = struct.unpack('<I', body.slice(-4))
+        const [checksum] = body.slice(-4).readUInt32LE(0)
         body = body.slice(0, -4)
 
         const validChecksum = crc32(Buffer.concat([packetLenSeq, body]))

@@ -1,4 +1,4 @@
-const aesjs = require('aes-js')
+const crypto = require('crypto')
 const { generateRandomBytes } = require('../Helpers')
 
 class AES {
@@ -10,18 +10,23 @@ class AES {
      * @returns {Buffer}
      */
     static decryptIge(cipherText, key, iv) {
+
         let iv1 = iv.slice(0, Math.floor(iv.length / 2))
         let iv2 = iv.slice(Math.floor(iv.length / 2))
         let plainText = []
-        const aes = new aesjs.AES(key)
+        const aes = crypto.createDecipheriv('AES-256-ECB', key, Buffer.alloc(0))
+        aes.setAutoPadding(true)
         const blocksCount = Math.floor(cipherText.length / 16)
-        const cipherTextBlock = new Array(16).fill(0)
+        const cipherTextBlock = Buffer.alloc(16).fill(0)
 
         for (let blockIndex = 0; blockIndex < blocksCount; blockIndex++) {
             for (let i = 0; i < 16; i++) {
                 cipherTextBlock[i] = cipherText[blockIndex * 16 + i] ^ iv2[i]
             }
-            const plainTextBlock = aes.decrypt(cipherTextBlock)
+            //This might be a bug in the crypto module
+            aes.update(cipherTextBlock)
+            const plainTextBlock = aes.update(cipherTextBlock)
+
             for (let i = 0; i < 16; i++) {
                 plainTextBlock[i] ^= iv1[i]
             }
@@ -49,8 +54,8 @@ class AES {
 
         let iv1 = iv.slice(0, Math.floor(iv.length / 2))
         let iv2 = iv.slice(Math.floor(iv.length / 2))
-
-        const aes = new aesjs.AES(key)
+        const aes = crypto.createCipheriv('AES-256-ECB', key, Buffer.alloc(0))
+        aes.setAutoPadding(true)
         let cipherText = Buffer.alloc(0)
         const blockCount = Math.floor(plainText.length / 16)
 
@@ -60,7 +65,7 @@ class AES {
             for (let i = 0; i < 16; i++) {
                 plainTextBlock[i] ^= iv1[i]
             }
-            const cipherTextBlock = Buffer.from(aes.encrypt(plainTextBlock))
+            const cipherTextBlock = aes.update(plainTextBlock)
 
             for (let i = 0; i < 16; i++) {
                 cipherTextBlock[i] ^= iv2[i]

@@ -1,4 +1,4 @@
-const { crc32 } = require('crc')
+const { crc32 } = require('../Helpers')
 const snakeToCamelCase = (name) => {
     const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase())
     return result.replace(/_/g, '')
@@ -55,13 +55,11 @@ const fromLine = (line, isFunction, methodInfo, layer) => {
         let hexId = ''
         let args
 
-
         if (Object.values(currentConfig.argsConfig).length) {
             args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(' ')}`
         } else {
             args = ''
         }
-
 
         const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`
             .replace(/(:|\?)bytes /g, '$1string ')
@@ -316,7 +314,9 @@ function serializeDate(dt) {
         dt = Math.floor((Date.now() - dt.getTime()) / 1000)
     }
     if (typeof dt == 'number') {
-        return struct.pack('<i', dt)
+        const t = Buffer.alloc(4)
+        t.writeInt32LE(dt, 0)
+        return t
     }
     throw Error(`Cannot interpret "${dt}" as a date`)
 }
