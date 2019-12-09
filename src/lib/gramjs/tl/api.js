@@ -228,17 +228,24 @@ function createClasses(classesType, params) {
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
-                            const tempBuffers = []
                             if (argsConfig[arg] === 'true') {
-
+                                // TODO ?
                             } else if (argsConfig[arg].isVector) {
-                                if (argsConfig[arg].useVectorId) {
-                                    tempBuffers.push(Buffer.from('15c4b51c', 'hex'))
+                                if (!this[arg]) {
+                                    buffers.push(Buffer.alloc(0))
+                                } else {
+                                    const tempBuffers = []
+                                    if (argsConfig[arg].useVectorId) {
+                                        tempBuffers.push(Buffer.from('15c4b51c', 'hex'))
+                                    }
+                                    const l = Buffer.alloc(4)
+                                    l.writeInt32LE(this[arg].length, 0)
+                                    buffers.push(Buffer.concat([
+                                        ...tempBuffers,
+                                        l,
+                                        Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type)))
+                                    ]))
                                 }
-                                const l = Buffer.alloc(4)
-                                l.writeInt32LE(this[arg].length, 0)
-                                buffers.push((!this[arg] ? Buffer.alloc(0) : Buffer.concat([...tempBuffers,
-                                    l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type)))])))
                             }
                         } else if (argsConfig[arg].isVector && !argsConfig[arg].isFlag) {
                             if (argsConfig[arg].isVector) {
@@ -248,7 +255,6 @@ function createClasses(classesType, params) {
                             l.writeInt32LE(this[arg].length, 0)
                             buffers.push(l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type))))
                         } else if (argsConfig[arg].flagIndicator) {
-                            // @ts-ignore
                             if (!Object.values(argsConfig)
                                 .some((f) => f.isFlag)) {
                                 buffers.push(Buffer.alloc(4))
@@ -268,7 +274,6 @@ function createClasses(classesType, params) {
                                 buffers.push(f)
                             }
                         } else {
-
                             switch (argsConfig[arg].type) {
                                 case 'int':
                                     const i = Buffer.alloc(4)
@@ -376,7 +381,6 @@ function createClasses(classesType, params) {
 
         if (namespace) {
             if (!classes[namespace]) {
-                // @ts-ignore
                 classes[namespace] = {}
             }
             classes[namespace][name] = VirtualClass
