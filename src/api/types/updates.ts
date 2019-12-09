@@ -87,3 +87,5 @@ export type ApiUpdate = (
   ApiUpdateUsers | ApiUpdateUser |
   ApiUpdateAvatar | ApiUpdateMessageImage
 );
+
+export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -2,14 +2,12 @@ import { addReducer, getDispatch } from '../../../lib/teactn';
 
 import { GlobalState } from '../../../store/types';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
-import {
-  init, provideAuthPhoneNumber, provideAuthCode, provideAuthPassword,
-} from '../../../api/gramjs';
+import { initSdk, callSdk } from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || '';
-  init(onUpdate, sessionId);
+  void initSdk(onUpdate, sessionId);
 
   return {
     ...global,
@@ -21,7 +19,7 @@ addReducer('init', (global: GlobalState) => {
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
-  void provideAuthPhoneNumber(phoneNumber);
+  void callSdk('provideAuthPhoneNumber', phoneNumber);
 
   return {
     ...global,
@@ -32,7 +30,7 @@ addReducer('setAuthPhoneNumber', (global, actions, payload) => {
 addReducer('setAuthCode', (global, actions, payload) => {
   const { code } = payload!;
 
-  void provideAuthCode(code);
+  void callSdk('provideAuthCode', code);
 
   return {
     ...global,
@@ -43,7 +41,7 @@ addReducer('setAuthCode', (global, actions, payload) => {
 addReducer('setAuthPassword', (global, actions, payload) => {
   const { password } = payload!;
 
-  void provideAuthPassword(password);
+  void callSdk('provideAuthPassword', password);
 
   return {
     ...global,

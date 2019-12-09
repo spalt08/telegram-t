@@ -1,7 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 import { ApiMessage } from '../../../api/types';
 
-import { fetchMessages, sendMessage } from '../../../api/gramjs';
+import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
 const MESSAGE_SLICE_LIMIT = 50;
@@ -72,7 +72,7 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
 }
 
 async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
-  const result = await fetchMessages({
+  const result = await callSdk('fetchMessages', {
     chatId,
     fromMessageId,
     limit: MESSAGE_SLICE_LIMIT,
@@ -86,5 +86,5 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
 }
 
 function sendTextMessage(chatId: number, text: string) {
-  sendMessage(chatId, text);
+  void callSdk('sendMessage', { chatId, text });
 }

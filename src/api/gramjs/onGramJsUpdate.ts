@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../lib/gramjs';
-import { OnApiUpdate } from './types';
+import { OnApiUpdate } from '../types';
 
 import { buildApiMessage, buildApiMessageFromShort, buildApiMessageFromShortChat } from './builders/messages';
 import { getApiChatIdFromMtpPeer } from './builders/chats';

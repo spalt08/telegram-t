@@ -1,7 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { ApiMessage } from '../../types';
-import { OnApiUpdate } from '../types';
+import { ApiMessage, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from '../client';
 import { buildApiMessage, buildLocalMessage } from '../builders/messages';
@@ -73,7 +72,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   };
 }
 
-export async function sendMessage(chatId: number, text: string) {
+export async function sendMessage({ chatId, text }: { chatId: number; text: string }) {
   const localMessage = buildLocalMessage(chatId, text);
   onUpdate({
     '@type': 'updateMessage',

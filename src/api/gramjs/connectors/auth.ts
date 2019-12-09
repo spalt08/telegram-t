@@ -1,5 +1,6 @@
-import { ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType } from '../../types';
-import { OnApiUpdate } from '../types';
+import {
+  ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType, OnApiUpdate,
+} from '../../types';
 
 const authPromiseResolvers: {
   resolvePhoneNumber: null | Function;

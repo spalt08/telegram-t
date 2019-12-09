@@ -2,7 +2,7 @@ import {
   addReducer, getDispatch, getGlobal, setGlobal,
 } from '../../../lib/teactn';
 
-import { fetchChats } from '../../../api/gramjs';
+import { callSdk } from '../../../api/gramjs';
 
 const LOAD_CHATS_LIMIT = 50;
 
@@ -32,7 +32,7 @@ addReducer('setChatScrollOffset', (global, actions, payload) => {
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
-  const result = await fetchChats({
+  const result = await callSdk('fetchChats', {
     limit: LOAD_CHATS_LIMIT,
     offsetDate,
   });

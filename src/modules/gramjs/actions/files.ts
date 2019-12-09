@@ -1,7 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
-import { loadAvatar } from '../../../api/gramjs';
+import { callSdk } from '../../../api/gramjs';
 
 addReducer('loadChatPhoto', (global, actions, payload) => {
   const { chat } = payload!;
@@ -22,7 +22,7 @@ async function loadChatPhoto(chat: ApiChat) {
     return;
   }
 
-  const dataUri = await loadAvatar(chat);
+  const dataUri = await callSdk('loadAvatar');
 
   if (!dataUri) {
     return;
@@ -39,7 +39,7 @@ async function loadUserPhoto(user: ApiUser) {
     return;
   }
 
-  const dataUri = await loadAvatar(user);
+  const dataUri = await callSdk('loadAvatar', user);
 
   if (!dataUri) {
     return;
