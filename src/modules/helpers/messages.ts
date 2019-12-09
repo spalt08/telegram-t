@@ -7,25 +7,24 @@ export function getLastMessageText(message: ApiMessage) {
     video,
     document,
     sticker,
-    caption,
   } = message.content;
 
-  if (text) {
-    return text.text;
-  }
-
   if (photo) {
-    if (caption && caption.text.length) {
-      return `(Photo) ${caption.text}`;
+    if (text && text.text.length) {
+      return `(Photo) ${text.text}`;
     }
     return 'Photo';
   }
 
   if (video) {
-    if (caption && caption.text.length) {
-      return `(Video) ${caption.text}`;
+    if (text && text.text.length) {
+      return `(Video) ${text.text}`;
     }
     return 'Video';
+  }
+
+  if (text) {
+    return text.text;
   }
 
   if (sticker) {
@@ -42,21 +41,16 @@ export function getLastMessageText(message: ApiMessage) {
 export function getMessageText(message: ApiMessage) {
   const {
     text,
+    document,
     photo,
     video,
-    document,
     sticker,
-    caption,
   } = message.content;
   if (text) {
     return text.text;
   }
 
-  if (photo || video) {
-    return caption ? caption.text : undefined;
-  }
-
-  if (sticker || document) {
+  if (sticker || document || photo || video) {
     return undefined;
   }
 

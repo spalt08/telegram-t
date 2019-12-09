@@ -67,23 +67,30 @@ export interface ApiMessageForwardInfo {
   };
 }
 
+export interface ApiMessageEntity {
+  className: string;
+  offset: number;
+  length: number;
+  user_id?: number;
+  url?: string;
+}
+
+export interface ApiFormattedText {
+  '@type': 'formattedText';
+  text: string;
+  entities?: ApiMessageEntity[];
+}
+
 export interface ApiMessage {
   id: number;
   chat_id: number;
   content: {
     // TODO Enum
     '@type': string;
-    text?: {
-      '@type': 'formattedText';
-      text: string;
-    };
+    text?: ApiFormattedText;
     photo?: ApiPhoto;
     video?: ApiVideo;
     document?: ApiDocument;
-    caption?: {
-      '@type': 'formattedText';
-      text: string;
-    };
     sticker?: ApiSticker;
   };
   date: number;

@@ -16,13 +16,7 @@ import {
   ApiMiniThumbnail,
 } from '../../../../../api/types';
 
-import {
-  TextPart,
-  enhanceTextParts,
-  addLineBreaks,
-  addBreaksToLongWords,
-  addLinks,
-} from './enhanceText';
+import { TextPart, enhanceTextParts } from './enhanceText';
 
 export type MessageDateGroup = {
   datetime: number;
@@ -115,10 +109,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       contentParts = text;
     } else {
       classNames.push('text');
-      contentParts = enhanceTextParts(
-        text,
-        options.isReply ? [] : [addLineBreaks, addBreaksToLongWords, addLinks],
-      );
+      contentParts = options.isReply ? text : enhanceTextParts(message.content.text);
     }
   }
 

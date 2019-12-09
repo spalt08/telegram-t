@@ -10,7 +10,7 @@ import { getUserFullName } from '../../../../modules/helpers';
 import { selectUser } from '../../../../modules/selectors';
 import { getReplyImageDimensions } from '../../../../util/imageDimensions';
 
-import { buildMessageContent } from './util/messages';
+import { buildMessageContent } from './message/utils';
 import './ReplyMessage.scss';
 
 type IProps = {

@@ -16,7 +16,7 @@ import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
-import { buildMessageContent } from './util/messages';
+import { buildMessageContent } from './message/utils';
 import './Message.scss';
 import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';

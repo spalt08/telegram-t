@@ -9,7 +9,7 @@ import { isOwnMessage, isPrivateChat } from '../../../../modules/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatChatDateHeader } from '../../../../util/dateFormat';
-import { MessageDateGroup, groupMessages } from './util/messages';
+import { MessageDateGroup, groupMessages } from './message/utils';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import './MessageList.scss';

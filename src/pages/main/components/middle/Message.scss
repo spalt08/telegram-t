@@ -154,6 +154,7 @@
 
   .content-inner > p {
     margin: 0;
+    word-break: break-word;
   }
 
   .sender-name {
@@ -185,12 +186,16 @@
     a {
       color: var(--color-links);
       text-decoration: none;
-      word-break: break-all;
+      word-break: none;
 
       &:hover, &:active, &:visited {
         color: var(--color-links-hover);
         text-decoration: underline;
       }
+    }
+
+    code {
+      color: var(--color-code);
     }
   }
 
@@ -417,6 +422,10 @@
 
     .content-inner > p::after {
       width: 3.5rem;
+    }
+
+    code {
+      color: var(--color-code-own);
     }
   }
 

@@ -50,7 +50,7 @@ export function buildApiMessageFromShortChat(
 export function buildApiMessageWithChatId(
   chatId: number,
   mtpMessage: Pick<Partial<GramJs.Message>, (
-    'id' | 'out' | 'message' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media'
+    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media'
   )>,
 ): ApiMessage {
   const sticker = mtpMessage.media && buildSticker(mtpMessage.media);
@@ -60,9 +60,9 @@ export function buildApiMessageWithChatId(
   const textContent = mtpMessage.message && {
     '@type': 'formattedText' as const,
     text: mtpMessage.message,
+    entities: mtpMessage.entities,
   };
-  const caption = textContent && (photo || video) ? textContent : null;
-  const text = textContent && !document && !(photo || video) ? textContent : null;
+  const text = textContent && !document ? textContent : null;
 
   return {
     id: mtpMessage.id,
@@ -75,7 +75,6 @@ export function buildApiMessageWithChatId(
       ...(photo && { photo }),
       ...(video && { video }),
       ...(document && { document }),
-      ...(caption && { caption }),
     },
     date: mtpMessage.date,
     sender_user_id: mtpMessage.fromId || DEFAULT_USER_ID,

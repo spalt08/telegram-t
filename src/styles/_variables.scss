@@ -45,6 +45,9 @@ $color-chat-hover: #f4f4f5;
   --color-links: #{$color-links};
   --color-links-hover: #{darken($color-links, 8%)};
 
+  --color-code: #{mix($color-links, $color-text-secondary, 50%)};
+  --color-code-own: #{mix($color-text-green, $color-text-secondary, 50%)};
+
   --color-gray: #{$color-gray};
 
   --color-chat-hover: #{$color-chat-hover};
