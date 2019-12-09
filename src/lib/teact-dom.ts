@@ -71,7 +71,13 @@ function initComponent($element: VirtualElement, parentEl: HTMLElement) {
     renderWithVirtual(parentEl, $previous, $updated);
   };
 
-  return $element.children.length ? $element : $element.componentInstance.render();
+  const $newElement = $element.children.length ? $element : $element.componentInstance.render();
+
+  if (isComponentElement($newElement.children[0])) {
+    $newElement.children = [initComponent($newElement.children[0], parentEl)];
+  }
+
+  return $newElement;
 }
 
 // TODO Support `null` return value for empty elements
