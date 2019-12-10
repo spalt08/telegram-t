@@ -29,14 +29,14 @@ class StringSession extends MemorySession {
             session = session.slice(1)
             const r = StringSession.decode(session)
             const reader = new BinaryReader(r)
-            this._dcId = reader.read(1).readUInt8(0)
-            const serverAddressLen = reader.read(2).readInt16BE(0)
+            this._dcId = reader.read(1)
+                .readUInt8(0)
+            const serverAddressLen = reader.read(2)
+                .readInt16BE(0)
             this._serverAddress = String(reader.read(serverAddressLen))
-            this._port = reader.read(2).readInt16BE(0)
-            const key = reader.read(-1)
-            if (key) {
-                this._authKey = new AuthKey(key)
-            }
+            this._port = reader.read(2)
+                .readInt16BE(0)
+            this._key = reader.read(-1)
         }
     }
 
@@ -56,6 +56,13 @@ class StringSession extends MemorySession {
         return Buffer.from(x, 'base64')
     }
 
+    async load() {
+        if (this._key) {
+            this._authKey = new AuthKey()
+            await this._authKey.setKey(this._key)
+        }
+    }
+
     save() {
         if (!this.authKey) {
             return ''
@@ -72,7 +79,7 @@ class StringSession extends MemorySession {
             addressLengthBuffer,
             addressBuffer,
             portBuffer,
-            this.authKey.key,
+            this.authKey.getKey(),
         ]))
     }
 }
