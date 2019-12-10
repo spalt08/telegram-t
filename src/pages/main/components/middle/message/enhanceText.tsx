@@ -43,7 +43,7 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
     return undefined;
   }
   if (!entities) {
-    return text;
+    return addLineBreaks(text);
   }
 
   let deleteLineBreakAfterPre = false;
