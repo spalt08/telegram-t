@@ -57,12 +57,11 @@ export function buildApiMessageWithChatId(
   const photo = mtpMessage.media && buildPhoto(mtpMessage.media);
   const video = mtpMessage.media && buildVideo(mtpMessage.media);
   const document = mtpMessage.media && buildDocument(mtpMessage.media);
-  const textContent = mtpMessage.message && {
+  const text = mtpMessage.message && {
     '@type': 'formattedText' as const,
     text: mtpMessage.message,
     entities: mtpMessage.entities,
   };
-  const text = textContent && !document ? textContent : null;
 
   return {
     id: mtpMessage.id,
