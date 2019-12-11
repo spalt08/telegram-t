@@ -57,14 +57,14 @@ export async function init(sessionId: string) {
 export async function invokeRequest<T extends GramJs.AnyRequest>(request: T) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE ${request}`);
+    console.log(`[GramJs/client] INVOKE ${request.className}`);
   }
 
   const result = await client.invoke(request);
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE RESPONSE ${request}`, result);
+    console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
   }
 
   return result;

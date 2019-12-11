@@ -171,16 +171,17 @@ function createClasses(classesType, params) {
     const classes = {}
     for (const classParams of params) {
         const { name, constructorId, subclassOfId, argsConfig, namespace, result } = classParams
+        const fullName = [namespace, name].join('.').replace(/^\./, '')
 
         class VirtualClass {
             static CONSTRUCTOR_ID = constructorId
             static SUBCLASS_OF_ID = subclassOfId
-            static className = name
+            static className = fullName
             static classType = classesType
 
             CONSTRUCTOR_ID = constructorId
             SUBCLASS_OF_ID = subclassOfId
-            className = name
+            className = fullName
             classType = classesType
 
             constructor(args) {
@@ -394,4 +395,3 @@ function createClasses(classesType, params) {
 }
 
 module.exports = buildApiFromTlSchema()
-console.log(module.exports)

@@ -28,6 +28,8 @@ namespace Api {
   class VirtualClass<Args extends AnyLiteral> {
     static CONSTRUCTOR_ID: number;
     static SUBCLASS_OF_ID: number;
+    static className: string;
+    static classType: 'constructor' | 'request';
 
     static serializeBytes(data: Buffer | string): Buffer;
     static serializeDate(date: Date | number): Buffer;
@@ -35,6 +37,8 @@ namespace Api {
 
     CONSTRUCTOR_ID: number;
     SUBCLASS_OF_ID: number;
+    className: string;
+    classType: 'constructor' | 'request';
 
     constructor(args: Args);
   }
