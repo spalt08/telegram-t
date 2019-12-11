@@ -174,7 +174,7 @@ class MTProtoState {
         // We could read msg_len bytes and use those in a new reader to read
         // the next TLObject without including the padding, but since the
         // reader isn't used for anything else after this, it's unnecessary.
-        const obj = await reader.tgReadObject()
+        const obj = reader.tgReadObject()
 
         return new TLMessage(remoteMsgId, remoteSequence, obj)
     }

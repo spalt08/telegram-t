@@ -33,7 +33,7 @@ const ChatList: FC<IProps> = ({
 
   return (
     <div className="ChatList custom-scroll" onScroll={(e) => handleScrollThrottled(e, loadMoreChats)}>{
-      areChatsLoaded && chatsArray ? (
+      chatsArray ? (
         <div>
           {chatsArray.map((chat) => (
             <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
