@@ -2,7 +2,6 @@ const Logger = require('../extensions/Logger')
 const { sleep } = require('../Helpers')
 const errors = require('../errors')
 const MemorySession = require('../sessions/Memory')
-const { init: initRSA } = require('../crypto/RSA')
 const Helpers = require('../Helpers')
 const { BinaryWriter } = require('../extensions')
 const utils = require('../Utils')
@@ -131,7 +130,6 @@ class TelegramClient {
      * @returns {Promise<void>}
      */
     async connect() {
-        await initRSA()
         await this.session.load()
         this._sender = new MTProtoSender(this.session.authKey, {
             logger: this._log,
