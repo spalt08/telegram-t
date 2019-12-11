@@ -74,8 +74,12 @@ class PromisedWebSockets {
         this.closed = false
         this.website = this.getWebSocketLink(ip, port)
         this.client = new WebSocketClient(this.website, 'binary')
+
+        console.timeLog('global', 'gramjs / socket initialized');
+
         return new Promise(function (resolve, reject) {
             this.client.onopen = function () {
+                console.timeLog('global', 'gramjs / socket opened');
                 this.receive()
                 resolve(this)
             }.bind(this)
@@ -113,6 +117,7 @@ class PromisedWebSockets {
                 data = Buffer.from(message.data)
             }
             this.stream = Buffer.concat([this.stream, data])
+
             this.resolveRead(true)
         }.bind(this)
     }

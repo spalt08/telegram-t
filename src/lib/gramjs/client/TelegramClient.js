@@ -130,7 +130,11 @@ class TelegramClient {
      * @returns {Promise<void>}
      */
     async connect() {
+        console.timeLog('global', 'gramjs / connect start');
+
         await this.session.load()
+        console.timeLog('global', 'gramjs / session loaded !!');
+
         this._sender = new MTProtoSender(this.session.authKey, {
             logger: this._log,
             retries: this._connectionRetries,
@@ -143,15 +147,25 @@ class TelegramClient {
         })
         const connection = new this._connection(this.session.serverAddress
             , this.session.port, this.session.dcId, this._log)
+        console.timeLog('global', 'gramjs / connection created');
+
         if (!await this._sender.connect(connection)) {
             return
         }
+        console.timeLog('global', 'gramjs / connected');
+
         this.session.authKey = this._sender.authKey
         await this.session.save()
+        console.timeLog('global', 'gramjs / session saved');
+
         await this._sender.send(this._initWith(
             new requests.help.GetConfig({}),
         ))
+        console.timeLog('global', 'gramjs / config obtained');
+
         this._updateLoop()
+
+        console.timeLog('global', 'gramjs / connect complete');
     }
 
     async _updateLoop() {
@@ -837,7 +851,9 @@ class TelegramClient {
     async isUserAuthorized() {
         if (this._authorized === undefined || this._authorized === null) {
             try {
+                console.timeLog('global', 'gramjs / state request start');
                 await this.invoke(new requests.updates.GetState())
+                console.timeLog('global', 'gramjs / state request complete');
                 this._authorized = true
             } catch (e) {
                 this._authorized = false

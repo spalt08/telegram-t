@@ -6,9 +6,13 @@ import './modules';
 import App from './App';
 import './styles/index.scss';
 
+console.timeLog('global', 'index.tsx');
+
 getDispatch().init();
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.timeLog('global', 'dom ready');
+
   TeactDOM.render(
     <App />,
     document.getElementById('root'),

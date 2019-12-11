@@ -37,6 +37,7 @@ class IGE {
 
             Array.prototype.push.apply(plainText, iv2)
         }
+
         return Buffer.from(plainText)
     }
 

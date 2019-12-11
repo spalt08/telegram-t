@@ -12,6 +12,8 @@ GramJsLogger.setLevel('warn');
 let client: TelegramClient;
 
 export async function init(sessionId: string) {
+  console.timeLog('global', 'client init');
+
   const { StringSession } = session;
 
   const stringSession = new StringSession(sessionId);
@@ -21,6 +23,8 @@ export async function init(sessionId: string) {
     process.env.TELEGRAM_T_API_HASH,
     { useWSS: true } as any,
   );
+
+  console.timeLog('global', 'client instantiated');
 
   client.addEventHandler(onGramJsUpdate, { build: (update: object) => update });
 
@@ -35,6 +39,8 @@ export async function init(sessionId: string) {
       code: onRequestCode,
       password: onRequestPassword,
     } as any);
+
+    console.timeLog('global', 'auth ready');
 
     const newSessionId = stringSession.save();
 

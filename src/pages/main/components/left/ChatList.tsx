@@ -1,5 +1,5 @@
 import { UIEvent } from 'react';
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../../store/types';
@@ -30,6 +30,16 @@ const ChatList: FC<IProps> = ({
   }
 
   const chatsArray = areChatsLoaded && chats ? prepareChats(chats, loadedChatIds) : undefined;
+
+  if (chatsArray) {
+    console.timeLog('global', 'chats render start');
+  }
+
+  useEffect(() => {
+    if (chatsArray) {
+      console.timeLog('global', 'chats render complete');
+    }
+  });
 
   return (
     <div className="ChatList custom-scroll" onScroll={(e) => handleScrollThrottled(e, loadMoreChats)}>{

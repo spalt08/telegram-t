@@ -32,10 +32,14 @@ addReducer('setChatScrollOffset', (global, actions, payload) => {
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
+  console.timeLog('global', 'load chats start');
+
   const result = await fetchChats({
     limit: LOAD_CHATS_LIMIT,
     offsetDate,
   });
+
+  console.timeLog('global', 'load chats complete');
 
   if (!result) {
     return;
