@@ -453,7 +453,7 @@ class MTProtoSender {
      * @returns {Promise<void>}
      * @private
      */
-    async _handleRPCResult(message) {
+    _handleRPCResult(message) {
         const RPCResult = message.obj
         const state = this._pending_state[RPCResult.reqMsgId]
         if (state) {
@@ -488,7 +488,7 @@ class MTProtoSender {
             state.reject(error)
         } else {
             const reader = new BinaryReader(RPCResult.body)
-            const read = await state.request.readResult(reader)
+            const read = state.request.readResult(reader)
             state.resolve(read)
         }
     }
