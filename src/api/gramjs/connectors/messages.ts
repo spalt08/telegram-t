@@ -11,6 +11,10 @@ import localDb from '../localDb';
 import { loadMessageMedia } from './files';
 import { UNSUPPORTED_RESPONSE } from '../utils';
 import { onGramJsUpdate } from '../onGramJsUpdate';
+import { pause } from '../../../util/schedulers';
+
+// This is an heuristic value that allows subsequent images to load properly when intermediate load breaks.
+const IMAGE_LOAD_DELAY = 150;
 
 let onUpdate: OnApiUpdate;
 
@@ -47,11 +51,9 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     });
   });
 
-  const messages = (result.messages as GramJs.Message[])
-    .map((mtpMessage) => {
-      loadImage(mtpMessage);
-      return buildApiMessage(mtpMessage);
-    });
+  loadImages(result.messages as GramJs.Message[]);
+
+  const messages = (result.messages as GramJs.Message[]).map(buildApiMessage);
 
   return {
     messages,
@@ -95,22 +97,30 @@ export async function sendMessage(chatId: number, text: string) {
   }
 }
 
-function loadImage(mtpMessage: GramJs.Message) {
-  if (!isMessageWithImage(mtpMessage)) {
-    return;
-  }
+async function loadImages(messages: GramJs.Message[]) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const message of messages) {
+    if (isMessageWithImage(message)) {
+      await pause(IMAGE_LOAD_DELAY);
 
-  loadMessageMedia(mtpMessage).then((dataUri) => {
-    if (!dataUri) {
-      return;
+      try {
+        // eslint-disable-next-line no-loop-func
+        loadMessageMedia(message).then((dataUri) => {
+          if (!dataUri) {
+            return;
+          }
+
+          onUpdate({
+            '@type': 'updateMessageImage',
+            message_id: message.id,
+            data_uri: dataUri,
+          });
+        });
+      } catch (err) {
+        // Do nothing.
+      }
     }
-
-    onUpdate({
-      '@type': 'updateMessageImage',
-      message_id: mtpMessage.id,
-      data_uri: dataUri,
-    });
-  });
+  }
 }
 
 function isMessageWithImage(message: GramJs.Message) {
