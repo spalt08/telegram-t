@@ -24,18 +24,47 @@ const AUTO_CASTS = new Set([
     'InputDocument',
     'InputChatPhoto'
 ])
+const CACHE_KEY = 'GramJs:apiCache';
 
 function buildApiFromTlSchema() {
+    const isBrowser = typeof process === 'undefined' ||
+        process.type === 'renderer' ||
+        process.browser === true ||
+        process.__nwjs;
+
+    let definitions;
+    const fromCache = isBrowser && loadFromCache()
+
+    if (fromCache) {
+        definitions = fromCache
+    } else {
+        definitions = loadFromTlSchemas()
+
+        if (isBrowser) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(definitions))
+        }
+    }
+
+    return mergeWithNamespaces(
+        createClasses('constructor', definitions.constructors),
+        createClasses('request', definitions.requests)
+    )
+}
+
+function loadFromCache() {
+    const jsonCache = localStorage.getItem(CACHE_KEY)
+    return jsonCache && JSON.parse(jsonCache)
+}
+
+function loadFromTlSchemas() {
     const tlContent = readFileSync('./static/api.tl', 'utf-8')
-    const [constructorParamsApi, functionParamsApi] = extractParams(tlContent)
     const schemeContent = readFileSync('./static/schema.tl', 'utf-8')
+    const [constructorParamsApi, functionParamsApi] = extractParams(tlContent)
     const [constructorParamsSchema, functionParamsSchema] = extractParams(schemeContent)
     const constructors = [].concat(constructorParamsApi, constructorParamsSchema)
     const requests = [].concat(functionParamsApi, functionParamsSchema)
-    return mergeWithNamespaces(
-        createClasses('constructor', constructors),
-        createClasses('request', requests)
-    )
+
+    return { constructors, requests }
 }
 
 function mergeWithNamespaces(obj1, obj2) {

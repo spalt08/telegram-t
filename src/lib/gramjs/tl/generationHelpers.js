@@ -32,7 +32,7 @@ const AUTH_KEY_TYPES = new Set([
 ])
 
 
-const fromLine = (line, isFunction, methodInfo, layer) => {
+const fromLine = (line, isFunction) => {
     const match = line.match(/([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/)
     if (!match) {
         // Probably "vector#1cb5c415 {t:Type} # [ t ] = Vector t;"
@@ -47,7 +47,6 @@ const fromLine = (line, isFunction, methodInfo, layer) => {
         subclassOfId: crc32(match[3]),
         result: match[3],
         isFunction: isFunction,
-        layer: layer,
         namespace: null
     }
     if (!currentConfig.constructorId) {
@@ -103,9 +102,7 @@ function buildArgConfig(name, argType) {
         isFlag: false,
         skipConstructorId: false,
         flagIndex: -1,
-        cls: null,
         flagIndicator: true,
-        isGeneric: false,
         type: null,
         useVectorId: null
     }
@@ -119,7 +116,6 @@ function buildArgConfig(name, argType) {
     // The type can be an indicator that other arguments will be flags
     if (argType !== '#') {
         currentConfig.flagIndicator = false
-        currentConfig.isGeneric = argType.startsWith('!')
         // Strip the exclamation mark always to have only the name
         currentConfig.type = argType.replace(/^!+/, '')
 
@@ -212,7 +208,7 @@ const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES)
         }
 
         try {
-            const result = fromLine(line, isFunction, methodInfo, layer)
+            const result = fromLine(line, isFunction)
 
             if (ignoreIds.has(result.constructorId)) {
                 continue
@@ -245,10 +241,6 @@ const parseTl = function* (content, layer, methods = [], ignoreIds = CORE_TYPES)
                     obj.argsConfig[arg].type = 'bytes'
                 }
             }
-        }
-
-        for (const arg in obj.argsConfig) {
-            obj.argsConfig[arg].cls = objByType[obj.argsConfig[arg].type] || (obj.argsConfig[arg].type in objByName ? [objByName[obj.argsConfig[arg].type]] : [])
         }
     }
 
