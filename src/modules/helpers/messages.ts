@@ -129,6 +129,10 @@ export function isOwnMessage(message: ApiMessage) {
   return message.is_outgoing;
 }
 
+export function isActionMessage(message: ApiMessage) {
+  return !!message.content.action;
+}
+
 export function getSendingState(message: ApiMessage) {
   if (!message.sending_state) {
     return 'succeeded';

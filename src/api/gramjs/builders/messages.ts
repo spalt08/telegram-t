@@ -1,7 +1,15 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 import {
-  ApiMessage, ApiMessageForwardInfo, ApiPhoto, ApiPhotoCachedSize, ApiPhotoSize, ApiSticker, ApiVideo, ApiDocument,
+  ApiMessage,
+  ApiMessageForwardInfo,
+  ApiPhoto,
+  ApiPhotoCachedSize,
+  ApiPhotoSize,
+  ApiSticker,
+  ApiVideo,
+  ApiDocument,
+  ApiAction,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -49,8 +57,8 @@ export function buildApiMessageFromShortChat(
 
 export function buildApiMessageWithChatId(
   chatId: number,
-  mtpMessage: Pick<Partial<GramJs.Message>, (
-    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media'
+  mtpMessage: Pick<Partial<GramJs.Message & GramJs.MessageService>, (
+    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
   )>,
 ): ApiMessage {
   const sticker = mtpMessage.media && buildSticker(mtpMessage.media);
@@ -62,6 +70,7 @@ export function buildApiMessageWithChatId(
     text: mtpMessage.message,
     entities: mtpMessage.entities,
   };
+  const action = mtpMessage.action && buildAction(mtpMessage.action);
 
   return {
     id: mtpMessage.id,
@@ -74,6 +83,7 @@ export function buildApiMessageWithChatId(
       ...(photo && { photo }),
       ...(video && { video }),
       ...(document && { document }),
+      ...(action && { action }),
     },
     date: mtpMessage.date,
     sender_user_id: mtpMessage.fromId || DEFAULT_USER_ID,
@@ -233,6 +243,76 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | null {
     size,
     mimeType,
     fileName: (docAttr && docAttr.fileName) || 'File',
+  };
+}
+
+// TODO add supplementing information
+function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
+  let text = '';
+
+  if (action instanceof GramJs.MessageActionEmpty) {
+    return null;
+  }
+
+  switch (action.className) {
+    case 'MessageActionChatCreate':
+      text = 'Chat created';
+      break;
+    case 'MessageActionChatEditTitle':
+      text = `%user% changed group name to «${action.title}»`;
+      break;
+    case 'MessageActionChatEditPhoto':
+      text = 'Chat photo was changed';
+      break;
+    case 'MessageActionChatDeletePhoto':
+      text = 'Chat photo was deleted';
+      break;
+    case 'MessageActionChatAddUser':
+      text = '%user% was added to the chat';
+      break;
+    case 'MessageActionChatDeleteUser':
+      text = '%user% was removed from the chat';
+      break;
+    case 'MessageActionChatJoinedByLink':
+      text = '%user% joined the chat from invitation link';
+      break;
+    case 'MessageActionChannelCreate':
+      text = 'Channel created';
+      break;
+    case 'MessageActionChatMigrateTo':
+      text = 'Chat migrated';
+      break;
+    case 'MessageActionChannelMigrateFrom':
+      text = 'Channel migrated';
+      break;
+    case 'MessageActionPinMessage':
+      text = '%user% pinned %message%';
+      break;
+    case 'MessageActionHistoryClear':
+      text = 'Chat history was cleared';
+      break;
+    case 'MessageActionPhoneCall':
+      text = 'Phone Call';
+      break;
+    case 'MessageActionContactSignUp':
+      text = '%user% joined Telegram';
+      break;
+    case 'MessageActionGameScore':
+    case 'MessageActionPaymentSentMe':
+    case 'MessageActionPaymentSent':
+    case 'MessageActionScreenshotTaken':
+    case 'MessageActionCustomAction':
+    case 'MessageActionBotAllowed':
+    case 'MessageActionSecureValuesSentMe':
+    case 'MessageActionSecureValuesSent':
+    default:
+      text = '%ACTION_NOT_IMPLEMENTED%';
+      break;
+  }
+
+  return {
+    '@type': 'action',
+    text,
   };
 }
 

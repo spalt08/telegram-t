@@ -6,6 +6,7 @@ import {
   getMessageSticker,
   getMessageVideo,
   getMessageDocument,
+  isActionMessage,
 } from '../../../../../modules/helpers';
 import {
   ApiMessage,
@@ -72,6 +73,8 @@ export function groupMessages(messages: ApiMessage[]) {
       messages[index + 1] && (
         message.sender_user_id !== messages[index + 1].sender_user_id
         || message.is_outgoing !== messages[index + 1].is_outgoing
+        || isActionMessage(message)
+        || isActionMessage(messages[index + 1])
       )
     ) {
       currentMessageDateGroup.messageGroups.push(currentMessageGroup);

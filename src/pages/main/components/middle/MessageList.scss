@@ -30,10 +30,9 @@
     margin: 0 auto;
   }
 
-  .message-date-header {
+  .message-date-header,
+  .message-action-header {
     display: inline-block;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
     background: rgba(var(--color-text-secondary-rgb), 0.45);
     color: white;
     font-size: 0.9rem;
@@ -41,9 +40,31 @@
     line-height: 1.5rem;
     padding: 0 .5rem;
     border-radius: 0.75rem;
+  }
+
+  .message-date-header {
     position: sticky;
     top: 0.625rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     z-index: 10;
+  }
+
+  .message-action-header {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    .action-link {
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .message-date-header + .message-action-group {
+    margin-top: -0.5rem;
   }
 
   .message-group {

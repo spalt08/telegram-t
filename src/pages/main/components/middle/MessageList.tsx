@@ -5,7 +5,7 @@ import { getGlobal, withGlobal } from '../../../../lib/teactn';
 import { GlobalActions } from '../../../../store/types';
 import { ApiMessage } from '../../../../api/types';
 import { selectChatMessages, selectChatScrollOffset } from '../../../../modules/selectors';
-import { isOwnMessage, isPrivateChat } from '../../../../modules/helpers';
+import { isOwnMessage, isPrivateChat, isActionMessage } from '../../../../modules/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatChatDateHeader } from '../../../../util/dateFormat';
@@ -13,6 +13,7 @@ import { MessageDateGroup, groupMessages } from './message/utils';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import './MessageList.scss';
+import ServiceMessage from './ServiceMessage';
 
 type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
   areMessagesLoaded: boolean;
@@ -56,22 +57,29 @@ const MessageList: FC<IProps> = ({
     return (
       <div className="message-date-group">
         <div className="message-date-header">{formatChatDateHeader(messageDateGroup.datetime)}</div>
-        {messageDateGroup.messageGroups.map((messageGroup) => (
-          <div className="message-group">
-            {messageGroup.map((message, i) => {
-              const isOwn = isOwnMessage(message);
+        {messageDateGroup.messageGroups.map((messageGroup) => {
+          if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
+            const message = messageGroup[0];
+            return <ServiceMessage message={message} />;
+          }
 
-              return (
-                <Message
-                  key={message.id}
-                  message={message}
-                  showAvatar={!isPrivate && !isOwn}
-                  showSenderName={i === 0 && !isPrivate && !isOwn}
-                />
-              );
-            })}
-          </div>
-        ))}
+          return (
+            <div className="message-group">
+              {messageGroup.map((message, i) => {
+                const isOwn = isOwnMessage(message);
+
+                return (
+                  <Message
+                    key={message.id}
+                    message={message}
+                    showAvatar={!isPrivate && !isOwn}
+                    showSenderName={i === 0 && !isPrivate && !isOwn}
+                  />
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     );
   }

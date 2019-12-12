@@ -55,6 +55,11 @@ export interface ApiDocument {
   mimeType: string;
 }
 
+export interface ApiAction {
+  '@type': 'action';
+  text: string;
+}
+
 export interface ApiMessageForwardInfo {
   '@type': 'messageForwardInfo';
   from_chat_id?: number;
@@ -92,6 +97,7 @@ export interface ApiMessage {
     video?: ApiVideo;
     document?: ApiDocument;
     sticker?: ApiSticker;
+    action?: ApiAction;
   };
   date: number;
   is_outgoing: boolean;

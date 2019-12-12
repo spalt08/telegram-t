@@ -260,7 +260,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-  
+
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -379,14 +379,14 @@ namespace Api {
   }
 
   export class InputPeerEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPeerSelf extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPeerChat extends VirtualClass<{
     chatId: int;
@@ -426,14 +426,14 @@ namespace Api {
     channelId: int;
   };
   export class InputUserEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputUserSelf extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputUser extends VirtualClass<{
     userId: int;
@@ -483,9 +483,9 @@ namespace Api {
     name: string;
   };
   export class InputMediaEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMediaUploadedPhoto extends VirtualClass<{
     // flags: null;
@@ -634,9 +634,9 @@ namespace Api {
     poll: TypePoll;
   };
   export class InputChatPhotoEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputChatUploadedPhoto extends VirtualClass<{
     file: TypeInputFile;
@@ -649,9 +649,9 @@ namespace Api {
     id: TypeInputPhoto;
   };
   export class InputGeoPointEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputGeoPoint extends VirtualClass<{
     lat: double;
@@ -661,9 +661,9 @@ namespace Api {
     long: double;
   };
   export class InputPhotoEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPhoto extends VirtualClass<{
     id: long;
@@ -711,9 +711,9 @@ namespace Api {
     accessHash: long;
   };
   export class InputTakeoutFileLocation extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPhotoFileLocation extends VirtualClass<{
     id: long;
@@ -824,9 +824,9 @@ namespace Api {
     langCode?: string;
   };
   export class UserProfilePhotoEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UserProfilePhoto extends VirtualClass<{
     photoId: long;
@@ -840,9 +840,9 @@ namespace Api {
     dcId: int;
   };
   export class UserStatusEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UserStatusOnline extends VirtualClass<{
     expires: int;
@@ -855,19 +855,19 @@ namespace Api {
     wasOnline: int;
   };
   export class UserStatusRecently extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UserStatusLastWeek extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UserStatusLastMonth extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChatEmpty extends VirtualClass<{
     id: int;
@@ -1120,9 +1120,9 @@ namespace Api {
     version: int;
   };
   export class ChatPhotoEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChatPhoto extends VirtualClass<{
     photoSmall: TypeFileLocation;
@@ -1221,9 +1221,9 @@ namespace Api {
     action: TypeMessageAction;
   };
   export class MessageMediaEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageMediaPhoto extends VirtualClass<{
     // flags: null;
@@ -1253,9 +1253,9 @@ namespace Api {
     userId: int;
   };
   export class MessageMediaUnsupported extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageMediaDocument extends VirtualClass<{
     // flags: null;
@@ -1329,9 +1329,9 @@ namespace Api {
     results: TypePollResults;
   };
   export class MessageActionEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageActionChatCreate extends VirtualClass<{
     title: string;
@@ -1351,9 +1351,9 @@ namespace Api {
     photo: TypePhoto;
   };
   export class MessageActionChatDeletePhoto extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageActionChatAddUser extends VirtualClass<{
     users: int[];
@@ -1388,14 +1388,14 @@ namespace Api {
     chatId: int;
   };
   export class MessageActionPinMessage extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageActionHistoryClear extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageActionGameScore extends VirtualClass<{
     gameId: long;
@@ -1442,9 +1442,9 @@ namespace Api {
     duration?: int;
   };
   export class MessageActionScreenshotTaken extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MessageActionCustomAction extends VirtualClass<{
     message: string;
@@ -1469,9 +1469,9 @@ namespace Api {
     types: TypeSecureValueType[];
   };
   export class MessageActionContactSignUp extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class Dialog extends VirtualClass<{
     // flags: null;
@@ -1586,9 +1586,9 @@ namespace Api {
     bytes: bytes;
   };
   export class GeoPointEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class GeoPoint extends VirtualClass<{
     long: double;
@@ -1605,19 +1605,19 @@ namespace Api {
     peer: TypeInputPeer;
   };
   export class InputNotifyUsers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputNotifyChats extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputNotifyBroadcasts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPeerNotifySettings extends VirtualClass<{
     // flags: null;
@@ -1686,24 +1686,24 @@ namespace Api {
     settings?: TypeWallPaperSettings;
   };
   export class InputReportReasonSpam extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputReportReasonViolence extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputReportReasonPornography extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputReportReasonChildAbuse extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputReportReasonOther extends VirtualClass<{
     text: string;
@@ -1711,14 +1711,14 @@ namespace Api {
     text: string;
   };
   export class InputReportReasonCopyright extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputReportReasonGeoIrrelevant extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UserFull extends VirtualClass<{
     // flags: null;
@@ -1782,54 +1782,54 @@ namespace Api {
     status: TypeUserStatus;
   };
   export class InputMessagesFilterEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterPhotos extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterVideo extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterPhotoVideo extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterDocument extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterUrl extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterGif extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterVoice extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterMusic extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterChatPhotos extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterPhoneCalls extends VirtualClass<{
     // flags: null;
@@ -1839,29 +1839,29 @@ namespace Api {
     missed?: true;
   };
   export class InputMessagesFilterRoundVoice extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterRoundVideo extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterMyMentions extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterGeo extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputMessagesFilterContacts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateNewMessage extends VirtualClass<{
     message: TypeMessage;
@@ -2168,14 +2168,14 @@ namespace Api {
     order: long[];
   };
   export class UpdateStickerSets extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateSavedGifs extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateBotInlineQuery extends VirtualClass<{
     // flags: null;
@@ -2283,24 +2283,24 @@ namespace Api {
     draft: TypeDraftMessage;
   };
   export class UpdateReadFeaturedStickers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateRecentStickers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateConfig extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdatePtsChanged extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateChannelWebPage extends VirtualClass<{
     channelId: int;
@@ -2393,9 +2393,9 @@ namespace Api {
     difference: TypeLangPackDifference;
   };
   export class UpdateFavedStickers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateChannelReadMessagesContents extends VirtualClass<{
     channelId: int;
@@ -2405,9 +2405,9 @@ namespace Api {
     messages: int[];
   };
   export class UpdateContactsReset extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateChannelAvailableMessages extends VirtualClass<{
     channelId: int;
@@ -2500,9 +2500,9 @@ namespace Api {
     theme: TypeTheme;
   };
   export class UpdatesTooLong extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class UpdateShortMessage extends VirtualClass<{
     // flags: null;
@@ -2828,9 +2828,9 @@ namespace Api {
     accessHash: long;
   };
   export class EncryptedFileEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class EncryptedFile extends VirtualClass<{
     id: long;
@@ -2846,9 +2846,9 @@ namespace Api {
     keyFingerprint: int;
   };
   export class InputEncryptedFileEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputEncryptedFileUploaded extends VirtualClass<{
     id: long;
@@ -2902,9 +2902,9 @@ namespace Api {
     bytes: bytes;
   };
   export class InputDocumentEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputDocument extends VirtualClass<{
     id: long;
@@ -2949,34 +2949,34 @@ namespace Api {
     peer: TypePeer;
   };
   export class NotifyUsers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class NotifyChats extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class NotifyBroadcasts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageTypingAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageCancelAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageRecordVideoAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageUploadVideoAction extends VirtualClass<{
     progress: int;
@@ -2984,9 +2984,9 @@ namespace Api {
     progress: int;
   };
   export class SendMessageRecordAudioAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageUploadAudioAction extends VirtualClass<{
     progress: int;
@@ -3004,24 +3004,24 @@ namespace Api {
     progress: int;
   };
   export class SendMessageGeoLocationAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageChooseContactAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageGamePlayAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageRecordRoundAction extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SendMessageUploadRoundAction extends VirtualClass<{
     progress: int;
@@ -3029,94 +3029,94 @@ namespace Api {
     progress: int;
   };
   export class InputPrivacyKeyStatusTimestamp extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyChatInvite extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyPhoneCall extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyPhoneP2P extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyForwards extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyProfilePhoto extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyPhoneNumber extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyKeyAddedByPhone extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyStatusTimestamp extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyChatInvite extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyPhoneCall extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyPhoneP2P extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyForwards extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyProfilePhoto extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyPhoneNumber extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyKeyAddedByPhone extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyValueAllowContacts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyValueAllowAll extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyValueAllowUsers extends VirtualClass<{
     users: TypeInputUser[];
@@ -3124,14 +3124,14 @@ namespace Api {
     users: TypeInputUser[];
   };
   export class InputPrivacyValueDisallowContacts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyValueDisallowAll extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputPrivacyValueDisallowUsers extends VirtualClass<{
     users: TypeInputUser[];
@@ -3149,14 +3149,14 @@ namespace Api {
     chats: int[];
   };
   export class PrivacyValueAllowContacts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyValueAllowAll extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyValueAllowUsers extends VirtualClass<{
     users: int[];
@@ -3164,14 +3164,14 @@ namespace Api {
     users: int[];
   };
   export class PrivacyValueDisallowContacts extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyValueDisallowAll extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PrivacyValueDisallowUsers extends VirtualClass<{
     users: int[];
@@ -3201,9 +3201,9 @@ namespace Api {
     h: int;
   };
   export class DocumentAttributeAnimated extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class DocumentAttributeSticker extends VirtualClass<{
     // flags: null;
@@ -3254,9 +3254,9 @@ namespace Api {
     fileName: string;
   };
   export class DocumentAttributeHasStickers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class StickerPack extends VirtualClass<{
     emoticon: string;
@@ -3319,9 +3319,9 @@ namespace Api {
     cachedPage?: TypePage;
   };
   export class WebPageNotModified extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class Authorization extends VirtualClass<{
     // flags: null;
@@ -3366,9 +3366,9 @@ namespace Api {
     // flags: int;
   };
   export class ChatInviteEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChatInviteExported extends VirtualClass<{
     link: string;
@@ -3402,9 +3402,9 @@ namespace Api {
     participants?: TypeUser[];
   };
   export class InputStickerSetEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputStickerSetID extends VirtualClass<{
     id: long;
@@ -3419,9 +3419,9 @@ namespace Api {
     shortName: string;
   };
   export class InputStickerSetAnimatedEmoji extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class StickerSet extends VirtualClass<{
     // flags: null;
@@ -3722,9 +3722,9 @@ namespace Api {
     length: int;
   };
   export class InputChannelEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputChannel extends VirtualClass<{
     channelId: int;
@@ -3750,9 +3750,9 @@ namespace Api {
     maxId: int;
   };
   export class ChannelMessagesFilterEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelMessagesFilter extends VirtualClass<{
     // flags: null;
@@ -3825,14 +3825,14 @@ namespace Api {
     bannedRights: TypeChatBannedRights;
   };
   export class ChannelParticipantsRecent extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelParticipantsAdmins extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelParticipantsKicked extends VirtualClass<{
     q: string;
@@ -3840,9 +3840,9 @@ namespace Api {
     q: string;
   };
   export class ChannelParticipantsBots extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelParticipantsBanned extends VirtualClass<{
     q: string;
@@ -4178,44 +4178,44 @@ namespace Api {
     rating: double;
   };
   export class TopPeerCategoryBotsPM extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryBotsInline extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryCorrespondents extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryGroups extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryChannels extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryPhoneCalls extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryForwardUsers extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryForwardChats extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TopPeerCategoryPeers extends VirtualClass<{
     category: TypeTopPeerCategory;
@@ -4326,9 +4326,9 @@ namespace Api {
     score: int;
   };
   export class TextEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TextPlain extends VirtualClass<{
     text: string;
@@ -4420,9 +4420,9 @@ namespace Api {
     name: string;
   };
   export class PageBlockUnsupported extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PageBlockTitle extends VirtualClass<{
     text: TypeRichText;
@@ -4469,9 +4469,9 @@ namespace Api {
     text: TypeRichText;
   };
   export class PageBlockDivider extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PageBlockAnchor extends VirtualClass<{
     name: string;
@@ -4647,24 +4647,24 @@ namespace Api {
     caption: TypePageCaption;
   };
   export class PhoneCallDiscardReasonMissed extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PhoneCallDiscardReasonDisconnect extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PhoneCallDiscardReasonHangup extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PhoneCallDiscardReasonBusy extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class DataJSON extends VirtualClass<{
     data: string;
@@ -5132,14 +5132,14 @@ namespace Api {
     message: TypeMessage;
   };
   export class ChannelAdminLogEventActionParticipantJoin extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelAdminLogEventActionParticipantLeave extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelAdminLogEventActionParticipantInvite extends VirtualClass<{
     participant: TypeChannelParticipant;
@@ -5334,9 +5334,9 @@ namespace Api {
     id: int;
   };
   export class InputMessagePinned extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputDialogPeer extends VirtualClass<{
     peer: TypeInputPeer;
@@ -5395,9 +5395,9 @@ namespace Api {
     accessHash: long;
   };
   export class SecureFileEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureFile extends VirtualClass<{
     id: long;
@@ -5436,69 +5436,69 @@ namespace Api {
     email: string;
   };
   export class SecureValueTypePersonalDetails extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypePassport extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeDriverLicense extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeIdentityCard extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeInternalPassport extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeAddress extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeUtilityBill extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeBankStatement extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeRentalAgreement extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypePassportRegistration extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeTemporaryRegistration extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypePhone extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValueTypeEmail extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecureValue extends VirtualClass<{
     // flags: null;
@@ -5655,9 +5655,9 @@ namespace Api {
     date: int;
   };
   export class PasswordKdfAlgoUnknown extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow extends VirtualClass<{
     salt1: bytes;
@@ -5671,9 +5671,9 @@ namespace Api {
     p: bytes;
   };
   export class SecurePasswordKdfAlgoUnknown extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class SecurePasswordKdfAlgoPBKDF2HMACSHA512iter100000 extends VirtualClass<{
     salt: bytes;
@@ -5695,9 +5695,9 @@ namespace Api {
     secureSecretId: long;
   };
   export class InputCheckPasswordEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class InputCheckPasswordSRP extends VirtualClass<{
     srpId: long;
@@ -5745,9 +5745,9 @@ namespace Api {
     value: TypeJSONValue;
   };
   export class JsonNull extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class JsonBool extends VirtualClass<{
     value: Bool;
@@ -6118,14 +6118,14 @@ namespace Api {
     url: string;
   };
   export class UrlAuthResultDefault extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelLocationEmpty extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class ChannelLocation extends VirtualClass<{
     geoPoint: TypeGeoPoint;
@@ -6165,9 +6165,9 @@ namespace Api {
     slug: string;
   };
   export class ThemeDocumentNotModified extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class Theme extends VirtualClass<{
     // flags: null;
@@ -6341,19 +6341,19 @@ namespace Api {
     newNonceHash3: int128;
   };
   export class DestroyAuthKeyOk extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class DestroyAuthKeyNone extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class DestroyAuthKeyFail extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class MsgsAck extends VirtualClass<{
     msgIds: long[];
@@ -6432,14 +6432,14 @@ namespace Api {
     errorMessage: string;
   };
   export class RpcAnswerUnknown extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class RpcAnswerDroppedRunning extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class RpcAnswerDropped extends VirtualClass<{
     msgId: long;
@@ -6549,9 +6549,9 @@ namespace Api {
     length: int;
   };
   export class TlsBlockDomain extends VirtualClass<{
-    
+
   }> {
-    
+
   };
   export class TlsBlockGrease extends VirtualClass<{
     seed: int;
@@ -6563,58 +6563,58 @@ namespace Api {
   }> {
     entries: TypeTlsBlock[];
   };
-  
+
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FilePartial extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileJpeg extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileGif extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FilePng extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FilePdf extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileMp3 extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileMov extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileMp4 extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FileWebp extends VirtualClass<{
-      
+
     }> {
-      
+
     };
   }
 
@@ -6661,19 +6661,19 @@ namespace Api {
       emailPattern: string;
     };
     export class CodeTypeSms extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class CodeTypeCall extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class CodeTypeFlashCall extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class SentCodeTypeApp extends VirtualClass<{
       length: int;
@@ -6699,9 +6699,9 @@ namespace Api {
 
   export namespace contacts {
     export class ContactsNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class Contacts extends VirtualClass<{
       contacts: TypeContact[];
@@ -6760,9 +6760,9 @@ namespace Api {
       users: TypeUser[];
     };
     export class TopPeersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class TopPeers extends VirtualClass<{
       categories: TypeTopPeerCategoryPeers[];
@@ -6774,9 +6774,9 @@ namespace Api {
       users: TypeUser[];
     };
     export class TopPeersDisabled extends VirtualClass<{
-      
+
     }> {
-      
+
     };
   }
 
@@ -6917,9 +6917,9 @@ namespace Api {
       file: TypeEncryptedFile;
     };
     export class StickersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class Stickers extends VirtualClass<{
       hash: int;
@@ -6929,9 +6929,9 @@ namespace Api {
       stickers: TypeDocument[];
     };
     export class AllStickersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class AllStickers extends VirtualClass<{
       hash: int;
@@ -6964,9 +6964,9 @@ namespace Api {
       results: TypeFoundGif[];
     };
     export class SavedGifsNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class SavedGifs extends VirtualClass<{
       hash: int;
@@ -7032,9 +7032,9 @@ namespace Api {
       state: updates.TypeState;
     };
     export class FeaturedStickersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FeaturedStickers extends VirtualClass<{
       hash: int;
@@ -7046,9 +7046,9 @@ namespace Api {
       unread: long[];
     };
     export class RecentStickersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class RecentStickers extends VirtualClass<{
       hash: int;
@@ -7069,9 +7069,9 @@ namespace Api {
       sets: TypeStickerSetCovered[];
     };
     export class StickerSetInstallResultSuccess extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class StickerSetInstallResultArchive extends VirtualClass<{
       sets: TypeStickerSetCovered[];
@@ -7086,9 +7086,9 @@ namespace Api {
       users: TypeUser[];
     };
     export class FavedStickersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FavedStickers extends VirtualClass<{
       hash: int;
@@ -7100,9 +7100,9 @@ namespace Api {
       stickers: TypeDocument[];
     };
     export class FoundStickerSetsNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class FoundStickerSets extends VirtualClass<{
       hash: int;
@@ -7324,9 +7324,9 @@ namespace Api {
       url?: string;
     };
     export class NoAppUpdate extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class InviteText extends VirtualClass<{
       message: string;
@@ -7393,9 +7393,9 @@ namespace Api {
       termsOfService: help.TypeTermsOfService;
     };
     export class DeepLinkInfoEmpty extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class DeepLinkInfo extends VirtualClass<{
       // flags: null;
@@ -7409,9 +7409,9 @@ namespace Api {
       entities?: TypeMessageEntity[];
     };
     export class PassportConfigNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class PassportConfig extends VirtualClass<{
       hash: int;
@@ -7426,9 +7426,9 @@ namespace Api {
       name: string;
     };
     export class UserInfoEmpty extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class UserInfo extends VirtualClass<{
       message: string;
@@ -7560,9 +7560,9 @@ namespace Api {
       id: long;
     };
     export class WallPapersNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class WallPapers extends VirtualClass<{
       hash: int;
@@ -7581,9 +7581,9 @@ namespace Api {
       high: TypeAutoDownloadSettings;
     };
     export class ThemesNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class Themes extends VirtualClass<{
       hash: int;
@@ -7605,9 +7605,9 @@ namespace Api {
       users: TypeUser[];
     };
     export class ChannelParticipantsNotModified extends VirtualClass<{
-      
+
     }> {
-      
+
     };
     export class ChannelParticipant extends VirtualClass<{
       participant: TypeChannelParticipant;
@@ -7818,9 +7818,9 @@ namespace Api {
     encryptedData: bytes;
   };
   export class DestroyAuthKey extends Request<Partial<{
-    
+
   }>, TypeDestroyAuthKeyRes> {
-    
+
   };
   export class RpcDropAnswer extends Request<Partial<{
     reqMsgId: long;
@@ -7849,7 +7849,7 @@ namespace Api {
   }>, TypeDestroySessionRes> {
     sessionId: long;
   };
-  
+
 
   export namespace auth {
     export class SendCode extends Request<Partial<{
@@ -7884,14 +7884,14 @@ namespace Api {
       phoneCode: string;
     };
     export class LogOut extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class ResetAuthorizations extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class ExportAuthorization extends Request<Partial<{
       dcId: int;
@@ -7933,9 +7933,9 @@ namespace Api {
       password: TypeInputCheckPasswordSRP;
     };
     export class RequestPasswordRecovery extends Request<Partial<{
-      
+
     }>, auth.TypePasswordRecovery> {
-      
+
     };
     export class RecoverPassword extends Request<Partial<{
       code: string;
@@ -8003,9 +8003,9 @@ namespace Api {
       peer: TypeInputNotifyPeer;
     };
     export class ResetNotifySettings extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class UpdateProfile extends Request<Partial<{
       // flags: null;
@@ -8063,9 +8063,9 @@ namespace Api {
       reason: string;
     };
     export class GetAccountTTL extends Request<Partial<{
-      
+
     }>, TypeAccountDaysTTL> {
-      
+
     };
     export class SetAccountTTL extends Request<Partial<{
       ttl: TypeAccountDaysTTL;
@@ -8094,9 +8094,9 @@ namespace Api {
       period: int;
     };
     export class GetAuthorizations extends Request<Partial<{
-      
+
     }>, account.TypeAuthorizations> {
-      
+
     };
     export class ResetAuthorization extends Request<Partial<{
       hash: long;
@@ -8104,9 +8104,9 @@ namespace Api {
       hash: long;
     };
     export class GetPassword extends Request<Partial<{
-      
+
     }>, account.TypePassword> {
-      
+
     };
     export class GetPasswordSettings extends Request<Partial<{
       password: TypeInputCheckPasswordSRP;
@@ -8142,9 +8142,9 @@ namespace Api {
       period: int;
     };
     export class GetWebAuthorizations extends Request<Partial<{
-      
+
     }>, account.TypeWebAuthorizations> {
-      
+
     };
     export class ResetWebAuthorization extends Request<Partial<{
       hash: long;
@@ -8152,14 +8152,14 @@ namespace Api {
       hash: long;
     };
     export class ResetWebAuthorizations extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class GetAllSecureValues extends Request<Partial<{
-      
+
     }>, TypeSecureValue[]> {
-      
+
     };
     export class GetSecureValue extends Request<Partial<{
       types: TypeSecureValueType[];
@@ -8260,19 +8260,19 @@ namespace Api {
       code: string;
     };
     export class ResendPasswordEmail extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class CancelPasswordEmail extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class GetContactSignUpNotification extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class SetContactSignUpNotification extends Request<Partial<{
       silent: Bool;
@@ -8319,14 +8319,14 @@ namespace Api {
       settings: TypeWallPaperSettings;
     };
     export class ResetWallPapers extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class GetAutoDownloadSettings extends Request<Partial<{
-      
+
     }>, account.TypeAutoDownloadSettings> {
-      
+
     };
     export class SaveAutoDownloadSettings extends Request<Partial<{
       // flags: null;
@@ -8439,9 +8439,9 @@ namespace Api {
       hash: int;
     };
     export class GetStatuses extends Request<Partial<{
-      
+
     }>, TypeContactStatus[]> {
-      
+
     };
     export class GetContacts extends Request<Partial<{
       hash: int;
@@ -8527,14 +8527,14 @@ namespace Api {
       peer: TypeInputPeer;
     };
     export class ResetSaved extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class GetSaved extends Request<Partial<{
-      
+
     }>, TypeSavedContact[]> {
-      
+
     };
     export class ToggleTopPeers extends Request<Partial<{
       enabled: Bool;
@@ -9207,9 +9207,9 @@ namespace Api {
       entities?: TypeMessageEntity[];
     };
     export class GetAllDrafts extends Request<Partial<{
-      
+
     }>, TypeUpdates> {
-      
+
     };
     export class GetFeaturedStickers extends Request<Partial<{
       hash: int;
@@ -9480,9 +9480,9 @@ namespace Api {
       hash: int;
     };
     export class GetSplitRanges extends Request<Partial<{
-      
+
     }>, TypeMessageRange[]> {
-      
+
     };
     export class MarkDialogUnread extends Request<Partial<{
       // flags: null;
@@ -9494,14 +9494,14 @@ namespace Api {
       peer: TypeInputDialogPeer;
     };
     export class GetDialogUnreadMarks extends Request<Partial<{
-      
+
     }>, TypeDialogPeer[]> {
-      
+
     };
     export class ClearAllDrafts extends Request<Partial<{
-      
+
     }>, Bool> {
-      
+
     };
     export class UpdatePinnedMessage extends Request<Partial<{
       // flags: null;
@@ -9648,9 +9648,9 @@ namespace Api {
 
   export namespace updates {
     export class GetState extends Request<Partial<{
-      
+
     }>, updates.TypeState> {
-      
+
     };
     export class GetDifference extends Request<Partial<{
       // flags: null;
@@ -9788,14 +9788,14 @@ namespace Api {
 
   export namespace help {
     export class GetConfig extends Request<Partial<{
-      
+
     }>, TypeConfig> {
-      
+
     };
     export class GetNearestDc extends Request<Partial<{
-      
+
     }>, TypeNearestDc> {
-      
+
     };
     export class GetAppUpdate extends Request<Partial<{
       source: string;
@@ -9803,14 +9803,14 @@ namespace Api {
       source: string;
     };
     export class GetInviteText extends Request<Partial<{
-      
+
     }>, help.TypeInviteText> {
-      
+
     };
     export class GetSupport extends Request<Partial<{
-      
+
     }>, help.TypeSupport> {
-      
+
     };
     export class GetAppChangelog extends Request<Partial<{
       prevAppVersion: string;
@@ -9825,9 +9825,9 @@ namespace Api {
       message: string;
     };
     export class GetCdnConfig extends Request<Partial<{
-      
+
     }>, TypeCdnConfig> {
-      
+
     };
     export class GetRecentMeUrls extends Request<Partial<{
       referer: string;
@@ -9835,14 +9835,14 @@ namespace Api {
       referer: string;
     };
     export class GetProxyData extends Request<Partial<{
-      
+
     }>, help.TypeProxyData> {
-      
+
     };
     export class GetTermsOfServiceUpdate extends Request<Partial<{
-      
+
     }>, help.TypeTermsOfServiceUpdate> {
-      
+
     };
     export class AcceptTermsOfService extends Request<Partial<{
       id: TypeDataJSON;
@@ -9855,9 +9855,9 @@ namespace Api {
       path: string;
     };
     export class GetAppConfig extends Request<Partial<{
-      
+
     }>, TypeJSONValue> {
-      
+
     };
     export class SaveAppLog extends Request<Partial<{
       events: TypeInputAppEvent[];
@@ -9870,9 +9870,9 @@ namespace Api {
       hash: int;
     };
     export class GetSupportName extends Request<Partial<{
-      
+
     }>, help.TypeSupportName> {
-      
+
     };
     export class GetUserInfo extends Request<Partial<{
       userId: TypeInputUser;
@@ -10123,9 +10123,9 @@ namespace Api {
       offset: int;
     };
     export class GetGroupsForDiscussion extends Request<Partial<{
-      
+
     }>, messages.TypeChats> {
-      
+
     };
     export class SetDiscussionGroup extends Request<Partial<{
       broadcast: TypeInputChannel;
@@ -10214,9 +10214,9 @@ namespace Api {
       credentials: TypeInputPaymentCredentials;
     };
     export class GetSavedInfo extends Request<Partial<{
-      
+
     }>, payments.TypeSavedInfo> {
-      
+
     };
     export class ClearSavedInfo extends Request<Partial<{
       // flags: null;
@@ -10268,9 +10268,9 @@ namespace Api {
 
   export namespace phone {
     export class GetCallConfig extends Request<Partial<{
-      
+
     }>, TypeDataJSON> {
-      
+
     };
     export class RequestCall extends Request<Partial<{
       // flags: null;
