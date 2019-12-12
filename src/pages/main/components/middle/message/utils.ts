@@ -112,7 +112,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       contentParts = text;
     } else {
       classNames.push('text');
-      contentParts = options.isReply ? text : enhanceTextParts(message.content.text);
+      contentParts = options.isReply || !message.content.text ? text : enhanceTextParts(message.content.text);
     }
   }
 
