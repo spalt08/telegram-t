@@ -1,4 +1,4 @@
-import { TelegramClient, session, Api as GramJs } from '../../lib/gramjs';
+import { TelegramClient, sessions, Api as GramJs } from '../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { DEBUG } from '../../config';
@@ -12,11 +12,9 @@ GramJsLogger.setLevel('warn');
 let client: TelegramClient;
 
 export async function init(sessionId: string) {
-  const { StringSession } = session;
-
-  const stringSession = new StringSession(sessionId);
+  const session = new sessions.LocalStorageSession(sessionId);
   client = new TelegramClient(
-    stringSession,
+    session,
     process.env.TELEGRAM_T_API_ID,
     process.env.TELEGRAM_T_API_HASH,
     { useWSS: true } as any,
@@ -36,7 +34,7 @@ export async function init(sessionId: string) {
       password: onRequestPassword,
     } as any);
 
-    const newSessionId = stringSession.save();
+    const newSessionId = session.save();
 
     if (DEBUG) {
       // eslint-disable-next-line no-console

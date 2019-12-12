@@ -32,7 +32,9 @@ export async function fetchChats(
     offsetDate,
   }));
 
-  if (!result || !(result instanceof GramJs.messages.DialogsSlice) || !result.dialogs.length) {
+  // I had to change it to Dialogs to work for me.
+  if (!result || !(result instanceof GramJs.messages.DialogsSlice
+      || result instanceof GramJs.messages.Dialogs) || !result.dialogs.length) {
     throw new Error(UNSUPPORTED_RESPONSE);
   }
 

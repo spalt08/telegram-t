@@ -6,4 +6,4 @@ export { default as version } from './Version';
 export { default as events } from './events';
 export { default as utils } from './Utils';
 export { default as errors } from './errors';
-export { default as session } from './sessions';
+export { default as sessions } from './sessions';
