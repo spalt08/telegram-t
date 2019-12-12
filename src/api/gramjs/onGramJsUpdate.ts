@@ -12,16 +12,16 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function onGramJsUpdate(update: AnyLiteral, originRequest?: GramJs.AnyRequest) {
+export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs.AnyRequest) {
   if (
     update instanceof GramJs.UpdateNewMessage
     || update instanceof GramJs.UpdateShortChatMessage
     || update instanceof GramJs.UpdateShortMessage
-    // TODO UpdateNewChannelMessage
+    || update instanceof GramJs.UpdateNewChannelMessage
   ) {
     let message;
 
-    if (update instanceof GramJs.UpdateNewMessage) {
+    if (update instanceof GramJs.UpdateNewMessage || update instanceof GramJs.UpdateNewChannelMessage) {
       message = buildApiMessage(update.message);
     } else if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);

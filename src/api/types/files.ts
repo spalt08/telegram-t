@@ -1,3 +1,5 @@
+import { Api as GramJs } from '../../lib/gramjs';
+
 export interface ApiFile {
   '@type': 'file';
   id: number;
@@ -27,7 +29,7 @@ export interface ApiFileSource {
 }
 
 export interface ApiFileLocation {
-  dcId: int;
-  volumeId: MTProto.long;
+  dcId: GramJs.int128;
+  volumeId: GramJs.long;
   localId: number;
 }

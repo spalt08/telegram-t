@@ -9,6 +9,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { loadAvatar } from './files';
 import localDb from '../localDb';
 import { UNSUPPORTED_RESPONSE } from '../utils';
+import { ApiChat } from '../../types';
 
 let onUpdate: OnApiUpdate;
 
@@ -39,11 +40,16 @@ export async function fetchChats(
 
   const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
   const peersByKey = preparePeers(result);
-  const chats = result.dialogs.map((dialog) => {
+  const chats: ApiChat[] = [];
+  result.dialogs.forEach((dialog) => {
+    if (!(dialog instanceof GramJs.Dialog)) {
+      return;
+    }
+
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
-    const chat = buildApiChatFromDialog(dialog as GramJs.Dialog, peerEntity);
+    const chat = buildApiChatFromDialog(dialog, peerEntity);
     chat.last_message = lastMessagesByChatId[chat.id];
-    return chat;
+    chats.push(chat);
   });
 
   onUpdate({
@@ -51,7 +57,7 @@ export async function fetchChats(
     chats,
   });
 
-  const users = (result.users as GramJs.User[]).map(buildApiUser);
+  const users = result.users.map(buildApiUser);
   onUpdate({
     '@type': 'users',
     users,
@@ -70,11 +76,11 @@ function preparePeers(result: GramJs.messages.DialogsSlice) {
   const store: Record<string, GramJs.Chat | GramJs.User> = {};
 
   result.chats.forEach((chat) => {
-    store[`chat${chat.id}`] = chat as GramJs.Chat;
+    store[`chat${chat.id}`] = chat;
   });
 
   result.users.forEach((user) => {
-    store[`user${user.id}`] = user as GramJs.User;
+    store[`user${user.id}`] = user;
   });
 
   return store;
@@ -82,17 +88,19 @@ function preparePeers(result: GramJs.messages.DialogsSlice) {
 
 function updateLocalDb(result: GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
-    localDb.users[user.id] = user as GramJs.User;
+    localDb.users[user.id] = user;
   });
 
   result.chats.forEach((chat) => {
-    localDb.chats[chat.id] = chat as GramJs.Chat | GramJs.Channel;
+    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
+      localDb.chats[chat.id] = chat;
+    }
   });
 }
 
 function loadAvatars(result: GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
-    loadAvatar(user as GramJs.User).then((dataUri) => {
+    loadAvatar(user).then((dataUri) => {
       if (!dataUri) {
         return;
       }
@@ -106,7 +114,7 @@ function loadAvatars(result: GramJs.messages.DialogsSlice) {
   });
 
   result.chats.forEach((chat) => {
-    loadAvatar(chat as GramJs.Chat).then((dataUri) => {
+    loadAvatar(chat).then((dataUri) => {
       if (!dataUri) {
         return;
       }

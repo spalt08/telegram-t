@@ -95,7 +95,7 @@ export function getMessageFileKey(message: ApiMessage): string | null {
   if (photo) {
     const size = getMessagePhotoInlineSize(photo);
 
-    if (size && size.hasOwnProperty('photo')) {
+    if (size && ('photo' in size) && size.photo !== undefined) {
       // TdLib way.
       return `msg${size.photo.id}`;
     } else {

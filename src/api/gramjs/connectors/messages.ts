@@ -8,10 +8,11 @@ import { buildApiMessage, buildLocalMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
-import { loadMessageMedia } from './files';
+import { loadAvatar, loadMessageMedia } from './files';
 import { UNSUPPORTED_RESPONSE } from '../utils';
 import { onGramJsUpdate } from '../onGramJsUpdate';
 import { pause } from '../../../util/schedulers';
+import { getApiChatIdFromMtpPeer } from '../builders/chats';
 
 // This is an heuristic value that allows subsequent images to load properly when intermediate load breaks.
 const IMAGE_LOAD_DELAY = 150;
@@ -41,7 +42,7 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
     return null;
   }
 
-  (result.users as GramJs.User[]).forEach((mtpUser) => {
+  result.users.forEach((mtpUser) => {
     const user = buildApiUser(mtpUser);
 
     onUpdate({
@@ -49,11 +50,23 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
       id: user.id,
       user,
     });
+
+    loadAvatar(mtpUser).then((dataUri) => {
+      if (!dataUri) {
+        return;
+      }
+
+      onUpdate({
+        '@type': 'updateAvatar',
+        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as GramJs.TypePeer),
+        data_uri: dataUri,
+      });
+    });
   });
 
-  loadImages(result.messages as GramJs.Message[]);
+  void loadImages(result.messages);
 
-  const messages = (result.messages as GramJs.Message[]).map(buildApiMessage);
+  const messages = result.messages.map(buildApiMessage);
 
   return {
     messages,
@@ -97,10 +110,10 @@ export async function sendMessage(chatId: number, text: string) {
   }
 }
 
-async function loadImages(messages: GramJs.Message[]) {
+async function loadImages(messages: GramJs.TypeMessage[]) {
   // eslint-disable-next-line no-restricted-syntax
   for (const message of messages) {
-    if (isMessageWithImage(message)) {
+    if (message instanceof GramJs.Message && isMessageWithImage(message)) {
       await pause(IMAGE_LOAD_DELAY);
 
       try {
