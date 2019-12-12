@@ -254,60 +254,36 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
     return null;
   }
 
-  switch (action.className) {
-    case 'MessageActionChatCreate':
-      text = 'Chat created';
-      break;
-    case 'MessageActionChatEditTitle':
-      text = `%user% changed group name to «${action.title}»`;
-      break;
-    case 'MessageActionChatEditPhoto':
-      text = 'Chat photo was changed';
-      break;
-    case 'MessageActionChatDeletePhoto':
-      text = 'Chat photo was deleted';
-      break;
-    case 'MessageActionChatAddUser':
-      text = '%user% was added to the chat';
-      break;
-    case 'MessageActionChatDeleteUser':
-      text = '%user% was removed from the chat';
-      break;
-    case 'MessageActionChatJoinedByLink':
-      text = '%user% joined the chat from invitation link';
-      break;
-    case 'MessageActionChannelCreate':
-      text = 'Channel created';
-      break;
-    case 'MessageActionChatMigrateTo':
-      text = 'Chat migrated';
-      break;
-    case 'MessageActionChannelMigrateFrom':
-      text = 'Channel migrated';
-      break;
-    case 'MessageActionPinMessage':
-      text = '%user% pinned %message%';
-      break;
-    case 'MessageActionHistoryClear':
-      text = 'Chat history was cleared';
-      break;
-    case 'MessageActionPhoneCall':
-      text = 'Phone Call';
-      break;
-    case 'MessageActionContactSignUp':
-      text = '%user% joined Telegram';
-      break;
-    case 'MessageActionGameScore':
-    case 'MessageActionPaymentSentMe':
-    case 'MessageActionPaymentSent':
-    case 'MessageActionScreenshotTaken':
-    case 'MessageActionCustomAction':
-    case 'MessageActionBotAllowed':
-    case 'MessageActionSecureValuesSentMe':
-    case 'MessageActionSecureValuesSent':
-    default:
-      text = '%ACTION_NOT_IMPLEMENTED%';
-      break;
+  if (action instanceof GramJs.MessageActionChatCreate) {
+    text = 'Chat created';
+  } else if (action instanceof GramJs.MessageActionChatEditTitle) {
+    text = `%user% changed group name to «${action.title}»`;
+  } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
+    text = 'Chat photo was changed';
+  } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
+    text = 'Chat photo was deleted';
+  } else if (action instanceof GramJs.MessageActionChatAddUser) {
+    text = '%user% was added to the chat';
+  } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
+    text = '%user% was removed from the chat';
+  } else if (action instanceof GramJs.MessageActionChatJoinedByLink) {
+    text = '%user% joined the chat from invitation link';
+  } else if (action instanceof GramJs.MessageActionChannelCreate) {
+    text = 'Channel created';
+  } else if (action instanceof GramJs.MessageActionChatMigrateTo) {
+    text = 'Chat migrated';
+  } else if (action instanceof GramJs.MessageActionChannelMigrateFrom) {
+    text = 'Channel migrated';
+  } else if (action instanceof GramJs.MessageActionPinMessage) {
+    text = '%user% pinned %message%';
+  } else if (action instanceof GramJs.MessageActionHistoryClear) {
+    text = 'Chat history was cleared';
+  } else if (action instanceof GramJs.MessageActionPhoneCall) {
+    text = 'Phone Call';
+  } else if (action instanceof GramJs.MessageActionContactSignUp) {
+    text = '%user% joined Telegram';
+  } else {
+    text = '%ACTION_NOT_IMPLEMENTED%';
   }
 
   return {
