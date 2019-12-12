@@ -1,5 +1,4 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-
 import { ApiMessage, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from '../client';
@@ -8,7 +7,6 @@ import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
 import { loadAvatar, loadMessageMedia } from './files';
-import { UNSUPPORTED_RESPONSE } from '../utils';
 import { onGramJsUpdate } from '../onGramJsUpdate';
 import { pause } from '../../../util/schedulers';
 import { getApiChatIdFromMtpPeer } from '../builders/chats';
@@ -98,8 +96,9 @@ export async function sendMessage({ chatId, text }: { chatId: number; text: stri
   });
   const result = await invokeRequest(request);
 
+  // TODO Implement
   if (result instanceof GramJs.UpdatesTooLong) {
-    throw new Error(UNSUPPORTED_RESPONSE);
+    return;
   }
 
   if (result instanceof GramJs.Updates) {

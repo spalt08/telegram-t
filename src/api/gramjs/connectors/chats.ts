@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate } from '../../types';
+import { OnApiUpdate, ApiChat } from '../../types';
 
 import { invokeRequest } from '../client';
 import { buildApiChatFromDialog, getApiChatIdFromMtpPeer, getPeerKey } from '../builders/chats';
@@ -8,8 +8,6 @@ import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { loadAvatar } from './files';
 import localDb from '../localDb';
-import { UNSUPPORTED_RESPONSE } from '../utils';
-import { ApiChat } from '../../types';
 
 let onUpdate: OnApiUpdate;
 
@@ -32,10 +30,8 @@ export async function fetchChats(
     offsetDate,
   }));
 
-  // I had to change it to Dialogs to work for me.
-  if (!result || !(result instanceof GramJs.messages.DialogsSlice
-      || result instanceof GramJs.messages.Dialogs) || !result.dialogs.length) {
-    throw new Error(UNSUPPORTED_RESPONSE);
+  if (result instanceof GramJs.messages.DialogsNotModified) {
+    return null;
   }
 
   updateLocalDb(result);
@@ -74,7 +70,7 @@ export async function fetchChats(
   };
 }
 
-function preparePeers(result: GramJs.messages.DialogsSlice) {
+function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
   const store: Record<string, GramJs.Chat | GramJs.User> = {};
 
   result.chats.forEach((chat) => {
@@ -88,7 +84,7 @@ function preparePeers(result: GramJs.messages.DialogsSlice) {
   return store;
 }
 
-function updateLocalDb(result: GramJs.messages.DialogsSlice) {
+function updateLocalDb(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
     localDb.users[user.id] = user;
   });
@@ -100,7 +96,7 @@ function updateLocalDb(result: GramJs.messages.DialogsSlice) {
   });
 }
 
-function loadAvatars(result: GramJs.messages.DialogsSlice) {
+function loadAvatars(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
     loadAvatar(user).then((dataUri) => {
       if (!dataUri) {
