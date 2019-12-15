@@ -21,6 +21,7 @@ export interface ApiChat {
     small: ApiFileLocation;
     big: ApiFileLocation;
   };
+  access_hash: string;
   // Only in TDLib.
   photo?: {
     small: ApiFile;

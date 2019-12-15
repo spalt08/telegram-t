@@ -1,5 +1,5 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
-import { ApiMessage } from '../../../api/types';
+import { ApiChat, ApiMessage } from '../../../api/types';
 
 import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -8,28 +8,31 @@ const MESSAGE_SLICE_LIMIT = 50;
 
 addReducer('loadChatMessages', (global, actions, payload) => {
   const { chatId } = payload!;
+  const chat = global.chats.byId[chatId];
 
-  void loadChatMessages(chatId);
+  void loadChatMessages(chat);
 });
 
 addReducer('loadMoreChatMessages', (global, actions, payload) => {
   const { chatId } = payload!;
 
+  const chat = global.chats.byId[chatId];
   const byChatId = global.messages.byChatId[chatId];
   const chatMessageIds = byChatId ? Object.keys(byChatId.byId || {}) : null;
   const lowestMessageId = chatMessageIds && chatMessageIds.length && Math.min(...chatMessageIds.map(Number));
 
-  void loadChatMessages(chatId, lowestMessageId || undefined);
+  void loadChatMessages(chat, lowestMessageId || undefined);
 });
 
 addReducer('sendTextMessage', (global, actions, payload) => {
   const { chatId, text } = payload!;
+  const chat = global.chats.byId[chatId];
 
-  void sendTextMessage(chatId, text);
+  void sendTextMessage(chat, text);
 });
 
-async function loadChatMessages(chatId: number, fromMessageId = 0) {
-  let messages = await loadChatMessagesPart(chatId, fromMessageId);
+async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
+  let messages = await loadChatMessagesPart(chat, fromMessageId);
 
   if (!messages) {
     return;
@@ -38,7 +41,7 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
   let wasLatestEmpty = !messages.length;
 
   while (messages.length < MESSAGE_SLICE_LIMIT && !wasLatestEmpty) {
-    const nextPart: ApiMessage[] | null = await loadChatMessagesPart(chatId, messages[messages.length - 1].id);
+    const nextPart: ApiMessage[] | null = await loadChatMessagesPart(chat, messages[messages.length - 1].id);
 
     if (nextPart && nextPart.length) {
       messages = [
@@ -60,9 +63,9 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
       ...global.messages,
       byChatId: {
         ...global.messages.byChatId,
-        [chatId]: {
+        [chat.id]: {
           byId: {
-            ...(global.messages.byChatId[chatId] || {}).byId,
+            ...(global.messages.byChatId[chat.id] || {}).byId,
             ...messagesById,
           },
         },
@@ -71,9 +74,9 @@ async function loadChatMessages(chatId: number, fromMessageId = 0) {
   });
 }
 
-async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
+async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
   const result = await callSdk('fetchMessages', {
-    chatId,
+    chat,
     fromMessageId,
     limit: MESSAGE_SLICE_LIMIT,
   });
@@ -85,6 +88,6 @@ async function loadChatMessagesPart(chatId: number, fromMessageId = 0) {
   return result.messages;
 }
 
-function sendTextMessage(chatId: number, text: string) {
-  void callSdk('sendMessage', { chatId, text });
+function sendTextMessage(chat: ApiChat, text: string) {
+  void callSdk('sendMessage', { chat, text });
 }

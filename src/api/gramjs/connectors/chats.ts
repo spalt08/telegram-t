@@ -7,7 +7,6 @@ import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { loadAvatar } from './files';
-import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -33,8 +32,6 @@ export async function fetchChats(
   if (result instanceof GramJs.messages.DialogsNotModified) {
     return null;
   }
-
-  updateLocalDb(result);
 
   const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
   const peersByKey = preparePeers(result);
@@ -82,18 +79,6 @@ function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsS
   });
 
   return store;
-}
-
-function updateLocalDb(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
-  result.users.forEach((user) => {
-    localDb.users[user.id] = user;
-  });
-
-  result.chats.forEach((chat) => {
-    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
-      localDb.chats[chat.id] = chat;
-    }
-  });
 }
 
 function loadAvatars(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {

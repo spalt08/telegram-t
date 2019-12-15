@@ -3,7 +3,10 @@ import { ApiChat } from '../../types';
 import { isPeerChat, isPeerUser } from './peers';
 import { buildApiPhotoLocations } from './common';
 
-export function buildApiChatFromDialog(dialog: GramJs.Dialog, peerEntity: GramJs.User | GramJs.Chat): ApiChat {
+export function buildApiChatFromDialog(
+  dialog: GramJs.Dialog,
+  peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel,
+): ApiChat {
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
@@ -17,6 +20,7 @@ export function buildApiChatFromDialog(dialog: GramJs.Dialog, peerEntity: GramJs
     unread_count: dialog.unreadCount,
     unread_mention_count: 0, // TODO
     is_pinned: dialog.pinned || false,
+    ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
   };
 }
 

@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiMessage, OnApiUpdate } from '../../types';
+import { ApiChat, ApiMessage, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from '../client';
 import { buildApiMessage, buildLocalMessage } from '../builders/messages';
@@ -20,15 +20,15 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function fetchMessages({ chatId, fromMessageId, limit }: {
-  chatId: number;
+export async function fetchMessages({ chat, fromMessageId, limit }: {
+  chat: ApiChat;
   fromMessageId: number;
   limit: number;
 }): Promise<{ messages: ApiMessage[] } | null> {
   const result = await invokeRequest(new GramJs.messages.GetHistory({
     offsetId: fromMessageId,
     limit,
-    peer: buildInputPeer(chatId),
+    peer: buildInputPeer(chat.id, chat.access_hash),
   }));
 
   if (
@@ -70,18 +70,18 @@ export async function fetchMessages({ chatId, fromMessageId, limit }: {
   };
 }
 
-export async function sendMessage({ chatId, text }: { chatId: number; text: string }) {
-  const localMessage = buildLocalMessage(chatId, text);
+export async function sendMessage({ chat, text }: { chat: ApiChat; text: string }) {
+  const localMessage = buildLocalMessage(chat.id, text);
   onUpdate({
     '@type': 'updateMessage',
     id: localMessage.id,
-    chat_id: chatId,
+    chat_id: chat.id,
     message: localMessage,
   });
 
   onUpdate({
     '@type': 'updateChat',
-    id: chatId,
+    id: chat.id,
     chat: {
       last_message: localMessage,
     },
@@ -91,7 +91,7 @@ export async function sendMessage({ chatId, text }: { chatId: number; text: stri
   localDb.localMessages[randomId.toString()] = localMessage;
   const request = new GramJs.messages.SendMessage({
     message: text,
-    peer: buildInputPeer(chatId),
+    peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
   });
   const result = await invokeRequest(request);

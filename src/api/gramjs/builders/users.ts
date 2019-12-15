@@ -15,6 +15,7 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
     phone_number: mtpUser.phone || '',
     profile_photo_locations: buildApiPhotoLocations(mtpUser),
     status: buildApiUserStatus(mtpUser.status),
+    ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
   };
 }
 

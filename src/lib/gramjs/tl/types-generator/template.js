@@ -136,7 +136,7 @@ namespace Api {
   type Bool = boolean;
   type int128 = number;
   type int256 = number;
-  type long = number[] | string | BigInteger;
+  type long = BigInteger;
   type bytes = string | Uint8Array;
 
   class VirtualClass<Args extends AnyLiteral> {

@@ -19,6 +19,7 @@ export interface ApiUser {
   };
   username: string;
   phone_number: string;
+  access_hash?: string;
 
   // Obtained from UserFullInfo
   bio?: string;
