@@ -14,7 +14,7 @@ import {
 
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
-import { bytesToDataUri } from './common';
+import { bytesToDataUri, omitGramJsFields } from './common';
 
 // TODO Maybe we do not need it.
 const DEFAULT_USER_ID = 0;
@@ -68,7 +68,7 @@ export function buildApiMessageWithChatId(
   const text = mtpMessage.message && {
     '@type': 'formattedText' as const,
     text: mtpMessage.message,
-    entities: mtpMessage.entities,
+    ...(mtpMessage.entities && { entities: mtpMessage.entities.map(omitGramJsFields) }),
   };
   const action = mtpMessage.action && buildAction(mtpMessage.action);
 
