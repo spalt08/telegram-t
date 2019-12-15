@@ -1,7 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiChat } from '../../types';
 import { isPeerChat, isPeerUser } from './peers';
-import { buildApiPhotoLocations } from './common';
 
 export function buildApiChatFromDialog(
   dialog: GramJs.Dialog,
@@ -14,7 +13,6 @@ export function buildApiChatFromDialog(
       ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
-    photo_locations: buildApiPhotoLocations(peerEntity),
     last_read_outbox_message_id: dialog.readOutboxMaxId,
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,

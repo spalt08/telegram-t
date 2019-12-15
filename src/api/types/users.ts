@@ -1,4 +1,4 @@
-import { ApiFile, ApiFileLocation } from './files';
+import { ApiFile } from './files';
 
 export interface ApiUser {
   id: number;
@@ -12,10 +12,6 @@ export interface ApiUser {
   profile_photo?: {
     small: ApiFile;
     big: ApiFile;
-  };
-  profile_photo_locations?: {
-    small: ApiFileLocation;
-    big: ApiFileLocation;
   };
   username: string;
   phone_number: string;

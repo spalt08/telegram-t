@@ -1,6 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus } from '../../types';
-import { buildApiPhotoLocations } from './common';
 
 export function buildApiUser(mtpUser: GramJs.User): ApiUser {
   return {
@@ -13,7 +12,6 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
     last_name: mtpUser.lastName,
     username: mtpUser.username || '',
     phone_number: mtpUser.phone || '',
-    profile_photo_locations: buildApiPhotoLocations(mtpUser),
     status: buildApiUserStatus(mtpUser.status),
     ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
   };

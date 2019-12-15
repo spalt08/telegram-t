@@ -162,15 +162,13 @@ export function isUserOnline(user: ApiUser) {
 }
 
 export function getUserPhotoKey(user: ApiUser): string | null {
-  const { profile_photo, profile_photo_locations } = user;
+  const { profile_photo } = user;
 
   // TdLib way.
   if (profile_photo) {
     return `user${profile_photo.small.id}`;
   // GramJs way.
-  } else if (profile_photo_locations) {
+  } else {
     return `avatar${user.id}`;
   }
-
-  return null;
 }

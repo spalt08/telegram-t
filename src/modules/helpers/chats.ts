@@ -21,15 +21,13 @@ export function getChatTitle(chat: ApiChat) {
 }
 
 export function getChatPhotoKey(chat: ApiChat): string | null {
-  const { photo, photo_locations } = chat;
+  const { photo } = chat;
 
   // TdLib way.
   if (photo) {
     return `chat${photo.small.id}`;
   // GramJs way.
-  } else if (photo_locations) {
+  } else {
     return `avatar${chat.id}`;
   }
-
-  return null;
 }

@@ -1,5 +1,5 @@
 import { ApiMessage } from './messages';
-import { ApiFile, ApiFileLocation } from './files';
+import { ApiFile } from './files';
 
 export interface ApiChat {
   id: number;
@@ -17,11 +17,7 @@ export interface ApiChat {
   unread_count: number;
   unread_mention_count: number;
   is_pinned: boolean;
-  photo_locations?: {
-    small: ApiFileLocation;
-    big: ApiFileLocation;
-  };
-  access_hash: string;
+  access_hash?: string;
   // Only in TDLib.
   photo?: {
     small: ApiFile;
