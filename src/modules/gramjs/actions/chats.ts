@@ -1,14 +1,10 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addReducer, getGlobal, setGlobal,
 } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
 
 const LOAD_CHATS_LIMIT = 50;
-
-addReducer('loadChats', () => {
-  void loadChats();
-});
 
 addReducer('loadMoreChats', (global) => {
   const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
@@ -61,11 +57,4 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
       ],
     },
   });
-
-  const currentSelectedId = global.chats.selectedId;
-  const prevSelectedId = Number(localStorage.getItem('selectedChatId'));
-
-  if (!currentSelectedId && prevSelectedId && newIds.includes(prevSelectedId)) {
-    getDispatch().selectChat({ id: prevSelectedId });
-  }
 }

@@ -84,7 +84,6 @@ const MessageList: FC<IProps> = ({
     );
   }
 
-  // TODO @perf Replace the whole element while rendering, it will be faster for long lists.
   return (
     <div
       className={`MessageList custom-scroll ${isPrivate ? 'no-avatars' : ''}`}
@@ -112,8 +111,8 @@ function handleScroll(
 
   setChatScrollOffset({ chatId, scrollOffset: target.scrollHeight - target.scrollTop });
 
-  if (loadMoreChatMessagesThrottled && target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-    loadMoreChatMessagesThrottled({ chatId });
+  if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+    loadMoreChatMessagesThrottled!({ chatId });
   }
 }
 

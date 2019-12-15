@@ -6,7 +6,7 @@ import { initSdk, callSdk } from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
-  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || '';
+  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
   void initSdk(onUpdate, sessionId);
 
   return {
@@ -49,8 +49,18 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   };
 });
 
+addReducer('saveSession', (global, actions, payload) => {
+  const { sessionId } = payload!;
+  localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
+});
+
+
 addReducer('signOut', () => {
-  localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
+  if (sessionId) {
+    localStorage.removeItem(sessionId);
+    localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+  }
 
   getDispatch().init();
 });

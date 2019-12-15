@@ -1,7 +1,6 @@
-import { ApiUpdate, ApiUpdateAuthorizationState } from '../../../api/types';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { getGlobal, setGlobal } from '../../../lib/teactn';
-import { GRAMJS_SESSION_ID_KEY } from '../../../config';
+import { ApiUpdate, ApiUpdateAuthorizationState } from '../../../api/types';
 
 export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
@@ -47,8 +46,10 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
     case 'authorizationStateReady': {
       const { session_id } = update;
       if (session_id && getGlobal().authRememberMe) {
-        localStorage.setItem(GRAMJS_SESSION_ID_KEY, session_id);
+        getDispatch().saveSession({ sessionId: session_id });
       }
+
+      getDispatch().sync();
 
       setGlobal({
         ...getGlobal(),

@@ -23,7 +23,6 @@ export type GlobalState = {
   };
 
   messages: {
-    selectedId?: number;
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
     }>;
@@ -46,7 +45,7 @@ export type GlobalState = {
 export type ActionTypes = (
   // system
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' | 'toggleRightColumn' |
+  'setAuthRememberMe' | 'toggleRightColumn' | 'saveSession' | 'sync' |
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages
