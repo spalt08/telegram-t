@@ -7,3 +7,4 @@ export { default as events } from './events';
 export { default as utils } from './Utils';
 export { default as errors } from './errors';
 export { default as sessions } from './sessions';
+export { default as helpers } from './Helpers';

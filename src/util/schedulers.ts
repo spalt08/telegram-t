@@ -2,7 +2,7 @@ type AnyArgsFunction = (...args: any) => void;
 type NoArgsFunction = () => void;
 type Scheduler = typeof requestAnimationFrame | typeof onNextTick | typeof runNow;
 
-export function debounce<F extends NoArgsFunction>(
+export function debounce<F extends AnyArgsFunction>(
   fn: F,
   ms: number,
   shouldRunFirst = true,
@@ -10,18 +10,20 @@ export function debounce<F extends NoArgsFunction>(
 ) {
   let waitingTimeout: number | null = null;
 
-  return () => {
+  return (...args: Parameters<F>) => {
     if (waitingTimeout) {
       clearTimeout(waitingTimeout);
       waitingTimeout = null;
     } else if (shouldRunFirst) {
-      fn();
+      // @ts-ignore
+      fn(...args);
     }
 
     // TODO `window.` is a workaround for TS.
     waitingTimeout = window.setTimeout(() => {
       if (shouldRunLast) {
-        fn();
+        // @ts-ignore
+        fn(...args);
       }
 
       waitingTimeout = null;
@@ -45,6 +47,7 @@ export function throttle<F extends AnyArgsFunction>(
     if (!interval) {
       if (shouldRunFirst) {
         isPending = false;
+        // @ts-ignore
         fn(...args);
       }
 
@@ -56,6 +59,7 @@ export function throttle<F extends AnyArgsFunction>(
         }
 
         isPending = false;
+        // @ts-ignore
         fn(...args);
       }, ms);
     }
@@ -86,6 +90,7 @@ export function throttleWith<F extends AnyArgsFunction>(schedulerFn: Scheduler, 
 
       schedulerFn(() => {
         waiting = false;
+        // @ts-ignore
         fn(...args);
       });
     }

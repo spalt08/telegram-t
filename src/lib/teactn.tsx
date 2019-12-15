@@ -2,7 +2,6 @@ import React, {
   FC, Props, useEffect, useState,
 } from './teact';
 
-import { DEBUG } from '../config';
 import useForceUpdate from '../hooks/useForceUpdate';
 import generateIdFor from '../util/generateIdFor';
 import { throttleWithRaf } from '../util/schedulers';
@@ -50,11 +49,6 @@ const runCallbacksThrottled = throttleWithRaf(runCallbacks);
 
 export function setGlobal(newGlobal?: GlobalState) {
   if (typeof newGlobal === 'object' && newGlobal !== global) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[State] UPDATE', { global, newGlobal });
-    }
-
     global = newGlobal;
     runCallbacksThrottled();
   }
@@ -104,16 +98,22 @@ export function addReducer(name: ActionTypes, reducer: Reducer) {
     reducers[name] = [];
 
     actions[name] = (payload?: ActionPayload) => {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('[State] ACTION', name, payload);
-      }
-
       onDispatch(name, payload);
     };
   }
 
   reducers[name].push(reducer);
+}
+
+export function addCallback(cb: Function) {
+  callbacks.push(cb);
+}
+
+export function removeCallback(cb: Function) {
+  const index = callbacks.indexOf(cb);
+  if (index !== -1) {
+    delete callbacks[index];
+  }
 }
 
 export function withGlobal(
