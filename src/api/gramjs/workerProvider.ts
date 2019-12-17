@@ -12,22 +12,11 @@ type WorkerPromiseStore = {
 };
 
 const worker = new Worker('./worker.ts');
+// TODO Use `MessageChannel` instead.
 const workerPromises: Record<string, WorkerPromiseStore> = {};
 
 export function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
-  worker.onmessage = (({ data }: WorkerMessageEvent) => {
-    if (data.type === 'update') {
-      onUpdate(data.update);
-    } else if (data.type === 'sdkResponse') {
-      if (data.messageId && workerPromises[data.messageId]) {
-        if (data.response) {
-          workerPromises[data.messageId].resolve(data.response);
-        } else if (data.error) {
-          workerPromises[data.messageId].reject(data.error);
-        }
-      }
-    }
-  });
+  subscribeToWorker(onUpdate);
 
   return sendToWorker({
     type: 'init',
@@ -43,6 +32,22 @@ export function callSdk<T extends keyof Sdk>(fnName: T, args: SdkArgs<T>): SdkRe
     name: fnName,
     args,
   }, true) as SdkResponse<T>;
+}
+
+function subscribeToWorker(onUpdate: OnApiUpdate) {
+  worker.addEventListener('message', ({ data }: WorkerMessageEvent) => {
+    if (data.type === 'update') {
+      onUpdate(data.update);
+    } else if (data.type === 'sdkResponse') {
+      if (data.messageId && workerPromises[data.messageId]) {
+        if (data.response) {
+          workerPromises[data.messageId].resolve(data.response);
+        } else if (data.error) {
+          workerPromises[data.messageId].reject(data.error);
+        }
+      }
+    }
+  });
 }
 
 function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false) {
