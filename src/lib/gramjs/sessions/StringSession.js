@@ -82,6 +82,24 @@ class StringSession extends MemorySession {
             this.authKey.getKey(),
         ]))
     }
+
+    getAuthKey(dcId) {
+        if (dcId && dcId !== this.dcId) {
+            // Not supported.
+            return undefined
+        }
+
+        return this.authKey
+    }
+
+    setAuthKey(authKey, dcId) {
+        if (dcId && dcId !== this.dcId) {
+            // Not supported.
+            return undefined
+        }
+
+        this.authKey = authKey
+    }
 }
 
 module.exports = StringSession

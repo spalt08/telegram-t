@@ -77,9 +77,7 @@ class TelegramClient {
         } else if (!(session instanceof Session)) {
             throw new Error('The given session must be str or a session instance')
         }
-        if (!session.serverAddress || (session.serverAddress.includes(':') !== this._useIPV6)) {
-            session.setDC(DEFAULT_DC_ID, this._useIPV6 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, args.useWSS ? 443 : 80)
-        }
+
         this.floodSleepLimit = args.floodSleepLimit
         this._eventBuilders = []
 
@@ -122,6 +120,8 @@ class TelegramClient {
                 }),
             })
         }
+
+        this._args = args
         // These will be set later
         this._config = null
         this.phoneCodeHashes = []
@@ -138,7 +138,7 @@ class TelegramClient {
      * @returns {Promise<void>}
      */
     async connect() {
-        //await this.session.load()
+        await this._initSession()
 
         this._sender = new MTProtoSender(this.session.getAuthKey(), {
             logger: this._log,
@@ -161,6 +161,14 @@ class TelegramClient {
             new requests.help.GetConfig({}),
         ))
         this._updateLoop()
+    }
+
+    async _initSession() {
+        await this.session.load()
+
+        if (!this.session.serverAddress || (this.session.serverAddress.includes(':') !== this._useIPV6)) {
+            this.session.setDC(DEFAULT_DC_ID, this._useIPV6 ? DEFAULT_IPV6_IP : DEFAULT_IPV4_IP, this._args.useWSS ? 443 : 80)
+        }
     }
 
     async _updateLoop() {

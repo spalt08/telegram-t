@@ -1,9 +1,9 @@
 const Memory = require('./Memory')
 const StringSession = require('./StringSession')
-const LocalStorageSession = require('./LocalStorageSession')
+const CacheApiSession = require('./CacheApiSession')
 
 module.exports = {
     Memory,
     StringSession,
-    LocalStorageSession
+    CacheApiSession
 }

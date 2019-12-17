@@ -24,23 +24,19 @@ const AUTO_CASTS = new Set([
     'InputDocument',
     'InputChatPhoto'
 ])
-const CACHE_KEY = 'GramJs:apiCache';
+const CACHING_SUPPORTED = typeof self !== undefined && self.localStorage !== undefined
+const CACHE_KEY = 'GramJs:apiCache'
 
 function buildApiFromTlSchema() {
-    const isBrowser = typeof process === 'undefined' ||
-        process.type === 'renderer' ||
-        process.browser === true ||
-        process.__nwjs;
-
     let definitions;
-    const fromCache = isBrowser && loadFromCache()
+    const fromCache = CACHING_SUPPORTED && loadFromCache()
 
     if (fromCache) {
         definitions = fromCache
     } else {
         definitions = loadFromTlSchemas()
 
-        if (isBrowser) {
+        if (CACHING_SUPPORTED) {
             localStorage.setItem(CACHE_KEY, JSON.stringify(definitions))
         }
     }

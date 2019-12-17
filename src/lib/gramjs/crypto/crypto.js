@@ -438,9 +438,9 @@ class Hash {
 
     async digest() {
         if (this.algorithm === 'sha1') {
-            return Buffer.from(await window.crypto.subtle.digest('SHA-1', this.data))
+            return Buffer.from(await self.crypto.subtle.digest('SHA-1', this.data))
         } else if (this.algorithm === 'sha256') {
-            return Buffer.from(await window.crypto.subtle.digest('SHA-256', this.data))
+            return Buffer.from(await self.crypto.subtle.digest('SHA-256', this.data))
         }
     }
 }
