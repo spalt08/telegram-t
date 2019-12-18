@@ -4,8 +4,10 @@ import {
 
 import { GlobalState } from './types';
 
-import { throttle } from '../util/schedulers';
+import { pause, throttle } from '../util/schedulers';
 import { GRAMJS_SESSION_ID_KEY } from '../config';
+import { getChatAvatarHash } from '../modules/helpers';
+import * as mediaLoader from '../util/mediaLoader';
 
 const INITIAL_STATE: GlobalState = {
   isInitialized: false,
@@ -38,16 +40,25 @@ const INITIAL_STATE: GlobalState = {
 };
 const CACHE_KEY = 'globalState';
 const CACHE_THROTTLE_TIMEOUT = 1000;
+const MAX_PRELOAD_DELAY = 1000;
 
 const updateCacheThrottled = throttle(updateCache, CACHE_THROTTLE_TIMEOUT, false);
 
 addReducer('init', () => {
+  setGlobal(INITIAL_STATE);
+
   const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
   if (hasActiveSession) {
-    setGlobal(getCache() || INITIAL_STATE);
+    const cached = getCache();
+
+    if (cached) {
+      preloadAssets(cached)
+        .then(() => {
+          setGlobal(cached);
+        });
+    }
+
     addCallback(updateCacheThrottled);
-  } else {
-    setGlobal(INITIAL_STATE);
   }
 });
 
@@ -59,6 +70,18 @@ addReducer('signOut', () => {
   removeCallback(updateCacheThrottled);
   localStorage.removeItem(CACHE_KEY);
 });
+
+function preloadAssets(cached: GlobalState) {
+  return Promise.race([
+    pause(MAX_PRELOAD_DELAY),
+    Promise.all(
+      Object.values(cached.chats.byId).map((chat) => {
+        const avatarHash = getChatAvatarHash(chat);
+        return avatarHash ? mediaLoader.fetch(avatarHash) : null;
+      }),
+    ),
+  ]);
+}
 
 function updateCache(state: GlobalState) {
   if (state.isLoggingOut) {
