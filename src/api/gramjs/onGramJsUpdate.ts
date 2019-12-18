@@ -22,6 +22,10 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
     let message;
 
     if (update instanceof GramJs.UpdateNewMessage || update instanceof GramJs.UpdateNewChannelMessage) {
+      if (update.message instanceof GramJs.Message) {
+        localDb.messages[update.message.id] = update.message;
+      }
+
       message = buildApiMessage(update.message);
     } else if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);
