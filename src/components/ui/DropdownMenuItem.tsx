@@ -1,6 +1,6 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
 
-import React, { FC, JsxChildren } from '../../lib/teact';
+import React, { FC } from '../../lib/teact';
 
 import './DropdownMenu.scss';
 
@@ -9,7 +9,7 @@ type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 interface IProps {
   icon?: string;
   className?: string;
-  children: JsxChildren;
+  children: any;
   onClick?: OnClickHandler;
 }
 

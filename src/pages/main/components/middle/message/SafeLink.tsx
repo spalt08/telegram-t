@@ -34,7 +34,6 @@ function getHref(url?: string) {
   return url.startsWith('http') ? url : `http://${url}`;
 }
 
-// TODO add Punycode support
 function getDecodedUrl(url?: string) {
   if (!url) {
     return undefined;

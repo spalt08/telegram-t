@@ -14,7 +14,6 @@ const Test: FC<IProps> = ({ authState, rand }) => {
   return <SubTest authState={authState} rand={rand} />;
 };
 
-// TODO Avoid multiple re-render for containers.
 export default withGlobal(
   global => {
     return {

@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, JsxChildren } from '../../lib/teact';
+import React, { FC } from '../../lib/teact';
 
 interface IProps {
   id?: string;
@@ -7,7 +7,7 @@ interface IProps {
   label?: string;
   placeholder?: string;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
-  children: JsxChildren;
+  children: any;
 }
 
 const Select: FC<IProps> = (props) => {

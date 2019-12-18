@@ -58,8 +58,6 @@ interface ComponentInstance {
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
-// Fix for default JSX type error.
-export type JsxChildren = VirtualElementChildren | VirtualElement;
 
 interface ComponentInstanceState {
   cursor: number;

@@ -1,5 +1,5 @@
 import React, {
-  FC, JsxChildren, useEffect, useState,
+  FC, useEffect, useState,
 } from '../../lib/teact';
 
 import './Modal.scss';
@@ -8,7 +8,7 @@ interface IProps {
   isOpen: boolean;
   title: string;
   className?: string;
-  children: JsxChildren;
+  children: any;
   onDismiss: () => void;
 }
 

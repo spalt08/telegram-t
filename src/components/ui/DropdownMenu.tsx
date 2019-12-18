@@ -1,4 +1,4 @@
-import React, { FC, JsxChildren, useState } from '../../lib/teact';
+import React, { FC, useState } from '../../lib/teact';
 
 import './DropdownMenu.scss';
 
@@ -7,7 +7,7 @@ interface IProps {
   trigger: FC<{ onClick: () => void }>;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
-  children: JsxChildren;
+  children: any;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
 }
 

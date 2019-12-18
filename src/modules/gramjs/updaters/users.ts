@@ -14,9 +14,6 @@ export function onUpdate(update: ApiUpdate) {
     case 'updateUser': {
       updateUser(update.id, update.user);
 
-      // TODO Only watch for new users and avatar updates
-      // getDispatch().loadUserPhoto({ user: update.user });
-
       break;
     }
   }

@@ -21,7 +21,7 @@ export function onUpdate(update: ApiUpdate) {
       break;
     }
 
-    // TODO Never sent from `api`.
+    // TODO @not-implemented.
     case 'updateMessageSendFailed': {
       const { chat_id, old_message_id, sending_state } = update;
 

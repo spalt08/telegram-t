@@ -14,9 +14,6 @@ export function onUpdate(update: ApiUpdate) {
     case 'updateChat': {
       updateChat(update.id, update.chat);
 
-      // TODO Only watch for new chats and avatar updates
-      // getDispatch().loadChatPhoto({ chat: update.chat });
-
       break;
     }
 

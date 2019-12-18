@@ -1,6 +1,6 @@
 import { MouseEvent } from 'react';
 
-import React, { FC, JsxChildren } from '../../lib/teact';
+import React, { FC } from '../../lib/teact';
 
 import Spinner from '../Spinner';
 import './Button.scss';
@@ -10,7 +10,7 @@ type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 interface IProps {
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
-  children: JsxChildren;
+  children: any;
   size?: 'default' | 'smaller';
   color?: 'primary' | 'secondary' | 'translucent';
   className?: string;
