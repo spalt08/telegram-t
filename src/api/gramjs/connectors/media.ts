@@ -1,15 +1,15 @@
-import { TelegramClient } from '../../../lib/gramjs';
+import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 
 import localDb from '../localDb';
 import { getEntityTypeById } from '../inputHelpers';
 import { pause } from '../../../util/schedulers';
+import { Queue } from '../util/queue';
 
-// This is an heuristic value that allows subsequent images to load properly when intermediate load breaks.
-const IMAGE_LOAD_DELAY = 200;
+const IMAGE_LOAD_TIMEOUT = 1000;
 
-let currentPromise: Promise<Buffer | null>;
+const queue = new Queue();
 
-// TODO client ready.
+// TODO Client ready.
 export default function downloadMedia(client: TelegramClient, url: string): Promise<Buffer | null> | null {
   const mediaMatch = url.match(/(avatar|msg)(-?\d+)/);
   if (!mediaMatch) {
@@ -18,7 +18,7 @@ export default function downloadMedia(client: TelegramClient, url: string): Prom
 
   let entityType = mediaMatch[1];
   let entityId: number = Number(mediaMatch[2]);
-  let entity;
+  let entity: GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Message | undefined;
 
   if (entityType === 'avatar') {
     entityType = getEntityTypeById(entityId);
@@ -39,21 +39,14 @@ export default function downloadMedia(client: TelegramClient, url: string): Prom
   }
 
   if (!entity) {
-    // TODO Load entity.
     return null;
   }
 
-  // TODO Queue with array.
   if (entityType === 'msg') {
-    const prevPromise = currentPromise;
-    currentPromise = (async () => {
-      if (prevPromise) {
-        await prevPromise;
-      }
-      await pause(IMAGE_LOAD_DELAY);
-      return client.downloadMedia(entity, { sizeType: 'x' });
-    })();
-    return currentPromise;
+    return queue.add(() => Promise.race([
+      client.downloadMedia(entity, { sizeType: 'x' }),
+      pause(IMAGE_LOAD_TIMEOUT),
+    ]));
   } else {
     return client.downloadProfilePhoto(entity, false);
   }
