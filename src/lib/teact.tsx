@@ -325,7 +325,7 @@ function unmountComponent(componentInstance: ComponentInstance) {
   componentInstance.isUnmounted = true;
 }
 
-export function useState(initial: any) {
+export function useState(initial?: any) {
   const { cursor, byCursor } = renderingInstance.state;
 
   if (byCursor[cursor] === undefined) {

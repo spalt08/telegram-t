@@ -89,7 +89,7 @@ export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
 
-// TODO Add file reference.
+// TODO Add chat ID and file reference.
 export function getMessageMediaHash(message: ApiMessage): string | null {
   const { photo, sticker } = message.content;
 

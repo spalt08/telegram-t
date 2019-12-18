@@ -29,9 +29,10 @@ type IProps = {
   showAvatar?: boolean;
   showSenderName?: boolean;
   replyMessage?: ApiMessage;
-  imageHash?: string;
+  mediaHash?: string;
   sender?: ApiUser;
   originSender?: ApiUser;
+  loadMedia?: boolean;
 };
 
 const Message: FC<IProps> = ({
@@ -39,21 +40,21 @@ const Message: FC<IProps> = ({
   showAvatar,
   showSenderName,
   replyMessage,
-  imageHash,
+  mediaHash,
   sender,
   originSender,
+  loadMedia,
 }) => {
   const [, onDataUriUpdate] = useState(null);
-  const dataUri = imageHash && mediaLoader.getFromMemory(imageHash);
+  const dataUri = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
 
   useEffect(() => {
-    if (imageHash && !dataUri) {
-      // TODO Only load messages in viewport.
-      mediaLoader.fetch(imageHash).then(onDataUriUpdate);
+    if (mediaHash && loadMedia && !dataUri) {
+      mediaLoader.fetch(mediaHash).then(onDataUriUpdate);
     }
-  }, [imageHash, dataUri]);
+  }, [mediaHash, loadMedia, dataUri]);
 
-  const className = buildClassName(message);
+  const className = buildClassName(message, Boolean(mediaHash));
   const {
     text,
     photo,
@@ -110,7 +111,7 @@ const Message: FC<IProps> = ({
   }
 
   return (
-    <div className={className}>
+    <div className={className} data-message-id={message.id}>
       {showAvatar && sender && (
         <Avatar size="small" user={sender} />
       )}
@@ -126,11 +127,15 @@ const Message: FC<IProps> = ({
   );
 };
 
-function buildClassName(message: ApiMessage) {
+function buildClassName(message: ApiMessage, hasMedia = false) {
   const classNames = ['Message'];
 
   if (isOwnMessage(message)) {
     classNames.push('own');
+  }
+
+  if (hasMedia) {
+    classNames.push('has-media');
   }
 
   return classNames.join(' ');
@@ -222,7 +227,7 @@ export default memo(withGlobal(
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
-    const imageHash = getMessageMediaHash(message);
+    const mediaHash = getMessageMediaHash(message);
 
     let userId;
     let originUserId;
@@ -235,7 +240,7 @@ export default memo(withGlobal(
 
     return {
       replyMessage,
-      imageHash,
+      mediaHash,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
     };

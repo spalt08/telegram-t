@@ -1,11 +1,10 @@
 import { callSdk } from '../api/gramjs';
 import { blobToDataUri } from './image';
+import * as cacheApi from './cacheApi';
 
 const MEMORY_CACHE: Record<string, string> = {};
 const PERSISTENT_CACHE_NAME = 'telegram-t-cache';
 const FETCH_PROMISES: Record<string, Promise<string>> = {};
-
-const cacheApi = window.caches;
 
 export function fetch(url: string) {
   if (!FETCH_PROMISES[url]) {
@@ -25,7 +24,7 @@ export function getFromMemory(url: string) {
 }
 
 async function fetchFromCacheOrRemote(url: string) {
-  const cached = await fetchFromCache(url);
+  const cached = await cacheApi.fetch(PERSISTENT_CACHE_NAME, url);
   if (cached) {
     MEMORY_CACHE[url] = cached;
 
@@ -40,22 +39,8 @@ async function fetchFromCacheOrRemote(url: string) {
 
   let dataUri = await blobToDataUri(new Blob([remote]));
   dataUri = dataUri.replace('application/octet-stream', 'image/jpg');
-  void saveToCache(url, dataUri);
+  void cacheApi.save(PERSISTENT_CACHE_NAME, url, dataUri);
   MEMORY_CACHE[url] = dataUri;
 
   return dataUri;
-}
-
-async function fetchFromCache(url: string) {
-  const request = new Request(url);
-  const cache = await cacheApi.open(PERSISTENT_CACHE_NAME);
-  const cached = await cache.match(request);
-  return cached ? cached.text() : null;
-}
-
-async function saveToCache(url: string, dataUri: string) {
-  const request = new Request(url);
-  const response = new Response(dataUri);
-  const cache = await cacheApi.open(PERSISTENT_CACHE_NAME);
-  return cache.put(request, response);
 }
