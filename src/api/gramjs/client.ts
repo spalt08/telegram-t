@@ -6,6 +6,7 @@ import {
   onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber,
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
+import queuedDownloadMedia from './connectors/media';
 
 GramJsLogger.setLevel('warn');
 
@@ -25,7 +26,7 @@ export async function init(sessionId: string) {
   try {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log('[GramJs/worker] CONNECTING');
+      console.log('[GramJs/client] CONNECTING');
     }
 
     await client.start({
@@ -38,14 +39,14 @@ export async function init(sessionId: string) {
 
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log('[GramJs/worker] CONNECTED as ', newSessionId);
+      console.log('[GramJs/client] CONNECTED as ', newSessionId);
     }
 
     onAuthReady(newSessionId);
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log('[GramJs/worker] CONNECTING ERROR', err);
+      console.log('[GramJs/client] CONNECTING ERROR', err);
     }
 
     throw err;
@@ -68,10 +69,6 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T) {
   return result;
 }
 
-export function downloadAvatar(entity: GramJs.Chat | GramJs.User, isBig = false) {
-  return client.downloadProfilePhoto(entity, isBig);
-}
-
-export function downloadMessageImage(message: GramJs.Message) {
-  return client.downloadMedia(message, { sizeType: 'x' });
+export function downloadMedia(url: string) {
+  return queuedDownloadMedia(client, url);
 }

@@ -6,13 +6,7 @@ import { buildApiMessage, buildLocalMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
-import { loadAvatar, loadMessageMedia } from './files';
 import { onGramJsUpdate } from '../onGramJsUpdate';
-import { pause } from '../../../util/schedulers';
-import { getApiChatIdFromMtpPeer } from '../builders/chats';
-
-// This is an heuristic value that allows subsequent images to load properly when intermediate load breaks.
-const IMAGE_LOAD_DELAY = 150;
 
 let onUpdate: OnApiUpdate;
 
@@ -47,21 +41,9 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
       id: user.id,
       user,
     });
-
-    loadAvatar(mtpUser).then((dataUri) => {
-      if (!dataUri) {
-        return;
-      }
-
-      onUpdate({
-        '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as GramJs.TypePeer),
-        data_uri: dataUri,
-      });
-    });
   });
 
-  void loadImages(result.messages);
+  updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage);
 
@@ -108,30 +90,18 @@ export async function sendMessage({ chat, text }: { chat: ApiChat; text: string 
   }
 }
 
-async function loadImages(messages: GramJs.TypeMessage[]) {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const message of messages) {
+function updateLocalDb(
+  result: GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages,
+) {
+  result.users.forEach((user) => {
+    localDb.users[user.id] = user;
+  });
+
+  result.messages.forEach((message) => {
     if (message instanceof GramJs.Message && isMessageWithImage(message)) {
-      await pause(IMAGE_LOAD_DELAY);
-
-      try {
-        // eslint-disable-next-line no-loop-func
-        loadMessageMedia(message).then((dataUri) => {
-          if (!dataUri) {
-            return;
-          }
-
-          onUpdate({
-            '@type': 'updateMessageImage',
-            message_id: message.id,
-            data_uri: dataUri,
-          });
-        });
-      } catch (err) {
-        // Do nothing.
-      }
+      localDb.messages[message.id] = message;
     }
-  }
+  });
 }
 
 function isMessageWithImage(message: GramJs.Message) {

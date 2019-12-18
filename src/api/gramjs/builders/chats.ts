@@ -6,6 +6,8 @@ export function buildApiChatFromDialog(
   dialog: GramJs.Dialog,
   peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel,
 ): ApiChat {
+  const avatar = peerEntity.photo && buildAvatar(peerEntity.photo);
+
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
@@ -19,6 +21,7 @@ export function buildApiChatFromDialog(
     unread_mention_count: 0, // TODO
     is_pinned: dialog.pinned || false,
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
+    ...(avatar && { avatar }),
   };
 }
 
@@ -63,4 +66,15 @@ export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: Gr
 
 function getUserName(user: GramJs.User) {
   return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
+}
+
+function buildAvatar(photo: any) {
+  if (photo instanceof GramJs.UserProfilePhoto) {
+    return { hash: photo.photoId.toString() };
+  } else if (photo instanceof GramJs.ChatPhoto) {
+    const { dcId, photoSmall: { volumeId, localId } } = photo;
+    return { hash: `${dcId}-${volumeId}-${localId}` };
+  }
+
+  return null;
 }

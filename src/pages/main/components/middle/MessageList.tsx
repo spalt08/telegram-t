@@ -49,7 +49,13 @@ const MessageList: FC<IProps> = ({
 
     if (scrollContainer) {
       const previousScrollOffset = selectChatScrollOffset(getGlobal(), chatId);
-      scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(previousScrollOffset || 0);
+      const updateFn = () => {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(previousScrollOffset || 0);
+      };
+
+      updateFn();
+      // We need this for the very first page render.
+      requestAnimationFrame(updateFn);
     }
   });
 

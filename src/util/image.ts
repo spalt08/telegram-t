@@ -20,6 +20,24 @@ export async function insertImage(image: File | string, containerId: string) {
   }
 }
 
+export function blobToDataUri(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const { result } = e.target || {};
+      if (typeof result === 'string') {
+        resolve(result);
+      }
+
+      reject(new Error('Failed to read blob'));
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 type ImageData = {
   name: string;
   url: string;
@@ -27,29 +45,23 @@ type ImageData = {
   height: number;
 };
 
-export function getImageData(imgFile: File): Promise<ImageData> {
+export async function getImageData(imgFile: File): Promise<ImageData> {
+  const dataUri = await blobToDataUri(imgFile);
+
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      const { result } = e.target || {};
-      if (typeof result !== 'string') {
-        reject(new Error('Unknown src format'));
-      } else {
-        const img = new Image();
-        img.src = result;
-        img.onload = () => {
-          resolve({
-            name: imgFile.name,
-            url: result,
-            width: img.width,
-            height: img.height,
-          });
-        };
-        img.onerror = () => reject(new Error('Error while loading image'));
-      }
+    const img = new Image();
+
+    img.src = dataUri;
+    img.onload = () => {
+      resolve({
+        name: imgFile.name,
+        url: dataUri,
+        width: img.width,
+        height: img.height,
+      });
     };
-    reader.onerror = () => reject(new Error('Error while reading image'));
-    reader.readAsDataURL(imgFile);
+
+    img.onerror = reject;
   });
 }
 

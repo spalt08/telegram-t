@@ -2,6 +2,9 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus } from '../../types';
 
 export function buildApiUser(mtpUser: GramJs.User): ApiUser {
+  const avatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
+    && { hash: mtpUser.photo.photoId.toString() };
+
   return {
     id: mtpUser.id,
     type: {
@@ -14,6 +17,7 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
     phone_number: mtpUser.phone || '',
     status: buildApiUserStatus(mtpUser.status),
     ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
+    ...(avatar && { avatar }),
   };
 }
 

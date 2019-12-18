@@ -20,14 +20,21 @@ export function getChatTitle(chat: ApiChat) {
   return chat.title || 'Deleted account';
 }
 
+// TdLib only.
 export function getChatPhotoKey(chat: ApiChat): string | null {
   const { photo } = chat;
 
-  // TdLib way.
   if (photo) {
     return `chat${photo.small.id}`;
-  // GramJs way.
-  } else {
-    return `avatar${chat.id}`;
   }
+
+  return null;
+}
+
+export function getChatAvatarHash(chat: ApiChat): string | null {
+  if (!chat.avatar) {
+    return null;
+  }
+
+  return `avatar${chat.id}?${chat.avatar.hash}`;
 }

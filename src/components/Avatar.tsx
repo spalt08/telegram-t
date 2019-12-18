@@ -1,11 +1,12 @@
-import React, { FC } from '../lib/teact';
+import React, { FC, useEffect, useState } from '../lib/teact';
 import { withGlobal } from '../lib/teactn';
 
 import { ApiUser, ApiChat } from '../api/types';
 import {
-  getChatTitle, getUserFullName, isPrivateChat, isUserOnline,
+  getChatAvatarHash, getChatTitle, isPrivateChat,
+  getUserAvatarHash, getUserFullName, isUserOnline,
 } from '../modules/helpers';
-import { selectChatPhotoUrl, selectUserPhotoUrl } from '../modules/selectors';
+import * as mediaLoader from '../util/mediaLoader';
 
 import './Avatar.scss';
 
@@ -14,18 +15,27 @@ interface IProps {
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
-  imageUrl?: string;
+  imageHash?: string;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, imageUrl, showOnlineStatus,
+  size = 'large', chat, user, imageHash, showOnlineStatus,
 }) => {
+  const [, onDataUriUpdate] = useState(null);
+  const dataUri = imageHash && mediaLoader.getFromMemory(imageHash);
+
+  useEffect(() => {
+    if (imageHash && !dataUri) {
+      mediaLoader.fetch(imageHash).then(onDataUriUpdate);
+    }
+  }, [imageHash, dataUri]);
+
   let content: string | null = '';
   const isOnline = user && isUserOnline(user);
 
-  if (imageUrl) {
+  if (dataUri) {
     content = (
-      <img src={imageUrl} alt="" />
+      <img src={dataUri} alt="" />
     );
   } else if (user) {
     const userName = getUserFullName(user);
@@ -54,14 +64,14 @@ function getFirstLetters(phrase: string) {
 
 export default withGlobal(
   (global, { chat, user }) => {
-    let imageUrl = null;
+    let imageHash = null;
 
     if (chat) {
-      imageUrl = selectChatPhotoUrl(global, chat);
+      imageHash = getChatAvatarHash(chat);
     } else if (user) {
-      imageUrl = selectUserPhotoUrl(global, user);
+      imageHash = getUserAvatarHash(user);
     }
 
-    return { imageUrl };
+    return { imageHash };
   },
 )(Avatar);

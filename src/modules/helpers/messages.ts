@@ -89,7 +89,8 @@ export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
 
-export function getMessageFileKey(message: ApiMessage): string | null {
+// TODO Add file reference.
+export function getMessageMediaHash(message: ApiMessage): string | null {
   const { photo, sticker } = message.content;
 
   if (photo) {

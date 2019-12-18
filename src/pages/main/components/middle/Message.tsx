@@ -1,4 +1,6 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, {
+  FC, memo, useEffect, useState,
+} from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import {
@@ -9,8 +11,8 @@ import {
   ApiVideo,
   ApiDocument,
 } from '../../../../api/types';
-import { selectUser, selectChatMessage, selectMessageFileUrl } from '../../../../modules/selectors';
-import { isOwnMessage, getUserFullName } from '../../../../modules/helpers';
+import { selectUser, selectChatMessage } from '../../../../modules/selectors';
+import { isOwnMessage, getUserFullName, getMessageMediaHash } from '../../../../modules/helpers';
 import { getImageDimensions, getVideoDimensions, getStickerDimensions } from '../../../../util/imageDimensions';
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
@@ -20,22 +22,37 @@ import { buildMessageContent } from './message/utils';
 import './Message.scss';
 import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
+import * as mediaLoader from '../../../../util/mediaLoader';
 
 type IProps = {
   message: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
   replyMessage?: ApiMessage;
-  fileDataUri?: string;
+  imageHash?: string;
   sender?: ApiUser;
   originSender?: ApiUser;
 };
 
-const Message: FC<IProps> = (
-  {
-    message, showAvatar, showSenderName, replyMessage, fileDataUri, sender, originSender,
-  },
-) => {
+const Message: FC<IProps> = ({
+  message,
+  showAvatar,
+  showSenderName,
+  replyMessage,
+  imageHash,
+  sender,
+  originSender,
+}) => {
+  const [, onDataUriUpdate] = useState(null);
+  const dataUri = imageHash && mediaLoader.getFromMemory(imageHash);
+
+  useEffect(() => {
+    if (imageHash && !dataUri) {
+      // TODO Only load messages in viewport.
+      mediaLoader.fetch(imageHash).then(onDataUriUpdate);
+    }
+  }, [imageHash, dataUri]);
+
   const className = buildClassName(message);
   const {
     text,
@@ -72,10 +89,10 @@ const Message: FC<IProps> = (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, fileDataUri)}
+        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, dataUri)}
         {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
         {document && renderMessageDocument(document)}
-        {sticker && renderMessageSticker(sticker, fileDataUri)}
+        {sticker && renderMessageSticker(sticker, dataUri)}
         {text && (
           <p>{text}</p>
         )}
@@ -205,7 +222,7 @@ export default memo(withGlobal(
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
-    const fileDataUri = selectMessageFileUrl(global, message);
+    const imageHash = getMessageMediaHash(message);
 
     let userId;
     let originUserId;
@@ -218,7 +235,7 @@ export default memo(withGlobal(
 
     return {
       replyMessage,
-      fileDataUri,
+      imageHash,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
     };

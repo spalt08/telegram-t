@@ -3,16 +3,26 @@ import { Api as GramJs } from '../../lib/gramjs';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
 
-export function buildInputPeer(chatOrUserId: number, accessHash: string): GramJs.TypePeer {
+export function getEntityTypeById(chatOrUserId: number) {
+  if (chatOrUserId > 0) {
+    return 'user';
+  } else if (chatOrUserId <= -1000000000) {
+    return 'channel';
+  } else {
+    return 'chat';
+  }
+}
+
+export function buildInputPeer(chatOrUserId: number, accessHash?: string): GramJs.TypePeer {
   if (chatOrUserId > 0) {
     return new GramJs.InputPeerUser({
       userId: chatOrUserId,
-      accessHash: BigInt(accessHash),
+      accessHash: BigInt(accessHash!),
     });
   } else if (chatOrUserId <= -1000000000) {
     return new GramJs.InputPeerChannel({
       channelId: -chatOrUserId,
-      accessHash: BigInt(accessHash),
+      accessHash: BigInt(accessHash!),
     });
   } else {
     return new GramJs.InputPeerChat({

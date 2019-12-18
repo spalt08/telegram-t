@@ -72,7 +72,6 @@ function updateCache(state: GlobalState) {
     chats: reduceChatsForCache(state),
     messages: reduceMessagesForCache(state),
     // TODO Reduce `users` and `groups`?
-    files: { byKey: {} },
   };
 
   const json = JSON.stringify(reducedState);

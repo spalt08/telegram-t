@@ -18,6 +18,9 @@ export interface ApiChat {
   unread_mention_count: number;
   is_pinned: boolean;
   access_hash?: string;
+  avatar?: {
+    hash: string;
+  };
   // Only in TDLib.
   photo?: {
     small: ApiFile;

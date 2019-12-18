@@ -360,14 +360,12 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
     byCursor[cursor].cleanup = effect() as Function;
   };
 
-  const scheduleFn = renderingInstance.$element.children.length ? onNextTick : requestAnimationFrame;
-
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
-      scheduleFn(exec);
+      onNextTick(exec);
     }
   } else {
-    scheduleFn(exec);
+    onNextTick(exec);
   }
 
   byCursor[cursor] = {

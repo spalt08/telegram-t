@@ -2,11 +2,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiChat } from '../../types';
 
 import { invokeRequest } from '../client';
-import { buildApiChatFromDialog, getApiChatIdFromMtpPeer, getPeerKey } from '../builders/chats';
+import { buildApiChatFromDialog, getPeerKey } from '../builders/chats';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { loadAvatar } from './files';
+import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -33,6 +33,8 @@ export async function fetchChats(
     return null;
   }
 
+  updateLocalDb(result);
+
   const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
   const peersByKey = preparePeers(result);
   const chats: ApiChat[] = [];
@@ -58,8 +60,6 @@ export async function fetchChats(
     users,
   });
 
-  loadAvatars(result);
-
   const chatIds = chats.map((chat) => chat.id);
 
   return {
@@ -81,32 +81,14 @@ function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsS
   return store;
 }
 
-function loadAvatars(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
+function updateLocalDb(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
   result.users.forEach((user) => {
-    loadAvatar(user).then((dataUri) => {
-      if (!dataUri) {
-        return;
-      }
-
-      onUpdate({
-        '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ userId: user.id } as GramJs.TypePeer),
-        data_uri: dataUri,
-      });
-    });
+    localDb.users[user.id] = user;
   });
 
   result.chats.forEach((chat) => {
-    loadAvatar(chat).then((dataUri) => {
-      if (!dataUri) {
-        return;
-      }
-
-      onUpdate({
-        '@type': 'updateAvatar',
-        chat_id: getApiChatIdFromMtpPeer({ chatId: chat.id } as GramJs.TypePeer),
-        data_uri: dataUri,
-      });
-    });
+    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
+      localDb.chats[chat.id] = chat;
+    }
   });
 }

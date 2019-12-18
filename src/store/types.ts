@@ -28,6 +28,7 @@ export type GlobalState = {
     }>;
   };
 
+  // Only used in TdLib.
   files: {
     byKey: Record<string, ApiFileSource>;
   };
@@ -49,9 +50,7 @@ export type ActionTypes = (
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' |
-  // files
-  'loadChatPhoto' | 'loadUserPhoto'
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage'
 );
 
 export type GlobalActions = Record<ActionTypes, Function>;

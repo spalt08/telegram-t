@@ -3,7 +3,7 @@ import {
 } from './connectors/auth';
 import { fetchChats } from './connectors/chats';
 import { fetchMessages, sendMessage } from './connectors/messages';
-import { loadAvatar } from './connectors/files';
+import { downloadMedia } from './client';
 
 export default {
   provideAuthPhoneNumber,
@@ -12,5 +12,5 @@ export default {
   fetchChats,
   fetchMessages,
   sendMessage,
-  loadAvatar,
+  downloadMedia,
 };
