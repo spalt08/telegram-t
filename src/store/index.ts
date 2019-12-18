@@ -39,13 +39,17 @@ const INITIAL_STATE: GlobalState = {
 const CACHE_KEY = 'globalState';
 const CACHE_THROTTLE_TIMEOUT = 1000;
 
+const updateCacheThrottled = throttle(updateCache, CACHE_THROTTLE_TIMEOUT, false);
+
 addReducer('init', () => {
   const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
-  const cached = (hasActiveSession && getCache()) || null;
-  setGlobal(cached || INITIAL_STATE);
+  if (hasActiveSession) {
+    setGlobal(getCache() || INITIAL_STATE);
+    addCallback(updateCacheThrottled);
+  } else {
+    setGlobal(INITIAL_STATE);
+  }
 });
-
-const updateCacheThrottled = throttle(updateCache, CACHE_THROTTLE_TIMEOUT, false);
 
 addReducer('saveSession', () => {
   addCallback(updateCacheThrottled);
