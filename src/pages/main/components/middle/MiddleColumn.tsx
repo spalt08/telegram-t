@@ -1,5 +1,7 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
+
+import { GlobalActions } from '../../../../store/types';
 
 import Button from '../../../../components/ui/Button';
 import MessageList from './MessageList';
@@ -7,12 +9,28 @@ import MiddleFooter from './MiddleFooter';
 import MiddleHeader from './MiddleHeader';
 import './MiddleColumn.scss';
 
-type IProps = {
+type IProps = Pick<GlobalActions, 'selectChat'> & {
   selectedChatId: number;
   areChatsLoaded: boolean;
 };
 
 const MiddleColumn: FC<IProps> = (props) => {
+  const { selectChat } = props;
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        selectChat({ id: undefined });
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectChat]);
+
   return (
     <div id="MiddleColumn">
       {renderSelectedChat(props)}
@@ -82,5 +100,9 @@ export default withGlobal(
       selectedChatId: global.chats.selectedId,
       areChatsLoaded,
     };
+  },
+  (setGlobal, actions) => {
+    const { selectChat } = actions;
+    return { selectChat };
   },
 )(MiddleColumn);
