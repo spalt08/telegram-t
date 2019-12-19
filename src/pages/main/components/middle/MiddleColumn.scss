@@ -71,12 +71,6 @@
           color: var(--color-primary);
         }
       }
-
-      &:active {
-        span {
-          color: var(--color-primary-shade);
-        }
-      }
     }
   }
 }

@@ -17,6 +17,7 @@ import { getServiceMessageContent } from '../common/getServiceMessageContent';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
 import './Chat.scss';
+import RippleEffect from '../../../../components/ui/RippleEffect';
 
 type IProps = {
   chat: ApiChat;
@@ -78,6 +79,7 @@ const Chat: FC<IProps> = ({
           <Badge chat={chat} />
         </div>
       </div>
+      <RippleEffect />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import React, { FC } from '../../lib/teact';
 
 import Spinner from '../Spinner';
 import './Button.scss';
+import RippleEffect from './RippleEffect';
 
 type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
 
@@ -50,6 +51,7 @@ const Button: FC<IProps> = ({
           <Spinner color="white" />
         </div>
       ) : children}
+      <RippleEffect />
     </button>
   );
 };

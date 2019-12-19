@@ -17,8 +17,8 @@ function onSignOut(signOut: Function) {
   }
 }
 
-const MenuButton: FC<{ onClick: () => void }> = ({ onClick }) => (
-  <Button round size="smaller" color="translucent" onClick={onClick}>
+const MenuButton: FC<{ onClick: () => void; isOpen?: boolean }> = ({ onClick, isOpen }) => (
+  <Button round size="smaller" color="translucent" className={isOpen ? 'active' : ''} onClick={onClick}>
     <i className="icon-menu" />
   </Button>
 );

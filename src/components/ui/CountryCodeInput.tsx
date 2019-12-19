@@ -95,7 +95,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
   }
 
-  const CodeInput: FC<{ onClick: () => void }> = ({ onClick }) => {
+  const CodeInput: FC<{ onClick: () => void; isOpen: boolean }> = ({ onClick, isOpen }) => {
     const handleClick = () => {
       onClick();
       focusSelectedItem();
@@ -108,7 +108,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
     return (
       <div className={className}>
         <input
-          className="form-control"
+          className={`form-control ${isOpen ? 'focus' : ''}`}
           type="text"
           id={id}
           value={inputValue}

@@ -12,6 +12,7 @@ import { getReplyImageDimensions } from '../../../../util/imageDimensions';
 
 import { buildMessageContent } from './message/utils';
 import './ReplyMessage.scss';
+import RippleEffect from '../../../../components/ui/RippleEffect';
 
 type IProps = {
   message: ApiMessage;
@@ -33,6 +34,7 @@ const ReplyMessage: FC<IProps> = ({
         <div className="sender-name">{getUserFullName(sender)}</div>
         <p>{text}</p>
       </div>
+      <RippleEffect />
     </div>
   );
 };

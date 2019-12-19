@@ -3,6 +3,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 import React, { FC } from '../../lib/teact';
 
 import './DropdownMenu.scss';
+import RippleEffect from './RippleEffect';
 
 type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 
@@ -28,6 +29,7 @@ const DropdownMenuItem: FC<IProps> = (props) => {
           <i className={`icon-${icon}`} />
         )}
         {children}
+        <RippleEffect />
       </button>
     </li>
   );

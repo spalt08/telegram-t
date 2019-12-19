@@ -7,6 +7,7 @@
   padding-left: 0.375rem;
   border-radius: var(--border-radius-messages-small);
   position: relative;
+  overflow: hidden;
   cursor: pointer;
 
   .sticker & {
@@ -44,6 +45,10 @@
 
   &:hover {
     background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+  }
+
+  .own &:hover {
+    background-color: rgba(var(--color-text-green-rgb), 0.12);
   }
 
   .reply-text {
