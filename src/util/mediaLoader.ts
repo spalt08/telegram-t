@@ -1,9 +1,9 @@
 import { callSdk } from '../api/gramjs';
 import { blobToDataUri } from './image';
 import * as cacheApi from './cacheApi';
+import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 
 const MEMORY_CACHE: Record<string, string> = {};
-const PERSISTENT_CACHE_NAME = 'telegram-t-cache';
 const FETCH_PROMISES: Record<string, Promise<string>> = {};
 
 export function fetch(url: string) {
@@ -24,11 +24,13 @@ export function getFromMemory(url: string) {
 }
 
 async function fetchFromCacheOrRemote(url: string) {
-  const cached = await cacheApi.fetch(PERSISTENT_CACHE_NAME, url);
-  if (cached) {
-    MEMORY_CACHE[url] = cached;
+  if (!MEDIA_CACHE_DISABLED) {
+    const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url);
+    if (cached) {
+      MEMORY_CACHE[url] = cached;
 
-    return cached;
+      return cached;
+    }
   }
 
   const remote = await callSdk('downloadMedia', url);
@@ -39,7 +41,11 @@ async function fetchFromCacheOrRemote(url: string) {
 
   let dataUri = await blobToDataUri(new Blob([remote]));
   dataUri = dataUri.replace('application/octet-stream', 'image/jpg');
-  void cacheApi.save(PERSISTENT_CACHE_NAME, url, dataUri);
+
+  if (!MEDIA_CACHE_DISABLED) {
+    cacheApi.save(MEDIA_CACHE_NAME, url, dataUri);
+  }
+
   MEMORY_CACHE[url] = dataUri;
 
   return dataUri;

@@ -5,7 +5,7 @@ import {
 import { GlobalState } from './types';
 
 import { pause, throttle } from '../util/schedulers';
-import { GRAMJS_SESSION_ID_KEY } from '../config';
+import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
 import { getChatAvatarHash } from '../modules/helpers';
 import * as mediaLoader from '../util/mediaLoader';
 
@@ -38,7 +38,6 @@ const INITIAL_STATE: GlobalState = {
 
   authRememberMe: true,
 };
-const CACHE_KEY = 'globalState';
 const CACHE_THROTTLE_TIMEOUT = 1000;
 const MAX_PRELOAD_DELAY = 1000;
 
@@ -48,7 +47,7 @@ addReducer('init', () => {
   setGlobal(INITIAL_STATE);
 
   const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
-  if (hasActiveSession) {
+  if (!GLOBAL_STATE_CACHE_DISABLED && hasActiveSession) {
     const cached = getCache();
 
     if (cached) {
@@ -62,14 +61,16 @@ addReducer('init', () => {
   }
 });
 
-addReducer('saveSession', () => {
-  addCallback(updateCacheThrottled);
-});
+if (!GLOBAL_STATE_CACHE_DISABLED) {
+  addReducer('saveSession', () => {
+    addCallback(updateCacheThrottled);
+  });
 
-addReducer('signOut', () => {
-  removeCallback(updateCacheThrottled);
-  localStorage.removeItem(CACHE_KEY);
-});
+  addReducer('signOut', () => {
+    removeCallback(updateCacheThrottled);
+    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+  });
+}
 
 function preloadAssets(cached: GlobalState) {
   return Promise.race([
@@ -102,7 +103,7 @@ function updateCache(state: GlobalState) {
   };
 
   const json = JSON.stringify(reducedState);
-  localStorage.setItem(CACHE_KEY, json);
+  localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
 }
 
 function reduceChatsForCache(state: GlobalState) {
@@ -130,6 +131,6 @@ function reduceMessagesForCache(state: GlobalState) {
 }
 
 function getCache(): GlobalState | null {
-  const json = localStorage.getItem(CACHE_KEY);
+  const json = localStorage.getItem(GLOBAL_STATE_CACHE_KEY);
   return json ? JSON.parse(json) : null;
 }
