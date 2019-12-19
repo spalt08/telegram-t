@@ -34,10 +34,10 @@ class Connection {
 
     async _connect() {
         this._log.debug('Connecting')
-        await this.socket.connect(this._port, this._ip)
+        this._codec = new this.PacketCodecClass(this)
+        await this.socket.connect(this._port, this._ip,this)
         this._log.debug('Finished connecting')
         // await this.socket.connect({host: this._ip, port: this._port});
-        this._codec = new this.PacketCodecClass(this)
         await this._initConn()
     }
 

@@ -2,14 +2,8 @@ import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 
 import localDb from '../localDb';
 import { getEntityTypeById } from '../inputHelpers';
-import { pause } from '../../../util/schedulers';
-import { Queue } from '../util/queue';
 
-const IMAGE_LOAD_TIMEOUT = 1000;
-
-const queue = new Queue();
-
-// TODO Client ready.
+// TODO Await client ready.
 export default function downloadMedia(client: TelegramClient, url: string): Promise<Buffer | null> | null {
   const mediaMatch = url.match(/(avatar|msg)(-?\d+)/);
   if (!mediaMatch) {
@@ -42,12 +36,7 @@ export default function downloadMedia(client: TelegramClient, url: string): Prom
     return null;
   }
 
-  if (entityType === 'msg') {
-    return queue.add(() => Promise.race([
-      client.downloadMedia(entity, { sizeType: 'x' }),
-      pause(IMAGE_LOAD_TIMEOUT),
-    ]));
-  } else {
-    return client.downloadProfilePhoto(entity, false);
-  }
+  return entityType === 'msg'
+    ? client.downloadMedia(entity, { sizeType: 'x' })
+    : client.downloadProfilePhoto(entity, false);
 }
