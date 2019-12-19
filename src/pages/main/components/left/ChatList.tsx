@@ -25,13 +25,19 @@ const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
 const ChatList: FC<IProps> = ({
   chats, loadedChatIds, areChatsLoaded, selectedChatId, loadMoreChats,
 }) => {
-  const chatsArray = areChatsLoaded && chats ? prepareChats(chats, loadedChatIds) : undefined;
+  const chatArrays = areChatsLoaded && chats ? prepareChats(chats, loadedChatIds) : undefined;
 
   return (
     <div className="ChatList custom-scroll" onScroll={(e) => handleScrollThrottled(e, loadMoreChats)}>{
-      chatsArray ? (
+      chatArrays ? (
         <div>
-          {chatsArray.map((chat) => (
+          {chatArrays.pinnedChats.map((chat) => (
+            <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
+          ))}
+          {chatArrays.pinnedChats.length && (
+            <div className="pinned-chats-divider" />
+          )}
+          {chatArrays.otherChats.map((chat) => (
             <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
           ))}
         </div>
@@ -54,8 +60,13 @@ function handleScroll(e: UIEvent, loadMoreChats: GlobalActions['loadMoreChats'])
 function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
   const filtered = toArray(chats)
     .filter((chat) => Boolean(chat.last_message) && loadedChatIds.includes(chat.id));
+  const pinnedChats = orderBy(filtered.filter((chat) => chat.is_pinned), [(chat) => chat.last_message!.date], 'desc');
+  const otherChats = orderBy(filtered.filter((chat) => !chat.is_pinned), [(chat) => chat.last_message!.date], 'desc');
 
-  return orderBy(filtered, ['is_pinned', (chat) => chat.last_message!.date], ['desc', 'desc']);
+  return {
+    pinnedChats,
+    otherChats,
+  };
 }
 
 export default withGlobal(

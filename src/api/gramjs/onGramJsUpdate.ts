@@ -112,14 +112,16 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
         status: buildApiUserStatus(update.status),
       },
     });
-    // TODO @gramjs This one never comes for some reason. `UpdatePinnedDialogs` comes instead.
-    // } else if (update instanceof GramJs.UpdateDialogPinned) {
-    //   onUpdate({
-    //     '@type': 'updateChat',
-    //     id: getApiChatIdFromMtpPeer(update.peer),
-    //     chat: {
-    //       is_pinned: update.pinned || false,
-    //     },
-    //   });
+  } else if (
+    update instanceof GramJs.UpdateDialogPinned
+    && update.peer instanceof GramJs.DialogPeer
+  ) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      chat: {
+        is_pinned: update.pinned || false,
+      },
+    });
   }
 }

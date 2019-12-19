@@ -7,18 +7,24 @@ type IProps = {
   chat: ApiChat;
 };
 
-// TODO Support mentions and `is_pinned`.
+// TODO Support mentions.
 
 const Badge: FC<IProps> = ({ chat }) => {
-  return (
-    chat.unread_count ? (
+  if (chat.unread_count) {
+    return (
       <div className="Badge">
         {chat.unread_count}
       </div>
-    ) : (
-      <div />
-    )
-  );
+    );
+  } else if (chat.is_pinned) {
+    return (
+      <div className="Badge pinned">
+        <i className="icon-pinned-chat" />
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default Badge;

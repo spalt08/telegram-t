@@ -7,4 +7,9 @@
   .Loading {
     min-height: 75vh;
   }
+
+  .pinned-chats-divider {
+    margin-bottom: 0.35rem;
+    border-bottom: 1px solid var(--color-borders);
+  }
 }

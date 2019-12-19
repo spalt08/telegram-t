@@ -12,7 +12,16 @@
   text-align: center;
   flex-shrink: 0;
 
-  .Chat.private & {
+  .Chat.private &:not(.pinned) {
     background: var(--color-green);
+  }
+
+  &.pinned {
+    width: 1.5rem;
+    padding: 0;
+
+    i {
+      font-size: 1.5rem;
+    }
   }
 }
