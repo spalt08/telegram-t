@@ -510,8 +510,7 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return
         }
-        let size
-        size = this._pickFileSize(photo.sizes, args.sizeType)
+        const size = this._pickFileSize(photo.sizes, args.sizeType)
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return
         }
