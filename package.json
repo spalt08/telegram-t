@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "async-mutex": "^0.1.4",
-    "big-integer": "latest",
+    "big-integer": "painor/BigInteger.js",
     "croppie": "^2.6.4",
     "emoji-regex": "^8.0.0",
     "events": "^3.0.0",

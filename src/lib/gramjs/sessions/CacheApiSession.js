@@ -25,10 +25,12 @@ class CacheApi extends MemorySession {
             this.setDC(mainDcId, ipAddress, port, true)
 
             Object.keys(keys).forEach((dcId) => {
-                this._authKeys[dcId] = new AuthKey(
-                    Buffer.from(keys[dcId].data),
-                    Buffer.from(hashes[dcId].data)
-                )
+                if (keys[dcId] && hashes[dcId]){
+                    this._authKeys[dcId] = new AuthKey(
+                        Buffer.from(keys[dcId].data),
+                        Buffer.from(hashes[dcId].data)
+                    )
+                }
             })
         } catch (err) {
             throw new Error(`Failed to retrieve or parse JSON from Cache for key ${this._storageKey}`)

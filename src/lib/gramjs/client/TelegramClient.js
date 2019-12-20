@@ -22,6 +22,8 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 const MIN_CHUNK_SIZE = 4096
 const MAX_CHUNK_SIZE = 512 * 1024
 const DEFAULT_CHUNK_SIZE = 64 // kb
+// All types
+const sizeTypes = ['w', 'y', 'x', 'm', 's']
 
 
 class TelegramClient {
@@ -142,7 +144,7 @@ class TelegramClient {
 
         this._sender = new MTProtoSender(this.session.getAuthKey(), {
             logger: this._log,
-            dcId:this.session.dcId,
+            dcId: this.session.dcId,
             retries: this._connectionRetries,
             delay: this._retryDelay,
             autoReconnect: this._autoReconnect,
@@ -223,8 +225,8 @@ class TelegramClient {
         return this.connect()
     }
 
-    async _authKeyCallback(authKey,dcId) {
-        this.session.setAuthKey(authKey,dcId)
+    async _authKeyCallback(authKey, dcId) {
+        this.session.setAuthKey(authKey, dcId)
     }
 
     // endregion
@@ -242,8 +244,9 @@ class TelegramClient {
     async _createExportedSender(dcId, retries) {
         const dc = utils.getDC(dcId)
         const sender = new MTProtoSender(this.session.getAuthKey(dcId),
-            { logger: this._log,
-                dcId:dcId,
+            {
+                logger: this._log,
+                dcId: dcId,
                 retries: this._connectionRetries,
                 delay: this._retryDelay,
                 autoReconnect: this._autoReconnect,
@@ -477,8 +480,15 @@ class TelegramClient {
         if (!sizeType || !sizes || !sizes.length) {
             return null
         }
-
-        return sizes.find((s) => s.type === sizeType)
+        const indexOfSize = sizeTypes.indexOf(sizeType)
+        let size
+        for (let i = indexOfSize; i < sizeTypes.length; i++) {
+            size = sizes.find((s) => s.type === sizeTypes[i])
+            if (size) {
+                break
+            }
+        }
+        return size
     }
 
 
@@ -500,7 +510,8 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return
         }
-        const size = this._pickFileSize(photo.sizes, args.sizeType)
+        let size
+        size = this._pickFileSize(photo.sizes, args.sizeType)
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return
         }
@@ -508,7 +519,6 @@ class TelegramClient {
         if (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize) {
             return this._downloadCachedPhotoSize(size)
         }
-
         return this.downloadFile(
             new constructors.InputPhotoFileLocation({
                 id: photo.id,

@@ -1,6 +1,6 @@
 export const DEBUG = true;
 
-export const MEDIA_CACHE_DISABLED = false;
+export const MEDIA_CACHE_DISABLED = true;
 export const MEDIA_CACHE_NAME = 'tt-media';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;

@@ -8,7 +8,7 @@ import {
 import { onGramJsUpdate } from './onGramJsUpdate';
 import queuedDownloadMedia from './connectors/media';
 
-GramJsLogger.setLevel('warn');
+GramJsLogger.setLevel(DEBUG ? 'debug' : 'warn');
 
 let client: TelegramClient;
 
