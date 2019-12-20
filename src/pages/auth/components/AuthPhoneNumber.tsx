@@ -50,7 +50,7 @@ const AuthPhoneNumber: FC<IProps> = ({
     }
     setPhone(phoneNumber);
     target.value = getNumberWithCode(phoneNumber, suggestedCountry);
-    setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 11);
+    setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 10);
   }
 
   function onKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {

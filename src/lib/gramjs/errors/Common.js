@@ -20,7 +20,7 @@ class TypeNotFoundError extends Error {
     constructor(invalidConstructorId, remaining) {
         super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
         read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
-         it should not be read. Remaining bytes: ${remaining}`)
+         it should not be read. Remaining bytes: ${remaining.length}`)
         this.invalidConstructorId = invalidConstructorId
         this.remaining = remaining
     }

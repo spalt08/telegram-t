@@ -24,7 +24,8 @@ const AUTO_CASTS = new Set([
     'InputDocument',
     'InputChatPhoto'
 ])
-const CACHING_SUPPORTED = typeof self !== undefined && self.localStorage !== undefined
+const CACHING_SUPPORTED = typeof self !== 'undefined' && self.localStorage !== undefined
+
 const CACHE_KEY = 'GramJs:apiCache'
 
 function buildApiFromTlSchema() {
