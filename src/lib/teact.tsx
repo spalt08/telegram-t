@@ -4,6 +4,7 @@ import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
+type AnyFunction = (...args: any) => any;
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -46,13 +47,16 @@ interface ComponentInstance {
   name: string;
   props: Props;
   children: VirtualElementChildren;
-  state: ComponentInstanceState;
-  effects: ComponentInstanceEffects;
-  refs: ComponentInstanceRefs;
   render: () => VirtualElementComponent;
   forceUpdate: Function;
   onUpdate?: Function;
   isUnmounted: boolean;
+  hooks: {
+    state: ComponentInstanceState;
+    effects: ComponentInstanceEffects;
+    refs: ComponentInstanceRefs;
+    callbacks: ComponentInstanceCallbacks;
+  };
 }
 
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
@@ -80,6 +84,14 @@ interface ComponentInstanceRefs {
   cursor: number;
   byCursor: {
     current: any;
+  }[];
+}
+
+interface ComponentInstanceCallbacks {
+  cursor: number;
+  byCursor: {
+    callback: AnyFunction;
+    dependencies: any[];
   }[];
 }
 
@@ -132,17 +144,23 @@ function createElement(
       props,
       children,
       isUnmounted: false,
-      state: {
-        cursor: 0,
-        byCursor: [],
-      },
-      effects: {
-        cursor: 0,
-        byCursor: [],
-      },
-      refs: {
-        cursor: 0,
-        byCursor: [],
+      hooks: {
+        state: {
+          cursor: 0,
+          byCursor: [],
+        },
+        effects: {
+          cursor: 0,
+          byCursor: [],
+        },
+        refs: {
+          cursor: 0,
+          byCursor: [],
+        },
+        callbacks: {
+          cursor: 0,
+          byCursor: [],
+        },
       },
       render() {
         const child = renderComponent(componentInstance);
@@ -227,7 +245,7 @@ function createComponentElement(
 
 function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
-  renderingInstance.state.cursor = 0;
+  renderingInstance.hooks.state.cursor = 0;
 
   const { Component, props, children } = componentInstance;
 
@@ -312,19 +330,20 @@ function unmountTree($element: VirtualElement) {
 }
 
 function unmountComponent(componentInstance: ComponentInstance) {
-  componentInstance.effects.byCursor.forEach(({ cleanup }) => {
+  componentInstance.hooks.effects.byCursor.forEach(({ cleanup }) => {
     if (typeof cleanup === 'function') {
       cleanup();
     }
   });
-  delete componentInstance.state;
-  delete componentInstance.effects;
-  delete componentInstance.refs;
+  delete componentInstance.hooks.state;
+  delete componentInstance.hooks.effects;
+  delete componentInstance.hooks.refs;
+  delete componentInstance.hooks.callbacks;
   componentInstance.isUnmounted = true;
 }
 
 export function useState(initial?: any) {
-  const { cursor, byCursor } = renderingInstance.state;
+  const { cursor, byCursor } = renderingInstance.hooks.state;
 
   if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
@@ -338,7 +357,7 @@ export function useState(initial?: any) {
     };
   }
 
-  renderingInstance.state.cursor++;
+  renderingInstance.hooks.state.cursor++;
 
   return [
     byCursor[cursor].value,
@@ -347,7 +366,7 @@ export function useState(initial?: any) {
 }
 
 export function useEffect(effect: () => Function | void, dependencies?: any[]) {
-  const { cursor, byCursor } = renderingInstance.effects;
+  const { cursor, byCursor } = renderingInstance.hooks.effects;
   const { cleanup } = byCursor[cursor] || {};
 
   const exec = () => {
@@ -372,12 +391,12 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
     cleanup,
   };
 
-  renderingInstance.state.cursor++;
+  renderingInstance.hooks.state.cursor++;
 }
 
 // TODO Support in `teact-dom`.
 export function useRef(initial: any) {
-  const { cursor, byCursor } = renderingInstance.refs;
+  const { cursor, byCursor } = renderingInstance.hooks.refs;
 
   if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
@@ -385,9 +404,30 @@ export function useRef(initial: any) {
     };
   }
 
-  renderingInstance.state.cursor++;
+  renderingInstance.hooks.state.cursor++;
 
   return byCursor[cursor];
+}
+
+export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[]): F {
+  const { cursor, byCursor } = renderingInstance.hooks.callbacks;
+  let { callback } = byCursor[cursor] || {};
+
+  if (
+    byCursor[cursor] === undefined
+    || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
+  ) {
+    callback = newCallback;
+  }
+
+  byCursor[cursor] = {
+    callback,
+    dependencies,
+  };
+
+  renderingInstance.hooks.callbacks.cursor++;
+
+  return callback as F;
 }
 
 export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
