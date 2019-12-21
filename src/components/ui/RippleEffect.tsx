@@ -1,4 +1,4 @@
-import React, { FC, useState } from '../../lib/teact';
+import React, { FC, useCallback, useState } from '../../lib/teact';
 import { debounce } from '../../util/schedulers';
 
 import './RippleEffect.scss';
@@ -16,9 +16,9 @@ const runDebounced = debounce((cb) => cb(), RIPPLE_DEBOUNCE_MS, false);
 const RippleEffect: FC<{}> = () => {
   const [ripples, setRipples] = useState([]);
 
-  function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const container = e.currentTarget as HTMLDivElement;
-    const position = container.getBoundingClientRect();
+    const position = container.getBoundingClientRect() as DOMRect;
 
     const rippleSize = container.offsetWidth / 2;
 
@@ -30,14 +30,14 @@ const RippleEffect: FC<{}> = () => {
         size: rippleSize,
       },
     ]);
-  }
+  }, [ripples]);
 
-  const cleanUp = runDebounced(() => setRipples([]));
+  const cleanUp = useCallback(() => runDebounced(() => setRipples([])), []);
 
   return (
     <div className="ripple-container" onMouseDown={handleMouseDown} onMouseUp={cleanUp}>
-      {ripples.map((ripple: Ripple) => (
-        <span style={`left: ${ripple.x}px; top: ${ripple.y}px; width: ${ripple.size}px; height: ${ripple.size}px;`} />
+      {ripples.map(({ x, y, size }: Ripple) => (
+        <span style={`left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px;`} />
       ))}
     </div>
   );

@@ -102,14 +102,15 @@ export default memo(withGlobal(
       return null;
     }
 
+    const lastMessage = chat.last_message;
     const privateChatUserId = isPrivateChat(chat.id) && chat.type.user_id;
     // TODO: Works for only recent messages that are already loaded in the store
-    const actionTargetMessage = chat.last_message.content.action && chat.last_message.reply_to_message_id
-      ? selectChatMessage(global, chat.last_message.chat_id, chat.last_message.reply_to_message_id)
+    const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
+      ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
       : undefined;
 
     return {
-      lastMessageSender: selectUser(global, chat.last_message.sender_user_id),
+      lastMessageSender: selectUser(global, lastMessage.sender_user_id),
       privateChatUser: privateChatUserId && selectUser(global, privateChatUserId),
       actionTargetMessage,
     };
