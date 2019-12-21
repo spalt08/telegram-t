@@ -13,39 +13,59 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs.AnyRequest) {
+  // Messages
   if (
     update instanceof GramJs.UpdateNewMessage
+    || update instanceof GramJs.UpdateNewChannelMessage
     || update instanceof GramJs.UpdateShortChatMessage
     || update instanceof GramJs.UpdateShortMessage
-    || update instanceof GramJs.UpdateNewChannelMessage
   ) {
     let message;
 
-    if (update instanceof GramJs.UpdateNewMessage || update instanceof GramJs.UpdateNewChannelMessage) {
+    if (update instanceof GramJs.UpdateShortChatMessage) {
+      message = buildApiMessageFromShortChat(update);
+    } else if (update instanceof GramJs.UpdateShortMessage) {
+      message = buildApiMessageFromShort(update);
+    } else {
       if (update.message instanceof GramJs.Message) {
         localDb.messages[update.message.id] = update.message;
       }
 
       message = buildApiMessage(update.message);
-    } else if (update instanceof GramJs.UpdateShortChatMessage) {
-      message = buildApiMessageFromShortChat(update);
-    } else {
-      message = buildApiMessageFromShort(update);
     }
 
     onUpdate({
-      '@type': 'updateMessage',
+      '@type': 'newMessage',
       id: message.id,
       chat_id: message.chat_id,
       message,
     });
+  } else if (
+    update instanceof GramJs.UpdateEditMessage
+    || update instanceof GramJs.UpdateEditChannelMessage
+  ) {
+    if (update.message instanceof GramJs.Message) {
+      localDb.messages[update.message.id] = update.message;
+    }
+
+    const message = buildApiMessage(update.message);
 
     onUpdate({
-      '@type': 'updateChat',
-      id: message.chat_id,
-      chat: {
-        last_message: message,
-      },
+      '@type': 'editMessage',
+      id: message.id,
+      chat_id: message.chat_id,
+      message,
+    });
+  } else if (
+    update instanceof GramJs.UpdateDeleteMessages
+    || update instanceof GramJs.UpdateDeleteChannelMessages
+  ) {
+    onUpdate({
+      '@type': 'deleteMessages',
+      ids: update.messages,
+      ...((update instanceof GramJs.UpdateDeleteChannelMessages) && {
+        chat_id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
+      }),
     });
   } else if (
     (originRequest instanceof GramJs.messages.SendMessage)
@@ -70,6 +90,8 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
         sending_state: undefined,
       },
     });
+
+    // Chats
   } else if (update instanceof GramJs.UpdateReadHistoryInbox) {
     onUpdate({
       '@type': 'updateChat',
@@ -104,14 +126,6 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
         last_read_outbox_message_id: update.maxId,
       },
     });
-  } else if (update instanceof GramJs.UpdateUserStatus) {
-    onUpdate({
-      '@type': 'updateUser',
-      id: update.userId,
-      user: {
-        status: buildApiUserStatus(update.status),
-      },
-    });
   } else if (
     update instanceof GramJs.UpdateDialogPinned
     && update.peer instanceof GramJs.DialogPeer
@@ -121,6 +135,16 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
       id: getApiChatIdFromMtpPeer(update.peer.peer),
       chat: {
         is_pinned: update.pinned || false,
+      },
+    });
+
+    // Users
+  } else if (update instanceof GramJs.UpdateUserStatus) {
+    onUpdate({
+      '@type': 'updateUser',
+      id: update.userId,
+      user: {
+        status: buildApiUserStatus(update.status),
       },
     });
   }

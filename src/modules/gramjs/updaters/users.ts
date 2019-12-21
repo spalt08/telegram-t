@@ -1,55 +1,24 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { ApiUpdate, ApiUser } from '../../../api/types';
+import { ApiUpdate } from '../../../api/types';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { setUsers, updateUser } from '../../common/users';
 
 export function onUpdate(update: ApiUpdate) {
+  const global = getGlobal();
+
   switch (update['@type']) {
     case 'users': {
-      setUsers(update.users);
+      const byId = buildCollectionByKey(update.users, 'id');
+      setGlobal(setUsers(global, byId));
 
       break;
     }
 
     case 'updateUser': {
-      updateUser(update.id, update.user);
+      setGlobal(updateUser(global, update.id, update.user));
 
       break;
     }
   }
-}
-
-function setUsers(users: ApiUser[]) {
-  const global = getGlobal();
-
-  const byId = buildCollectionByKey(users, 'id');
-
-  setGlobal({
-    ...global,
-    users: {
-      ...global.users,
-      byId: {
-        ...global.users.byId,
-        ...byId,
-      },
-    },
-  });
-}
-
-function updateUser(userId: number, userUpdate: Partial<ApiUser>) {
-  const global = getGlobal();
-
-  setGlobal({
-    ...global,
-    users: {
-      ...global.users,
-      byId: {
-        ...global.users.byId,
-        [userId]: {
-          ...global.users.byId[userId],
-          ...userUpdate,
-        },
-      },
-    },
-  });
 }

@@ -3,6 +3,7 @@ import {
 } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
+import { addChatIds, updateChatScrollOffset } from '../../common/chats';
 
 const LOAD_CHATS_LIMIT = 50;
 
@@ -15,16 +16,7 @@ addReducer('loadMoreChats', (global) => {
 addReducer('setChatScrollOffset', (global, actions, payload) => {
   const { chatId, scrollOffset } = payload!;
 
-  setGlobal({
-    ...global,
-    chats: {
-      ...global.chats,
-      scrollOffsetById: {
-        ...global.chats.scrollOffsetById,
-        [chatId]: scrollOffset,
-      },
-    },
-  });
+  return updateChatScrollOffset(global, chatId, scrollOffset);
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
@@ -43,18 +35,5 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
     chat_ids.shift();
   }
 
-  const global = getGlobal();
-  const currentIds = global.chats.ids;
-  const newIds = (currentIds && currentIds.length) ? chat_ids.filter((id) => !currentIds.includes(id)) : chat_ids;
-
-  setGlobal({
-    ...global,
-    chats: {
-      ...global.chats,
-      ids: [
-        ...currentIds,
-        ...newIds,
-      ],
-    },
-  });
+  setGlobal(addChatIds(getGlobal(), chat_ids));
 }

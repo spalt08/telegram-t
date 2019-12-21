@@ -55,18 +55,10 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
 export async function sendMessage({ chat, text }: { chat: ApiChat; text: string }) {
   const localMessage = buildLocalMessage(chat.id, text);
   onUpdate({
-    '@type': 'updateMessage',
+    '@type': 'newMessage',
     id: localMessage.id,
     chat_id: chat.id,
     message: localMessage,
-  });
-
-  onUpdate({
-    '@type': 'updateChat',
-    id: chat.id,
-    chat: {
-      last_message: localMessage,
-    },
   });
 
   const randomId = generateRandomBigInt();

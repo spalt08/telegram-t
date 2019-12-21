@@ -34,8 +34,15 @@ export type ApiUpdateChat = {
   chat: Partial<ApiChat>;
 };
 
-export type ApiUpdateMessage = {
-  '@type': 'updateMessage';
+export type ApiUpdateNewMessage = {
+  '@type': 'newMessage';
+  chat_id: number;
+  id: number;
+  message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateEditMessage = {
+  '@type': 'editMessage';
   chat_id: number;
   id: number;
   message: Partial<ApiMessage>;
@@ -55,6 +62,12 @@ export type ApiUpdateMessageSendFailed = {
   sending_state: {
     '@type': 'messageSendingStateFailed';
   };
+};
+
+export type ApiUpdateDeleteMessages = {
+  '@type': 'deleteMessages';
+  ids: number[];
+  chat_id?: number;
 };
 
 export type ApiUpdateUsers = {
@@ -83,7 +96,8 @@ export type ApiUpdateMessageImage = {
 export type ApiUpdate = (
   ApiUpdateAuthorizationState |
   ApiUpdateChats | ApiUpdateChat |
-  ApiUpdateMessage | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
+  ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
+  ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUsers | ApiUpdateUser |
   ApiUpdateAvatar | ApiUpdateMessageImage
 );
