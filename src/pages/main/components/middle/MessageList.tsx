@@ -8,7 +8,7 @@ import { selectChatMessages } from '../../../../modules/selectors';
 import { isOwnMessage, isPrivateChat, isActionMessage } from '../../../../modules/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
-import { formatChatDateHeader } from '../../../../util/dateFormat';
+import { formatHumanDate } from '../../../../util/dateFormat';
 import { MessageDateGroup, groupMessages } from './message/utils';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
@@ -90,7 +90,7 @@ const MessageList: FC<IProps> = ({
   function renderMessageDateGroup(messageDateGroup: MessageDateGroup) {
     return (
       <div className="message-date-group">
-        <div className="message-date-header">{formatChatDateHeader(messageDateGroup.datetime)}</div>
+        <div className="message-date-header">{formatHumanDate(messageDateGroup.datetime)}</div>
         {messageDateGroup.messageGroups.map((messageGroup) => {
           if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
             const message = messageGroup[0];

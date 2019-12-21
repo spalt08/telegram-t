@@ -5,41 +5,6 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-export function formatTime(datetime: number | Date) {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const hours = padStart(String(date.getHours()), 2, '0');
-  const minutes = padStart(String(date.getMinutes()), 2, '0');
-
-  return `${hours}:${minutes}`;
-}
-
-export function formatDate(datetime: number | Date, isShort = false) {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const day = date.getDate();
-  const month = padStart(String(date.getMonth() + 1), 2, '0');
-  const year = String(date.getFullYear()).slice(0, isShort ? 2 : 4);
-
-  return `${day}.${month}.${year}`;
-}
-
-export function formatDateForMessageList(datetime: number | Date) {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-  const day = date.getDate();
-  const month = MONTHS[date.getMonth()];
-  const currentYear = new Date().getFullYear();
-  const year = date.getFullYear();
-
-  return `${month} ${day}${year < currentYear ? ` ${year}` : ''}`;
-}
-
-function padStart(str: string, targetLength: number, padString: string) {
-  while (str.length < targetLength) {
-    str = padString + str;
-  }
-
-  return str;
-}
-
 export function formatPastTimeShort(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
@@ -57,10 +22,27 @@ export function formatPastTimeShort(datetime: number | Date) {
     return WEEKDAYS_SHORT[date.getDay()];
   }
 
-  return formatDate(date, true);
+  return formatFullDate(date, true);
 }
 
-export function formatChatDateHeader(datetime: number | Date) {
+export function formatTime(datetime: number | Date) {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+  const hours = padStart(String(date.getHours()), 2, '0');
+  const minutes = padStart(String(date.getMinutes()), 2, '0');
+
+  return `${hours}:${minutes}`;
+}
+
+export function formatFullDate(datetime: number | Date, isShort = false) {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+  const day = date.getDate();
+  const month = padStart(String(date.getMonth() + 1), 2, '0');
+  const year = String(date.getFullYear()).slice(0, isShort ? 2 : 4);
+
+  return `${day}.${month}.${year}`;
+}
+
+export function formatHumanDate(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = new Date();
@@ -84,54 +66,20 @@ export function formatChatDateHeader(datetime: number | Date) {
     return WEEKDAYS_FULL[date.getDay()];
   }
 
-  return formatDateForMessageList(date);
+  const day = date.getDate();
+  const month = MONTHS[date.getMonth()];
+  const currentYear = new Date().getFullYear();
+  const year = date.getFullYear();
+
+  return `${month} ${day}${year < currentYear ? ` ${year}` : ''}`;
 }
 
-export function formatPastTime(datetime: number | Date) {
-  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
-
-  const now = new Date();
-
-  if (date >= now) {
-    return 'just now';
+function padStart(str: string, targetLength: number, padString: string) {
+  while (str.length < targetLength) {
+    str = padString + str;
   }
 
-  const diff = new Date(now.getTime() - date.getTime());
-
-  // within a minute
-  if (diff.getTime() / 1000 < 60) {
-    return 'just now';
-  }
-
-  // within an hour
-  if (diff.getTime() / 1000 < 60 * 60) {
-    const minutes = Math.floor(diff.getTime() / 1000 / 60);
-    return `${minutes === 1 ? '1 minute' : `${minutes} minutes`} ago`;
-  }
-
-  // today
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (date > today) {
-    // up to 6 hours ago
-    if (diff.getTime() / 1000 < 6 * 60 * 60) {
-      const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
-      return `${hours === 1 ? '1 hour' : `${hours} hours`} ago`;
-    }
-
-    // other
-    return `today at ${formatTime(date)}`;
-  }
-
-  // yesterday
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-  today.setHours(0, 0, 0, 0);
-  if (date > yesterday) {
-    return `yesterday at ${formatTime(date)}`;
-  }
-
-  return `${formatDate(date)}`;
+  return str;
 }
 
 export function isSameDay(datetime1: number | Date, datetime2: number | Date) {

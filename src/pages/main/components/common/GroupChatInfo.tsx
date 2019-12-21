@@ -2,7 +2,7 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat, ApiGroup } from '../../../../api/types';
-import { isChannel, getGroupTypeString } from '../../../../modules/helpers';
+import { isChannel, getGroupTypeString, isSuperGroupChat } from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
 import { selectChat, selectChatGroupId, selectGroupOnlineCount } from '../../../../modules/selectors';
 import { selectGroup } from '../../../../modules/selectors/groups';
@@ -21,7 +21,7 @@ const GroupChatInfo: FC<IProps> = ({
   onlineMembers,
   avatarSize = 'medium',
 }) => {
-  const groupStatus = getGroupStatus(group);
+  const groupStatus = getGroupStatus(chat, group);
   const onlineStatus = onlineMembers ? `, ${onlineMembers} online` : '';
 
   return (
@@ -38,9 +38,9 @@ const GroupChatInfo: FC<IProps> = ({
   );
 };
 
-function getGroupStatus(group?: ApiGroup) {
+function getGroupStatus(chat: ApiChat, group?: ApiGroup) {
   if (!group) {
-    return 'Group Chat';
+    return isSuperGroupChat(chat.id) ? 'Super Group' : 'Group Chat';
   }
 
   return group.member_count

@@ -1,5 +1,5 @@
 import { ApiUser } from '../../api/types/index';
-import { formatDate, formatTime } from '../../util/dateFormat';
+import { formatFullDate, formatTime } from '../../util/dateFormat';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
@@ -132,7 +132,7 @@ export function getUserStatus(user: ApiUser) {
         return `last seen yesterday at ${formatTime(wasOnline)}`;
       }
 
-      return `last seen ${formatDate(wasOnline)}`;
+      return `last seen ${formatFullDate(wasOnline)}`;
     }
 
     case 'userStatusOnline': {

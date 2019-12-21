@@ -12,6 +12,11 @@ export function isSuperGroupChat(chatId: number) {
   return chatId < -1000000000;
 }
 
+export function isChannelChat(chatId: number) {
+  // TODO This is temporary, as not all supergroups are channels.
+  return isSuperGroupChat(chatId);
+}
+
 export function getPrivateChatUserId(chat: ApiPrivateChat) {
   return chat.type.user_id;
 }

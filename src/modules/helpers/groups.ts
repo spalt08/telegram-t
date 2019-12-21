@@ -1,6 +1,7 @@
 import { ApiGroup } from '../../api/types';
 
 export function isChannel(group: ApiGroup) {
+  // TODO Not supported in Gram JS.
   return group.is_channel || false;
 }
 
