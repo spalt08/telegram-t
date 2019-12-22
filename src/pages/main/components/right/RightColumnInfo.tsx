@@ -1,5 +1,4 @@
 import React, { FC } from '../../../../lib/teact';
-import { withGlobal } from '../../../../lib/teactn';
 
 import { isPrivateChat } from '../../../../modules/helpers';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -27,6 +26,4 @@ const RightColumnInfo: FC<IProps> = ({ chatId }) => {
   );
 };
 
-export default withGlobal(
-
-)(RightColumnInfo);
+export default RightColumnInfo;

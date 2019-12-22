@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useState } from '../../lib/teact';
+import React, {
+  FC, useCallback, useState, memo,
+} from '../../lib/teact';
 import { debounce } from '../../util/schedulers';
 
 import './RippleEffect.scss';
@@ -43,4 +45,4 @@ const RippleEffect: FC<{}> = () => {
   );
 };
 
-export default RippleEffect;
+export default memo(RippleEffect);

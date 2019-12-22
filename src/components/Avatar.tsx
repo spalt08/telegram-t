@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from '../lib/teact';
-import { withGlobal } from '../lib/teactn';
 
 import { ApiUser, ApiChat } from '../api/types';
 import {
@@ -15,12 +14,19 @@ interface IProps {
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
-  imageHash?: string;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, imageHash, showOnlineStatus,
+  size = 'large', chat, user, showOnlineStatus,
 }) => {
+  let imageHash: string | null = null;
+
+  if (chat) {
+    imageHash = getChatAvatarHash(chat);
+  } else if (user) {
+    imageHash = getUserAvatarHash(user);
+  }
+
   const [, onDataUriUpdate] = useState(null);
   const dataUri = imageHash && mediaLoader.getFromMemory(imageHash);
 
@@ -62,16 +68,4 @@ function getFirstLetters(phrase: string) {
     .toUpperCase();
 }
 
-export default withGlobal(
-  (global, { chat, user }) => {
-    let imageHash = null;
-
-    if (chat) {
-      imageHash = getChatAvatarHash(chat);
-    } else if (user) {
-      imageHash = getUserAvatarHash(user);
-    }
-
-    return { imageHash };
-  },
-)(Avatar);
+export default Avatar;
