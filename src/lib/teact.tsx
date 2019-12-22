@@ -3,7 +3,7 @@ import { flatten } from '../util/iteratees';
 import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
-export type FC<P extends Props = any> = (props: P) => VirtualElementComponent;
+export type FC<P extends Props = any> = (props: P) => any;
 type AnyFunction = (...args: any) => any;
 
 export enum VirtualElementTypesEnum {
@@ -52,48 +52,40 @@ interface ComponentInstance {
   onUpdate?: Function;
   isUnmounted: boolean;
   hooks: {
-    state: ComponentInstanceState;
-    effects: ComponentInstanceEffects;
-    refs: ComponentInstanceRefs;
-    callbacks: ComponentInstanceCallbacks;
+    state: {
+      cursor: number;
+      byCursor: {
+        value: any;
+        setter: Function;
+      }[];
+    };
+    effects: {
+      cursor: number;
+      byCursor: {
+        effect: () => void;
+        dependencies?: any[];
+        cleanup?: Function;
+      }[];
+    };
+    refs: {
+      cursor: number;
+      byCursor: {
+        current: any;
+      }[];
+    };
+    callbacks: {
+      cursor: number;
+      byCursor: {
+        callback: AnyFunction;
+        dependencies: any[];
+      }[];
+    };
   };
 }
 
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
-
-interface ComponentInstanceState {
-  cursor: number;
-  byCursor: {
-    value: any;
-    setter: Function;
-  }[];
-}
-
-interface ComponentInstanceEffects {
-  cursor: number;
-  byCursor: {
-    effect: () => void;
-    dependencies?: any[];
-    cleanup?: Function;
-  }[];
-}
-
-interface ComponentInstanceRefs {
-  cursor: number;
-  byCursor: {
-    current: any;
-  }[];
-}
-
-interface ComponentInstanceCallbacks {
-  cursor: number;
-  byCursor: {
-    callback: AnyFunction;
-    dependencies: any[];
-  }[];
-}
 
 const EMPTY_CHILDREN: any[] = [];
 
@@ -163,10 +155,20 @@ function createElement(
         },
       },
       render() {
-        const child = renderComponent(componentInstance);
+        const newChild = renderComponent(componentInstance);
+        const currentChild = componentInstance.$element.children[0];
 
-        if (componentInstance.$element.children[0] !== child) {
-          const renderedChildren = getUpdatedChildren(componentInstance.$element, [child]);
+        // `renderComponent` may return the same child element (cached by `memo`), but if it is another component,
+        // that element would already be replaced in that component while its initial rendering.
+        // Although, the link to it will be kept in the child component's `$prevElement`.
+        // This logic should likely be simplified.
+        const equalsToPrevChild = currentChild
+          && isComponentElement(currentChild)
+          && newChild === currentChild.componentInstance.$prevElement;
+
+        if (newChild !== currentChild && !equalsToPrevChild) {
+          // TODO `newChild` must be converted to element.
+          const renderedChildren = getUpdatedChildren(componentInstance.$element, [newChild]);
           componentInstance.$prevElement = componentInstance.$element;
           componentInstance.$element = createComponentElement(componentInstance, renderedChildren);
         } else {
@@ -246,6 +248,9 @@ function createComponentElement(
 function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
   renderingInstance.hooks.state.cursor = 0;
+  renderingInstance.hooks.effects.cursor = 0;
+  renderingInstance.hooks.refs.cursor = 0;
+  renderingInstance.hooks.callbacks.cursor = 0;
 
   const { Component, props, children } = componentInstance;
 
@@ -281,6 +286,7 @@ function getUpdatedChild(
     if (isComponentElement(currentChild) && isComponentElement(newChild)) {
       currentChild.componentInstance.props = newChild.componentInstance.props;
       currentChild.componentInstance.children = newChild.componentInstance.children;
+
       return currentChild.componentInstance.render();
     } else {
       newChild.children = getUpdatedChildren(currentChild, newChild.children);
@@ -391,11 +397,11 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
     cleanup,
   };
 
-  renderingInstance.hooks.state.cursor++;
+  renderingInstance.hooks.effects.cursor++;
 }
 
 // TODO Support in `teact-dom`.
-export function useRef(initial: any) {
+export function useRef(initial?: any) {
   const { cursor, byCursor } = renderingInstance.hooks.refs;
 
   if (byCursor[cursor] === undefined) {
@@ -404,7 +410,7 @@ export function useRef(initial: any) {
     };
   }
 
-  renderingInstance.hooks.state.cursor++;
+  renderingInstance.hooks.refs.cursor++;
 
   return byCursor[cursor];
 }
@@ -433,15 +439,15 @@ export function useCallback<F extends AnyFunction>(newCallback: F, dependencies:
 export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
   return function MemoWrapper(props: Props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const propsRef = useRef({});
-    const renderRef = useRef({});
+    const propsRef = useRef(props);
+    const renderedRef = useRef();
 
-    if (!renderRef.current || !areEqual(propsRef.current, props)) {
+    if (!renderedRef.current || !areEqual(propsRef.current, props)) {
       propsRef.current = props;
-      renderRef.current = createElement(Component, props) as VirtualElementComponent;
+      renderedRef.current = createElement(Component, props) as VirtualElementComponent;
     }
 
-    return renderRef.current;
+    return renderedRef.current;
   };
 }
 
