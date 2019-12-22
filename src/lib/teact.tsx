@@ -48,8 +48,8 @@ interface ComponentInstance {
   props: Props;
   children: VirtualElementChildren;
   render: () => VirtualElementComponent;
-  forceUpdate: Function;
-  onUpdate?: Function;
+  renderedValue?: any;
+  isRendered: () => boolean;
   isUnmounted: boolean;
   hooks: {
     state: {
@@ -81,15 +81,16 @@ interface ComponentInstance {
       }[];
     };
   };
+  forceUpdate: Function;
+  onUpdate?: Function;
 }
 
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
 
-const EMPTY_CHILDREN: any[] = [];
+const EMPTY_COMPONENT_CHILDREN: any[] = [];
 
-// Used for memoization.
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
@@ -113,7 +114,7 @@ export function isRealElement($element: VirtualElement): $element is VirtualReal
 }
 
 function createElement(
-  tag: string | FC,
+  tagOrComponent: string | FC,
   props: Props,
   ...children: any[]
 ): VirtualRealElement {
@@ -121,111 +122,64 @@ function createElement(
     props = {};
   }
 
-  if (typeof tag === 'function') {
-    children = flatten(children);
+  children = flatten(children);
 
-    if (!children.length) {
-      children = EMPTY_CHILDREN;
-    }
+  return typeof tagOrComponent === 'function'
+    ? createComponentInstance(tagOrComponent, props, children)
+    : buildTagElement(tagOrComponent, props, children);
+}
 
-    const componentInstance: ComponentInstance = {
-      $element: {} as VirtualElementComponent,
-      $prevElement: {} as VirtualElementComponent,
-      Component: tag,
-      name: tag.name,
-      props,
-      children,
-      isUnmounted: false,
-      hooks: {
-        state: {
-          cursor: 0,
-          byCursor: [],
-        },
-        effects: {
-          cursor: 0,
-          byCursor: [],
-        },
-        refs: {
-          cursor: 0,
-          byCursor: [],
-        },
-        callbacks: {
-          cursor: 0,
-          byCursor: [],
-        },
-      },
-      render() {
-        const newChild = renderComponent(componentInstance);
-        const currentChild = componentInstance.$element.children[0];
-
-        // `renderComponent` may return the same child element (cached by `memo`), but if it is another component,
-        // that element would already be replaced in that component while its initial rendering.
-        // Although, the link to it will be kept in the child component's `$prevElement`.
-        // This logic should likely be simplified.
-        const equalsToPrevChild = currentChild
-          && isComponentElement(currentChild)
-          && newChild === currentChild.componentInstance.$prevElement;
-
-        if (newChild !== currentChild && !equalsToPrevChild) {
-          // TODO `newChild` must be converted to element.
-          const renderedChildren = getUpdatedChildren(componentInstance.$element, [newChild]);
-          componentInstance.$prevElement = componentInstance.$element;
-          componentInstance.$element = createComponentElement(componentInstance, renderedChildren);
-        } else {
-          componentInstance.$prevElement = componentInstance.$element;
-        }
-
-        return componentInstance.$element;
-      },
-      forceUpdate: throttleWithRaf((newProps?: Props) => {
-        if (newProps) {
-          componentInstance.props = newProps;
-        }
-
-        if (componentInstance.onUpdate && !componentInstance.isUnmounted) {
-          const currentElement = componentInstance.$element;
-          componentInstance.render();
-
-          if (componentInstance.$element !== currentElement) {
-            componentInstance.onUpdate(componentInstance.$prevElement, componentInstance.$element);
-          }
-        }
-      }),
-    };
-
-    componentInstance.$element = createComponentElement(componentInstance);
-
-    return componentInstance.$element;
-  }
-
-  return {
-    type: VirtualElementTypesEnum.Tag,
-    tag,
+function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
+  const componentInstance: ComponentInstance = {
+    $element: {} as VirtualElementComponent,
+    $prevElement: {} as VirtualElementComponent,
+    Component,
+    name: Component.name,
     props,
-    children: flatten(children).map((child: any): VirtualElement => {
-      if (child === false || child === null || child === undefined) {
-        return createEmptyElement();
-      } else if (isRealElement(child)) {
-        return child;
-      } else {
-        return createTextElement(child);
+    children: children.length ? children : EMPTY_COMPONENT_CHILDREN,
+    isRendered: () => Boolean(componentInstance.$element.children.length),
+    isUnmounted: false,
+    hooks: {
+      state: {
+        cursor: 0,
+        byCursor: [],
+      },
+      effects: {
+        cursor: 0,
+        byCursor: [],
+      },
+      refs: {
+        cursor: 0,
+        byCursor: [],
+      },
+      callbacks: {
+        cursor: 0,
+        byCursor: [],
+      },
+    },
+    render: () => renderComponent(componentInstance),
+    forceUpdate: throttleWithRaf((newProps?: Props) => {
+      if (newProps) {
+        componentInstance.props = newProps;
+      }
+
+      if (componentInstance.onUpdate && !componentInstance.isUnmounted) {
+        const currentElement = componentInstance.$element;
+        componentInstance.render();
+
+        if (componentInstance.$element !== currentElement) {
+          componentInstance.onUpdate(componentInstance.$prevElement, componentInstance.$element);
+        }
       }
     }),
   };
+
+  componentInstance.$element = buildComponentElement(componentInstance);
+
+  return componentInstance.$element;
 }
 
-function createEmptyElement(): VirtualElementEmpty {
-  return { type: VirtualElementTypesEnum.Empty };
-}
-
-function createTextElement(value: string): VirtualElementText {
-  return {
-    type: VirtualElementTypesEnum.Text,
-    value,
-  };
-}
-
-function createComponentElement(
+function buildComponentElement(
   componentInstance: ComponentInstance,
   children: VirtualElementChildren = [],
 ): VirtualElementComponent {
@@ -245,63 +199,103 @@ function createComponentElement(
   };
 }
 
+function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
+  return {
+    type: VirtualElementTypesEnum.Tag,
+    tag,
+    props,
+    children: children.map(buildChildElement),
+  };
+}
+
+function buildChildElement(child: any): VirtualElement {
+  if (child === false || child === null || child === undefined) {
+    return buildEmptyElement();
+  } else if (isRealElement(child)) {
+    return child;
+  } else {
+    return buildTextElement(child);
+  }
+}
+
+function buildTextElement(value: string): VirtualElementText {
+  return {
+    type: VirtualElementTypesEnum.Text,
+    value,
+  };
+}
+
+function buildEmptyElement(): VirtualElementEmpty {
+  return { type: VirtualElementTypesEnum.Empty };
+}
+
 function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
-  renderingInstance.hooks.state.cursor = 0;
-  renderingInstance.hooks.effects.cursor = 0;
-  renderingInstance.hooks.refs.cursor = 0;
-  renderingInstance.hooks.callbacks.cursor = 0;
+  componentInstance.hooks.state.cursor = 0;
+  componentInstance.hooks.effects.cursor = 0;
+  componentInstance.hooks.refs.cursor = 0;
+  componentInstance.hooks.callbacks.cursor = 0;
 
   const { Component, props, children } = componentInstance;
-
-  return Component({
+  const newRenderedValue = Component({
     ...props,
     children,
   });
+
+  if (componentInstance.isRendered() && newRenderedValue === componentInstance.renderedValue) {
+    componentInstance.$prevElement = componentInstance.$element;
+    return componentInstance.$element;
+  }
+
+  componentInstance.renderedValue = newRenderedValue;
+
+  const newChild = buildChildElement(newRenderedValue);
+  const renderedChildren = replaceChildren(componentInstance.$element, [newChild]);
+  componentInstance.$prevElement = componentInstance.$element;
+  componentInstance.$element = buildComponentElement(componentInstance, renderedChildren);
+
+  return componentInstance.$element;
 }
 
-function getUpdatedChildren($element: VirtualRealElement, newChildren: VirtualElementChildren) {
+function replaceChildren($element: VirtualRealElement, newChildren: VirtualElementChildren) {
   const currentLength = $element.children.length;
   const newLength = newChildren.length;
   const maxLength = Math.max(currentLength, newLength);
 
   const children: VirtualElementChildren = [];
   for (let i = 0; i < maxLength; i++) {
-    children.push(getUpdatedChild($element, i, $element.children[i], newChildren[i]) || createEmptyElement());
+    const updatedChild = replaceChild($element.children[i], newChildren[i]);
+    if (updatedChild) {
+      children.push(updatedChild);
+    }
   }
   return children;
 }
 
-function getUpdatedChild(
-  $element: VirtualRealElement,
-  childIndex: number,
-  currentChild?: VirtualElement,
-  newChild?: VirtualElement,
+function replaceChild(
+  $currentChild?: VirtualElement,
+  $newChild?: VirtualElement,
 ) {
-  if (
-    currentChild && isRealElement(currentChild)
-    && newChild && isRealElement(newChild)
-    && !hasElementChanged(currentChild, newChild)
-  ) {
-    if (isComponentElement(currentChild) && isComponentElement(newChild)) {
-      currentChild.componentInstance.props = newChild.componentInstance.props;
-      currentChild.componentInstance.children = newChild.componentInstance.children;
+  if ($currentChild && $newChild && !hasElementChanged($currentChild, $newChild)) {
+    if (isComponentElement($currentChild) && isComponentElement($newChild)) {
+      $currentChild.componentInstance.props = $newChild.componentInstance.props;
+      $currentChild.componentInstance.children = $newChild.componentInstance.children;
 
-      return currentChild.componentInstance.render();
-    } else {
-      newChild.children = getUpdatedChildren(currentChild, newChild.children);
-    }
-  } else {
-    if (currentChild) {
-      unmountTree(currentChild);
-    }
+      return $currentChild.componentInstance.render();
+    } else if (isTagElement($currentChild) && isTagElement($newChild)) {
+      $newChild.children = replaceChildren($currentChild, $newChild.children);
 
-    if (newChild && isComponentElement(newChild)) {
-      return newChild.componentInstance.render();
+      return $newChild;
     }
   }
 
-  return newChild;
+  if ($currentChild && isRealElement($currentChild)) {
+    unmountTree($currentChild);
+  }
+
+  return $newChild && isComponentElement($newChild)
+    ? $newChild.componentInstance.render()
+    : $newChild;
 }
 
 export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
