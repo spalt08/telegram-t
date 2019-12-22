@@ -137,8 +137,7 @@ function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement
     if (!$current.props.hasOwnProperty(key)) {
       addAttribute(element, key, $new.props[key]);
     } else if ($current.props[key] !== $new.props[key]) {
-      removeAttribute(element, key, $current.props[key]);
-      addAttribute(element, key, $new.props[key]);
+      updateAttribute(element, key, $current.props[key], $new.props[key]);
     }
   });
 }
@@ -150,8 +149,6 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 
   if (key === 'className') {
     element.className = value;
-  } else if (key === 'value') {
-    (element as HTMLInputElement).value = value;
   } else if (key.startsWith('on')) {
     element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
@@ -166,8 +163,6 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
     element.className = '';
-  } else if (key === 'value') {
-    (element as HTMLInputElement).value = '';
   } else if (key.startsWith('on')) {
     element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
@@ -176,6 +171,16 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     }
   } else {
     element.removeAttribute(key);
+  }
+}
+
+function updateAttribute(element: HTMLElement, key: string, oldValue: any, newValue: any) {
+  if (key === 'value') {
+    // Setting value to '' (as we do with `className`) causes a cursor jump.
+    (element as HTMLInputElement).value = newValue;
+  } else {
+    removeAttribute(element, key, oldValue);
+    addAttribute(element, key, newValue);
   }
 }
 
