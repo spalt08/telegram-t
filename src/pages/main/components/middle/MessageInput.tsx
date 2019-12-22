@@ -24,8 +24,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
     }
 
     const { currentTarget } = e;
-    const value = currentTarget.value.trim();
-    setMessageText(value);
+    setMessageText(currentTarget.value);
     if (currentTarget.scrollHeight !== currentTarget.offsetHeight) {
       currentTarget.style.height = 'auto';
       currentTarget.style.height = `${Math.min(currentTarget.scrollHeight, MAX_INPUT_HEIGHT)}px`;
