@@ -8,12 +8,10 @@ import './styles/index.scss';
 
 getDispatch().init();
 
-document.addEventListener('DOMContentLoaded', () => {
-  TeactDOM.render(
-    <App />,
-    document.getElementById('root'),
-  );
-});
+TeactDOM.render(
+  <App />,
+  document.getElementById('root'),
+);
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console
