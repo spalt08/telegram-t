@@ -35,6 +35,7 @@ export interface VirtualElementTag {
 export interface VirtualElementComponent {
   type: VirtualElementTypesEnum.Component;
   target?: Node;
+  targetAsPrev?: Node;
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
@@ -192,6 +193,12 @@ function buildComponentElement(
     children,
     get target() {
       return this.children[0].target;
+    },
+    get targetAsPrev() {
+      const $firstChild = this.children[0];
+      return isComponentElement($firstChild)
+        ? $firstChild.componentInstance.$prevElement.targetAsPrev
+        : $firstChild.target;
     },
     set target(value) {
       this.children[0].target = value;
