@@ -28,11 +28,11 @@ function renderWithVirtual(
   $current: VirtualElement | undefined,
   $new: VirtualElement | undefined,
 ) {
-  if ($new && $current && isComponentElement($current)) {
+  if ($current && isComponentElement($current)) {
     // When component element is recursively rendered by its parent, the cached `$current` element is passed from above.
     // However, if that child component element has already been updated earlier, the `$current` would be outdated.
     // That is why we get the updated `$prevElement` right from the component instance.
-    $current = hasElementChanged($current, $new)
+    $current = $new === undefined || hasElementChanged($current, $new)
       ? $current.componentInstance.$element
       : $current.componentInstance.$prevElement;
   }
