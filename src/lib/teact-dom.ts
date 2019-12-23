@@ -26,9 +26,9 @@ function render($element: VirtualElementComponent, parentEl: HTMLElement | null)
 function renderWithVirtual(
   parentEl: HTMLElement,
   $current: VirtualElement | undefined,
-  $new: VirtualElement,
+  $new: VirtualElement | undefined,
 ) {
-  if ($current && isComponentElement($current)) {
+  if ($new && $current && isComponentElement($current)) {
     // When component element is recursively rendered by its parent, the cached `$current` element is passed from above.
     // However, if that child component element has already been updated earlier, the `$current` would be outdated.
     // That is why we get the updated `$prevElement` right from the component instance.
@@ -41,31 +41,23 @@ function renderWithVirtual(
     return;
   }
 
-  let currentTarget = null;
-  if ($current) {
-    // For component elements `target` is iteratively derived from the closest non-component child.
-    // If the first child is another component, it may have already been updated earlier,
-    // so we need to make sure we iterate through its actual "prev" tree, rather than one cached in `$current`.
-    currentTarget = isComponentElement($current) ? $current.targetAsPrev : $current.target;
-  }
-
   if ($current === undefined && $new !== undefined) {
     $new = initComponent($new, parentEl);
     $new.target = createNode($new, parentEl);
     parentEl.appendChild($new.target);
   } else if ($current !== undefined && $new === undefined) {
-    parentEl.removeChild(currentTarget!);
+    parentEl.removeChild($current.target!);
   } else if ($current !== undefined && $new !== undefined) {
     if (hasElementChanged($current, $new)) {
       $new = initComponent($new, parentEl);
       $new.target = createNode($new, parentEl);
-      parentEl.replaceChild($new.target, currentTarget!);
+      parentEl.replaceChild($new.target, $current.target!);
     } else {
-      $new.target = currentTarget!;
+      $new.target = $current.target;
 
       if (isTagElement($current) && isTagElement($new)) {
-        updateAttributes($current, $new, currentTarget as HTMLElement);
-        renderChildren($current, $new, currentTarget as HTMLElement);
+        updateAttributes($current, $new, $current.target as HTMLElement);
+        renderChildren($current, $new, $current.target as HTMLElement);
       } else if (isComponentElement($current) && isComponentElement($new)) {
         renderWithVirtual(parentEl, $current.children[0], $new.children[0]);
       }
