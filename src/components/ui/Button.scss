@@ -13,6 +13,7 @@
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  transition: background-color .15s, color .15s;
 
   &.round {
     width: 3.5rem;
@@ -55,6 +56,17 @@
     &:hover, &.active {
       background-color: rgba(var(--color-text-secondary-rgb), 0.08);
       opacity: 1;
+    }
+  }
+
+  &.translucent-white {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    --ripple-color: rgba(255, 255, 255, 0.08);
+
+    &:hover, &:active {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: white;
     }
   }
 

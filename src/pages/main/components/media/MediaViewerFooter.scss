@@ -1,0 +1,58 @@
+.MediaViewerFooter {
+  padding: 1rem 0;
+
+  @media (max-height: 640px) {
+    padding: .5rem 0 0;
+  }
+
+  .media-viewer-footer-content {
+    position: relative;
+    max-width: var(--messages-container-width);
+    margin: auto;
+    opacity: .5;
+    transition: opacity .15s;
+    position: relative;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .media-text {
+    margin-bottom: 0;
+    overflow: auto;
+    padding: 0 .5rem;
+    text-align: center;
+    color: rgba(255, 255, 255, .9);
+    font-size: .942rem;
+    letter-spacing: .025rem;
+    max-height: 4.25rem;
+
+    @media (max-height: 640px) {
+      max-height: 2.75rem;
+    }
+  
+    &.multiline {
+      &::before {
+        content: '';
+        position: absolute;
+        left: -.75rem;
+        right: -.75rem;
+        top: -.25rem;
+        bottom: -.25rem;
+        background: rgba(0, 0, 0, .75);
+        border-radius: var(--border-radius-default);
+        z-index: -1;
+      }
+    }
+  }
+
+  a {
+    color: var(--color-links);
+
+    &:hover,
+    &:focus {
+      color: var(--color-links-hover);
+    }
+  }
+}

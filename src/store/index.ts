@@ -127,7 +127,10 @@ function reduceMessagesForCache(state: GlobalState) {
     byChatId[chatId] = state.messages.byChatId[chatId];
   });
 
-  return { byChatId };
+  return {
+    ...state.messages,
+    byChatId,
+  };
 }
 
 function getCache(): GlobalState | null {

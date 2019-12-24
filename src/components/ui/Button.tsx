@@ -13,10 +13,11 @@ interface IProps {
   onClick?: Function;
   children: any;
   size?: 'default' | 'smaller';
-  color?: 'primary' | 'secondary' | 'translucent';
+  color?: 'primary' | 'secondary' | 'translucent' | 'translucent-white';
   className?: string;
   round?: boolean;
   isLoading?: boolean;
+  ariaLabel?: string;
 }
 
 const Button: FC<IProps> = ({
@@ -28,6 +29,7 @@ const Button: FC<IProps> = ({
   className,
   round,
   isLoading,
+  ariaLabel,
 }) => {
   let combinedClass = 'Button';
   combinedClass += ` ${size} ${color}`;
@@ -44,7 +46,12 @@ const Button: FC<IProps> = ({
 
   return (
     // eslint-disable-next-line react/button-has-type
-    <button type={type} className={combinedClass} onClick={onClick ? onClick as OnClickHandler : undefined}>
+    <button
+      type={type}
+      className={combinedClass}
+      onClick={onClick ? onClick as OnClickHandler : undefined}
+      aria-label={ariaLabel}
+    >
       {isLoading ? (
         <div>
           <span>Please wait...</span>

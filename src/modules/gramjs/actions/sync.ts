@@ -64,6 +64,7 @@ async function loadAndReplaceMessages() {
       scrollOffsetById: {},
     },
     messages: {
+      ...global.messages,
       byChatId,
     },
   });

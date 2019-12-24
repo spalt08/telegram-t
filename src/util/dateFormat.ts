@@ -1,10 +1,13 @@
 const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = [
+const MONTHS_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+const MONTHS_FULL = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
-
 export function formatPastTimeShort(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
@@ -42,7 +45,7 @@ export function formatFullDate(datetime: number | Date, isShort = false) {
   return `${day}.${month}.${year}`;
 }
 
-export function formatHumanDate(datetime: number | Date) {
+export function formatHumanDate(datetime: number | Date, isShort = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = new Date();
@@ -67,7 +70,8 @@ export function formatHumanDate(datetime: number | Date) {
   }
 
   const day = date.getDate();
-  const month = MONTHS[date.getMonth()];
+  const monthsArray = isShort ? MONTHS_SHORT : MONTHS_FULL;
+  const month = monthsArray[date.getMonth()];
   const currentYear = new Date().getFullYear();
   const year = date.getFullYear();
 
@@ -90,6 +94,12 @@ export function isSameDay(datetime1: number | Date, datetime2: number | Date) {
   date2.setHours(0, 0, 0, 0);
 
   return date1.valueOf() === date2.valueOf();
+}
+
+export function formatMediaDateTime(datetime: number | Date) {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+
+  return `${formatHumanDate(date, true)} at ${formatTime(date)}`;
 }
 
 export function formatMediaDuration(duration: number) {

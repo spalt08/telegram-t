@@ -1,7 +1,8 @@
 import { GlobalState } from '../../store/types';
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiUser } from '../../api/types';
 import { selectChat } from './chats';
 import { getSendingState, isMessageLocal } from '../helpers';
+import { selectUser } from './users';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
   const byChatId = global.messages.byChatId[chatId];
@@ -27,4 +28,12 @@ export function selectOutgoingStatus(global: GlobalState, message: ApiMessage) {
   }
 
   return getSendingState(message);
+}
+
+export function selectSender(global: GlobalState, message: ApiMessage): ApiUser | undefined {
+  if (message.sender_user_id) {
+    return selectUser(global, message.sender_user_id);
+  }
+
+  return message.forward_info ? selectUser(global, message.forward_info.origin.sender_user_id) : undefined;
 }

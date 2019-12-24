@@ -12,14 +12,15 @@ import './MiddleColumn.scss';
 type IProps = Pick<GlobalActions, 'selectChat'> & {
   selectedChatId: number;
   areChatsLoaded: boolean;
+  canCloseChatOnEsc: boolean;
 };
 
 const MiddleColumn: FC<IProps> = (props) => {
-  const { selectChat } = props;
+  const { selectChat, canCloseChatOnEsc } = props;
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
+      if (canCloseChatOnEsc && (e.key === 'Escape' || e.key === 'Esc')) {
         selectChat({ id: undefined });
       }
     }
@@ -29,7 +30,7 @@ const MiddleColumn: FC<IProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectChat]);
+  }, [canCloseChatOnEsc, selectChat]);
 
   return (
     <div id="MiddleColumn">
@@ -97,8 +98,9 @@ export default withGlobal(
     const areChatsLoaded = idsLength > 0 && Object.keys(chats.byId).length >= idsLength;
 
     return {
-      selectedChatId: global.chats.selectedId,
+      selectedChatId: chats.selectedId,
       areChatsLoaded,
+      canCloseChatOnEsc: !global.messages.selectedMediaMessageId,
     };
   },
   (setGlobal, actions) => {

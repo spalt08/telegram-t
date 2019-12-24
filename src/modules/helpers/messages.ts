@@ -145,3 +145,15 @@ export function getSendingState(message: ApiMessage) {
 export function isMessageLocal(message: ApiMessage) {
   return message.id < 0;
 }
+
+export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
+  return Object.keys(messages)
+    .reduce((result, id) => {
+      const messageId = Number(id);
+      if (messages[messageId].content.photo) {
+        result.push(messageId);
+      }
+
+      return result;
+    }, [] as Array<number>);
+}

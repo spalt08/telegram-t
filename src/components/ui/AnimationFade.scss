@@ -1,0 +1,29 @@
+.AnimationFadeIn {
+  animation: AnimationFadeIn .2s;
+  position: relative;
+  z-index: 11;
+}
+
+.AnimationFadeOut {
+  animation: AnimationFadeOut .2s;
+  position: relative;
+  z-index: 11;
+}
+
+@keyframes AnimationFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes AnimationFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}

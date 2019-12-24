@@ -23,6 +23,7 @@ export type GlobalState = {
   };
 
   messages: {
+    selectedMediaMessageId?: number;
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
     }>;
@@ -50,7 +51,7 @@ export type ActionTypes = (
   // chats
   'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage'
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'selectMediaMessage'
 );
 
 export type GlobalActions = Record<ActionTypes, Function>;

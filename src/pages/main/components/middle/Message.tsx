@@ -34,7 +34,7 @@ type IProps = {
   sender?: ApiUser;
   originSender?: ApiUser;
   loadAndPlayMedia?: boolean;
-};
+} & Pick<GlobalActions, 'selectMediaMessage'>;
 
 const Message: FC<IProps> = ({
   message,
@@ -45,6 +45,7 @@ const Message: FC<IProps> = ({
   sender,
   originSender,
   loadAndPlayMedia,
+  selectMediaMessage,
 }) => {
   const [, onDataUriUpdate] = useState(null);
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
@@ -69,6 +70,10 @@ const Message: FC<IProps> = ({
   const isSticker = contentClassName && contentClassName.includes('sticker');
   const isForwarded = Boolean(message.forward_info);
 
+  function openMediaMessage(): void {
+    selectMediaMessage({ id: message.id });
+  }
+
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
@@ -92,7 +97,7 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, mediaData)}
+        {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData)}
         {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
         {document && renderMessageDocument(document)}
         {sticker && renderMessageSticker(sticker, mediaData, loadAndPlayMedia)}
@@ -143,12 +148,14 @@ function buildClassName(message: ApiMessage, hasMedia = false) {
   return classNames.join(' ');
 }
 
-function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded: boolean, mediaData?: string) {
+function renderMessagePhoto(
+  photo: ApiPhoto, clickHandler: Function, fromOwnMessage: boolean, isForwarded: boolean, mediaData?: string,
+) {
   const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
 
   if (mediaData) {
     return (
-      <div className="media-content">
+      <div className="media-content" tabIndex={-1} role="button" onClick={clickHandler}>
         <img src={mediaData} width={width} height={height} alt="" />
       </div>
     );
@@ -160,7 +167,7 @@ function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarde
   }
 
   return (
-    <div className="media-content message-media-thumbnail not-implemented">
+    <div className="media-content message-media-thumbnail">
       <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
       <div className="message-media-loading">
         <Spinner color="white" />
@@ -263,5 +270,9 @@ export default memo(withGlobal(
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
     };
+  },
+  (setGlobal, actions) => {
+    const { selectMediaMessage } = actions;
+    return { selectMediaMessage };
   },
 )(Message));
