@@ -23,6 +23,7 @@ import './Message.scss';
 import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
+import AnimatedSticker from '../../../../components/AnimatedSticker';
 
 type IProps = {
   message: ApiMessage;
@@ -32,7 +33,7 @@ type IProps = {
   mediaHash?: string;
   sender?: ApiUser;
   originSender?: ApiUser;
-  loadMedia?: boolean;
+  loadAndPlayMedia?: boolean;
 };
 
 const Message: FC<IProps> = ({
@@ -43,16 +44,17 @@ const Message: FC<IProps> = ({
   mediaHash,
   sender,
   originSender,
-  loadMedia,
+  loadAndPlayMedia,
 }) => {
   const [, onDataUriUpdate] = useState(null);
-  const dataUri = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
+  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
 
   useEffect(() => {
-    if (mediaHash && loadMedia && !dataUri) {
-      mediaLoader.fetch(mediaHash).then(onDataUriUpdate);
+    const isAnimatedSticker = message.content.sticker && message.content.sticker.is_animated;
+    if (mediaHash && loadAndPlayMedia && !mediaData) {
+      mediaLoader.fetch(mediaHash, isAnimatedSticker).then(onDataUriUpdate);
     }
-  }, [mediaHash, loadMedia, dataUri]);
+  }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
   const className = buildClassName(message, Boolean(mediaHash));
   const {
@@ -90,10 +92,10 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, dataUri)}
+        {photo && renderMessagePhoto(photo, isOwnMessage(message), isForwarded, mediaData)}
         {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
         {document && renderMessageDocument(document)}
-        {sticker && renderMessageSticker(sticker, dataUri)}
+        {sticker && renderMessageSticker(sticker, mediaData, loadAndPlayMedia)}
         {text && (
           <p>{text}</p>
         )}
@@ -141,13 +143,13 @@ function buildClassName(message: ApiMessage, hasMedia = false) {
   return classNames.join(' ');
 }
 
-function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded: boolean, dataUri?: string) {
+function renderMessagePhoto(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded: boolean, mediaData?: string) {
   const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
 
-  if (dataUri) {
+  if (mediaData) {
     return (
       <div className="media-content">
-        <img src={dataUri} width={width} height={height} alt="" />
+        <img src={mediaData} width={width} height={height} alt="" />
       </div>
     );
   }
@@ -207,16 +209,33 @@ function renderMessageDocument(document: ApiDocument) {
   );
 }
 
-function renderMessageSticker(sticker: ApiSticker, dataUri?: string) {
-  const { thumbnail } = sticker;
+function renderMessageSticker(sticker: ApiSticker, mediaData?: string, loadAndPlayMedia?: boolean) {
+  const { thumbnail, is_animated } = sticker;
   const { width, height } = getStickerDimensions(sticker);
 
-  return dataUri || thumbnail ? (
+  if (!mediaData && !thumbnail) {
+    return <p>{sticker.emoji}</p>;
+  }
+
+  if (mediaData && is_animated) {
+    return (
+      <div className="media-content">
+        <AnimatedSticker
+          id={sticker.id}
+          animationData={JSON.parse(mediaData)}
+          width={width}
+          height={height}
+          play={!!loadAndPlayMedia}
+          thumbnailData={thumbnail && thumbnail.dataUri}
+        />
+      </div>
+    );
+  }
+
+  return (
     <div className="media-content">
-      <img src={dataUri || (thumbnail && thumbnail.dataUri)} width={width} height={height} alt="" />
+      <img src={mediaData || (thumbnail && thumbnail.dataUri)} width={width} height={height} alt="" />
     </div>
-  ) : (
-    <p>{sticker.emoji}</p>
   );
 }
 

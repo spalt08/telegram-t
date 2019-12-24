@@ -132,6 +132,7 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
 
   return {
     '@type': 'sticker',
+    id: String(media.document.id),
     emoji,
     is_animated: isAnimated,
     width,

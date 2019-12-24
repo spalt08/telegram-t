@@ -108,7 +108,7 @@ const MessageList: FC<IProps> = ({
                     message={message}
                     showAvatar={!isPrivate && !isOwn}
                     showSenderName={i === 0 && !isPrivate && !isOwn}
-                    loadMedia={viewportMessageIds.includes(message.id)}
+                    loadAndPlayMedia={viewportMessageIds.includes(message.id)}
                   />
                 );
               })}

@@ -6,9 +6,11 @@ import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 const MEMORY_CACHE: Record<string, string> = {};
 const FETCH_PROMISES: Record<string, Promise<string>> = {};
 
-export function fetch(url: string) {
+let pako: typeof import('pako/dist/pako_inflate');
+
+export function fetch(url: string, asString = false) {
   if (!FETCH_PROMISES[url]) {
-    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url);
+    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, asString);
     FETCH_PROMISES[url].catch((err) => {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -23,7 +25,7 @@ export function getFromMemory(url: string) {
   return MEMORY_CACHE[url];
 }
 
-async function fetchFromCacheOrRemote(url: string) {
+async function fetchFromCacheOrRemote(url: string, asString: boolean) {
   if (!MEDIA_CACHE_DISABLED) {
     const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url);
     if (cached) {
@@ -39,8 +41,17 @@ async function fetchFromCacheOrRemote(url: string) {
     throw new Error('Failed to fetch media');
   }
 
-  let dataUri = await blobToDataUri(new Blob([remote]));
-  dataUri = dataUri.replace('application/octet-stream', 'image/jpg');
+  let dataUri: any;
+
+  if (asString) {
+    if (!pako) {
+      pako = await import('pako/dist/pako_inflate');
+    }
+    dataUri = pako.inflate(remote, { to: 'string' });
+  } else {
+    dataUri = await blobToDataUri(new Blob([remote]));
+    dataUri = dataUri.replace('application/octet-stream', 'image/jpg');
+  }
 
   if (!MEDIA_CACHE_DISABLED) {
     cacheApi.save(MEDIA_CACHE_NAME, url, dataUri);

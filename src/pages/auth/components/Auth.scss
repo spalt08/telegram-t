@@ -31,36 +31,17 @@
   }
 
   #monkey {
-    background-position: 0 0;
-    background-size: 200%;
-    background-repeat: no-repeat;
+    position: relative;
 
-    &.code {
-      background-image: url('../../../assets/monkey_code_sprite.png');
-
-      &.invalid {
-        background-position-x: 100%;
-      }
-    }
-
-    &.password {
-      background-image: url('../../../assets/monkey_password_sprite.png');
-
-      &.shown {
-        background-position-x: 100%;
-      }
-    }
-
-    img {
+    .AnimatedSticker {
       position: absolute;
-      top: 0;
       left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
-      opacity: 0;
 
-      &.shown {
-        opacity: 1;
+      &.hidden {
+        display: none;
       }
     }
   }

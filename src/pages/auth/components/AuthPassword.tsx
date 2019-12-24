@@ -1,10 +1,14 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../../lib/teact';
+import React, { FC, useState, useEffect } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../store/types';
 import InputPassword from '../../../components/ui/InputPassword';
 import Button from '../../../components/ui/Button';
+import AnimatedSticker from '../../../components/AnimatedSticker';
+import getAnimationDataFromFile from '../../../util/getAnimationDataFromFile';
+
+import MonkeyPeek from '../../../assets/TwoFactorSetupMonkeyClose.tgs';
 
 import './Auth.scss';
 
@@ -15,6 +19,13 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonShown, setIsButtonShown] = useState(false);
+  const [peekMonkey, setPeekMonkey] = useState(undefined);
+
+  useEffect(() => {
+    if (!peekMonkey) {
+      getAnimationDataFromFile(MonkeyPeek).then(setPeekMonkey);
+    }
+  }, [peekMonkey]);
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     const { target } = e;
@@ -38,7 +49,16 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
 
   return (
     <div id="auth-code-form" className="auth-form">
-      <div id="monkey" className={`password${showPassword ? ' shown' : ''}`} />
+      <div id="monkey">
+        {peekMonkey && (
+          <AnimatedSticker
+            id="monkey-tracking"
+            animationData={peekMonkey}
+            play={false}
+            noLoop
+          />
+        )}
+      </div>
       <h2>Enter a Password</h2>
       <p className="note">
         Your account is protected with

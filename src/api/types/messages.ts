@@ -33,6 +33,7 @@ export interface ApiPhoto {
 
 export interface ApiSticker {
   '@type': 'sticker';
+  id: string;
   emoji: string;
   is_animated: boolean;
   width?: number;

@@ -64,7 +64,7 @@ export function getStickerDimensions(sticker: ApiSticker) {
   const { width, height } = sticker;
   const aspectRatio = (height && width) && height / width;
   const rem = getRemValue();
-  const baseWidth = 12.5 * rem;
+  const baseWidth = 16 * rem;
 
   return {
     width: baseWidth,

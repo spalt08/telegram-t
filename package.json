@@ -60,6 +60,7 @@
     "croppie": "^2.6.4",
     "emoji-regex": "^8.0.0",
     "events": "^3.0.0",
+    "lottie-web": "^5.5.10",
     "pako": "latest",
     "tdweb": "^1.5.0",
     "websocket": "^1.0.30"
