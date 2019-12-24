@@ -194,8 +194,10 @@
       }
     }
 
-    code {
+    code, pre {
       color: var(--color-code);
+      white-space: inherit;
+      margin: 0;
     }
   }
 
@@ -424,7 +426,7 @@
       width: 3.5rem;
     }
 
-    code {
+    code, pre {
       color: var(--color-code-own);
     }
   }

@@ -13,14 +13,14 @@ type IProps = {
 };
 
 const RightColumn: FC<IProps> = ({ showRightColumn, areChatsLoaded, selectedChatId }) => {
-  if (!showRightColumn) {
+  if (!showRightColumn || !selectedChatId) {
     return null;
   }
 
   return (
     <div id="RightColumn">
       <RightHeader />
-      {areChatsLoaded && selectedChatId && (
+      {areChatsLoaded && (
         <RightColumnInfo chatId={selectedChatId} />
       )}
     </div>
