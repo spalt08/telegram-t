@@ -1,21 +1,27 @@
 import { FormEvent } from 'react';
 import React, { FC, useState, useEffect } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
-
 import { GlobalState, GlobalActions } from '../../../store/types';
+
 import InputText from '../../../components/ui/InputText';
-
-import MonkeyIdle from '../../../assets/TwoFactorSetupMonkeyIdle.tgs';
-import MonkeyTracking from '../../../assets/TwoFactorSetupMonkeyTracking.tgs';
-
-import './Auth.scss';
+import Loading from '../../../components/Loading';
 import AnimatedSticker from '../../../components/AnimatedSticker';
+
 import getAnimationDataFromFile from '../../../util/getAnimationDataFromFile';
 
-type IProps = Pick<GlobalState, 'authPhoneNumber' | 'authError'> &
-Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber'>;
+import './Auth.scss';
+// @ts-ignore
+import MonkeyIdle from '../../../assets/TwoFactorSetupMonkeyIdle.tgs';
+// @ts-ignore
+import MonkeyTracking from '../../../assets/TwoFactorSetupMonkeyTracking.tgs';
+
+type IProps = (
+  Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>
+  & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber'>
+);
+
 const AuthCode: FC<IProps> = ({
-  authPhoneNumber, authError, setAuthCode, returnToAuthPhoneNumber,
+  authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber,
 }) => {
   const [code, setCode] = useState(undefined);
   const [idleMonkey, setIdleMonkey] = useState(undefined);
@@ -92,14 +98,15 @@ const AuthCode: FC<IProps> = ({
         value={code}
         error={authError}
       />
+      {authIsLoading && <Loading />}
     </div>
   );
 };
 
 export default withGlobal(
   global => {
-    const { authPhoneNumber, authError } = global;
-    return { authPhoneNumber, authError };
+    const { authPhoneNumber, authIsLoading, authError } = global;
+    return { authPhoneNumber, authIsLoading, authError };
   },
   (setGlobal, actions) => {
     const { setAuthCode, returnToAuthPhoneNumber } = actions;

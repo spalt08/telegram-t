@@ -8,8 +8,8 @@ import Button from '../../../components/ui/Button';
 import AnimatedSticker from '../../../components/AnimatedSticker';
 import getAnimationDataFromFile from '../../../util/getAnimationDataFromFile';
 
+// @ts-ignore
 import MonkeyPeek from '../../../assets/TwoFactorSetupMonkeyClose.tgs';
-
 import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'setAuthPassword'>;
