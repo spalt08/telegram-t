@@ -838,6 +838,7 @@ upload.getFile#b15a9afc flags:# precise:flags.0?true location:InputFileLocation 
 upload.saveBigFilePart#de7b673d file_id:long file_part:int file_total_parts:int bytes:bytes = Bool;
 help.getConfig#c4f9186b = Config;
 help.getNearestDc#1fb33026 = NearestDc;
+help.acceptTermsOfService#ee72f79a id:DataJSON = Bool;
 channels.readHistory#cc104937 channel:InputChannel max_id:int = Bool;
 channels.getMessages#ad8c9a23 channel:InputChannel id:Vector<InputMessage> = messages.Messages;
 channels.getParticipants#123e05e9 channel:InputChannel filter:ChannelParticipantsFilter offset:int limit:int hash:int = channels.ChannelParticipants;

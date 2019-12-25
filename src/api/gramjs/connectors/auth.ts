@@ -6,10 +6,12 @@ const authPromiseResolvers: {
   resolvePhoneNumber: null | Function;
   resolveCode: null | Function;
   resolvePassword: null | Function;
+  resolveRegistration: null | Function;
 } = {
   resolvePhoneNumber: null,
   resolveCode: null,
   resolvePassword: null,
+  resolveRegistration: null,
 };
 
 let onUpdate: OnApiUpdate;
@@ -51,6 +53,18 @@ export function onRequestPassword() {
 
   return new Promise((resolve) => {
     authPromiseResolvers.resolvePassword = resolve;
+  });
+}
+
+export function onRequestRegistration() {
+  if (!onUpdate) {
+    return null;
+  }
+
+  onUpdate(buildAuthState('authorizationStateWaitRegistration'));
+
+  return new Promise((resolve) => {
+    authPromiseResolvers.resolveRegistration = resolve;
   });
 }
 
@@ -96,4 +110,14 @@ export function provideAuthPassword(password: string) {
   }
 
   authPromiseResolvers.resolvePassword(password);
+}
+
+export function provideAuthRegistration(registration: { firstName: string; lastName: string }) {
+  const { firstName, lastName } = registration;
+
+  if (!authPromiseResolvers.resolveRegistration) {
+    return;
+  }
+
+  authPromiseResolvers.resolveRegistration([firstName, lastName]);
 }

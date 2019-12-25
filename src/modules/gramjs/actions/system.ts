@@ -49,6 +49,17 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   };
 });
 
+addReducer('signUp', (global, actions, payload) => {
+  const { firstName, lastName } = payload!;
+
+  void callSdk('provideAuthRegistration', { firstName, lastName });
+
+  return {
+    ...global,
+    authIsLoading: true,
+  };
+});
+
 addReducer('saveSession', (global, actions, payload) => {
   const { sessionId } = payload!;
   localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);

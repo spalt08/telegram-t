@@ -1,5 +1,5 @@
 import {
-  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword,
+  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration,
 } from './connectors/auth';
 import { fetchChats } from './connectors/chats';
 import { fetchMessages, sendMessage } from './connectors/messages';
@@ -9,6 +9,7 @@ export default {
   provideAuthPhoneNumber,
   provideAuthCode,
   provideAuthPassword,
+  provideAuthRegistration,
   fetchChats,
   fetchMessages,
   sendMessage,
