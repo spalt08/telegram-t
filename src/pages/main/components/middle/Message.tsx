@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react';
 import React, {
   FC, memo, useEffect, useState,
 } from '../../../../lib/teact';
@@ -18,13 +19,16 @@ import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
+import ContactMessage from './ContactMessage';
 import { buildMessageContent } from './message/utils';
 import './Message.scss';
 import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import AnimatedSticker from '../../../../components/AnimatedSticker';
-import ContactMessage from './ContactMessage';
+import { DEBUG } from '../../../../config';
+
+type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 
 type IProps = {
   message: ApiMessage;
@@ -105,7 +109,7 @@ const Message: FC<IProps> = ({
         {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData)}
         {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
         {document && renderMessageDocument(document)}
-        {sticker && renderMessageSticker(sticker, mediaData, loadAndPlayMedia)}
+        {sticker && renderMessageSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
         {text && (
           <p>{text}</p>
         )}
@@ -155,17 +159,13 @@ function buildClassName(message: ApiMessage, hasMedia = false) {
 }
 
 function renderMessagePhoto(
-  photo: ApiPhoto, clickHandler: Function, fromOwnMessage: boolean, isForwarded: boolean, mediaData?: string,
+  photo: ApiPhoto,
+  clickHandler: OnClickHandler,
+  fromOwnMessage: boolean,
+  isForwarded: boolean,
+  mediaData?: string,
 ) {
   const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
-
-  if (mediaData) {
-    return (
-      <div className="media-content" tabIndex={-1} role="button" onClick={clickHandler}>
-        <img src={mediaData} width={width} height={height} alt="" />
-      </div>
-    );
-  }
 
   const thumbnail = photo.minithumbnail;
   if (!thumbnail) {
@@ -173,11 +173,29 @@ function renderMessagePhoto(
   }
 
   return (
-    <div className="media-content message-media-thumbnail">
-      <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
+    <div
+      className="media-content"
+      tabIndex={-1}
+      role="button"
+      onClick={mediaData ? clickHandler : undefined}
+    >
+      <img
+        src={`data:image/jpeg;base64, ${thumbnail.data}`}
+        className="thumbnail-img"
+        width={width}
+        height={height}
+        alt=""
+      />
       <div className="message-media-loading">
         <Spinner color="white" />
       </div>
+      <img
+        src={mediaData}
+        className={mediaData ? 'full-image loaded' : 'full-image'}
+        width={width}
+        height={height}
+        alt=""
+      />
     </div>
   );
 }
@@ -222,32 +240,57 @@ function renderMessageDocument(document: ApiDocument) {
   );
 }
 
-function renderMessageSticker(sticker: ApiSticker, mediaData?: string, loadAndPlayMedia?: boolean) {
+function renderMessageSticker(
+  sticker: ApiSticker,
+  id: number,
+  mediaData?: string,
+  loadAndPlayMedia?: boolean,
+) {
   const { thumbnail, is_animated } = sticker;
   const { width, height } = getStickerDimensions(sticker);
 
-  if (!mediaData && !thumbnail) {
-    return <p>{sticker.emoji}</p>;
-  }
-
+  let animationData: any;
   if (mediaData && is_animated) {
-    return (
-      <div className="media-content">
-        <AnimatedSticker
-          id={sticker.id}
-          animationData={JSON.parse(mediaData)}
-          width={width}
-          height={height}
-          play={!!loadAndPlayMedia}
-          thumbnailData={thumbnail && thumbnail.dataUri}
-        />
-      </div>
-    );
+    try {
+      animationData = JSON.parse(mediaData);
+    } catch (err) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+      animationData = undefined;
+    }
   }
 
   return (
     <div className="media-content">
-      <img src={mediaData || (thumbnail && thumbnail.dataUri)} width={width} height={height} alt="" />
+      <img
+        src={thumbnail && thumbnail.dataUri}
+        width={width}
+        height={height}
+        alt=""
+        className={!thumbnail || mediaData ? 'thumbnail-image hidden' : 'thumbnail-image'}
+      />
+      {!is_animated && (
+        <img
+          src={mediaData}
+          width={width}
+          height={height}
+          alt=""
+          className={mediaData ? 'full-image loaded' : 'full-image'}
+        />
+      )}
+      {is_animated && (
+        <AnimatedSticker
+          key={`sticker:${id}`}
+          id={String(id)}
+          animationData={animationData}
+          width={width}
+          height={height}
+          play={!!loadAndPlayMedia}
+          className={mediaData ? 'full-image loaded' : 'full-image'}
+        />
+      )}
     </div>
   );
 }

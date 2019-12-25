@@ -9,7 +9,6 @@ type IProps = {
   play?: boolean;
   noLoop?: boolean;
   className?: string;
-  thumbnailData?: string;
 };
 
 let Lottie: typeof import('lottie-web/build/player/lottie_light');
@@ -30,7 +29,7 @@ async function requireLottie() {
 }
 
 const AnimatedSticker: FC<IProps> = ({
-  id, animationData, width, height, play, noLoop, className, thumbnailData,
+  id, animationData, width, height, play, noLoop, className,
 }) => {
   const [animation, setAnimation] = useState(null);
   const [isLottieReady, setIsLottieReady] = useState(false);
@@ -85,11 +84,7 @@ const AnimatedSticker: FC<IProps> = ({
       id={`sticker:${id}`}
       className={`AnimatedSticker ${className}`}
       style={style}
-    >
-      {thumbnailData && !animation && (
-        <img src={thumbnailData} width={width} height={height} alt="" />
-      )}
-    </div>
+    />
   );
 };
 
