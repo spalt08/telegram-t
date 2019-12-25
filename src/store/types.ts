@@ -12,7 +12,7 @@ export type GlobalState = {
 
   chats: {
     selectedId?: number;
-    ids: number[];
+    ids: number[] | null;
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
   };

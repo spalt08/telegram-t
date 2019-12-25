@@ -10,7 +10,7 @@ export function addChatIds(global: GlobalState, chatIds: number[]) {
     chats: {
       ...global.chats,
       ids: [
-        ...currentIds,
+        ...(currentIds || []),
         ...newIds,
       ],
     },

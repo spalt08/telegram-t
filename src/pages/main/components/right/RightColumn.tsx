@@ -31,8 +31,7 @@ export default withGlobal(
   (global) => {
     const { chats, showRightColumn } = global;
 
-    const idsLength = chats.ids.length;
-    const areChatsLoaded = idsLength > 0 && Object.keys(chats.byId).length >= idsLength;
+    const areChatsLoaded = Boolean(chats.ids);
     const selectedChatId = chats.selectedId;
 
     return {

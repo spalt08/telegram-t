@@ -92,15 +92,12 @@ function renderOpenChatScreen(props: IProps) {
 
 export default withGlobal(
   (global) => {
-    const { chats } = global;
-
-    const idsLength = chats.ids.length;
-    const areChatsLoaded = idsLength > 0 && Object.keys(chats.byId).length >= idsLength;
+    const { chats, messages } = global;
 
     return {
       selectedChatId: chats.selectedId,
-      areChatsLoaded,
-      canCloseChatOnEsc: !global.messages.selectedMediaMessageId,
+      areChatsLoaded: Boolean(chats.ids),
+      canCloseChatOnEsc: !messages.selectedMediaMessageId,
     };
   },
   (setGlobal, actions) => {

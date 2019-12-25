@@ -14,7 +14,6 @@ type IProps = {
   chats: Record<number, ApiChat>;
   loadedChatIds: number[];
   selectedChatId: number;
-  areChatsLoaded: boolean;
 } & Pick<GlobalActions, 'loadMoreChats'>;
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -23,24 +22,27 @@ const SCROLL_THROTTLE_MS = 1000;
 const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
 
 const ChatList: FC<IProps> = ({
-  chats, loadedChatIds, areChatsLoaded, selectedChatId, loadMoreChats,
+  chats, loadedChatIds, selectedChatId, loadMoreChats,
 }) => {
-  const chatArrays = areChatsLoaded && chats ? prepareChats(chats, loadedChatIds) : undefined;
+  const chatArrays = loadedChatIds ? prepareChats(chats, loadedChatIds) : undefined;
 
   return (
     <div className="ChatList custom-scroll" onScroll={(e) => handleScrollThrottled(e, loadMoreChats)}>{
-      chatArrays ? (
+      // eslint-disable-next-line no-nested-ternary
+      loadedChatIds && loadedChatIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map((chat) => (
             <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
           ))}
-          {chatArrays.pinnedChats.length && (
+          {chatArrays.pinnedChats.length > 0 && (
             <div className="pinned-chats-divider" />
           )}
           {chatArrays.otherChats.map((chat) => (
             <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
           ))}
         </div>
+      ) : loadedChatIds && loadedChatIds.length === 0 ? (
+        <div className="no-chats">Chat list empty.</div>
       ) : (
         <Loading />
       )
@@ -80,7 +82,6 @@ export default withGlobal(
     } = global;
 
     return {
-      areChatsLoaded: loadedChatIds.length > 0 && Object.keys(chats).length >= loadedChatIds.length,
       chats,
       loadedChatIds,
       selectedChatId,

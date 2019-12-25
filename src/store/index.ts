@@ -18,7 +18,7 @@ const INITIAL_STATE: GlobalState = {
   },
 
   chats: {
-    ids: [],
+    ids: null,
     byId: {},
     scrollOffsetById: {},
   },
@@ -89,12 +89,6 @@ function updateCache(state: GlobalState) {
     return;
   }
 
-  const byId: GlobalState['chats']['byId'] = {};
-  const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
-  state.chats.ids.forEach((id) => {
-    byId[id] = state.chats.byId[id];
-    scrollOffsetById[id] = state.chats.scrollOffsetById[id];
-  });
   const reducedState: GlobalState = {
     ...state,
     chats: reduceChatsForCache(state),
@@ -109,10 +103,13 @@ function updateCache(state: GlobalState) {
 function reduceChatsForCache(state: GlobalState) {
   const byId: GlobalState['chats']['byId'] = {};
   const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
-  state.chats.ids.forEach((id) => {
-    byId[id] = state.chats.byId[id];
-    scrollOffsetById[id] = state.chats.scrollOffsetById[id];
-  });
+
+  if (state.chats.ids) {
+    state.chats.ids.forEach((id) => {
+      byId[id] = state.chats.byId[id];
+      scrollOffsetById[id] = state.chats.scrollOffsetById[id];
+    });
+  }
 
   return {
     ...state.chats,
@@ -123,9 +120,12 @@ function reduceChatsForCache(state: GlobalState) {
 
 function reduceMessagesForCache(state: GlobalState) {
   const byChatId: GlobalState['messages']['byChatId'] = {};
-  state.chats.ids.forEach((chatId) => {
-    byChatId[chatId] = state.messages.byChatId[chatId];
-  });
+
+  if (state.chats.ids) {
+    state.chats.ids.forEach((chatId) => {
+      byChatId[chatId] = state.messages.byChatId[chatId];
+    });
+  }
 
   return {
     ...state.messages,
