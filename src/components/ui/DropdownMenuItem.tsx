@@ -12,6 +12,7 @@ interface IProps {
   className?: string;
   children: any;
   onClick?: OnClickHandler;
+  disabled?: boolean;
 }
 
 const DropdownMenuItem: FC<IProps> = (props) => {
@@ -20,11 +21,19 @@ const DropdownMenuItem: FC<IProps> = (props) => {
     className,
     children,
     onClick,
+    disabled,
   } = props;
+
+  const handleClick = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (disabled || !onClick) {
+      return;
+    }
+    onClick(e);
+  };
 
   return (
     <li className={`DropdownMenuItem ${className}`}>
-      <button type="button" onClick={onClick as OnClickHandler}>
+      <button type="button" onClick={handleClick} disabled={disabled}>
         {icon && (
           <i className={`icon-${icon}`} />
         )}

@@ -49,7 +49,7 @@ const AuthPhoneNumber: FC<IProps> = ({
       onCountryChange(selectedCountry);
     }
     setPhone(phoneNumber);
-    target.value = getNumberWithCode(phoneNumber, suggestedCountry);
+    target.value = getNumberWithCode(phoneNumber, selectedCountry);
     setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 10);
   }
 

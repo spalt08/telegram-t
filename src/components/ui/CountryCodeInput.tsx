@@ -2,7 +2,6 @@ import React, { FC, useState, useEffect } from '../../lib/teact';
 
 import { countryList } from '../../util/formatPhoneNumber';
 import getPlatform from '../../util/getPlatform';
-import { getElementIndex } from '../../util/domUtils';
 import searchWords from '../../util/searchWords';
 
 import DropdownMenu from './DropdownMenu';
@@ -48,11 +47,24 @@ const CountryCodeInput: FC<IProps> = (props) => {
     const country: Country | undefined = countryList.find((c) => input && c.id === input.value);
     if (country && onChange) {
       onChange(country);
+      updateFilter(undefined);
     }
   }
 
   function onInput(e: React.FormEvent<HTMLInputElement>) {
     const target = e.target as HTMLInputElement;
+    updateFilter(target.value);
+  }
+
+  function onInputKeyDown(e: React.KeyboardEvent<any>) {
+    if (e.keyCode !== 8) {
+      return;
+    }
+
+    const target = e.target as HTMLInputElement;
+    if (value && filter === undefined) {
+      target.value = '';
+    }
     updateFilter(target.value);
   }
 
@@ -63,10 +75,13 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
 
     let newIndex = focusedIndex;
+
     if (e.keyCode === 38 && newIndex > 0) {
       newIndex--;
-    } else if (e.keyCode === 40 && newIndex < dropdown.childNodes.length - 1) {
+    } else if (e.keyCode === 40 && newIndex < dropdown.children.length - 1) {
       newIndex++;
+    } else if (dropdown.children.length === 1) {
+      newIndex = 0;
     } else {
       return;
     }
@@ -78,27 +93,12 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
   }
 
-  function focusSelectedItem() {
-    if (!value) {
-      return;
-    }
-
-    const selectedItem = document.querySelector('.CountryCodeInput li.selected') as HTMLElement;
-    const selectedIndex = getElementIndex(selectedItem);
-
-    if (selectedItem && (focusedIndex < 0 || focusedIndex === selectedIndex)) {
-      setFocusedIndex(getElementIndex(selectedItem));
-      window.requestAnimationFrame(() => {
-        const button = selectedItem.firstChild as HTMLElement;
-        button.focus();
-      });
-    }
-  }
-
   const CodeInput: FC<{ onClick: () => void; isOpen: boolean }> = ({ onClick, isOpen }) => {
     const handleClick = () => {
+      if (isOpen) {
+        return;
+      }
       onClick();
-      focusSelectedItem();
     };
 
     const inputValue = filter !== undefined
@@ -117,6 +117,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
           onClick={handleClick}
           onFocus={handleClick}
           onInput={onInput}
+          onKeyDown={onInputKeyDown}
         />
         <label>Country</label>
       </div>
@@ -141,6 +142,15 @@ const CountryCodeInput: FC<IProps> = (props) => {
           <span className="country-code">{country.code}</span>
         </DropdownMenuItem>
       ))}
+      {!filteredList.length && (
+        <DropdownMenuItem
+          key="no-results"
+          className="no-results"
+          disabled
+        >
+          <span>No countries matched your filter.</span>
+        </DropdownMenuItem>
+      )}
     </DropdownMenu>
   );
 };

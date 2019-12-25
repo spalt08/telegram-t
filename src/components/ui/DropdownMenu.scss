@@ -58,13 +58,20 @@
       display: flex;
       align-items: center;
       padding: 1rem;
-      cursor: pointer;
       position: relative;
       overflow: hidden;
       --ripple-color: rgba(0, 0, 0, .08);
 
-      &:hover, &:focus {
-        background-color: var(--color-chat-hover);
+      &:not([disabled]) {
+        cursor: pointer;
+
+        &:hover, &:focus {
+          background-color: var(--color-chat-hover);
+        }
+      }
+
+      &[disabled] {
+        opacity: 0.5;
       }
 
       i {

@@ -3,6 +3,10 @@
 .CountryCodeInput {
   cursor: pointer;
 
+  .input-group {
+    z-index: 10;
+  }
+
   .bubble {
     width: 100%;
     max-height: 23.5rem;
@@ -13,6 +17,15 @@
     button {
       display: flex;
       align-items: center;
+    }
+
+    &.no-results button {
+      justify-content: center;
+      padding: .5rem 1rem;
+
+      span {
+        font-size: 0.9rem;
+      }
     }
   }
 
