@@ -122,6 +122,10 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
     .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
       attr instanceof GramJs.DocumentAttributeSticker
     ));
+  const sizeAttribute = media.document.attributes
+    .find((attr: any): attr is GramJs.DocumentAttributeImageSize => (
+      attr instanceof GramJs.DocumentAttributeImageSize
+    ));
 
   if (!stickerAttribute) {
     return null;
@@ -131,7 +135,7 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
   const isAnimated = media.document.mimeType === 'application/x-tgsticker';
   const thumb = media.document.thumbs && media.document.thumbs.find((s: any) => s instanceof GramJs.PhotoCachedSize);
   const thumbnail = thumb && buildApiPhotoCachedSize(thumb as GramJs.PhotoCachedSize);
-  const { width, height } = thumbnail || {};
+  const { w: width, h: height } = thumb as GramJs.PhotoCachedSize || sizeAttribute;
 
   return {
     '@type': 'sticker',

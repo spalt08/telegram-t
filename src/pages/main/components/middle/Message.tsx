@@ -94,6 +94,9 @@ const Message: FC<IProps> = ({
     if (isForwarded) {
       classNames.push('forwarded-message');
     }
+    if (replyMessage) {
+      classNames.push('reply-message');
+    }
 
     return (
       <div className={classNames.join(' ')}>
@@ -122,7 +125,7 @@ const Message: FC<IProps> = ({
 
   return (
     <div className={className} data-message-id={message.id}>
-      {showAvatar && sender && (
+      {showAvatar && (
         <Avatar size="small" user={sender} />
       )}
       {/* eslint-disable-next-line */}

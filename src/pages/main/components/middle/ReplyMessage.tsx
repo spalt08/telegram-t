@@ -5,6 +5,7 @@ import {
   ApiUser,
   ApiMessage,
   ApiMiniThumbnail,
+  ApiPhotoCachedSize,
 } from '../../../../api/types';
 import { getUserFullName } from '../../../../modules/helpers';
 import { selectUser } from '../../../../modules/selectors';
@@ -39,12 +40,18 @@ const ReplyMessage: FC<IProps> = ({
   );
 };
 
-function renderMessagePhoto(thumbnail?: ApiMiniThumbnail) {
+function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
   if (!thumbnail) {
     return null;
   }
 
   const { width, height } = getReplyImageDimensions();
+
+  if ('dataUri' in thumbnail) {
+    return (
+      <img src={thumbnail.dataUri} width={width} height={height} alt="" />
+    );
+  }
 
   return (
     <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />

@@ -136,6 +136,14 @@ export function getMessagePhotoInlineSize(photo: ApiPhoto) {
   );
 }
 
+export function getMessagePhotoMaxSize(photo: ApiPhoto) {
+  return (
+    photo.sizes.find((size) => size.type === 'y')
+    || photo.sizes.find((size) => size.type === 'x')
+    || getMessagePhotoInlineSize(photo)
+  );
+}
+
 export function isOwnMessage(message: ApiMessage) {
   return message.is_outgoing;
 }

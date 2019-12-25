@@ -7,6 +7,7 @@ import {
   getMessageVideo,
   getMessageDocument,
   isActionMessage,
+  getLastMessageText,
   getMessageContact,
 } from '../../../../../modules/helpers';
 import {
@@ -16,6 +17,7 @@ import {
   ApiVideo,
   ApiDocument,
   ApiMiniThumbnail,
+  ApiPhotoCachedSize,
   ApiContact,
 } from '../../../../../api/types';
 
@@ -33,7 +35,7 @@ export interface MessageContent {
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
-  replyThumbnail?: ApiMiniThumbnail;
+  replyThumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize;
   className?: string;
 }
 
@@ -105,7 +107,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const contact = getMessageContact(message);
   const classNames = ['content'];
   let contentParts: TextPart | TextPart[] | undefined;
-  let replyThumbnail: ApiMiniThumbnail | undefined;
+  let replyThumbnail: ApiMiniThumbnail | ApiPhotoCachedSize | undefined;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
@@ -116,27 +118,26 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       contentParts = text;
     } else {
       classNames.push('text');
-      contentParts = options.isReply || !message.content.text ? text : enhanceTextParts(message.content.text);
+      contentParts = !message.content.text ? text : enhanceTextParts(message.content.text);
     }
   }
 
   if (photo || video) {
     classNames.push('media');
     if (options.isReply) {
-      contentParts = photo ? 'Photo' : 'Video';
       replyThumbnail = getReplyThumbnail(photo || video);
     }
   }
 
   if (sticker) {
     classNames.push('sticker');
+    if (options.isReply) {
+      replyThumbnail = sticker.thumbnail;
+    }
   }
 
   if (document) {
     classNames.push('document');
-    if (options.isReply) {
-      contentParts = document.fileName;
-    }
   }
 
   if (contact) {
@@ -149,6 +150,10 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
 
   if (message.reply_to_message_id && !classNames.includes('sticker')) {
     classNames.push('is-reply');
+  }
+
+  if (options.isReply) {
+    contentParts = getLastMessageText(message);
   }
 
   classNames.push('status-read');

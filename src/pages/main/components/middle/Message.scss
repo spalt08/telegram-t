@@ -26,10 +26,6 @@
     --border-bottom-right-radius: var(--border-radius-messages);
     --background-color: white;
 
-    &.sticker {
-      border-radius: 0 !important;
-    }
-
     &,
     .media-content,
     .message-media-loading {
@@ -218,13 +214,31 @@
       margin-bottom: 1rem;
     }
 
-    .photo-content {
+    .media-content {
       line-height: 1;
       font-size: 1rem;
     }
 
     .forwarded-message {
       border-left: none;
+    }
+
+    .reply-message {
+      display: flex;
+      align-items: flex-start;
+
+      .media-content, > p {
+        order: 1;
+      }
+
+      > p {
+        margin-bottom: 0 !important;
+      }
+
+      .ReplyMessage {
+        order: 2;
+        margin-left: 0.5rem;
+      }
     }
 
     &.emoji-only-1 {
@@ -394,7 +408,7 @@
     }
   }
 
-  .forwarded-message {
+  &:not(.sticker) .forwarded-message {
     margin-top: 0.25rem;
     border-left: 0.125rem solid var(--color-primary);
     padding-left: 0.5rem;
@@ -437,6 +451,19 @@
 
   .forwarded-message {
     border-color: var(--color-text-green);
+  }
+
+  &.sticker {
+    .reply-message {
+      .ReplyMessage {
+        order: 1;
+        margin-right: 0.5rem;
+      }
+
+      .media-content, > p {
+        order: 2;
+      }
+    }
   }
 }
 

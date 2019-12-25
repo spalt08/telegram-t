@@ -1,5 +1,5 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
-import { getMessagePhotoInlineSize } from '../modules/helpers';
+import { getMessagePhotoMaxSize } from '../modules/helpers';
 
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 
@@ -24,7 +24,8 @@ function getAvailableHeight() {
 function calculateDimensions(width: number, height: number, fromOwnMessage: boolean, isForwarded?: boolean) {
   const aspectRatio = height / width;
   const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded);
-  const calculatedHeight = Math.round(availableWidth * aspectRatio);
+  const calculatedWidth = Math.min(width, availableWidth);
+  const calculatedHeight = Math.round(calculatedWidth * aspectRatio);
   const availableHeight = getAvailableHeight();
 
   if (calculatedHeight > availableHeight) {
@@ -34,16 +35,14 @@ function calculateDimensions(width: number, height: number, fromOwnMessage: bool
     };
   }
 
-  const resultWidth = Math.min(width, availableWidth);
-
   return {
-    width: resultWidth,
-    height: Math.round(resultWidth * aspectRatio),
+    width: calculatedWidth,
+    height: Math.round(calculatedWidth * aspectRatio),
   };
 }
 
 export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const { width, height } = getMessagePhotoInlineSize(photo) || DEFAULT_MEDIA_DIMENSIONS;
+  const { width, height } = getMessagePhotoMaxSize(photo) || DEFAULT_MEDIA_DIMENSIONS;
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
