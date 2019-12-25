@@ -52,8 +52,17 @@ function formatPhoneNumber(input: string, country?: Country) {
   return phoneNumber;
 }
 
+function formatPhoneNumberWithCode(phoneNumber: string) {
+  const country = getCountryFromPhoneNumber(phoneNumber);
+  if (!country) {
+    return phoneNumber;
+  }
+  return `${country.code} ${formatPhoneNumber(phoneNumber, country)}`;
+}
+
 export {
   countryList,
   getCountryFromPhoneNumber,
   formatPhoneNumber,
+  formatPhoneNumberWithCode,
 };

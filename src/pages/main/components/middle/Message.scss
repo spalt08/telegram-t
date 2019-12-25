@@ -79,7 +79,7 @@
     &:last-child .content {
       --border-bottom-left-radius: var(--border-radius-messages-small);
 
-      &.text, &.document &.is-forwarded {
+      &.text, &.contact, &.document, &.is-forwarded {
         --border-bottom-left-radius: 0;
       }
     }
@@ -102,7 +102,7 @@
     &:last-child .content {
       --border-bottom-right-radius: var(--border-radius-messages-small);
 
-      &.text, &.document, &.is-forwarded {
+      &.text, &.contact, &.document, &.is-forwarded {
         --border-bottom-right-radius: 0;
       }
     }
@@ -112,7 +112,7 @@
 // Bubble appendix styles
 .Message {
   &.own:last-child {
-    .text, .document, .is-forwarded {
+    .text, .contact, .document, .is-forwarded {
       &::before {
         content: '';
         display: block;
@@ -129,7 +129,7 @@
   }
 
   &:not(.own):last-child {
-    .text, .document, .is-forwarded {
+    .text, .contact, .document, .is-forwarded {
       &::before {
         content: '';
         display: block;
@@ -163,11 +163,11 @@
     color: var(--color-primary);
   }
 
-  &.text, &.document, &.media, &.is-forwarded {
+  &.text, &.contact, &.document, &.media, &.is-forwarded {
     box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
   }
 
-  &.text, &.document, &.is-forwarded, &.is-reply {
+  &.text, &.contact, &.document, &.is-forwarded, &.is-reply {
     background: var(--background-color);
     padding: .35rem .5rem;
     font-size: 0.9375rem;
@@ -419,7 +419,7 @@
     color: var(--color-text-green);
   }
 
-  &.text, &.document, &.is-forwarded, &.is-reply {
+  &.text, &.contact, &.document, &.is-forwarded, &.is-reply {
     --background-color: #EEFEDF;
 
     .content-inner > p::after {

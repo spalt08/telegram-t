@@ -56,6 +56,14 @@ export interface ApiDocument {
   mimeType: string;
 }
 
+export interface ApiContact {
+  '@type': 'contact';
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  userId: number;
+}
+
 export interface ApiAction {
   '@type': 'action';
   text: string;
@@ -98,6 +106,7 @@ export interface ApiMessage {
     video?: ApiVideo;
     document?: ApiDocument;
     sticker?: ApiSticker;
+    contact?: ApiContact;
     action?: ApiAction;
   };
   date: number;

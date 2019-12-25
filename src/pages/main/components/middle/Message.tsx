@@ -24,6 +24,7 @@ import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import AnimatedSticker from '../../../../components/AnimatedSticker';
+import ContactMessage from './ContactMessage';
 
 type IProps = {
   message: ApiMessage;
@@ -64,6 +65,7 @@ const Message: FC<IProps> = ({
     video,
     document,
     sticker,
+    contact,
     className: contentClassName,
   } = buildMessageContent(message);
   const isText = contentClassName && contentClassName.includes('text');
@@ -104,6 +106,7 @@ const Message: FC<IProps> = ({
         {text && (
           <p>{text}</p>
         )}
+        {contact && <ContactMessage contact={contact} />}
       </div>
     );
   }

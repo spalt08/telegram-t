@@ -18,7 +18,7 @@
     margin-right: 0.1rem;
   }
 
-  .text &, .document & {
+  .text &, .document &, .contact & {
     color: var(--color-text-meta);
     background: none;
   }
@@ -40,7 +40,8 @@
   }
 
   .own .text &,
-  .own .document & {
+  .own .document &,
+  .own .contact & {
     color: var(--color-text-green);
   }
 
@@ -49,7 +50,7 @@
     height: 1.1rem;
     font-size: 1.1rem;
 
-    .text &, .document &, .media & {
+    .text &, .contact &, .document &, .media & {
       @include icon-styles() {
         position: relative;
         top: -0.2rem;

@@ -10,6 +10,7 @@ import {
   ApiVideo,
   ApiDocument,
   ApiAction,
+  ApiContact,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -65,6 +66,7 @@ export function buildApiMessageWithChatId(
   const photo = mtpMessage.media && buildPhoto(mtpMessage.media);
   const video = mtpMessage.media && buildVideo(mtpMessage.media);
   const document = mtpMessage.media && buildDocument(mtpMessage.media);
+  const contact = mtpMessage.media && buildContact(mtpMessage.media);
   const text = mtpMessage.message && {
     '@type': 'formattedText' as const,
     text: mtpMessage.message,
@@ -83,6 +85,7 @@ export function buildApiMessageWithChatId(
       ...(photo && { photo }),
       ...(video && { video }),
       ...(document && { document }),
+      ...(contact && { contact }),
       ...(action && { action }),
     },
     date: mtpMessage.date,
@@ -244,6 +247,27 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | null {
     size,
     mimeType,
     fileName: (docAttr && docAttr.fileName) || 'File',
+  };
+}
+
+function buildContact(media: GramJs.TypeMessageMedia): ApiContact | null {
+  if (!(media instanceof GramJs.MessageMediaContact)) {
+    return null;
+  }
+
+  const {
+    firstName,
+    lastName,
+    phoneNumber,
+    userId,
+  } = media;
+
+  return {
+    '@type': 'contact',
+    firstName,
+    lastName,
+    phoneNumber,
+    userId,
   };
 }
 

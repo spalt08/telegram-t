@@ -7,6 +7,7 @@ export function getLastMessageText(message: ApiMessage) {
     video,
     document,
     sticker,
+    contact,
   } = message.content;
 
   if (photo) {
@@ -35,6 +36,10 @@ export function getLastMessageText(message: ApiMessage) {
     return document.fileName;
   }
 
+  if (contact) {
+    return 'Contact';
+  }
+
   return '%UNSUPPORTED_CONTENT%';
 }
 
@@ -45,12 +50,13 @@ export function getMessageText(message: ApiMessage) {
     photo,
     video,
     sticker,
+    contact,
   } = message.content;
   if (text) {
     return text.text;
   }
 
-  if (sticker || document || photo || video) {
+  if (sticker || document || photo || video || contact) {
     return undefined;
   }
 
@@ -87,6 +93,10 @@ export function getMessageDocument(message: ApiMessage) {
 
 export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
+}
+
+export function getMessageContact(message: ApiMessage) {
+  return message.content.contact;
 }
 
 // TODO Add chat ID and file reference.

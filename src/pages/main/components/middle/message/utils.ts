@@ -7,6 +7,7 @@ import {
   getMessageVideo,
   getMessageDocument,
   isActionMessage,
+  getMessageContact,
 } from '../../../../../modules/helpers';
 import {
   ApiMessage,
@@ -15,6 +16,7 @@ import {
   ApiVideo,
   ApiDocument,
   ApiMiniThumbnail,
+  ApiContact,
 } from '../../../../../api/types';
 
 import { TextPart, enhanceTextParts } from './enhanceText';
@@ -30,6 +32,7 @@ export interface MessageContent {
   video?: ApiVideo;
   document?: ApiDocument;
   sticker?: ApiSticker;
+  contact?: ApiContact;
   replyThumbnail?: ApiMiniThumbnail;
   className?: string;
 }
@@ -99,6 +102,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const video = getMessageVideo(message);
   const document = getMessageDocument(message);
   const sticker = getMessageSticker(message);
+  const contact = getMessageContact(message);
   const classNames = ['content'];
   let contentParts: TextPart | TextPart[] | undefined;
   let replyThumbnail: ApiMiniThumbnail | undefined;
@@ -135,6 +139,10 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     }
   }
 
+  if (contact) {
+    classNames.push('contact');
+  }
+
   if (message.forward_info && !classNames.includes('sticker')) {
     classNames.push('is-forwarded');
   }
@@ -151,6 +159,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     video,
     document,
     sticker,
+    contact,
     replyThumbnail,
     className: classNames.join(' '),
   };
