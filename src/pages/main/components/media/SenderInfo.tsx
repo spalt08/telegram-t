@@ -25,7 +25,11 @@ const SenderInfo: FC<IProps> = ({
 
   return (
     <div className="SenderInfo">
-      {isChannelChatMessage ? <Avatar size="medium" chat={sender} /> : <Avatar size="medium" user={sender} /> }
+      {isChannelChatMessage ? (
+        <Avatar size="medium" chat={sender as ApiChat} />
+      ) : (
+        <Avatar size="medium" user={sender as ApiUser} />
+      )}
       <div className="meta">
         <div className="title">
           {isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser)}
@@ -44,6 +48,10 @@ export default memo(withGlobal((global, { chatId, messageId }) => {
   let sender;
   const isChannelChatMessage = isChannelChat(chatId);
   const message = selectChatMessage(global, chatId, messageId);
+
+  if (!message) {
+    return {};
+  }
 
   if (isChannelChatMessage) {
     sender = selectChat(global, chatId);

@@ -61,7 +61,7 @@
     "emoji-regex": "^8.0.0",
     "events": "^3.0.0",
     "lottie-web": "^5.5.10",
-    "pako": "latest",
+    "pako": "^1.0.10",
     "tdweb": "^1.5.0",
     "websocket": "^1.0.30"
   }

@@ -44,14 +44,23 @@ async function loadAndReplaceChats() {
 
 async function loadAndReplaceMessages() {
   let global = getGlobal();
-  const byChatId: GlobalState['messages']['byChatId'] = {};
+  const newMessages: GlobalState['messages'] = { byChatId: {} };
 
   if (global.chats.selectedId) {
     const messages = await loadTopMessages(global.chats.byId[global.chats.selectedId]);
 
     if (messages) {
       const byId = buildCollectionByKey(messages, 'id');
-      byChatId[global.chats.selectedId] = { byId };
+      newMessages.byChatId[global.chats.selectedId] = { byId };
+
+      newMessages.selectedMediaMessageId = undefined;
+      const currentSelectedMessageMediaId = global.messages.selectedMediaMessageId;
+      if (currentSelectedMessageMediaId) {
+        const newIds = messages.map(({ id }) => id);
+        if (newIds.includes(currentSelectedMessageMediaId)) {
+          newMessages.selectedMediaMessageId = currentSelectedMessageMediaId;
+        }
+      }
     }
   }
 
@@ -65,7 +74,7 @@ async function loadAndReplaceMessages() {
     },
     messages: {
       ...global.messages,
-      byChatId,
+      ...newMessages,
     },
   });
 }
