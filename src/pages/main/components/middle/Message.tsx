@@ -282,7 +282,6 @@ function renderMessageSticker(
       )}
       {is_animated && (
         <AnimatedSticker
-          key={`sticker:${id}`}
           id={String(id)}
           animationData={animationData}
           width={width}

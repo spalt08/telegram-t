@@ -11,11 +11,12 @@ type IProps = {
   className?: string;
 };
 
-let Lottie: typeof import('lottie-web/build/player/lottie_light');
+type LottieModule = typeof import('lottie-web/build/player/lottie_light').default;
+let Lottie: LottieModule;
 
 async function requireLottie() {
   try {
-    Lottie = await import('lottie-web/build/player/lottie_light');
+    Lottie = await import('lottie-web/build/player/lottie_light') as unknown as LottieModule;
 
     return true;
   } catch (err) {
@@ -31,8 +32,8 @@ async function requireLottie() {
 const AnimatedSticker: FC<IProps> = ({
   id, animationData, width, height, play, noLoop, className,
 }) => {
-  const [animation, setAnimation] = useState(null);
   const [isLottieReady, setIsLottieReady] = useState(false);
+  const [animation, setAnimation] = useState(null);
 
   useEffect(() => {
     if (!isLottieReady) {
@@ -53,17 +54,14 @@ const AnimatedSticker: FC<IProps> = ({
   }, [play, animation]);
 
   useEffect(() => {
-    if (!animationData || !isLottieReady) {
+    if (animation || !animationData || !isLottieReady) {
       return;
     }
 
     const container = document.getElementById(`sticker:${id}`);
+
     if (!container) {
       return;
-    }
-
-    if (animation) {
-      animation.destroy();
     }
 
     setAnimation(Lottie.loadAnimation({
@@ -73,7 +71,15 @@ const AnimatedSticker: FC<IProps> = ({
       autoplay: false,
       animationData,
     }));
-  }, [id, animationData, isLottieReady]);
+  }, [id, animationData, isLottieReady, animation]);
+
+  useEffect(() => {
+    return () => {
+      if (animation) {
+        animation.destroy();
+      }
+    };
+  }, [animation]);
 
   const style = width && height
     ? `width: ${width}px; height: ${height}px;`
