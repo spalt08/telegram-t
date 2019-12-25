@@ -1,4 +1,5 @@
 export const DEBUG = true;
+export const DEBUG_GRAMJS = false;
 
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';

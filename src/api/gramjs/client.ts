@@ -1,14 +1,14 @@
 import { TelegramClient, sessions, Api as GramJs } from '../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
-import { DEBUG } from '../../config';
+import { DEBUG, DEBUG_GRAMJS } from '../../config';
 import {
   onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber, onRequestRegistration,
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 import queuedDownloadMedia from './connectors/media';
 
-GramJsLogger.setLevel(DEBUG ? 'debug' : 'warn');
+GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
 let client: TelegramClient;
 
