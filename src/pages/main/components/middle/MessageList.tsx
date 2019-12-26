@@ -58,14 +58,16 @@ const MessageList: FC<IProps> = ({
       runThrottled(() => {
         setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
-        const newViewportMessageIds = findMediaMessagesInViewport(target);
-        if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
-          setViewportMessageIds(newViewportMessageIds);
+        if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+          loadMoreChatMessages({ chatId });
         }
 
-        if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMoreChatMessages!({ chatId });
-        }
+        requestAnimationFrame(() => {
+          const newViewportMessageIds = findMediaMessagesInViewport(target);
+          if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+            setViewportMessageIds(newViewportMessageIds);
+          }
+        });
       });
     }
     : undefined;
@@ -137,17 +139,22 @@ const MessageList: FC<IProps> = ({
 function findMediaMessagesInViewport(container: HTMLElement) {
   const viewportY1 = container.scrollTop;
   const viewportY2 = viewportY1 + container.clientHeight;
-  const messageEls = Array.from(document.querySelectorAll('.Message.has-media')).reverse() as HTMLElement[];
+  const messageEls = document.querySelectorAll('.Message.has-media');
   const visibleIds: number[] = [];
+  let isFound = false;
 
-  messageEls.forEach((messageEl) => {
+  for (let i = messageEls.length - 1; i >= 0; i--) {
+    const messageEl = messageEls[i] as HTMLElement;
     const y1 = messageEl.offsetTop;
     const y2 = y1 + messageEl.offsetHeight;
 
     if (y1 <= viewportY2 + VIEWPORT_MARGIN && y2 >= viewportY1 - VIEWPORT_MARGIN) {
-      visibleIds.push(Number((messageEl.dataset.messageId)));
+      visibleIds.push(Number(messageEl.dataset.messageId));
+      isFound = true;
+    } else if (isFound) {
+      break;
     }
-  });
+  }
 
   return visibleIds;
 }
