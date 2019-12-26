@@ -39,8 +39,6 @@ export interface MessageContent {
   className?: string;
 }
 
-const MAX_EMOJI_COUNT = 3;
-
 export function groupMessages(messages: ApiMessage[]) {
   const messageDateGroups: MessageDateGroup[] = [
     {
@@ -112,7 +110,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
 
-    if (!photo && emojiOnlyCount && emojiOnlyCount <= MAX_EMOJI_COUNT) {
+    if (!photo && emojiOnlyCount) {
       classNames.push('sticker');
       classNames.push(`emoji-only-${emojiOnlyCount}`);
       contentParts = text;
