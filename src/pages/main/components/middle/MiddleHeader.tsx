@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 
 import { isPrivateChat } from '../../../../modules/helpers';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -24,4 +24,4 @@ const MiddleHeader: FC<IProps> = ({ chatId }) => {
   );
 };
 
-export default MiddleHeader;
+export default memo(MiddleHeader);

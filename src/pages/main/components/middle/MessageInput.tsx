@@ -14,7 +14,7 @@ const MAX_INPUT_HEIGHT = 240;
 
 let isJustSent = false;
 
-const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
+const MessageInput: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   const [messageText, setMessageText] = useState('');
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
@@ -91,4 +91,4 @@ export default withGlobal(
     const { sendTextMessage } = actions;
     return { sendTextMessage };
   },
-)(MiddleFooter);
+)(MessageInput);

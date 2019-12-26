@@ -1,5 +1,7 @@
 import { UIEvent } from 'react';
-import React, { FC, useEffect, useState } from '../../../../lib/teact';
+import React, {
+  FC, memo, useEffect, useState,
+} from '../../../../lib/teact';
 import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
@@ -16,8 +18,8 @@ import './MessageList.scss';
 import ServiceMessage from './ServiceMessage';
 
 type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
+  chatId: number;
   areMessagesLoaded?: boolean;
-  chatId?: number;
   messages?: Record<number, ApiMessage>;
 };
 
@@ -28,7 +30,7 @@ const VIEWPORT_MARGIN = 500;
 
 const runThrottled = throttle((cb) => cb(), SCROLL_THROTTLE_MS, true);
 
-let currentScrollOffset = 0;
+const currentScrollOffset: Record<number, number> = {};
 
 const MessageList: FC<IProps> = ({
   areMessagesLoaded,
@@ -53,10 +55,10 @@ const MessageList: FC<IProps> = ({
   const handleScroll = chatId
     ? (e: UIEvent) => {
       const target = e.target as HTMLElement;
-      currentScrollOffset = target.scrollHeight - target.scrollTop;
+      currentScrollOffset[chatId] = target.scrollHeight - target.scrollTop;
 
       runThrottled(() => {
-        setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
+        setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset[chatId] });
 
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
           loadMoreChatMessages({ chatId });
@@ -74,15 +76,16 @@ const MessageList: FC<IProps> = ({
 
   useEffect(() => {
     if (chatId) {
-      currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
+      currentScrollOffset[chatId] = getGlobal().chats.scrollOffsetById[chatId];
+      applyScrollOffset(chatId);
+      // requestAnimationFrame(() => applyScrollOffset(chatId));
     }
   }, [chatId]);
 
   useEffect(() => {
-    const scrollContainer = document.querySelector('.MessageList') as HTMLElement;
-
-    if (chatId && scrollContainer) {
-      scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(currentScrollOffset || 0);
+    if (messages) {
+      applyScrollOffset(chatId);
+      // setTimeout(() => applyScrollOffset(chatId), 1000);
     }
   }, [chatId, messages]);
 
@@ -120,6 +123,7 @@ const MessageList: FC<IProps> = ({
 
   return (
     <div
+      id={`message-list-${chatId}`}
       className={`MessageList custom-scroll ${isPrivate ? 'no-avatars' : ''}`}
       onScroll={handleScroll}
     >
@@ -167,24 +171,24 @@ function areArraysEqual(arr1: any[], arr2: any[]) {
   return arr1.every((el, i) => el === arr2[i]);
 }
 
-export default withGlobal(
-  global => {
-    const { chats: { selectedId } } = global;
+function applyScrollOffset(chatId: number) {
+  const scrollContainer = document.getElementById(`message-list-${chatId}`) as HTMLElement;
+  scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(currentScrollOffset[chatId] || 0);
+  console.log({ chatId, currentScrollOffset: currentScrollOffset[chatId] });
+}
 
-    if (!selectedId) {
-      return {};
-    }
-
-    const messages = selectChatMessages(global, selectedId);
+export default memo(withGlobal(
+  (global, { chatId }) => {
+    const messages = selectChatMessages(global, chatId);
 
     return {
-      chatId: selectedId,
-      messages,
+      chatId,
       areMessagesLoaded: Boolean(messages),
+      messages,
     };
   },
   (setGlobal, actions) => {
     const { loadChatMessages, loadMoreChatMessages, setChatScrollOffset } = actions;
     return { loadChatMessages, loadMoreChatMessages, setChatScrollOffset };
   },
-)(MessageList);
+)(MessageList));

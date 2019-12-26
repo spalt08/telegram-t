@@ -41,19 +41,19 @@ const MiddleColumn: FC<IProps> = (props) => {
 };
 
 function renderSelectedChat(props: IProps) {
-  const { selectedChatId } = props;
+  const { selectedChatId, loadedChatIds } = props;
 
   if (!selectedChatId) {
     return null;
   }
 
-  return (
-    <div className="messages-layout">
-      <MiddleHeader chatId={selectedChatId} />
-      <MessageList key={selectedChatId} />
+  return loadedChatIds.map((chatId: number) => (
+    <div key={chatId} className={`messages-layout${selectedChatId !== chatId ? ' hidden' : ''}`}>
+      <MiddleHeader chatId={chatId} />
+      <MessageList chatId={chatId} />
       <MiddleFooter />
     </div>
-  );
+  ));
 }
 
 function renderOpenChatScreen(props: IProps) {
@@ -93,10 +93,17 @@ function renderOpenChatScreen(props: IProps) {
 export default withGlobal(
   (global) => {
     const { chats, messages } = global;
+    // TODO @perf
+    // TODO Add newer chats to the end of array to not replace tree.
+    const loadedChatIds = Object
+      .keys(chats.byId)
+      .map(Number)
+      .filter((chatId) => chatId === chats.selectedId || !!global.messages.byChatId[chatId]);
 
     return {
       selectedChatId: chats.selectedId,
       areChatsLoaded: Boolean(chats.ids),
+      loadedChatIds,
       canCloseChatOnEsc: !messages.selectedMediaMessageId,
     };
   },

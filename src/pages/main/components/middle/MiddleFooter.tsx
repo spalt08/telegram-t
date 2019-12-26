@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 
 import Button from '../../../../components/ui/Button';
 import MessageInput from './MessageInput';
@@ -25,4 +25,4 @@ const MiddleFooter: FC<IProps> = () => {
   );
 };
 
-export default MiddleFooter;
+export default memo(MiddleFooter);
