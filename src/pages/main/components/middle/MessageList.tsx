@@ -28,6 +28,8 @@ const VIEWPORT_MARGIN = 500;
 
 const runThrottled = throttle((cb) => cb(), SCROLL_THROTTLE_MS, true);
 
+let currentScrollOffset = 0;
+
 const MessageList: FC<IProps> = ({
   areMessagesLoaded,
   chatId,
@@ -51,11 +53,11 @@ const MessageList: FC<IProps> = ({
   const handleScroll = chatId
     ? (e: UIEvent) => {
       const target = e.target as HTMLElement;
-
-      const newScrollOffset = target.scrollHeight - target.scrollTop;
-      setChatScrollOffset({ chatId, scrollOffset: newScrollOffset });
+      currentScrollOffset = target.scrollHeight - target.scrollTop;
 
       runThrottled(() => {
+        setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
+
         const newViewportMessageIds = findMediaMessagesInViewport(target);
         if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
           setViewportMessageIds(newViewportMessageIds);
@@ -69,21 +71,16 @@ const MessageList: FC<IProps> = ({
     : undefined;
 
   useEffect(() => {
+    if (chatId) {
+      currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
+    }
+  }, [chatId]);
+
+  useEffect(() => {
     const scrollContainer = document.querySelector('.MessageList') as HTMLElement;
 
     if (chatId && scrollContainer) {
-      const updateFn = () => {
-        const previousScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
-        const currentScrollOffset = scrollContainer.scrollHeight - scrollContainer.scrollTop;
-
-        if (currentScrollOffset !== previousScrollOffset) {
-          scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(previousScrollOffset || 0);
-        }
-      };
-
-      updateFn();
-      // We need this for the very first page render.
-      requestAnimationFrame(updateFn);
+      scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(currentScrollOffset || 0);
     }
   }, [chatId, messages]);
 
