@@ -3,7 +3,7 @@ import { DEBUG } from '../config';
 
 type IProps = {
   id: string;
-  animationData: any;
+  animationData: AnyLiteral;
   width?: number;
   height?: number;
   play?: boolean;

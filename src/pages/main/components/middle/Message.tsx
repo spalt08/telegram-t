@@ -3,18 +3,14 @@ import React, {
   FC, memo, useEffect, useState,
 } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
+import { GlobalActions } from '../../../../store/types';
 
 import {
-  ApiUser,
-  ApiMessage,
-  ApiPhoto,
-  ApiSticker,
-  ApiVideo,
-  ApiDocument,
+  ApiDocument, ApiMessage, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
 } from '../../../../api/types';
-import { selectUser, selectChatMessage } from '../../../../modules/selectors';
-import { isOwnMessage, getUserFullName, getMessageMediaHash } from '../../../../modules/helpers';
-import { getImageDimensions, getVideoDimensions, getStickerDimensions } from '../../../../util/imageDimensions';
+import { selectChatMessage, selectUser } from '../../../../modules/selectors';
+import { getMessageMediaHash, getUserFullName, isOwnMessage } from '../../../../modules/helpers';
+import { getImageDimensions, getStickerDimensions, getVideoDimensions } from '../../../../util/imageDimensions';
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import MessageMeta from './MessageMeta';
@@ -26,7 +22,6 @@ import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import AnimatedSticker from '../../../../components/AnimatedSticker';
-import { DEBUG } from '../../../../config';
 
 type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 
@@ -58,7 +53,9 @@ const Message: FC<IProps> = ({
   useEffect(() => {
     const isAnimatedSticker = message.content.sticker && message.content.sticker.is_animated;
     if (mediaHash && loadAndPlayMedia && !mediaData) {
-      mediaLoader.fetch(mediaHash, isAnimatedSticker).then(onDataUriUpdate);
+      mediaLoader
+        .fetch(mediaHash, isAnimatedSticker ? mediaLoader.Type.Lottie : mediaLoader.Type.Jpeg)
+        .then(onDataUriUpdate);
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
@@ -106,7 +103,7 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData)}
+        {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
         {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
         {document && renderMessageDocument(document)}
         {sticker && renderMessageSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
@@ -243,24 +240,11 @@ function renderMessageDocument(document: ApiDocument) {
 function renderMessageSticker(
   sticker: ApiSticker,
   id: number,
-  mediaData?: string,
+  mediaData?: string | AnyLiteral,
   loadAndPlayMedia?: boolean,
 ) {
   const { thumbnail, is_animated } = sticker;
   const { width, height } = getStickerDimensions(sticker);
-
-  let animationData: any;
-  if (mediaData && is_animated) {
-    try {
-      animationData = JSON.parse(mediaData);
-    } catch (err) {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-      animationData = undefined;
-    }
-  }
 
   return (
     <div className="media-content">
@@ -273,7 +257,7 @@ function renderMessageSticker(
       />
       {!is_animated && (
         <img
-          src={mediaData}
+          src={mediaData as string}
           width={width}
           height={height}
           alt=""
@@ -283,10 +267,10 @@ function renderMessageSticker(
       {is_animated && (
         <AnimatedSticker
           id={String(id)}
-          animationData={animationData}
+          animationData={mediaData as AnyLiteral}
           width={width}
           height={height}
-          play={!!loadAndPlayMedia}
+          play={loadAndPlayMedia}
           className={mediaData ? 'full-image loaded' : 'full-image'}
         />
       )}

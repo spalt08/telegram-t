@@ -53,7 +53,7 @@ const MediaViewer: FC<IProps> = ({
 
   useEffect(() => {
     if (mediaHash && !dataUri) {
-      mediaLoader.fetch(mediaHash).then(onDataUriUpdate);
+      mediaLoader.fetch(mediaHash, mediaLoader.Type.Jpeg).then(onDataUriUpdate);
     }
   }, [mediaHash, dataUri]);
 

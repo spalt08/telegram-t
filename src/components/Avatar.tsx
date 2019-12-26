@@ -32,7 +32,7 @@ const Avatar: FC<IProps> = ({
 
   useEffect(() => {
     if (imageHash && !dataUri) {
-      mediaLoader.fetch(imageHash).then(onDataUriUpdate);
+      mediaLoader.fetch(imageHash, mediaLoader.Type.Jpeg).then(onDataUriUpdate);
     }
   }, [imageHash, dataUri]);
 

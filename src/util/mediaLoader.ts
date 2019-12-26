@@ -3,14 +3,21 @@ import { blobToDataUri } from './image';
 import * as cacheApi from './cacheApi';
 import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 
-const MEMORY_CACHE: Record<string, string> = {};
-const FETCH_PROMISES: Record<string, Promise<string>> = {};
+export enum Type {
+  Jpeg,
+  Lottie,
+}
+
+type ParsedMedia = string | AnyLiteral;
+
+const MEMORY_CACHE: Record<string, ParsedMedia> = {};
+const FETCH_PROMISES: Record<string, Promise<ParsedMedia>> = {};
 
 let pako: typeof import('pako/dist/pako_inflate');
 
-export function fetch(url: string, asString = false) {
+export function fetch(url: string, mediaType: Type) {
   if (!FETCH_PROMISES[url]) {
-    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, asString);
+    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType);
     FETCH_PROMISES[url].catch((err) => {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -25,9 +32,10 @@ export function getFromMemory(url: string) {
   return MEMORY_CACHE[url];
 }
 
-async function fetchFromCacheOrRemote(url: string, asString: boolean) {
+async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
   if (!MEDIA_CACHE_DISABLED) {
-    const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url);
+    const cacheType = mediaType === Type.Lottie ? cacheApi.Type.Json : cacheApi.Type.Text;
+    const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, cacheType);
     if (cached) {
       MEMORY_CACHE[url] = cached;
 
@@ -41,23 +49,31 @@ async function fetchFromCacheOrRemote(url: string, asString: boolean) {
     throw new Error('Failed to fetch media');
   }
 
-  let dataUri: any;
-
-  if (asString) {
-    if (!pako) {
-      pako = await import('pako/dist/pako_inflate');
-    }
-    dataUri = pako.inflate(remote, { to: 'string' });
-  } else {
-    dataUri = await blobToDataUri(new Blob([remote]));
-    dataUri = dataUri.replace('application/octet-stream', 'image/jpg');
-  }
+  const mediaData = await parseMedia(remote, mediaType);
 
   if (!MEDIA_CACHE_DISABLED) {
-    cacheApi.save(MEDIA_CACHE_NAME, url, dataUri);
+    cacheApi.save(MEDIA_CACHE_NAME, url, mediaData);
   }
 
-  MEMORY_CACHE[url] = dataUri;
+  MEMORY_CACHE[url] = mediaData;
 
-  return dataUri;
+  return mediaData;
+}
+
+async function parseMedia(data: Buffer, mediaType: Type): Promise<string | AnyLiteral> {
+  switch (mediaType) {
+    case Type.Jpeg: {
+      const dataUri = await blobToDataUri(new Blob([data]));
+      return dataUri.replace('application/octet-stream', 'image/jpg');
+    }
+    case Type.Lottie: {
+      if (!pako) {
+        pako = await import('pako/dist/pako_inflate');
+      }
+      const json = pako.inflate(data, { to: 'string' });
+      return JSON.parse(json);
+    }
+  }
+
+  throw new Error('Unknown media type');
 }
