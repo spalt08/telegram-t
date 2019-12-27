@@ -223,7 +223,7 @@
         opacity: 1;
         transition: opacity .3s ease;
 
-        &.hidden {
+        &.loaded {
           opacity: 0;
         }
       }

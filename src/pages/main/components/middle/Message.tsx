@@ -253,7 +253,7 @@ function renderMessageSticker(
         width={width}
         height={height}
         alt=""
-        className={!thumbnail || mediaData ? 'thumbnail-image hidden' : 'thumbnail-image'}
+        className={!thumbnail || mediaData ? 'thumbnail-image loaded' : 'thumbnail-image'}
       />
       {!is_animated && (
         <img
