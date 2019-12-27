@@ -1,19 +1,16 @@
 import React, { FC } from '../../../../lib/teact';
-import { withGlobal } from '../../../../lib/teactn';
 
 import Button from '../../../../components/ui/Button';
 
-type IProps = {
-  showRightColumn: boolean;
-  toggleRightColumn?: Function;
-};
+type IProps = {};
 
-const HeaderActions: FC<IProps> = ({
-  showRightColumn,
-  toggleRightColumn,
-}) => {
+const HeaderActions: FC<IProps> = () => {
+  function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
+    e.stopPropagation();
+  }
+
   return (
-    <div className="HeaderActions">
+    <div className="HeaderActions" onClick={stopPropagation}>
       <Button
         round
         color="translucent"
@@ -22,15 +19,6 @@ const HeaderActions: FC<IProps> = ({
         onClick={() => { }}
       >
         <i className="icon-search" />
-      </Button>
-      <Button
-        round
-        color="translucent"
-        size="smaller"
-        className={`toggle-right-pane-button ${showRightColumn ? 'active' : ''}`}
-        onClick={toggleRightColumn}
-      >
-        <i className="icon-right-pane" />
       </Button>
       <Button
         round
@@ -45,16 +33,4 @@ const HeaderActions: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  global => {
-    const { showRightColumn } = global;
-
-    return {
-      showRightColumn,
-    };
-  },
-  (setGlobal, actions) => {
-    const { toggleRightColumn } = actions;
-    return { toggleRightColumn };
-  },
-)(HeaderActions);
+export default HeaderActions;

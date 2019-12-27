@@ -1,6 +1,9 @@
 import React, { FC } from '../../../../lib/teact';
+import { withGlobal } from '../../../../lib/teactn';
 
-import { isPrivateChat } from '../../../../modules/helpers';
+import { getPrivateChatUserId } from '../../../../modules/helpers';
+import { ApiPrivateChat } from '../../../../api/types';
+import { selectChat } from '../../../../modules/selectors';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import UserExtra from './UserExtra';
@@ -10,13 +13,15 @@ import './RightColumnInfo.scss';
 
 type IProps = {
   chatId: number;
+  userId?: number;
+  selectedUserId?: number;
 };
 
-const RightColumnInfo: FC<IProps> = ({ chatId }) => {
-  return isPrivateChat(chatId) ? (
+const RightColumnInfo: FC<IProps> = ({ chatId, selectedUserId }) => {
+  return selectedUserId ? (
     <div className="RightColumnInfo">
-      <PrivateChatInfo chatId={chatId} avatarSize="jumbo" />
-      <UserExtra chatId={chatId} />
+      <PrivateChatInfo userId={selectedUserId} avatarSize="jumbo" />
+      <UserExtra userId={selectedUserId} />
     </div>
   ) : (
     <div className="RightColumnInfo">
@@ -26,4 +31,14 @@ const RightColumnInfo: FC<IProps> = ({ chatId }) => {
   );
 };
 
-export default RightColumnInfo;
+export default withGlobal(
+  (global, { chatId, userId }: IProps) => {
+    if (userId) {
+      return { selectedUserId: userId };
+    } else {
+      const chat = selectChat(global, chatId) as ApiPrivateChat | undefined;
+      const id = chat && getPrivateChatUserId(chat);
+      return { selectedUserId: id };
+    }
+  },
+)(RightColumnInfo);

@@ -1,14 +1,13 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiPrivateChat } from '../../../../api/types';
+import { ApiUser } from '../../../../api/types';
 import { GlobalActions } from '../../../../store/types';
-import { selectChat, selectUser } from '../../../../modules/selectors';
-import { getPrivateChatUserId } from '../../../../modules/helpers';
+import { selectUser } from '../../../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../../../util/formatPhoneNumber';
 
 type IProps = Pick<GlobalActions, 'loadFullUser'> & {
-  chatId: number;
+  userId: number;
   user: ApiUser;
 };
 
@@ -56,10 +55,8 @@ const PrivateChatInfo: FC<IProps> = ({ user, loadFullUser }) => {
 };
 
 export default withGlobal(
-  (global, { chatId }: IProps) => {
-    const chat = selectChat(global, chatId) as ApiPrivateChat;
-    const userId = chat && getPrivateChatUserId(chat);
-    const user = userId && selectUser(global, userId);
+  (global, { userId }: IProps) => {
+    const user = selectUser(global, userId);
 
     return { user };
   },

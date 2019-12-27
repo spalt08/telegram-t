@@ -14,10 +14,11 @@ interface IProps {
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, showOnlineStatus,
+  size = 'large', chat, user, showOnlineStatus, onClick,
 }) => {
   let imageHash: string | null = null;
 
@@ -52,7 +53,10 @@ const Avatar: FC<IProps> = ({
   }
 
   return (
-    <div className={`Avatar size-${size} ${showOnlineStatus && isOnline ? 'online' : ''}`}>
+    <div
+      className={`Avatar size-${size} ${showOnlineStatus && isOnline ? 'online' : ''}`}
+      onClick={onClick}
+    >
       {content}
     </div>
   );

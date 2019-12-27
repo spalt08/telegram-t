@@ -8,6 +8,7 @@ export type GlobalState = {
 
   users: {
     byId: Record<number, ApiUser>;
+    selectedId?: number;
   };
 
   chats: {
@@ -49,11 +50,11 @@ export type ActionTypes = (
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'toggleRightColumn' | 'saveSession' | 'sync' |
   // chats
-  'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' | 'loadFullChat' | 'loadChatOnlines' |
+  'loadChats' | 'loadMoreChats' | 'selectChatToView' | 'setChatScrollOffset' | 'loadFullChat' | 'loadChatOnlines' |
   // messages
   'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'selectMediaMessage' |
   // users
-  'loadFullUser'
+  'loadFullUser' | 'selectUserToView'
 );
 
 export type GlobalActions = Record<ActionTypes, Function>;

@@ -1,17 +1,14 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiUser, ApiPrivateChat } from '../../../../api/types';
-import { selectChat, selectUser } from '../../../../modules/selectors';
-import {
-  getPrivateChatUserId, getUserFullName, getUserStatus, isUserOnline,
-} from '../../../../modules/helpers';
+import { ApiUser } from '../../../../api/types';
+import { selectUser } from '../../../../modules/selectors';
+import { getUserFullName, getUserStatus, isUserOnline } from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
 
 type IProps = {
-  chatId: number;
+  userId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
-  chat: ApiPrivateChat;
   user: ApiUser;
 };
 
@@ -28,14 +25,9 @@ const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium' }) => {
 };
 
 export default withGlobal(
-  (global, { chatId }: IProps) => {
-    const chat = selectChat(global, chatId) as ApiPrivateChat;
-    const userId = chat && getPrivateChatUserId(chat);
-    const user = userId && selectUser(global, userId);
+  (global, { userId }: IProps) => {
+    const user = selectUser(global, userId);
 
-    return {
-      chat,
-      user,
-    };
+    return { user };
   },
 )(PrivateChatInfo);

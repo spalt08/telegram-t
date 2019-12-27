@@ -34,7 +34,7 @@ type IProps = {
   sender?: ApiUser;
   originSender?: ApiUser;
   loadAndPlayMedia?: boolean;
-} & Pick<GlobalActions, 'selectMediaMessage'>;
+} & Pick<GlobalActions, 'selectMediaMessage' | 'selectUserToView'>;
 
 const Message: FC<IProps> = ({
   message,
@@ -46,6 +46,7 @@ const Message: FC<IProps> = ({
   originSender,
   loadAndPlayMedia,
   selectMediaMessage,
+  selectUserToView,
 }) => {
   const [, onDataUriUpdate] = useState(null);
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
@@ -115,6 +116,13 @@ const Message: FC<IProps> = ({
     );
   }
 
+  function viewUser() {
+    if (!sender) {
+      return;
+    }
+    selectUserToView({ id: sender.id, forceOpen: true });
+  }
+
   let style = '';
   if (photo || video) {
     const { width } = photo
@@ -127,7 +135,7 @@ const Message: FC<IProps> = ({
   return (
     <div className={className} data-message-id={message.id}>
       {showAvatar && (
-        <Avatar size="small" user={sender} />
+        <Avatar size="small" user={sender} onClick={viewUser} />
       )}
       {/* eslint-disable-next-line */}
       <div className={contentClassName} style={style}>
@@ -304,7 +312,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { selectMediaMessage } = actions;
-    return { selectMediaMessage };
+    const { selectMediaMessage, selectUserToView } = actions;
+    return { selectMediaMessage, selectUserToView };
   },
 )(Message));

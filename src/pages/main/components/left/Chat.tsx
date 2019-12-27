@@ -25,7 +25,7 @@ type IProps = {
   lastMessageSender?: ApiUser;
   actionTargetMessage?: ApiMessage;
   selected: boolean;
-} & Pick<GlobalActions, 'selectChat'>;
+} & Pick<GlobalActions, 'selectChatToView'>;
 
 const Chat: FC<IProps> = ({
   chat,
@@ -33,7 +33,7 @@ const Chat: FC<IProps> = ({
   lastMessageSender,
   actionTargetMessage,
   selected,
-  selectChat,
+  selectChatToView,
 }) => {
   function renderLastMessage() {
     const { last_message } = chat;
@@ -65,7 +65,7 @@ const Chat: FC<IProps> = ({
   }
 
   return (
-    <div className={buildClassNames(chat, selected)} onClick={() => selectChat({ id: chat.id })}>
+    <div className={buildClassNames(chat, selected)} onClick={() => selectChatToView({ id: chat.id })}>
       <Avatar chat={chat} user={privateChatUser} showOnlineStatus />
       <div className="info">
         <div className="title">
@@ -116,7 +116,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { selectChat } = actions;
-    return { selectChat };
+    const { selectChatToView } = actions;
+    return { selectChatToView };
   },
 )(Chat));
