@@ -150,6 +150,16 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
         member_count: members && members.length,
       },
     });
+  } else if (
+    update instanceof GramJs.UpdateChatPinnedMessage
+  ) {
+    onUpdate({
+      '@type': 'updateChatFullInfo',
+      id: -update.chatId,
+      full_info: {
+        pinned_message_id: update.id,
+      },
+    });
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {

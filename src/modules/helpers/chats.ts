@@ -1,4 +1,4 @@
-import { ApiChat, ApiPrivateChat } from '../../api/types';
+import { ApiChat } from '../../api/types';
 
 export function isPrivateChat(chatId: number) {
   return chatId > 0;
@@ -35,7 +35,10 @@ export function getChatTypeString(chat: ApiChat) {
   }
 }
 
-export function getPrivateChatUserId(chat: ApiPrivateChat) {
+export function getPrivateChatUserId(chat: ApiChat) {
+  if (chat.type['@type'] !== 'chatTypePrivate' && chat.type['@type'] !== 'chatTypeSecret') {
+    return undefined;
+  }
   return chat.type.user_id;
 }
 

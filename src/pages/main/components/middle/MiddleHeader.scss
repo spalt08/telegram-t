@@ -30,6 +30,74 @@
     }
   }
 
+  .HeaderPinnedMessage {
+    display: flex;
+    margin-left: auto;
+    padding: 0.25rem;
+    padding-left: 0.375rem;
+    border-radius: var(--border-radius-messages-small);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0.25rem;
+      bottom: 0.25rem;
+      left: 0.25rem;
+      width: 2px;
+      background: var(--color-primary);
+    }
+
+    &:hover {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+    }
+
+    .message-text {
+      overflow: hidden;
+      margin-left: 0.4rem;
+      max-width: 15rem;
+
+      .title {
+        font-weight: bold;
+        font-size: 0.9rem;
+        line-height: 1rem;
+        height: 1rem;
+        color: var(--color-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      p {
+        font-size: 0.875rem;
+        line-height: 1.125rem;
+        height: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+      }
+    }
+
+    img {
+      width: 2.25rem;
+      height: 2.25rem;
+      object-fit: cover;
+      border-radius: 0.25rem;
+      margin-left: 0.4rem;
+      flex-shrink: 0;
+
+      & + .message-text {
+        max-width: 12rem;
+      }
+    }
+
+    & + .HeaderActions {
+      margin-left: 1rem;
+    }
+  }
+
   .HeaderActions {
     margin-left: auto;
     display: flex;
