@@ -2,9 +2,7 @@ import { ApiFile } from './files';
 
 export interface ApiUser {
   id: number;
-  type: {
-    '@type': 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';
-  };
+  type: ApiUserType;
   first_name?: string;
   last_name?: string;
   status?: ApiUserStatus;
@@ -14,13 +12,23 @@ export interface ApiUser {
   avatar?: {
     hash: string;
   };
-  // Obtained from UserFullInfo
-  bio?: string;
+  // Obtained from GetFullUser / UserFullInfo
+  full_info?: ApiUserFullInfo;
+
   // Only in TDLib, remove.
   profile_photo?: {
     small: ApiFile;
     big: ApiFile;
   };
+}
+
+export interface ApiUserFullInfo {
+  bio?: string;
+  common_chats_count: number;
+}
+
+export interface ApiUserType {
+  '@type': ('userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown');
 }
 
 export interface ApiUserStatus {

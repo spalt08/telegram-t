@@ -22,6 +22,12 @@
     padding-bottom: .1rem;
   }
 
+  &.bottom-padding {
+    .messages-container {
+      padding-bottom: 2.5rem;
+    }
+  }
+
   .message-date-group {
     text-align: center;
     width: 100%;

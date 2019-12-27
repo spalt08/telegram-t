@@ -2,15 +2,19 @@ import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
+import { ApiChat } from '../../../../api/types';
+import { selectChat as selectChatFromState } from '../../../../modules/selectors';
 
 import Button from '../../../../components/ui/Button';
 import MessageList from './MessageList';
 import MiddleFooter from './MiddleFooter';
 import MiddleHeader from './MiddleHeader';
 import './MiddleColumn.scss';
+import { isChannel } from '../../../../modules/helpers';
 
 type IProps = Pick<GlobalActions, 'selectChat'> & {
   selectedChatId: number;
+  selectedChat?: ApiChat;
   areChatsLoaded: boolean;
   canCloseChatOnEsc: boolean;
 };
@@ -41,7 +45,7 @@ const MiddleColumn: FC<IProps> = (props) => {
 };
 
 function renderSelectedChat(props: IProps) {
-  const { selectedChatId } = props;
+  const { selectedChatId, selectedChat } = props;
 
   if (!selectedChatId) {
     return null;
@@ -51,7 +55,9 @@ function renderSelectedChat(props: IProps) {
     <div className="messages-layout">
       <MiddleHeader chatId={selectedChatId} />
       <MessageList key={selectedChatId} />
-      <MiddleFooter />
+      {selectedChat && !isChannel(selectedChat) && (
+        <MiddleFooter />
+      )}
     </div>
   );
 }
@@ -93,10 +99,17 @@ function renderOpenChatScreen(props: IProps) {
 export default withGlobal(
   (global) => {
     const { chats, messages } = global;
+    const selectedChatId = chats.selectedId;
+    const areChatsLoaded = Boolean(chats.ids);
+
+    const selectedChat = selectedChatId && areChatsLoaded
+      ? selectChatFromState(global, selectedChatId)
+      : undefined;
 
     return {
-      selectedChatId: chats.selectedId,
-      areChatsLoaded: Boolean(chats.ids),
+      selectedChatId,
+      selectedChat,
+      areChatsLoaded,
       canCloseChatOnEsc: !messages.selectedMediaMessageId,
     };
   },

@@ -4,8 +4,13 @@ import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import { ApiMessage } from '../../../../api/types';
-import { selectChatMessages } from '../../../../modules/selectors';
-import { isOwnMessage, isPrivateChat, isActionMessage } from '../../../../modules/helpers';
+import { selectChatMessages, selectChat } from '../../../../modules/selectors';
+import {
+  isOwnMessage,
+  isPrivateChat,
+  isActionMessage,
+  isChannel,
+} from '../../../../modules/helpers';
 import { orderBy, toArray } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatHumanDate } from '../../../../util/dateFormat';
@@ -19,6 +24,7 @@ type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 
   areMessagesLoaded?: boolean;
   chatId?: number;
   messages?: Record<number, ApiMessage>;
+  isChannelChat: boolean;
 };
 
 const SCROLL_THROTTLE_MS = 1000;
@@ -34,6 +40,7 @@ const MessageList: FC<IProps> = ({
   areMessagesLoaded,
   chatId,
   messages,
+  isChannelChat,
   loadChatMessages,
   loadMoreChatMessages,
   setChatScrollOffset,
@@ -118,9 +125,17 @@ const MessageList: FC<IProps> = ({
     );
   }
 
+  const classNames = ['MessageList', 'custom-scroll'];
+  if (isPrivate || isChannelChat) {
+    classNames.push('no-avatars');
+  }
+  if (isChannelChat) {
+    classNames.push('bottom-padding');
+  }
+
   return (
     <div
-      className={`MessageList custom-scroll ${isPrivate ? 'no-avatars' : ''}`}
+      className={classNames.join(' ')}
       onScroll={handleScroll}
     >
       {
@@ -176,9 +191,11 @@ export default withGlobal(
     }
 
     const messages = selectChatMessages(global, selectedId);
+    const chat = selectChat(global, selectedId);
 
     return {
       chatId: selectedId,
+      isChannelChat: chat && isChannel(chat),
       messages,
       areMessagesLoaded: Boolean(messages),
     };

@@ -1,12 +1,18 @@
 import { ApiMessage } from './messages';
 import { ApiFile } from './files';
 
+type ApiChatType = 'chatTypePrivate' | 'chatTypeSecret' |
+'chatTypeBasicGroup' | 'chatTypeSuperGroup' |
+'chatTypeChannel';
+
 export interface ApiChat {
   id: number;
   type: {
-    '@type': 'chatTypePrivate' | 'chatTypeSecret' | 'chatTypeBasicGroup' | 'chatTypeSupergroup';
-    basic_group_id?: number;
+    '@type': ApiChatType;
     user_id?: number;
+
+    // Only in TDLib.
+    basic_group_id?: number;
     supergroup_id?: number;
     is_channel?: boolean;
   };
@@ -21,12 +27,33 @@ export interface ApiChat {
   avatar?: {
     hash: string;
   };
+  username?: string;
+  // Obtained from GetFullChat / GetFullChannel
+  full_info?: ApiChatFullInfo;
+  // Obtained from GetOnlines
+  online_count?: number;
+
   // Only in TDLib.
   photo?: {
     small: ApiFile;
     big: ApiFile;
   };
   order?: string;
+}
+
+export interface ApiChatFullInfo {
+  about?: string;
+  members?: ApiChatMember[];
+  member_count?: number;
+  pinned_message_id?: number;
+  invite_link?: string;
+}
+
+export interface ApiChatMember {
+  '@type': 'chatMember';
+  user_id: number;
+  inviter_id: number;
+  joined_date: number;
 }
 
 export interface ApiPrivateChat extends ApiChat {

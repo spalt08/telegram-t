@@ -28,7 +28,7 @@ export function getUserFullName(user?: ApiUser) {
     return null;
   }
 
-  if (user.status && user.status['@type'] === 'userStatusEmpty') {
+  if (user.type['@type'] !== 'userTypeBot' && user.status && user.status['@type'] === 'userStatusEmpty') {
     return 'Deleted account';
   }
 

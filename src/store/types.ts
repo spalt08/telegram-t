@@ -49,9 +49,11 @@ export type ActionTypes = (
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'toggleRightColumn' | 'saveSession' | 'sync' |
   // chats
-  'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' |
+  'loadChats' | 'loadMoreChats' | 'selectChat' | 'setChatScrollOffset' | 'loadFullChat' | 'loadChatOnlines' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'selectMediaMessage'
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'selectMediaMessage' |
+  // users
+  'loadFullUser'
 );
 
 export type GlobalActions = Record<ActionTypes, Function>;

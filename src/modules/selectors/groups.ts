@@ -1,13 +1,13 @@
 import { GlobalState } from '../../store/types';
 import { ApiGroup } from '../../api/types';
-import { isChannel, isUserOnline } from '../helpers';
+import { isGroupChannel, isUserOnline } from '../helpers';
 
 export function selectGroup(global: GlobalState, groupId: number) {
   return global.groups.byId[groupId];
 }
 
 export function selectGroupOnlineCount(global: GlobalState, group: ApiGroup) {
-  if (isChannel(group) || !group.members) {
+  if (isGroupChannel(group) || !group.members) {
     return undefined;
   }
 

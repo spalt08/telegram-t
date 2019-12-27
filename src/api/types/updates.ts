@@ -1,4 +1,4 @@
-import { ApiChat } from './chats';
+import { ApiChat, ApiChatFullInfo } from './chats';
 import { ApiMessage } from './messages';
 import { ApiUser } from './users';
 
@@ -32,6 +32,12 @@ export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: number;
   chat: Partial<ApiChat>;
+};
+
+export type ApiUpdateChatFullInfo = {
+  '@type': 'updateChatFullInfo';
+  id: number;
+  full_info: Partial<ApiChatFullInfo>;
 };
 
 export type ApiUpdateNewMessage = {
@@ -95,7 +101,7 @@ export type ApiUpdateMessageImage = {
 
 export type ApiUpdate = (
   ApiUpdateAuthorizationState |
-  ApiUpdateChats | ApiUpdateChat |
+  ApiUpdateChats | ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUsers | ApiUpdateUser |

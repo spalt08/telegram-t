@@ -1,20 +1,20 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiGroup } from '../../../../api/types';
-import { selectChat, selectChatGroupId, selectGroup } from '../../../../modules/selectors';
-import { getGroupDescription, getGroupLink } from '../../../../modules/helpers';
+import { ApiChat } from '../../../../api/types';
+import { selectChat } from '../../../../modules/selectors';
+import { getChatDescription, getChatLink } from '../../../../modules/helpers';
 
 type IProps = {
   chatId: number;
-  group: ApiGroup;
+  chat: ApiChat;
 };
 
 const GroupChatInfo: FC<IProps> = ({
-  group,
+  chat,
 }) => {
-  const description = (group && getGroupDescription(group)) || '';
-  const link = (group && getGroupLink(group)) || '';
+  const description = getChatDescription(chat);
+  const link = getChatLink(chat);
   const url = link.indexOf('http') === 0 ? link : `http://${link}`;
 
   return (
@@ -44,9 +44,7 @@ const GroupChatInfo: FC<IProps> = ({
 export default withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
-    const chatGroupId = chat && selectChatGroupId(chat);
-    const group = chatGroupId && selectGroup(global, chatGroupId);
 
-    return { group };
+    return { chat };
   },
 )(GroupChatInfo);

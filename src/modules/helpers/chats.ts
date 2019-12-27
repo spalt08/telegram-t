@@ -17,12 +17,48 @@ export function isChannelChat(chatId: number) {
   return isSuperGroupChat(chatId);
 }
 
+export function isChannel(chat: ApiChat) {
+  return chat.type['@type'] === 'chatTypeChannel';
+}
+
+export function getChatTypeString(chat: ApiChat) {
+  switch (chat.type['@type']) {
+    case 'chatTypePrivate':
+      return 'Private Chat';
+    case 'chatTypeBasicGroup':
+    case 'chatTypeSuperGroup':
+      return 'Group Chat';
+    case 'chatTypeChannel':
+      return 'Channel';
+    default:
+      return 'Chat';
+  }
+}
+
 export function getPrivateChatUserId(chat: ApiPrivateChat) {
   return chat.type.user_id;
 }
 
 export function getChatTitle(chat: ApiChat) {
   return chat.title || 'Deleted account';
+}
+
+export function getChatDescription(chat: ApiChat) {
+  if (!chat.full_info) {
+    return null;
+  }
+  return chat.full_info.about;
+}
+
+export function getChatLink(chat: ApiChat) {
+  const { username } = chat;
+  const invite_link = chat.full_info && chat.full_info.invite_link;
+
+  if (invite_link && invite_link.length) {
+    return invite_link;
+  }
+
+  return username ? `t.me/${username}` : '';
 }
 
 // TdLib only.

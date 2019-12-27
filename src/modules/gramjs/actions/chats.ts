@@ -4,6 +4,7 @@ import {
 
 import { callSdk } from '../../../api/gramjs';
 import { addChatIds, updateChatScrollOffset } from '../../common/chats';
+import { selectChat } from '../../selectors';
 
 const LOAD_CHATS_LIMIT = 50;
 
@@ -17,6 +18,30 @@ addReducer('setChatScrollOffset', (global, actions, payload) => {
   const { chatId, scrollOffset } = payload!;
 
   return updateChatScrollOffset(global, chatId, scrollOffset);
+});
+
+addReducer('loadFullChat', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const { id, access_hash: accessHash } = chat;
+
+  void callSdk('fetchFullChat', { id, accessHash });
+});
+
+addReducer('loadChatOnlines', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const { id, access_hash: accessHash } = chat;
+
+  void callSdk('fetchChatOnlines', { id, accessHash });
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {

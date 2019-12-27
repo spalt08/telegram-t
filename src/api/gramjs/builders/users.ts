@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiUser, ApiUserStatus } from '../../types';
+import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
 export function buildApiUser(mtpUser: GramJs.User): ApiUser {
   const avatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
@@ -7,10 +7,7 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
 
   return {
     id: mtpUser.id,
-    type: {
-      // TODO Support other user types.
-      '@type': 'userTypeRegular',
-    },
+    type: buildApiUserType(mtpUser),
     first_name: mtpUser.firstName,
     last_name: mtpUser.lastName,
     username: mtpUser.username || '',
@@ -19,6 +16,17 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
     ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
     ...(avatar && { avatar }),
   };
+}
+
+function buildApiUserType(user: GramJs.User): ApiUserType {
+  if (user.bot) {
+    return { '@type': 'userTypeBot' };
+  }
+  if (user.deleted) {
+    return { '@type': 'userTypeDeleted' };
+  }
+
+  return { '@type': 'userTypeRegular' };
 }
 
 export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus | undefined {

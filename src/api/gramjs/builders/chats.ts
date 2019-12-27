@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiChat } from '../../types';
+import { ApiChat, ApiChatMember } from '../../types';
 import { isPeerChat, isPeerUser } from './peers';
 
 export function buildApiChatFromDialog(
@@ -11,7 +11,7 @@ export function buildApiChatFromDialog(
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
-      '@type': getApiChatTypeFromMtpPeer(dialog.peer),
+      '@type': getApiChatTypeFromPeerEntity(peerEntity),
       ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
@@ -19,6 +19,7 @@ export function buildApiChatFromDialog(
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,
     unread_mention_count: 0, // TODO
+    ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
     is_pinned: dialog.pinned || false,
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
@@ -35,14 +36,13 @@ export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer) {
   }
 }
 
-export function getApiChatTypeFromMtpPeer(peer: GramJs.TypePeer) {
-  if (isPeerUser(peer)) {
+export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel) {
+  if (peerEntity instanceof GramJs.User) {
     return 'chatTypePrivate';
-  } else if (isPeerChat(peer)) {
+  } else if (peerEntity instanceof GramJs.Chat) {
     return 'chatTypeBasicGroup';
   } else {
-    // TODO Support channels, supergroups, etc.
-    return 'chatTypeBasicGroup';
+    return peerEntity.megagroup ? 'chatTypeSuperGroup' : 'chatTypeChannel';
   }
 }
 
@@ -77,4 +77,23 @@ function buildAvatar(photo: any) {
   }
 
   return null;
+}
+
+export function buildChatMembers(participants: GramJs.TypeChatParticipants): ApiChatMember[] | undefined {
+  if (!(participants instanceof GramJs.ChatParticipants)) {
+    return undefined;
+  }
+
+  return participants.participants.map((member) => ({
+    '@type': 'chatMember',
+    user_id: member.userId,
+    inviter_id: 'inviterId' in member && member.inviterId,
+    joined_date: 'date' in member && member.date,
+  }));
+}
+
+export function buildChatInviteLink(exportedInvite: GramJs.TypeExportedChatInvite) {
+  return exportedInvite instanceof GramJs.ChatInviteExported
+    ? exportedInvite.link
+    : undefined;
 }

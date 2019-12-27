@@ -35,5 +35,20 @@ export function onUpdate(update: ApiUpdate) {
 
       break;
     }
+
+    case 'updateChatFullInfo': {
+      const { full_info } = update;
+      const targetChat = global.chats.byId[update.id];
+      if (!targetChat) {
+        return;
+      }
+
+      setGlobal(updateChat(global, update.id, {
+        full_info: {
+          ...targetChat.full_info,
+          ...full_info,
+        },
+      }));
+    }
   }
 }

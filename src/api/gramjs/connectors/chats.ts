@@ -2,11 +2,17 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiChat } from '../../types';
 
 import { invokeRequest } from '../client';
-import { buildApiChatFromDialog, getPeerKey } from '../builders/chats';
+import {
+  buildApiChatFromDialog,
+  getPeerKey,
+  buildChatMembers,
+  buildChatInviteLink,
+} from '../builders/chats';
 import { buildApiMessage } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
+import { buildInputEntity, buildInputPeer } from '../inputHelpers';
 
 let onUpdate: OnApiUpdate;
 
@@ -64,6 +70,94 @@ export async function fetchChats(
 
   return {
     chat_ids: chatIds,
+  };
+}
+
+export async function fetchFullChat(
+  {
+    id,
+    accessHash,
+  }: {
+    id: number;
+    accessHash?: string;
+  },
+) {
+  const input = buildInputEntity(id, accessHash);
+  if (input instanceof GramJs.InputUser) {
+    return;
+  }
+  const full_info = input instanceof GramJs.InputChannel
+    ? await getFullChannelInfo(input)
+    : await getFullChatInfo(input);
+
+  onUpdate({
+    '@type': 'updateChat',
+    id,
+    chat: { full_info },
+  });
+}
+
+export async function fetchChatOnlines(
+  {
+    id,
+    accessHash,
+  }: {
+    id: number;
+    accessHash?: string;
+  },
+) {
+  const peer = buildInputPeer(id, accessHash);
+
+  const result = await invokeRequest(new GramJs.messages.GetOnlines({ peer }));
+  const { onlines } = result;
+
+  onUpdate({
+    '@type': 'updateChat',
+    id,
+    chat: { online_count: onlines },
+  });
+}
+
+async function getFullChatInfo(chatId: number) {
+  const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
+
+  const {
+    about,
+    participants,
+    pinnedMsgId,
+    exportedInvite,
+  } = result.fullChat as unknown as GramJs.ChatFull;
+
+  const members = buildChatMembers(participants);
+
+  return {
+    about,
+    members,
+    member_count: members && members.length,
+    pinned_message_id: pinnedMsgId,
+    invite_link: buildChatInviteLink(exportedInvite),
+  };
+}
+
+async function getFullChannelInfo(channel: GramJs.InputChannel) {
+  const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
+
+  const {
+    about,
+    participantsCount,
+    pinnedMsgId,
+    exportedInvite,
+  } = result.fullChat as unknown as GramJs.ChannelFull;
+
+  const invite_link = exportedInvite instanceof GramJs.ChatInviteExported
+    ? exportedInvite.link
+    : undefined;
+
+  return {
+    about,
+    member_count: participantsCount,
+    pinned_message_id: pinnedMsgId,
+    invite_link,
   };
 }
 

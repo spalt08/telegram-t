@@ -1,34 +1,38 @@
 import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
-import { ApiChat, ApiGroup } from '../../../../api/types';
-import { isChannel, getGroupTypeString, isSuperGroupChat } from '../../../../modules/helpers';
+import { ApiChat } from '../../../../api/types';
+import { GlobalActions } from '../../../../store/types';
+import { getChatTypeString, getChatTitle } from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
-import { selectChat, selectChatGroupId, selectGroupOnlineCount } from '../../../../modules/selectors';
-import { selectGroup } from '../../../../modules/selectors/groups';
+import { selectChat } from '../../../../modules/selectors';
 
-type IProps = {
+type IProps = Pick<GlobalActions, 'loadFullChat' | 'loadChatOnlines'> & {
   chatId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   chat: ApiChat;
-  group: ApiGroup;
-  onlineMembers?: number;
 };
 
 const GroupChatInfo: FC<IProps> = ({
   chat,
-  group,
-  onlineMembers,
   avatarSize = 'medium',
+  loadFullChat,
+  loadChatOnlines,
 }) => {
-  const groupStatus = getGroupStatus(chat, group);
-  const onlineStatus = onlineMembers ? `, ${onlineMembers} online` : '';
+  if (!chat.full_info) {
+    loadFullChat({ chatId: chat.id });
+  }
+  if (chat.online_count === undefined) {
+    loadChatOnlines({ chatId: chat.id });
+  }
+  const groupStatus = getGroupStatus(chat);
+  const onlineStatus = chat.online_count ? `, ${chat.online_count} online` : '';
 
   return (
     <div className="ChatInfo">
       <Avatar size={avatarSize} chat={chat} />
       <div>
-        <div className="title">{chat.title}</div>
+        <div className="title">{getChatTitle(chat)}</div>
         <div className="status">
           {groupStatus}
           {onlineStatus}
@@ -38,27 +42,27 @@ const GroupChatInfo: FC<IProps> = ({
   );
 };
 
-function getGroupStatus(chat: ApiChat, group?: ApiGroup) {
-  if (!group) {
-    return isSuperGroupChat(chat.id) ? 'Super Group' : 'Group Chat';
+function getGroupStatus(chat: ApiChat) {
+  const chatTypeString = getChatTypeString(chat);
+  if (!chat.full_info) {
+    return chatTypeString;
   }
 
-  return group.member_count
-    ? `${group.member_count} ${isChannel(group) ? 'subscribers' : 'members'}`
-    : getGroupTypeString(group);
+  const { member_count } = chat.full_info;
+
+  return member_count
+    ? `${member_count} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+    : chatTypeString;
 }
 
 export default withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
-    const chatGroupId = chat && selectChatGroupId(chat);
-    const group = chatGroupId && selectGroup(global, chatGroupId);
-    const onlineMembers = group && selectGroupOnlineCount(global, group);
 
-    return {
-      chat,
-      group,
-      onlineMembers,
-    };
+    return { chat };
+  },
+  (setGlobal, actions) => {
+    const { loadFullChat, loadChatOnlines } = actions;
+    return { loadFullChat, loadChatOnlines };
   },
 )(GroupChatInfo);

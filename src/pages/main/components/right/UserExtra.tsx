@@ -2,16 +2,26 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser, ApiPrivateChat } from '../../../../api/types';
+import { GlobalActions } from '../../../../store/types';
 import { selectChat, selectUser } from '../../../../modules/selectors';
 import { getPrivateChatUserId } from '../../../../modules/helpers';
+import { formatPhoneNumberWithCode } from '../../../../util/formatPhoneNumber';
 
-type IProps = {
+type IProps = Pick<GlobalActions, 'loadFullUser'> & {
   chatId: number;
   user: ApiUser;
 };
 
-const PrivateChatInfo: FC<IProps> = ({ user }) => {
-  const { bio, username, phone_number } = user;
+const PrivateChatInfo: FC<IProps> = ({ user, loadFullUser }) => {
+  const { full_info, username, phone_number } = user;
+  if (!full_info) {
+    loadFullUser({ userId: user.id });
+  }
+
+  const bio = full_info && full_info.bio;
+
+  const formattedNumber = formatPhoneNumberWithCode(phone_number.startsWith('+') ? phone_number : `+${phone_number}`);
+
   return (
     <div className="ChatExtra">
       {bio && !!bio.length && (
@@ -36,7 +46,7 @@ const PrivateChatInfo: FC<IProps> = ({ user }) => {
         <div className="item">
           <i className="icon-phone" />
           <div>
-            <p className="title">{phone_number}</p>
+            <p className="title">{formattedNumber}</p>
             <p className="subtitle">Phone</p>
           </div>
         </div>
@@ -52,5 +62,9 @@ export default withGlobal(
     const user = userId && selectUser(global, userId);
 
     return { user };
+  },
+  (setGlobal, actions) => {
+    const { loadFullUser } = actions;
+    return { loadFullUser };
   },
 )(PrivateChatInfo);

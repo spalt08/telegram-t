@@ -1,3 +1,5 @@
+// DEPRECATED - Only for TDLib
+
 export interface ApiGroupMember {
   '@type': 'chatMember';
   inviter_user_id: number;

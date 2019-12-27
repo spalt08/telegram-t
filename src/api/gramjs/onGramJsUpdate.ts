@@ -2,7 +2,7 @@ import { Api as GramJs } from '../../lib/gramjs';
 import { OnApiUpdate } from '../types';
 
 import { buildApiMessage, buildApiMessageFromShort, buildApiMessageFromShortChat } from './builders/messages';
-import { getApiChatIdFromMtpPeer } from './builders/chats';
+import { getApiChatIdFromMtpPeer, buildChatMembers } from './builders/chats';
 import { buildApiUserStatus } from './builders/users';
 import localDb from './localDb';
 
@@ -135,6 +135,19 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
       id: getApiChatIdFromMtpPeer(update.peer.peer),
       chat: {
         is_pinned: update.pinned || false,
+      },
+    });
+  } else if (
+    update instanceof GramJs.UpdateChatParticipants
+  ) {
+    const members = buildChatMembers(update.participants);
+
+    onUpdate({
+      '@type': 'updateChatFullInfo',
+      id: -update.participants.chatId,
+      full_info: {
+        members,
+        member_count: members && members.length,
       },
     });
 
