@@ -1,6 +1,6 @@
 import { ApiChat, ApiChatFullInfo } from './chats';
 import { ApiMessage } from './messages';
-import { ApiUser } from './users';
+import { ApiUser, ApiUserFullInfo } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
@@ -87,6 +87,12 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
+export type ApiUpdateUserFullInfo = {
+  '@type': 'updateUserFullInfo';
+  id: number;
+  full_info: Partial<ApiUserFullInfo>;
+};
+
 export type ApiUpdateAvatar = {
   '@type': 'updateAvatar';
   chat_id: number;
@@ -104,7 +110,7 @@ export type ApiUpdate = (
   ApiUpdateChats | ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateUsers | ApiUpdateUser |
+  ApiUpdateUsers | ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage
 );
 

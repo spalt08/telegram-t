@@ -24,7 +24,8 @@ export interface ApiUser {
 
 export interface ApiUserFullInfo {
   bio?: string;
-  common_chats_count: number;
+  common_chats_count?: number;
+  pinned_message_id?: number;
 }
 
 export interface ApiUserType {

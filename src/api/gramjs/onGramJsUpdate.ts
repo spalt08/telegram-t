@@ -170,5 +170,13 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
         status: buildApiUserStatus(update.status),
       },
     });
+  } else if (update instanceof GramJs.UpdateUserPinnedMessage) {
+    onUpdate({
+      '@type': 'updateUserFullInfo',
+      id: update.userId,
+      full_info: {
+        pinned_message_id: update.id,
+      },
+    });
   }
 }

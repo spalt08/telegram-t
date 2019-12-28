@@ -20,5 +20,20 @@ export function onUpdate(update: ApiUpdate) {
 
       break;
     }
+
+    case 'updateUserFullInfo': {
+      const { id, full_info } = update;
+      const targetUser = global.users.byId[id];
+      if (!targetUser) {
+        return;
+      }
+
+      setGlobal(updateUser(global, id, {
+        full_info: {
+          ...targetUser.full_info,
+          ...full_info,
+        },
+      }));
+    }
   }
 }
