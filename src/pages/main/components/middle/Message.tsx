@@ -34,7 +34,7 @@ type IProps = {
   sender?: ApiUser;
   originSender?: ApiUser;
   loadAndPlayMedia?: boolean;
-} & Pick<GlobalActions, 'selectMediaMessage' | 'selectUserToView'>;
+} & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
   message,
@@ -46,7 +46,7 @@ const Message: FC<IProps> = ({
   originSender,
   loadAndPlayMedia,
   selectMediaMessage,
-  selectUserToView,
+  openUserInfo,
 }) => {
   const [, onDataUriUpdate] = useState(null);
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
@@ -120,7 +120,7 @@ const Message: FC<IProps> = ({
     if (!sender) {
       return;
     }
-    selectUserToView({ id: sender.id, forceOpen: true });
+    openUserInfo({ id: sender.id });
   }
 
   let style = '';
@@ -312,7 +312,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { selectMediaMessage, selectUserToView } = actions;
-    return { selectMediaMessage, selectUserToView };
+    const { selectMediaMessage, openUserInfo } = actions;
+    return { selectMediaMessage, openUserInfo };
   },
 )(Message));

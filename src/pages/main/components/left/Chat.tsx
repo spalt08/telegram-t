@@ -10,6 +10,7 @@ import {
   isPrivateChat,
   isGroupChat,
   isActionMessage,
+  getPrivateChatUserId,
 } from '../../../../modules/helpers';
 import { selectUser, selectChatMessage } from '../../../../modules/selectors';
 import Avatar from '../../../../components/Avatar';
@@ -25,7 +26,7 @@ type IProps = {
   lastMessageSender?: ApiUser;
   actionTargetMessage?: ApiMessage;
   selected: boolean;
-} & Pick<GlobalActions, 'selectChatToView'>;
+} & Pick<GlobalActions, 'openChat'>;
 
 const Chat: FC<IProps> = ({
   chat,
@@ -33,7 +34,7 @@ const Chat: FC<IProps> = ({
   lastMessageSender,
   actionTargetMessage,
   selected,
-  selectChatToView,
+  openChat,
 }) => {
   function renderLastMessage() {
     const { last_message } = chat;
@@ -65,7 +66,7 @@ const Chat: FC<IProps> = ({
   }
 
   return (
-    <div className={buildClassNames(chat, selected)} onClick={() => selectChatToView({ id: chat.id })}>
+    <div className={buildClassNames(chat, selected)} onClick={() => openChat({ id: chat.id })}>
       <Avatar chat={chat} user={privateChatUser} showOnlineStatus />
       <div className="info">
         <div className="title">
@@ -103,7 +104,7 @@ export default memo(withGlobal(
     }
 
     const lastMessage = chat.last_message;
-    const privateChatUserId = isPrivateChat(chat.id) && chat.type.user_id;
+    const privateChatUserId = getPrivateChatUserId(chat);
     // TODO: Works for only recent messages that are already loaded in the store
     const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
       ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
@@ -116,7 +117,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { selectChatToView } = actions;
-    return { selectChatToView };
+    const { openChat } = actions;
+    return { openChat };
   },
 )(Chat));

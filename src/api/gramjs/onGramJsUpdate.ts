@@ -144,7 +144,7 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
 
     onUpdate({
       '@type': 'updateChatFullInfo',
-      id: -update.participants.chatId,
+      id: getApiChatIdFromMtpPeer({ chatId: update.participants.chatId } as GramJs.TypePeer),
       full_info: {
         members,
         member_count: members && members.length,
@@ -155,7 +155,7 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
   ) {
     onUpdate({
       '@type': 'updateChatFullInfo',
-      id: -update.chatId,
+      id: getApiChatIdFromMtpPeer({ chatId: update.chatId } as GramJs.TypePeer),
       full_info: {
         pinned_message_id: update.id,
       },

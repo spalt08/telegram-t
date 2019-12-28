@@ -19,7 +19,7 @@ const PrivateChatInfo: FC<IProps> = ({ user, loadFullUser }) => {
 
   const bio = full_info && full_info.bio;
 
-  const formattedNumber = formatPhoneNumberWithCode(phone_number.startsWith('+') ? phone_number : `+${phone_number}`);
+  const formattedNumber = formatPhoneNumberWithCode(phone_number);
 
   return (
     <div className="ChatExtra">

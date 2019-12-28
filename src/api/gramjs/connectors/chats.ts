@@ -73,16 +73,9 @@ export async function fetchChats(
   };
 }
 
-export async function fetchFullChat(
-  {
-    id,
-    accessHash,
-  }: {
-    id: number;
-    accessHash?: string;
-  },
-) {
-  const input = buildInputEntity(id, accessHash);
+export async function fetchFullChat(chat: ApiChat) {
+  const { id, access_hash } = chat;
+  const input = buildInputEntity(id, access_hash);
   if (input instanceof GramJs.InputUser) {
     return;
   }
@@ -97,16 +90,9 @@ export async function fetchFullChat(
   });
 }
 
-export async function fetchChatOnlines(
-  {
-    id,
-    accessHash,
-  }: {
-    id: number;
-    accessHash?: string;
-  },
-) {
-  const peer = buildInputPeer(id, accessHash);
+export async function fetchChatOnlines(chat: ApiChat) {
+  const { id, access_hash } = chat;
+  const peer = buildInputPeer(id, access_hash);
 
   const result = await invokeRequest(new GramJs.messages.GetOnlines({ peer }));
   const { onlines } = result;

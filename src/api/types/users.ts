@@ -28,7 +28,7 @@ export interface ApiUserFullInfo {
 }
 
 export interface ApiUserType {
-  '@type': ('userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown');
+  '@type': 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';
 }
 
 export interface ApiUserStatus {

@@ -12,7 +12,6 @@ export function buildApiChatFromDialog(
     id: getApiChatIdFromMtpPeer(dialog.peer),
     type: {
       '@type': getApiChatTypeFromPeerEntity(peerEntity),
-      ...(isPeerUser(dialog.peer) && { user_id: dialog.peer.userId }),
     },
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
     last_read_outbox_message_id: dialog.readOutboxMaxId,

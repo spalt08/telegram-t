@@ -16,13 +16,13 @@ type IProps = {
   chatId: number;
   userId?: number;
   pinnedMessage?: ApiMessage;
-} & Pick<GlobalActions, 'selectChatToView'>;
+} & Pick<GlobalActions, 'openChatWithInfo'>;
 
 const MiddleHeader: FC<IProps> = ({
-  chatId, userId, pinnedMessage, selectChatToView,
+  chatId, userId, pinnedMessage, openChatWithInfo,
 }) => {
   function onHeaderClick() {
-    selectChatToView({ id: chatId, forceOpen: true });
+    openChatWithInfo({ id: chatId });
   }
 
   return (
@@ -49,7 +49,7 @@ export default withGlobal(
 
     if (isPrivateChat(chatId)) {
       const id = chat && getPrivateChatUserId(chat);
-      return { selectedUserId: id };
+      return { userId: id };
     } else if (chat.full_info) {
       const { pinned_message_id } = chat.full_info;
       const pinnedMessage = pinned_message_id && selectChatMessage(global, chatId, pinned_message_id);
@@ -61,7 +61,7 @@ export default withGlobal(
     return null;
   },
   (setGlobal, actions) => {
-    const { selectChatToView } = actions;
-    return { selectChatToView };
+    const { openChatWithInfo } = actions;
+    return { openChatWithInfo };
   },
 )(MiddleHeader);

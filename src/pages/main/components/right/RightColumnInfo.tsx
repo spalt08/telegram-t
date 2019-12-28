@@ -14,14 +14,14 @@ import './RightColumnInfo.scss';
 type IProps = {
   chatId: number;
   userId?: number;
-  selectedUserId?: number;
+  resolvedUserId?: number;
 };
 
-const RightColumnInfo: FC<IProps> = ({ chatId, selectedUserId }) => {
-  return selectedUserId ? (
+const RightColumnInfo: FC<IProps> = ({ chatId, resolvedUserId }) => {
+  return resolvedUserId ? (
     <div className="RightColumnInfo">
-      <PrivateChatInfo userId={selectedUserId} avatarSize="jumbo" />
-      <UserExtra userId={selectedUserId} />
+      <PrivateChatInfo userId={resolvedUserId} avatarSize="jumbo" />
+      <UserExtra userId={resolvedUserId} />
     </div>
   ) : (
     <div className="RightColumnInfo">
@@ -34,11 +34,11 @@ const RightColumnInfo: FC<IProps> = ({ chatId, selectedUserId }) => {
 export default withGlobal(
   (global, { chatId, userId }: IProps) => {
     if (userId) {
-      return { selectedUserId: userId };
+      return { resolvedUserId: userId };
     } else {
       const chat = selectChat(global, chatId) as ApiPrivateChat | undefined;
       const id = chat && getPrivateChatUserId(chat);
-      return { selectedUserId: id };
+      return { resolvedUserId: id };
     }
   },
 )(RightColumnInfo);

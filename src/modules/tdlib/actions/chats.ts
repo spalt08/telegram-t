@@ -73,6 +73,6 @@ async function loadChats(offsetChatId: number | null = null, offsetOrder = OFFSE
   const prevSelectedId = Number(localStorage.getItem('selectedChatId'));
 
   if (!currentSelectedId && prevSelectedId && newIds.includes(prevSelectedId)) {
-    getDispatch().selectChatToView({ id: prevSelectedId });
+    getDispatch().openChat({ id: prevSelectedId });
   }
 }

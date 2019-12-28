@@ -25,14 +25,11 @@ export async function fetchFullUser(
   }
   const fullInfo = await invokeRequest(new GramJs.users.GetFullUser({ id: input }));
 
-  const {
-    about: bio,
-    commonChatsCount: common_chats_count,
-  } = fullInfo;
+  const { about, commonChatsCount } = fullInfo;
 
   onUpdate({
     '@type': 'updateUser',
     id,
-    user: { full_info: { bio, common_chats_count } },
+    user: { full_info: { bio: about, common_chats_count: commonChatsCount } },
   });
 }

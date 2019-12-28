@@ -2,30 +2,29 @@ import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
-import { ApiChat } from '../../../../api/types';
 import { selectChat } from '../../../../modules/selectors';
+import { isChannel } from '../../../../modules/helpers';
 
 import Button from '../../../../components/ui/Button';
 import MessageList from './MessageList';
 import MiddleFooter from './MiddleFooter';
 import MiddleHeader from './MiddleHeader';
 import './MiddleColumn.scss';
-import { isChannel } from '../../../../modules/helpers';
 
-type IProps = Pick<GlobalActions, 'selectChatToView'> & {
+type IProps = Pick<GlobalActions, 'openChat'> & {
   selectedChatId: number;
-  selectedChat?: ApiChat;
+  isChannelChat: boolean;
   areChatsLoaded: boolean;
   canCloseChatOnEsc: boolean;
 };
 
 const MiddleColumn: FC<IProps> = (props) => {
-  const { selectChatToView, canCloseChatOnEsc } = props;
+  const { openChat, canCloseChatOnEsc } = props;
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (canCloseChatOnEsc && (e.key === 'Escape' || e.key === 'Esc')) {
-        selectChatToView({ id: undefined });
+        openChat({ id: undefined });
       }
     }
 
@@ -34,7 +33,7 @@ const MiddleColumn: FC<IProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [canCloseChatOnEsc, selectChatToView]);
+  }, [canCloseChatOnEsc, openChat]);
 
   return (
     <div id="MiddleColumn">
@@ -45,7 +44,7 @@ const MiddleColumn: FC<IProps> = (props) => {
 };
 
 function renderSelectedChat(props: IProps) {
-  const { selectedChatId, selectedChat } = props;
+  const { selectedChatId, isChannelChat } = props;
 
   if (!selectedChatId) {
     return null;
@@ -55,7 +54,7 @@ function renderSelectedChat(props: IProps) {
     <div className="messages-layout">
       <MiddleHeader chatId={selectedChatId} />
       <MessageList key={selectedChatId} />
-      {selectedChat && !isChannel(selectedChat) && (
+      {!isChannelChat && (
         <MiddleFooter />
       )}
     </div>
@@ -105,16 +104,17 @@ export default withGlobal(
     const selectedChat = selectedChatId && areChatsLoaded
       ? selectChat(global, selectedChatId)
       : undefined;
+    const isChannelChat = selectedChat && isChannel(selectedChat);
 
     return {
       selectedChatId,
-      selectedChat,
+      isChannelChat,
       areChatsLoaded,
       canCloseChatOnEsc: !messages.selectedMediaMessageId,
     };
   },
   (setGlobal, actions) => {
-    const { selectChatToView } = actions;
-    return { selectChatToView };
+    const { openChat } = actions;
+    return { openChat };
   },
 )(MiddleColumn);

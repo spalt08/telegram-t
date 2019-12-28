@@ -53,11 +53,12 @@ function formatPhoneNumber(input: string, country?: Country) {
 }
 
 function formatPhoneNumberWithCode(phoneNumber: string) {
-  const country = getCountryFromPhoneNumber(phoneNumber);
+  const numberWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+  const country = getCountryFromPhoneNumber(numberWithPlus);
   if (!country) {
-    return phoneNumber;
+    return numberWithPlus;
   }
-  return `${country.code} ${formatPhoneNumber(phoneNumber, country)}`;
+  return `${country.code} ${formatPhoneNumber(numberWithPlus, country)}`;
 }
 
 export {

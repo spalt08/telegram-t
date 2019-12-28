@@ -27,9 +27,7 @@ addReducer('loadFullChat', (global, actions, payload) => {
     return;
   }
 
-  const { id, access_hash: accessHash } = chat;
-
-  void callSdk('fetchFullChat', { id, accessHash });
+  void callSdk('fetchFullChat', chat);
 });
 
 addReducer('loadChatOnlines', (global, actions, payload) => {
@@ -39,9 +37,7 @@ addReducer('loadChatOnlines', (global, actions, payload) => {
     return;
   }
 
-  const { id, access_hash: accessHash } = chat;
-
-  void callSdk('fetchChatOnlines', { id, accessHash });
+  void callSdk('fetchChatOnlines', chat);
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {

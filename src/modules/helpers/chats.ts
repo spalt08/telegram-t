@@ -12,11 +12,6 @@ export function isSuperGroupChat(chatId: number) {
   return chatId < -1000000000;
 }
 
-export function isChannelChat(chatId: number) {
-  // TODO This is temporary, as not all supergroups are channels.
-  return isSuperGroupChat(chatId);
-}
-
 export function isChannel(chat: ApiChat) {
   return chat.type['@type'] === 'chatTypeChannel';
 }
@@ -39,7 +34,7 @@ export function getPrivateChatUserId(chat: ApiChat) {
   if (chat.type['@type'] !== 'chatTypePrivate' && chat.type['@type'] !== 'chatTypeSecret') {
     return undefined;
   }
-  return chat.type.user_id;
+  return chat.id;
 }
 
 export function getChatTitle(chat: ApiChat) {
@@ -55,7 +50,7 @@ export function getChatDescription(chat: ApiChat) {
 
 export function getChatLink(chat: ApiChat) {
   const { username } = chat;
-  const invite_link = chat.full_info && chat.full_info.invite_link;
+  const { invite_link } = chat.full_info || {};
 
   if (invite_link && invite_link.length) {
     return invite_link;

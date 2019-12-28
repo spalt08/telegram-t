@@ -1,11 +1,12 @@
 import { addReducer } from '../lib/teactn';
+import { GlobalState } from '../store/types';
 
-addReducer('selectUserToView', (global, actions, payload) => {
-  const { id, forceOpen } = payload!;
+addReducer('openUserInfo', (global, actions, payload) => {
+  const { id } = payload!;
 
   return {
     ...global,
-    ...(forceOpen && { showRightColumn: true }),
+    showRightColumn: true,
     users: {
       ...global.users,
       selectedId: id,
@@ -13,12 +14,13 @@ addReducer('selectUserToView', (global, actions, payload) => {
   };
 });
 
-addReducer('selectChatToView', (global) => {
-  return {
-    ...global,
-    users: {
-      ...global.users,
-      selectedId: undefined,
-    },
-  };
+const clearSelectedUserId = (global: GlobalState) => ({
+  ...global,
+  users: {
+    ...global.users,
+    selectedId: undefined,
+  },
 });
+
+addReducer('openChatWithInfo', clearSelectedUserId);
+addReducer('openChat', clearSelectedUserId);

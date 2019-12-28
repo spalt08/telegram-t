@@ -1,7 +1,7 @@
 import React, { FC, memo } from '../../../../lib/teact';
 import { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
 import Avatar from '../../../../components/Avatar';
-import { getUserFullName, isChannelChat } from '../../../../modules/helpers';
+import { getUserFullName, isChannel } from '../../../../modules/helpers';
 import { formatMediaDateTime } from '../../../../util/dateFormat';
 import { withGlobal } from '../../../../lib/teactn';
 import { selectChat, selectChatMessage, selectSender } from '../../../../modules/selectors';
@@ -46,15 +46,17 @@ export default memo(withGlobal((global, { chatId, messageId }) => {
   }
 
   let sender;
-  const isChannelChatMessage = isChannelChat(chatId);
+  let isChannelChatMessage = false;
+  const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
 
   if (!message) {
     return {};
   }
 
-  if (isChannelChatMessage) {
-    sender = selectChat(global, chatId);
+  if (chat && isChannel(chat)) {
+    sender = chat;
+    isChannelChatMessage = true;
   } else {
     sender = selectSender(global, message as ApiMessage);
   }
