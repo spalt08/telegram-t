@@ -161,17 +161,6 @@ export function isUserOnline(user: ApiUser) {
   return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-// TdLib only.
-export function getUserPhotoKey(user: ApiUser): string | null {
-  const { profile_photo } = user;
-
-  if (profile_photo) {
-    return `user${profile_photo.small.id}`;
-  }
-
-  return null;
-}
-
 export function getUserAvatarHash(user: ApiUser): string | null {
   if (!user.avatar) {
     return null;

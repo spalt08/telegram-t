@@ -1,5 +1,4 @@
 import { ApiMessage } from './messages';
-import { ApiFile } from './files';
 
 type ApiChatType = 'chatTypePrivate' | 'chatTypeSecret' |
 'chatTypeBasicGroup' | 'chatTypeSuperGroup' |
@@ -32,13 +31,6 @@ export interface ApiChat {
   full_info?: ApiChatFullInfo;
   // Obtained from GetOnlines
   online_count?: number;
-
-  // Only in TDLib.
-  photo?: {
-    small: ApiFile;
-    big: ApiFile;
-  };
-  order?: string;
 }
 
 export interface ApiChatFullInfo {

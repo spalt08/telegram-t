@@ -1,5 +1,5 @@
 import {
-  ApiChat, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup, ApiFileSource,
+  ApiChat, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup,
 } from '../api/types';
 
 export type GlobalState = {
@@ -28,11 +28,6 @@ export type GlobalState = {
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
     }>;
-  };
-
-  // Only used in TdLib.
-  files: {
-    byKey: Record<string, ApiFileSource>;
   };
 
   // TODO Move to `auth`.

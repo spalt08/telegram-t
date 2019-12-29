@@ -1,12 +1,8 @@
-import { ApiFile } from './files';
-
 export interface ApiPhotoSize {
   '@type': 'photoSize';
   type: 's' | 'm' | 'x' | 'y';
   width: number;
   height: number;
-  // TdLib only.
-  photo?: ApiFile;
 }
 
 export interface ApiPhotoCachedSize {
@@ -39,8 +35,6 @@ export interface ApiSticker {
   width?: number;
   height?: number;
   thumbnail?: ApiPhotoCachedSize;
-  // TdLib only.
-  sticker?: ApiPhotoSize;
 }
 
 export interface ApiVideo {
@@ -76,7 +70,6 @@ export interface ApiMessageForwardInfo {
   origin: {
     '@type': 'messageForwardOriginUser';
     sender_user_id: number;
-    // GramJS only.
     sender_user_name?: string;
   };
 }

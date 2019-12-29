@@ -1,5 +1,3 @@
-import { ApiFile } from './files';
-
 export interface ApiUser {
   id: number;
   type: ApiUserType;
@@ -14,12 +12,6 @@ export interface ApiUser {
   };
   // Obtained from GetFullUser / UserFullInfo
   full_info?: ApiUserFullInfo;
-
-  // Only in TDLib, remove.
-  profile_photo?: {
-    small: ApiFile;
-    big: ApiFile;
-  };
 }
 
 export interface ApiUserFullInfo {

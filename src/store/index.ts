@@ -32,10 +32,6 @@ const INITIAL_STATE: GlobalState = {
     byChatId: {},
   },
 
-  files: {
-    byKey: {},
-  },
-
   authRememberMe: true,
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;

@@ -8,10 +8,6 @@ export function isGroupChat(chatId: number) {
   return !isPrivateChat(chatId);
 }
 
-export function isSuperGroupChat(chatId: number) {
-  return chatId < -1000000000;
-}
-
 export function isChannel(chat: ApiChat) {
   return chat.type['@type'] === 'chatTypeChannel';
 }
@@ -57,17 +53,6 @@ export function getChatLink(chat: ApiChat) {
   }
 
   return username ? `t.me/${username}` : '';
-}
-
-// TdLib only.
-export function getChatPhotoKey(chat: ApiChat): string | null {
-  const { photo } = chat;
-
-  if (photo) {
-    return `chat${photo.small.id}`;
-  }
-
-  return null;
 }
 
 export function getChatAvatarHash(chat: ApiChat): string | null {

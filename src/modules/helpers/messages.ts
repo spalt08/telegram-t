@@ -101,28 +101,10 @@ export function getMessageContact(message: ApiMessage) {
 
 // TODO Add chat ID and file reference.
 export function getMessageMediaHash(message: ApiMessage): string | null {
-  const { photo, sticker } = message.content;
+  const { photo, video, sticker } = message.content;
 
-  if (photo) {
-    const size = getMessagePhotoInlineSize(photo);
-
-    if (size && ('photo' in size) && size.photo !== undefined) {
-      // TdLib way.
-      return `msg${size.photo.id}`;
-    } else {
-      // GramJs way.
-      return `msg${message.id}`;
-    }
-  }
-
-  if (sticker) {
-    if (sticker.sticker && sticker.sticker.photo) {
-      // TdLib way.
-      return `msg${sticker.sticker.photo.id}`;
-    } else {
-      // GramJs way.
-      return `msg${message.id}`;
-    }
+  if (photo || video || sticker) {
+    return `msg${message.id}`;
   }
 
   return null;
