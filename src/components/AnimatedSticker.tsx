@@ -71,7 +71,7 @@ const AnimatedSticker: FC<IProps> = ({
       autoplay: false,
       animationData,
     }));
-  }, [id, animationData, isLottieReady, animation]);
+  }, [id, animationData, isLottieReady, animation, noLoop]);
 
   useEffect(() => {
     return () => {

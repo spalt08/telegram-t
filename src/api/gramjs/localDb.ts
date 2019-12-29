@@ -6,7 +6,7 @@ export default <{
   // Used for loading avatars and media through in-memory Gram JS instances.
   chats: Record<number, GramJs.Chat | GramJs.Channel>;
   users: Record<number, GramJs.User>;
-  messages: Record<number, GramJs.Message>;
+  messages: Record<string, GramJs.Message>;
 }>{
   localMessages: {},
   chats: {},

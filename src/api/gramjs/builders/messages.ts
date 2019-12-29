@@ -28,12 +28,20 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
     throw new Error('Not supported');
   }
 
+  return buildApiMessageWithChatId(resolveMessageApiChatId(mtpMessage), mtpMessage);
+}
+
+export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
+  if (
+    !(mtpMessage instanceof GramJs.Message)
+    && !(mtpMessage instanceof GramJs.MessageService)) {
+    throw new Error('Not supported');
+  }
+
   const isPrivateToMe = mtpMessage.out !== true && isPeerUser(mtpMessage.toId);
-  const chatId = isPrivateToMe
+  return isPrivateToMe
     ? (mtpMessage.fromId || DEFAULT_USER_ID)
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
-
-  return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
 export function buildApiMessageFromShort(

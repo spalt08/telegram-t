@@ -1,5 +1,7 @@
 import { ApiMessage, ApiPhoto } from '../../api/types';
 
+const MAX_INLINE_VIDEO_DURATION = 10;
+
 export function getLastMessageText(message: ApiMessage) {
   const {
     text,
@@ -99,12 +101,31 @@ export function getMessageContact(message: ApiMessage) {
   return message.content.contact;
 }
 
-// TODO Add chat ID and file reference.
-export function getMessageMediaHash(message: ApiMessage): string | null {
-  const { photo, video, sticker } = message.content;
+export function getMessageMediaHash(message: ApiMessage, isInline = false): string | null {
+  const { chat_id, content: { photo, video, sticker } } = message;
 
-  if (photo || video || sticker) {
-    return `msg${message.id}`;
+  const base = `msg${chat_id}-${message.id}`;
+
+  if (photo) {
+    return `${base}?size=x`;
+  }
+
+  if (sticker) {
+    return base;
+  }
+
+  if (video) {
+    if (isInline) {
+      if (video.duration <= MAX_INLINE_VIDEO_DURATION) {
+        // TODO Support inline video.
+        // return base;
+        return null;
+      }
+
+      return `${base}?size=m`;
+    } else {
+      return base;
+    }
   }
 
   return null;

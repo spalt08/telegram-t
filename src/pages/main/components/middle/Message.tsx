@@ -208,6 +208,7 @@ function renderMessagePhoto(
 function renderMessageVideo(video: ApiVideo, fromOwnMessage: boolean, isForwarded: boolean) {
   const { width, height } = getVideoDimensions(video, fromOwnMessage, isForwarded);
 
+  // TODO Add inline player for videos with duration < 10 sec and HQ preview image for the rest.
   const { minithumbnail, duration } = video;
   if (!minithumbnail) {
     return null;
@@ -293,7 +294,7 @@ export default memo(withGlobal(
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
-    const mediaHash = getMessageMediaHash(message);
+    const mediaHash = getMessageMediaHash(message, true);
 
     let userId;
     let originUserId;

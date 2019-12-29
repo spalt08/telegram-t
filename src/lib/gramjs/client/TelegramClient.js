@@ -404,7 +404,7 @@ class TelegramClient {
         if (media instanceof constructors.MessageMediaPhoto || media instanceof constructors.Photo) {
             return this._downloadPhoto(media, args)
         } else if (media instanceof constructors.MessageMediaDocument || media instanceof constructors.Document) {
-            return this._downloadDocument(media, args, media.dcId)
+            return this._downloadDocument(media, args)
         } else if (media instanceof constructors.MessageMediaContact) {
             return this._downloadContact(media, args)
         } else if (media instanceof constructors.WebDocument || media instanceof constructors.WebDocumentNoProxy) {
@@ -547,9 +547,13 @@ class TelegramClient {
             return
         }
 
-        const size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null
-        if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
-            return this._downloadCachedPhotoSize(size)
+        let size = null;
+        if (args.sizeType) {
+            size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null
+
+            if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
+                return this._downloadCachedPhotoSize(size)
+            }
         }
 
         return this.downloadFile(

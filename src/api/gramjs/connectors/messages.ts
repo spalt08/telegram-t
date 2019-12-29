@@ -2,7 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiChat, ApiMessage, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from '../client';
-import { buildApiMessage, buildLocalMessage } from '../builders/messages';
+import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
@@ -91,7 +91,8 @@ function updateLocalDb(
 
   result.messages.forEach((message) => {
     if (message instanceof GramJs.Message && isMessageWithImage(message)) {
-      localDb.messages[message.id] = message;
+      const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
+      localDb.messages[messageFullId] = message;
     }
   });
 }

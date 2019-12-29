@@ -1,7 +1,12 @@
 import { Api as GramJs } from '../../lib/gramjs';
 import { OnApiUpdate } from '../types';
 
-import { buildApiMessage, buildApiMessageFromShort, buildApiMessageFromShortChat } from './builders/messages';
+import {
+  buildApiMessage,
+  buildApiMessageFromShort,
+  buildApiMessageFromShortChat,
+  resolveMessageApiChatId,
+} from './builders/messages';
 import { getApiChatIdFromMtpPeer, buildChatMembers } from './builders/chats';
 import { buildApiUserStatus } from './builders/users';
 import localDb from './localDb';
@@ -28,7 +33,8 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
       message = buildApiMessageFromShort(update);
     } else {
       if (update.message instanceof GramJs.Message) {
-        localDb.messages[update.message.id] = update.message;
+        const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;
+        localDb.messages[messageFullId] = update.message;
       }
 
       message = buildApiMessage(update.message);
@@ -45,7 +51,8 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs
     || update instanceof GramJs.UpdateEditChannelMessage
   ) {
     if (update.message instanceof GramJs.Message) {
-      localDb.messages[update.message.id] = update.message;
+      const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;
+      localDb.messages[messageFullId] = update.message;
     }
 
     const message = buildApiMessage(update.message);
