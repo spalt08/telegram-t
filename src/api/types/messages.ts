@@ -40,6 +40,10 @@ export interface ApiSticker {
 export interface ApiVideo {
   '@type': 'video';
   duration: number;
+  width?: number;
+  height?: number;
+  supportsStreaming: boolean;
+  isRound: boolean;
   minithumbnail?: ApiMiniThumbnail;
 }
 

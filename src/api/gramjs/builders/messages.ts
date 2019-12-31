@@ -234,9 +234,25 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | null {
   const videoAttr = media.document.attributes
     .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
 
+  if (!videoAttr) {
+    return null;
+  }
+
+  const {
+    duration,
+    w: width,
+    h: height,
+    supportsStreaming = false,
+    roundMessage: isRound = false,
+  } = videoAttr;
+
   return {
     '@type': 'video',
-    duration: videoAttr && videoAttr.duration,
+    duration,
+    width,
+    height,
+    supportsStreaming,
+    isRound,
     minithumbnail: buildApiPhotoMiniThumbnail(media.document.thumbs),
   };
 }

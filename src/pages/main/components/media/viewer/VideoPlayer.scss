@@ -1,0 +1,14 @@
+.VideoPlayer {
+  display: inline-block;
+
+  video {
+    display: block;
+    max-width: 76vw;
+    max-height: calc(100vh - 15rem);
+    height: auto;
+    margin: auto;
+    @media (max-height: 640px) {
+      max-height: calc(100vh - 10rem);
+    }
+  }
+}

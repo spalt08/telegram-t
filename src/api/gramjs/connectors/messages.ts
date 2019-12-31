@@ -90,14 +90,14 @@ function updateLocalDb(
   });
 
   result.messages.forEach((message) => {
-    if (message instanceof GramJs.Message && isMessageWithImage(message)) {
+    if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
       const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
       localDb.messages[messageFullId] = message;
     }
   });
 }
 
-function isMessageWithImage(message: GramJs.Message) {
+function isMessageWithMedia(message: GramJs.Message) {
   const { media } = message;
 
   if (!media) {
@@ -110,7 +110,10 @@ function isMessageWithImage(message: GramJs.Message) {
 
   if (media instanceof GramJs.MessageMediaDocument && media.document) {
     return ('attributes' in media.document) && media.document.attributes
-      .some((attr: any) => attr instanceof GramJs.DocumentAttributeSticker);
+      .some((attr: any) => (
+        attr instanceof GramJs.DocumentAttributeSticker
+        || attr instanceof GramJs.DocumentAttributeVideo
+      ));
   }
 
   return false;

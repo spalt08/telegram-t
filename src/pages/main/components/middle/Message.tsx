@@ -9,7 +9,13 @@ import {
   ApiDocument, ApiMessage, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
 } from '../../../../api/types';
 import { selectChatMessage, selectUser } from '../../../../modules/selectors';
-import { getMessageMediaHash, getUserFullName, isOwnMessage } from '../../../../modules/helpers';
+import {
+  getMessageMediaHash,
+  getUserFullName,
+  isOwnMessage,
+  shouldMessageLoadMedia,
+  shouldMessagePlayVideoInline,
+} from '../../../../modules/helpers';
 import { getImageDimensions, getStickerDimensions, getVideoDimensions } from '../../../../util/imageDimensions';
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
@@ -55,7 +61,7 @@ const Message: FC<IProps> = ({
     const isAnimatedSticker = message.content.sticker && message.content.sticker.is_animated;
     if (mediaHash && loadAndPlayMedia && !mediaData) {
       mediaLoader
-        .fetch(mediaHash, isAnimatedSticker ? mediaLoader.Type.Lottie : mediaLoader.Type.Jpeg)
+        .fetch(mediaHash, isAnimatedSticker ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl)
         .then(onDataUriUpdate);
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
@@ -105,7 +111,9 @@ const Message: FC<IProps> = ({
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
         {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
-        {video && renderMessageVideo(video, isOwnMessage(message), isForwarded)}
+        {video && renderMessageVideo(
+          video, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string, loadAndPlayMedia,
+        )}
         {document && renderMessageDocument(document)}
         {sticker && renderMessageSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
         {text && (
@@ -205,23 +213,52 @@ function renderMessagePhoto(
   );
 }
 
-function renderMessageVideo(video: ApiVideo, fromOwnMessage: boolean, isForwarded: boolean) {
+function renderMessageVideo(
+  video: ApiVideo,
+  clickHandler: OnClickHandler,
+  fromOwnMessage: boolean,
+  isForwarded: boolean,
+  mediaData?: string,
+  loadAndPlayMedia?: boolean,
+) {
   const { width, height } = getVideoDimensions(video, fromOwnMessage, isForwarded);
-
-  // TODO Add inline player for videos with duration < 10 sec and HQ preview image for the rest.
+  const shouldPlayInline = shouldMessagePlayVideoInline(video);
+  const isInlineVideo = mediaData && loadAndPlayMedia && shouldPlayInline;
+  const isHqPreview = mediaData && !shouldPlayInline;
   const { minithumbnail, duration } = video;
-  if (!minithumbnail) {
-    return null;
-  }
 
   return (
-    <div className="media-content message-media-thumbnail not-implemented">
-      <img src={`data:image/jpeg;base64, ${minithumbnail.data}`} width={width} height={height} alt="" />
-      <div className="message-media-loading">
-        <div className="message-media-play-button">
-          <i className="icon-large-play" />
+    <div
+      className={`media-content message-media-${isInlineVideo ? 'inline-video' : 'thumbnail'}`}
+      tabIndex={-1}
+      role="button"
+      onClick={clickHandler}
+    >
+      {isInlineVideo && (
+        <video
+          width={width}
+          height={height}
+          autoPlay
+          muted
+          loop
+          playsinline
+          /* eslint-disable-next-line react/jsx-props-no-spreading */
+          {...(minithumbnail && { poster: `data:image/jpeg;base64, ${minithumbnail.data}` })}
+        >
+          <source src={mediaData} />
+        </video>
+      )}
+      {!isInlineVideo && (
+        <div className="message-media-loading">
+          <div className="message-media-play-button">
+            <i className="icon-large-play" />
+          </div>
         </div>
-      </div>
+      )}
+      {!isInlineVideo && isHqPreview && <img src={mediaData} width={width} height={height} alt="" />}
+      {!isInlineVideo && !isHqPreview && minithumbnail && (
+        <img src={`data:image/jpeg;base64, ${minithumbnail.data}`} width={width} height={height} alt="" />
+      )}
       <div className="message-media-duration">{formatMediaDuration(duration)}</div>
     </div>
   );
@@ -294,7 +331,8 @@ export default memo(withGlobal(
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
-    const mediaHash = getMessageMediaHash(message, true);
+    const shouldLoadMedia = shouldMessageLoadMedia(message);
+    const mediaHash = shouldLoadMedia ? getMessageMediaHash(message, true) : undefined;
 
     let userId;
     let originUserId;

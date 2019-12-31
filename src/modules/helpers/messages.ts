@@ -1,4 +1,4 @@
-import { ApiMessage, ApiPhoto } from '../../api/types';
+import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
 
 const MAX_INLINE_VIDEO_DURATION = 10;
 
@@ -116,10 +116,8 @@ export function getMessageMediaHash(message: ApiMessage, isInline = false): stri
 
   if (video) {
     if (isInline) {
-      if (video.duration <= MAX_INLINE_VIDEO_DURATION) {
-        // TODO Support inline video.
-        // return base;
-        return null;
+      if (shouldMessagePlayVideoInline(video)) {
+        return base;
       }
 
       return `${base}?size=m`;
@@ -129,6 +127,18 @@ export function getMessageMediaHash(message: ApiMessage, isInline = false): stri
   }
 
   return null;
+}
+
+export function shouldMessageLoadMedia(message: ApiMessage) {
+  return (
+    message.content.photo
+    || message.content.sticker
+    || message.content.video
+  );
+}
+
+export function shouldMessagePlayVideoInline(video: ApiVideo): boolean {
+  return video.duration <= MAX_INLINE_VIDEO_DURATION;
 }
 
 export function getMessagePhotoInlineSize(photo: ApiPhoto) {
@@ -171,7 +181,7 @@ export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
   return Object.keys(messages)
     .reduce((result, id) => {
       const messageId = Number(id);
-      if (messages[messageId].content.photo) {
+      if (messages[messageId].content.photo || messages[messageId].content.video) {
         result.push(messageId);
       }
 

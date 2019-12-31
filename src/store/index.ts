@@ -74,7 +74,7 @@ function preloadAssets(cached: GlobalState) {
     Promise.all(
       Object.values(cached.chats.byId).map((chat) => {
         const avatarHash = getChatAvatarHash(chat);
-        return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.Jpeg) : null;
+        return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
       }),
     ),
   ]);

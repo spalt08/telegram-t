@@ -1,17 +1,27 @@
 import { callSdk } from '../api/gramjs';
-import { blobToDataUri } from './image';
 import * as cacheApi from './cacheApi';
 import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
+import { blobToDataUri } from './image';
 
+// We cache avatars as Data URI for faster initial load
+// and messages media as Blob for smaller size.
 export enum Type {
-  Jpeg,
+  DataUri,
+  BlobUrl,
   Lottie,
 }
 
-type ParsedMedia = string | AnyLiteral;
+const asCacheApiType = {
+  [Type.DataUri]: cacheApi.Type.Text,
+  [Type.BlobUrl]: cacheApi.Type.Blob,
+  [Type.Lottie]: cacheApi.Type.Json,
+};
 
-const MEMORY_CACHE: Record<string, ParsedMedia> = {};
-const FETCH_PROMISES: Record<string, Promise<ParsedMedia>> = {};
+type ParsedMedia = string | Blob | AnyLiteral;
+type MemoryMedia = string | AnyLiteral;
+
+const MEMORY_CACHE: Record<string, MemoryMedia> = {};
+const FETCH_PROMISES: Record<string, Promise<MemoryMedia>> = {};
 
 let pako: typeof import('pako/dist/pako_inflate');
 
@@ -28,18 +38,17 @@ export function fetch(url: string, mediaType: Type) {
   return FETCH_PROMISES[url];
 }
 
-export function getFromMemory(url: string) {
-  return MEMORY_CACHE[url];
+export function getFromMemory<T extends MemoryMedia>(url: string): T {
+  return MEMORY_CACHE[url] as T;
 }
 
 async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
   if (!MEDIA_CACHE_DISABLED) {
-    const cacheType = mediaType === Type.Lottie ? cacheApi.Type.Json : cacheApi.Type.Text;
-    const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, cacheType);
+    const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, asCacheApiType[mediaType]);
     if (cached) {
-      MEMORY_CACHE[url] = cached;
+      MEMORY_CACHE[url] = forMemory(cached);
 
-      return cached;
+      return MEMORY_CACHE[url];
     }
   }
 
@@ -55,17 +64,17 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
     cacheApi.save(MEDIA_CACHE_NAME, url, mediaData);
   }
 
-  MEMORY_CACHE[url] = mediaData;
+  MEMORY_CACHE[url] = forMemory(mediaData);
 
-  return mediaData;
+  return MEMORY_CACHE[url];
 }
 
-async function parseMedia(data: Buffer, mediaType: Type): Promise<string | AnyLiteral> {
+async function parseMedia(data: Buffer, mediaType: Type): Promise<ParsedMedia> {
   switch (mediaType) {
-    case Type.Jpeg: {
-      const dataUri = await blobToDataUri(new Blob([data]));
-      return dataUri.replace('application/octet-stream', 'image/jpg');
-    }
+    case Type.DataUri:
+      return blobToDataUri(new Blob([data]));
+    case Type.BlobUrl:
+      return new Blob([data]);
     case Type.Lottie: {
       if (!pako) {
         pako = await import('pako/dist/pako_inflate');
@@ -76,4 +85,12 @@ async function parseMedia(data: Buffer, mediaType: Type): Promise<string | AnyLi
   }
 
   throw new Error('Unknown media type');
+}
+
+function forMemory(mediaData: ParsedMedia): MemoryMedia {
+  if (mediaData instanceof Blob) {
+    return URL.createObjectURL(mediaData);
+  }
+
+  return mediaData;
 }

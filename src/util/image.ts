@@ -45,24 +45,25 @@ type ImageData = {
   height: number;
 };
 
-export async function getImageData(imgFile: File): Promise<ImageData> {
-  const dataUri = await blobToDataUri(imgFile);
-
+export function preloadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-
-    img.src = dataUri;
-    img.onload = () => {
-      resolve({
-        name: imgFile.name,
-        url: dataUri,
-        width: img.width,
-        height: img.height,
-      });
-    };
-
+    img.src = url;
+    img.onload = () => resolve(img);
     img.onerror = reject;
   });
+}
+
+export async function getImageData(imgFile: File): Promise<ImageData> {
+  const dataUri = await blobToDataUri(imgFile);
+  const img = await preloadImage(dataUri);
+
+  return {
+    name: imgFile.name,
+    url: dataUri,
+    width: img.width,
+    height: img.height,
+  };
 }
 
 export function blobToFile(blob: Blob, fileName: string) {

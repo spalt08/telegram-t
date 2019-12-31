@@ -152,6 +152,10 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 
   if (key === 'className') {
     element.className = value;
+  } else if (key === 'muted') {
+    (element as HTMLVideoElement).muted = true;
+  } else if (key === 'autoPlay') {
+    (element as HTMLVideoElement).autoplay = true;
   } else if (key.startsWith('on')) {
     element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
@@ -166,6 +170,10 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
     element.className = '';
+  } else if (key === 'muted') {
+    delete (element as HTMLVideoElement).muted;
+  } else if (key === 'autoPlay') {
+    delete (element as HTMLVideoElement).autoplay;
   } else if (key.startsWith('on')) {
     element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
 

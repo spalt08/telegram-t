@@ -31,10 +31,22 @@
     grid-area: media;
     position: relative;
     justify-self: center;
+    text-align: center;
     padding-top: 4.25rem;
+    width: 100%;
 
     @media (max-height: 640px) {
       padding-top: 2.25rem;
+    }
+
+    .video-thumbnail {
+      position: relative;
+      img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
 
     img  {
@@ -46,6 +58,10 @@
       @media (max-height: 640px) {
         max-height: calc(100vh - 10rem);
       }
+    }
+
+    .Spinner {
+      margin: auto;
     }
 
     .navigation {
