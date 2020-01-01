@@ -17,17 +17,17 @@ import {
   shouldMessagePlayVideoInline,
 } from '../../../../modules/helpers';
 import { getImageDimensions, getStickerDimensions, getVideoDimensions } from '../../../../util/imageDimensions';
-import Avatar from '../../../../components/Avatar';
-import Spinner from '../../../../components/Spinner';
-import MessageMeta from './MessageMeta';
-import ReplyMessage from './ReplyMessage';
-import ContactMessage from './ContactMessage';
-import { buildMessageContent } from './message/utils';
-import './Message.scss';
 import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
+import { buildMessageContent } from './message/utils';
+import Avatar from '../../../../components/Avatar';
+import Spinner from '../../../../components/Spinner';
 import AnimatedSticker from '../../../../components/AnimatedSticker';
+import MessageMeta from './MessageMeta';
+import ReplyMessage from './ReplyMessage';
+import ContactMessage from './ContactMessage';
+import './Message.scss';
 
 type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 

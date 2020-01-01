@@ -1,4 +1,4 @@
-import React, { FC } from '../lib/teact';
+import React, { FC, memo } from '../lib/teact';
 
 import './Spinner.scss';
 
@@ -8,4 +8,4 @@ const Spinner: FC<{ color?: 'blue' | 'white' }> = ({ color = 'blue' }) => {
   );
 };
 
-export default Spinner;
+export default memo(Spinner);

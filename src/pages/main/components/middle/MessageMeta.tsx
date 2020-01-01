@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 
 import { ApiMessage } from '../../../../api/types';
 import { formatTime } from '../../../../util/dateFormat';
@@ -23,4 +23,4 @@ const MessageMeta: FC<IProps> = ({ message }) => {
 };
 
 
-export default MessageMeta;
+export default memo(MessageMeta);

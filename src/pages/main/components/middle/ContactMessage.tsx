@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser, ApiContact } from '../../../../api/types';
@@ -31,10 +31,10 @@ const ContactMessage: FC<IProps> = ({ contact, user }) => {
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global, { contact }: IProps) => {
     return {
       user: selectUser(global, contact.userId),
     };
   },
-)(ContactMessage);
+)(ContactMessage));

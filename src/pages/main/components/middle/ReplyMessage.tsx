@@ -1,4 +1,4 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import {
@@ -58,10 +58,10 @@ function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
   );
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   (global, { message }: IProps) => {
     return {
       sender: selectUser(global, message.sender_user_id),
     };
   },
-)(ReplyMessage);
+)(ReplyMessage));

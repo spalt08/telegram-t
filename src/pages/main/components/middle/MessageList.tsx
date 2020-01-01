@@ -1,5 +1,7 @@
 import { UIEvent } from 'react';
-import React, { FC, useEffect, useState } from '../../../../lib/teact';
+import React, {
+  FC, useEffect, useState, memo,
+} from '../../../../lib/teact';
 import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
@@ -17,8 +19,8 @@ import { formatHumanDate } from '../../../../util/dateFormat';
 import { MessageDateGroup, groupMessages } from './message/utils';
 import Loading from '../../../../components/Loading';
 import Message from './Message';
-import './MessageList.scss';
 import ServiceMessage from './ServiceMessage';
+import './MessageList.scss';
 
 type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
   areMessagesLoaded?: boolean;
@@ -182,7 +184,7 @@ function areArraysEqual(arr1: any[], arr2: any[]) {
   return arr1.every((el, i) => el === arr2[i]);
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   global => {
     const { chats: { selectedId } } = global;
 
@@ -204,4 +206,4 @@ export default withGlobal(
     const { loadChatMessages, loadMoreChatMessages, setChatScrollOffset } = actions;
     return { loadChatMessages, loadMoreChatMessages, setChatScrollOffset };
   },
-)(MessageList);
+)(MessageList));

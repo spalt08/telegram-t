@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useState } from '../lib/teact';
+import React, {
+  FC, useEffect, useState, memo,
+} from '../lib/teact';
 import { DEBUG } from '../config';
 
 type IProps = {
@@ -94,4 +96,4 @@ const AnimatedSticker: FC<IProps> = ({
   );
 };
 
-export default AnimatedSticker;
+export default memo(AnimatedSticker);
