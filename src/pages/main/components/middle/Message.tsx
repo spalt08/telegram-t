@@ -199,9 +199,11 @@ function renderMessagePhoto(
         height={height}
         alt=""
       />
-      <div className="message-media-loading">
-        <Spinner color="white" />
-      </div>
+      {!mediaData && (
+        <div className="message-media-loading">
+          <Spinner color="white" />
+        </div>
+      )}
       <img
         src={mediaData}
         className={mediaData ? 'full-image loaded' : 'full-image'}
