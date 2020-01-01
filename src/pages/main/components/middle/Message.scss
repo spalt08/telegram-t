@@ -199,6 +199,10 @@
     }
   }
 
+  &.media .media-content {
+    cursor: pointer;
+  }
+
   &.sticker, &.media {
     .media-content {
       position: relative;

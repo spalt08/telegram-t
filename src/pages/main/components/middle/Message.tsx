@@ -188,7 +188,7 @@ function renderMessagePhoto(
   return (
     <div
       className="media-content"
-      onClick={mediaData ? clickHandler : undefined}
+      onClick={clickHandler}
     >
       <img
         src={`data:image/jpeg;base64, ${thumbnail.data}`}
@@ -229,7 +229,7 @@ function renderMessageVideo(
 
   return (
     <div
-      className={`media-content message-media-${isInlineVideo ? 'inline-video' : 'thumbnail'}`}
+      className="media-content"
       onClick={clickHandler}
     >
       {isInlineVideo && (
