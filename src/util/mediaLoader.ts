@@ -1,7 +1,7 @@
 import { callSdk } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
-import { blobToDataUri } from './image';
+import { blobToDataUri, preloadImage } from './image';
 
 // We cache avatars as Data URI for faster initial load
 // and messages media as Blob for smaller size.
@@ -46,7 +46,7 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
   if (!MEDIA_CACHE_DISABLED) {
     const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, asCacheApiType[mediaType]);
     if (cached) {
-      MEMORY_CACHE[url] = forMemory(cached);
+      MEMORY_CACHE[url] = await prepareForMemory(cached);
 
       return MEMORY_CACHE[url];
     }
@@ -54,27 +54,28 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
 
   const remote = await callSdk('downloadMedia', url);
 
-  if (!remote) {
+  if (!remote || !remote.data) {
     throw new Error('Failed to fetch media');
   }
 
-  const mediaData = await parseMedia(remote, mediaType);
+  const { mimeType, data } = remote;
+  const mediaData = await parseMedia(data, mediaType, mimeType);
 
   if (!MEDIA_CACHE_DISABLED) {
     cacheApi.save(MEDIA_CACHE_NAME, url, mediaData);
   }
 
-  MEMORY_CACHE[url] = forMemory(mediaData);
+  MEMORY_CACHE[url] = await prepareForMemory(mediaData);
 
   return MEMORY_CACHE[url];
 }
 
-async function parseMedia(data: Buffer, mediaType: Type): Promise<ParsedMedia> {
+async function parseMedia(data: Buffer, mediaType: Type, mimeType: string | undefined): Promise<ParsedMedia> {
   switch (mediaType) {
     case Type.DataUri:
-      return blobToDataUri(new Blob([data]));
+      return blobToDataUri(new Blob([data], { type: mimeType }));
     case Type.BlobUrl:
-      return new Blob([data]);
+      return new Blob([data], { type: mimeType });
     case Type.Lottie: {
       if (!pako) {
         pako = await import('pako/dist/pako_inflate');
@@ -87,9 +88,15 @@ async function parseMedia(data: Buffer, mediaType: Type): Promise<ParsedMedia> {
   throw new Error('Unknown media type');
 }
 
-function forMemory(mediaData: ParsedMedia): MemoryMedia {
+async function prepareForMemory(mediaData: ParsedMedia): Promise<MemoryMedia> {
   if (mediaData instanceof Blob) {
-    return URL.createObjectURL(mediaData);
+    const blobUrl = URL.createObjectURL(mediaData);
+
+    if (mediaData.type.startsWith('image/')) {
+      await preloadImage(blobUrl);
+    }
+
+    return blobUrl;
   }
 
   return mediaData;

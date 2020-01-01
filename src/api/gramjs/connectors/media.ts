@@ -4,7 +4,10 @@ import localDb from '../localDb';
 import { getEntityTypeById } from '../inputHelpers';
 
 // TODO Await client ready.
-export default function downloadMedia(client: TelegramClient, url: string): Promise<Buffer | null> | null {
+export default async function downloadMedia(client: TelegramClient, url: string): Promise<{
+  data: Buffer | null;
+  mimeType?: string;
+} | null> {
   const mediaMatch = url.match(/(avatar|msg)([-\d]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return null;
@@ -37,7 +40,29 @@ export default function downloadMedia(client: TelegramClient, url: string): Prom
     return null;
   }
 
-  return entityType === 'msg'
-    ? client.downloadMedia(entity, { sizeType })
-    : client.downloadProfilePhoto(entity, false);
+  if (entityType === 'msg') {
+    const data = await client.downloadMedia(entity, { sizeType });
+    const mimeType = getMediaMimeType(entity as GramJs.Message);
+    return { mimeType, data };
+  } else {
+    const data = await client.downloadProfilePhoto(entity, false);
+    const mimeType = 'image/jpeg';
+    return { mimeType, data };
+  }
+}
+
+function getMediaMimeType(message: GramJs.Message) {
+  if (!message || !message.media) {
+    return undefined;
+  }
+
+  if (message.media instanceof GramJs.MessageMediaPhoto) {
+    return 'image/jpeg';
+  }
+
+  if (message.media instanceof GramJs.MessageMediaDocument && message.media.document instanceof GramJs.Document) {
+    return message.media.document.mimeType;
+  }
+
+  return undefined;
 }
