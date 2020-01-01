@@ -188,8 +188,6 @@ function renderMessagePhoto(
   return (
     <div
       className="media-content"
-      tabIndex={-1}
-      role="button"
       onClick={mediaData ? clickHandler : undefined}
     >
       <img
@@ -232,8 +230,6 @@ function renderMessageVideo(
   return (
     <div
       className={`media-content message-media-${isInlineVideo ? 'inline-video' : 'thumbnail'}`}
-      tabIndex={-1}
-      role="button"
       onClick={clickHandler}
     >
       {isInlineVideo && (
