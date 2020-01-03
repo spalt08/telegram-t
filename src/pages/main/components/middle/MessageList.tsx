@@ -29,12 +29,12 @@ type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 
   isChannelChat: boolean;
 };
 
-const SCROLL_THROTTLE_MS = 1000;
 const LOAD_MORE_THRESHOLD_PX = 1000;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const VIEWPORT_MARGIN = 500;
 
-const runThrottled = throttle((cb) => cb(), SCROLL_THROTTLE_MS, true);
+const runThrottledForLoadMessages = throttle((cb) => cb(), 500, true);
+const runThrottledForScroll = throttle((cb) => cb(), 1000, true);
 
 let currentScrollOffset = 0;
 
@@ -51,11 +51,13 @@ const MessageList: FC<IProps> = ({
 
   const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : [];
 
-  if (!areMessagesLoaded) {
-    loadChatMessages({ chatId });
-  } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
-    loadMoreChatMessages({ chatId });
-  }
+  runThrottledForLoadMessages(() => {
+    if (!areMessagesLoaded) {
+      loadChatMessages({ chatId });
+    } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+      loadMoreChatMessages({ chatId });
+    }
+  });
 
   const isPrivate = chatId && isPrivateChat(chatId);
 
@@ -64,7 +66,7 @@ const MessageList: FC<IProps> = ({
       const target = e.target as HTMLElement;
       currentScrollOffset = target.scrollHeight - target.scrollTop;
 
-      runThrottled(() => {
+      runThrottledForScroll(() => {
         setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
