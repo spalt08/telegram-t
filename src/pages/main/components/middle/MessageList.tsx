@@ -33,7 +33,7 @@ const LOAD_MORE_THRESHOLD_PX = 1000;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const VIEWPORT_MARGIN = 500;
 
-const runThrottledForLoadMessages = throttle((cb) => cb(), 500, true);
+const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
 const runThrottledForScroll = throttle((cb) => cb(), 1000, true);
 
 let currentScrollOffset = 0;
