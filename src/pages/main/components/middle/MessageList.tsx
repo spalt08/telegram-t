@@ -49,11 +49,11 @@ const MessageList: FC<IProps> = ({
 }) => {
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
 
-  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : undefined;
+  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : [];
 
   if (!areMessagesLoaded) {
     loadChatMessages({ chatId });
-  } else if (messagesArray && messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+  } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
     loadMoreChatMessages({ chatId });
   }
 
@@ -143,7 +143,7 @@ const MessageList: FC<IProps> = ({
       {
         areMessagesLoaded ? (
           <div className="messages-container">
-            {messagesArray && groupMessages(messagesArray).map(renderMessageDateGroup)}
+            {messagesArray.length > 0 && groupMessages(messagesArray).map(renderMessageDateGroup)}
           </div>
         ) : (
           <Loading />
