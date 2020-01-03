@@ -42,15 +42,12 @@ export interface VirtualElementComponent {
 
 interface ComponentInstance {
   $element: VirtualElementComponent;
-  $prevElement: VirtualElementComponent;
   Component: FC;
   name: string;
   props: Props;
   children: VirtualElementChildren;
-  render: () => VirtualElementComponent;
   renderedValue?: any;
-  isRendered: () => boolean;
-  isUnmounted: boolean;
+  isMounted: boolean;
   hooks: {
     state: {
       cursor: number;
@@ -81,8 +78,8 @@ interface ComponentInstance {
       }[];
     };
   };
-  forceUpdate: Function;
-  onUpdate?: Function;
+  forceUpdate: () => void;
+  onUpdate?: () => void;
 }
 
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
@@ -132,13 +129,11 @@ function createElement(
 function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
   const componentInstance: ComponentInstance = {
     $element: {} as VirtualElementComponent,
-    $prevElement: {} as VirtualElementComponent,
     Component,
     name: Component.name,
     props,
     children: children.length ? children : EMPTY_COMPONENT_CHILDREN,
-    isRendered: () => Boolean(componentInstance.$element.children.length),
-    isUnmounted: false,
+    isMounted: false,
     hooks: {
       state: {
         cursor: 0,
@@ -157,21 +152,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
         byCursor: [],
       },
     },
-    render: () => renderComponent(componentInstance),
-    forceUpdate: throttleWithRaf((newProps?: Props) => {
-      if (newProps) {
-        componentInstance.props = newProps;
-      }
-
-      if (componentInstance.onUpdate && !componentInstance.isUnmounted) {
-        const currentElement = componentInstance.$element;
-        componentInstance.render();
-
-        if (componentInstance.$element !== currentElement) {
-          componentInstance.onUpdate(componentInstance.$prevElement, componentInstance.$element);
-        }
-      }
-    }),
+    forceUpdate: throttleWithRaf(() => forceUpdate(componentInstance)),
   };
 
   componentInstance.$element = buildComponentElement(componentInstance);
@@ -191,10 +172,7 @@ function buildComponentElement(
     props,
     children,
     get target() {
-      const $child = this.children[0];
-      // If the first child is another component, it may have already been updated earlier,
-      // so we need to derive target directly from its element.
-      return isComponentElement($child) ? $child.componentInstance.$element.target : $child.target;
+      return this.children[0].target;
     },
     set target(value) {
       this.children[0].target = value;
@@ -232,7 +210,7 @@ function buildEmptyElement(): VirtualElementEmpty {
   return { type: VirtualElementTypesEnum.Empty };
 }
 
-function renderComponent(componentInstance: ComponentInstance) {
+export function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
@@ -245,60 +223,16 @@ function renderComponent(componentInstance: ComponentInstance) {
     children,
   });
 
-  if (componentInstance.isRendered() && newRenderedValue === componentInstance.renderedValue) {
-    componentInstance.$prevElement = componentInstance.$element;
+  if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
   }
 
   componentInstance.renderedValue = newRenderedValue;
 
   const newChild = buildChildElement(newRenderedValue);
-  const renderedChildren = replaceChildren(componentInstance.$element, [newChild]);
-  componentInstance.$prevElement = componentInstance.$element;
-  componentInstance.$element = buildComponentElement(componentInstance, renderedChildren);
+  componentInstance.$element = buildComponentElement(componentInstance, [newChild]);
 
   return componentInstance.$element;
-}
-
-function replaceChildren($element: VirtualRealElement, newChildren: VirtualElementChildren) {
-  const currentLength = $element.children.length;
-  const newLength = newChildren.length;
-  const maxLength = Math.max(currentLength, newLength);
-
-  const children: VirtualElementChildren = [];
-  for (let i = 0; i < maxLength; i++) {
-    const updatedChild = replaceChild($element.children[i], newChildren[i]);
-    if (updatedChild) {
-      children.push(updatedChild);
-    }
-  }
-  return children;
-}
-
-function replaceChild(
-  $currentChild?: VirtualElement,
-  $newChild?: VirtualElement,
-) {
-  if ($currentChild && $newChild && !hasElementChanged($currentChild, $newChild)) {
-    if (isComponentElement($currentChild) && isComponentElement($newChild)) {
-      $currentChild.componentInstance.props = $newChild.componentInstance.props;
-      $currentChild.componentInstance.children = $newChild.componentInstance.children;
-
-      return $currentChild.componentInstance.render();
-    } else if (isTagElement($currentChild) && isTagElement($newChild)) {
-      $newChild.children = replaceChildren($currentChild, $newChild.children);
-
-      return $newChild;
-    }
-  }
-
-  if ($currentChild && isRealElement($currentChild)) {
-    unmountTree($currentChild);
-  }
-
-  return $newChild && isComponentElement($newChild)
-    ? $newChild.componentInstance.render()
-    : $newChild;
 }
 
 export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
@@ -321,15 +255,22 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   return false;
 }
 
-function unmountTree($element: VirtualElement) {
-  if (isComponentElement($element)) {
-    unmountComponent($element.componentInstance);
-    $element = $element.componentInstance.$element;
+export function unmountTree($element: VirtualElement) {
+  if (!isRealElement($element)) {
+    return;
   }
 
-  if ('children' in $element) {
-    $element.children.forEach(unmountTree);
+  if (isComponentElement($element)) {
+    unmountComponent($element.componentInstance);
   }
+
+  $element.children.forEach(unmountTree);
+}
+
+export function mountComponent(componentInstance: ComponentInstance) {
+  renderComponent(componentInstance);
+  componentInstance.isMounted = true;
+  return componentInstance.$element;
 }
 
 function unmountComponent(componentInstance: ComponentInstance) {
@@ -342,7 +283,18 @@ function unmountComponent(componentInstance: ComponentInstance) {
   delete componentInstance.hooks.effects;
   delete componentInstance.hooks.refs;
   delete componentInstance.hooks.callbacks;
-  componentInstance.isUnmounted = true;
+  componentInstance.isMounted = false;
+}
+
+function forceUpdate(componentInstance: ComponentInstance) {
+  if (componentInstance.onUpdate && componentInstance.isMounted) {
+    const currentElement = componentInstance.$element;
+    renderComponent(componentInstance);
+
+    if (componentInstance.$element !== currentElement) {
+      componentInstance.onUpdate();
+    }
+  }
 }
 
 export function useState(initial?: any) {
