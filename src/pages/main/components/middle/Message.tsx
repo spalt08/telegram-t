@@ -97,7 +97,7 @@ const Message: FC<IProps> = ({
     );
   }
 
-  function renderMessageContent() {
+  function renderContent() {
     const classNames = ['content-inner'];
     if (isForwarded) {
       classNames.push('forwarded-message');
@@ -110,12 +110,12 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} />}
-        {photo && renderMessagePhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
-        {video && renderMessageVideo(
+        {photo && renderPhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
+        {video && renderVideo(
           video, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string, loadAndPlayMedia,
         )}
-        {document && renderMessageDocument(document)}
-        {sticker && renderMessageSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
+        {document && renderDocument(document)}
+        {sticker && renderSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
         {text && (
           <p>{text}</p>
         )}
@@ -150,7 +150,7 @@ const Message: FC<IProps> = ({
         {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
         )}
-        {renderMessageContent()}
+        {renderContent()}
         <MessageMeta message={message} />
       </div>
     </div>
@@ -171,7 +171,7 @@ function buildClassName(message: ApiMessage, hasMedia = false) {
   return classNames.join(' ');
 }
 
-function renderMessagePhoto(
+function renderPhoto(
   photo: ApiPhoto,
   clickHandler: OnClickHandler,
   fromOwnMessage: boolean,
@@ -179,11 +179,7 @@ function renderMessagePhoto(
   mediaData?: string,
 ) {
   const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
-
-  const thumbnail = photo.minithumbnail;
-  if (!thumbnail) {
-    return null;
-  }
+  const thumbData = photo.minithumbnail && photo.minithumbnail.data;
 
   return (
     <div
@@ -191,8 +187,8 @@ function renderMessagePhoto(
       onClick={clickHandler}
     >
       <img
-        src={`data:image/jpeg;base64, ${thumbnail.data}`}
-        className="thumbnail-img"
+        src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
+        className={`thumbnail blur ${!thumbData ? 'empty' : ''}`}
         width={width}
         height={height}
         alt=""
@@ -204,7 +200,7 @@ function renderMessagePhoto(
       )}
       <img
         src={mediaData}
-        className={mediaData ? 'full-image loaded' : 'full-image'}
+        className={mediaData ? 'full-media fade-in' : 'full-media'}
         width={width}
         height={height}
         alt=""
@@ -213,7 +209,7 @@ function renderMessagePhoto(
   );
 }
 
-function renderMessageVideo(
+function renderVideo(
   video: ApiVideo,
   clickHandler: OnClickHandler,
   fromOwnMessage: boolean,
@@ -226,6 +222,7 @@ function renderMessageVideo(
   const isInlineVideo = mediaData && loadAndPlayMedia && shouldPlayInline;
   const isHqPreview = mediaData && !shouldPlayInline;
   const { minithumbnail, duration } = video;
+  const thumbData = minithumbnail && minithumbnail.data;
 
   return (
     <div
@@ -241,10 +238,21 @@ function renderMessageVideo(
           loop
           playsinline
           /* eslint-disable-next-line react/jsx-props-no-spreading */
-          {...(minithumbnail && { poster: `data:image/jpeg;base64, ${minithumbnail.data}` })}
+          {...(thumbData && { poster: `data:image/jpeg;base64, ${thumbData}` })}
         >
           <source src={mediaData} />
         </video>
+      )}
+      {!isInlineVideo && isHqPreview && (
+        <img src={mediaData} width={width} height={height} alt="" />
+      )}
+      {!isInlineVideo && !isHqPreview && (
+        <img
+          src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
+          width={width}
+          height={height}
+          alt=""
+        />
       )}
       {!isInlineVideo && (
         <div className="message-media-loading">
@@ -253,16 +261,12 @@ function renderMessageVideo(
           </div>
         </div>
       )}
-      {!isInlineVideo && isHqPreview && <img src={mediaData} width={width} height={height} alt="" />}
-      {!isInlineVideo && !isHqPreview && minithumbnail && (
-        <img src={`data:image/jpeg;base64, ${minithumbnail.data}`} width={width} height={height} alt="" />
-      )}
       <div className="message-media-duration">{formatMediaDuration(duration)}</div>
     </div>
   );
 }
 
-function renderMessageDocument(document: ApiDocument) {
+function renderDocument(document: ApiDocument) {
   const { size, extension, color } = getDocumentInfo(document);
   const { fileName } = document;
 
@@ -281,7 +285,7 @@ function renderMessageDocument(document: ApiDocument) {
   );
 }
 
-function renderMessageSticker(
+function renderSticker(
   sticker: ApiSticker,
   id: number,
   mediaData?: string | AnyLiteral,
@@ -289,15 +293,23 @@ function renderMessageSticker(
 ) {
   const { thumbnail, is_animated } = sticker;
   const { width, height } = getStickerDimensions(sticker);
+  const thumbData = thumbnail && thumbnail.dataUri;
+
+  let thumbClassName = 'thumbnail';
+  if (thumbData && is_animated && mediaData) {
+    thumbClassName += ' fade-out';
+  } else if (!thumbData) {
+    thumbClassName += ' empty';
+  }
 
   return (
     <div className="media-content">
       <img
-        src={thumbnail && thumbnail.dataUri}
+        src={thumbData}
         width={width}
         height={height}
         alt=""
-        className={!thumbnail || mediaData ? 'thumbnail-image loaded' : 'thumbnail-image'}
+        className={thumbClassName}
       />
       {!is_animated && (
         <img
@@ -305,7 +317,7 @@ function renderMessageSticker(
           width={width}
           height={height}
           alt=""
-          className={mediaData ? 'full-image loaded' : 'full-image'}
+          className={mediaData ? 'full-media fade-in' : 'full-media'}
         />
       )}
       {is_animated && (
@@ -315,7 +327,7 @@ function renderMessageSticker(
           width={width}
           height={height}
           play={loadAndPlayMedia}
-          className={mediaData ? 'full-image loaded' : 'full-image'}
+          className={mediaData ? 'full-media fade-in' : 'full-media'}
         />
       )}
     </div>

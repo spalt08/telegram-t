@@ -42,7 +42,7 @@ export default async function downloadMedia(client: TelegramClient, url: string)
 
   if (entityType === 'msg') {
     const data = await client.downloadMedia(entity, { sizeType });
-    const mimeType = getMediaMimeType(entity as GramJs.Message);
+    const mimeType = getMediaMimeType(entity as GramJs.Message, Boolean(sizeType));
     return { mimeType, data };
   } else {
     const data = await client.downloadProfilePhoto(entity, false);
@@ -51,12 +51,12 @@ export default async function downloadMedia(client: TelegramClient, url: string)
   }
 }
 
-function getMediaMimeType(message: GramJs.Message) {
+function getMediaMimeType(message: GramJs.Message, isThumb = false) {
   if (!message || !message.media) {
     return undefined;
   }
 
-  if (message.media instanceof GramJs.MessageMediaPhoto) {
+  if (isThumb || message.media instanceof GramJs.MessageMediaPhoto) {
     return 'image/jpeg';
   }
 
