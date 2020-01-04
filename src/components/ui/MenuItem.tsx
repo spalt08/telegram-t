@@ -2,7 +2,7 @@ import { MouseEvent as ReactMouseEvent } from 'react';
 
 import React, { FC } from '../../lib/teact';
 
-import './DropdownMenu.scss';
+import './Menu.scss';
 import RippleEffect from './RippleEffect';
 
 type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -15,7 +15,7 @@ interface IProps {
   disabled?: boolean;
 }
 
-const DropdownMenuItem: FC<IProps> = (props) => {
+const MenuItem: FC<IProps> = (props) => {
   const {
     icon,
     className,
@@ -32,7 +32,7 @@ const DropdownMenuItem: FC<IProps> = (props) => {
   };
 
   return (
-    <li className={`DropdownMenuItem ${className}`}>
+    <li className={`MenuItem ${className}`}>
       <button type="button" onClick={handleClick} disabled={disabled}>
         {icon && (
           <i className={`icon-${icon}`} />
@@ -44,4 +44,4 @@ const DropdownMenuItem: FC<IProps> = (props) => {
   );
 };
 
-export default DropdownMenuItem;
+export default MenuItem;

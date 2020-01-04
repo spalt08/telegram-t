@@ -1,6 +1,7 @@
 import React, { FC, useState } from '../../lib/teact';
 
 import './DropdownMenu.scss';
+import Menu from './Menu';
 
 interface IProps {
   className?: string;
@@ -23,16 +24,6 @@ const DropdownMenu: FC<IProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
 
-  let bubbleClassName = `bubble ${positionY} ${positionX}`;
-
-  if (isOpen) {
-    bubbleClassName += ' open';
-  }
-
-  if (isShown) {
-    bubbleClassName += ' shown';
-  }
-
   const toggleIsOpen = () => {
     if (isOpen) {
       setTimeout(() => setIsShown(false), 150);
@@ -51,16 +42,26 @@ const DropdownMenu: FC<IProps> = (props) => {
     onKeyDown(e);
   };
 
+  const handleClose = (e: React.MouseEvent<any>) => {
+    setTimeout(() => setIsShown(false), 150);
+    setIsOpen(false);
+  }
+
   return (
     <div className={`DropdownMenu ${className || ''}`} onKeyDown={handleKeyDown}>
       {trigger({ onClick: toggleIsOpen, isOpen })}
-      {isOpen && (
-        <div className="backdrop" onClick={toggleIsOpen} />
-      )}
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <ul className={bubbleClassName} onClick={toggleIsOpen}>
+
+      <Menu
+        isOpen={isOpen}
+        isShown={isShown}
+        className={className || ''}
+        positionX={positionX}
+        positionY={positionY}
+        onKeyDown={onKeyDown}
+        handleClose={handleClose}
+      >
         {children}
-      </ul>
+      </Menu>
     </div>
   );
 };

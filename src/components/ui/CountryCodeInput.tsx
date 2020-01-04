@@ -5,7 +5,7 @@ import getPlatform from '../../util/getPlatform';
 import searchWords from '../../util/searchWords';
 
 import DropdownMenu from './DropdownMenu';
-import DropdownMenuItem from './DropdownMenuItem';
+import MenuItem from './MenuItem';
 
 import './CountryCodeInput.scss';
 
@@ -131,7 +131,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
       onKeyDown={onKeyDown}
     >
       {filteredList.map((country: Country) => (
-        <DropdownMenuItem
+        <MenuItem
           key={country.id}
           className={value && country.id === value.id ? 'selected' : ''}
           onClick={handleChange}
@@ -140,16 +140,16 @@ const CountryCodeInput: FC<IProps> = (props) => {
           <span className={`${baseFlagClass} ${country.id.toLowerCase()}`}>{country.flag}</span>
           <span className="country-name">{country.name}</span>
           <span className="country-code">{country.code}</span>
-        </DropdownMenuItem>
+        </MenuItem>
       ))}
       {!filteredList.length && (
-        <DropdownMenuItem
+        <MenuItem
           key="no-results"
           className="no-results"
           disabled
         >
           <span>No countries matched your filter.</span>
-        </DropdownMenuItem>
+        </MenuItem>
       )}
     </DropdownMenu>
   );

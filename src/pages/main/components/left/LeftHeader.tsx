@@ -3,7 +3,7 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import DropdownMenu from '../../../../components/ui/DropdownMenu';
-import DropdownMenuItem from '../../../../components/ui/DropdownMenuItem';
+import MenuItem from '../../../../components/ui/MenuItem';
 import Button from '../../../../components/ui/Button';
 import SearchInput from './SearchInput';
 import './LeftHeader.scss';
@@ -29,13 +29,13 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
       <DropdownMenu
         trigger={MenuButton}
       >
-        <DropdownMenuItem className="not-implemented" icon="new-group">New Group</DropdownMenuItem>
-        <DropdownMenuItem className="not-implemented" icon="user">Contacts</DropdownMenuItem>
-        <DropdownMenuItem className="not-implemented" icon="archive">Archived</DropdownMenuItem>
-        <DropdownMenuItem className="not-implemented" icon="saved-messages">Saved</DropdownMenuItem>
-        <DropdownMenuItem className="not-implemented" icon="settings">Settings</DropdownMenuItem>
-        <DropdownMenuItem className="not-implemented" icon="help">Help</DropdownMenuItem>
-        <DropdownMenuItem icon="logout" onClick={() => onSignOut(signOut)}>Log Out</DropdownMenuItem>
+        <MenuItem className="not-implemented" icon="new-group">New Group</MenuItem>
+        <MenuItem className="not-implemented" icon="user">Contacts</MenuItem>
+        <MenuItem className="not-implemented" icon="archive">Archived</MenuItem>
+        <MenuItem className="not-implemented" icon="saved-messages">Saved</MenuItem>
+        <MenuItem className="not-implemented" icon="settings">Settings</MenuItem>
+        <MenuItem className="not-implemented" icon="help">Help</MenuItem>
+        <MenuItem icon="logout" onClick={() => onSignOut(signOut)}>Log Out</MenuItem>
       </DropdownMenu>
       <SearchInput />
     </div>
