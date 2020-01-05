@@ -21,13 +21,18 @@ import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import { buildMessageContent } from './message/utils';
+import { disableScrolling, enableScrolling } from '../../../../util/scrollLock';
+
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
 import AnimatedSticker from '../../../../components/AnimatedSticker';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
 import ContactMessage from './ContactMessage';
+import MessageContextMenu from '../common/MessageContextMenu';
 import './Message.scss';
+
+const ANIMATION_TIMEOUT = 150;
 
 type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 
@@ -55,6 +60,8 @@ const Message: FC<IProps> = ({
   openUserInfo,
 }) => {
   const [, onDataUriUpdate] = useState(null);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
 
   useEffect(() => {
@@ -66,7 +73,24 @@ const Message: FC<IProps> = ({
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
-  const className = buildClassName(message, Boolean(mediaHash));
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLBodyElement>): void => {
+    if (contextMenuPosition !== null && (e.key === 'Esc' || e.key === 'Escape')) {
+      e.stopPropagation();
+      closeContextMenu();
+    }
+  };
+
+  useEffect(() => {
+    if (contextMenuPosition !== null) {
+      window.document.body.addEventListener('keydown', handleKeyDown, false);
+    }
+
+    return () => {
+      window.document.body.removeEventListener('keydown', handleKeyDown, false);
+    };
+  });
+
+  const className = buildClassName(message, Boolean(mediaHash), contextMenuPosition !== null);
   const {
     text,
     photo,
@@ -82,6 +106,31 @@ const Message: FC<IProps> = ({
 
   function openMediaMessage(): void {
     selectMediaMessage({ id: message.id });
+  }
+
+  function handleBeforeContextMenu(e: React.MouseEvent) {
+    if (e.button === 2) {
+      e.currentTarget.classList.add('no-selection');
+    }
+  }
+
+  function showContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('no-selection');
+    disableScrolling();
+
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    requestAnimationFrame(() => {
+      setIsContextMenuOpen(true);
+    });
+  }
+
+  function closeContextMenu() {
+    setIsContextMenuOpen(false);
+    enableScrolling();
+    setTimeout(() => {
+      setContextMenuPosition(null);
+    }, ANIMATION_TIMEOUT);
   }
 
   function renderSenderName(user?: ApiUser) {
@@ -146,18 +195,26 @@ const Message: FC<IProps> = ({
         <Avatar size="small" user={sender} onClick={viewUser} />
       )}
       {/* eslint-disable-next-line */}
-      <div className={contentClassName} style={style}>
+      <div className={contentClassName} style={style} onMouseDown={handleBeforeContextMenu} onContextMenu={showContextMenu}>
         {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
         )}
         {renderContent()}
         <MessageMeta message={message} />
       </div>
+      {contextMenuPosition !== null && (
+        <MessageContextMenu
+          messageId={message.id}
+          isOpen={isContextMenuOpen}
+          anchor={contextMenuPosition}
+          onClose={closeContextMenu}
+        />
+      )}
     </div>
   );
 };
 
-function buildClassName(message: ApiMessage, hasMedia = false) {
+function buildClassName(message: ApiMessage, hasMedia = false, hasContextMenu = false) {
   const classNames = ['Message'];
 
   if (isOwnMessage(message)) {
@@ -166,6 +223,10 @@ function buildClassName(message: ApiMessage, hasMedia = false) {
 
   if (hasMedia) {
     classNames.push('has-media');
+  }
+
+  if (hasContextMenu) {
+    classNames.push('has-menu-open');
   }
 
   return classNames.join(' ');

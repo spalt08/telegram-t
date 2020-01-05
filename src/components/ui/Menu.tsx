@@ -11,7 +11,7 @@ interface IProps {
   positionY?: 'top' | 'bottom';
   children: any;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
-  handleClose?: (e: React.MouseEvent<any>) => void;
+  onClose?: (e: React.MouseEvent<any, MouseEvent>) => void;
 }
 
 const Menu: FC<IProps> = (props) => {
@@ -24,7 +24,7 @@ const Menu: FC<IProps> = (props) => {
     positionX = 'left',
     positionY = 'top',
     onKeyDown,
-    handleClose,
+    onClose,
   } = props;
 
   let bubbleClassName = `bubble ${positionY} ${positionX}`;
@@ -48,10 +48,10 @@ const Menu: FC<IProps> = (props) => {
   return (
     <div className={`Menu ${className || ''}`} onKeyDown={handleKeyDown} style={style || ''}>
       {isOpen && (
-        <div className="backdrop" onClick={handleClose} onContextMenu={handleClose} />
+        <div className="backdrop" onClick={onClose} onContextMenu={onClose} />
       )}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <ul className={bubbleClassName} onClick={handleClose}>
+      <ul className={bubbleClassName} onClick={onClose} onContextMenu={onClose}>
         {children}
       </ul>
     </div>

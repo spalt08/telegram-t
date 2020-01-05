@@ -7,7 +7,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    z-index: 9;
+    z-index: 12;
   }
 
   .bubble {
@@ -21,7 +21,7 @@
     border-radius: var(--border-radius-default);
     width: 13.5rem;
     opacity: 0;
-    z-index: 10;
+    z-index: 13;
     transition: opacity .15s ease;
 
     &:not(.shown) {

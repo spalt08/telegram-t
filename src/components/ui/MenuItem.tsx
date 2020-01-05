@@ -1,11 +1,8 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
-
 import React, { FC } from '../../lib/teact';
 
-import './Menu.scss';
 import RippleEffect from './RippleEffect';
 
-type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {
   icon?: string;
@@ -24,7 +21,7 @@ const MenuItem: FC<IProps> = (props) => {
     disabled,
   } = props;
 
-  const handleClick = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (disabled || !onClick) {
       return;
     }

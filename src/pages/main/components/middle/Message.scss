@@ -3,6 +3,7 @@
   display: flex;
   align-items: flex-end;
   margin-bottom: 0.375rem;
+  position: relative;
 
   &:last-child {
     margin-bottom: 0;
@@ -12,10 +13,19 @@
     flex-direction: row-reverse;
   }
 
+  &.has-context-menu .content,
+  &.has-context-menu .Avatar {
+    z-index: 12;
+  }
+
   .Avatar {
     margin-right: 0.3rem;
     cursor: pointer;
     z-index: 2;
+  }
+
+  .no-selection {
+    user-select: none;
   }
 }
 
