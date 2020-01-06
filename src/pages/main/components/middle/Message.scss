@@ -269,6 +269,7 @@
     .media-content {
       line-height: 1;
       font-size: 1rem;
+      flex-shrink: 0;
     }
 
     .forwarded-message {
