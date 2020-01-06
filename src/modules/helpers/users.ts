@@ -28,7 +28,7 @@ export function getUserFullName(user?: ApiUser) {
     return null;
   }
 
-  if (user.type['@type'] !== 'userTypeBot' && user.status && user.status['@type'] === 'userStatusEmpty') {
+  if (isDeletedUser(user)) {
     return 'Deleted account';
   }
 
@@ -167,4 +167,14 @@ export function getUserAvatarHash(user: ApiUser): string | null {
   }
 
   return `avatar${user.id}?${user.avatar.hash}`;
+}
+
+export function isDeletedUser(user: ApiUser) {
+  if (!user.status || user.type['@type'] === 'userTypeBot') {
+    return false;
+  }
+
+  return user.type['@type'] === 'userTypeDeleted'
+    || user.type['@type'] === 'userTypeUnknown'
+    || user.status['@type'] === 'userStatusEmpty';
 }

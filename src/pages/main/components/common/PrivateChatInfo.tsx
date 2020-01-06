@@ -15,10 +15,16 @@ type IProps = {
 const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium' }) => {
   return (
     <div className="ChatInfo">
-      <Avatar size={avatarSize} user={user} />
+      <Avatar size={avatarSize} user={user} isSavedMessages={user.is_self} />
       <div>
-        <div className="title">{getUserFullName(user)}</div>
-        <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>{getUserStatus(user)}</div>
+        {user.is_self ? (
+          <div className="title">Saved Messages</div>
+        ) : (
+          <div className="title">{getUserFullName(user)}</div>
+        )}
+        {!user.is_self && (
+          <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>{getUserStatus(user)}</div>
+        )}
       </div>
     </div>
   );

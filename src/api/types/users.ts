@@ -1,5 +1,6 @@
 export interface ApiUser {
   id: number;
+  is_self?: true;
   type: ApiUserType;
   first_name?: string;
   last_name?: string;

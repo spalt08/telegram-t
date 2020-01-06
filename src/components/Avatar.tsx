@@ -5,7 +5,7 @@ import React, {
 import { ApiUser, ApiChat } from '../api/types';
 import {
   getChatAvatarHash, getChatTitle, isPrivateChat,
-  getUserAvatarHash, getUserFullName, isUserOnline,
+  getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
 } from '../modules/helpers';
 import * as mediaLoader from '../util/mediaLoader';
 
@@ -16,18 +16,21 @@ interface IProps {
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
+  isSavedMessages?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, showOnlineStatus, onClick,
+  size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages,
 }) => {
   let imageHash: string | null = null;
 
-  if (chat) {
-    imageHash = getChatAvatarHash(chat);
-  } else if (user) {
-    imageHash = getUserAvatarHash(user);
+  if (!isSavedMessages) {
+    if (chat) {
+      imageHash = getChatAvatarHash(chat);
+    } else if (user) {
+      imageHash = getUserAvatarHash(user);
+    }
   }
 
   const [, onDataUriUpdate] = useState(null);
@@ -40,15 +43,21 @@ const Avatar: FC<IProps> = ({
   }, [imageHash, dataUri]);
 
   let content: string | null = '';
-  const isOnline = user && isUserOnline(user);
+  const isOnline = !isSavedMessages && user && isUserOnline(user);
 
-  if (dataUri) {
+  if (isSavedMessages) {
+    content = <i className="icon-avatar-saved-messages" />;
+  } else if (dataUri) {
     content = (
       <img src={dataUri} alt="" />
     );
   } else if (user) {
     const userName = getUserFullName(user);
-    content = userName ? getFirstLetters(userName).slice(0, 2) : null;
+    if (isDeletedUser(user)) {
+      content = <i className="icon-avatar-deleted-account" />;
+    } else {
+      content = userName ? getFirstLetters(userName).slice(0, 2) : null;
+    }
   } else if (chat) {
     const title = getChatTitle(chat);
     content = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);

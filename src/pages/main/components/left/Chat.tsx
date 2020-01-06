@@ -55,10 +55,12 @@ const Chat: FC<IProps> = ({
       );
     }
 
+    const senderName = getSenderName(chat.id, lastMessageSender);
+
     return (
       <p className="last-message">
-        {isGroupChat(chat.id) && getUserFirstName(lastMessageSender) && (
-          <span className="sender-name">{getUserFirstName(lastMessageSender)}</span>
+        {senderName && (
+          <span className="sender-name">{senderName}</span>
         )}
         {getLastMessageText(last_message)}
       </p>
@@ -67,10 +69,15 @@ const Chat: FC<IProps> = ({
 
   return (
     <div className={buildClassNames(chat, selected)} onClick={() => openChat({ id: chat.id })}>
-      <Avatar chat={chat} user={privateChatUser} showOnlineStatus />
+      <Avatar
+        chat={chat}
+        user={privateChatUser}
+        showOnlineStatus
+        isSavedMessages={privateChatUser && privateChatUser.is_self}
+      />
       <div className="info">
         <div className="title">
-          <h3>{getChatTitle(chat)}</h3>
+          <h3>{getChatTitle(chat, privateChatUser)}</h3>
           {chat.last_message && (
             <LastMessageMeta message={chat.last_message} />
           )}
@@ -95,6 +102,18 @@ function buildClassNames(chat: ApiChat, isSelected: boolean) {
   }
 
   return classNames.join(' ');
+}
+
+function getSenderName(chatId: number, sender?: ApiUser) {
+  if (!sender || !isGroupChat(chatId)) {
+    return undefined;
+  }
+
+  if (sender.is_self) {
+    return 'You';
+  }
+
+  return getUserFirstName(sender);
 }
 
 export default memo(withGlobal(

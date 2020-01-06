@@ -14,6 +14,10 @@
     overflow: hidden;
   }
 
+  i {
+    font-size: 2.5rem;
+  }
+
   &.size-small {
     width: 2.125rem;
     height: 2.125rem;
@@ -30,6 +34,10 @@
     width: 7.5rem;
     height: 7.5rem;
     font-size: 4rem;
+
+    i {
+      font-size: 6rem;
+    }
   }
 
   &.online {

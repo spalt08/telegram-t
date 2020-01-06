@@ -11,8 +11,17 @@ type IProps = Pick<GlobalActions, 'loadFullUser'> & {
   user: ApiUser;
 };
 
-const PrivateChatInfo: FC<IProps> = ({ user, loadFullUser }) => {
-  const { full_info, username, phone_number } = user;
+const UserExtra: FC<IProps> = ({ user, loadFullUser }) => {
+  const {
+    full_info,
+    username,
+    phone_number,
+    is_self,
+  } = user;
+  if (is_self) {
+    return null;
+  }
+
   if (!full_info) {
     loadFullUser({ userId: user.id });
   }
@@ -64,4 +73,4 @@ export default withGlobal(
     const { loadFullUser } = actions;
     return { loadFullUser };
   },
-)(PrivateChatInfo);
+)(UserExtra);

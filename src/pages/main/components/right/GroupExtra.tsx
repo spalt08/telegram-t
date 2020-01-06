@@ -10,7 +10,7 @@ type IProps = {
   chat: ApiChat;
 };
 
-const GroupChatInfo: FC<IProps> = ({
+const GroupExtra: FC<IProps> = ({
   chat,
 }) => {
   const description = getChatDescription(chat);
@@ -47,4 +47,4 @@ export default withGlobal(
 
     return { chat };
   },
-)(GroupChatInfo);
+)(GroupExtra);
