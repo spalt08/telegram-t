@@ -29,7 +29,7 @@ const MenuItem: FC<IProps> = (props) => {
   };
 
   return (
-    <li className={`MenuItem ${className}`}>
+    <li className={`MenuItem ${className || ''}`}>
       <button type="button" onClick={handleClick} disabled={disabled}>
         {icon && (
           <i className={`icon-${icon}`} />

@@ -10,6 +10,11 @@
     z-index: var(--z-menu-backdrop);
   }
 
+  &.fluid .bubble {
+    min-width: 13.5rem;
+    width: auto;
+  }
+
   .bubble {
     display: block;
     list-style: none;
@@ -60,6 +65,7 @@
       padding: 1rem;
       position: relative;
       overflow: hidden;
+      white-space: nowrap;
       --ripple-color: rgba(0, 0, 0, .08);
 
       &:not([disabled]) {
