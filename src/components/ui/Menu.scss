@@ -7,7 +7,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    z-index: 12;
+    z-index: var(--z-menu-backdrop);
   }
 
   .bubble {
@@ -21,8 +21,8 @@
     border-radius: var(--border-radius-default);
     width: 13.5rem;
     opacity: 0;
-    z-index: 13;
     transition: opacity .15s ease;
+    z-index: var(--z-menu-bubble);
 
     &:not(.shown) {
       visibility: hidden;

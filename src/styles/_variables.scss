@@ -57,4 +57,18 @@ $color-chat-hover: #f4f4f5;
   --border-radius-messages: 0.75rem;
   --border-radius-messages-small: 0.375rem;
   --messages-container-width: 45.5rem;
+
+  --z-modal: 1000;
+  --z-media-viewer: 100;
+  --z-animation-fade: 50;
+  --z-menu-bubble: 21;
+  --z-menu-backdrop: 20;
+  --z-message-highlighted: 12;
+  --z-message-context-menu: 11;
+  --z-message-date-header: 10;
+  --z-country-code-input-group: 10;
+  --z-layout-left-header: 5;
+  --z-register-add-avatar: 5;
+  --z-message-avatar: 2;
+  --z-below: -1;
 }

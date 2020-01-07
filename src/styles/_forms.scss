@@ -154,7 +154,7 @@ textarea.form-control {
 
   input {
     position: absolute;
-    z-index: -1;
+    z-index: var(--z-below);
     opacity: 0;
   }
 

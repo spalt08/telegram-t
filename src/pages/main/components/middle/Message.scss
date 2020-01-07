@@ -13,15 +13,15 @@
     flex-direction: row-reverse;
   }
 
-  &.has-context-menu .content,
-  &.has-context-menu .Avatar {
-    z-index: 12;
+  &.has-menu-open .content,
+  &.has-menu-open .Avatar {
+    z-index: var(--z-message-highlighted);
   }
 
   .Avatar {
     margin-right: 0.3rem;
     cursor: pointer;
-    z-index: 2;
+    z-index: var(--z-message-avatar);
   }
 
   .no-selection {

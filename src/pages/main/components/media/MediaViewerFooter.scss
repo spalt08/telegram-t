@@ -31,7 +31,7 @@
     @media (max-height: 640px) {
       max-height: 2.75rem;
     }
-  
+
     &.multiline {
       &::before {
         content: '';
@@ -42,7 +42,7 @@
         bottom: -.25rem;
         background: rgba(0, 0, 0, .75);
         border-radius: var(--border-radius-default);
-        z-index: -1;
+        z-index: var(--z-below);
       }
     }
   }

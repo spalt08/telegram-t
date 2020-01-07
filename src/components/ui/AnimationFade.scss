@@ -1,13 +1,13 @@
 .AnimationFadeIn {
   animation: AnimationFadeIn .2s;
   position: relative;
-  z-index: 11;
+  z-index: var(--z-animation-fade);
 }
 
 .AnimationFadeOut {
   animation: AnimationFadeOut .2s;
   position: relative;
-  z-index: 11;
+  z-index: var(--z-animation-fade);
 }
 
 @keyframes AnimationFadeIn {

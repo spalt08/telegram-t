@@ -4,7 +4,7 @@
   cursor: pointer;
 
   .input-group {
-    z-index: 10;
+    z-index: var(--z-country-code-input-group);
   }
 
   .bubble {
