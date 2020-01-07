@@ -3,6 +3,11 @@ import { getMessagePhotoMaxSize } from '../modules/helpers';
 
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 
+type IMediaDimensions = {
+  width: number;
+  height: number;
+};
+
 function getRemValue() {
   return window.innerWidth > 1440 ? 16 : 14;
 }
@@ -19,6 +24,21 @@ function getAvailableWidth(fromOwnMessage: boolean, isForwarded?: boolean) {
 function getAvailableHeight() {
   const rem = getRemValue();
   return 27 * rem;
+}
+
+function getDimensionsFromVideo(video: ApiVideo): IMediaDimensions | undefined {
+  if (video.minithumbnail) {
+    return video.minithumbnail;
+  }
+
+  if (video.width && video.height) {
+    return {
+      width: video.width,
+      height: video.height,
+    };
+  }
+
+  return undefined;
 }
 
 function calculateDimensions(width: number, height: number, fromOwnMessage: boolean, isForwarded?: boolean) {
@@ -47,7 +67,7 @@ export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isF
 }
 
 export function getVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const { width, height } = video.minithumbnail || DEFAULT_MEDIA_DIMENSIONS;
+  const { width, height } = getDimensionsFromVideo(video) || DEFAULT_MEDIA_DIMENSIONS;
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
