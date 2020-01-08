@@ -1,11 +1,18 @@
-import React, { FC, useEffect, useState } from '../../../../lib/teact';
+import React, {
+  FC, useCallback, useEffect, useState,
+} from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
-import { selectChatMessage } from '../../../../modules/selectors';
-import { getMessageCopyOptions } from '../middle/message/clipboard';
+
 import { ApiMessage } from '../../../../api/types';
+import { GlobalActions } from '../../../../store/types';
+
+import { selectChat, selectChatMessage, selectIsChatWithSelf } from '../../../../modules/selectors';
+import { isGroupChat } from '../../../../modules/helpers';
+import { getMessageCopyOptions } from '../middle/message/clipboard';
 
 import MenuItem from '../../../../components/ui/MenuItem';
 import Menu from '../../../../components/ui/Menu';
+
 import './MessageContextMenu.scss';
 
 type IAnchorPosition = {
@@ -19,12 +26,13 @@ type IProps = {
   messageId: number;
   message: ApiMessage;
   onClose: (e: React.MouseEvent<any, MouseEvent>) => void;
-};
+  canPin?: boolean;
+} & Pick<GlobalActions, 'pinMessage'>;
 
 const SCROLLBAR_WIDTH = 10;
 
 const MessageContextMenu: FC<IProps> = ({
-  isOpen, messageId, anchor, message, onClose,
+  isOpen, messageId, anchor, message, onClose, canPin, pinMessage,
 }) => {
   const [isShown, setIsShown] = useState(false);
   const [positionX, setPositionX] = useState('right');
@@ -69,6 +77,10 @@ const MessageContextMenu: FC<IProps> = ({
     onClose(e);
   };
 
+  const handlePin = useCallback(() => {
+    pinMessage({ chatId: message.chat_id, messageId });
+  }, [pinMessage, message, messageId]);
+
   return (
     <Menu
       isOpen={isOpen}
@@ -83,19 +95,28 @@ const MessageContextMenu: FC<IProps> = ({
       {copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
-      <MenuItem className="not-implemented" icon="pin">Pin</MenuItem>
+      {canPin && <MenuItem icon="pin" onClick={handlePin}>Pin</MenuItem>}
       <MenuItem className="not-implemented" icon="forward">Forward</MenuItem>
       <MenuItem className="danger not-implemented" icon="delete">Delete</MenuItem>
     </Menu>
   );
 };
 
-export default withGlobal((global, { messageId }) => {
-  const { chats: { selectedId: chatId } } = global;
+export default withGlobal(
+  (global, { messageId }) => {
+    const { chats: { selectedId: chatId } } = global;
 
-  const message = selectChatMessage(global, chatId as number, messageId);
+    const message = selectChatMessage(global, chatId as number, messageId);
+    const chat = selectChat(global, chatId as number);
+    const canPin = isGroupChat(chat) || selectIsChatWithSelf(global, chat);
 
-  return {
-    message,
-  };
-})(MessageContextMenu);
+    return {
+      message,
+      canPin,
+    };
+  },
+  (_, actions) => {
+    const { pinMessage } = actions;
+    return { pinMessage };
+  },
+)(MessageContextMenu);

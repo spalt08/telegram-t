@@ -6,7 +6,6 @@ import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../
 import { buildApiUser } from '../builders/users';
 import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
 import localDb from '../localDb';
-import { onGramJsUpdate } from '../onGramJsUpdate';
 
 let onUpdate: OnApiUpdate;
 
@@ -63,23 +62,19 @@ export async function sendMessage({ chat, text }: { chat: ApiChat; text: string 
 
   const randomId = generateRandomBigInt();
   localDb.localMessages[randomId.toString()] = localMessage;
-  const request = new GramJs.messages.SendMessage({
+
+  await invokeRequest(new GramJs.messages.SendMessage({
     message: text,
     peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
-  });
-  const result = await invokeRequest(request);
+  }), true);
+}
 
-  // TODO Implement
-  if (result instanceof GramJs.UpdatesTooLong) {
-    return;
-  }
-
-  if (result instanceof GramJs.Updates) {
-    result.updates.forEach((update) => onGramJsUpdate(update, request));
-  } else {
-    onGramJsUpdate(result, request);
-  }
+export async function pinMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {
+  await invokeRequest(new GramJs.messages.UpdatePinnedMessage({
+    peer: buildInputPeer(chat.id, chat.access_hash),
+    id: messageId,
+  }), true);
 }
 
 function updateLocalDb(

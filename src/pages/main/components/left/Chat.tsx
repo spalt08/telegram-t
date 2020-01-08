@@ -8,7 +8,6 @@ import {
   getLastMessageText,
   getUserFirstName,
   isPrivateChat,
-  isGroupChat,
   isActionMessage,
   getPrivateChatUserId,
 } from '../../../../modules/helpers';
@@ -105,7 +104,7 @@ function buildClassNames(chat: ApiChat, isSelected: boolean) {
 }
 
 function getSenderName(chatId: number, sender?: ApiUser) {
-  if (!sender || !isGroupChat(chatId)) {
+  if (!sender || isPrivateChat(chatId)) {
     return undefined;
   }
 

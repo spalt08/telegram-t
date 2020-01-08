@@ -17,7 +17,7 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function onGramJsUpdate(update: GramJs.TypeUpdate, originRequest?: GramJs.AnyRequest) {
+export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRequest?: GramJs.AnyRequest) {
   // Messages
   if (
     update instanceof GramJs.UpdateNewMessage

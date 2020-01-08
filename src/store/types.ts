@@ -48,7 +48,8 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' |
   'loadFullChat' | 'loadChatOnlines' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'selectMediaMessage' |
+  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' |
+  'selectMediaMessage' |
   // users
   'loadFullUser' | 'openUserInfo'
 );

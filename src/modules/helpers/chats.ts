@@ -4,8 +4,8 @@ export function isPrivateChat(chatId: number) {
   return chatId > 0;
 }
 
-export function isGroupChat(chatId: number) {
-  return !isPrivateChat(chatId);
+export function isGroupChat(chat: ApiChat) {
+  return !isPrivateChat(chat.id) && !isChannel(chat);
 }
 
 export function isChannel(chat: ApiChat) {

@@ -54,7 +54,7 @@ export async function init(sessionId: string) {
   }
 }
 
-export async function invokeRequest<T extends GramJs.AnyRequest>(request: T) {
+export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, shouldHandleUpdates = false) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log(`[GramJs/client] INVOKE ${request.className}`);
@@ -65,6 +65,16 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
+  }
+
+  if (shouldHandleUpdates) {
+    if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
+      result.updates.forEach((update) => onGramJsUpdate(update, request));
+    } else if (result instanceof GramJs.UpdatesTooLong) {
+      // TODO Implement
+    } else {
+      onGramJsUpdate(result as GramJs.TypeUpdates, request);
+    }
   }
 
   return result;

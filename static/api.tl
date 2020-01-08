@@ -829,6 +829,7 @@ messages.editMessage#48f71778 flags:# no_webpage:flags.1?true peer:InputPeer id:
 messages.getPeerDialogs#e470bcfd peers:Vector<InputDialogPeer> = messages.PeerDialogs;
 messages.getWebPage#32ca8f91 url:string hash:int = WebPage;
 messages.uploadMedia#519bc2b1 peer:InputPeer media:InputMedia = MessageMedia;
+messages.updatePinnedMessage#d2aaf7ec flags:# silent:flags.0?true peer:InputPeer id:int = Updates;
 messages.getOnlines#6e2be050 peer:InputPeer = ChatOnlines;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;
