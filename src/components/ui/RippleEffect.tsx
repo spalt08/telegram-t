@@ -19,6 +19,10 @@ const RippleEffect: FC<{}> = () => {
   const [ripples, setRipples] = useState([]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (e.button !== 0) {
+      return;
+    }
+
     const container = e.currentTarget as HTMLDivElement;
     const position = container.getBoundingClientRect() as DOMRect;
 
@@ -39,7 +43,10 @@ const RippleEffect: FC<{}> = () => {
   return (
     <div className="ripple-container" onMouseDown={handleMouseDown} onMouseUp={cleanUp}>
       {ripples.map(({ x, y, size }: Ripple) => (
-        <span style={`left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px;`} />
+        <span
+          // @ts-ignore
+          style={`left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px;`}
+        />
       ))}
     </div>
   );
