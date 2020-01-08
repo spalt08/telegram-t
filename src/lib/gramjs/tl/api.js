@@ -92,7 +92,8 @@ function argToBytes(x, type) {
     switch (type) {
         case 'int':
             const i = Buffer.alloc(4)
-            return i.writeInt32LE(x, 0)
+            i.writeInt32LE(x, 0)
+            return i
         case 'long':
             return toSignedLittleBuffer(x, 8)
         case 'int128':
@@ -101,7 +102,8 @@ function argToBytes(x, type) {
             return toSignedLittleBuffer(x, 32)
         case 'double':
             const d = Buffer.alloc(8)
-            return d.writeDoubleLE(x, 0)
+            d.writeDoubleLE(x, 0)
+            return d
         case 'string':
             return serializeBytes(x)
         case 'Bool':
@@ -213,9 +215,9 @@ function createClasses(classesType, params) {
             constructor(args) {
                 args = args || {}
                 Object.keys(args)
-                    .forEach((argName) => {
-                        this[argName] = args[argName]
-                    })
+                  .forEach((argName) => {
+                      this[argName] = args[argName]
+                  })
             }
 
             static fromReader(reader) {
@@ -274,8 +276,9 @@ function createClasses(classesType, params) {
                                     ]))
                                 }
                             }
-                        } else if (argsConfig[arg].isVector && !argsConfig[arg].isFlag) {
-                            if (argsConfig[arg].isVector) {
+                        }
+                        if (argsConfig[arg].isVector && !argsConfig[arg].isFlag) {
+                            if (argsConfig[arg].useVectorId) {
                                 buffers.push(Buffer.from('15c4b51c', 'hex'))
                             }
                             const l = Buffer.alloc(4)
@@ -283,16 +286,16 @@ function createClasses(classesType, params) {
                             buffers.push(l, Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type))))
                         } else if (argsConfig[arg].flagIndicator) {
                             if (!Object.values(argsConfig)
-                                .some((f) => f.isFlag)) {
+                              .some((f) => f.isFlag)) {
                                 buffers.push(Buffer.alloc(4))
                             } else {
                                 let flagCalculate = 0
-                                for (const f of Object.values(argsConfig)) {
-                                    if (f.isFlag) {
-                                        if (!this[f.name]) {
+                                for (const f in argsConfig) {
+                                    if (argsConfig[f].isFlag) {
+                                        if (!this[f]) {
                                             flagCalculate |= 0
                                         } else {
-                                            flagCalculate |= f.flagIndex
+                                            flagCalculate |= 1 << argsConfig[f].flagIndex
                                         }
                                     }
                                 }
@@ -336,6 +339,9 @@ function createClasses(classesType, params) {
                                     buffers.push(serializeDate(this[arg]))
                                     break
                                 default:
+                                    if (this[arg]===false || this[arg]==null){
+                                        continue
+                                    }
                                     buffers.push(this[arg].getBytes())
                                     let boxed = (argsConfig[arg].type.charAt(argsConfig[arg].type.indexOf('.') + 1))
                                     boxed = boxed === boxed.toUpperCase()
