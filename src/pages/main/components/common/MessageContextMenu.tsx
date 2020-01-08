@@ -7,7 +7,7 @@ import { ApiMessage } from '../../../../api/types';
 import { GlobalActions } from '../../../../store/types';
 
 import { selectChat, selectChatMessage, selectIsChatWithSelf } from '../../../../modules/selectors';
-import { isGroupChat } from '../../../../modules/helpers';
+import { isPrivateChat } from '../../../../modules/helpers';
 import { getMessageCopyOptions } from '../middle/message/clipboard';
 
 import MenuItem from '../../../../components/ui/MenuItem';
@@ -27,7 +27,8 @@ type IProps = {
   message: ApiMessage;
   onClose: (e: React.MouseEvent<any, MouseEvent>) => void;
   canPin?: boolean;
-} & Pick<GlobalActions, 'pinMessage' | 'setChatReplyingTo'>;
+  canDelete?: boolean;
+} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages'>;
 
 const SCROLLBAR_WIDTH = 10;
 
@@ -38,8 +39,10 @@ const MessageContextMenu: FC<IProps> = ({
   message,
   onClose,
   canPin,
-  pinMessage,
+  canDelete,
   setChatReplyingTo,
+  pinMessage,
+  deleteMessages,
 }) => {
   const [isShown, setIsShown] = useState(false);
   const [positionX, setPositionX] = useState('right');
@@ -84,13 +87,20 @@ const MessageContextMenu: FC<IProps> = ({
     onClose(e);
   };
 
+  const handleReply = useCallback(() => {
+    setChatReplyingTo({ chatId: message.chat_id, messageId });
+  }, [setChatReplyingTo, message, messageId]);
+
   const handlePin = useCallback(() => {
     pinMessage({ chatId: message.chat_id, messageId });
   }, [pinMessage, message, messageId]);
 
-  const handleReply = useCallback(() => {
-    setChatReplyingTo({ chatId: message.chat_id, messageId });
-  }, [setChatReplyingTo, message, messageId]);
+  const handleDelete = useCallback(() => {
+    // eslint-disable-next-line no-alert
+    if (window.confirm('Are you sure?')) {
+      deleteMessages({ chatId: message.chat_id, messageIds: [messageId], shouldDeleteForAll: false });
+    }
+  }, [deleteMessages, message, messageId]);
 
   return (
     <Menu
@@ -108,7 +118,7 @@ const MessageContextMenu: FC<IProps> = ({
       ))}
       {canPin && <MenuItem icon="pin" onClick={handlePin}>Pin</MenuItem>}
       <MenuItem className="not-implemented" icon="forward">Forward</MenuItem>
-      <MenuItem className="danger not-implemented" icon="delete">Delete</MenuItem>
+      {canDelete && <MenuItem className="danger" icon="delete" onClick={handleDelete}>Delete</MenuItem>}
     </Menu>
   );
 };
@@ -119,15 +129,17 @@ export default withGlobal(
 
     const message = selectChatMessage(global, chatId as number, messageId);
     const chat = selectChat(global, chatId as number);
-    const canPin = isGroupChat(chat) || selectIsChatWithSelf(global, chat);
+    const canPin = selectIsChatWithSelf(global, chat); // TODO || isGroupChatAdmin(chat)
+    const canDelete = isPrivateChat(chat.id); // TODO || isGroupChatAdmin(chat) || selectIsSelfMessage(global, message)
 
     return {
       message,
       canPin,
+      canDelete,
     };
   },
   (_, actions) => {
-    const { pinMessage, setChatReplyingTo } = actions;
-    return { pinMessage, setChatReplyingTo };
+    const { setChatReplyingTo, pinMessage, deleteMessages } = actions;
+    return { setChatReplyingTo, pinMessage, deleteMessages };
   },
 )(MessageContextMenu);

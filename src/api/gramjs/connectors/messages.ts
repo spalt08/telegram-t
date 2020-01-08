@@ -4,7 +4,9 @@ import { ApiChat, ApiMessage, OnApiUpdate } from '../../types';
 import { invokeRequest } from '../client';
 import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
-import { buildInputPeer, generateRandomBigInt } from '../inputHelpers';
+import {
+  buildInputEntity, buildInputPeer, generateRandomBigInt, getEntityTypeById,
+} from '../inputHelpers';
 import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
@@ -80,6 +82,26 @@ export async function pinMessage({ chat, messageId }: { chat: ApiChat; messageId
     peer: buildInputPeer(chat.id, chat.access_hash),
     id: messageId,
   }), true);
+}
+
+export async function deleteMessages({
+  chat, messageIds, shouldDeleteForAll,
+}: {
+  chat: ApiChat; messageIds: number[]; shouldDeleteForAll?: boolean;
+}) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  await invokeRequest(
+    isChannel
+      ? new GramJs.channels.DeleteMessages({
+        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
+        id: messageIds,
+      })
+      : new GramJs.messages.DeleteMessages({
+        id: messageIds,
+        ...(shouldDeleteForAll && { revoke: true }),
+      }),
+  );
 }
 
 function updateLocalDb(

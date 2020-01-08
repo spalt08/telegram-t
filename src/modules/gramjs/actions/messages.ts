@@ -40,6 +40,13 @@ addReducer('pinMessage', (global, actions, payload) => {
   void pinMessage(chat, messageId);
 });
 
+addReducer('deleteMessages', (global, actions, payload) => {
+  const { chatId, messageIds, shouldDeleteForAll } = payload!;
+  const chat = global.chats.byId[chatId];
+
+  void deleteMessages(chat, messageIds, shouldDeleteForAll);
+});
+
 async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
   let messages = await loadChatMessagesPart(chat, fromMessageId);
 
@@ -87,4 +94,8 @@ function sendTextMessage(chat: ApiChat, text: string, replyingTo?: number) {
 
 function pinMessage(chat: ApiChat, messageId: number) {
   void callSdk('pinMessage', { chat, messageId });
+}
+
+function deleteMessages(chat: ApiChat, messageIds: number[], shouldDeleteForAll?: boolean) {
+  void callSdk('deleteMessages', { chat, messageIds, shouldDeleteForAll });
 }

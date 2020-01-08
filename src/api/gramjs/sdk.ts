@@ -2,7 +2,9 @@ import {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration,
 } from './connectors/auth';
 import { fetchChats, fetchFullChat, fetchChatOnlines } from './connectors/chats';
-import { fetchMessages, sendMessage, pinMessage } from './connectors/messages';
+import {
+  fetchMessages, sendMessage, pinMessage, deleteMessages,
+} from './connectors/messages';
 import { fetchFullUser } from './connectors/users';
 import { downloadMedia } from './client';
 
@@ -15,6 +17,7 @@ export default {
   fetchMessages,
   sendMessage,
   pinMessage,
+  deleteMessages,
   downloadMedia,
   fetchFullChat,
   fetchChatOnlines,
