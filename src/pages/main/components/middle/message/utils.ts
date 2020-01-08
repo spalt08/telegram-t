@@ -121,7 +121,12 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   }
 
   if (photo || video) {
-    classNames.push('media');
+    if (video && video.isRound) {
+      classNames.push('round', 'sticker');
+    } else {
+      classNames.push('media');
+    }
+
     if (options.isReply) {
       replyThumbnail = getReplyThumbnail(photo || video);
     }

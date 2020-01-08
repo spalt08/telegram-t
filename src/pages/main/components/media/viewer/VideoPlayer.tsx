@@ -29,6 +29,7 @@ const VideoPlayer: FC<IProps> = ({ url }) => {
       <video
         autoPlay
         controls
+        // @ts-ignore
         style={style}
         id="media-viewer-video"
         onLoadedMetadata={handleMetadata}

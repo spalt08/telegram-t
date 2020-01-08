@@ -183,7 +183,7 @@ function renderPhoto(
 
   return (
     <div
-      className="media-content"
+      className="media-content has-viewer"
       onClick={clickHandler}
     >
       <img
@@ -226,7 +226,7 @@ function renderVideo(
 
   return (
     <div
-      className="media-content"
+      className="media-content has-viewer"
       onClick={clickHandler}
     >
       {isInlineVideo && (
