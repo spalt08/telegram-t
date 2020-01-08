@@ -27,12 +27,19 @@ type IProps = {
   message: ApiMessage;
   onClose: (e: React.MouseEvent<any, MouseEvent>) => void;
   canPin?: boolean;
-} & Pick<GlobalActions, 'pinMessage'>;
+} & Pick<GlobalActions, 'pinMessage' | 'setChatReplyingTo'>;
 
 const SCROLLBAR_WIDTH = 10;
 
 const MessageContextMenu: FC<IProps> = ({
-  isOpen, messageId, anchor, message, onClose, canPin, pinMessage,
+  isOpen,
+  messageId,
+  anchor,
+  message,
+  onClose,
+  canPin,
+  pinMessage,
+  setChatReplyingTo,
 }) => {
   const [isShown, setIsShown] = useState(false);
   const [positionX, setPositionX] = useState('right');
@@ -81,6 +88,10 @@ const MessageContextMenu: FC<IProps> = ({
     pinMessage({ chatId: message.chat_id, messageId });
   }, [pinMessage, message, messageId]);
 
+  const handleReply = useCallback(() => {
+    setChatReplyingTo({ chatId: message.chat_id, messageId });
+  }, [setChatReplyingTo, message, messageId]);
+
   return (
     <Menu
       isOpen={isOpen}
@@ -91,7 +102,7 @@ const MessageContextMenu: FC<IProps> = ({
       className={`MessageContextMenu fluid${isOpen ? ' open' : ''}${isShown ? ' shown' : ''}`}
       onClose={handleClose}
     >
-      <MenuItem className="not-implemented" icon="reply">Reply</MenuItem>
+      <MenuItem icon="reply" onClick={handleReply}>Reply</MenuItem>
       {copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
@@ -116,7 +127,7 @@ export default withGlobal(
     };
   },
   (_, actions) => {
-    const { pinMessage } = actions;
-    return { pinMessage };
+    const { pinMessage, setChatReplyingTo } = actions;
+    return { pinMessage, setChatReplyingTo };
   },
 )(MessageContextMenu);

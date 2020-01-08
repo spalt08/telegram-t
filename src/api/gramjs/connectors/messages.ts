@@ -51,8 +51,12 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
   };
 }
 
-export async function sendMessage({ chat, text }: { chat: ApiChat; text: string }) {
-  const localMessage = buildLocalMessage(chat.id, text);
+export async function sendMessage({
+  chat, text, replyingTo,
+}: {
+  chat: ApiChat; text: string; replyingTo?: number;
+}) {
+  const localMessage = buildLocalMessage(chat.id, text, replyingTo);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -67,6 +71,7 @@ export async function sendMessage({ chat, text }: { chat: ApiChat; text: string 
     message: text,
     peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
+    ...(replyingTo && { replyToMsgId: replyingTo }),
   }), true);
 }
 

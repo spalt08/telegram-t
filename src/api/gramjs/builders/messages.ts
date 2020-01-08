@@ -348,7 +348,7 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
 // We only support 100000 local pending messages here and expect it will not interfere with real IDs.
 let localMessageCounter = -1;
 
-export function buildLocalMessage(chatId: number, text: string): ApiMessage {
+export function buildLocalMessage(chatId: number, text: string, replyingTo?: number): ApiMessage {
   const localId = localMessageCounter--;
 
   return {
@@ -367,5 +367,6 @@ export function buildLocalMessage(chatId: number, text: string): ApiMessage {
     sending_state: {
       '@type': 'messageSendingStatePending',
     },
+    ...(replyingTo && { reply_to_message_id: replyingTo }),
   };
 }

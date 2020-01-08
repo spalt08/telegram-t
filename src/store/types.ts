@@ -16,6 +16,7 @@ export type GlobalState = {
     ids: number[] | null;
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
+    replyingToById: Record<number, number>;
   };
 
   groups: {
@@ -45,7 +46,7 @@ export type ActionTypes = (
   'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'toggleRightColumn' | 'saveSession' | 'sync' |
   // chats
-  'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' |
+  'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' |
   // messages
   'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' |

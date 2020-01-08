@@ -34,6 +34,23 @@ export function updateChatScrollOffset(
   };
 }
 
+export function updateChatReplyingTo(
+  global: GlobalState,
+  chatId: number,
+  messageId: number,
+) {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      replyingToById: {
+        ...global.chats.replyingToById,
+        [chatId]: messageId,
+      },
+    },
+  };
+}
+
 export function setChats(global: GlobalState, byId: Record<number, ApiChat>) {
   return {
     ...global,

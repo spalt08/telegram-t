@@ -21,6 +21,7 @@ const INITIAL_STATE: GlobalState = {
     ids: null,
     byId: {},
     scrollOffsetById: {},
+    replyingToById: {},
   },
 
   groups: {
@@ -99,11 +100,13 @@ function updateCache(state: GlobalState) {
 function reduceChatsForCache(state: GlobalState) {
   const byId: GlobalState['chats']['byId'] = {};
   const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
+  const replyingToById: GlobalState['chats']['replyingToById'] = {};
 
   if (state.chats.ids) {
     state.chats.ids.forEach((id) => {
       byId[id] = state.chats.byId[id];
       scrollOffsetById[id] = state.chats.scrollOffsetById[id];
+      replyingToById[id] = state.chats.replyingToById[id];
     });
   }
 
@@ -111,6 +114,7 @@ function reduceChatsForCache(state: GlobalState) {
     ...state.chats,
     byId,
     scrollOffsetById,
+    replyingToById,
   };
 }
 

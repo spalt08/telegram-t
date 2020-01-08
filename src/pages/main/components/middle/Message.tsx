@@ -73,7 +73,7 @@ const Message: FC<IProps> = ({
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLBodyElement>): void => {
+  const handleKeyDown = (e: KeyboardEvent): void => {
     if (contextMenuPosition !== null && (e.key === 'Esc' || e.key === 'Escape')) {
       e.stopPropagation();
       closeContextMenu();
@@ -194,8 +194,14 @@ const Message: FC<IProps> = ({
       {showAvatar && (
         <Avatar size="small" user={sender} onClick={viewUser} />
       )}
-      {/* eslint-disable-next-line */}
-      <div className={contentClassName} style={style} onMouseDown={handleBeforeContextMenu} onContextMenu={showContextMenu}>
+      <div
+        className={contentClassName}
+        // @ts-ignore
+        // eslint-disable-next-line
+        style={style}
+        onMouseDown={handleBeforeContextMenu}
+        onContextMenu={showContextMenu}
+      >
         {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
         )}

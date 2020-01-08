@@ -6,15 +6,18 @@ import { GlobalActions } from '../../../../store/types';
 import { onNextTick } from '../../../../util/schedulers';
 import './MiddleFooter.scss';
 
-type IProps = Pick<GlobalActions, 'sendTextMessage'> & {
+type IProps = Pick<GlobalActions, 'sendTextMessage' | 'setChatReplyingTo'> & {
   selectedChatId: number;
+  replyingTo?: number;
 };
 
 const MAX_INPUT_HEIGHT = 240;
 
 let isJustSent = false;
 
-const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
+const MiddleFooter: FC<IProps> = ({
+  selectedChatId, replyingTo, sendTextMessage, setChatReplyingTo,
+}) => {
   const [messageText, setMessageText] = useState('');
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
@@ -46,6 +49,8 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
       setMessageText('');
       currentTarget.removeAttribute('style');
 
+      setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
+
       // Disable `onChange` following immediately after `onKeyPress`.
       isJustSent = true;
       setTimeout(() => {
@@ -60,7 +65,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
     <textarea
       id="message-input-text"
       className="form-control custom-scroll"
-      placeholder="Message"
+      placeholder={replyingTo ? 'Reply Message' : 'Message'}
       rows={1}
       autoComplete="off"
       onChange={onChange}
@@ -81,14 +86,16 @@ function focusInput() {
 
 export default withGlobal(
   (global) => {
-    const { chats } = global;
+    const { chats: { selectedId: selectedChatId, replyingToById } } = global;
+    const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
 
     return {
-      selectedChatId: chats.selectedId,
+      selectedChatId,
+      replyingTo,
     };
   },
   (setGlobal, actions) => {
-    const { sendTextMessage } = actions;
-    return { sendTextMessage };
+    const { sendTextMessage, setChatReplyingTo } = actions;
+    return { sendTextMessage, setChatReplyingTo };
   },
 )(MiddleFooter);

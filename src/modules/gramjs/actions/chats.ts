@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
-import { addChatIds, updateChatScrollOffset } from '../../common/chats';
+import { addChatIds } from '../../common/chats';
 import { selectChat } from '../../selectors';
 
 const LOAD_CHATS_LIMIT = 50;
@@ -12,12 +12,6 @@ addReducer('loadMoreChats', (global) => {
   const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
   const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
   void loadChats(lastChat.id, lastChat.last_message!.date);
-});
-
-addReducer('setChatScrollOffset', (global, actions, payload) => {
-  const { chatId, scrollOffset } = payload!;
-
-  return updateChatScrollOffset(global, chatId, scrollOffset);
 });
 
 addReducer('loadFullChat', (global, actions, payload) => {

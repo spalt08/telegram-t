@@ -28,8 +28,9 @@ addReducer('loadMoreChatMessages', (global, actions, payload) => {
 addReducer('sendTextMessage', (global, actions, payload) => {
   const { chatId, text } = payload!;
   const chat = global.chats.byId[chatId];
+  const replyingTo = global.chats.replyingToById[chatId];
 
-  void sendTextMessage(chat, text);
+  void sendTextMessage(chat, text, replyingTo);
 });
 
 addReducer('pinMessage', (global, actions, payload) => {
@@ -80,8 +81,8 @@ async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
   return result.messages;
 }
 
-function sendTextMessage(chat: ApiChat, text: string) {
-  void callSdk('sendMessage', { chat, text });
+function sendTextMessage(chat: ApiChat, text: string, replyingTo?: number) {
+  void callSdk('sendMessage', { chat, text, replyingTo });
 }
 
 function pinMessage(chat: ApiChat, messageId: number) {
