@@ -3,17 +3,14 @@ import React, { FC, useState, useEffect } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 import { GlobalState, GlobalActions } from '../../../store/types';
 
+import getMonkeyAnimationData from '../../../util/monkeys';
+
 import InputText from '../../../components/ui/InputText';
 import Loading from '../../../components/Loading';
+
 import AnimatedSticker from '../../../components/AnimatedSticker';
 
-import getAnimationDataFromFile from '../../../util/getAnimationDataFromFile';
-
 import './Auth.scss';
-// @ts-ignore
-import MonkeyIdle from '../../../assets/TwoFactorSetupMonkeyIdle.tgs';
-// @ts-ignore
-import MonkeyTracking from '../../../assets/TwoFactorSetupMonkeyTracking.tgs';
 
 type IProps = (
   Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>
@@ -30,10 +27,10 @@ const AuthCode: FC<IProps> = ({
 
   useEffect(() => {
     if (!idleMonkey) {
-      getAnimationDataFromFile(MonkeyIdle).then(setIdleMonkey);
+      getMonkeyAnimationData('MonkeyIdle').then(setIdleMonkey);
     }
     if (!trackingMonkey) {
-      getAnimationDataFromFile(MonkeyTracking).then(setTrackingMonkey);
+      getMonkeyAnimationData('MonkeyTracking').then(setTrackingMonkey);
     }
   }, [idleMonkey, trackingMonkey]);
 

@@ -3,13 +3,12 @@ import React, { FC, useState, useEffect } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../store/types';
+
+import getMonkeyAnimationData from '../../../util/monkeys';
 import InputPassword from '../../../components/ui/InputPassword';
 import Button from '../../../components/ui/Button';
 import AnimatedSticker from '../../../components/AnimatedSticker';
-import getAnimationDataFromFile from '../../../util/getAnimationDataFromFile';
 
-// @ts-ignore
-import MonkeyPeek from '../../../assets/TwoFactorSetupMonkeyClose.tgs';
 import './Auth.scss';
 
 type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'setAuthPassword'>;
@@ -23,7 +22,7 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
 
   useEffect(() => {
     if (!peekMonkey) {
-      getAnimationDataFromFile(MonkeyPeek).then(setPeekMonkey);
+      getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkey);
     }
   }, [peekMonkey]);
 

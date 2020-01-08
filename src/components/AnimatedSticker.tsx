@@ -91,6 +91,7 @@ const AnimatedSticker: FC<IProps> = ({
     <div
       id={`sticker:${id}`}
       className={`AnimatedSticker ${className}`}
+      // @ts-ignore
       style={style}
     />
   );

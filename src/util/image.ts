@@ -1,3 +1,19 @@
+import { pause } from './schedulers';
+
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved
+import spinnerPaths from '../assets/spinner-*.svg';
+
+export async function preloadSpinners(lazyTimeout = 1000) {
+  await pause(lazyTimeout);
+
+  (Object
+    .values(spinnerPaths) as string[])
+    .forEach((path) => {
+      preloadImage(path);
+    });
+}
+
 export async function insertImage(image: File | string, containerId: string) {
   const previousImg = document.querySelector(`#${containerId} img`);
   if (previousImg) {
@@ -12,8 +28,7 @@ export async function insertImage(image: File | string, containerId: string) {
   container.appendChild(img);
 
   try {
-    const url = typeof image === 'string' ? image : (await getImageData(image)).url;
-    img.src = url;
+    img.src = typeof image === 'string' ? image : (await getImageData(image)).url;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
