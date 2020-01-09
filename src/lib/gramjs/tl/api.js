@@ -257,7 +257,7 @@ function createClasses(classesType, params) {
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
-                          if (this[arg]===false || this[arg]==null || argsConfig[arg].type==='true'){
+                          if (this[arg]===false || this[arg]===null || this[arg]===undefined || argsConfig[arg].type==='true'){
                               continue
                           }
                         }
