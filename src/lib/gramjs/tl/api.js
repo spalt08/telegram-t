@@ -257,27 +257,11 @@ function createClasses(classesType, params) {
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
-                            if (argsConfig[arg] === 'true') {
-                                // TODO ?
-                            } else if (argsConfig[arg].isVector) {
-                                if (!this[arg]) {
-                                    buffers.push(Buffer.alloc(0))
-                                } else {
-                                    const tempBuffers = []
-                                    if (argsConfig[arg].useVectorId) {
-                                        tempBuffers.push(Buffer.from('15c4b51c', 'hex'))
-                                    }
-                                    const l = Buffer.alloc(4)
-                                    l.writeInt32LE(this[arg].length, 0)
-                                    buffers.push(Buffer.concat([
-                                        ...tempBuffers,
-                                        l,
-                                        Buffer.concat(this[arg].map(x => argToBytes(x, argsConfig[arg].type)))
-                                    ]))
-                                }
-                            }
+                          if (this[arg]===false || this[arg]==null){
+                              continue
+                          }
                         }
-                        if (argsConfig[arg].isVector && !argsConfig[arg].isFlag) {
+                        if (argsConfig[arg].isVector) {
                             if (argsConfig[arg].useVectorId) {
                                 buffers.push(Buffer.from('15c4b51c', 'hex'))
                             }
@@ -339,9 +323,6 @@ function createClasses(classesType, params) {
                                     buffers.push(serializeDate(this[arg]))
                                     break
                                 default:
-                                    if (this[arg]===false || this[arg]==null){
-                                        continue
-                                    }
                                     buffers.push(this[arg].getBytes())
                                     let boxed = (argsConfig[arg].type.charAt(argsConfig[arg].type.indexOf('.') + 1))
                                     boxed = boxed === boxed.toUpperCase()
