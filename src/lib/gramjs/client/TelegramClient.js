@@ -11,6 +11,7 @@ const { LAYER } = require('../tl/AllTLObjects')
 const { constructors, requests } = require('../tl')
 const { computeCheck } = require('../Password')
 const MTProtoSender = require('../network/MTProtoSender')
+const { UpdateConnectionState } = require("../network")
 const { FloodWaitError } = require('../errors/RPCErrorList')
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated')
 
@@ -33,8 +34,8 @@ class TelegramClient {
         proxy: null,
         timeout: 10,
         requestRetries: 5,
-        connectionRetries: 5,
-        retryDelay: 1,
+        connectionRetries: Infinity,
+        retryDelay: 1000,
         autoReconnect: true,
         sequentialUpdates: false,
         floodSleepLimit: 60,
@@ -153,15 +154,18 @@ class TelegramClient {
             updateCallback: this._handleUpdate.bind(this),
 
         })
+
         const connection = new this._connection(this.session.serverAddress
             , this.session.port, this.session.dcId, this._log)
-        if (!await this._sender.connect(connection)) {
+        if (!await this._sender.connect(connection,this._dispatchUpdate.bind(this))) {
             return
         }
         this.session.setAuthKey(this._sender.authKey)
         await this._sender.send(this._initWith(
             new requests.help.GetConfig({}),
         ))
+
+        this._dispatchUpdate({ update: new UpdateConnectionState(1) })
         this._updateLoop()
     }
 
@@ -924,6 +928,13 @@ class TelegramClient {
     }
 
     _handleUpdate(update) {
+        if (update === 1) {
+            this._dispatchUpdate({ update: new UpdateConnectionState(update) })
+            return
+        } else if (update === -1) {
+            this._dispatchUpdate({ update: new UpdateConnectionState(update) })
+            return
+        }
         this.session.processEntities(update)
         this._entityCache.add(update)
 

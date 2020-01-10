@@ -15,12 +15,24 @@ export type ApiUpdateAuthorizationStateType = (
   'authorizationStateClosed'
 );
 
+export type ApiUpdateConnectionStateType = (
+  'connectionStateConnecting' |
+  'connectionStateReady'
+);
+
 export type ApiUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState';
   authorization_state: {
     '@type': ApiUpdateAuthorizationStateType;
   };
   session_id?: string;
+};
+
+export type ApiUpdateConnectionState = {
+  '@type': 'updateConnectionState';
+  connection_state: {
+    '@type': ApiUpdateConnectionStateType;
+  };
 };
 
 export type ApiUpdateChats = {
@@ -106,7 +118,7 @@ export type ApiUpdateMessageImage = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateAuthorizationState |
+  ApiUpdateAuthorizationState | ApiUpdateConnectionState |
   ApiUpdateChats | ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

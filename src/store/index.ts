@@ -10,7 +10,6 @@ import { getChatAvatarHash } from '../modules/helpers';
 import * as mediaLoader from '../util/mediaLoader';
 
 const INITIAL_STATE: GlobalState = {
-  isInitialized: false,
   showRightColumn: true,
 
   users: {
@@ -81,15 +80,16 @@ function preloadAssets(cached: GlobalState) {
   ]);
 }
 
-function updateCache(state: GlobalState) {
-  if (state.isLoggingOut) {
+function updateCache(global: GlobalState) {
+  if (global.isLoggingOut) {
     return;
   }
 
   const reducedState: GlobalState = {
-    ...state,
-    chats: reduceChatsForCache(state),
-    messages: reduceMessagesForCache(state),
+    ...global,
+    chats: reduceChatsForCache(global),
+    messages: reduceMessagesForCache(global),
+    connectionState: undefined,
     // TODO Reduce `users` and `groups`?
   };
 
@@ -97,38 +97,38 @@ function updateCache(state: GlobalState) {
   localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
 }
 
-function reduceChatsForCache(state: GlobalState) {
+function reduceChatsForCache(global: GlobalState) {
   const byId: GlobalState['chats']['byId'] = {};
   const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
   const replyingToById: GlobalState['chats']['replyingToById'] = {};
 
-  if (state.chats.ids) {
-    state.chats.ids.forEach((id) => {
-      byId[id] = state.chats.byId[id];
-      scrollOffsetById[id] = state.chats.scrollOffsetById[id];
-      replyingToById[id] = state.chats.replyingToById[id];
+  if (global.chats.ids) {
+    global.chats.ids.forEach((id) => {
+      byId[id] = global.chats.byId[id];
+      scrollOffsetById[id] = global.chats.scrollOffsetById[id];
+      replyingToById[id] = global.chats.replyingToById[id];
     });
   }
 
   return {
-    ...state.chats,
+    ...global.chats,
     byId,
     scrollOffsetById,
     replyingToById,
   };
 }
 
-function reduceMessagesForCache(state: GlobalState) {
+function reduceMessagesForCache(global: GlobalState) {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
-  if (state.chats.ids) {
-    state.chats.ids.forEach((chatId) => {
-      byChatId[chatId] = state.messages.byChatId[chatId];
+  if (global.chats.ids) {
+    global.chats.ids.forEach((chatId) => {
+      byChatId[chatId] = global.messages.byChatId[chatId];
     });
   }
 
   return {
-    ...state.messages,
+    ...global.messages,
     byChatId,
   };
 }

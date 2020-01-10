@@ -43,8 +43,8 @@ function buildApiFromTlSchema() {
     }
 
     return mergeWithNamespaces(
-        createClasses('constructor', definitions.constructors),
-        createClasses('request', definitions.requests)
+      createClasses('constructor', definitions.constructors),
+      createClasses('request', definitions.requests)
     )
 }
 

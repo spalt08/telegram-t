@@ -1,4 +1,4 @@
-import { Api as GramJs } from '../../lib/gramjs';
+import { Api as GramJs, connection } from '../../lib/gramjs';
 import { OnApiUpdate } from '../types';
 
 import {
@@ -18,8 +18,20 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRequest?: GramJs.AnyRequest) {
-  // Messages
-  if (
+  if (update instanceof connection.UpdateConnectionState) {
+    const connectionState = update.state === connection.UpdateConnectionState.states.disconnected
+      ? 'connectionStateConnecting'
+      : 'connectionStateReady';
+
+    onUpdate({
+      '@type': 'updateConnectionState',
+      connection_state: {
+        '@type': connectionState,
+      },
+    });
+
+    // Messages
+  } else if (
     update instanceof GramJs.UpdateNewMessage
     || update instanceof GramJs.UpdateNewChannelMessage
     || update instanceof GramJs.UpdateShortChatMessage

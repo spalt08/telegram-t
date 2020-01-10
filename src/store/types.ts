@@ -1,9 +1,13 @@
 import {
-  ApiChat, ApiMessage, ApiUser, ApiUpdateAuthorizationStateType, ApiGroup,
+  ApiChat,
+  ApiMessage,
+  ApiUser,
+  ApiGroup,
+  ApiUpdateAuthorizationStateType,
+  ApiUpdateConnectionStateType,
 } from '../api/types';
 
 export type GlobalState = {
-  isInitialized: boolean;
   showRightColumn: boolean;
 
   users: {
@@ -39,6 +43,8 @@ export type GlobalState = {
   authError?: string;
   authRememberMe?: boolean;
   authIsSessionRemembered?: boolean;
+
+  connectionState?: ApiUpdateConnectionStateType;
 };
 
 export type ActionTypes = (

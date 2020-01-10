@@ -1,4 +1,6 @@
-import { TelegramClient, sessions, Api as GramJs } from '../../lib/gramjs';
+import {
+  TelegramClient, sessions, Api as GramJs, connection,
+} from '../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { DEBUG, DEBUG_GRAMJS } from '../../config';
@@ -10,7 +12,10 @@ import queuedDownloadMedia from './connectors/media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
+const gramJsUpdateEventBuilder = { build: (update: object) => update };
+
 let client: TelegramClient;
+let isConnected = false;
 
 export async function init(sessionId: string) {
   const session = new sessions.CacheApiSession(sessionId);
@@ -21,7 +26,8 @@ export async function init(sessionId: string) {
     { useWSS: true } as any,
   );
 
-  client.addEventHandler(onGramJsUpdate, { build: (update: object) => update });
+  client.addEventHandler(onGramJsUpdate, gramJsUpdateEventBuilder);
+  client.addEventHandler(onUpdate, gramJsUpdateEventBuilder);
 
   try {
     if (DEBUG) {
@@ -54,8 +60,20 @@ export async function init(sessionId: string) {
   }
 }
 
+function onUpdate(update: any) {
+  if (update instanceof connection.UpdateConnectionState) {
+    isConnected = update.state === connection.UpdateConnectionState.states.connected;
+  }
+}
+
 export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, shouldHandleUpdates = false) {
   if (DEBUG) {
+    if (!isConnected) {
+      // eslint-disable-next-line no-console
+      console.warn(`[GramJs/client] INVOKE ${request.className} ERROR: Client is not connected`);
+      return undefined;
+    }
+
     // eslint-disable-next-line no-console
     console.log(`[GramJs/client] INVOKE ${request.className}`);
   }
@@ -81,5 +99,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, sho
 }
 
 export function downloadMedia(url: string) {
+  if (!isConnected) {
+    throw new Error('ERROR: Client is not connected');
+  }
+
   return queuedDownloadMedia(client, url);
 }

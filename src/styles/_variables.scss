@@ -15,8 +15,11 @@ $color-error: #e53935;
 
 $color-warning: #fb8c00;
 
+$color-yellow: #FDD764;
+
 $color-white: #ffffff;
 $color-black: #000000;
+$color-dark-gray: #2e3939;
 $color-gray: #c4c9cc;
 $color-text-secondary: #707579;
 $color-text-meta: #686c72;
@@ -26,6 +29,7 @@ $color-chat-hover: #f4f4f5;
 :root {
   --color-background: #{$color-white};
   --color-text: #{$color-black};
+  --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
   --color-text-secondary-rgb: #{toRGB($color-text-secondary)};
   --color-text-meta: #{$color-text-meta};
@@ -41,6 +45,8 @@ $color-chat-hover: #f4f4f5;
   --color-error: #{$color-error};
 
   --color-warning: #{$color-warning};
+
+  --color-yellow: #{$color-yellow};
 
   --color-links: #{$color-links};
   --color-links-hover: #{darken($color-links, 8%)};

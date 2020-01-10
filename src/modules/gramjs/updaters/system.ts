@@ -1,11 +1,19 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 
-import { ApiUpdate, ApiUpdateAuthorizationState } from '../../../api/types';
+import {
+  ApiUpdate,
+  ApiUpdateAuthorizationState,
+  ApiUpdateConnectionState,
+} from '../../../api/types';
 
 export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
     case 'updateAuthorizationState':
       onUpdateAuthorizationState(update);
+      break;
+
+    case 'updateConnectionState':
+      onUpdateConnectionState(update);
       break;
   }
 }
@@ -55,6 +63,25 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         ...getGlobal(),
         isLoggingOut: false,
       });
+
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function onUpdateConnectionState(update: ApiUpdateConnectionState) {
+  const connectionState = update.connection_state['@type'];
+
+  setGlobal({
+    ...getGlobal(),
+    connectionState,
+  });
+
+  switch (connectionState) {
+    case 'connectionStateReady': {
+      getDispatch().sync();
 
       break;
     }
