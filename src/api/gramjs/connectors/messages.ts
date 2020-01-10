@@ -102,6 +102,12 @@ export async function deleteMessages({
         ...(shouldDeleteForAll && { revoke: true }),
       }),
   );
+
+  onUpdate({
+    '@type': 'deleteMessages',
+    ids: messageIds,
+    ...(isChannel && { chat_id: chat.id }),
+  });
 }
 
 function updateLocalDb(
