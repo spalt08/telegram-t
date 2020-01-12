@@ -388,6 +388,7 @@
     .document-content {
       display: flex;
       align-items: center;
+      margin-bottom: 0.5rem;
 
       .document-icon {
         width: 3.5rem;
@@ -434,7 +435,7 @@
         .document-filename {
           font-size: 1rem;
           line-height: 1rem;
-          margin-bottom: 0.25rem;
+          padding-bottom: 0.25rem;
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
