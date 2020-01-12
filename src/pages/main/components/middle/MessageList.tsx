@@ -99,7 +99,7 @@ const MessageList: FC<IProps> = ({
 
   function renderMessageDateGroup(messageDateGroup: MessageDateGroup) {
     return (
-      <div className="message-date-group">
+      <div className="message-date-group" key={messageDateGroup.datetime}>
         <div className="message-date-header">{formatHumanDate(messageDateGroup.datetime)}</div>
         {messageDateGroup.messageGroups.map((messageGroup) => {
           if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
