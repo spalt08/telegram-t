@@ -1,9 +1,9 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
-import React, { FC, useState } from '../../../../lib/teact';
+import React, { FC, useEffect, useState } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
-import { onNextTick } from '../../../../util/schedulers';
+
 import './MiddleFooter.scss';
 
 type IProps = Pick<GlobalActions, 'sendTextMessage' | 'setChatReplyingTo'> & {
@@ -59,7 +59,9 @@ const MiddleFooter: FC<IProps> = ({
     }
   }
 
-  onNextTick(focusInput);
+  useEffect(() => {
+    requestAnimationFrame(focusInput);
+  });
 
   return (
     <textarea
