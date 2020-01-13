@@ -85,6 +85,7 @@ const MessageList: FC<IProps> = ({
 
   useEffect(() => {
     if (chatId) {
+      // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
       currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
     }
   }, [chatId]);
@@ -94,6 +95,10 @@ const MessageList: FC<IProps> = ({
 
     if (chatId && scrollContainer) {
       scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(currentScrollOffset || 0);
+    }
+
+    if (process.env.NODE_ENV === 'perf') {
+      (window as WindowWithPerf).perf.onMessageListEffectsDone();
     }
   }, [chatId, messages]);
 

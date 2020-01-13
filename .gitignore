@@ -6,3 +6,4 @@ src/lib/gramjs/build/
 build-contest/
 .idea
 *.iml
+src/dev/perf/screenshot.png

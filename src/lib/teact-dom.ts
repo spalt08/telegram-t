@@ -17,13 +17,23 @@ type VirtualDomHead = {
 };
 
 const $head: VirtualDomHead = { children: [] };
+let DEBUG_virtualTreeSize = 1;
 
 function render($element: VirtualElement, parentEl: HTMLElement | null) {
   if (!parentEl) {
-    return;
+    return undefined;
   }
 
   $head.children = [renderWithVirtual(parentEl, undefined, $element, [0]) as VirtualElement];
+
+  if (process.env.NODE_ENV === 'perf') {
+    DEBUG_virtualTreeSize = 0;
+    DEBUG_addToVirtualTreeSize($head);
+
+    return DEBUG_virtualTreeSize;
+  }
+
+  return undefined;
 }
 
 function renderWithVirtual(
@@ -262,6 +272,16 @@ function setupAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHan
 function removeAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
   element.removeEventListener('paste', handler);
   element.removeEventListener('input', handler);
+}
+
+function DEBUG_addToVirtualTreeSize($current: VirtualRealElement | VirtualDomHead) {
+  DEBUG_virtualTreeSize += $current.children.length;
+
+  $current.children.forEach(($child) => {
+    if (isRealElement($child)) {
+      DEBUG_addToVirtualTreeSize($child);
+    }
+  });
 }
 
 export default { render };

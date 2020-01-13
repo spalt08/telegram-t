@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "shx mkdir -p dist/ && shx cp node_modules/tdweb/dist/* dist/ && parcel src/index.html",
+    "dev": "parcel src/index.html",
     "build": "npm run build:staging:gramjs",
     "build:staging:gramjs": "parcel build src/index.html --public-url ./",
     "build:contest:tdlib": "./deploy/contest-tdlib.sh",
     "build:contest:gramjs": "./deploy/contest-gramjs.sh",
     "build:github:all": "./deploy/github.sh",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
+    "perf:test": "TS_NODE_COMPILER_OPTIONS='{\"isolatedModules\":false}' ts-node src/dev/perf/render.perf.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
@@ -29,6 +30,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@types/croppie": "^2.5.4",
+    "@types/puppeteer": "^2.0.0",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.3",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
@@ -50,10 +52,12 @@
     "parcel": "^1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
     "postcss-modules": "^1.5.0",
+    "puppeteer": "^2.0.0",
     "react": "^16.11.0",
     "sass": "^1.23.3",
     "shx": "^0.3.2",
     "terser": "^4.3.9",
+    "ts-node": "^8.6.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {
