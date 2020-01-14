@@ -81,7 +81,9 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   switch (connectionState) {
     case 'connectionStateReady': {
-      getDispatch().sync();
+      if (getGlobal().authState === 'authorizationStateReady') {
+        getDispatch().sync();
+      }
 
       break;
     }
