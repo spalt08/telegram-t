@@ -34,7 +34,6 @@ export interface VirtualElementTag {
 
 export interface VirtualElementComponent {
   type: VirtualElementTypesEnum.Component;
-  target?: Node;
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
@@ -78,7 +77,7 @@ interface ComponentInstance {
       }[];
     };
   };
-  forceUpdate: () => void;
+  forceUpdate?: () => void;
   onUpdate?: () => void;
 }
 
@@ -152,7 +151,6 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
         byCursor: [],
       },
     },
-    forceUpdate: throttleWithRaf(() => forceUpdate(componentInstance)),
   };
 
   componentInstance.$element = buildComponentElement(componentInstance);
@@ -171,12 +169,6 @@ function buildComponentElement(
     type: VirtualElementTypesEnum.Component,
     props,
     children,
-    get target() {
-      return this.children[0].target;
-    },
-    set target(value) {
-      this.children[0].target = value;
-    },
   };
 }
 
@@ -286,7 +278,7 @@ function unmountComponent(componentInstance: ComponentInstance) {
   componentInstance.isMounted = false;
 }
 
-function forceUpdate(componentInstance: ComponentInstance) {
+function forceUpdateComponent(componentInstance: ComponentInstance) {
   if (componentInstance.onUpdate && componentInstance.isMounted) {
     const currentElement = componentInstance.$element;
     renderComponent(componentInstance);
@@ -294,6 +286,22 @@ function forceUpdate(componentInstance: ComponentInstance) {
     if (componentInstance.$element !== currentElement) {
       componentInstance.onUpdate();
     }
+  }
+}
+
+export function getTarget($element: VirtualElement): Node | undefined {
+  if (isComponentElement($element)) {
+    return getTarget($element.children[0]);
+  } else {
+    return $element.target;
+  }
+}
+
+export function setTarget($element: VirtualElement, target: Node) {
+  if (isComponentElement($element)) {
+    setTarget($element.children[0], target);
+  } else {
+    $element.target = target;
   }
 }
 
@@ -306,6 +314,10 @@ export function useState(initial?: any) {
       setter: ((componentInstance) => (newValue: any) => {
         if (byCursor[cursor].value !== newValue) {
           byCursor[cursor].value = newValue;
+
+          if (!componentInstance.forceUpdate) {
+            componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
+          }
           componentInstance.forceUpdate();
         }
       })(renderingInstance),

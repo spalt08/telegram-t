@@ -5,8 +5,10 @@ import {
   isRealElement,
   isTextElement,
   mountComponent,
-  unmountTree,
   renderComponent,
+  unmountTree,
+  getTarget,
+  setTarget,
   VirtualElement,
   VirtualElementComponent,
   VirtualRealElement,
@@ -24,7 +26,7 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
     return undefined;
   }
 
-  $head.children = [renderWithVirtual(parentEl, undefined, $element, [0]) as VirtualElement];
+  $head.children = [renderWithVirtual(parentEl, undefined, $element, $head, 0) as VirtualElement];
 
   if (process.env.NODE_ENV === 'perf') {
     DEBUG_virtualTreeSize = 0;
@@ -40,7 +42,8 @@ function renderWithVirtual(
   parentEl: HTMLElement,
   $current: VirtualElement | undefined,
   $new: VirtualElement | undefined,
-  path: number[],
+  $parent: VirtualRealElement | VirtualDomHead,
+  index: number,
   skipComponentUpdate = false,
 ) {
   if (
@@ -52,40 +55,52 @@ function renderWithVirtual(
     $new = updateComponent($current, $new);
   }
 
+  // Parent element may have changed, so we need to update the listener closure.
+  if (!skipComponentUpdate && $new && isComponentElement($new) && $new.componentInstance.isMounted) {
+    setupComponentUpdateListener($new, $parent, index, parentEl);
+  }
+
   if ($current === $new) {
     return $new;
   }
 
   if (!$current && $new) {
-    $new = initComponent($new, parentEl, path);
-    $new.target = createNode($new, parentEl, path);
-    parentEl.appendChild($new.target);
+    if (isComponentElement($new)) {
+      $new = initComponent($new, $parent, index, parentEl);
+    }
+
+    const node = createNode($new);
+    setTarget($new, node);
+    parentEl.appendChild(node);
   } else if ($current && !$new) {
     unmountTree($current);
-    parentEl.removeChild($current.target!);
+    parentEl.removeChild(getTarget($current)!);
   } else if ($current && $new) {
     if (hasElementChanged($current, $new)) {
       unmountTree($current);
-      $new = initComponent($new, parentEl, path);
-      $new.target = createNode($new, parentEl, path);
-      parentEl.replaceChild($new.target, $current.target!);
+      if (isComponentElement($new)) {
+        $new = initComponent($new, $parent, index, parentEl);
+      }
+
+      const node = createNode($new);
+      setTarget($new, node);
+      parentEl.replaceChild(node, getTarget($current)!);
     } else {
       const areComponents = isComponentElement($current) && isComponentElement($new);
 
       if (!areComponents) {
-        $new.target = $current.target;
+        setTarget($new, getTarget($current)!);
       }
 
       if (isRealElement($current) && isRealElement($new)) {
         if (!areComponents) {
-          updateAttributes($current, $new, $current.target as HTMLElement);
+          updateAttributes($current, $new, getTarget($current) as HTMLElement);
         }
 
         $new.children = renderChildren(
           $current,
           $new,
-          areComponents ? parentEl : $current.target as HTMLElement,
-          path,
+          areComponents ? parentEl : getTarget($current) as HTMLElement,
         );
       }
     }
@@ -94,7 +109,9 @@ function renderWithVirtual(
   return $new;
 }
 
-function initComponent($element: VirtualElement, parentEl: HTMLElement, path: number[]) {
+function initComponent(
+  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: HTMLElement,
+) {
   if (!isComponentElement($element)) {
     return $element;
   }
@@ -102,22 +119,12 @@ function initComponent($element: VirtualElement, parentEl: HTMLElement, path: nu
   const { componentInstance } = $element;
 
   if (!componentInstance.isMounted) {
-    componentInstance.onUpdate = () => {
-      const [$parent, index] = findParent(path);
-      $parent.children[index] = renderWithVirtual(
-        parentEl,
-        $parent.children[index],
-        componentInstance.$element,
-        path,
-        true,
-      ) as VirtualElementComponent;
-    };
-
     $element = mountComponent(componentInstance);
+    setupComponentUpdateListener($element, $parent, index, parentEl);
 
     const $firstChild = $element.children[0];
     if (isComponentElement($firstChild)) {
-      $element.children = [initComponent($firstChild, parentEl, continuePath(path, 0))];
+      $element.children = [initComponent($firstChild, $element, 0, parentEl)];
     }
 
     componentInstance.isMounted = true;
@@ -133,20 +140,24 @@ function updateComponent($current: VirtualElementComponent, $new: VirtualElement
   return renderComponent($current.componentInstance);
 }
 
-function continuePath(path: number[], index: number) {
-  return path.concat([index]);
+function setupComponentUpdateListener(
+  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: HTMLElement,
+) {
+  const { componentInstance } = $element;
+
+  componentInstance.onUpdate = () => {
+    $parent.children[index] = renderWithVirtual(
+      parentEl,
+      $parent.children[index],
+      componentInstance.$element,
+      $parent,
+      index,
+      true,
+    ) as VirtualElementComponent;
+  };
 }
 
-function findParent(path: number[]): [VirtualRealElement, number] {
-  const parent = path.slice(0, -1).reduce((current: VirtualDomHead | VirtualRealElement, childIndex) => {
-    return current.children[childIndex] as VirtualDomHead | VirtualRealElement;
-  }, $head) as VirtualRealElement;
-  const lastIndex = path[path.length - 1];
-
-  return [parent, lastIndex];
-}
-
-function createNode($element: VirtualElement, parentEl: HTMLElement, path: number[]): Node {
+function createNode($element: VirtualElement): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');
   }
@@ -156,7 +167,7 @@ function createNode($element: VirtualElement, parentEl: HTMLElement, path: numbe
   }
 
   if (isComponentElement($element)) {
-    return createNode($element.children[0] as VirtualElement, parentEl, continuePath(path, 0));
+    return createNode($element.children[0] as VirtualElement);
   }
 
   const { tag, props, children = [] } = $element;
@@ -167,14 +178,14 @@ function createNode($element: VirtualElement, parentEl: HTMLElement, path: numbe
   });
 
   $element.children = children.map(($child, i) => (
-    renderWithVirtual(element, undefined, $child, continuePath(path, i)) as VirtualElement
+    renderWithVirtual(element, undefined, $child, $element, i) as VirtualElement
   ));
 
   return element;
 }
 
 function renderChildren(
-  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement, path: number[],
+  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
 ) {
   const maxLength = Math.max($current.children.length, $new.children.length);
   const newChildren = [];
@@ -184,7 +195,8 @@ function renderChildren(
       currentEl,
       $current.children[i],
       $new.children[i],
-      continuePath(path, i),
+      $new,
+      i,
     );
 
     if ($newChild) {
