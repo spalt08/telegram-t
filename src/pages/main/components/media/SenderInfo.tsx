@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC } from '../../../../lib/teact';
 import { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
 import Avatar from '../../../../components/Avatar';
 import { getUserFullName, isChannel } from '../../../../modules/helpers';
@@ -40,7 +40,7 @@ const SenderInfo: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal((global, { chatId, messageId }) => {
+export default withGlobal((global, { chatId, messageId }) => {
   if (!messageId || !chatId) {
     return {};
   }
@@ -66,4 +66,4 @@ export default memo(withGlobal((global, { chatId, messageId }) => {
     sender,
     message,
   };
-})(SenderInfo));
+})(SenderInfo);

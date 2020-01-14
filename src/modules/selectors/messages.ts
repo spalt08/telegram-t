@@ -1,5 +1,5 @@
 import { GlobalState } from '../../store/types';
-import { ApiMessage, ApiUser } from '../../api/types';
+import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat } from './chats';
 import { getSendingState, isMessageLocal } from '../helpers';
 import { selectUser } from './users';
@@ -22,7 +22,7 @@ export function selectIsUnread(global: GlobalState, message: ApiMessage) {
   return isMessageLocal(message) || chat.last_read_outbox_message_id < message.id;
 }
 
-export function selectOutgoingStatus(global: GlobalState, message: ApiMessage) {
+export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
   if (!selectIsUnread(global, message)) {
     return 'read';
   }

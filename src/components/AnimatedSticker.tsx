@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useState, memo,
+  FC, useEffect, useState,
 } from '../lib/teact';
 import { DEBUG } from '../config';
 
@@ -97,4 +97,4 @@ const AnimatedSticker: FC<IProps> = ({
   );
 };
 
-export default memo(AnimatedSticker);
+export default AnimatedSticker;

@@ -12,7 +12,6 @@ type IProps = {
   text: string;
 };
 
-// TODO @not-implemented
 const MentionLink: FC<IProps> = ({ userId, user, text }) => {
   const title = userId && user ? getUserFullName(user) as string : undefined;
 

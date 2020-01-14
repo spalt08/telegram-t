@@ -1,12 +1,14 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser, ApiContact } from '../../../../api/types';
+
 import { selectUser } from '../../../../modules/selectors';
+import { formatPhoneNumberWithCode } from '../../../../util/formatPhoneNumber';
+
+import Avatar from '../../../../components/Avatar';
 
 import './ContactMessage.scss';
-import Avatar from '../../../../components/Avatar';
-import { formatPhoneNumberWithCode } from '../../../../util/formatPhoneNumber';
 
 type IProps = {
   contact: ApiContact;
@@ -31,10 +33,10 @@ const ContactMessage: FC<IProps> = ({ contact, user }) => {
   );
 };
 
-export default memo(withGlobal(
+export default withGlobal(
   (global, { contact }: IProps) => {
     return {
       user: selectUser(global, contact.userId),
     };
   },
-)(ContactMessage));
+)(ContactMessage);

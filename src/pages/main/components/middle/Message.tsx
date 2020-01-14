@@ -6,9 +6,9 @@ import { withGlobal } from '../../../../lib/teactn';
 import { GlobalActions } from '../../../../store/types';
 
 import {
-  ApiDocument, ApiMessage, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
+  ApiDocument, ApiMessage, ApiMessageOutgoingStatus, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
 } from '../../../../api/types';
-import { selectChatMessage, selectUser } from '../../../../modules/selectors';
+import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../../modules/selectors';
 import {
   getMessageMediaHash,
   getUserFullName,
@@ -40,22 +40,26 @@ type IProps = {
   message: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
-  replyMessage?: ApiMessage;
-  mediaHash?: string;
-  sender?: ApiUser;
-  originSender?: ApiUser;
   loadAndPlayMedia?: boolean;
+  sender?: ApiUser;
+  mediaHash?: string;
+  replyMessage?: ApiMessage;
+  replyMessageSender?: ApiUser;
+  originSender?: ApiUser;
+  outgoingStatus?: ApiMessageOutgoingStatus;
 } & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
   message,
   showAvatar,
   showSenderName,
-  replyMessage,
+  loadAndPlayMedia,
   mediaHash,
   sender,
+  replyMessage,
+  replyMessageSender,
   originSender,
-  loadAndPlayMedia,
+  outgoingStatus,
   selectMediaMessage,
   openUserInfo,
 }) => {
@@ -158,7 +162,7 @@ const Message: FC<IProps> = ({
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {replyMessage && <ReplyMessage message={replyMessage} />}
+        {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
         {photo && renderPhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
         {video && renderVideo(
           video, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string, loadAndPlayMedia,
@@ -206,7 +210,7 @@ const Message: FC<IProps> = ({
           <div className="sender-name">Forwarded message</div>
         )}
         {renderContent()}
-        <MessageMeta message={message} />
+        <MessageMeta message={message} outgoingStatus={outgoingStatus} />
       </div>
       {contextMenuPosition !== null && (
         <MessageContextMenu
@@ -421,10 +425,14 @@ export default memo(withGlobal(
     }
 
     return {
-      replyMessage,
       mediaHash,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
+      ...(replyMessage && {
+        replyMessage,
+        replyMessageSender: selectUser(global, replyMessage.sender_user_id),
+      }),
+      ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
     };
   },
   (setGlobal, actions) => {

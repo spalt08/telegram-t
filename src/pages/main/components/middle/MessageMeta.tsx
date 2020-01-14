@@ -1,26 +1,29 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC } from '../../../../lib/teact';
 
-import { ApiMessage } from '../../../../api/types';
+import { ApiMessage, ApiMessageOutgoingStatus } from '../../../../api/types';
+
 import { formatTime } from '../../../../util/dateFormat';
+
 import MessageOutgoingStatus from '../../../../components/MessageOutgoingStatus';
+
 import './MessageMeta.scss';
 
 type IProps = {
   message: ApiMessage;
+  outgoingStatus?: ApiMessageOutgoingStatus;
 };
 
-const MessageMeta: FC<IProps> = ({ message }) => {
+const MessageMeta: FC<IProps> = ({ message, outgoingStatus }) => {
   return (
     <span className="MessageMeta">
       <span className="message-time">
         {formatTime(message.date * 1000)}
       </span>
-      {message.is_outgoing && (
-        <MessageOutgoingStatus message={message} />
+      {outgoingStatus && (
+        <MessageOutgoingStatus status={outgoingStatus} />
       )}
     </span>
   );
 };
 
-
-export default memo(MessageMeta);
+export default MessageMeta;

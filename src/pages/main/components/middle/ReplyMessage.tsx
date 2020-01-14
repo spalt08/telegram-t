@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import {
@@ -8,7 +8,6 @@ import {
   ApiPhotoCachedSize,
 } from '../../../../api/types';
 import { getUserFullName } from '../../../../modules/helpers';
-import { selectUser } from '../../../../modules/selectors';
 import { getReplyImageDimensions } from '../../../../util/imageDimensions';
 
 import { buildMessageContent } from './message/utils';
@@ -17,7 +16,7 @@ import RippleEffect from '../../../../components/ui/RippleEffect';
 
 type IProps = {
   message: ApiMessage;
-  sender: ApiUser;
+  sender?: ApiUser;
 };
 
 const ReplyMessage: FC<IProps> = ({
@@ -58,10 +57,4 @@ function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
   );
 }
 
-export default memo(withGlobal(
-  (global, { message }: IProps) => {
-    return {
-      sender: selectUser(global, message.sender_user_id),
-    };
-  },
-)(ReplyMessage));
+export default ReplyMessage;

@@ -2,7 +2,10 @@ import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
-import { ApiChat, ApiUser, ApiMessage } from '../../../../api/types';
+import {
+  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus
+} from '../../../../api/types';
+
 import {
   getChatTitle,
   getLastMessageText,
@@ -11,18 +14,21 @@ import {
   isActionMessage,
   getPrivateChatUserId,
 } from '../../../../modules/helpers';
-import { selectUser, selectChatMessage } from '../../../../modules/selectors';
-import Avatar from '../../../../components/Avatar';
+import { selectUser, selectChatMessage, selectOutgoingStatus } from '../../../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
+
+import Avatar from '../../../../components/Avatar';
+import RippleEffect from '../../../../components/ui/RippleEffect';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
+
 import './Chat.scss';
-import RippleEffect from '../../../../components/ui/RippleEffect';
 
 type IProps = {
   chat: ApiChat;
   privateChatUser?: ApiUser;
   lastMessageSender?: ApiUser;
+  lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   selected: boolean;
 } & Pick<GlobalActions, 'openChat'>;
@@ -31,6 +37,7 @@ const Chat: FC<IProps> = ({
   chat,
   privateChatUser,
   lastMessageSender,
+  lastMessageOutgoingStatus,
   actionTargetMessage,
   selected,
   openChat,
@@ -78,7 +85,7 @@ const Chat: FC<IProps> = ({
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
           {chat.last_message && (
-            <LastMessageMeta message={chat.last_message} />
+            <LastMessageMeta message={chat.last_message} outgoingStatus={lastMessageOutgoingStatus} />
           )}
         </div>
         <div className="subtitle">
@@ -122,14 +129,15 @@ export default memo(withGlobal(
     }
 
     const lastMessage = chat.last_message;
-    const privateChatUserId = getPrivateChatUserId(chat);
     // TODO: Works for only recent messages that are already loaded in the store
     const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
       ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
       : undefined;
+    const privateChatUserId = getPrivateChatUserId(chat);
 
     return {
       lastMessageSender: selectUser(global, lastMessage.sender_user_id),
+      lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
       privateChatUser: privateChatUserId && selectUser(global, privateChatUserId),
       actionTargetMessage,
     };

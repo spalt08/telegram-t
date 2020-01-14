@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useState, memo,
+  FC, useCallback, useState,
 } from '../../lib/teact';
 import { debounce } from '../../util/schedulers';
 
@@ -52,4 +52,4 @@ const RippleEffect: FC<{}> = () => {
   );
 };
 
-export default memo(RippleEffect);
+export default RippleEffect;

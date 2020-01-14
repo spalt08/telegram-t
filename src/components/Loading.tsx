@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../lib/teact';
+import React, { FC } from '../lib/teact';
 
 import Spinner from './Spinner';
 import './Loading.scss';
@@ -11,4 +11,4 @@ const Loading: FC = () => {
   );
 };
 
-export default memo(Loading);
+export default Loading;

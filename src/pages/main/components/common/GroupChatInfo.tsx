@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat } from '../../../../api/types';
@@ -56,7 +56,7 @@ function getGroupStatus(chat: ApiChat) {
     : chatTypeString;
 }
 
-export default memo(withGlobal(
+export default withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
 
@@ -66,4 +66,4 @@ export default memo(withGlobal(
     const { loadFullChat, loadChatOnlines } = actions;
     return { loadFullChat, loadChatOnlines };
   },
-)(GroupChatInfo));
+)(GroupChatInfo);

@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useState, memo,
+  FC, useEffect, useState,
 } from '../lib/teact';
 
 import { ApiUser, ApiChat } from '../api/types';
@@ -83,4 +83,4 @@ function getFirstLetters(phrase: string) {
     .toUpperCase();
 }
 
-export default memo(Avatar);
+export default Avatar;

@@ -1,13 +1,16 @@
 import { UIEvent } from 'react';
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, memo } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import { ApiChat } from '../../../../api/types';
+
 import { toArray, orderBy } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
+
 import Chat from './Chat';
 import Loading from '../../../../components/Loading';
+
 import './ChatList.scss';
 
 type IProps = {
@@ -71,7 +74,7 @@ function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
   };
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   global => {
     const {
       chats: {
@@ -91,4 +94,4 @@ export default withGlobal(
     const { loadMoreChats } = actions;
     return { loadMoreChats };
   },
-)(ChatList);
+)(ChatList));

@@ -1,22 +1,18 @@
 import React, { FC } from '../lib/teact';
-import { withGlobal } from '../lib/teactn';
-import { GlobalState } from '../store/types';
 
-import { ApiMessage } from '../api/types';
-import { selectOutgoingStatus } from '../modules/selectors';
+import { ApiMessageOutgoingStatus } from '../api/types';
 
 type IProps = {
-  message: ApiMessage;
-  outgoingStatus: ReturnType<typeof selectOutgoingStatus>;
+  status: ApiMessageOutgoingStatus;
 };
 
-const MessageOutgoingStatus: FC<IProps> = ({ message, outgoingStatus }) => {
+const MessageOutgoingStatus: FC<IProps> = ({ status }) => {
   return (
-    <span className="MessageOutgoingStatus">{renderOutgoingStatus(message, outgoingStatus)}</span>
+    <span className="MessageOutgoingStatus">{renderOutgoingStatus(status)}</span>
   );
 };
 
-function renderOutgoingStatus(message: ApiMessage, outgoingStatus: ReturnType<typeof selectOutgoingStatus>) {
+function renderOutgoingStatus(outgoingStatus: ApiMessageOutgoingStatus) {
   switch (outgoingStatus) {
     case 'read':
       return <i className="icon-message-read" />;
@@ -31,10 +27,4 @@ function renderOutgoingStatus(message: ApiMessage, outgoingStatus: ReturnType<ty
   return null;
 }
 
-export default withGlobal(
-  (global: GlobalState, { message }: IProps) => {
-    return {
-      outgoingStatus: selectOutgoingStatus(global, message),
-    };
-  },
-)(MessageOutgoingStatus);
+export default MessageOutgoingStatus;

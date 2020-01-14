@@ -115,3 +115,5 @@ export interface ApiMessage {
   };
   forward_info?: ApiMessageForwardInfo;
 }
+
+export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
