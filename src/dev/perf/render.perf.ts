@@ -28,7 +28,7 @@ const globalState = require('./globals/0c46207b-1000.json');
     await page.goto('http://localhost:1234', { waitUntil: 'domcontentloaded' });
 
     const result = await page.evaluate(evaluateFn, globalState);
-    console.log(result);
+    console.log(JSON.stringify(result));
 
     await page.screenshot({ path: path.resolve(__dirname, 'screenshot.png') });
     await browser.close();
@@ -40,6 +40,12 @@ function evaluateFn(_globalState: typeof globalState) {
     return new Promise((resolve) => {
       setTimeout(() => resolve(), ms);
     });
+  }
+
+  function countDomNodes(current: Node): number {
+    return 1 + Array.from(current.childNodes).map(countDomNodes).reduce((total, childCount) => {
+      return total + childCount;
+    }, 0);
   }
 
   const { perf: app } = window as WindowWithPerf;
@@ -63,7 +69,12 @@ function evaluateFn(_globalState: typeof globalState) {
     return effectsPromise.then(() => {
       effectsTime = Date.now() - effectsTime;
 
-      return { renderTime, virtualTreeSize, effectsTime };
+      const domElements = document.querySelectorAll('*').length;
+      const domNodes = countDomNodes(document.body);
+
+      return {
+        renderTime, effectsTime, virtualTreeSize, domElements, domNodes,
+      };
     });
   });
 }
