@@ -9,7 +9,7 @@ import { WindowWithPerf } from '../../@types/global.d';
 const path = require('path');
 const puppeteer = require('puppeteer');
 
-const globalState = require('./globals/ee8b2615-1000.json');
+const globalState = require('./globals/0c46207b-1000.json');
 // const HEAVY_CHAT_ID = -1186709966;
 
 (async () => {
