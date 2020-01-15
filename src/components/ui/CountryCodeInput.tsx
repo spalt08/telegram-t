@@ -47,7 +47,6 @@ const CountryCodeInput: FC<IProps> = (props) => {
     const country: Country | undefined = countryList.find((c) => input && c.id === input.value);
     if (country && onChange) {
       onChange(country);
-      updateFilter(undefined);
     }
   }
 
@@ -93,7 +92,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
   }
 
-  const CodeInput: FC<{ onClick: () => void; isOpen: boolean }> = ({ onClick, isOpen }) => {
+  const CodeInput: FC<{ onClick: () => void; isOpen?: boolean }> = ({ onClick, isOpen }) => {
     const handleClick = () => {
       if (isOpen) {
         return;

@@ -48,6 +48,7 @@ const DropdownMenu: FC<IProps> = (props) => {
         className={className || ''}
         positionX={positionX}
         positionY={positionY}
+        autoClose
         onKeyDown={onKeyDown}
         onClose={handleClose}
       >

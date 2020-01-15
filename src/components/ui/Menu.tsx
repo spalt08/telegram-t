@@ -10,10 +10,11 @@ interface IProps {
   style?: string;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
-  children: any;
+  autoClose?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
   onClose?: (e: React.MouseEvent<any, MouseEvent>) => void;
+  children: any;
 }
 
 const Menu: FC<IProps> = (props) => {
@@ -24,6 +25,7 @@ const Menu: FC<IProps> = (props) => {
     children,
     positionX = 'left',
     positionY = 'top',
+    autoClose = false,
     onKeyDown,
     onCloseAnimationEnd,
     onClose,
@@ -39,7 +41,11 @@ const Menu: FC<IProps> = (props) => {
         <div className="backdrop" onClick={onClose} onContextMenu={onClose} />
       )}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <ul className={bubbleClassNames} onTransitionEnd={handleCloseAnimationEnd}>
+      <ul
+        className={bubbleClassNames}
+        onTransitionEnd={handleCloseAnimationEnd}
+        onClick={autoClose ? onClose : undefined}
+      >
         {children}
       </ul>
     </div>
