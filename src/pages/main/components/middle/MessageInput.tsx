@@ -4,19 +4,17 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 
-import './MiddleFooter.scss';
-
 type IProps = Pick<GlobalActions, 'sendTextMessage' | 'setChatReplyingTo'> & {
   selectedChatId: number;
-  replyingTo?: number;
+  isReply: boolean;
 };
 
 const MAX_INPUT_HEIGHT = 240;
 
 let isJustSent = false;
 
-const MiddleFooter: FC<IProps> = ({
-  selectedChatId, replyingTo, sendTextMessage, setChatReplyingTo,
+const MessageInput: FC<IProps> = ({
+  selectedChatId, isReply, sendTextMessage, setChatReplyingTo,
 }) => {
   const [messageText, setMessageText] = useState('');
 
@@ -59,6 +57,13 @@ const MiddleFooter: FC<IProps> = ({
     }
   }
 
+  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (isReply && (e.key === 'Esc' || e.key === 'Escape')) {
+      e.stopPropagation();
+      setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
+    }
+  }
+
   useEffect(() => {
     requestAnimationFrame(focusInput);
   });
@@ -67,10 +72,11 @@ const MiddleFooter: FC<IProps> = ({
     <textarea
       id="message-input-text"
       className="form-control custom-scroll"
-      placeholder={replyingTo ? 'Reply Message' : 'Message'}
+      placeholder="Message"
       rows={1}
       autoComplete="off"
       onChange={onChange}
+      onKeyDown={onKeyDown}
       onKeyPress={onKeyPress}
       value={messageText}
     />
@@ -93,11 +99,11 @@ export default withGlobal(
 
     return {
       selectedChatId,
-      replyingTo,
+      isReply: Boolean(replyingTo),
     };
   },
   (setGlobal, actions) => {
     const { sendTextMessage, setChatReplyingTo } = actions;
     return { sendTextMessage, setChatReplyingTo };
   },
-)(MiddleFooter);
+)(MessageInput);

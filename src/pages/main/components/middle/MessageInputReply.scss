@@ -1,0 +1,26 @@
+.MessageInputReply {
+  display: flex;
+  align-items: center;
+  margin-bottom: -.75rem;
+  padding-right: 0.625rem;
+  padding-top: 0.4375rem;
+
+  & > .Button {
+    flex-shrink: 0;
+    background: none !important;
+    width: 2.125rem;
+    height: 2.125rem;
+    margin: 0 0.625rem;
+    padding: 0;
+    align-self: center;
+  }
+
+  .message {
+    flex-grow: 1;
+    border-color: var(--color-text-green);
+    border-left: 2px solid;
+    margin-left: .5rem;
+    padding-left: .5rem;
+    font-size: 0.875rem;
+  }
+}

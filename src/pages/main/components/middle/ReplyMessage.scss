@@ -37,6 +37,7 @@
     left: 0.25rem;
     width: 2px;
     background: var(--color-primary);
+    border-radius: 2px;
 
     .own & {
       background: var(--color-text-green);
@@ -87,5 +88,31 @@
     border-radius: 0.25rem;
     margin-left: 0.4rem;
     flex-shrink: 0;
+  }
+
+  &.inside-input {
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    padding-left: 0.5625rem;
+    margin: 0 0 0 -0.1875rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+
+    &::before {
+      left: 0.3125rem;
+    }
+
+    img,
+    .reply-text {
+      margin-left: .35rem;
+    }
+
+    .sender-name {
+      font-weight: bold;
+      color: var(--color-primary);
+      line-height: .75rem;
+    }
   }
 }

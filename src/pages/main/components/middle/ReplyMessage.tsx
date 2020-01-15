@@ -18,10 +18,11 @@ import './ReplyMessage.scss';
 type IProps = {
   message: ApiMessage;
   sender?: ApiUser;
+  className?: string;
 };
 
 const ReplyMessage: FC<IProps> = ({
-  message, sender,
+  message, sender, className,
 }) => {
   const {
     text,
@@ -29,7 +30,7 @@ const ReplyMessage: FC<IProps> = ({
   } = buildMessageContent(message, { isReply: true });
 
   return (
-    <div className="ReplyMessage not-implemented">
+    <div className={`ReplyMessage not-implemented ${className || ''}`}>
       {renderMessagePhoto(replyThumbnail)}
       <div className="reply-text">
         <div className="sender-name">{getUserFullName(sender)}</div>
