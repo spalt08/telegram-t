@@ -1,17 +1,13 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useEffect, useState,
 } from '../../../../lib/teact';
-import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiMessage } from '../../../../api/types';
-import { GlobalActions } from '../../../../store/types';
 
-import { selectChat, selectChatMessage, selectIsChatWithSelf } from '../../../../modules/selectors';
-import { isPrivateChat } from '../../../../modules/helpers';
 import { getMessageCopyOptions } from '../middle/message/clipboard';
 
-import MenuItem from '../../../../components/ui/MenuItem';
 import Menu from '../../../../components/ui/Menu';
+import MenuItem from '../../../../components/ui/MenuItem';
 
 import './MessageContextMenu.scss';
 
@@ -23,36 +19,38 @@ type IAnchorPosition = {
 type IProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
-  messageId: number;
   message: ApiMessage;
-  onClose: (e: React.MouseEvent<any, MouseEvent>) => void;
   canPin?: boolean;
   canDelete?: boolean;
-} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages'>;
+  onReply: () => void;
+  onPin: () => void;
+  onDelete: () => void;
+  onClose: () => void;
+  onCloseAnimationEnd?: () => void;
+};
 
 const SCROLLBAR_WIDTH = 10;
 
 const MessageContextMenu: FC<IProps> = ({
   isOpen,
-  messageId,
-  anchor,
   message,
-  onClose,
+  anchor,
   canPin,
   canDelete,
-  setChatReplyingTo,
-  pinMessage,
-  deleteMessages,
+  onReply,
+  onPin,
+  onDelete,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
-  const [isShown, setIsShown] = useState(false);
   const [positionX, setPositionX] = useState('right');
   const [positionY, setPositionY] = useState('bottom');
   const [style, setStyle] = useState('');
-  const copyOptions = getMessageCopyOptions(message);
+  const copyOptions = getMessageCopyOptions(message, onClose);
 
   useEffect(() => {
     let { x, y } = anchor;
-    const messageEl = document.querySelector(`div[data-message-id="${messageId}"]`);
+    const messageEl = document.querySelector(`div[data-message-id="${message.id}"]`);
 
     if (messageEl) {
       const emptyRect = {
@@ -77,69 +75,28 @@ const MessageContextMenu: FC<IProps> = ({
       x += positionX === 'left' ? 3 : -3;
 
       setStyle(`left: ${x - messageRect.left}px; top: ${y - messageRect.top}px;`);
-      setIsShown(true);
     }
-  }, [messageId, anchor, positionX]);
-
-  const handleClose = (e: React.MouseEvent) => {
-    // Prevent showing default context menu for custom context menu.
-    e.preventDefault();
-    onClose(e);
-  };
-
-  const handleReply = useCallback(() => {
-    setChatReplyingTo({ chatId: message.chat_id, messageId });
-  }, [setChatReplyingTo, message, messageId]);
-
-  const handlePin = useCallback(() => {
-    pinMessage({ chatId: message.chat_id, messageId });
-  }, [pinMessage, message, messageId]);
-
-  const handleDelete = useCallback(() => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm('Are you sure?')) {
-      deleteMessages({ chatId: message.chat_id, messageIds: [messageId], shouldDeleteForAll: false });
-    }
-  }, [deleteMessages, message, messageId]);
+  }, [message, anchor, positionX]);
 
   return (
     <Menu
       isOpen={isOpen}
-      isShown={isShown}
       positionX={positionX}
       positionY={positionY}
       style={style}
-      className={`MessageContextMenu fluid${isOpen ? ' open' : ''}${isShown ? ' shown' : ''}`}
-      onClose={handleClose}
+      className="MessageContextMenu fluid"
+      onClose={onClose}
+      onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <MenuItem icon="reply" onClick={handleReply}>Reply</MenuItem>
+      <MenuItem icon="reply" onClick={onReply}>Reply</MenuItem>
       {copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
-      {canPin && <MenuItem icon="pin" onClick={handlePin}>Pin</MenuItem>}
+      {canPin && <MenuItem icon="pin" onClick={onPin}>Pin</MenuItem>}
       <MenuItem className="not-implemented" icon="forward">Forward</MenuItem>
-      {canDelete && <MenuItem className="danger" icon="delete" onClick={handleDelete}>Delete</MenuItem>}
+      {canDelete && <MenuItem className="danger" icon="delete" onClick={onDelete}>Delete</MenuItem>}
     </Menu>
   );
 };
 
-export default withGlobal(
-  (global, { messageId }) => {
-    const { chats: { selectedId: chatId } } = global;
-
-    const message = selectChatMessage(global, chatId as number, messageId);
-    const chat = selectChat(global, chatId as number);
-    const canPin = selectIsChatWithSelf(global, chat); // TODO || isGroupChatAdmin(chat)
-    const canDelete = isPrivateChat(chat.id); // TODO || isGroupChatAdmin(chat) || selectIsSelfMessage(global, message)
-
-    return {
-      message,
-      canPin,
-      canDelete,
-    };
-  },
-  (_, actions) => {
-    const { setChatReplyingTo, pinMessage, deleteMessages } = actions;
-    return { setChatReplyingTo, pinMessage, deleteMessages };
-  },
-)(MessageContextMenu);
+export default MessageContextMenu;

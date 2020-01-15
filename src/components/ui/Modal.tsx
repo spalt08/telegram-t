@@ -42,7 +42,7 @@ const Modal: FC<IProps> = (props) => {
 
   return (
     <div className={`${modalClassName} ${className || ''}`}>
-      <div className="modal-container">
+      <div>
         <div className="modal-backdrop" onClick={onDismiss} />
         <div className="modal-dialog">
           <div className="modal-header">

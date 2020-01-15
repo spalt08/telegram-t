@@ -1,0 +1,60 @@
+.Dialog {
+  position: relative;
+  z-index: var(--z-modal);
+
+  &.delete {
+    .dialog {
+      max-width: 23rem;
+    }
+  }
+
+  .container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .dialog {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    max-width: 35rem;
+    min-width: 17.5rem;
+    margin: 2rem auto;
+    background-color: white;
+    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+    border-radius: var(--border-radius-default);
+  }
+
+  .header {
+    padding: 1rem 1rem 0;
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+  }
+
+  .content {
+    flex-grow: 1;
+    padding: 1rem;
+  }
+
+  .button {
+    width: auto;
+    height: auto;
+    margin-left: auto;
+    text-align: right;
+  }
+}

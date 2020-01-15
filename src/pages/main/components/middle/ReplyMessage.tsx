@@ -1,5 +1,4 @@
 import React, { FC } from '../../../../lib/teact';
-import { withGlobal } from '../../../../lib/teactn';
 
 import {
   ApiUser,
@@ -7,12 +6,14 @@ import {
   ApiMiniThumbnail,
   ApiPhotoCachedSize,
 } from '../../../../api/types';
+
 import { getUserFullName } from '../../../../modules/helpers';
 import { getReplyImageDimensions } from '../../../../util/imageDimensions';
-
 import { buildMessageContent } from './message/utils';
-import './ReplyMessage.scss';
+
 import RippleEffect from '../../../../components/ui/RippleEffect';
+
+import './ReplyMessage.scss';
 
 type IProps = {
   message: ApiMessage;

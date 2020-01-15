@@ -39,10 +39,12 @@ $color-chat-hover: #f4f4f5;
 
   --color-primary: #{$color-primary};
   --color-primary-shade: #{mix($color-primary, $color-black, 92%)};
+  --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
 
   --color-green: #{$color-green};
 
   --color-error: #{$color-error};
+  --color-error-rgb: #{toRGB($color-error)};
 
   --color-warning: #{$color-warning};
 

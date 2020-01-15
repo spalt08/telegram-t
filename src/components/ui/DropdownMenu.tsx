@@ -3,8 +3,6 @@ import React, { FC, useState } from '../../lib/teact';
 import Menu from './Menu';
 import './DropdownMenu.scss';
 
-const ANIMATION_TIMEOUT = 150;
-
 interface IProps {
   className?: string;
   trigger: FC<{ onClick: () => void; isOpen?: boolean }>;
@@ -24,15 +22,8 @@ const DropdownMenu: FC<IProps> = (props) => {
     onKeyDown,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [isShown, setIsShown] = useState(false);
 
   const toggleIsOpen = () => {
-    if (isOpen) {
-      setTimeout(() => setIsShown(false), ANIMATION_TIMEOUT);
-    } else {
-      setIsShown(true);
-    }
-
     setIsOpen(!isOpen);
   };
 
@@ -45,7 +36,6 @@ const DropdownMenu: FC<IProps> = (props) => {
   };
 
   const handleClose = () => {
-    setTimeout(() => setIsShown(false), 150);
     setIsOpen(false);
   };
 
@@ -55,7 +45,6 @@ const DropdownMenu: FC<IProps> = (props) => {
 
       <Menu
         isOpen={isOpen}
-        isShown={isShown}
         className={className || ''}
         positionX={positionX}
         positionY={positionY}

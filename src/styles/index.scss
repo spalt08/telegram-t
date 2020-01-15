@@ -79,3 +79,17 @@ div[role="button"] {
   outline: none !important;
   cursor: pointer;
 }
+
+.overlay {
+  opacity: 0;
+  transition: opacity .15s ease;
+
+  &.open {
+    opacity: 1;
+  }
+
+  &:not(.shown) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

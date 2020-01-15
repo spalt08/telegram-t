@@ -3,11 +3,12 @@ import React, {
   FC, memo, useEffect, useState,
 } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
-import { GlobalActions } from '../../../../store/types';
 
+import { GlobalActions } from '../../../../store/types';
 import {
   ApiDocument, ApiMessage, ApiMessageOutgoingStatus, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
 } from '../../../../api/types';
+
 import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../../modules/selectors';
 import {
   getMessageMediaHash,
@@ -21,7 +22,6 @@ import { formatMediaDuration } from '../../../../util/dateFormat';
 import { getDocumentInfo } from '../../../../util/documentInfo';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import { buildMessageContent } from './message/utils';
-import { disableScrolling, enableScrolling } from '../../../../util/scrollLock';
 
 import Avatar from '../../../../components/Avatar';
 import Spinner from '../../../../components/Spinner';
@@ -29,10 +29,9 @@ import AnimatedSticker from '../../../../components/AnimatedSticker';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from './ReplyMessage';
 import ContactMessage from './ContactMessage';
-import MessageContextMenu from '../common/MessageContextMenu';
-import './Message.scss';
+import ContextMenuContainer from '../common/ContextMenuContainer';
 
-const ANIMATION_TIMEOUT = 150;
+import './Message.scss';
 
 type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 
@@ -46,6 +45,8 @@ type IProps = {
   replyMessage?: ApiMessage;
   replyMessageSender?: ApiUser;
   originSender?: ApiUser;
+  canDelete?: boolean;
+  contactFirstName: string | null;
   outgoingStatus?: ApiMessageOutgoingStatus;
 } & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
@@ -77,23 +78,6 @@ const Message: FC<IProps> = ({
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
-  const handleKeyDown = (e: KeyboardEvent): void => {
-    if (contextMenuPosition !== null && (e.key === 'Esc' || e.key === 'Escape')) {
-      e.stopPropagation();
-      closeContextMenu();
-    }
-  };
-
-  useEffect(() => {
-    if (contextMenuPosition !== null) {
-      window.document.body.addEventListener('keydown', handleKeyDown, false);
-    }
-
-    return () => {
-      window.document.body.removeEventListener('keydown', handleKeyDown, false);
-    };
-  });
-
   const className = buildClassName(message, Boolean(mediaHash), contextMenuPosition !== null);
   const {
     text,
@@ -118,23 +102,24 @@ const Message: FC<IProps> = ({
     }
   }
 
-  function showContextMenu(e: React.MouseEvent) {
+  function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     e.currentTarget.classList.remove('no-selection');
-    disableScrolling();
 
+    if (contextMenuPosition) {
+      return;
+    }
+
+    setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    requestAnimationFrame(() => {
-      setIsContextMenuOpen(true);
-    });
   }
 
-  function closeContextMenu() {
+  function handleContextMenuClose() {
     setIsContextMenuOpen(false);
-    enableScrolling();
-    setTimeout(() => {
-      setContextMenuPosition(null);
-    }, ANIMATION_TIMEOUT);
+  }
+
+  function handleContextMenuHide() {
+    setContextMenuPosition(null);
   }
 
   function renderSenderName(user?: ApiUser) {
@@ -204,7 +189,7 @@ const Message: FC<IProps> = ({
         // eslint-disable-next-line
         style={style}
         onMouseDown={handleBeforeContextMenu}
-        onContextMenu={showContextMenu}
+        onContextMenu={handleContextMenu}
       >
         {message.forward_info && !isSticker && (
           <div className="sender-name">Forwarded message</div>
@@ -212,12 +197,13 @@ const Message: FC<IProps> = ({
         {renderContent()}
         <MessageMeta message={message} outgoingStatus={outgoingStatus} />
       </div>
-      {contextMenuPosition !== null && (
-        <MessageContextMenu
-          messageId={message.id}
+      {Boolean(contextMenuPosition) && (
+        <ContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuPosition}
-          onClose={closeContextMenu}
+          message={message}
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
         />
       )}
     </div>

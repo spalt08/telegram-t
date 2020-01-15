@@ -3,7 +3,7 @@ import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus
+  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
 } from '../../../../api/types';
 
 import {

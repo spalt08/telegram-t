@@ -1,12 +1,12 @@
 .AnimationFadeIn {
-  animation: AnimationFadeIn .2s;
-  position: relative;
+  animation: AnimationFadeIn .15s;
+  position: fixed;
   z-index: var(--z-animation-fade);
 }
 
 .AnimationFadeOut {
-  animation: AnimationFadeOut .2s;
-  position: relative;
+  animation: AnimationFadeOut .15s;
+  position: fixed;
   z-index: var(--z-animation-fade);
 }
 
@@ -24,6 +24,6 @@
     opacity: 1;
   }
   100% {
-    opacity: 0.1;
+    opacity: 0;
   }
 }

@@ -13,9 +13,10 @@ interface IProps {
   onClick?: Function;
   children: any;
   size?: 'default' | 'smaller';
-  color?: 'primary' | 'secondary' | 'translucent' | 'translucent-white';
+  color?: 'primary' | 'secondary' | 'danger' | 'translucent' | 'translucent-white';
   className?: string;
   round?: boolean;
+  isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
 }
@@ -28,6 +29,7 @@ const Button: FC<IProps> = ({
   color = 'primary',
   className,
   round,
+  isText,
   isLoading,
   ariaLabel,
 }) => {
@@ -39,6 +41,9 @@ const Button: FC<IProps> = ({
   }
   if (className) {
     combinedClass += ` ${className}`;
+  }
+  if (isText) {
+    combinedClass += ' text';
   }
   if (isLoading) {
     combinedClass += ' loading';

@@ -8,7 +8,7 @@ type ICopyOptions = {
   handler: () => void;
 }[];
 
-export function getMessageCopyOptions(message: ApiMessage): ICopyOptions {
+export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => void): ICopyOptions {
   const options: ICopyOptions = [];
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
@@ -21,8 +21,11 @@ export function getMessageCopyOptions(message: ApiMessage): ICopyOptions {
       label: 'Copy Media',
       handler: () => {
         const blobUrl = mediaLoader.fetch(mediaHash as string, mediaLoader.Type.BlobUrl) as Promise<string>;
-
         blobUrl.then((url) => copyImageToClipboard(url));
+
+        if (afterEffect) {
+          afterEffect();
+        }
       },
     });
   }
@@ -40,6 +43,10 @@ export function getMessageCopyOptions(message: ApiMessage): ICopyOptions {
       handler: () => {
         const clipboardText = hasSelection && selection ? selection.toString() : text;
         copyTextToClipboard(clipboardText);
+
+        if (afterEffect) {
+          afterEffect();
+        }
       },
     });
   }
