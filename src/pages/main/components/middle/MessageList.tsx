@@ -91,6 +91,11 @@ const MessageList: FC<IProps> = ({
   }, [chatId]);
 
   useEffect(() => {
+    if (process.env.NODE_ENV === 'perf') {
+      // eslint-disable-next-line no-console
+      console.time('scrollTop');
+    }
+
     const scrollContainer = document.querySelector('.MessageList') as HTMLElement;
 
     if (chatId && scrollContainer) {
@@ -98,13 +103,15 @@ const MessageList: FC<IProps> = ({
     }
 
     if (process.env.NODE_ENV === 'perf') {
-      (window as WindowWithPerf).perf.onMessageListEffectsDone();
+      // eslint-disable-next-line no-console
+      console.timeEnd('scrollTop');
     }
   }, [chatId, messages]);
 
   function renderMessageDateGroup(messageDateGroup: MessageDateGroup) {
     return (
-      <div className="message-date-group" key={messageDateGroup.datetime}>
+      // @ts-ignore
+      <div className="message-date-group" key={messageDateGroup.datetime} teactChildrenKeyOrder="asc">
         <div className="message-date-header">{formatHumanDate(messageDateGroup.datetime)}</div>
         {messageDateGroup.messageGroups.map((messageGroup) => {
           if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
@@ -113,13 +120,14 @@ const MessageList: FC<IProps> = ({
           }
 
           return (
-            <div className="message-group">
+            // @ts-ignore
+            <div className="message-group" key={messageGroup[0].date} teactChildrenKeyOrder="asc">
               {messageGroup.map((message, i) => {
                 const isOwn = isOwnMessage(message);
 
                 return (
                   <Message
-                    key={message.id}
+                    key={message.date}
                     message={message}
                     showAvatar={!isPrivate && !isOwn}
                     showSenderName={i === 0 && !isPrivate && !isOwn}
@@ -149,7 +157,8 @@ const MessageList: FC<IProps> = ({
     >
       {
         areMessagesLoaded ? (
-          <div className="messages-container">
+          // @ts-ignore
+          <div className="messages-container" teactChildrenKeyOrder="asc">
             {messagesArray.length > 0 && groupMessages(messagesArray).map(renderMessageDateGroup)}
           </div>
         ) : (

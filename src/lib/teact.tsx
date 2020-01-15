@@ -191,10 +191,10 @@ function buildChildElement(child: any): VirtualElement {
   }
 }
 
-function buildTextElement(value: string): VirtualElementText {
+function buildTextElement(value: any): VirtualElementText {
   return {
     type: VirtualElementTypesEnum.Text,
-    value,
+    value: String(value),
   };
 }
 

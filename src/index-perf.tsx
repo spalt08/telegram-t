@@ -1,4 +1,4 @@
-import React, { setGlobal } from './lib/teactn';
+import React, { getGlobal, setGlobal } from './lib/teactn';
 import TeactDOM from './lib/teact-dom';
 
 // import './store';
@@ -26,6 +26,7 @@ function renderNothing() {
 // renderApp();
 
 (window as any).perf = {
+  getGlobal,
   setGlobal,
   renderApp,
   renderNothing,

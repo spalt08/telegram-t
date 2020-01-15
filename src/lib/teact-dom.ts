@@ -11,12 +11,15 @@ import {
   setTarget,
   VirtualElement,
   VirtualElementComponent,
+  VirtualElementTag,
   VirtualRealElement,
 } from './teact';
 
 type VirtualDomHead = {
   children: [VirtualElement] | [];
 };
+
+const FILTERED_ATTRIBUTES = new Set(['key', 'teactChildrenKeyOrder']);
 
 const $head: VirtualDomHead = { children: [] };
 let DEBUG_virtualTreeSize = 1;
@@ -45,6 +48,7 @@ function renderWithVirtual(
   $parent: VirtualRealElement | VirtualDomHead,
   index: number,
   skipComponentUpdate = false,
+  insertAfterOrPrepend?: Element | 'prepend',
 ) {
   if (
     !skipComponentUpdate
@@ -71,7 +75,14 @@ function renderWithVirtual(
 
     const node = createNode($new);
     setTarget($new, node);
-    parentEl.appendChild(node);
+
+    if (insertAfterOrPrepend === 'prepend' && parentEl.firstChild) {
+      parentEl.insertBefore(node, parentEl.firstChild);
+    } else if ((insertAfterOrPrepend instanceof Element) && insertAfterOrPrepend.nextSibling) {
+      parentEl.insertBefore(node, insertAfterOrPrepend.nextSibling);
+    } else {
+      parentEl.appendChild(node);
+    }
   } else if ($current && !$new) {
     unmountTree($current);
     parentEl.removeChild(getTarget($current)!);
@@ -187,6 +198,10 @@ function createNode($element: VirtualElement): Node {
 function renderChildren(
   $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
 ) {
+  if ($new.props.teactChildrenKeyOrder === 'asc') {
+    return renderOrderedChildren($current, $new, currentEl);
+  }
+
   const maxLength = Math.max($current.children.length, $new.children.length);
   const newChildren = [];
 
@@ -202,6 +217,52 @@ function renderChildren(
     if ($newChild) {
       newChildren.push($newChild);
     }
+  }
+
+  return newChildren;
+}
+
+// A simple diff algorithm for two ordered lists. This is different to React which supports diffs for any keyed lists.
+function renderOrderedChildren(
+  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
+) {
+  let prevChild = $current.children[0] as VirtualRealElement;
+  let nextChild = $new.children[0] as VirtualRealElement;
+  let prevI = 0;
+  let nextI = 0;
+
+  const newChildren = [];
+  let i = 0;
+
+  let insertAfterOrPrepend: Element | 'prepend' = 'prepend';
+
+  while (prevChild || nextChild) {
+    if (nextChild && (!prevChild || nextChild.props.key < prevChild.props.key)) {
+      const newChild = renderWithVirtual(
+        currentEl, undefined, nextChild, $new, i, false, insertAfterOrPrepend,
+      ) as VirtualElementTag;
+      newChildren.push(newChild);
+      insertAfterOrPrepend = newChild.target as Element;
+
+      nextI++;
+      nextChild = $new.children[nextI] as VirtualRealElement;
+    } else if (prevChild && (!nextChild || nextChild.props.key > prevChild.props.key)) {
+      renderWithVirtual(currentEl, prevChild, undefined, $new, i);
+
+      prevI++;
+      prevChild = $current.children[prevI] as VirtualRealElement;
+    } else {
+      const newChild = renderWithVirtual(currentEl, prevChild, nextChild, $new, i) as VirtualElementTag;
+      newChildren.push(newChild);
+      insertAfterOrPrepend = newChild.target as Element;
+
+      prevI++;
+      prevChild = $current.children[prevI] as VirtualRealElement;
+      nextI++;
+      nextChild = $new.children[nextI] as VirtualRealElement;
+    }
+
+    i++;
   }
 
   return newChildren;
@@ -243,7 +304,7 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
     if (key === 'onChange') {
       setupAdditionalOnChangeHandlers(element, value);
     }
-  } else {
+  } else if (!FILTERED_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   }
 }
