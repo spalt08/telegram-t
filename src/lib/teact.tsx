@@ -177,12 +177,29 @@ function buildTagElement(tag: string, props: Props, children: any[]): VirtualEle
     type: VirtualElementTypesEnum.Tag,
     tag,
     props,
-    children: children.map(buildChildElement),
+    children: dropEmptyTail(children).map(buildChildElement),
   };
 }
 
+// We only need placeholders in the middle of collection (to ensure other elements order).
+function dropEmptyTail(children: any[]) {
+  let i = children.length - 1;
+
+  for (; i >= 0; i--) {
+    if (!isEmptyPlaceholder(children[i])) {
+      break;
+    }
+  }
+
+  return i + 1 < children.length ? children.slice(0, i + 1) : children;
+}
+
+function isEmptyPlaceholder(child: any) {
+  return child === false || child === null || child === undefined;
+}
+
 function buildChildElement(child: any): VirtualElement {
-  if (child === false || child === null || child === undefined) {
+  if (isEmptyPlaceholder(child)) {
     return buildEmptyElement();
   } else if (isRealElement(child)) {
     return child;
