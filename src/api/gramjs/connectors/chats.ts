@@ -76,12 +76,10 @@ export async function fetchChats(
 export async function fetchFullChat(chat: ApiChat) {
   const { id, access_hash } = chat;
   const input = buildInputEntity(id, access_hash);
-  if (input instanceof GramJs.InputUser) {
-    return;
-  }
+
   const full_info = input instanceof GramJs.InputChannel
     ? await getFullChannelInfo(input)
-    : await getFullChatInfo(input);
+    : await getFullChatInfo(input as number);
 
   onUpdate({
     '@type': 'updateChat',
@@ -107,12 +105,16 @@ export async function fetchChatOnlines(chat: ApiChat) {
 async function getFullChatInfo(chatId: number) {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 
+  if (!(result.fullChat instanceof GramJs.ChatFull)) {
+    return undefined;
+  }
+
   const {
     about,
     participants,
     pinnedMsgId,
     exportedInvite,
-  } = result.fullChat as unknown as GramJs.ChatFull;
+  } = result.fullChat;
 
   const members = buildChatMembers(participants);
 
@@ -128,12 +130,16 @@ async function getFullChatInfo(chatId: number) {
 async function getFullChannelInfo(channel: GramJs.InputChannel) {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
 
+  if (!(result.fullChat instanceof GramJs.ChannelFull)) {
+    return undefined;
+  }
+
   const {
     about,
     participantsCount,
     pinnedMsgId,
     exportedInvite,
-  } = result.fullChat as unknown as GramJs.ChannelFull;
+  } = result.fullChat;
 
   const invite_link = exportedInvite instanceof GramJs.ChatInviteExported
     ? exportedInvite.link

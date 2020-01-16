@@ -100,7 +100,7 @@ ${indent}};`.trim())
     }
 
     function renderTypeName(typeName) {
-        return typeName.includes('.') ? typeName.replace('.', '.Type') : `Type${typeName}`
+        return typeName.includes('.') ? typeName.replace('.', '.Type') : `Api.Type${typeName}`
     }
 
     function upperFirst(str) {
