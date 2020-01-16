@@ -39,9 +39,24 @@
     }
   }
 
+  .HeaderPinnedMessage-wrapper {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    cursor: default;
+
+    > .Button {
+      flex-shrink: 0;
+      margin: 0 0.25rem;
+    }
+
+    & + .HeaderActions {
+      margin-left: 1rem;
+    }
+  }
+
   .HeaderPinnedMessage {
     display: flex;
-    margin-left: auto;
     padding: 0.25rem;
     padding-left: 0.375rem;
     border-radius: var(--border-radius-messages-small);
@@ -75,7 +90,7 @@
         line-height: 1rem;
         height: 1rem;
         color: var(--color-primary);
-        margin-bottom: 0.1875rem;
+        margin-bottom: 0.125rem;
       }
 
       p {
@@ -100,10 +115,6 @@
       & + .message-text {
         max-width: 12rem;
       }
-    }
-
-    & + .HeaderActions {
-      margin-left: 1rem;
     }
   }
 

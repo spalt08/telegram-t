@@ -5,9 +5,10 @@ import useOverlay from '../../hooks/useOverlay';
 import './Dialog.scss';
 
 interface IProps {
-  title: string;
+  title?: string;
   className?: string;
   isOpen?: boolean;
+  transparentBackdrop?: boolean;
   children: any;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
@@ -15,9 +16,10 @@ interface IProps {
 
 const Dialog: FC<IProps> = (props) => {
   const {
-    isOpen,
     title,
     className,
+    isOpen,
+    transparentBackdrop,
     children,
     onClose,
     onCloseAnimationEnd,
@@ -28,8 +30,16 @@ const Dialog: FC<IProps> = (props) => {
     return null;
   }
 
+  const classNames = ['Dialog', className, 'overlay', ...overlayClassNames];
+  if (className) {
+    classNames.push(className);
+  }
+  if (transparentBackdrop) {
+    classNames.push('transparent-backdrop');
+  }
+
   return (
-    <div className={`Dialog ${className || ''}`}>
+    <div className={classNames.join(' ')}>
       <div className="container">
         {isOpen && (
           <div className="backdrop" onClick={onClose} />

@@ -4,16 +4,21 @@ import { withGlobal } from '../../../../lib/teactn';
 import { ApiUser } from '../../../../api/types';
 import { selectUser } from '../../../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../../../modules/helpers';
+import { GlobalActions } from '../../../../store/types';
 import Avatar from '../../../../components/Avatar';
 import VerifiedIcon from '../../../../components/VerifiedIcon';
 
-type IProps = {
+type IProps = Pick<GlobalActions, 'loadFullUser'> & {
   userId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   user: ApiUser;
 };
 
-const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium' }) => {
+const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium', loadFullUser }) => {
+  if (user.is_self && !user.full_info) {
+    loadFullUser({ userId: user.id });
+  }
+
   return (
     <div className="ChatInfo">
       <Avatar size={avatarSize} user={user} isSavedMessages={user.is_self} />
@@ -39,5 +44,9 @@ export default withGlobal(
     const user = selectUser(global, userId);
 
     return { user };
+  },
+  (setGlobal, actions) => {
+    const { loadFullUser } = actions;
+    return { loadFullUser };
   },
 )(PrivateChatInfo);

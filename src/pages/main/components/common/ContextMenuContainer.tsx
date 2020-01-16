@@ -134,6 +134,7 @@ const ContextMenuContainer: FC<IProps> = ({
         onClose={closeDeleteDialog}
         className="delete"
         title="Delete Message?"
+        transparentBackdrop
       >
         <p>Are you sure you want to delete message?</p>
         {canDeleteForAll && (

@@ -15,13 +15,17 @@ import './MiddleHeader.scss';
 type IProps = {
   chatId: number;
   pinnedMessage?: ApiMessage;
-} & Pick<GlobalActions, 'openChatWithInfo'>;
+} & Pick<GlobalActions, 'openChatWithInfo' | 'pinMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
-  chatId, pinnedMessage, openChatWithInfo,
+  chatId, pinnedMessage, openChatWithInfo, pinMessage,
 }) => {
   function onHeaderClick() {
     openChatWithInfo({ id: chatId });
+  }
+
+  function onUnpinMessage() {
+    pinMessage({ chatId, messageId: 0 });
   }
 
   return (
@@ -32,7 +36,10 @@ const MiddleHeader: FC<IProps> = ({
         <GroupChatInfo chatId={chatId} />
       )}
       {pinnedMessage && (
-        <HeaderPinnedMessage message={pinnedMessage} />
+        <HeaderPinnedMessage
+          message={pinnedMessage}
+          onUnpinMessage={onUnpinMessage}
+        />
       )}
       <HeaderActions />
     </div>
@@ -63,7 +70,7 @@ export default withGlobal(
     return null;
   },
   (setGlobal, actions) => {
-    const { openChatWithInfo } = actions;
-    return { openChatWithInfo };
+    const { openChatWithInfo, pinMessage } = actions;
+    return { openChatWithInfo, pinMessage };
   },
 )(MiddleHeader);

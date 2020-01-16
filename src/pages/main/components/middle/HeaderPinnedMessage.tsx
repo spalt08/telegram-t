@@ -1,15 +1,33 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useState, useCallback } from '../../../../lib/teact';
 
 import { ApiMessage, ApiMiniThumbnail, ApiPhotoCachedSize } from '../../../../api/types';
 import { getReplyImageDimensions } from '../../../../util/imageDimensions';
 import RippleEffect from '../../../../components/ui/RippleEffect';
+import Button from '../../../../components/ui/Button';
 import { buildMessageContent } from './message/utils';
+import ConfirmDialog from '../common/ConfirmDialog';
 
 type IProps = {
   message: ApiMessage;
+  onUnpinMessage: () => void;
 };
 
-const HeaderPinnedMessage: FC<IProps> = ({ message }) => {
+const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
+  const [isUnpinDialogOpen, setIsUnpinDialogOpen] = useState(false);
+
+  function openUnpinConfirmation() {
+    setIsUnpinDialogOpen(true);
+  }
+
+  function closeUnpinConfirmation() {
+    setIsUnpinDialogOpen(false);
+  }
+
+  const handleUnpinMessage = useCallback(() => {
+    closeUnpinConfirmation();
+    onUnpinMessage();
+  }, [onUnpinMessage]);
+
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
   }
@@ -17,13 +35,32 @@ const HeaderPinnedMessage: FC<IProps> = ({ message }) => {
   const { text, replyThumbnail } = buildMessageContent(message, { isReply: true });
 
   return (
-    <div className="HeaderPinnedMessage not-implemented" onClick={stopPropagation}>
-      {renderMessagePhoto(replyThumbnail)}
-      <div className="message-text">
-        <div className="title">Pinned message</div>
-        <p>{text}</p>
+    <div className="HeaderPinnedMessage-wrapper">
+      <Button
+        round
+        size="smaller"
+        color="translucent"
+        ariaLabel="Unpin message"
+        onClick={openUnpinConfirmation}
+      >
+        <i className="icon-close" />
+      </Button>
+      <div className="HeaderPinnedMessage not-implemented" onClick={stopPropagation}>
+        {renderMessagePhoto(replyThumbnail)}
+        <div className="message-text">
+          <div className="title">Pinned message</div>
+          <p>{text}</p>
+        </div>
+
+        <RippleEffect />
       </div>
-      <RippleEffect />
+      <ConfirmDialog
+        isOpen={isUnpinDialogOpen}
+        onClose={closeUnpinConfirmation}
+        text="Would you like to unpin this message?"
+        confirmLabel="Unpin"
+        confirmHandler={handleUnpinMessage}
+      />
     </div>
   );
 };
