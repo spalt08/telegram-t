@@ -70,10 +70,10 @@ if (!GLOBAL_STATE_CACHE_DISABLED) {
 }
 
 function preloadAvatars(cached: GlobalState) {
-  return Object.values(cached.chats.byId).map((chat) => {
+  return Promise.all(Object.values(cached.chats.byId).map((chat) => {
     const avatarHash = getChatAvatarHash(chat);
     return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
-  });
+  }));
 }
 
 function preloadAssets(cached: GlobalState) {
