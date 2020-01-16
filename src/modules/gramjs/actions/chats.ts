@@ -3,8 +3,10 @@ import {
 } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
-import { addChatIds } from '../../common/chats';
+import { addChatIds, updateChats } from '../../common/chats';
 import { selectChat } from '../../selectors';
+import { updateUsers } from '../../common/users';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 const LOAD_CHATS_LIMIT = 50;
 
@@ -50,5 +52,11 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
     chat_ids.shift();
   }
 
-  setGlobal(addChatIds(getGlobal(), chat_ids));
+  let global = getGlobal();
+
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addChatIds(global, chat_ids);
+
+  setGlobal(global);
 }

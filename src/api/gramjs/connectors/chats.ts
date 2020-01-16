@@ -28,7 +28,7 @@ export async function fetchChats(
     limit: number;
     offsetDate?: number;
   },
-): Promise<{ chat_ids: number[] } | null> {
+) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty({}),
     limit,
@@ -44,6 +44,7 @@ export async function fetchChats(
   const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
   const peersByKey = preparePeers(result);
   const chats: ApiChat[] = [];
+
   result.dialogs.forEach((dialog) => {
     if (!(dialog instanceof GramJs.Dialog)) {
       return;
@@ -55,21 +56,13 @@ export async function fetchChats(
     chats.push(chat);
   });
 
-  onUpdate({
-    '@type': 'chats',
-    chats,
-  });
-
   const users = result.users.map(buildApiUser);
-  onUpdate({
-    '@type': 'users',
-    users,
-  });
-
   const chatIds = chats.map((chat) => chat.id);
 
   return {
     chat_ids: chatIds,
+    chats,
+    users,
   };
 }
 

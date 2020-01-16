@@ -1,5 +1,5 @@
 import { onNextTick, throttleWithRaf } from '../util/schedulers';
-import { flatten } from '../util/iteratees';
+import { flatten, orderBy } from '../util/iteratees';
 import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
@@ -219,7 +219,23 @@ function buildEmptyElement(): VirtualElementEmpty {
   return { type: VirtualElementTypesEnum.Empty };
 }
 
+const DEBUG_components: AnyLiteral = {};
+
+document.addEventListener('dblclick', () => {
+  // eslint-disable-next-line no-console
+  console.log('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
+});
+
 export function renderComponent(componentInstance: ComponentInstance) {
+  const componentName = componentInstance.name;
+  if (!DEBUG_components[componentName]) {
+    DEBUG_components[componentName] = {
+      componentName,
+      renderCount: 0,
+    };
+  }
+  DEBUG_components[componentName].renderCount++;
+
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;

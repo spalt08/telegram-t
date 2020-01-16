@@ -35,11 +35,6 @@ export type ApiUpdateConnectionState = {
   };
 };
 
-export type ApiUpdateChats = {
-  '@type': 'chats';
-  chats: ApiChat[];
-};
-
 export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: number;
@@ -88,11 +83,6 @@ export type ApiUpdateDeleteMessages = {
   chat_id?: number;
 };
 
-export type ApiUpdateUsers = {
-  '@type': 'users';
-  users: ApiUser[];
-};
-
 export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: number;
@@ -119,10 +109,10 @@ export type ApiUpdateMessageImage = {
 
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateConnectionState |
-  ApiUpdateChats | ApiUpdateChat | ApiUpdateChatFullInfo |
+  ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateUsers | ApiUpdateUser | ApiUpdateUserFullInfo |
+  ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage
 );
 

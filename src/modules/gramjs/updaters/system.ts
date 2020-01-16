@@ -57,8 +57,6 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         getDispatch().saveSession({ sessionId: session_id });
       }
 
-      getDispatch().sync();
-
       setGlobal({
         ...getGlobal(),
         isLoggingOut: false,

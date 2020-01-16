@@ -51,7 +51,7 @@ export function updateChatReplyingTo(
   };
 }
 
-export function setChats(global: GlobalState, byId: Record<number, ApiChat>) {
+export function updateChats(global: GlobalState, byId: Record<number, ApiChat>) {
   return {
     ...global,
     chats: {
@@ -65,17 +65,10 @@ export function setChats(global: GlobalState, byId: Record<number, ApiChat>) {
 }
 
 export function updateChat(global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>) {
-  return {
-    ...global,
-    chats: {
-      ...global.chats,
-      byId: {
-        ...global.chats.byId,
-        [chatId]: {
-          ...global.chats.byId[chatId],
-          ...chatUpdate,
-        },
-      },
+  return updateChats(global, {
+    [chatId]: {
+      ...global.chats.byId[chatId],
+      ...chatUpdate,
     },
-  };
+  });
 }

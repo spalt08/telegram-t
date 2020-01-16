@@ -1,21 +1,12 @@
 import { getGlobal, setGlobal } from '../../../lib/teactn';
 
 import { ApiUpdate } from '../../../api/types';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { setChats, updateChat } from '../../common/chats';
+import { updateChat } from '../../common/chats';
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
 
   switch (update['@type']) {
-    case 'chats': {
-      const byId = buildCollectionByKey(update.chats, 'id');
-
-      setGlobal(setChats(global, byId));
-
-      break;
-    }
-
     case 'updateChat': {
       setGlobal(updateChat(global, update.id, update.chat));
 

@@ -2,10 +2,13 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teactn';
 
-import { callSdk } from '../../../api/gramjs';
 import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../store/types';
+
+import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { updateChats } from '../../common/chats';
+import { updateUsers } from '../../common/users';
 
 const INITIAL_CHATS_LIMIT = 50;
 const INITIAL_MESSAGES_LIMIT = 50;
@@ -28,18 +31,23 @@ async function loadAndReplaceChats() {
     return;
   }
 
+  let global = getGlobal();
+
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+
   const newIds = result.chat_ids;
 
-  const global = getGlobal();
-
-  setGlobal({
+  global = {
     ...global,
     chats: {
       ...global.chats,
       ids: newIds,
       ...(global.chats.selectedId && !newIds.includes(global.chats.selectedId) && { selectedId: undefined }),
     },
-  });
+  };
+
+  setGlobal(global);
 }
 
 async function loadAndReplaceMessages() {

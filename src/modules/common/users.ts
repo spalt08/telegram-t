@@ -1,7 +1,7 @@
 import { ApiUser } from '../../api/types';
 import { GlobalState } from '../../store/types';
 
-export function setUsers(global: GlobalState, byId: Record<number, ApiUser>) {
+export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>) {
   return {
     ...global,
     users: {
@@ -15,17 +15,10 @@ export function setUsers(global: GlobalState, byId: Record<number, ApiUser>) {
 }
 
 export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>) {
-  return {
-    ...global,
-    users: {
-      ...global.users,
-      byId: {
-        ...global.users.byId,
-        [userId]: {
-          ...global.users.byId[userId],
-          ...userUpdate,
-        },
-      },
+  return updateUsers(global, {
+    [userId]: {
+      ...global.users.byId[userId],
+      ...userUpdate,
     },
-  };
+  });
 }
