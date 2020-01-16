@@ -5,6 +5,7 @@ import { ApiUser } from '../../../../api/types';
 import { selectUser } from '../../../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../../../modules/helpers';
 import Avatar from '../../../../components/Avatar';
+import VerifiedIcon from '../../../../components/VerifiedIcon';
 
 type IProps = {
   userId: number;
@@ -20,7 +21,10 @@ const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium' }) => {
         {user.is_self ? (
           <div className="title">Saved Messages</div>
         ) : (
-          <div className="title">{getUserFullName(user)}</div>
+          <div className="title">
+            {getUserFullName(user)}
+            {user.is_verified && <VerifiedIcon />}
+          </div>
         )}
         {!user.is_self && (
           <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>{getUserStatus(user)}</div>

@@ -20,6 +20,7 @@ export function buildApiChatFromDialog(
     unread_mention_count: 0, // TODO
     ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
     is_pinned: dialog.pinned || false,
+    is_verified: (('verified' in peerEntity) && peerEntity.verified) || false,
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
   };

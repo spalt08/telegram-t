@@ -7,7 +7,8 @@ export function buildApiUser(mtpUser: GramJs.User): ApiUser {
 
   return {
     id: mtpUser.id,
-    is_self: mtpUser.self,
+    is_self: mtpUser.self || false,
+    is_verified: mtpUser.verified || false,
     type: buildApiUserType(mtpUser),
     first_name: mtpUser.firstName,
     last_name: mtpUser.lastName,

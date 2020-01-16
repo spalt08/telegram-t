@@ -4,8 +4,9 @@ import { withGlobal } from '../../../../lib/teactn';
 import { ApiChat } from '../../../../api/types';
 import { GlobalActions } from '../../../../store/types';
 import { getChatTypeString, getChatTitle } from '../../../../modules/helpers';
-import Avatar from '../../../../components/Avatar';
 import { selectChat } from '../../../../modules/selectors';
+import Avatar from '../../../../components/Avatar';
+import VerifiedIcon from '../../../../components/VerifiedIcon';
 
 type IProps = Pick<GlobalActions, 'loadFullChat' | 'loadChatOnlines'> & {
   chatId: number;
@@ -33,7 +34,10 @@ const GroupChatInfo: FC<IProps> = ({
     <div className="ChatInfo">
       <Avatar size={avatarSize} chat={chat} />
       <div>
-        <div className="title">{getChatTitle(chat)}</div>
+        <div className="title">
+          {getChatTitle(chat)}
+          {chat.is_verified && <VerifiedIcon />}
+        </div>
         <div className="status">
           {groupStatus}
           {onlineStatus}

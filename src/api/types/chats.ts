@@ -22,6 +22,7 @@ export interface ApiChat {
   unread_count: number;
   unread_mention_count: number;
   is_pinned: boolean;
+  is_verified: boolean;
   access_hash?: string;
   avatar?: {
     hash: string;

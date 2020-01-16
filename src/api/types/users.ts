@@ -1,6 +1,7 @@
 export interface ApiUser {
   id: number;
-  is_self?: true;
+  is_self: boolean;
+  is_verified: boolean;
   type: ApiUserType;
   first_name?: string;
   last_name?: string;

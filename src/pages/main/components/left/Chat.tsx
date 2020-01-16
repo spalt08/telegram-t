@@ -19,6 +19,7 @@ import { getServiceMessageContent } from '../common/getServiceMessageContent';
 
 import Avatar from '../../../../components/Avatar';
 import RippleEffect from '../../../../components/ui/RippleEffect';
+import VerifiedIcon from '../../../../components/VerifiedIcon';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
 
@@ -84,6 +85,7 @@ const Chat: FC<IProps> = ({
       <div className="info">
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
+          {chat.is_verified && <VerifiedIcon />}
           {chat.last_message && (
             <LastMessageMeta message={chat.last_message} outgoingStatus={lastMessageOutgoingStatus} />
           )}
