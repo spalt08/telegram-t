@@ -1,9 +1,9 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../../lib/teact';
+import React, { FC, useState, useEffect } from '../../../lib/teact';
 import { withGlobal } from '../../../lib/teactn';
 
 import { GlobalState, GlobalActions } from '../../../store/types';
-import { formatPhoneNumber, getCountryFromPhoneNumber } from '../../../util/formatPhoneNumber';
+import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../../util/formatPhoneNumber';
 
 import Button from '../../../components/ui/Button';
 import InputText from '../../../components/ui/InputText';
@@ -14,19 +14,34 @@ import Loading from '../../../components/Loading';
 import './Auth.scss';
 
 type IProps = (
-  Pick<GlobalState, 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe'> &
-  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe'>
+  Pick<GlobalState, 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'> &
+  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry'>
 );
 
 const AuthPhoneNumber: FC<IProps> = ({
-  authState, authIsLoading, authError, authRememberMe, setAuthPhoneNumber, setAuthRememberMe,
+  authState,
+  authIsLoading,
+  authError,
+  authRememberMe,
+  authNearestCountry,
+  setAuthPhoneNumber,
+  setAuthRememberMe,
+  loadNearestCountry,
 }) => {
-  // TODO: Add automatic country detection
-  // const currentCountry = countryList.find((c) => c.id === 'RU');
+  if (!authNearestCountry) {
+    loadNearestCountry();
+  }
 
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [country, setCountry] = useState(undefined);
   const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (authNearestCountry && !country) {
+      const suggestedCountry = getCountryById(authNearestCountry);
+      setCountry(suggestedCountry);
+    }
+  }, [country, authNearestCountry]);
 
   function onCountryChange(newCountry: Country) {
     setCountry(newCountry);
@@ -81,6 +96,7 @@ const AuthPhoneNumber: FC<IProps> = ({
         <CountryCodeInput
           id="sign-in-phone-code"
           value={country}
+          isLoading={!authNearestCountry && !country}
           onChange={onCountryChange}
         />
         <InputText
@@ -118,14 +134,14 @@ function getNumberWithCode(phoneNumber: string, country?: Country) {
 export default withGlobal(
   (global) => {
     const {
-      authState, authIsLoading, authError, authRememberMe,
+      authState, authIsLoading, authError, authRememberMe, authNearestCountry,
     } = global;
     return {
-      authState, authIsLoading, authError, authRememberMe,
+      authState, authIsLoading, authError, authRememberMe, authNearestCountry,
     };
   },
   (setGlobal, actions) => {
-    const { setAuthPhoneNumber, setAuthRememberMe } = actions;
-    return { setAuthPhoneNumber, setAuthRememberMe };
+    const { setAuthPhoneNumber, setAuthRememberMe, loadNearestCountry } = actions;
+    return { setAuthPhoneNumber, setAuthRememberMe, loadNearestCountry };
   },
 )(AuthPhoneNumber);

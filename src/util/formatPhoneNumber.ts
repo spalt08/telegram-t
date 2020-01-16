@@ -1,5 +1,9 @@
 import countryList from '../../public/countries.json';
 
+function getCountryById(id: string) {
+  return countryList.find((c) => c.id === id);
+}
+
 function getPhoneNumberFormat(country?: Country) {
   const id = country ? country.id : 'UNKNOWN';
 
@@ -62,6 +66,7 @@ function formatPhoneNumberWithCode(phoneNumber: string) {
 }
 
 export {
+  getCountryById,
   countryList,
   getCountryFromPhoneNumber,
   formatPhoneNumber,

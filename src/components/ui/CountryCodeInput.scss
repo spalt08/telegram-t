@@ -5,6 +5,14 @@
 
   .input-group {
     z-index: var(--z-country-code-input-group);
+
+    .Spinner {
+      position: absolute;
+      top: 1rem;
+      right: 0.75rem;
+      opacity: 0.5;
+      --spinner-size: 1.5rem;
+    }
   }
 
   .bubble {

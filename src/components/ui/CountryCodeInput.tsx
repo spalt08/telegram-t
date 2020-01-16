@@ -8,15 +8,22 @@ import DropdownMenu from './DropdownMenu';
 import MenuItem from './MenuItem';
 
 import './CountryCodeInput.scss';
+import Spinner from '../Spinner';
 
 type IProps = {
   id: string;
   value?: Country;
+  isLoading?: boolean;
   onChange?: (value: Country) => void;
 };
 
 const CountryCodeInput: FC<IProps> = (props) => {
-  const { id, value, onChange } = props;
+  const {
+    id,
+    value,
+    isLoading,
+    onChange,
+  } = props;
   const [filter, setFilter] = useState(undefined);
   const [filteredList, setFilteredList] = useState(countryList);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -119,6 +126,9 @@ const CountryCodeInput: FC<IProps> = (props) => {
           onKeyDown={onInputKeyDown}
         />
         <label>Country</label>
+        {isLoading && (
+          <Spinner color="black" />
+        )}
       </div>
     );
   };

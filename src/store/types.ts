@@ -43,6 +43,7 @@ export type GlobalState = {
   authError?: string;
   authRememberMe?: boolean;
   authIsSessionRemembered?: boolean;
+  authNearestCountry?: string;
 
   connectionState?: ApiUpdateConnectionStateType;
 };
@@ -58,7 +59,7 @@ export type ActionTypes = (
   'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' |
   // users
-  'loadFullUser' | 'openUserInfo'
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry'
 );
 
 export type GlobalActions = Record<ActionTypes, Function>;

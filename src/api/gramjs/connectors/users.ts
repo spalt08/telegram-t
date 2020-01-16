@@ -39,3 +39,11 @@ export async function fetchFullUser(
     },
   });
 }
+
+export async function fetchNearestCountry() {
+  const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc({}));
+
+  const { country } = dcInfo;
+
+  return country;
+}
