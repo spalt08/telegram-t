@@ -13,10 +13,8 @@ export enum VirtualElementTypesEnum {
   Component,
 }
 
-interface VirtualElementEmpty {
-  type: VirtualElementTypesEnum.Empty;
-  target?: Node;
-}
+const VIRTUAL_ELEMENT_EMPTY = undefined;
+type VirtualElementEmpty = typeof VIRTUAL_ELEMENT_EMPTY;
 
 interface VirtualElementText {
   type: VirtualElementTypesEnum.Text;
@@ -90,19 +88,19 @@ const EMPTY_COMPONENT_CHILDREN: any[] = [];
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
-  return $element.type === VirtualElementTypesEnum.Empty;
+  return $element === VIRTUAL_ELEMENT_EMPTY;
 }
 
 export function isTextElement($element: VirtualElement): $element is VirtualElementText {
-  return $element.type === VirtualElementTypesEnum.Text;
+  return !isEmptyElement($element) && $element.type === VirtualElementTypesEnum.Text;
 }
 
 export function isTagElement($element: VirtualElement): $element is VirtualElementTag {
-  return $element.type === VirtualElementTypesEnum.Tag;
+  return !isEmptyElement($element) && $element.type === VirtualElementTypesEnum.Tag;
 }
 
 export function isComponentElement($element: VirtualElement): $element is VirtualElementComponent {
-  return $element.type === VirtualElementTypesEnum.Component;
+  return !isEmptyElement($element) && $element.type === VirtualElementTypesEnum.Component;
 }
 
 export function isRealElement($element: VirtualElement): $element is VirtualRealElement {
@@ -216,7 +214,8 @@ function buildTextElement(value: any): VirtualElementText {
 }
 
 function buildEmptyElement(): VirtualElementEmpty {
-  return { type: VirtualElementTypesEnum.Empty };
+  // return { type: VirtualElementTypesEnum.Empty };
+  return VIRTUAL_ELEMENT_EMPTY;
 }
 
 export function renderComponent(componentInstance: ComponentInstance) {
@@ -247,6 +246,8 @@ export function renderComponent(componentInstance: ComponentInstance) {
 export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
   if (typeof $old !== typeof $new) {
     return true;
+  } else if (isEmptyElement($old) || isEmptyElement($new)) {
+    return $old !== $new;
   } else if ($old.type !== $new.type) {
     return true;
   } else if (isTextElement($old) && isTextElement($new)) {
@@ -309,15 +310,17 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 export function getTarget($element: VirtualElement): Node | undefined {
   if (isComponentElement($element)) {
     return getTarget($element.children[0]);
-  } else {
+  } else if (!isEmptyElement($element)) {
     return $element.target;
   }
+
+  return undefined;
 }
 
 export function setTarget($element: VirtualElement, target: Node) {
   if (isComponentElement($element)) {
     setTarget($element.children[0], target);
-  } else {
+  } else if (!isEmptyElement($element)) {
     $element.target = target;
   }
 }

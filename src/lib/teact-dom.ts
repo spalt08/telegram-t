@@ -24,12 +24,12 @@ const FILTERED_ATTRIBUTES = new Set(['key', 'teactChildrenKeyOrder']);
 const $head: VirtualDomHead = { children: [] };
 let DEBUG_virtualTreeSize = 1;
 
-function render($element: VirtualElement, parentEl: HTMLElement | null) {
+function render($element: VirtualElement, parentEl: Element | null) {
   if (!parentEl) {
     return undefined;
   }
 
-  $head.children = [renderWithVirtual(parentEl, undefined, $element, $head, 0) as VirtualElement];
+  $head.children = [renderWithVirtual(parentEl, undefined, $element, $head, 0, true) as VirtualElement];
 
   if (process.env.NODE_ENV === 'perf') {
     DEBUG_virtualTreeSize = 0;
@@ -42,13 +42,13 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
 }
 
 function renderWithVirtual(
-  parentEl: HTMLElement,
+  parentEl: Element,
   $current: VirtualElement | undefined,
   $new: VirtualElement | undefined,
   $parent: VirtualRealElement | VirtualDomHead,
   index: number,
   skipComponentUpdate = false,
-  insertAfterOrPrepend?: Element | 'prepend',
+  insertAfterOrPrepend?: Node | 'prepend',
 ) {
   if (
     !skipComponentUpdate
@@ -105,13 +105,14 @@ function renderWithVirtual(
 
       if (isRealElement($current) && isRealElement($new)) {
         if (!areComponents) {
-          updateAttributes($current, $new, getTarget($current) as HTMLElement);
+          updateAttributes($current, $new, getTarget($current) as Element);
         }
 
-        $new.children = renderChildren(
+        $new.children = updateChildren(
           $current,
           $new,
-          areComponents ? parentEl : getTarget($current) as HTMLElement,
+          areComponents ? parentEl : getTarget($current) as Element,
+          areComponents ? insertAfterOrPrepend : undefined,
         );
       }
     }
@@ -121,7 +122,7 @@ function renderWithVirtual(
 }
 
 function initComponent(
-  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: HTMLElement,
+  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: Element,
 ) {
   if (!isComponentElement($element)) {
     return $element;
@@ -152,7 +153,7 @@ function updateComponent($current: VirtualElementComponent, $new: VirtualElement
 }
 
 function setupComponentUpdateListener(
-  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: HTMLElement,
+  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: Element,
 ) {
   const { componentInstance } = $element;
 
@@ -195,26 +196,39 @@ function createNode($element: VirtualElement): Node {
   return element;
 }
 
-function renderChildren(
-  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
+function updateChildren(
+  $current: VirtualRealElement,
+  $new: VirtualRealElement,
+  currentEl: Element,
+  insertAfterOrPrepend: Node | 'prepend' = 'prepend',
 ) {
   if ($new.props.teactChildrenKeyOrder === 'asc') {
-    return renderOrderedChildren($current, $new, currentEl);
+    return updateOrderedChildren($current, $new, currentEl);
   }
 
   const maxLength = Math.max($current.children.length, $new.children.length);
   const newChildren = [];
 
   for (let i = 0; i < maxLength; i++) {
+    const $nextChild = $new.children[i];
+    const shouldInsert = (isEmptyElement($current.children[i]) && !isEmptyElement($nextChild))
+      || isComponentElement($nextChild);
+
     const $newChild = renderWithVirtual(
       currentEl,
       $current.children[i],
       $new.children[i],
       $new,
       i,
+      false,
+      shouldInsert ? insertAfterOrPrepend : undefined,
     );
 
-    if ($newChild) {
+    if (i < $new.children.length) {
+      if (!isEmptyElement($newChild)) {
+        insertAfterOrPrepend = getTarget($newChild)!;
+      }
+
       newChildren.push($newChild);
     }
   }
@@ -223,43 +237,43 @@ function renderChildren(
 }
 
 // A simple diff algorithm for two ordered lists. This is different to React which supports diffs for any keyed lists.
-function renderOrderedChildren(
-  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
+function updateOrderedChildren(
+  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: Element,
 ) {
-  let prevChild = $current.children[0] as VirtualRealElement;
-  let nextChild = $new.children[0] as VirtualRealElement;
+  let $prevChild = $current.children[0] as VirtualRealElement;
+  let $nextChild = $new.children[0] as VirtualRealElement;
   let prevI = 0;
   let nextI = 0;
 
   const newChildren = [];
   let i = 0;
 
-  let insertAfterOrPrepend: Element | 'prepend' = 'prepend';
+  let insertAfterOrPrepend: Node | 'prepend' = 'prepend';
 
-  while (prevChild || nextChild) {
-    if (nextChild && (!prevChild || nextChild.props.key < prevChild.props.key)) {
-      const newChild = renderWithVirtual(
-        currentEl, undefined, nextChild, $new, i, false, insertAfterOrPrepend,
+  while ($prevChild || $nextChild) {
+    if ($nextChild && (!$prevChild || $nextChild.props.key < $prevChild.props.key)) {
+      const $newChild = renderWithVirtual(
+        currentEl, undefined, $nextChild, $new, i, false, insertAfterOrPrepend,
       ) as VirtualElementTag;
-      newChildren.push(newChild);
-      insertAfterOrPrepend = newChild.target as Element;
+      newChildren.push($newChild);
+      insertAfterOrPrepend = $newChild.target!;
 
       nextI++;
-      nextChild = $new.children[nextI] as VirtualRealElement;
-    } else if (prevChild && (!nextChild || nextChild.props.key > prevChild.props.key)) {
-      renderWithVirtual(currentEl, prevChild, undefined, $new, i);
+      $nextChild = $new.children[nextI] as VirtualRealElement;
+    } else if ($prevChild && (!$nextChild || $nextChild.props.key > $prevChild.props.key)) {
+      renderWithVirtual(currentEl, $prevChild, undefined, $new, i);
 
       prevI++;
-      prevChild = $current.children[prevI] as VirtualRealElement;
+      $prevChild = $current.children[prevI] as VirtualRealElement;
     } else {
-      const newChild = renderWithVirtual(currentEl, prevChild, nextChild, $new, i) as VirtualElementTag;
-      newChildren.push(newChild);
-      insertAfterOrPrepend = newChild.target as Element;
+      const $newChild = renderWithVirtual(currentEl, $prevChild, $nextChild, $new, i) as VirtualElementTag;
+      newChildren.push($newChild);
+      insertAfterOrPrepend = $newChild.target!;
 
       prevI++;
-      prevChild = $current.children[prevI] as VirtualRealElement;
+      $prevChild = $current.children[prevI] as VirtualRealElement;
       nextI++;
-      nextChild = $new.children[nextI] as VirtualRealElement;
+      $nextChild = $new.children[nextI] as VirtualRealElement;
     }
 
     i++;
@@ -268,7 +282,7 @@ function renderOrderedChildren(
   return newChildren;
 }
 
-function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement, element: HTMLElement) {
+function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement, element: Element) {
   const currentKeys = Object.keys($current.props);
   const newKeys = Object.keys($new.props);
 
@@ -287,7 +301,7 @@ function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement
   });
 }
 
-function addAttribute(element: HTMLElement, key: string, value: any) {
+function addAttribute(element: Element, key: string, value: any) {
   if (value === false || value === null || value === undefined) {
     return;
   }
@@ -309,7 +323,7 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
   }
 }
 
-function removeAttribute(element: HTMLElement, key: string, value: any) {
+function removeAttribute(element: Element, key: string, value: any) {
   if (key === 'className') {
     element.className = '';
   } else if (key === 'muted') {
@@ -327,7 +341,7 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   }
 }
 
-function updateAttribute(element: HTMLElement, key: string, oldValue: any, newValue: any) {
+function updateAttribute(element: Element, key: string, oldValue: any, newValue: any) {
   if (key === 'value') {
     // Setting value to '' (as we do with `className`) causes a cursor jump.
     (element as HTMLInputElement).value = newValue;
@@ -337,12 +351,12 @@ function updateAttribute(element: HTMLElement, key: string, oldValue: any, newVa
   }
 }
 
-function setupAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
+function setupAdditionalOnChangeHandlers(element: Element, handler: EventHandlerNonNull) {
   element.addEventListener('input', handler);
   element.addEventListener('paste', handler);
 }
 
-function removeAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
+function removeAdditionalOnChangeHandlers(element: Element, handler: EventHandlerNonNull) {
   element.removeEventListener('paste', handler);
   element.removeEventListener('input', handler);
 }
