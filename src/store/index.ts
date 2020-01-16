@@ -8,6 +8,7 @@ import { pause, throttle } from '../util/schedulers';
 import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
 import { getChatAvatarHash } from '../modules/helpers';
 import * as mediaLoader from '../util/mediaLoader';
+import preloadFonts from '../util/fonts';
 
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
@@ -68,15 +69,20 @@ if (!GLOBAL_STATE_CACHE_DISABLED) {
   });
 }
 
+function preloadAvatars(cached: GlobalState) {
+  return Object.values(cached.chats.byId).map((chat) => {
+    const avatarHash = getChatAvatarHash(chat);
+    return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
+  });
+}
+
 function preloadAssets(cached: GlobalState) {
   return Promise.race([
     pause(MAX_PRELOAD_DELAY),
-    Promise.all(
-      Object.values(cached.chats.byId).map((chat) => {
-        const avatarHash = getChatAvatarHash(chat);
-        return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
-      }),
-    ),
+    Promise.all([
+      preloadFonts(),
+      preloadAvatars(cached),
+    ]),
   ]);
 }
 
