@@ -12,10 +12,12 @@ interface Ripple {
 }
 
 const RIPPLE_DEBOUNCE_MS = 2000;
+// Workaround for flickering when rendering messages. The value is heuristic.
+const DELAY_MS = 90;
 
 const runDebounced = debounce((cb) => cb(), RIPPLE_DEBOUNCE_MS, false);
 
-const RippleEffect: FC<{}> = () => {
+const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
   const [ripples, setRipples] = useState([]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -27,8 +29,7 @@ const RippleEffect: FC<{}> = () => {
     const position = container.getBoundingClientRect() as DOMRect;
 
     const rippleSize = container.offsetWidth / 2;
-
-    setRipples([
+    const exec = () => setRipples([
       ...ripples,
       {
         x: e.pageX - position.x - (rippleSize / 2),
@@ -36,7 +37,15 @@ const RippleEffect: FC<{}> = () => {
         size: rippleSize,
       },
     ]);
-  }, [ripples]);
+
+    if (delayed) {
+      setTimeout(() => {
+        exec();
+      }, DELAY_MS);
+    } else {
+      exec();
+    }
+  }, [ripples, delayed]);
 
   const cleanUp = useCallback(() => runDebounced(() => setRipples([])), []);
 

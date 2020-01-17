@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC, memo, useCallback } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
@@ -74,8 +74,12 @@ const Chat: FC<IProps> = ({
     );
   }
 
+  const handleClick = useCallback(() => {
+    openChat({ id: chat.id });
+  }, [openChat, chat.id]);
+
   return (
-    <div className={buildClassNames(chat, selected)} onClick={() => openChat({ id: chat.id })}>
+    <div className={buildClassNames(chat, selected)} onClick={handleClick}>
       <Avatar
         chat={chat}
         user={privateChatUser}
@@ -95,7 +99,7 @@ const Chat: FC<IProps> = ({
           <Badge chat={chat} />
         </div>
       </div>
-      <RippleEffect />
+      <RippleEffect delayed={!selected} />
     </div>
   );
 };
