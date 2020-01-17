@@ -7,7 +7,7 @@ import { GlobalState } from '../../../store/types';
 
 import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { updateChats } from '../../common/chats';
+import { updateChatIds, updateChats } from '../../common/chats';
 import { updateUsers } from '../../common/users';
 
 const INITIAL_CHATS_LIMIT = 50;
@@ -33,19 +33,19 @@ async function loadAndReplaceChats() {
 
   let global = getGlobal();
 
-  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'), true);
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'), true);
+  global = updateChatIds(global, result.chat_ids, true);
 
-  const newIds = result.chat_ids;
-
-  global = {
-    ...global,
-    chats: {
-      ...global.chats,
-      ids: newIds,
-      ...(global.chats.selectedId && !newIds.includes(global.chats.selectedId) && { selectedId: undefined }),
-    },
-  };
+  if (global.chats.selectedId && !result.chat_ids.includes(global.chats.selectedId)) {
+    global = {
+      ...global,
+      chats: {
+        ...global.chats,
+        selectedId: undefined,
+      },
+    };
+  }
 
   setGlobal(global);
 }

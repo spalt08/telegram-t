@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
-import { addChatIds, updateChats } from '../../common/chats';
+import { updateChatIds, updateChats } from '../../common/chats';
 import { selectChat } from '../../selectors';
 import { updateUsers } from '../../common/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -56,7 +56,7 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
 
   global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = addChatIds(global, chat_ids);
+  global = updateChatIds(global, chat_ids);
 
   setGlobal(global);
 }

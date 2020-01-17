@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useEffect, useState, memo,
+  FC, useEffect, useState, memo, useCallback,
 } from '../../../../lib/teact';
 import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
@@ -51,37 +51,43 @@ const MessageList: FC<IProps> = ({
 
   const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : [];
 
-  runThrottledForLoadMessages(() => {
-    if (!areMessagesLoaded) {
+  if (!areMessagesLoaded) {
+    runThrottledForLoadMessages(() => {
       loadChatMessages({ chatId });
-    } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+    });
+  } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+    runThrottledForLoadMessages(() => {
       loadMoreChatMessages({ chatId });
-    }
-  });
+    });
+  }
 
   const isPrivate = chatId && isPrivateChat(chatId);
 
-  const handleScroll = chatId
-    ? (e: UIEvent) => {
-      const target = e.target as HTMLElement;
-      currentScrollOffset = target.scrollHeight - target.scrollTop;
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    currentScrollOffset = target.scrollHeight - target.scrollTop;
 
-      runThrottledForScroll(() => {
-        setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
-
+    if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+      runThrottledForLoadMessages(() => {
+        // More than one callback can be added to the queue
+        // before the messages are prepended, so we need to check again.
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
           loadMoreChatMessages({ chatId });
         }
-
-        requestAnimationFrame(() => {
-          const newViewportMessageIds = findMediaMessagesInViewport(target);
-          if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
-            setViewportMessageIds(newViewportMessageIds);
-          }
-        });
       });
     }
-    : undefined;
+
+    runThrottledForScroll(() => {
+      setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
+
+      requestAnimationFrame(() => {
+        const newViewportMessageIds = findMediaMessagesInViewport(target);
+        if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+          setViewportMessageIds(newViewportMessageIds);
+        }
+      });
+    });
+  }, [chatId, loadMoreChatMessages, setChatScrollOffset, viewportMessageIds]);
 
   useEffect(() => {
     if (chatId) {
@@ -155,16 +161,14 @@ const MessageList: FC<IProps> = ({
       className={classNames.join(' ')}
       onScroll={handleScroll}
     >
-      {
-        areMessagesLoaded ? (
-          // @ts-ignore
-          <div className="messages-container" teactChildrenKeyOrder="asc">
-            {messagesArray.length > 0 && groupMessages(messagesArray).map(renderMessageDateGroup)}
-          </div>
-        ) : (
-          <Loading />
-        )
-      }
+      {areMessagesLoaded ? (
+        // @ts-ignore
+        <div className="messages-container" teactChildrenKeyOrder="asc">
+          {messagesArray.length > 0 && groupMessages(messagesArray).map(renderMessageDateGroup)}
+        </div>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 };

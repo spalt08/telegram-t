@@ -1,13 +1,13 @@
 import { ApiUser } from '../../api/types';
 import { GlobalState } from '../../store/types';
 
-export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>) {
+export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>, shouldReplaceExisting = false) {
   return {
     ...global,
     users: {
       ...global.users,
       byId: {
-        ...global.users.byId,
+        ...(!shouldReplaceExisting && global.users.byId),
         ...byId,
       },
     },

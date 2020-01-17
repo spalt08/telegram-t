@@ -1,8 +1,8 @@
 import { GlobalState } from '../../store/types';
 import { ApiChat } from '../../api/types';
 
-export function addChatIds(global: GlobalState, chatIds: number[]) {
-  const currentIds = global.chats.ids;
+export function updateChatIds(global: GlobalState, chatIds: number[], shouldReplaceExisting = false) {
+  const currentIds = !shouldReplaceExisting ? global.chats.ids : null;
   const newIds = (currentIds && currentIds.length) ? chatIds.filter((id) => !currentIds.includes(id)) : chatIds;
 
   return {
@@ -51,13 +51,13 @@ export function updateChatReplyingTo(
   };
 }
 
-export function updateChats(global: GlobalState, byId: Record<number, ApiChat>) {
+export function updateChats(global: GlobalState, byId: Record<number, ApiChat>, shouldReplaceExisting = false) {
   return {
     ...global,
     chats: {
       ...global.chats,
       byId: {
-        ...global.chats.byId,
+        ...(!shouldReplaceExisting && global.chats.byId),
         ...byId,
       },
     },

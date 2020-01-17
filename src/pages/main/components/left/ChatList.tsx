@@ -1,5 +1,4 @@
-import { UIEvent } from 'react';
-import React, { FC, memo } from '../../../../lib/teact';
+import React, { FC, memo, useCallback } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
@@ -20,17 +19,30 @@ type IProps = {
 } & Pick<GlobalActions, 'loadMoreChats'>;
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
-const SCROLL_THROTTLE_MS = 1000;
 
-const handleScrollThrottled = throttle(handleScroll, SCROLL_THROTTLE_MS, true);
+const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 
 const ChatList: FC<IProps> = ({
   chats, loadedChatIds, selectedChatId, loadMoreChats,
 }) => {
   const chatArrays = loadedChatIds ? prepareChats(chats, loadedChatIds) : undefined;
 
+  const handleScroll = useCallback((e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
+      runThrottledForLoadChats(() => {
+        // More than one callback can be added to the queue
+        // before the chats are appended, so we need to check again.
+        if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
+          loadMoreChats();
+        }
+      });
+    }
+  }, [loadMoreChats]);
+
   return (
-    <div className="ChatList custom-scroll" onScroll={(e) => handleScrollThrottled(e, loadMoreChats)}>{
+    <div className="ChatList custom-scroll" onScroll={handleScroll}>{
       // eslint-disable-next-line no-nested-ternary
       loadedChatIds && loadedChatIds.length && chatArrays ? (
         <div>
@@ -53,14 +65,6 @@ const ChatList: FC<IProps> = ({
     </div>
   );
 };
-
-function handleScroll(e: UIEvent, loadMoreChats: GlobalActions['loadMoreChats']) {
-  const target = e.target as HTMLElement;
-
-  if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
-    loadMoreChats();
-  }
-}
 
 function prepareChats(chats: Record<number, ApiChat>, loadedChatIds: number[]) {
   const filtered = toArray(chats)
