@@ -14,11 +14,14 @@ import Loading from '../../../components/Loading';
 import './Auth.scss';
 
 type IProps = (
-  Pick<GlobalState, 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'> &
+  Pick<GlobalState, (
+    'connectionState' | 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+  )> &
   Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry'>
 );
 
 const AuthPhoneNumber: FC<IProps> = ({
+  connectionState,
   authState,
   authIsLoading,
   authError,
@@ -28,13 +31,15 @@ const AuthPhoneNumber: FC<IProps> = ({
   setAuthRememberMe,
   loadNearestCountry,
 }) => {
-  if (!authNearestCountry) {
-    loadNearestCountry();
-  }
-
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [country, setCountry] = useState(undefined);
   const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (connectionState === 'connectionStateReady' && !authNearestCountry) {
+      loadNearestCountry();
+    }
+  }, [connectionState, authNearestCountry, loadNearestCountry]);
 
   useEffect(() => {
     if (authNearestCountry && !country) {
@@ -134,10 +139,10 @@ function getNumberWithCode(phoneNumber: string, country?: Country) {
 export default withGlobal(
   (global) => {
     const {
-      authState, authIsLoading, authError, authRememberMe, authNearestCountry,
+      connectionState, authState, authIsLoading, authError, authRememberMe, authNearestCountry,
     } = global;
     return {
-      authState, authIsLoading, authError, authRememberMe, authNearestCountry,
+      connectionState, authState, authIsLoading, authError, authRememberMe, authNearestCountry,
     };
   },
   (setGlobal, actions) => {

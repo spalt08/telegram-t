@@ -55,13 +55,13 @@ async function loadAndReplaceMessages() {
   const newMessages: GlobalState['messages'] = { byChatId: {} };
 
   if (global.chats.selectedId) {
-    const messages = await loadTopMessages(global.chats.byId[global.chats.selectedId]);
+    const messages = await loadNewestMessages(global.chats.byId[global.chats.selectedId]);
 
     if (messages) {
       const byId = buildCollectionByKey(messages, 'id');
       newMessages.byChatId[global.chats.selectedId] = { byId };
-
       newMessages.selectedMediaMessageId = undefined;
+
       const currentSelectedMessageMediaId = global.messages.selectedMediaMessageId;
       if (currentSelectedMessageMediaId) {
         const newIds = messages.map(({ id }) => id);
@@ -75,19 +75,16 @@ async function loadAndReplaceMessages() {
   global = getGlobal();
 
   setGlobal({
-    ...getGlobal(),
+    ...global,
     chats: {
       ...global.chats,
       scrollOffsetById: {},
     },
-    messages: {
-      ...global.messages,
-      ...newMessages,
-    },
+    messages: newMessages,
   });
 }
 
-async function loadTopMessages(chat: ApiChat) {
+async function loadNewestMessages(chat: ApiChat) {
   const result = await callSdk('fetchMessages', {
     chat,
     fromMessageId: 0,

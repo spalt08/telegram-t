@@ -29,43 +29,39 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
     authError = 'Invalid Password';
   }
 
+  const global = getGlobal();
+  const prevState = global.authState;
   setGlobal({
-    ...getGlobal(),
+    ...global,
     authState,
     authIsLoading: false,
     authError,
   });
 
-  switch (authState) {
-    case 'authorizationStateLoggingOut':
-      setGlobal({
-        ...getGlobal(),
-        isLoggingOut: true,
-      });
-      break;
-    case 'authorizationStateWaitPhoneNumber':
-      break;
-    case 'authorizationStateWaitCode':
-      break;
-    case 'authorizationStateWaitPassword':
-      break;
-    case 'authorizationStateWaitRegistration':
-      break;
-    case 'authorizationStateReady': {
-      const { session_id } = update;
-      if (session_id && getGlobal().authRememberMe) {
-        getDispatch().saveSession({ sessionId: session_id });
+  if (authState !== prevState) {
+    switch (authState) {
+      case 'authorizationStateLoggingOut':
+        setGlobal({
+          ...getGlobal(),
+          isLoggingOut: true,
+        });
+        break;
+      case 'authorizationStateReady': {
+        setGlobal({
+          ...getGlobal(),
+          isLoggingOut: false,
+        });
+
+        const { session_id } = update;
+        if (session_id && getGlobal().authRememberMe) {
+          getDispatch().saveSession({ sessionId: session_id });
+        }
+
+        onConnect();
+
+        break;
       }
-
-      setGlobal({
-        ...getGlobal(),
-        isLoggingOut: false,
-      });
-
-      break;
     }
-    default:
-      break;
   }
 }
 
@@ -79,13 +75,18 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   switch (connectionState) {
     case 'connectionStateReady': {
-      if (getGlobal().authState === 'authorizationStateReady') {
-        getDispatch().sync();
-      }
+      onConnect();
 
       break;
     }
     default:
       break;
+  }
+}
+
+function onConnect() {
+  const { connectionState, authState } = getGlobal();
+  if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
+    getDispatch().sync();
   }
 }
