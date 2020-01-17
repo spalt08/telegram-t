@@ -395,7 +395,7 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
 }
 
 // TODO Support in `teact-dom`.
-export function useRef(initial?: any) {
+export function useRef<T extends any>(initial?: any): { current: T } {
   const { cursor, byCursor } = renderingInstance.hooks.refs;
 
   if (byCursor[cursor] === undefined) {
