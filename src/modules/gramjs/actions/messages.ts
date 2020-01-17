@@ -1,9 +1,10 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
-import { ApiChat, ApiMessage } from '../../../api/types';
+import { ApiChat } from '../../../api/types';
 
 import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateMessages } from '../../common/messages';
+import { updateUsers } from '../../common/users';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
@@ -48,30 +49,37 @@ addReducer('deleteMessages', (global, actions, payload) => {
 });
 
 async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
-  let messages = await loadChatMessagesPart(chat, fromMessageId);
+  const result = await loadChatMessagesPart(chat, fromMessageId);
 
-  if (!messages) {
+  if (!result) {
     return;
   }
+
+  let { messages, users } = result;
 
   let wasLatestEmpty = !messages.length;
 
   while (messages.length < MESSAGE_SLICE_LIMIT && !wasLatestEmpty) {
-    const nextPart: ApiMessage[] | null = await loadChatMessagesPart(chat, messages[messages.length - 1].id);
+    const nextPart = await loadChatMessagesPart(chat, messages[messages.length - 1].id);
 
-    if (nextPart && nextPart.length) {
+    if (nextPart && nextPart.messages.length) {
       messages = [
         ...messages,
-        ...nextPart,
+        ...nextPart.messages,
+      ];
+      users = [
+        ...users,
+        ...nextPart.users,
       ];
     } else {
       wasLatestEmpty = true;
     }
   }
 
-  const messagesById = buildCollectionByKey(messages, 'id');
-
-  setGlobal(updateMessages(getGlobal(), chat.id, messagesById));
+  let global = getGlobal();
+  global = updateMessages(global, chat.id, buildCollectionByKey(messages, 'id'));
+  global = updateUsers(global, buildCollectionByKey(users, 'id'));
+  setGlobal(global);
 }
 
 async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
@@ -85,7 +93,7 @@ async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
     return null;
   }
 
-  return result.messages;
+  return result;
 }
 
 function sendTextMessage(chat: ApiChat, text: string, replyingTo?: number) {

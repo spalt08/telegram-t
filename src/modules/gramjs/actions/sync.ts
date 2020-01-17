@@ -18,20 +18,20 @@ addReducer('sync', () => {
 });
 
 async function sync() {
-  await loadAndReplaceChats();
-  await loadAndReplaceMessages();
+  let global = getGlobal();
+  global = await loadAndReplaceChats(global);
+  global = await loadAndReplaceMessages(global);
+  setGlobal(global);
 }
 
-async function loadAndReplaceChats() {
+async function loadAndReplaceChats(global: GlobalState) {
   const result = await callSdk('fetchChats', {
     limit: INITIAL_CHATS_LIMIT,
   });
 
   if (!result) {
-    return;
+    return global;
   }
-
-  let global = getGlobal();
 
   global = updateUsers(global, buildCollectionByKey(result.users, 'id'), true);
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'), true);
@@ -47,41 +47,51 @@ async function loadAndReplaceChats() {
     };
   }
 
-  setGlobal(global);
+  return global;
 }
 
-async function loadAndReplaceMessages() {
-  let global = getGlobal();
-  const newMessages: GlobalState['messages'] = { byChatId: {} };
-
+async function loadAndReplaceMessages(global: GlobalState) {
   if (global.chats.selectedId) {
-    const messages = await loadNewestMessages(global.chats.byId[global.chats.selectedId]);
+    const result = await loadNewestMessages(global.chats.byId[global.chats.selectedId]);
 
-    if (messages) {
-      const byId = buildCollectionByKey(messages, 'id');
-      newMessages.byChatId[global.chats.selectedId] = { byId };
-      newMessages.selectedMediaMessageId = undefined;
-
+    if (result && global.chats.selectedId) {
+      let selectedMediaMessageId;
       const currentSelectedMessageMediaId = global.messages.selectedMediaMessageId;
       if (currentSelectedMessageMediaId) {
-        const newIds = messages.map(({ id }) => id);
+        const newIds = result.messages.map(({ id }) => id);
         if (newIds.includes(currentSelectedMessageMediaId)) {
-          newMessages.selectedMediaMessageId = currentSelectedMessageMediaId;
+          selectedMediaMessageId = currentSelectedMessageMediaId;
         }
       }
+
+      global = {
+        ...global,
+        messages: {
+          selectedMediaMessageId,
+          byChatId: {
+            [global.chats.selectedId]: {
+              byId: buildCollectionByKey(result.messages, 'id'),
+            },
+          },
+        },
+      };
+
+      global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+
+      return global;
     }
   }
 
-  global = getGlobal();
-
-  setGlobal({
+  global = {
     ...global,
     chats: {
       ...global.chats,
       scrollOffsetById: {},
     },
-    messages: newMessages,
-  });
+    messages: { byChatId: {} },
+  };
+
+  return global;
 }
 
 async function loadNewestMessages(chat: ApiChat) {
@@ -95,5 +105,5 @@ async function loadNewestMessages(chat: ApiChat) {
     return null;
   }
 
-  return result.messages;
+  return result;
 }

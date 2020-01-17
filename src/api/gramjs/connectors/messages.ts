@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiChat, ApiMessage, OnApiUpdate } from '../../types';
+import { ApiChat, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from '../client';
 import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../builders/messages';
@@ -19,7 +19,7 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
   chat: ApiChat;
   fromMessageId: number;
   limit: number;
-}): Promise<{ messages: ApiMessage[] } | null> {
+}) {
   const result = await invokeRequest(new GramJs.messages.GetHistory({
     offsetId: fromMessageId,
     limit,
@@ -34,22 +34,14 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
     return null;
   }
 
-  result.users.forEach((mtpUser) => {
-    const user = buildApiUser(mtpUser);
-
-    onUpdate({
-      '@type': 'updateUser',
-      id: user.id,
-      user,
-    });
-  });
-
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage);
+  const users = result.users.map(buildApiUser);
 
   return {
     messages,
+    users,
   };
 }
 
