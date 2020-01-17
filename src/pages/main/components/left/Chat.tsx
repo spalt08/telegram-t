@@ -143,8 +143,8 @@ export default memo(withGlobal(
 
     return {
       lastMessageSender: selectUser(global, lastMessage.sender_user_id),
-      lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
-      privateChatUser: privateChatUserId && selectUser(global, privateChatUserId),
+      ...(lastMessage.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage) }),
+      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       actionTargetMessage,
     };
   },
