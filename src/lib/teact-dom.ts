@@ -20,6 +20,7 @@ type VirtualDomHead = {
 };
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'teactChildrenKeyOrder']);
+const MAPPED_ATTRIBUTES: { [k: string]: string } = { autoPlay: 'autoplay' };
 
 const $head: VirtualDomHead = { children: [] };
 let DEBUG_virtualTreeSize = 1;
@@ -292,38 +293,39 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
     return;
   }
 
+  // An optimization attempt.
   if (key === 'className') {
     element.className = value;
-  } else if (key === 'muted') {
-    (element as HTMLVideoElement).muted = true;
-  } else if (key === 'autoPlay') {
-    (element as HTMLVideoElement).autoplay = true;
+  } else if (key === 'style') {
+    element.style.cssText = value;
   } else if (key.startsWith('on')) {
     element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
     if (key === 'onChange') {
       setupAdditionalOnChangeHandlers(element, value);
     }
-  } else if (!FILTERED_ATTRIBUTES.has(key)) {
+  } else if (key.startsWith('data-')) {
     element.setAttribute(key, value);
+  } else if (!FILTERED_ATTRIBUTES.has(key)) {
+    (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
   }
 }
 
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
     element.className = '';
-  } else if (key === 'muted') {
-    delete (element as HTMLVideoElement).muted;
-  } else if (key === 'autoPlay') {
-    delete (element as HTMLVideoElement).autoplay;
+  } else if (key === 'style') {
+    element.style.cssText = value;
   } else if (key.startsWith('on')) {
     element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
     if (key === 'onChange') {
       removeAdditionalOnChangeHandlers(element, value);
     }
-  } else {
+  } else if (key.startsWith('data-')) {
     element.removeAttribute(key);
+  } else if (!FILTERED_ATTRIBUTES.has(key)) {
+    delete (element as any)[MAPPED_ATTRIBUTES[key] || key];
   }
 }
 
