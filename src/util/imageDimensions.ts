@@ -2,28 +2,23 @@ import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
 import { getMessagePhotoMaxSize } from '../modules/helpers';
 
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
+const REM = 16;
 
 type IMediaDimensions = {
   width: number;
   height: number;
 };
 
-function getRemValue() {
-  return window.innerWidth > 1440 ? 16 : 14;
-}
-
 function getAvailableWidth(fromOwnMessage: boolean, isForwarded?: boolean) {
-  const rem = getRemValue();
   const extraPadding = isForwarded ? 1.75 : 0;
   if (fromOwnMessage) {
-    return (30 - extraPadding) * rem;
+    return (30 - extraPadding) * REM;
   }
-  return (29 - extraPadding) * rem;
+  return (29 - extraPadding) * REM;
 }
 
 function getAvailableHeight() {
-  const rem = getRemValue();
-  return 27 * rem;
+  return 27 * REM;
 }
 
 function getDimensionsFromVideo(video: ApiVideo): IMediaDimensions | undefined {
@@ -72,18 +67,16 @@ export function getVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isF
 }
 
 export function getReplyImageDimensions() {
-  const rem = getRemValue();
   return {
-    width: 2 * rem,
-    height: 2 * rem,
+    width: 2 * REM,
+    height: 2 * REM,
   };
 }
 
 export function getStickerDimensions(sticker: ApiSticker) {
   const { width, height } = sticker;
   const aspectRatio = (height && width) && height / width;
-  const rem = getRemValue();
-  const baseWidth = 16 * rem;
+  const baseWidth = 16 * REM;
 
   return {
     width: baseWidth,
