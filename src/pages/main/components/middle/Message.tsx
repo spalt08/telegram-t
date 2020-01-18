@@ -48,6 +48,7 @@ type IProps = {
   canDelete?: boolean;
   contactFirstName: string | null;
   outgoingStatus?: ApiMessageOutgoingStatus;
+  className?: string;
 } & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
@@ -63,6 +64,7 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   selectMediaMessage,
   openUserInfo,
+  className,
 }) => {
   const [, onDataUriUpdate] = useState(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -78,7 +80,11 @@ const Message: FC<IProps> = ({
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
-  const className = buildClassName(message, Boolean(mediaHash), contextMenuPosition !== null);
+  const containerClassNames = [
+    ...buildClassNames(message, Boolean(mediaHash), contextMenuPosition !== null),
+    className,
+  ];
+
   const {
     text,
     photo,
@@ -179,7 +185,7 @@ const Message: FC<IProps> = ({
   }
 
   return (
-    <div className={className} data-message-id={message.id}>
+    <div className={containerClassNames.join(' ')} data-message-id={message.id}>
       {showAvatar && (
         <Avatar size="small" user={sender} onClick={viewUser} />
       )}
@@ -210,7 +216,7 @@ const Message: FC<IProps> = ({
   );
 };
 
-function buildClassName(message: ApiMessage, hasMedia = false, hasContextMenu = false) {
+function buildClassNames(message: ApiMessage, hasMedia = false, hasContextMenu = false) {
   const classNames = ['Message'];
 
   if (isOwnMessage(message)) {
@@ -225,7 +231,7 @@ function buildClassName(message: ApiMessage, hasMedia = false, hasContextMenu = 
     classNames.push('has-menu-open');
   }
 
-  return classNames.join(' ');
+  return classNames;
 }
 
 function renderPhoto(

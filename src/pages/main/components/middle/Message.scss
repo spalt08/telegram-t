@@ -5,8 +5,12 @@
   margin-bottom: 0.375rem;
   position: relative;
 
-  &:last-child {
-    margin-bottom: 0;
+  &.last-in-group {
+    margin-bottom: 0.625rem;
+  }
+
+  &.last-in-list {
+    margin-bottom: 0.375rem;
   }
 
   &.own {
@@ -65,20 +69,20 @@
   }
 
   &:not(.own) {
-    &:first-child:not(:only-child) .content {
+    &.first-in-group:not(.last-in-group) .content {
       --border-bottom-left-radius: var(--border-radius-messages-small);
     }
 
-    &:not(:first-child):not(:last-child) .content {
+    &:not(.first-in-group):not(.last-in-group) .content {
       --border-top-left-radius: var(--border-radius-messages-small);
       --border-bottom-left-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child:not(:only-child) .content {
+    &.last-in-group:not(.first-in-group) .content {
       --border-top-left-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child .content {
+    &.last-in-group .content {
       --border-bottom-left-radius: var(--border-radius-messages-small);
 
       &.text, &.contact, &.document, &.is-forwarded {
@@ -88,20 +92,20 @@
   }
 
   &.own {
-    &:first-child:not(:only-child) .content {
+    &.first-in-group:not(.last-in-group) .content {
       --border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
-    &:not(:first-child):not(:last-child) .content {
+    &:not(.first-in-group):not(.last-in-group) .content {
       --border-top-right-radius: var(--border-radius-messages-small);
       --border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child:not(:only-child) .content {
+    &.last-in-group:not(:only-child) .content {
       --border-top-right-radius: var(--border-radius-messages-small);
     }
 
-    &:last-child .content {
+    &.last-in-group .content {
       --border-bottom-right-radius: var(--border-radius-messages-small);
 
       &.text, &.contact, &.document, &.is-forwarded {
@@ -113,7 +117,7 @@
 
 // Bubble appendix styles
 .Message {
-  &.own:last-child {
+  &.own.last-in-group {
     .text, .contact, .document, .is-forwarded {
       &::before {
         content: '';
@@ -130,7 +134,7 @@
     }
   }
 
-  &:not(.own):last-child {
+  &:not(.own).last-in-group {
     .text, .contact, .document, .is-forwarded {
       &::before {
         content: '';

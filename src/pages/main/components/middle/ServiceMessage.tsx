@@ -15,8 +15,8 @@ type IProps = {
 };
 
 const ServiceMessage: FC<IProps> = ({ message, sender, actionTargetMessage }) => (
-  <div className="message-action-group">
-    <div className="message-action-header">{getServiceMessageContent(message, sender, actionTargetMessage)}</div>
+  <div className="message-action-header">
+    <span>{getServiceMessageContent(message, sender, actionTargetMessage)}</span>
   </div>
 );
 

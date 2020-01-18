@@ -13,7 +13,7 @@ import {
   isActionMessage,
   isChannel,
 } from '../../../../modules/helpers';
-import { orderBy, toArray } from '../../../../util/iteratees';
+import { orderBy, toArray, flatten } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatHumanDate } from '../../../../util/dateFormat';
 import { MessageDateGroup, groupMessages } from './message/utils';
@@ -113,36 +113,57 @@ const MessageList: FC<IProps> = ({
     }
   }, [chatId, messages]);
 
-  function renderMessageDateGroup(messageDateGroup: MessageDateGroup) {
+  function renderMessageDateGroup(
+    messageDateGroup: MessageDateGroup,
+    dateGroupIndex: number,
+    messageDateGroupsArray: MessageDateGroup[],
+  ) {
+    const messageGroups = messageDateGroup.messageGroups.map((
+      messageGroup,
+      groupIndex,
+      messageGroupsArray,
+    ) => {
+      if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
+        const message = messageGroup[0];
+        return <ServiceMessage key={message.date} message={message} />;
+      }
+
+      return messageGroup.map((message, i) => {
+        const isOwn = isOwnMessage(message);
+        const classNames = [];
+        if (i === 0) {
+          classNames.push('first-in-group');
+        }
+        if (i === messageGroup.length - 1) {
+          classNames.push('last-in-group');
+          if (
+            groupIndex === messageGroupsArray.length - 1
+            && dateGroupIndex === messageDateGroupsArray.length - 1
+          ) {
+            classNames.push('last-in-list');
+          }
+        }
+
+        return (
+          <Message
+            key={message.date}
+            message={message}
+            showAvatar={!isPrivate && !isOwn}
+            showSenderName={i === 0 && !isPrivate && !isOwn}
+            loadAndPlayMedia={viewportMessageIds.includes(message.id)}
+            className={classNames.join(' ')}
+          />
+        );
+      });
+    });
+
     return (
       // @ts-ignore
       <div className="message-date-group" key={messageDateGroup.datetime} teactChildrenKeyOrder="asc">
-        <div className="message-date-header">{formatHumanDate(messageDateGroup.datetime)}</div>
-        {messageDateGroup.messageGroups.map((messageGroup) => {
-          if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
-            const message = messageGroup[0];
-            return <ServiceMessage message={message} />;
-          }
-
-          return (
-            // @ts-ignore
-            <div className="message-group" key={messageGroup[0].date} teactChildrenKeyOrder="asc">
-              {messageGroup.map((message, i) => {
-                const isOwn = isOwnMessage(message);
-
-                return (
-                  <Message
-                    key={message.date}
-                    message={message}
-                    showAvatar={!isPrivate && !isOwn}
-                    showSenderName={i === 0 && !isPrivate && !isOwn}
-                    loadAndPlayMedia={viewportMessageIds.includes(message.id)}
-                  />
-                );
-              })}
-            </div>
-          );
-        })}
+        <div className="message-date-header" key={0}>
+          <span>{formatHumanDate(messageDateGroup.datetime)}</span>
+        </div>
+        {flatten(messageGroups)}
       </div>
     );
   }
@@ -164,7 +185,7 @@ const MessageList: FC<IProps> = ({
       {areMessagesLoaded ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
-          {messagesArray.length > 0 && groupMessages(messagesArray).map(renderMessageDateGroup)}
+          {messagesArray.length > 0 && flatten(groupMessages(messagesArray).map(renderMessageDateGroup))}
         </div>
       ) : (
         <Loading />
