@@ -19,7 +19,7 @@ type VirtualDomHead = {
   children: [VirtualElement] | [];
 };
 
-const FILTERED_ATTRIBUTES = new Set(['key', 'teactChildrenKeyOrder']);
+const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactChildrenKeyOrder']);
 const MAPPED_ATTRIBUTES: { [k: string]: string } = { autoPlay: 'autoplay' };
 
 const $head: VirtualDomHead = { children: [] };
@@ -184,6 +184,10 @@ function createNode($element: VirtualElement): Node {
 
   const { tag, props, children = [] } = $element;
   const element = document.createElement(tag);
+
+  if (typeof props.ref === 'object') {
+    props.ref.current = element;
+  }
 
   Object.keys(props).forEach((key) => {
     addAttribute(element, key, props[key]);

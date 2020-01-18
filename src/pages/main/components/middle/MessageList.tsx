@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useEffect, useState, memo, useCallback,
+  FC, useEffect, useState, memo, useCallback, useRef,
 } from '../../../../lib/teact';
 import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
@@ -47,6 +47,7 @@ const MessageList: FC<IProps> = ({
   loadMoreChatMessages,
   setChatScrollOffset,
 }) => {
+  const containerRef = useRef<HTMLDivElement>();
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
 
   const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : [];
@@ -102,10 +103,8 @@ const MessageList: FC<IProps> = ({
       console.time('scrollTop');
     }
 
-    const scrollContainer = document.querySelector('.MessageList') as HTMLElement;
-
-    if (chatId && scrollContainer) {
-      scrollContainer.scrollTop = scrollContainer.scrollHeight - Number(currentScrollOffset || 0);
+    if (chatId && containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight - Number(currentScrollOffset || 0);
     }
 
     if (process.env.NODE_ENV === 'perf') {
@@ -158,6 +157,7 @@ const MessageList: FC<IProps> = ({
 
   return (
     <div
+      ref={containerRef}
       className={classNames.join(' ')}
       onScroll={handleScroll}
     >

@@ -63,12 +63,6 @@ interface ComponentInstance {
         cleanup?: Function;
       }[];
     };
-    refs: {
-      cursor: number;
-      byCursor: {
-        current: any;
-      }[];
-    };
     memos: {
       cursor: number;
       byCursor: {
@@ -139,10 +133,6 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
         byCursor: [],
       },
       effects: {
-        cursor: 0,
-        byCursor: [],
-      },
-      refs: {
         cursor: 0,
         byCursor: [],
       },
@@ -239,7 +229,6 @@ export function renderComponent(componentInstance: ComponentInstance) {
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
-  componentInstance.hooks.refs.cursor = 0;
   componentInstance.hooks.memos.cursor = 0;
 
   const { Component, props, children } = componentInstance;
@@ -306,7 +295,6 @@ function unmountComponent(componentInstance: ComponentInstance) {
   });
   delete componentInstance.hooks.state;
   delete componentInstance.hooks.effects;
-  delete componentInstance.hooks.refs;
   delete componentInstance.hooks.memos;
   componentInstance.isMounted = false;
 }
@@ -394,21 +382,6 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
   renderingInstance.hooks.effects.cursor++;
 }
 
-// TODO Support in `teact-dom`.
-export function useRef(initial?: any) {
-  const { cursor, byCursor } = renderingInstance.hooks.refs;
-
-  if (byCursor[cursor] === undefined) {
-    byCursor[cursor] = {
-      current: initial,
-    };
-  }
-
-  renderingInstance.hooks.refs.cursor++;
-
-  return byCursor[cursor];
-}
-
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[]): T {
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { current } = byCursor[cursor] || {};
@@ -431,7 +404,17 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[]): 
 }
 
 export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[]): F {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => newCallback, dependencies);
+}
+
+export function useRef<T>(initial: T | null = null): {
+  current: T | null;
+} {
+  return useMemo(() => ({
+    current: initial,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
 }
 
 export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
@@ -440,7 +423,7 @@ export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
     const propsRef = useRef(props);
     const renderedRef = useRef();
 
-    if (!renderedRef.current || !areEqual(propsRef.current, props)) {
+    if (!renderedRef.current || (propsRef.current && !areEqual(propsRef.current, props))) {
       propsRef.current = props;
       renderedRef.current = createElement(Component, props) as VirtualElementComponent;
     }
