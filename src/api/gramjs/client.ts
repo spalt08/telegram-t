@@ -100,7 +100,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, sho
 
 export function downloadMedia(url: string) {
   if (!isConnected) {
-    throw new Error('ERROR: Client is not connected');
+    return Promise.reject(new Error('ERROR: Client is not connected'));
   }
 
   return queuedDownloadMedia(client, url);

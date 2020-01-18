@@ -21,17 +21,18 @@ type ParsedMedia = string | Blob | AnyLiteral;
 type MemoryMedia = string | AnyLiteral;
 
 const MEMORY_CACHE: Record<string, MemoryMedia> = {};
-const FETCH_PROMISES: Record<string, Promise<MemoryMedia>> = {};
+const FETCH_PROMISES: Record<string, Promise<MemoryMedia | null>> = {};
 
 let pako: typeof import('pako/dist/pako_inflate');
 
 export function fetch(url: string, mediaType: Type) {
   if (!FETCH_PROMISES[url]) {
-    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType);
-    FETCH_PROMISES[url].catch((err) => {
+    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType).catch((err) => {
       // eslint-disable-next-line no-console
-      console.error(err);
+      console.warn(err);
       delete FETCH_PROMISES[url];
+
+      return null;
     });
   }
 
