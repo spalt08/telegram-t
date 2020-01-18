@@ -68,8 +68,4 @@
   .message-date-header + .message-action-header {
     margin-top: -0.5rem;
   }
-
-  .Message:not(.last-child) > .Avatar {
-    visibility: hidden;
-  }
 }

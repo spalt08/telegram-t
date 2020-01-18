@@ -5,8 +5,16 @@
   margin-bottom: 0.375rem;
   position: relative;
 
+  > .Avatar {
+    visibility: hidden;
+  }
+
   &.last-in-group {
     margin-bottom: 0.625rem;
+
+    > .Avatar {
+      visibility: visible;
+    }
   }
 
   &.last-in-list {
