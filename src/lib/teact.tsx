@@ -69,10 +69,10 @@ interface ComponentInstance {
         current: any;
       }[];
     };
-    callbacks: {
+    memos: {
       cursor: number;
       byCursor: {
-        callback: AnyFunction;
+        current: any;
         dependencies: any[];
       }[];
     };
@@ -146,7 +146,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
         cursor: 0,
         byCursor: [],
       },
-      callbacks: {
+      memos: {
         cursor: 0,
         byCursor: [],
       },
@@ -240,7 +240,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
   componentInstance.hooks.refs.cursor = 0;
-  componentInstance.hooks.callbacks.cursor = 0;
+  componentInstance.hooks.memos.cursor = 0;
 
   const { Component, props, children } = componentInstance;
   const newRenderedValue = Component({
@@ -307,7 +307,7 @@ function unmountComponent(componentInstance: ComponentInstance) {
   delete componentInstance.hooks.state;
   delete componentInstance.hooks.effects;
   delete componentInstance.hooks.refs;
-  delete componentInstance.hooks.callbacks;
+  delete componentInstance.hooks.memos;
   componentInstance.isMounted = false;
 }
 
@@ -409,25 +409,29 @@ export function useRef(initial?: any) {
   return byCursor[cursor];
 }
 
-export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[]): F {
-  const { cursor, byCursor } = renderingInstance.hooks.callbacks;
-  let { callback } = byCursor[cursor] || {};
+export function useMemo<T extends any>(resolver: () => T, dependencies: any[]): T {
+  const { cursor, byCursor } = renderingInstance.hooks.memos;
+  let { current } = byCursor[cursor] || {};
 
   if (
     byCursor[cursor] === undefined
     || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
   ) {
-    callback = newCallback;
+    current = resolver();
   }
 
   byCursor[cursor] = {
-    callback,
+    current,
     dependencies,
   };
 
-  renderingInstance.hooks.callbacks.cursor++;
+  renderingInstance.hooks.memos.cursor++;
 
-  return callback as F;
+  return current;
+}
+
+export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[]): F {
+  return useMemo(() => newCallback, dependencies);
 }
 
 export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
