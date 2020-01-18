@@ -89,7 +89,6 @@ div[role="button"] {
   }
 
   &:not(.shown) {
-    visibility: hidden;
-    pointer-events: none;
+    display: none;
   }
 }
