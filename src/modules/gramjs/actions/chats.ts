@@ -7,8 +7,12 @@ import { updateChatIds, updateChats } from '../../common/chats';
 import { selectChat } from '../../selectors';
 import { updateUsers } from '../../common/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { debounce } from '../../../util/schedulers';
 
 const LOAD_CHATS_LIMIT = 50;
+
+const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
+const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
 
 addReducer('loadMoreChats', (global) => {
   const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
@@ -23,7 +27,7 @@ addReducer('loadFullChat', (global, actions, payload) => {
     return;
   }
 
-  void callSdk('fetchFullChat', chat);
+  runDebouncedForFetchFullChat(() => callSdk('fetchFullChat', chat));
 });
 
 addReducer('loadChatOnlines', (global, actions, payload) => {
@@ -33,7 +37,7 @@ addReducer('loadChatOnlines', (global, actions, payload) => {
     return;
   }
 
-  void callSdk('fetchChatOnlines', chat);
+  runDebouncedForFetchOnlines(() => callSdk('fetchChatOnlines', chat));
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {

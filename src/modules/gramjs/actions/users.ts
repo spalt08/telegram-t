@@ -2,6 +2,9 @@ import { addReducer, setGlobal, getGlobal } from '../../../lib/teactn';
 
 import { callSdk } from '../../../api/gramjs';
 import { selectUser } from '../../selectors';
+import { debounce } from '../../../util/schedulers';
+
+const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 
 addReducer('loadFullUser', (global, actions, payload) => {
   const { userId } = payload!;
@@ -12,7 +15,7 @@ addReducer('loadFullUser', (global, actions, payload) => {
 
   const { id, access_hash: accessHash } = user;
 
-  void callSdk('fetchFullUser', { id, accessHash });
+  runDebouncedForFetchFullUser(() => callSdk('fetchFullUser', { id, accessHash }));
 });
 
 addReducer('loadNearestCountry', (global) => {

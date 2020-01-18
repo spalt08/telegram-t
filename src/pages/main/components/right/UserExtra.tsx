@@ -1,29 +1,32 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser } from '../../../../api/types';
-import { GlobalActions } from '../../../../store/types';
+import { GlobalActions, GlobalState } from '../../../../store/types';
 import { selectUser } from '../../../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../../../util/formatPhoneNumber';
 
-type IProps = Pick<GlobalActions, 'loadFullUser'> & {
+type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullUser'> & {
   userId: number;
   user: ApiUser;
 };
 
-const UserExtra: FC<IProps> = ({ user, loadFullUser }) => {
+const UserExtra: FC<IProps> = ({ lastSyncTime, user, loadFullUser }) => {
   const {
     full_info,
     username,
     phone_number,
     is_self,
   } = user;
+
+  useEffect(() => {
+    if (lastSyncTime && !is_self) {
+      loadFullUser({ userId: user.id });
+    }
+  }, [is_self, loadFullUser, user.id, lastSyncTime]);
+
   if (is_self) {
     return null;
-  }
-
-  if (!full_info) {
-    loadFullUser({ userId: user.id });
   }
 
   const bio = full_info && full_info.bio;
@@ -65,9 +68,10 @@ const UserExtra: FC<IProps> = ({ user, loadFullUser }) => {
 
 export default withGlobal(
   (global, { userId }: IProps) => {
+    const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 
-    return { user };
+    return { lastSyncTime, user };
   },
   (setGlobal, actions) => {
     const { loadFullUser } = actions;

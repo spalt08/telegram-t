@@ -21,6 +21,10 @@ async function sync() {
   let global = getGlobal();
   global = await loadAndReplaceChats(global);
   global = await loadAndReplaceMessages(global);
+  global = {
+    ...global,
+    lastSyncTime: Date.now(),
+  };
   setGlobal(global);
 }
 
@@ -37,15 +41,15 @@ async function loadAndReplaceChats(global: GlobalState) {
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'), true);
   global = updateChatIds(global, result.chat_ids, true);
 
-  if (global.chats.selectedId && !result.chat_ids.includes(global.chats.selectedId)) {
-    global = {
-      ...global,
-      chats: {
-        ...global.chats,
-        selectedId: undefined,
-      },
-    };
-  }
+  const currentSelectedId = global.chats.selectedId;
+  global = {
+    ...global,
+    chats: {
+      ...global.chats,
+      scrollOffsetById: {},
+      selectedId: currentSelectedId && result.chat_ids.includes(currentSelectedId) ? currentSelectedId : undefined,
+    },
+  };
 
   return global;
 }
@@ -84,10 +88,6 @@ async function loadAndReplaceMessages(global: GlobalState) {
 
   global = {
     ...global,
-    chats: {
-      ...global.chats,
-      scrollOffsetById: {},
-    },
     messages: { byChatId: {} },
   };
 

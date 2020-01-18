@@ -8,8 +8,6 @@ import {
 } from '../api/types';
 
 export type GlobalState = {
-  showRightColumn: boolean;
-
   users: {
     byId: Record<number, ApiUser>;
     selectedId?: number;
@@ -46,6 +44,8 @@ export type GlobalState = {
   authNearestCountry?: string;
 
   connectionState?: ApiUpdateConnectionStateType;
+  showRightColumn: boolean;
+  lastSyncTime?: number;
 };
 
 export type ActionTypes = (
@@ -62,4 +62,4 @@ export type ActionTypes = (
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry'
 );
 
-export type GlobalActions = Record<ActionTypes, Function>;
+export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

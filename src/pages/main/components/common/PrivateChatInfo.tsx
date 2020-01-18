@@ -1,23 +1,27 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiUser } from '../../../../api/types';
 import { selectUser } from '../../../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../../../modules/helpers';
-import { GlobalActions } from '../../../../store/types';
+import { GlobalActions, GlobalState } from '../../../../store/types';
 import Avatar from '../../../../components/Avatar';
 import VerifiedIcon from '../../../../components/VerifiedIcon';
 
-type IProps = Pick<GlobalActions, 'loadFullUser'> & {
+type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullUser'> & {
   userId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   user: ApiUser;
 };
 
-const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium', loadFullUser }) => {
-  if (user.is_self && !user.full_info) {
-    loadFullUser({ userId: user.id });
-  }
+const PrivateChatInfo: FC<IProps> = ({
+  lastSyncTime, user, avatarSize = 'medium', loadFullUser,
+}) => {
+  useEffect(() => {
+    if (lastSyncTime && user.is_self) {
+      loadFullUser({ userId: user.id });
+    }
+  }, [user.is_self, loadFullUser, user.id, lastSyncTime]);
 
   return (
     <div className="ChatInfo">
@@ -41,9 +45,10 @@ const PrivateChatInfo: FC<IProps> = ({ user, avatarSize = 'medium', loadFullUser
 
 export default withGlobal(
   (global, { userId }: IProps) => {
+    const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 
-    return { user };
+    return { lastSyncTime, user };
   },
   (setGlobal, actions) => {
     const { loadFullUser } = actions;

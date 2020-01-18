@@ -1,31 +1,32 @@
-import React, { FC } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { ApiChat } from '../../../../api/types';
-import { GlobalActions } from '../../../../store/types';
+import { GlobalActions, GlobalState } from '../../../../store/types';
 import { getChatTypeString, getChatTitle } from '../../../../modules/helpers';
 import { selectChat } from '../../../../modules/selectors';
 import Avatar from '../../../../components/Avatar';
 import VerifiedIcon from '../../../../components/VerifiedIcon';
 
-type IProps = Pick<GlobalActions, 'loadFullChat' | 'loadChatOnlines'> & {
+type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullChat' | 'loadChatOnlines'> & {
   chatId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   chat: ApiChat;
 };
 
 const GroupChatInfo: FC<IProps> = ({
+  lastSyncTime,
   chat,
   avatarSize = 'medium',
   loadFullChat,
   loadChatOnlines,
 }) => {
-  if (!chat.full_info) {
-    loadFullChat({ chatId: chat.id });
-  }
-  if (chat.online_count === undefined) {
-    loadChatOnlines({ chatId: chat.id });
-  }
+  useEffect(() => {
+    if (lastSyncTime) {
+      loadFullChat({ chatId: chat.id });
+      loadChatOnlines({ chatId: chat.id });
+    }
+  }, [chat.id, loadChatOnlines, loadFullChat, lastSyncTime]);
 
   const groupStatus = getGroupStatus(chat);
   const onlineStatus = chat.online_count ? `, ${chat.online_count} online` : '';
@@ -62,9 +63,10 @@ function getGroupStatus(chat: ApiChat) {
 
 export default withGlobal(
   (global, { chatId }: IProps) => {
+    const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
 
-    return { chat };
+    return { lastSyncTime, chat };
   },
   (setGlobal, actions) => {
     const { loadFullChat, loadChatOnlines } = actions;
