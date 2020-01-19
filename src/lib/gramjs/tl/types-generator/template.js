@@ -25,39 +25,57 @@ module.exports = ({ types, constructors, functions }) => {
     }
 
     function renderConstructors(constructors, indent) {
-        return constructors.map(({ name, argsConfig }) => `
+        return constructors.map(({ name, argsConfig }) => {
+            const argKeys = Object.keys(argsConfig)
+
+            if (!argKeys.length) {
+                return `export class ${upperFirst(name)} extends VirtualClass<void> {};`
+            }
+
+            let hasRequiredArgs = argKeys.some((argName) => argName !== 'flags' && !argsConfig[argName].isFlag)
+
+            return `
       export class ${upperFirst(name)} extends VirtualClass<{
 ${indent}  ${Object.keys(argsConfig)
             .map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
-${indent}}> {
+${indent}}${!hasRequiredArgs ? ` | void` : ''}> {
 ${indent}  ${Object.keys(argsConfig)
             .map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
-${indent}};`.trim())
-            .join(`\n${indent}`)
+${indent}};`.trim()
+        })
+        .join(`\n${indent}`)
     }
 
     function renderRequests(requests, indent) {
-        return requests.map(({ name, argsConfig, result }) => `
+        return requests.map(({ name, argsConfig, result }) => {
+            const argKeys = Object.keys(argsConfig)
+
+            if (!argKeys.length) {
+                return `export class ${upperFirst(name)} extends Request<void, ${renderResult(result)}> {};`
+            }
+
+            let hasRequiredArgs = argKeys.some((argName) => argName !== 'flags' && !argsConfig[argName].isFlag)
+
+            return `
       export class ${upperFirst(name)} extends Request<Partial<{
-${indent}  ${Object.keys(argsConfig)
-            .map((argName) => `
+${indent}  ${argKeys.map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
-${indent}}>, ${renderResult(result)}> {
-${indent}  ${Object.keys(argsConfig)
-            .map((argName) => `
+${indent}}${!hasRequiredArgs ? ` | void` : ''}>, ${renderResult(result)}> {
+${indent}  ${argKeys.map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
-${indent}};`.trim())
-            .join(`\n${indent}`)
+${indent}};`.trim()
+        })
+        .join(`\n${indent}`)
     }
 
     function renderResult(result) {
