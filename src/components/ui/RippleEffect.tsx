@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useState,
+  FC, useCallback, useMemo, useState,
 } from '../../lib/teact';
 import { debounce } from '../../util/schedulers';
 
@@ -11,11 +11,9 @@ interface Ripple {
   size: number;
 }
 
-const RIPPLE_DEBOUNCE_MS = 2000;
+const ANIMATION_DURATION_MS = 700;
 // Workaround for flickering when rendering messages. The value is heuristic.
 const DELAY_MS = 90;
-
-const runDebounced = debounce((cb) => cb(), RIPPLE_DEBOUNCE_MS, false);
 
 const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
   const [ripples, setRipples] = useState([]);
@@ -47,7 +45,11 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
     }
   }, [ripples, delayed]);
 
-  const cleanUp = useCallback(() => runDebounced(() => setRipples([])), []);
+  const cleanUp = useMemo(() => {
+    return debounce(() => {
+      setRipples([]);
+    }, ANIMATION_DURATION_MS + DELAY_MS, false);
+  }, []);
 
   return (
     <div className="ripple-container" onMouseDown={handleMouseDown} onMouseUp={cleanUp}>
