@@ -4,7 +4,6 @@ import arePropsShallowEqual from '../util/arePropsShallowEqual';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
-type AnyFunction = (...args: any) => any;
 
 export enum VirtualElementTypesEnum {
   Empty,

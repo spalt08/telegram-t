@@ -1,8 +1,6 @@
-type AnyArgsFunction = (...args: any) => void;
-type NoArgsFunction = () => void;
 type Scheduler = typeof requestAnimationFrame | typeof onNextTick | typeof runNow;
 
-export function debounce<F extends AnyArgsFunction>(
+export function debounce<F extends AnyToVoidFunction>(
   fn: F,
   ms: number,
   shouldRunFirst = true,
@@ -31,7 +29,7 @@ export function debounce<F extends AnyArgsFunction>(
   };
 }
 
-export function throttle<F extends AnyArgsFunction>(
+export function throttle<F extends AnyToVoidFunction>(
   fn: F,
   ms: number,
   shouldRunFirst = true,
@@ -66,19 +64,19 @@ export function throttle<F extends AnyArgsFunction>(
   };
 }
 
-export function throttleWithRaf<F extends AnyArgsFunction>(fn: F) {
+export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(requestAnimationFrame, fn);
 }
 
-export function throttleWithNextTick<F extends AnyArgsFunction>(fn: F) {
+export function throttleWithNextTick<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onNextTick, fn);
 }
 
-export function throttleWithNow<F extends AnyArgsFunction>(fn: F) {
+export function throttleWithNow<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(runNow, fn);
 }
 
-export function throttleWith<F extends AnyArgsFunction>(schedulerFn: Scheduler, fn: F) {
+export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler, fn: F) {
   let waiting = false;
   let args: Parameters<F>;
 
@@ -97,11 +95,11 @@ export function throttleWith<F extends AnyArgsFunction>(schedulerFn: Scheduler, 
   };
 }
 
-export function onNextTick(cb: NoArgsFunction) {
+export function onNextTick(cb: NoneToVoidFunction) {
   Promise.resolve().then(cb);
 }
 
-function runNow(fn: NoArgsFunction) {
+function runNow(fn: NoneToVoidFunction) {
   fn();
 }
 
