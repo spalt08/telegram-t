@@ -15,6 +15,13 @@ export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>, 
 }
 
 export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>) {
+  const currentUser = global.users.byId[userId];
+
+  const isSufficient = (currentUser && currentUser.type) || userUpdate.type;
+  if (!isSufficient) {
+    return global;
+  }
+
   return updateUsers(global, {
     [userId]: {
       ...global.users.byId[userId],
