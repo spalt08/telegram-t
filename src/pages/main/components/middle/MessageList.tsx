@@ -6,6 +6,7 @@ import { getGlobal, withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 import { ApiMessage } from '../../../../api/types';
+
 import { selectChatMessages, selectChat } from '../../../../modules/selectors';
 import {
   isOwnMessage,
@@ -16,11 +17,15 @@ import {
 import { orderBy, toArray, flatten } from '../../../../util/iteratees';
 import { throttle } from '../../../../util/schedulers';
 import { formatHumanDate } from '../../../../util/dateFormat';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import { MessageDateGroup, groupMessages } from './message/utils';
+
 import Loading from '../../../../components/Loading';
 import Message from './Message';
 import ServiceMessage from './ServiceMessage';
+
 import './MessageList.scss';
+
 
 type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
   areMessagesLoaded?: boolean;
@@ -62,7 +67,14 @@ const MessageList: FC<IProps> = ({
     });
   }
 
-  const isPrivate = chatId && isPrivateChat(chatId);
+  const playMediaInViewport = useCallback(() => {
+    requestAnimationFrame(() => {
+      const newViewportMessageIds = findMediaMessagesInViewport(containerRef.current!);
+      if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+        setViewportMessageIds(newViewportMessageIds);
+      }
+    });
+  }, [viewportMessageIds]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
@@ -81,14 +93,9 @@ const MessageList: FC<IProps> = ({
     runThrottledForScroll(() => {
       setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
-      requestAnimationFrame(() => {
-        const newViewportMessageIds = findMediaMessagesInViewport(target);
-        if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
-          setViewportMessageIds(newViewportMessageIds);
-        }
-      });
+      playMediaInViewport();
     });
-  }, [chatId, loadMoreChatMessages, setChatScrollOffset, viewportMessageIds]);
+  }, [chatId, loadMoreChatMessages, setChatScrollOffset, playMediaInViewport]);
 
   useEffect(() => {
     if (chatId) {
@@ -97,21 +104,34 @@ const MessageList: FC<IProps> = ({
     }
   }, [chatId]);
 
-  useEffect(() => {
+  useEffectWithPrevDeps(([prevChatId, prevMessages]) => {
+    if (chatId === prevChatId && messages === prevMessages) {
+      return;
+    }
+
+    if (!containerRef.current) {
+      return;
+    }
+
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
     }
 
-    if (chatId && containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight - Number(currentScrollOffset || 0);
+    const { scrollHeight, clientHeight } = containerRef.current;
+    if (scrollHeight !== clientHeight) {
+      containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
+    } else {
+      playMediaInViewport();
     }
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messages]);
+  }, [chatId, messages, playMediaInViewport]);
+
+  const isPrivate = chatId && isPrivateChat(chatId);
 
   function renderMessageDateGroup(
     messageDateGroup: MessageDateGroup,
