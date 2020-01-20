@@ -9,11 +9,11 @@ const Session = require('../sessions/Abstract')
 const os = require('os')
 const { LAYER } = require('../tl/AllTLObjects')
 const { constructors, requests } = require('../tl')
-const { computeCheck } = require('../Password')
 const MTProtoSender = require('../network/MTProtoSender')
 const { UpdateConnectionState } = require("../network")
 const { FloodWaitError } = require('../errors/RPCErrorList')
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated')
+const { authFlow, checkAuthorization } = require('./auth')
 
 const DEFAULT_DC_ID = 2
 const DEFAULT_IPV4_IP = 'venus.web.telegram.org'
@@ -21,7 +21,6 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 
 // Chunk sizes for upload.getFile must be multiples of the smallest size
 const MIN_CHUNK_SIZE = 4096
-const MAX_CHUNK_SIZE = 512 * 1024
 const DEFAULT_CHUNK_SIZE = 64 // kb
 // All types
 const sizeTypes = ['w', 'y', 'x', 'm', 's']
@@ -215,7 +214,6 @@ class TelegramClient {
             await this._sender.disconnect()
         }
     }
-
 
     async _switchDC(newDc) {
         this._log.info(`Reconnecting to new data center ${newDc}`)
@@ -637,7 +635,7 @@ class TelegramClient {
                     e instanceof errors.UserMigrateError) {
                     this._log.info(`Phone migrated to ${e.newDc}`)
                     const shouldRaise = e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError
-                    if (shouldRaise && await this.isUserAuthorized()) {
+                    if (shouldRaise && await checkAuthorization(this)) {
                         throw e
                     }
                     await this._switchDC(e.newDc)
@@ -657,268 +655,21 @@ class TelegramClient {
         }
     }
 
-
-    async start(args = {
-        phone: null,
-        code: null,
-        password: null,
-        botToken: null,
-        forceSMS: null,
-        firstAndLastNames: null,
-        maxAttempts: 5,
-    }) {
-        args.maxAttempts = args.maxAttempts || 5
+    async start(authParams) {
         if (!this.isConnected()) {
             await this.connect()
         }
-        if (await this.isUserAuthorized()) {
-            return this
-        }
-        if (args.code == null && !args.botToken) {
-            throw new Error('Please pass a promise to the code arg')
-        }
-        if (!args.botToken && !args.phone) {
-            throw new Error('Please provide either a phone or a bot token')
-        }
-        if (!args.botToken) {
-            while (typeof args.phone == 'function') {
-                const value = await args.phone()
-                if (value.indexOf(':') !== -1) {
-                    args.botToken = value
-                    break
-                }
-                args.phone = utils.parsePhone(value) || args.phone
-            }
-        }
-        if (args.botToken) {
-            await this.signIn({
-                botToken: args.botToken,
-            })
-            return this
+
+        if (await checkAuthorization(this)) {
+            return;
         }
 
-        let me
-        let attempts = 0
-        let twoStepDetected = false
+        const apiCredentials = {
+            apiId: this.apiId,
+            apiHash: this.apiHash
+        };
 
-        await this.sendCodeRequest(args.phone, args.forceSMS)
-
-        let signUp = false
-        let value
-        while (attempts < args.maxAttempts) {
-            try {
-                if (!signUp) {
-                    value = await args.code()
-                }
-                if (!value) {
-                    throw new Error('the phone code is empty')
-                }
-
-                if (signUp) {
-                    const [firstName, lastName] = await args.firstAndLastNames()
-                    if (!firstName) {
-                        throw new Error("first name can't be empty")
-                    }
-                    me = await this.signUp({
-                        code: value,
-                        firstName: firstName,
-                        lastName: lastName || '',
-                    })
-                } else {
-                    // this throws SessionPasswordNeededError if 2FA enabled
-                    me = await this.signIn({
-                        phone: args.phone,
-                        code: value,
-                    })
-                }
-                break
-            } catch (e) {
-                if (e.message === 'SESSION_PASSWORD_NEEDED') {
-                    twoStepDetected = true
-                    break
-                } else if (e.message === 'PHONE_NUMBER_OCCUPIED') {
-                    signUp = false
-                } else if (e.message === 'PHONE_NUMBER_UNOCCUPIED') {
-                    signUp = true
-                } else if (e.message === 'PHONE_CODE_EMPTY' ||
-                    e.message === 'PHONE_CODE_EXPIRED' ||
-                    e.message === 'PHONE_CODE_HASH_EMPTY' ||
-                    e.message === 'PHONE_CODE_INVALID') {
-                    console.log('Invalid code. Please try again.')
-                } else {
-                    throw e
-                }
-            }
-            attempts++
-        }
-        if (attempts >= args.maxAttempts) {
-            throw new Error(`${args.maxAttempts} consecutive sign-in attempts failed. Aborting`)
-        }
-        if (twoStepDetected) {
-            if (!args.password) {
-                throw new Error('Two-step verification is enabled for this account. ' +
-                    'Please provide the \'password\' argument to \'start()\'.')
-            }
-            if (typeof args.password == 'function') {
-                try {
-                    me = await this.signIn({
-                        phone: args.phone,
-                        password: args.password,
-                    })
-                } catch (e) {
-                    console.log(e)
-                    console.log('Invalid password. Please try again')
-                }
-            } else {
-                me = await this.signIn({
-                    phone: args.phone,
-                    password: args.password,
-                })
-            }
-
-        }
-        const name = utils.getDisplayName(me)
-        console.log('Signed in successfully as', name)
-
-        return this
-    }
-
-    async signIn(args = {
-        phone: null,
-        code: null,
-        password: null,
-        botToken: null,
-        phoneCodeHash: null,
-    }) {
-        let result
-        if (args.phone && !args.code && !args.password) {
-            return this.sendCodeRequest(args.phone)
-        } else if (args.code) {
-            const [phone, phoneCodeHash] =
-                this._parsePhoneAndHash(args.phone, args.phoneCodeHash)
-            // May raise PhoneCodeEmptyError, PhoneCodeExpiredError,
-            // PhoneCodeHashEmptyError or PhoneCodeInvalidError.
-            result = await this.invoke(new requests.auth.SignIn({
-                phoneNumber: phone,
-                phoneCodeHash: phoneCodeHash,
-                phoneCode: args.code.toString(),
-            }))
-        } else if (args.password) {
-            for (let i = 0; i < 5; i++) {
-                try {
-                    const pwd = await this.invoke(new requests.account.GetPassword())
-                    result = await this.invoke(new requests.auth.CheckPassword({
-                        password: await computeCheck(pwd, await args.password()),
-                    }))
-                    break
-                } catch (err) {
-                    console.error(`Password check attempt ${i + 1} of 5 failed. Reason: `, err)
-                }
-            }
-        } else if (args.botToken) {
-            result = await this.invoke(new requests.auth.ImportBotAuthorization(
-                {
-                    flags: 0,
-                    botAuthToken: args.botToken,
-                    apiId: this.apiId,
-                    apiHash: this.apiHash,
-                },
-            ))
-        } else {
-            throw new Error('You must provide a phone and a code the first time, ' +
-                'and a password only if an RPCError was raised before.')
-        }
-        if (result instanceof constructors.auth.AuthorizationSignUpRequired) {
-            this._tos = result.termsOfService
-            throw new Error('PHONE_NUMBER_UNOCCUPIED')
-        }
-
-        return this._onLogin(result.user)
-    }
-
-
-    _parsePhoneAndHash(phone, phoneHash) {
-        if (!phone) {
-            phone = this._phone
-        } else {
-            phone = utils.parsePhone(phone)
-        }
-        if (!phone) {
-            throw new Error('Please make sure to call send_code_request first.')
-        }
-        phoneHash = phoneHash || this._phoneCodeHash[phone]
-        if (!phoneHash) {
-            throw new Error('You also need to provide a phone_code_hash.')
-        }
-
-        return [phone, phoneHash]
-    }
-
-    // endregion
-    async isUserAuthorized() {
-        if (this._authorized === undefined || this._authorized === null) {
-            try {
-                await this.invoke(new requests.updates.GetState())
-                this._authorized = true
-            } catch (e) {
-                this._authorized = false
-            }
-        }
-        return this._authorized
-    }
-
-    /**
-     * Callback called whenever the login or sign up process completes.
-     * Returns the input user parameter.
-     * @param user
-     * @private
-     */
-    _onLogin(user) {
-        this._bot = Boolean(user.bot)
-        this._authorized = true
-        return user
-    }
-
-    async sendCodeRequest(phone, forceSMS = false) {
-        let result
-        phone = utils.parsePhone(phone) || this._phone
-        let phoneHash = this._phoneCodeHash[phone]
-
-        if (!phoneHash) {
-            try {
-                result = await this.invoke(new requests.auth.SendCode({
-                    phoneNumber: phone,
-                    apiId: this.apiId,
-                    apiHash: this.apiHash,
-                    settings: new constructors.CodeSettings(),
-                }))
-            } catch (e) {
-                if (e.message === 'AUTH_RESTART') {
-                    return this.sendCodeRequest(phone, forceSMS)
-                }
-                throw e
-            }
-
-            // If we already sent a SMS, do not resend the code (hash may be empty)
-            if (result.type instanceof constructors.auth.SentCodeTypeSms) {
-                forceSMS = false
-            }
-            if (result.phoneCodeHash) {
-                this._phoneCodeHash[phone] = phoneHash = result.phoneCodeHash
-            }
-        } else {
-            forceSMS = true
-        }
-        this._phone = phone
-        if (forceSMS) {
-            result = await this.invoke(new requests.auth.ResendCode({
-                phone: phone,
-                phoneHash: phoneHash,
-            }))
-
-            this._phoneCodeHash[phone] = result.phoneCodeHash
-        }
-        return result
+        await authFlow(this, apiCredentials, authParams)
     }
 
 
@@ -1193,10 +944,6 @@ class TelegramClient {
         )
     }
 
-
-    // endregion
-
-
     async _dispatchUpdate(args = {
         update: null,
         others: null,
@@ -1218,29 +965,6 @@ class TelegramClient {
             }
         }
         return false
-    }
-
-    async signUp(args) {
-        const me = await this.getMe()
-        if (me) {
-            return me
-        }
-        if (this._tos && this._tos.text) {
-            console.log(this._tos.text)
-            // The user should click accept if he wants to continue
-        }
-        const [phone, phoneCodeHash] =
-            this._parsePhoneAndHash(args.phone, args.phoneCodeHash)
-        const result = await this.invoke(new requests.auth.SignUp({
-            phoneNumber: phone,
-            phoneCodeHash: phoneCodeHash,
-            firstName: args.firstName,
-            lastName: args.lastName,
-        }))
-        if (this._tos) {
-            await this.invoke(new requests.help.AcceptTermsOfService({ id: this._tos.id }))
-        }
-        return this._onLogin(result.user)
     }
 }
 

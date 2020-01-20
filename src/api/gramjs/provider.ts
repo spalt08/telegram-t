@@ -21,6 +21,7 @@ export async function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
   await initClient(sessionId);
 }
 
-export function callSdk<T extends keyof Sdk>(fnName: T, args: SdkArgs<T>): SdkResponse<T> {
-  return sdk[fnName](args as any) as SdkResponse<T>;
+export function callSdk<T extends keyof Sdk>(fnName: T, ...args: SdkArgs<T>): SdkResponse<T> {
+  // @ts-ignore
+  return sdk[fnName](...args) as SdkResponse<T>;
 }

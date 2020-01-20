@@ -14,11 +14,11 @@ import './Auth.scss';
 
 type IProps = (
   Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>
-  & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber'>
+  & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>
 );
 
 const AuthCode: FC<IProps> = ({
-  authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber,
+  authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
   const [code, setCode] = useState(undefined);
   const [idleMonkey, setIdleMonkey] = useState(undefined);
@@ -35,6 +35,10 @@ const AuthCode: FC<IProps> = ({
   }, [idleMonkey, trackingMonkey]);
 
   function onCodeChange(e: FormEvent<HTMLInputElement>) {
+    if (authError) {
+      clearAuthError();
+    }
+
     const { currentTarget: target } = e;
 
     target.value = target.value.replace(/[^\d]+/, '').substr(0, 5);
@@ -106,7 +110,7 @@ export default withGlobal(
     return { authPhoneNumber, authIsLoading, authError };
   },
   (setGlobal, actions) => {
-    const { setAuthCode, returnToAuthPhoneNumber } = actions;
-    return { setAuthCode, returnToAuthPhoneNumber };
+    const { setAuthCode, returnToAuthPhoneNumber, clearAuthError } = actions;
+    return { setAuthCode, returnToAuthPhoneNumber, clearAuthError };
   },
 )(AuthCode);

@@ -30,7 +30,7 @@ export async function fetchChats(
   },
 ) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
-    offsetPeer: new GramJs.InputPeerEmpty({}),
+    offsetPeer: new GramJs.InputPeerEmpty(),
     limit,
     offsetDate,
   }));

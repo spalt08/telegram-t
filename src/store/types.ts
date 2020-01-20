@@ -49,9 +49,11 @@ export type GlobalState = {
 };
 
 export type ActionTypes = (
-  // system
-  'init' | 'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' | 'toggleRightColumn' | 'saveSession' | 'sync' |
+  // system and UI
+  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' |
+  // auth
+  'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
+  'setAuthRememberMe' | 'clearAuthError' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' |

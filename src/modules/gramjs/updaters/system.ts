@@ -3,6 +3,7 @@ import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
 import {
   ApiUpdate,
   ApiUpdateAuthorizationState,
+  ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
 } from '../../../api/types';
 
@@ -12,6 +13,10 @@ export function onUpdate(update: ApiUpdate) {
       onUpdateAuthorizationState(update);
       break;
 
+    case 'updateAuthorizationError':
+      onUpdateAuthorizationError(update);
+      break;
+
     case 'updateConnectionState':
       onUpdateConnectionState(update);
       break;
@@ -19,50 +24,49 @@ export function onUpdate(update: ApiUpdate) {
 }
 
 function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
-  const currentState = getGlobal().authState;
-  const authState = update.authorization_state['@type'];
-  let authError;
-
-  if (currentState === 'authorizationStateWaitCode' && authState === 'authorizationStateWaitCode') {
-    authError = 'Invalid Code';
-  } else if (currentState === 'authorizationStateWaitPassword' && authState === 'authorizationStateWaitPassword') {
-    authError = 'Invalid Password';
-  }
-
   const global = getGlobal();
-  const prevState = global.authState;
+  const authState = update.authorization_state['@type'];
+
   setGlobal({
     ...global,
     authState,
     authIsLoading: false,
-    authError,
   });
 
-  if (authState !== prevState) {
-    switch (authState) {
-      case 'authorizationStateLoggingOut':
-        setGlobal({
-          ...getGlobal(),
-          isLoggingOut: true,
-        });
-        break;
-      case 'authorizationStateReady': {
-        setGlobal({
-          ...getGlobal(),
-          isLoggingOut: false,
-        });
+  if (global.authState === authState) {
+    return;
+  }
 
-        const { session_id } = update;
-        if (session_id && getGlobal().authRememberMe) {
-          getDispatch().saveSession({ sessionId: session_id });
-        }
+  switch (authState) {
+    case 'authorizationStateLoggingOut':
+      setGlobal({
+        ...getGlobal(),
+        isLoggingOut: true,
+      });
+      break;
+    case 'authorizationStateReady': {
+      setGlobal({
+        ...getGlobal(),
+        isLoggingOut: false,
+      });
 
-        onConnect();
-
-        break;
+      const { session_id } = update;
+      if (session_id && getGlobal().authRememberMe) {
+        getDispatch().saveSession({ sessionId: session_id });
       }
+
+      onConnect();
+
+      break;
     }
   }
+}
+
+function onUpdateAuthorizationError(update: ApiUpdateAuthorizationError) {
+  setGlobal({
+    ...getGlobal(),
+    authError: update.message,
+  });
 }
 
 function onUpdateConnectionState(update: ApiUpdateConnectionState) {

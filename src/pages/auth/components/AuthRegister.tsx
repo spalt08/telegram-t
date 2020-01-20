@@ -11,9 +11,11 @@ import CropModal from './CropModal';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'signUp'>;
+type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'signUp' | 'clearAuthError'>;
 
-const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
+const AuthRegister: FC<IProps> = ({
+  authIsLoading, authError, signUp, clearAuthError,
+}) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [avatar, setAvatar] = useState(undefined);
   const [selectedFile, setSelectedFile] = useState(undefined);
@@ -43,6 +45,10 @@ const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
   }
 
   function handleFirstNameChange(event: ChangeEvent<HTMLInputElement>) {
+    if (authError) {
+      clearAuthError();
+    }
+
     const { target } = event;
 
     setFirstName(target.value);
@@ -100,13 +106,13 @@ const AuthRegister: FC<IProps> = ({ authIsLoading, authError, signUp }) => {
           label="Name"
           onChange={handleFirstNameChange}
           value={firstName}
+          error={authError}
         />
         <InputText
           id="registration-last-name"
           label="Last Name (optional)"
           onChange={handleLastNameChange}
           value={lastName}
-          error={authError}
         />
         {isButtonShown && (
           <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
@@ -123,7 +129,7 @@ export default withGlobal(
     return { authIsLoading, authError };
   },
   (setGlobal, actions) => {
-    const { signUp } = actions;
-    return { signUp };
+    const { signUp, clearAuthError } = actions;
+    return { signUp, clearAuthError };
   },
 )(AuthRegister);

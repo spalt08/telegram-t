@@ -26,7 +26,7 @@ onmessage = async (message: OriginMessageEvent) => {
     case 'callSdk': {
       const { messageId, name, args } = data;
       try {
-        const response = await callSdk(name, args);
+        const response = await callSdk(name, ...args);
 
         if (messageId) {
           sendToOrigin({
@@ -59,8 +59,9 @@ async function initSdk(sessionId = '') {
   await initClient(sessionId);
 }
 
-function callSdk<T extends keyof Sdk>(fnName: T, args: SdkArgs<T>): SdkResponse<T> {
-  return sdk[fnName](args as any) as SdkResponse<T>;
+function callSdk<T extends keyof Sdk>(fnName: T, ...args: SdkArgs<T>): SdkResponse<T> {
+  // @ts-ignore
+  return sdk[fnName](...args) as SdkResponse<T>;
 }
 
 function onUpdate(update: ApiUpdate) {

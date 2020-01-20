@@ -11,10 +11,14 @@ import AnimatedSticker from '../../../components/AnimatedSticker';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'setAuthPassword'>;
+type IProps = (
+  Pick<GlobalState, 'authIsLoading' | 'authError'>
+  & Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>
+);
 
-// TODO Support `authError`.
-const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword }) => {
+const AuthPassword: FC<IProps> = ({
+  authIsLoading, authError, setAuthPassword, clearAuthError,
+}) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -27,6 +31,10 @@ const AuthPassword: FC<IProps> = ({ authIsLoading, authError, setAuthPassword })
   }, [peekMonkey]);
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
+    if (authError) {
+      clearAuthError();
+    }
+
     const { target } = e;
     setPassword(target.value);
     setIsButtonShown(target.value.length > 4);
@@ -86,7 +94,7 @@ export default withGlobal(
     return { authIsLoading, authError };
   },
   (setGlobal, actions) => {
-    const { setAuthPassword } = actions;
-    return { setAuthPassword };
+    const { setAuthPassword, clearAuthError } = actions;
+    return { setAuthPassword, clearAuthError };
   },
 )(AuthPassword);

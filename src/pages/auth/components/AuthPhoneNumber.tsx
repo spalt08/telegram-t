@@ -17,7 +17,7 @@ type IProps = (
   Pick<GlobalState, (
     'connectionState' | 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
   )> &
-  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry'>
+  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'>
 );
 
 const AuthPhoneNumber: FC<IProps> = ({
@@ -29,6 +29,7 @@ const AuthPhoneNumber: FC<IProps> = ({
   authNearestCountry,
   setAuthPhoneNumber,
   setAuthRememberMe,
+  clearAuthError,
   loadNearestCountry,
 }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -53,8 +54,11 @@ const AuthPhoneNumber: FC<IProps> = ({
   }
 
   function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
-    const { target } = e;
+    if (authError) {
+      clearAuthError();
+    }
 
+    const { target } = e;
     const suggestedCountry = getCountryFromPhoneNumber(target.value);
     const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
       ? suggestedCountry
@@ -146,7 +150,11 @@ export default withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { setAuthPhoneNumber, setAuthRememberMe, loadNearestCountry } = actions;
-    return { setAuthPhoneNumber, setAuthRememberMe, loadNearestCountry };
+    const {
+      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
+    } = actions;
+    return {
+      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
+    };
   },
 )(AuthPhoneNumber);

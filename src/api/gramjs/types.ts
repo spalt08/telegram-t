@@ -2,7 +2,7 @@ import { ApiUpdate } from '../types';
 import sdk from './sdk';
 
 export type Sdk = typeof sdk;
-export type SdkArgs<N extends keyof Sdk> = Parameters<Sdk[N]>[0];
+export type SdkArgs<N extends keyof Sdk> = Parameters<Sdk[N]>;
 export type SdkResponse<N extends keyof Sdk> = ReturnType<Sdk[N]>;
 
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;

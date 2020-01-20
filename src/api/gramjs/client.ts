@@ -5,7 +5,7 @@ import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { DEBUG, DEBUG_GRAMJS } from '../../config';
 import {
-  onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber, onRequestRegistration,
+  onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber, onRequestRegistration, onAuthError,
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 import queuedDownloadMedia from './connectors/media';
@@ -26,8 +26,8 @@ export async function init(sessionId: string) {
     { useWSS: true } as any,
   );
 
-  client.addEventHandler(onGramJsUpdate, gramJsUpdateEventBuilder);
   client.addEventHandler(onUpdate, gramJsUpdateEventBuilder);
+  client.addEventHandler(onGramJsUpdate, gramJsUpdateEventBuilder);
 
   try {
     if (DEBUG) {
@@ -36,11 +36,12 @@ export async function init(sessionId: string) {
     }
 
     await client.start({
-      phone: onRequestPhoneNumber,
-      code: onRequestCode,
+      phoneNumber: onRequestPhoneNumber,
+      phoneCode: onRequestCode,
       password: onRequestPassword,
       firstAndLastNames: onRequestRegistration,
-    } as any);
+      onError: onAuthError,
+    });
 
     const newSessionId = await session.save();
 

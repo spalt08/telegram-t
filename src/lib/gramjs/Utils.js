@@ -506,15 +506,7 @@ function getMessageId(message) {
  * @param phone
  */
 function parsePhone(phone) {
-    if (typeof phone === 'number') {
-        return phone.toString()
-    } else {
-        phone = phone.toString()
-            .replace(/[+()\s-]/gm, '')
-        if (!isNaN(phone)) {
-            return phone
-        }
-    }
+    return phone.toString().replace(/[+()\s-]/gm, '')
 }
 
 /**

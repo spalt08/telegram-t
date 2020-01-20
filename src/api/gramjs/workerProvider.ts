@@ -26,7 +26,7 @@ export function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
   }, true);
 }
 
-export function callSdk<T extends keyof Sdk>(fnName: T, args: SdkArgs<T>): SdkResponse<T> {
+export function callSdk<T extends keyof Sdk>(fnName: T, ...args: SdkArgs<T>): SdkResponse<T> {
   return sendToWorker({
     type: 'callSdk',
     name: fnName,

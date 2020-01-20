@@ -28,6 +28,11 @@ export type ApiUpdateAuthorizationState = {
   session_id?: string;
 };
 
+export type ApiUpdateAuthorizationError = {
+  '@type': 'updateAuthorizationError';
+  message: string;
+};
+
 export type ApiUpdateConnectionState = {
   '@type': 'updateConnectionState';
   connection_state: {
@@ -108,7 +113,7 @@ export type ApiUpdateMessageImage = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateAuthorizationState | ApiUpdateConnectionState |
+  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState |
   ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

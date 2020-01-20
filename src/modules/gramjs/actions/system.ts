@@ -23,6 +23,7 @@ addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   return {
     ...global,
     authIsLoading: true,
+    authError: undefined,
   };
 });
 
@@ -34,6 +35,7 @@ addReducer('setAuthCode', (global, actions, payload) => {
   return {
     ...global,
     authIsLoading: true,
+    authError: undefined,
   };
 });
 
@@ -45,6 +47,7 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   return {
     ...global,
     authIsLoading: true,
+    authError: undefined,
   };
 });
 
@@ -56,14 +59,18 @@ addReducer('signUp', (global, actions, payload) => {
   return {
     ...global,
     authIsLoading: true,
+    authError: undefined,
   };
+});
+
+addReducer('returnToAuthPhoneNumber', () => {
+  void callSdk('restartAuth');
 });
 
 addReducer('saveSession', (global, actions, payload) => {
   const { sessionId } = payload!;
   localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
 });
-
 
 addReducer('signOut', () => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
