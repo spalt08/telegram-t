@@ -20,7 +20,10 @@ type VirtualDomHead = {
 };
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactChildrenKeyOrder']);
-const MAPPED_ATTRIBUTES: { [k: string]: string } = { autoPlay: 'autoplay' };
+const MAPPED_ATTRIBUTES: { [k: string]: string } = {
+  autoPlay: 'autoplay',
+  autoComplete: 'autocomplete',
+};
 
 const $head: VirtualDomHead = { children: [] };
 let DEBUG_virtualTreeSize = 1;
