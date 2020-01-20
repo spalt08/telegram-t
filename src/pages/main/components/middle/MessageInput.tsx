@@ -1,12 +1,15 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
-import React, { FC, useEffect, useState } from '../../../../lib/teact';
+import React, { FC, useEffect } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 
 import { GlobalActions } from '../../../../store/types';
 
-type IProps = Pick<GlobalActions, 'sendTextMessage' | 'setChatReplyingTo'> & {
+type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
   selectedChatId: number;
   isReply: boolean;
+  messageText: string;
+  setMessageText: Function;
+  onSendMessage: Function;
 };
 
 const MAX_INPUT_HEIGHT = 240;
@@ -14,10 +17,8 @@ const MAX_INPUT_HEIGHT = 240;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, isReply, sendTextMessage, setChatReplyingTo,
+  selectedChatId, isReply, messageText, setMessageText, onSendMessage, setChatReplyingTo,
 }) => {
-  const [messageText, setMessageText] = useState('');
-
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
       isJustSent = false;
@@ -39,12 +40,7 @@ const MessageInput: FC<IProps> = ({
     const value = currentTarget.value.trim();
 
     if (e.keyCode === 13 && !e.shiftKey && value.length) {
-      sendTextMessage({
-        chatId: selectedChatId,
-        text: value,
-      });
-
-      setMessageText('');
+      onSendMessage();
       currentTarget.removeAttribute('style');
 
       setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
@@ -103,7 +99,7 @@ export default withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { sendTextMessage, setChatReplyingTo } = actions;
-    return { sendTextMessage, setChatReplyingTo };
+    const { setChatReplyingTo } = actions;
+    return { setChatReplyingTo };
   },
 )(MessageInput);

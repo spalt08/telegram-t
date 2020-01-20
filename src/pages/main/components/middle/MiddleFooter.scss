@@ -19,6 +19,31 @@
   > .Button {
     flex-shrink: 0;
     margin-left: .5rem;
+
+    .icon-send,
+    .icon-microphone {
+      position: absolute;
+    }
+
+    &.send {
+      .icon-send {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-microphone {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.microphone {
+      .icon-microphone {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-send {
+        animation: hide-icon .4s forwards ease-out;
+      }
+    }
   }
 }
 
@@ -78,5 +103,30 @@
   &:not(:only-child) {
     padding-left: 0;
     padding-right: 0;
+  }
+}
+
+@keyframes grow-icon {
+  0% {
+    transform: scale(0.5);
+    opacity: .8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hide-icon {
+  from {
+    transform: scale(1);
+    opacity: .4;
+  }
+  to {
+    transform: scale(.5);
+    opacity: 0;
   }
 }

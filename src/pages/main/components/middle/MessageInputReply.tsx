@@ -2,7 +2,7 @@ import React, { FC } from '../../../../lib/teact';
 import { withGlobal } from '../../../../lib/teactn';
 import { selectChatMessage, selectUser } from '../../../../modules/selectors';
 import { GlobalActions } from '../../../../store/types';
-import { ApiMessage } from '../../../../api/types';
+import { ApiMessage, ApiUser } from '../../../../api/types';
 
 import Button from '../../../../components/ui/Button';
 import ReplyMessage from './ReplyMessage';
