@@ -17,6 +17,8 @@ type IProps = {
   onChange?: (value: Country) => void;
 };
 
+const DROPDOWN_HIDING_DURATION = 100;
+
 const CountryCodeInput: FC<IProps> = (props) => {
   const {
     id,
@@ -29,7 +31,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
-    updateFilter(undefined);
+    setTimeout(() => updateFilter(undefined), DROPDOWN_HIDING_DURATION);
   }, [value]);
 
   let className = 'input-group';

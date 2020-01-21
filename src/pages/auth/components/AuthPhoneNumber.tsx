@@ -35,6 +35,7 @@ const AuthPhoneNumber: FC<IProps> = ({
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [country, setCountry] = useState(undefined);
   const [phone, setPhone] = useState('');
+  const [isTouched, setIsTouched] = useState(false);
 
   useEffect(() => {
     if (connectionState === 'connectionStateReady' && !authNearestCountry) {
@@ -43,13 +44,13 @@ const AuthPhoneNumber: FC<IProps> = ({
   }, [connectionState, authNearestCountry, loadNearestCountry]);
 
   useEffect(() => {
-    if (authNearestCountry && !country) {
+    if (authNearestCountry && !country && !isTouched) {
       const suggestedCountry = getCountryById(authNearestCountry);
       setCountry(suggestedCountry);
     }
-  }, [country, authNearestCountry]);
+  }, [country, authNearestCountry, isTouched]);
 
-  function onCountryChange(newCountry: Country) {
+  function onCountryChange(newCountry?: Country) {
     setCountry(newCountry);
   }
 
@@ -58,6 +59,7 @@ const AuthPhoneNumber: FC<IProps> = ({
       clearAuthError();
     }
 
+    setIsTouched(true);
     const { target } = e;
     const suggestedCountry = getCountryFromPhoneNumber(target.value);
     const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
@@ -66,14 +68,19 @@ const AuthPhoneNumber: FC<IProps> = ({
 
     const phoneNumber = formatPhoneNumber(target.value, selectedCountry);
 
-    if (
-      !country
-      || (selectedCountry && selectedCountry.id !== country.id)
-    ) {
+    if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
       onCountryChange(selectedCountry);
     }
+    if (!target.value.length) {
+      onCountryChange(undefined);
+    }
+
     setPhone(phoneNumber);
-    target.value = getNumberWithCode(phoneNumber, selectedCountry);
+
+    if (selectedCountry && target.value.length > 3 && target.value.length > selectedCountry.code.length) {
+      target.value = getNumberWithCode(phoneNumber, selectedCountry);
+    }
+
     setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 10);
   }
 
