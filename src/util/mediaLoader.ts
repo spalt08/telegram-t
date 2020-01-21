@@ -1,6 +1,6 @@
 import { callSdk } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
-import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
+import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { blobToDataUri, preloadImage } from './image';
 
 // We cache avatars as Data URI for faster initial load
@@ -28,8 +28,11 @@ let pako: typeof import('pako/dist/pako_inflate');
 export function fetch(url: string, mediaType: Type) {
   if (!FETCH_PROMISES[url]) {
     FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType).catch((err) => {
-      // eslint-disable-next-line no-console
-      console.warn(err);
+      if (DEBUG && process.env.NODE_ENV !== 'perf') {
+        // eslint-disable-next-line no-console
+        console.warn(err);
+      }
+
       delete FETCH_PROMISES[url];
 
       return null;
