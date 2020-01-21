@@ -51,7 +51,9 @@
     --background-color: white;
 
     &,
-    .media-content {
+    .media-content,
+    &.media img,
+    &.sticker img {
       border-top-left-radius: var(--border-top-left-radius);
       border-top-right-radius: var(--border-top-right-radius);
       border-bottom-left-radius: var(--border-bottom-left-radius);
@@ -60,6 +62,10 @@
 
     .media-content {
       overflow: hidden;
+
+      &.small-image img {
+        border-radius: 0 !important;
+      }
     }
 
     &.text {
@@ -181,8 +187,11 @@
     box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
   }
 
-  &.text, &.contact, &.document, &.is-forwarded, &.is-reply {
+  &.text, &.media, &.contact, &.document, &.is-forwarded, &.is-reply {
     background: var(--background-color);
+  }
+
+  &.text, &.contact, &.document, &.is-forwarded, &.is-reply {
     padding: .35rem .5rem;
     font-size: 0.9375rem;
 
@@ -218,7 +227,6 @@
   &.sticker, &.media {
     .media-content {
       position: relative;
-      overflow: hidden;
 
       &.has-viewer {
         cursor: pointer;
@@ -231,10 +239,6 @@
 
       .full-media, .message-media-loading {
         position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
       }
 
       .full-media {
@@ -248,7 +252,8 @@
 
       .thumbnail {
         opacity: 1;
-        transition: opacity .3s ease;
+        transition: opacity .3s ease, filter .3s ease;
+        filter: blur(0px);
 
         &.blur {
           filter: blur(5px);
@@ -324,6 +329,13 @@
       line-height: 1;
       font-size: 1rem;
       flex-shrink: 0;
+
+      .full-media {
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
     }
 
     .forwarded-message {
@@ -345,6 +357,7 @@
       .ReplyMessage {
         order: 2;
         margin-left: 0.5rem;
+        border-radius: var(--border-radius-messages);
       }
     }
 
@@ -375,6 +388,13 @@
 
   &.media {
     max-width: 100%;
+
+    .media-content {
+      min-height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
     &.text .media-content,
     &.is-reply .media-content {
@@ -481,14 +501,13 @@
 // Own message content styles
 .Message.own .content {
   max-width: 30rem;
+  --background-color: #EEFEDF;
 
   .sender-name {
     color: var(--color-text-green);
   }
 
-  &.text, &.contact, &.document, &.is-forwarded, &.is-reply {
-    --background-color: #EEFEDF;
-
+  &.text, &.media, &.contact, &.document, &.is-forwarded, &.is-reply {
     .content-inner > p::after {
       width: 3.5rem;
     }

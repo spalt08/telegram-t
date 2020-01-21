@@ -1,4 +1,4 @@
-export default function getPlatform() {
+export function getPlatform() {
   const { userAgent, platform } = window.navigator;
   const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
   const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
@@ -18,4 +18,9 @@ export default function getPlatform() {
   }
 
   return os;
+}
+
+export function isSafari() {
+  const ua = navigator.userAgent;
+  return ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1;
 }

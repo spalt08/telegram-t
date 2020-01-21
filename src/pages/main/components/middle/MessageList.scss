@@ -4,7 +4,8 @@
   flex: 1;
   width: 100%;
   height: calc(100% - 1.1rem);
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &.no-avatars .Message > .Avatar {
     display: none;
@@ -44,12 +45,34 @@
     }
   }
 
+  &.mac-os-fix {
+    .message-date-header,
+    .message-action-header {
+      > span {
+        line-height: 1.4rem;
+        padding-top: 0.1rem;
+      }
+    }
+  }
+
   .message-date-header {
     position: sticky;
     top: 0.625rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
     z-index: var(--z-message-date-header);
+    pointer-events: none;
+
+    &.is-sticky {
+      transition: opacity .3s ease;
+      opacity: 0;
+    }
+  }
+
+  &.is-scrolling {
+    .message-date-header.is-sticky {
+      opacity: 1;
+    }
   }
 
   .message-action-header {

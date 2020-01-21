@@ -33,6 +33,10 @@ import ContextMenuContainer from '../common/ContextMenuContainer';
 
 import './Message.scss';
 
+const MIN_MEDIA_WIDTH = 100;
+const MIN_MEDIA_WIDTH_WITH_TEXT = 200;
+const SMALL_IMAGE_THRESHOLD = 12;
+
 type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
 
 type IProps = {
@@ -50,6 +54,14 @@ type IProps = {
   outgoingStatus?: ApiMessageOutgoingStatus;
   className?: string;
 } & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
+
+interface IRenderMediaOptions {
+  isInOwnMessage: boolean;
+  isForwarded: boolean;
+  mediaData?: string;
+  loadAndPlayMedia?: boolean;
+  hasText?: boolean;
+}
 
 const Message: FC<IProps> = ({
   message,
@@ -150,13 +162,27 @@ const Message: FC<IProps> = ({
       classNames.push('reply-message');
     }
 
+    const renderMediaOptions: IRenderMediaOptions = {
+      isInOwnMessage: isOwnMessage(message),
+      isForwarded,
+      mediaData: mediaData as string,
+      loadAndPlayMedia,
+      hasText: Boolean(text),
+    };
+
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
-        {photo && renderPhoto(photo, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string)}
+        {photo && renderPhoto(
+          photo,
+          openMediaMessage,
+          renderMediaOptions,
+        )}
         {video && renderVideo(
-          video, openMediaMessage, isOwnMessage(message), isForwarded, mediaData as string, loadAndPlayMedia,
+          video,
+          openMediaMessage,
+          renderMediaOptions,
         )}
         {document && renderDocument(document)}
         {sticker && renderSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
@@ -181,7 +207,14 @@ const Message: FC<IProps> = ({
       ? getImageDimensions(photo, isOwnMessage(message), isForwarded)
       : (video && getVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
 
-    style = `width: ${width}px`;
+    if (width) {
+      const calculatedWidth = Math.max(
+        getMinMediaWidth(Boolean(text)),
+        width,
+      );
+
+      style = `width: ${calculatedWidth}px`;
+    }
   }
 
   return (
@@ -237,23 +270,49 @@ function buildClassNames(message: ApiMessage, hasMedia = false, hasContextMenu =
 function renderPhoto(
   photo: ApiPhoto,
   clickHandler: OnClickHandler,
-  fromOwnMessage: boolean,
-  isForwarded: boolean,
-  mediaData?: string,
+  options: IRenderMediaOptions,
 ) {
-  const { width, height } = getImageDimensions(photo, fromOwnMessage, isForwarded);
+  const {
+    isInOwnMessage, isForwarded, mediaData, hasText,
+  } = options;
+  const { width, height } = getImageDimensions(photo, isInOwnMessage, isForwarded);
   const thumbData = photo.minithumbnail && photo.minithumbnail.data;
+  const minMediaWidth = getMinMediaWidth(hasText);
+  const minMediaHeight = MIN_MEDIA_WIDTH;
+
+  let stretchFactor = 1;
+  if (width < minMediaWidth && minMediaWidth - width < SMALL_IMAGE_THRESHOLD) {
+    stretchFactor = minMediaWidth / width;
+  }
+  if (height * stretchFactor < minMediaHeight && minMediaHeight - height * stretchFactor < SMALL_IMAGE_THRESHOLD) {
+    stretchFactor = minMediaHeight / height;
+  }
+
+  const finalWidth = width * stretchFactor;
+  const finalHeight = height * stretchFactor;
+
+  let thumbClassName = 'thumbnail';
+  if (!mediaData) {
+    thumbClassName += ' blur';
+  }
+  if (!thumbData) {
+    thumbClassName += ' empty';
+  }
+
+  const className = finalWidth < minMediaWidth || finalHeight < minMediaHeight
+    ? 'media-content has-viewer small-image'
+    : 'media-content has-viewer';
 
   return (
     <div
-      className="media-content has-viewer"
+      className={className}
       onClick={clickHandler}
     >
       <img
         src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
-        className={`thumbnail blur ${!thumbData ? 'empty' : ''}`}
-        width={width}
-        height={height}
+        className={thumbClassName}
+        width={finalWidth}
+        height={finalHeight}
         alt=""
       />
       {!mediaData && (
@@ -264,8 +323,8 @@ function renderPhoto(
       <img
         src={mediaData}
         className={mediaData ? 'full-media fade-in' : 'full-media'}
-        width={width}
-        height={height}
+        width={finalWidth}
+        height={finalHeight}
         alt=""
       />
     </div>
@@ -275,12 +334,12 @@ function renderPhoto(
 function renderVideo(
   video: ApiVideo,
   clickHandler: OnClickHandler,
-  fromOwnMessage: boolean,
-  isForwarded: boolean,
-  mediaData?: string,
-  loadAndPlayMedia?: boolean,
+  options: IRenderMediaOptions,
 ) {
-  const { width, height } = getVideoDimensions(video, fromOwnMessage, isForwarded);
+  const {
+    isInOwnMessage, isForwarded, mediaData, loadAndPlayMedia,
+  } = options;
+  const { width, height } = getVideoDimensions(video, isInOwnMessage, isForwarded);
   const shouldPlayInline = shouldMessagePlayVideoInline(video);
   const isInlineVideo = mediaData && loadAndPlayMedia && shouldPlayInline;
   const isHqPreview = mediaData && !shouldPlayInline;
@@ -395,6 +454,10 @@ function renderSticker(
       )}
     </div>
   );
+}
+
+function getMinMediaWidth(hasText?: boolean) {
+  return hasText ? MIN_MEDIA_WIDTH_WITH_TEXT : MIN_MEDIA_WIDTH;
 }
 
 export default memo(withGlobal(

@@ -40,7 +40,7 @@ export function formatFullDate(datetime: number | Date, isShort = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const day = date.getDate();
   const month = padStart(String(date.getMonth() + 1), 2, '0');
-  const year = String(date.getFullYear()).slice(0, isShort ? 2 : 4);
+  const year = String(date.getFullYear()).slice(isShort ? -2 : -4);
 
   return `${day}.${month}.${year}`;
 }

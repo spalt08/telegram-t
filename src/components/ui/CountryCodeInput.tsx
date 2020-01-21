@@ -1,7 +1,7 @@
 import React, { FC, useState, useEffect } from '../../lib/teact';
 
 import { countryList } from '../../util/formatPhoneNumber';
-import getPlatform from '../../util/getPlatform';
+import { getPlatform } from '../../util/environment';
 import searchWords from '../../util/searchWords';
 
 import DropdownMenu from './DropdownMenu';

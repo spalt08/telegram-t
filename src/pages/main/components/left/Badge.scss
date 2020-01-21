@@ -16,6 +16,12 @@
     background: var(--color-green);
   }
 
+  &.mac-os-fix {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    line-height: 1;
+  }
+
   &.pinned {
     width: 1.5rem;
     padding: 0;
