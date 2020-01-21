@@ -86,6 +86,11 @@
       background-color: rgba(var(--color-text-secondary-rgb), 0.08);
       opacity: 1;
     }
+
+    &.activated {
+      color: var(--color-primary);
+      opacity: 1;
+    }
   }
 
   &.translucent-white {
