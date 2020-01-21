@@ -1,4 +1,3 @@
-// TODO @size Make target es2017, check file size.
 {
   "compilerOptions": {
     "target": "es2016",
