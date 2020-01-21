@@ -1,4 +1,4 @@
-import { useState } from '../lib/teact';
+import { useState } from '../lib/teact/teact';
 
 export default () => {
   const [, setRandom] = useState(0);

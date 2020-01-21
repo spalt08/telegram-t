@@ -1,8 +1,8 @@
 import { MouseEvent } from 'react';
 
-import React, { FC } from '../../lib/teact';
+import React, { FC } from '../../lib/teact/teact';
 
-import Spinner from '../Spinner';
+import Spinner from './Spinner';
 import './Button.scss';
 import RippleEffect from './RippleEffect';
 

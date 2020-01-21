@@ -1,6 +1,6 @@
 import React, {
   FC, useEffect, useState,
-} from '../../lib/teact';
+} from '../../lib/teact/teact';
 
 import './Modal.scss';
 

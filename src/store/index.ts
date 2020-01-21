@@ -1,6 +1,6 @@
 import {
   addCallback, addReducer, removeCallback, setGlobal,
-} from '../lib/teactn';
+} from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 

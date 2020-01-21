@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiUser } from '../../../api/types';
 import { TdLibUpdate, TdLibUpdateUser } from '../../../api/tdlib/types/updates';

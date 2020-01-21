@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent } from 'react';
-import React, { FC } from '../../lib/teact';
+import React, { FC } from '../../lib/teact/teact';
 
 interface IProps {
   id?: string;

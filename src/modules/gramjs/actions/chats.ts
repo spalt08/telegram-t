@@ -1,6 +1,6 @@
 import {
   addReducer, getGlobal, setGlobal,
-} from '../../../lib/teactn';
+} from '../../../lib/teact/teactn';
 
 import { callSdk } from '../../../api/gramjs';
 import { updateChatIds, updateChats } from '../../common/chats';

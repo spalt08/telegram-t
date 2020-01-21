@@ -1,5 +1,5 @@
 import { TransitionEvent } from 'react';
-import { useCallback, useEffect, useState } from '../lib/teact';
+import { useCallback, useEffect, useState } from '../lib/teact/teact';
 
 export default (isOpen = false, onCloseAnimationEnd?: () => void) => {
   const [hasOpenClassName, setHasOpenClassName] = useState(false);

@@ -1,4 +1,4 @@
-import { addReducer, setGlobal, getGlobal } from '../../../lib/teactn';
+import { addReducer, setGlobal, getGlobal } from '../../../lib/teact/teactn';
 
 import { callSdk } from '../../../api/gramjs';
 import { selectUser } from '../../selectors';

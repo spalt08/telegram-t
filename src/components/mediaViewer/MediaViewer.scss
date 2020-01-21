@@ -1,0 +1,100 @@
+#MediaViewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, .9);
+  color: #fff;
+  z-index: var(--z-media-viewer);
+  padding: 0.5rem 1.25rem;
+
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 2.75rem 1fr 7rem;
+  grid-column-gap: 0;
+  grid-row-gap: 0;
+  justify-items: stretch;
+  align-items: center;
+  grid-template-areas: "header" "media" "footer";
+
+  @media (max-height: 640px) {
+    grid-template-rows: 2.75rem 1fr 4rem;
+  }
+
+  .media-viewer-head {
+    display: flex;
+    grid-area: header;
+  }
+
+  .media-viewer-content {
+    grid-area: media;
+    position: relative;
+    justify-self: center;
+    text-align: center;
+    padding-top: 4.25rem;
+    width: 100%;
+
+    @media (max-height: 640px) {
+      padding-top: 2.25rem;
+    }
+
+    .video-thumbnail {
+      position: relative;
+      img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    img  {
+      display: block;
+      max-width: 76vw;
+      max-height: calc(100vh - 15rem);
+      height: auto;
+      margin: auto;
+      @media (max-height: 640px) {
+        max-height: calc(100vh - 10rem);
+      }
+    }
+
+    .Spinner {
+      margin: auto;
+    }
+
+    .navigation {
+      position: fixed;
+      top: 4rem;
+      width: 10vw;
+      bottom: 0;
+      border: none;
+      padding: 0;
+      margin: 0;
+      appearance: none;
+      background: transparent no-repeat;
+      background-size: 2rem;
+      opacity: 0;
+      transition: opacity .15s;
+      outline: none;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      &.prev {
+        left: 0;
+        background-image: url("../../assets/media_navigation_previous.svg");
+        background-position: 1rem calc(50% - 2rem);
+      }
+
+      &.next {
+        right: 0;
+        background-image: url("../../assets/media_navigation_next.svg");
+        background-position: calc(100% - 1rem) calc(50% - 2rem);
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import {
   addReducer, getGlobal, setGlobal,
-} from '../../../lib/teactn';
+} from '../../../lib/teact/teactn';
 
 import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../store/types';

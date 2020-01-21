@@ -1,4 +1,4 @@
-import React, { FC, useState } from '../../lib/teact';
+import React, { FC, useState } from '../../lib/teact/teact';
 
 import Menu from './Menu';
 import './DropdownMenu.scss';

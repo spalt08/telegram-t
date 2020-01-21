@@ -1,5 +1,5 @@
-import React, { getDispatch, getGlobal } from './lib/teactn';
-import TeactDOM from './lib/teact-dom';
+import React, { getDispatch, getGlobal } from './lib/teact/teactn';
+import TeactDOM from './lib/teact/teact-dom';
 
 import './store';
 import './modules';

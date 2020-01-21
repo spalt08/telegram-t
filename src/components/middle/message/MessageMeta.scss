@@ -1,0 +1,84 @@
+@import '../../../styles/utils';
+
+.MessageMeta {
+  position: absolute;
+  height: 1.1rem;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  background: rgba(#999999, 0.6);
+  border-radius: 0.65rem;
+  padding: 0 0.375rem;
+  color: white;
+
+  .message-time {
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-right: 0.1rem;
+
+    .mac-os-fix & {
+      margin-top: 0.1rem;
+    }
+  }
+
+  .text &, .document &, .contact & {
+    color: var(--color-text-meta);
+    background: none;
+  }
+
+  .media:not(.text) &,
+  .Message.own .sticker & {
+    background: rgba(0,0,0, 0.2);
+    color: white !important;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    left: auto;
+  }
+
+  .sticker .reply-message + & {
+    right: auto;
+    left: 13.2rem;
+    bottom: 0.25rem;
+  }
+
+  .emoji-only-1 .reply-message + & {
+    left: 2.5rem;
+  }
+
+  .emoji-only-2 .reply-message + & {
+    left: 5.5rem;
+  }
+
+  .emoji-only-3 .reply-message + & {
+    left: 6.5rem;
+  }
+
+  .is-forwarded.media:not(.text) & {
+    bottom: 0.9rem;
+    right: 0.8rem;
+  }
+
+  .emoji-only-1 &, .emoji-only-2 &, .emoji-only-3 & {
+    right: 0;
+  }
+
+  .own .text &,
+  .own .document &,
+  .own .contact & {
+    color: var(--color-text-green);
+  }
+
+  .MessageOutgoingStatus {
+    display: inline-block;
+    height: 1.1rem;
+    font-size: 1.1rem;
+
+    .text &, .contact &, .document &, .media & {
+      @include icon-styles() {
+        position: relative;
+        top: -0.2rem;
+      }
+    }
+  }
+}

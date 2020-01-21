@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 import { ApiChat, ApiUser } from '../../../api/types';

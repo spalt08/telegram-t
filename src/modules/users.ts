@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/teactn';
+import { addReducer } from '../lib/teact/teactn';
 import { GlobalState } from '../store/types';
 
 addReducer('openUserInfo', (global, actions, payload) => {

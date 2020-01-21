@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact';
+import React, { FC } from '../../lib/teact/teact';
 
 import useOverlay from '../../hooks/useOverlay';
 

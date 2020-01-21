@@ -1,4 +1,4 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
 import { updateChat } from '../../common/chats';

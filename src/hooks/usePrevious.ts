@@ -1,4 +1,4 @@
-import { useEffect, useRef } from '../lib/teact';
+import { useEffect, useRef } from '../lib/teact/teact';
 
 export default (value: any) => {
   const ref = useRef(value);

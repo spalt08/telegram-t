@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat } from '../../../api/types';
 
 import { callSdk } from '../../../api/gramjs';

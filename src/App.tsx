@@ -1,9 +1,9 @@
-import { FC } from './lib/teact';
-import React, { withGlobal } from './lib/teactn';
+import { FC } from './lib/teact/teact';
+import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalState } from './store/types';
-import Auth from './pages/auth/Auth';
-import Main from './pages/main/Main';
+import Auth from './components/auth/Auth';
+import Main from './components/Main';
 // import Test from './pages/test/Test';
 
 type IProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;

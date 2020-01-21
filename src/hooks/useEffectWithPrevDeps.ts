@@ -1,4 +1,4 @@
-import { useEffect, useRef } from '../lib/teact';
+import { useEffect, useRef } from '../lib/teact/teact';
 
 export default <T extends any[]>(cb: (args: T) => void, dependencies: T) => {
   // @ts-ignore TODO Fix "could be instantiated with a different subtype" issue

@@ -1,4 +1,4 @@
-import { getGlobal, setGlobal } from '../../../lib/teactn';
+import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 import { updateUser } from '../../common/users';

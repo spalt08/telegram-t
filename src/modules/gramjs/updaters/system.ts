@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import {
   ApiUpdate,

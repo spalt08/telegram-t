@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/teactn';
+import { addReducer } from '../lib/teact/teactn';
 import { updateChatReplyingTo, updateChatScrollOffset } from './common/chats';
 
 addReducer('openChat', (global, actions, payload) => {

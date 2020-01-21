@@ -1,6 +1,6 @@
 import React, {
   FC, useCallback, useMemo, useState,
-} from '../../lib/teact';
+} from '../../lib/teact/teact';
 import { debounce } from '../../util/schedulers';
 
 import './RippleEffect.scss';

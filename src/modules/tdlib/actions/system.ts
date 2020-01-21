@@ -1,4 +1,4 @@
-import { addReducer, getGlobal, setGlobal } from '../../../lib/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { TDLIB_SESSION_ID_KEY } from '../../../config';
 import { GlobalState } from '../../../store/types';

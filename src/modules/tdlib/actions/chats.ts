@@ -1,6 +1,6 @@
 import {
   addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teactn';
+} from '../../../lib/teact/teactn';
 
 import * as TdLib from '../../../api/tdlib';
 

@@ -1,4 +1,4 @@
-import { addReducer, getDispatch } from '../../../lib/teactn';
+import { addReducer, getDispatch } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../store/types';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';

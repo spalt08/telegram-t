@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/teactn';
+import { addReducer } from '../lib/teact/teactn';
 
 addReducer('toggleRightColumn', (global) => {
   return {
