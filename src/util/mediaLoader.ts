@@ -23,7 +23,7 @@ type MemoryMedia = string | AnyLiteral;
 const MEMORY_CACHE: Record<string, MemoryMedia> = {};
 const FETCH_PROMISES: Record<string, Promise<MemoryMedia | null>> = {};
 
-let pako: typeof import('pako/dist/pako_inflate');
+let pako: typeof import('../lib/pako_inflate');
 
 export function fetch(url: string, mediaType: Type) {
   if (!FETCH_PROMISES[url]) {
@@ -82,7 +82,7 @@ async function parseMedia(data: Buffer, mediaType: Type, mimeType: string | unde
       return new Blob([data], { type: mimeType });
     case Type.Lottie: {
       if (!pako) {
-        pako = await import('pako/dist/pako_inflate');
+        pako = await import('../lib/pako_inflate');
       }
       const json = pako.inflate(data, { to: 'string' });
       return JSON.parse(json);

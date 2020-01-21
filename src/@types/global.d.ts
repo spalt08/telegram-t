@@ -15,7 +15,7 @@ type Country = {
 
 declare module '*.png';
 
-declare module 'pako/dist/pako_inflate' {
+declare module '../lib/pako_inflate' {
   function inflate(...args: any[]): string;
 }
 

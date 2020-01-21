@@ -5,7 +5,7 @@ import { pause } from './schedulers';
 import monkeyPaths from '../assets/TwoFactorSetup*.tgs';
 
 const cache: Record<string, AnyLiteral> = {};
-let pako: typeof import('pako/dist/pako_inflate');
+let pako: typeof import('../lib/pako_inflate');
 
 export async function preloadMonkeys(lazyTimeout = 1000) {
   await pause(lazyTimeout);
@@ -20,7 +20,7 @@ export async function preloadMonkeys(lazyTimeout = 1000) {
 export default async function getMonkeyAnimationData(name: string) {
   if (!cache[name]) {
     if (!pako) {
-      pako = await import('pako/dist/pako_inflate');
+      pako = await import('../lib/pako_inflate');
     }
 
     const file = await fetch(monkeyPaths[name]);
