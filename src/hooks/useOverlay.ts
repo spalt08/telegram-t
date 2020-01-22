@@ -1,12 +1,14 @@
 import { TransitionEvent } from 'react';
 import { useCallback, useEffect, useState } from '../lib/teact/teact';
 
-export default (isOpen = false, onCloseAnimationEnd?: () => void) => {
-  const [hasOpenClassName, setHasOpenClassName] = useState(false);
+export default (isOpen = false, onCloseAnimationEnd?: () => void, noOpenTransition = false) => {
   const [isShown, setIsShown] = useState(isOpen);
+  // СSS class should be added in a separate tick to turn on CSS transition.
+  const [hasAsyncOpenClassName, setHasAsyncOpenClassName] = useState(false);
+  const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
 
   useEffect(() => {
-    setHasOpenClassName(isOpen && isShown);
+    setHasAsyncOpenClassName(isOpen && isShown);
 
     if (isOpen && !isShown) {
       setIsShown(true);

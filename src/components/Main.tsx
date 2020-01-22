@@ -1,20 +1,23 @@
 import React, { FC } from '../lib/teact/teact';
 
+import UiLoader from './common/UiLoader';
+import MediaViewer from './mediaViewer/MediaViewer';
 import LeftColumn from './left/LeftColumn';
 import MiddleColumn from './middle/MiddleColumn';
 import RightColumn from './right/RightColumn';
-import MediaViewer from './mediaViewer/MediaViewer';
 
 import './Main.scss';
 
 const Main: FC = () => {
   return (
-    <div id="Main">
+    <UiLoader page="main" key="main">
       <MediaViewer />
-      <LeftColumn />
-      <MiddleColumn />
-      <RightColumn />
-    </div>
+      <div id="Main">
+        <LeftColumn />
+        <MiddleColumn />
+        <RightColumn />
+      </div>
+    </UiLoader>
   );
 };
 

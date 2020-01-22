@@ -9,6 +9,7 @@ import Button from '../ui/Button';
 import MessageList from './MessageList';
 import MiddleFooter from './footer/MiddleFooter';
 import MiddleHeader from './MiddleHeader';
+
 import './MiddleColumn.scss';
 
 type IProps = Pick<GlobalActions, 'openChat'> & {

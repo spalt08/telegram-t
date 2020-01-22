@@ -7,5 +7,6 @@ export default <T extends any[]>(cb: (args: T) => void, dependencies: T) => {
     cb(prevDeps.current);
 
     prevDeps.current = dependencies;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 };

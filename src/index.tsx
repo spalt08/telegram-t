@@ -3,7 +3,6 @@ import TeactDOM from './lib/teact/teact-dom';
 
 import './store';
 import './modules';
-import { preloadSpinners } from './util/image';
 
 import App from './App';
 
@@ -15,8 +14,6 @@ TeactDOM.render(
   <App />,
   document.getElementById('root'),
 );
-
-void preloadSpinners();
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console

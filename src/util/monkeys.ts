@@ -1,26 +1,16 @@
-import { pause } from './schedulers';
-
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
 import monkeyPaths from '../assets/TwoFactorSetup*.tgs';
 
 const cache: Record<string, AnyLiteral> = {};
+
 let pako: typeof import('../lib/pako_inflate');
-
-export async function preloadMonkeys(lazyTimeout = 1000) {
-  await pause(lazyTimeout);
-
-  Object
-    .keys(monkeyPaths)
-    .forEach(async (name) => {
-      cache[name] = await getMonkeyAnimationData(name);
-    });
-}
+let lottie: typeof import('lottie-web/build/player/lottie_light').default;
 
 export default async function getMonkeyAnimationData(name: string) {
   if (!cache[name]) {
-    if (!pako) {
-      pako = await import('../lib/pako_inflate');
+    if (!pako || !lottie) {
+      await preloadLibs();
     }
 
     const file = await fetch(monkeyPaths[name]);
@@ -30,4 +20,14 @@ export default async function getMonkeyAnimationData(name: string) {
   }
 
   return cache[name];
+}
+
+async function preloadLibs() {
+  const [loadedPako, loadedLottie] = await Promise.all([
+    (pako || import('../lib/pako_inflate')),
+    (lottie || import('lottie-web/build/player/lottie_light')),
+  ]);
+
+  pako = loadedPako;
+  lottie = loadedLottie;
 }

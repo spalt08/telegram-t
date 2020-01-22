@@ -32,6 +32,7 @@ type IProps = {
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   selected: boolean;
+  isUiReady: boolean;
 } & Pick<GlobalActions, 'openChat'>;
 
 const Chat: FC<IProps> = ({
@@ -41,6 +42,7 @@ const Chat: FC<IProps> = ({
   lastMessageOutgoingStatus,
   actionTargetMessage,
   selected,
+  isUiReady,
   openChat,
 }) => {
   function renderLastMessage() {
@@ -80,12 +82,14 @@ const Chat: FC<IProps> = ({
 
   return (
     <div className={buildClassNames(chat, selected)} onClick={handleClick}>
-      <Avatar
-        chat={chat}
-        user={privateChatUser}
-        showOnlineStatus
-        isSavedMessages={privateChatUser && privateChatUser.is_self}
-      />
+      {isUiReady && (
+        <Avatar
+          chat={chat}
+          user={privateChatUser}
+          showOnlineStatus
+          isSavedMessages={privateChatUser && privateChatUser.is_self}
+        />
+      )}
       <div className="info">
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
@@ -140,12 +144,14 @@ export default memo(withGlobal(
       ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
       : undefined;
     const privateChatUserId = getPrivateChatUserId(chat);
+    const { isUiReady } = global;
 
     return {
       lastMessageSender: selectUser(global, lastMessage.sender_user_id),
       ...(lastMessage.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       actionTargetMessage,
+      isUiReady,
     };
   },
   (setGlobal, actions) => {

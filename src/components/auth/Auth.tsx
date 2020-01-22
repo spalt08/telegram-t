@@ -3,8 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState } from '../../store/types';
 
-import { preloadMonkeys } from '../../util/monkeys';
-
+import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthCode from './AuthCode';
 import AuthRegister from './AuthRegister';
@@ -12,24 +11,17 @@ import AuthPassword from './AuthPassword';
 
 type IProps = Pick<GlobalState, 'authState'>;
 
-let areMonkeysPreloaded = false;
-
 const Auth: FC<IProps> = ({ authState }) => {
-  if (!areMonkeysPreloaded) {
-    void preloadMonkeys();
-    areMonkeysPreloaded = true;
-  }
-
   switch (authState) {
     case 'authorizationStateWaitCode':
-      return <AuthCode />;
+      return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;
     case 'authorizationStateWaitPassword':
-      return <AuthPassword />;
+      return <UiLoader page="authPassword" key="authPassword"><AuthPassword /></UiLoader>;
     case 'authorizationStateWaitRegistration':
       return <AuthRegister />;
     case 'authorizationStateWaitPhoneNumber':
     default:
-      return <AuthPhoneNumber />;
+      return <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>;
   }
 };
 

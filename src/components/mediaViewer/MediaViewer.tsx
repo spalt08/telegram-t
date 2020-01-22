@@ -15,8 +15,9 @@ import AnimationFade from '../ui/AnimationFade';
 import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
-import './MediaViewer.scss';
 import VideoPlayer from './VideoPlayer';
+
+import './MediaViewer.scss';
 
 type IPhotoRenderProps = {
   selectedMediaMessageId?: number;

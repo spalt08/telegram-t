@@ -1,14 +1,9 @@
-import {
-  addCallback, addReducer, removeCallback, setGlobal,
-} from '../lib/teact/teactn';
+import { addCallback, addReducer, removeCallback } from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 
-import { pause, throttle } from '../util/schedulers';
+import { throttle } from '../util/schedulers';
 import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
-import { getChatAvatarHash } from '../modules/helpers';
-import * as mediaLoader from '../util/mediaLoader';
-import preloadFonts from '../util/fonts';
 
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
@@ -34,28 +29,25 @@ const INITIAL_STATE: GlobalState = {
   },
 
   authRememberMe: true,
+
+  isUiReady: false,
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
-const MAX_PRELOAD_DELAY = 1000;
 
 const updateCacheThrottled = throttle(updateCache, CACHE_THROTTLE_TIMEOUT, false);
 
 addReducer('init', () => {
-  setGlobal(INITIAL_STATE);
-
   const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
   if (!GLOBAL_STATE_CACHE_DISABLED && hasActiveSession) {
-    const cached = getCache();
-
-    if (cached) {
-      preloadAssets(cached)
-        .then(() => {
-          setGlobal(cached);
-        });
-    }
-
     addCallback(updateCacheThrottled);
+
+    const cached = getCache();
+    if (cached) {
+      return cached;
+    }
   }
+
+  return INITIAL_STATE;
 });
 
 if (!GLOBAL_STATE_CACHE_DISABLED) {
@@ -69,23 +61,6 @@ if (!GLOBAL_STATE_CACHE_DISABLED) {
   });
 }
 
-function preloadAvatars(cached: GlobalState) {
-  return Promise.all(Object.values(cached.chats.byId).map((chat) => {
-    const avatarHash = getChatAvatarHash(chat);
-    return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
-  }));
-}
-
-function preloadAssets(cached: GlobalState) {
-  return Promise.race([
-    pause(MAX_PRELOAD_DELAY),
-    Promise.all([
-      preloadFonts(),
-      preloadAvatars(cached),
-    ]),
-  ]);
-}
-
 function updateCache(global: GlobalState) {
   if (global.isLoggingOut) {
     return;
@@ -96,6 +71,7 @@ function updateCache(global: GlobalState) {
     chats: reduceChatsForCache(global),
     messages: reduceMessagesForCache(global),
     connectionState: undefined,
+    isUiReady: false,
     // TODO Reduce `users` and `groups`?
   };
 

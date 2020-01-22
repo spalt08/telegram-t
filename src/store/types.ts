@@ -43,6 +43,7 @@ export type GlobalState = {
   authIsSessionRemembered?: boolean;
   authNearestCountry?: string;
 
+  isUiReady: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   showRightColumn: boolean;
   lastSyncTime?: number;
@@ -50,7 +51,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system and UI
-  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' |
+  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' |

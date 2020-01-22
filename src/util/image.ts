@@ -1,19 +1,3 @@
-import { pause } from './schedulers';
-
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import spinnerPaths from '../assets/spinner-*.svg';
-
-export async function preloadSpinners(lazyTimeout = 1000) {
-  await pause(lazyTimeout);
-
-  (Object
-    .values(spinnerPaths) as string[])
-    .forEach((path) => {
-      preloadImage(path);
-    });
-}
-
 export async function insertImage(image: File | string, containerId: string) {
   const previousImg = document.querySelector(`#${containerId} img`);
   if (previousImg) {
