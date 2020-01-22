@@ -150,7 +150,6 @@ function initComponent(
 
 function updateComponent($current: VirtualElementComponent, $new: VirtualElementComponent) {
   $current.componentInstance.props = $new.componentInstance.props;
-  $current.componentInstance.children = $new.componentInstance.children;
 
   return renderComponent($current.componentInstance);
 }

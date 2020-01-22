@@ -43,7 +43,6 @@ interface ComponentInstance {
   Component: FC;
   name: string;
   props: Props;
-  children: VirtualElementChildren;
   renderedValue?: any;
   isMounted: boolean;
   hooks: {
@@ -77,8 +76,6 @@ interface ComponentInstance {
 export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
-
-const EMPTY_COMPONENT_CHILDREN: any[] = [];
 
 let renderingInstance: ComponentInstance;
 
@@ -123,8 +120,10 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
     $element: {} as VirtualElementComponent,
     Component,
     name: Component.name,
-    props,
-    children: children.length ? children : EMPTY_COMPONENT_CHILDREN,
+    props: {
+      ...props,
+      ...(children.length && { children }),
+    },
     isMounted: false,
     hooks: {
       state: {
@@ -230,11 +229,8 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.hooks.effects.cursor = 0;
   componentInstance.hooks.memos.cursor = 0;
 
-  const { Component, props, children } = componentInstance;
-  const newRenderedValue = Component({
-    ...props,
-    children,
-  });
+  const { Component, props } = componentInstance;
+  const newRenderedValue = Component(props);
 
   if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
