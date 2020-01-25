@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from '../../../lib/teact/teact';
 
 import { getImageData } from '../../../util/image';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Button from '../../ui/Button';
 import './MessageInputImage.scss';
@@ -20,9 +21,7 @@ const MessageInputImage: FC<IProps> = ({ image, onClearImage }) => {
     }
   }, [image]);
 
-  if (!image) {
-    return null;
-  }
+  useEffect(() => captureEscKeyListener(onClearImage), [onClearImage]);
 
   return (
     <div className={`MessageInputImage${imageDataUri !== null ? ' loaded' : ''}`}>

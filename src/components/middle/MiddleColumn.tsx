@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../store/types';
 import { selectChat } from '../../modules/selectors';
 import { isChannel } from '../../modules/helpers';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import Button from '../ui/Button';
 import MessageList from './MessageList';
@@ -16,25 +17,19 @@ type IProps = Pick<GlobalActions, 'openChat'> & {
   selectedChatId: number;
   isChannelChat: boolean;
   areChatsLoaded: boolean;
-  canCloseChatOnEsc: boolean;
 };
 
 const MiddleColumn: FC<IProps> = (props) => {
-  const { openChat, canCloseChatOnEsc } = props;
+  const { selectedChatId, openChat } = props;
+  const isChatOpen = Boolean(selectedChatId);
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (canCloseChatOnEsc && (e.key === 'Escape' || e.key === 'Esc')) {
+    return isChatOpen
+      ? captureEscKeyListener(() => {
         openChat({ id: undefined });
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [canCloseChatOnEsc, openChat]);
+      })
+      : undefined;
+  }, [isChatOpen, openChat]);
 
   return (
     <div id="MiddleColumn">
@@ -98,7 +93,7 @@ function renderOpenChatScreen(props: IProps) {
 
 export default withGlobal(
   (global) => {
-    const { chats, messages } = global;
+    const { chats } = global;
     const selectedChatId = chats.selectedId;
     const areChatsLoaded = Boolean(chats.ids);
 
@@ -111,7 +106,6 @@ export default withGlobal(
       selectedChatId,
       isChannelChat,
       areChatsLoaded,
-      canCloseChatOnEsc: !messages.selectedMediaMessageId,
     };
   },
   (setGlobal, actions) => {

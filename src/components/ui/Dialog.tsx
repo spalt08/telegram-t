@@ -1,6 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useEffect } from '../../lib/teact/teact';
 
 import useOverlay from '../../hooks/useOverlay';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import './Dialog.scss';
 
@@ -25,6 +26,8 @@ const Dialog: FC<IProps> = (props) => {
     onCloseAnimationEnd,
   } = props;
   const { isShown, overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
+
+  useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
   if (!isShown) {
     return null;

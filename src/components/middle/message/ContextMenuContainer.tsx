@@ -94,24 +94,10 @@ const ContextMenuContainer: FC<IProps> = ({
   }, [deleteMessages, message.chat_id, message.id]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Esc' || e.key === 'Escape') {
-        e.stopPropagation();
-
-        setIsMenuOpen(false);
-        setIsDeleteDialogOpen(false);
-        onClose();
-      }
-    };
-
     disableScrolling();
-    window.document.body.addEventListener('keydown', handleKeyDown, false);
 
-    return () => {
-      window.document.body.removeEventListener('keydown', handleKeyDown, false);
-      enableScrolling();
-    };
-  }, [onClose]);
+    return enableScrolling;
+  }, []);
 
   return (
     <div

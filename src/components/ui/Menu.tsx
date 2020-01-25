@@ -1,6 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useEffect } from '../../lib/teact/teact';
 
 import useOverlay from '../../hooks/useOverlay';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import './Menu.scss';
 
@@ -13,7 +14,7 @@ interface IProps {
   autoClose?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
-  onClose?: (e: React.MouseEvent<any, MouseEvent>) => void;
+  onClose?: () => void;
   children: any;
 }
 
@@ -31,8 +32,9 @@ const Menu: FC<IProps> = (props) => {
     onClose,
   } = props;
   const { overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
-
   const bubbleClassNames = ['bubble', positionY, positionX, 'overlay', ...overlayClassNames].join(' ');
+
+  useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
   return (
     // @ts-ignore

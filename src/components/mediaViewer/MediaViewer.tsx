@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useState, memo,
+  FC, useEffect, useState, memo, useCallback,
 } from '../../lib/teact/teact';
 import usePrevious from '../../hooks/usePrevious';
 import { withGlobal } from '../../lib/teact/teactn';
@@ -9,6 +9,7 @@ import { getChatMediaMessageIds, getMessageMediaHash } from '../../modules/helpe
 import * as mediaLoader from '../../util/mediaLoader';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import { ApiMessage, ApiMiniThumbnail } from '../../api/types';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -47,6 +48,7 @@ const MediaViewer: FC<IProps> = ({
   const selectedMediaMessageIndex = selectedMediaMessageId && messageIds.indexOf(selectedMediaMessageId);
   const isFirst = selectedMediaMessageIndex === undefined || selectedMediaMessageIndex === 0;
   const isLast = selectedMediaMessageIndex === undefined || selectedMediaMessageIndex === messageIds.length - 1;
+  const isOpen = Boolean(selectedMediaMessageId);
 
   const [, onBlobUrlUpdate] = useState(null);
   const blobUrl = mediaHash ? mediaLoader.getFromMemory<string>(mediaHash) : undefined;
@@ -81,26 +83,27 @@ const MediaViewer: FC<IProps> = ({
     return messageIds[index];
   };
 
-  const handleKeyDown = (e: KeyboardEvent): void => {
-    switch (e.key) {
-      case 'Esc': // IE/Edge specific value
-      case 'Escape':
-        closeMediaViewer();
-        break;
+  const closeMediaViewer = useCallback(() => {
+    selectMediaMessage({ id: null });
+  }, [selectMediaMessage]);
 
-      case 'Left': // IE/Edge specific value
-      case 'ArrowLeft':
-        selectPreviousMedia();
-        break;
-
-      case 'Right': // IE/Edge specific value
-      case 'ArrowRight':
-        selectNextMedia();
-        break;
-    }
-  };
+  useEffect(() => (isOpen ? captureEscKeyListener(closeMediaViewer) : undefined), [closeMediaViewer, isOpen]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'Left': // IE/Edge specific value
+        case 'ArrowLeft':
+          selectPreviousMedia();
+          break;
+
+        case 'Right': // IE/Edge specific value
+        case 'ArrowRight':
+          selectNextMedia();
+          break;
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown, false);
 
     return () => {
@@ -108,7 +111,7 @@ const MediaViewer: FC<IProps> = ({
     };
   });
 
-  function handleClose(e: React.MouseEvent<HTMLElement, MouseEvent>): void {
+  function handleClose(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     e.stopPropagation();
     const { classList } = e.target as HTMLElement;
 
@@ -117,24 +120,20 @@ const MediaViewer: FC<IProps> = ({
     }
   }
 
-  function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
+  function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.stopPropagation();
   }
 
-  function selectPreviousMedia(): void {
+  function selectPreviousMedia() {
     selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, -1) : null });
   }
 
-  function selectNextMedia(): void {
+  function selectNextMedia() {
     selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, 1) : null });
   }
 
-  function closeMediaViewer(): void {
-    selectMediaMessage({ id: null });
-  }
-
   return (
-    <AnimationFade show={Boolean(selectedMediaMessageId)}>
+    <AnimationFade show={isOpen}>
       <div id="MediaViewer" onClick={handleClose}>
         <div className="media-viewer-head" onClick={stopEvent}>
           <SenderInfo chatId={chatId || previousChatId} messageId={selectedMediaMessageId || previousMediaMessageId} />

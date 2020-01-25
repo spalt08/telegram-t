@@ -1,11 +1,15 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, useCallback, useEffect } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
-import { selectChatMessage, selectUser } from '../../../modules/selectors';
+
 import { GlobalActions } from '../../../store/types';
 import { ApiMessage, ApiUser } from '../../../api/types';
 
+import { selectChatMessage, selectUser } from '../../../modules/selectors';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
+
 import Button from '../../ui/Button';
 import ReplyMessage from '../../common/ReplyMessage';
+
 import './MessageInputReply.scss';
 
 type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
@@ -18,24 +22,26 @@ type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
 const MessageInputReply: FC<IProps> = ({
   selectedChatId, replyingTo, message, sender, setChatReplyingTo,
 }) => {
-  if (!replyingTo || !message) {
-    return null;
-  }
-
-  function clearReplyTo() {
+  const clearReplyingTo = useCallback(() => {
     setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
+  }, [selectedChatId, setChatReplyingTo]);
+  const isShown = replyingTo && message;
+
+  useEffect(() => (isShown ? captureEscKeyListener(clearReplyingTo) : undefined), [isShown, clearReplyingTo]);
+
+  if (!isShown) {
+    return null;
   }
 
   return (
     <div className="MessageInputReply">
-      <Button round color="translucent" ariaLabel="Cancel replying" onClick={clearReplyTo}>
+      <Button round color="translucent" ariaLabel="Cancel replying" onClick={clearReplyingTo}>
         <i className="icon-close" />
       </Button>
       <ReplyMessage message={message} sender={sender} className="inside-input" />
     </div>
   );
 };
-
 
 export default withGlobal(
   (global) => {

@@ -17,7 +17,7 @@ const MAX_INPUT_HEIGHT = 240;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, isReply, messageText, setMessageText, onSendMessage, setChatReplyingTo,
+  selectedChatId, messageText, setMessageText, onSendMessage, setChatReplyingTo,
 }) => {
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
@@ -53,13 +53,6 @@ const MessageInput: FC<IProps> = ({
     }
   }
 
-  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (isReply && (e.key === 'Esc' || e.key === 'Escape')) {
-      e.stopPropagation();
-      setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
-    }
-  }
-
   useEffect(() => {
     requestAnimationFrame(focusInput);
   });
@@ -72,7 +65,6 @@ const MessageInput: FC<IProps> = ({
       rows={1}
       autoComplete="off"
       onChange={onChange}
-      onKeyDown={onKeyDown}
       onKeyPress={onKeyPress}
       value={messageText}
     />
@@ -87,15 +79,12 @@ function focusInput() {
   }
 }
 
-
 export default withGlobal(
   (global) => {
-    const { chats: { selectedId: selectedChatId, replyingToById } } = global;
-    const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
+    const { chats: { selectedId: selectedChatId } } = global;
 
     return {
       selectedChatId,
-      isReply: Boolean(replyingTo),
     };
   },
   (setGlobal, actions) => {
