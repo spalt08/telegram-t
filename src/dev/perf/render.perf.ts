@@ -38,8 +38,8 @@ function pause(ms: number) {
 
     // await page.screenshot({ path: path.resolve(__dirname, 'screenshot1.png') });
 
-    // For some reason we need to wait for some actions caused by previous rendering.
-    await pause(1000);
+    // We need to wait for some side effects caused by previous rendering (i.e fonts pre-loading) to end.
+    await pause(2000);
 
     const prependRender = await page.evaluate(prependRenderFn);
     console.log('Prepend render', JSON.stringify(prependRender));
