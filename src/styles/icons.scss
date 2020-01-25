@@ -1,8 +1,7 @@
 @font-face {
   font-family: 'icomoon';
-  src: url('../assets/fonts/icomoon.ttf?8tkig7') format('truetype'),
-    url('../assets/fonts/icomoon.woff?8tkig7') format('woff'),
-    url('../assets/fonts/icomoon.svg?8tkig7#icomoon') format('svg');
+  src: url('../assets/fonts/icomoon.woff?8tkig7') format('woff'),
+    url('../assets/fonts/icomoon.woff2?8tkig7') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -94,6 +93,9 @@
 .icon-right-pane:before {
   content: "\e95c";
 }
+.icon-muted-chat:before {
+  content: "\e95d";
+}
 .icon-message-delivered:before {
   content: "\e900";
 }
@@ -132,6 +134,9 @@
 }
 .icon-camera-add:before {
   content: "\e90f";
+}
+.icon-saved-messages:before {
+  content: "\e948";
 }
 .icon-active-sessions:before {
   content: "\e902";
@@ -255,9 +260,6 @@
 }
 .icon-reply:before {
   content: "\e947";
-}
-.icon-saved-messages:before {
-  content: "\e948";
 }
 .icon-search:before {
   content: "\e949";

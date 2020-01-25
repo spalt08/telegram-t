@@ -12,7 +12,7 @@
   text-align: center;
   flex-shrink: 0;
 
-  .Chat.private &:not(.pinned) {
+  &:not(.pinned):not(.muted) {
     background: var(--color-green);
   }
 

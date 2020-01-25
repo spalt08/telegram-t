@@ -17,6 +17,9 @@ const Badge: FC<IProps> = ({ chat }) => {
     if (getPlatform() === 'Mac OS' && !isSafari()) {
       classNames.push('mac-os-fix');
     }
+    if (chat.is_muted) {
+      classNames.push('muted');
+    }
 
     return (
       <div className={classNames.join(' ')}>

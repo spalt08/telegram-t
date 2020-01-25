@@ -97,6 +97,7 @@ const Chat: FC<IProps> = ({
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
           {chat.is_verified && <VerifiedIcon />}
+          {chat.is_muted && <i className="icon-muted-chat" />}
           {chat.last_message && (
             <LastMessageMeta message={chat.last_message} outgoingStatus={lastMessageOutgoingStatus} />
           )}

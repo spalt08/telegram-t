@@ -7,6 +7,7 @@ export function buildApiChatFromDialog(
   peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel,
 ): ApiChat {
   const avatar = peerEntity.photo && buildAvatar(peerEntity.photo);
+  const { silent, muteUntil } = dialog.notifySettings;
 
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
@@ -21,6 +22,7 @@ export function buildApiChatFromDialog(
     ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
     is_pinned: dialog.pinned || false,
     is_verified: (('verified' in peerEntity) && peerEntity.verified) || false,
+    is_muted: silent || Date.now() < muteUntil * 1000,
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
   };
