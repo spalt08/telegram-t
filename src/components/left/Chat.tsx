@@ -14,7 +14,9 @@ import {
   isActionMessage,
   getPrivateChatUserId,
 } from '../../modules/helpers';
-import { selectUser, selectChatMessage, selectOutgoingStatus } from '../../modules/selectors';
+import {
+  selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
+} from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
 
 import Avatar from '../common/Avatar';
@@ -26,6 +28,7 @@ import Badge from './Badge';
 import './Chat.scss';
 
 type IProps = {
+  chatId: number;
   chat: ApiChat;
   privateChatUser?: ApiUser;
   lastMessageSender?: ApiUser;
@@ -133,7 +136,9 @@ function getSenderName(chatId: number, sender?: ApiUser) {
 }
 
 export default memo(withGlobal(
-  (global, { chat }: IProps) => {
+  (global, { chatId }: IProps) => {
+    const chat = selectChat(global, chatId);
+
     if (!chat || !chat.last_message) {
       return null;
     }
@@ -147,6 +152,7 @@ export default memo(withGlobal(
     const { isUiReady } = global;
 
     return {
+      chat,
       lastMessageSender: selectUser(global, lastMessage.sender_user_id),
       ...(lastMessage.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),

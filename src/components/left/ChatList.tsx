@@ -46,14 +46,14 @@ const ChatList: FC<IProps> = ({
       // eslint-disable-next-line no-nested-ternary
       loadedChatIds && loadedChatIds.length && chatArrays ? (
         <div>
-          {chatArrays.pinnedChats.map((chat) => (
-            <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
+          {chatArrays.pinnedChats.map(({ id }) => (
+            <Chat key={id} chatId={id} selected={id === selectedChatId} />
           ))}
           {chatArrays.pinnedChats.length > 0 && (
             <div className="pinned-chats-divider" />
           )}
-          {chatArrays.otherChats.map((chat) => (
-            <Chat key={chat.id} chat={chat} selected={chat.id === selectedChatId} />
+          {chatArrays.otherChats.map(({ id }) => (
+            <Chat key={id} chatId={id} selected={id === selectedChatId} />
           ))}
         </div>
       ) : loadedChatIds && loadedChatIds.length === 0 ? (
