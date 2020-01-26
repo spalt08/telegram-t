@@ -17,7 +17,6 @@ export function debounce<F extends AnyToVoidFunction>(
       fn(...args);
     }
 
-    // TODO `window.` is a workaround for TS.
     waitingTimeout = window.setTimeout(() => {
       if (shouldRunLast) {
         // @ts-ignore

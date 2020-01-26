@@ -329,7 +329,7 @@ export function useState(initial?: any) {
       value: initial,
       setter: ((componentInstance) => (newValue: any) => {
         if (byCursor[cursor].value !== newValue) {
-          byCursor[cursor].value = newValue;
+          byCursor[cursor].value = typeof newValue === 'function' ? newValue(byCursor[cursor].value) : newValue;
 
           if (!componentInstance.forceUpdate) {
             componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
