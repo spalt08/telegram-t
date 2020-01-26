@@ -36,6 +36,7 @@ type IProps = {
   anchor: IAnchorPosition;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
+  canReply?: boolean;
   canPin?: boolean;
   canDelete?: boolean;
   canDeleteForAll?: boolean;
@@ -49,6 +50,7 @@ const ContextMenuContainer: FC<IProps> = ({
   anchor,
   onClose,
   onCloseAnimationEnd,
+  canReply,
   canPin,
   canDelete,
   canDeleteForAll,
@@ -111,6 +113,7 @@ const ContextMenuContainer: FC<IProps> = ({
         message={message}
         isOpen={isMenuOpen}
         anchor={anchor}
+        canReply={canReply}
         canPin={canPin}
         canDelete={canDelete}
         onReply={handleReply}
@@ -142,13 +145,16 @@ const ContextMenuContainer: FC<IProps> = ({
 
 export default memo(withGlobal(
   (global, { message }: IProps) => {
-    const { canPin, canDelete, canDeleteForAll } = selectAllowedMessagedActions(global, message);
+    const {
+      canReply, canPin, canDelete, canDeleteForAll,
+    } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
     const contactFirstName = isPrivateChat(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : null;
 
     return {
+      canReply,
       canPin,
       canDelete,
       canDeleteForAll,

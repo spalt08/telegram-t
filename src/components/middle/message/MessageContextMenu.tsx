@@ -20,6 +20,7 @@ type IProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   message: ApiMessage;
+  canReply?: boolean;
   canPin?: boolean;
   canDelete?: boolean;
   onReply: () => void;
@@ -35,6 +36,7 @@ const MessageContextMenu: FC<IProps> = ({
   isOpen,
   message,
   anchor,
+  canReply,
   canPin,
   canDelete,
   onReply,
@@ -88,7 +90,7 @@ const MessageContextMenu: FC<IProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <MenuItem icon="reply" onClick={onReply}>Reply</MenuItem>
+      {canReply && <MenuItem icon="reply" onClick={onReply}>Reply</MenuItem>}
       {copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
