@@ -34,8 +34,6 @@ export function groupMessages(messages: ApiMessage[]) {
     if (
       !currentMessageGroup.length || (
         message.sender_user_id === currentMessageGroup[currentMessageGroup.length - 1].sender_user_id
-        // Forwarded messages to chat with self.
-        && message.is_outgoing === currentMessageGroup[currentMessageGroup.length - 1].is_outgoing
       )
     ) {
       currentMessageGroup.push(message);
@@ -44,7 +42,6 @@ export function groupMessages(messages: ApiMessage[]) {
     if (
       messages[index + 1] && (
         message.sender_user_id !== messages[index + 1].sender_user_id
-        || message.is_outgoing !== messages[index + 1].is_outgoing
         || isActionMessage(message)
         || isActionMessage(messages[index + 1])
       )

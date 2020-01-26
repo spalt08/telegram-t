@@ -5,7 +5,8 @@ import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
 
 import { DEBUG, DEBUG_GRAMJS } from '../../config';
 import {
-  onAuthReady, onRequestCode, onRequestPassword, onRequestPhoneNumber, onRequestRegistration, onAuthError,
+  onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
+  onAuthError, onAuthReady, onCurrentUserId,
 } from './connectors/auth';
 import { onGramJsUpdate } from './onGramJsUpdate';
 import queuedDownloadMedia from './connectors/media';
@@ -51,6 +52,7 @@ export async function init(sessionId: string) {
     }
 
     onAuthReady(newSessionId);
+    void loadCurrentUser();
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -105,4 +107,16 @@ export function downloadMedia(url: string) {
   }
 
   return queuedDownloadMedia(client, url);
+}
+
+async function loadCurrentUser() {
+  const users = await invokeRequest(new GramJs.users.GetUsers({
+    id: [new GramJs.InputUserSelf()],
+  }));
+
+  if (!users || !users.length) {
+    return;
+  }
+
+  onCurrentUserId(users[0].id);
 }

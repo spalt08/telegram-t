@@ -17,8 +17,6 @@ import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
 import { bytesToDataUri, omitGramJsFields } from './common';
 
-// TODO Maybe we do not need it.
-const DEFAULT_USER_ID = 0;
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
@@ -38,9 +36,9 @@ export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
     throw new Error('Not supported');
   }
 
-  const isPrivateToMe = mtpMessage.out !== true && isPeerUser(mtpMessage.toId);
+  const isPrivateToMe = !mtpMessage.out && isPeerUser(mtpMessage.toId);
   return isPrivateToMe
-    ? (mtpMessage.fromId || DEFAULT_USER_ID)
+    ? mtpMessage.fromId
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
 }
 
@@ -51,8 +49,7 @@ export function buildApiMessageFromShort(
 
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
-    // TODO Current user ID needed here.
-    fromId: mtpMessage.out ? DEFAULT_USER_ID : mtpMessage.userId,
+    fromId: mtpMessage.userId,
   });
 }
 
@@ -67,7 +64,7 @@ export function buildApiMessageFromShortChat(
 export function buildApiMessageWithChatId(
   chatId: number,
   mtpMessage: Pick<Partial<GramJs.Message & GramJs.MessageService>, (
-    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
+    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
   )>,
 ): ApiMessage {
   const sticker = mtpMessage.media && buildSticker(mtpMessage.media);
@@ -81,11 +78,13 @@ export function buildApiMessageWithChatId(
     ...(mtpMessage.entities && { entities: mtpMessage.entities.map(omitGramJsFields) }),
   };
   const action = mtpMessage.action && buildAction(mtpMessage.action);
+  const toId = mtpMessage.toId ? getApiChatIdFromMtpPeer(mtpMessage.toId) : undefined;
+  const isChatWithSelf = Boolean(toId) && mtpMessage.fromId === toId;
 
   return {
     id: mtpMessage.id,
     chat_id: chatId,
-    is_outgoing: Boolean(mtpMessage.out),
+    is_outgoing: Boolean(mtpMessage.out) || (isChatWithSelf && !mtpMessage.fwdFrom),
     content: {
       '@type': 'message',
       ...(text && { text }),
@@ -97,7 +96,7 @@ export function buildApiMessageWithChatId(
       ...(action && { action }),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || DEFAULT_USER_ID,
+    sender_user_id: mtpMessage.fromId,
     reply_to_message_id: mtpMessage.replyToMsgId,
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
   };
@@ -109,7 +108,6 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessag
     from_chat_id: fwdFrom.fromId,
     origin: {
       '@type': 'messageForwardOriginUser',
-      // TODO Handle when empty `fromId`.
       sender_user_id: fwdFrom.fromId,
       // TODO @gramjs Not supported?
       // sender_user_name: fwdFrom.fromName,
@@ -348,7 +346,9 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
 // We only support 100000 local pending messages here and expect it will not interfere with real IDs.
 let localMessageCounter = -1;
 
-export function buildLocalMessage(chatId: number, text: string, replyingTo?: number): ApiMessage {
+export function buildLocalMessage(
+  chatId: number, currentUserId: number, text: string, replyingTo?: number,
+): ApiMessage {
   const localId = localMessageCounter--;
 
   return {
@@ -363,7 +363,7 @@ export function buildLocalMessage(chatId: number, text: string, replyingTo?: num
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,
-    sender_user_id: DEFAULT_USER_ID, // TODO
+    sender_user_id: currentUserId,
     sending_state: {
       '@type': 'messageSendingStatePending',
     },

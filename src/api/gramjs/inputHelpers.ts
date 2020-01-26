@@ -47,19 +47,6 @@ export function buildInputEntity(chatOrUserId: number, accessHash?: string) {
   }
 }
 
-// export function buildInputPeerPhotoFileLocation(
-//   chatOrUserId: number,
-//   volumeId: GramJs.long,
-//   localId: number,
-// ): GramJs.InputPeerPhotoFileLocation {
-//   const peer = buildInputPeer(chatOrUserId);
-//   return new GramJs.InputPeerPhotoFileLocation({
-//     peer,
-//     volumeId,
-//     localId,
-//   });
-// }
-
 export function generateRandomBigInt() {
   return readBigIntFromBuffer(generateRandomBytes(8), false);
 }

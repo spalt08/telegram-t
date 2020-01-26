@@ -28,7 +28,7 @@ export function buildApiChatFromDialog(
   };
 }
 
-export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer) {
+export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {
   if (isPeerUser(peer)) {
     return peer.userId;
   } else if (isPeerChat(peer)) {

@@ -6,7 +6,7 @@ import { deleteMessages, updateMessage } from '../../common/messages';
 import { GlobalState } from '../../../store/types';
 import { selectChatMessage, selectChatMessages } from '../../selectors';
 
-const DELETING_DELAY = 300;
+const DELETING_DELAY = 200;
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();

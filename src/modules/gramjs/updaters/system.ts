@@ -5,6 +5,7 @@ import {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
+  ApiUpdateCurrentUserId,
 } from '../../../api/types';
 
 export function onUpdate(update: ApiUpdate) {
@@ -19,6 +20,10 @@ export function onUpdate(update: ApiUpdate) {
 
     case 'updateConnectionState':
       onUpdateConnectionState(update);
+      break;
+
+    case 'updateCurrentUserId':
+      onUpdateCurrentUserId(update);
       break;
   }
 }
@@ -86,6 +91,15 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
     default:
       break;
   }
+}
+
+function onUpdateCurrentUserId(update: ApiUpdateCurrentUserId) {
+  const currentUserId = update.current_user_id;
+
+  setGlobal({
+    ...getGlobal(),
+    currentUserId,
+  });
 }
 
 function onConnect() {

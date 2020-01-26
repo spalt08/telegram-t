@@ -33,14 +33,18 @@ addReducer('loadMoreMessages', (global) => {
 
 addReducer('sendTextMessage', (global, actions, payload) => {
   const chat = selectOpenChat(global);
-  if (!chat) {
+  const { currentUserId } = global;
+
+  if (!chat || !currentUserId) {
     return;
   }
 
   const { text } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
-  void callSdk('sendMessage', { chat, text, replyingTo });
+  void callSdk('sendMessage', {
+    chat, currentUserId, text, replyingTo,
+  });
 });
 
 addReducer('pinMessage', (global, actions, payload) => {

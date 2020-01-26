@@ -45,6 +45,7 @@ export type GlobalState = {
 
   isUiReady: boolean;
   connectionState?: ApiUpdateConnectionStateType;
+  currentUserId?: number;
   showRightColumn: boolean;
   lastSyncTime?: number;
 };

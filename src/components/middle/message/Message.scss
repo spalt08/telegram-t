@@ -13,7 +13,7 @@
     opacity: 1;
     transform: scale(1) translateX(0);
     transform-origin: bottom;
-    transition: opacity 200ms, transform 200ms ease-in;
+    transition: opacity 150ms, transform 150ms ease-in;
   }
 
   &.last-in-group {

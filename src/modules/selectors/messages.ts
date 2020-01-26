@@ -1,6 +1,6 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
-import { selectChat } from './chats';
+import { selectChat, selectIsChatWithSelf } from './chats';
 import { getSendingState, isMessageLocal } from '../helpers';
 import { selectUser } from './users';
 
@@ -27,7 +27,16 @@ export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): 
     return 'read';
   }
 
-  return getSendingState(message);
+  const sendingState = getSendingState(message);
+
+  if (sendingState === 'succeeded') {
+    const chat = selectChat(global, message.chat_id);
+    if (chat && selectIsChatWithSelf(global, chat)) {
+      return 'read';
+    }
+  }
+
+  return sendingState;
 }
 
 export function selectSender(global: GlobalState, message: ApiMessage): ApiUser | undefined {
@@ -36,4 +45,8 @@ export function selectSender(global: GlobalState, message: ApiMessage): ApiUser 
   }
 
   return message.forward_info ? selectUser(global, message.forward_info.origin.sender_user_id) : undefined;
+}
+
+export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): boolean {
+  return message.sender_user_id === global.currentUserId;
 }

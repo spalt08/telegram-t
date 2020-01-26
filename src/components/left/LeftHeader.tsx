@@ -38,12 +38,12 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
       <DropdownMenu
         trigger={MenuButton}
       >
-        <MenuItem className="not-implemented" icon="new-group">New Group</MenuItem>
-        <MenuItem className="not-implemented" icon="user">Contacts</MenuItem>
-        <MenuItem className="not-implemented" icon="archive">Archived</MenuItem>
-        <MenuItem className="not-implemented" icon="saved-messages">Saved</MenuItem>
-        <MenuItem className="not-implemented" icon="settings">Settings</MenuItem>
-        <MenuItem className="not-implemented" icon="help">Help</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="new-group">New Group</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="user">Contacts</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="saved-messages">Saved</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="settings">Settings</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
       <SearchInput />

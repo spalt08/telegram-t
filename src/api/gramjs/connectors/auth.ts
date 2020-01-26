@@ -96,6 +96,13 @@ export function onAuthReady(sessionId: string) {
   });
 }
 
+export function onCurrentUserId(currentUserId: number) {
+  onUpdate({
+    '@type': 'updateCurrentUserId',
+    current_user_id: currentUserId,
+  });
+}
+
 export function buildAuthState(authState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
   return {
     '@type': 'updateAuthorizationState',

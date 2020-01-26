@@ -46,11 +46,11 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
 }
 
 export async function sendMessage({
-  chat, text, replyingTo,
+  chat, currentUserId, text, replyingTo,
 }: {
-  chat: ApiChat; text: string; replyingTo?: number;
+  chat: ApiChat; currentUserId: number; text: string; replyingTo?: number;
 }) {
-  const localMessage = buildLocalMessage(chat.id, text, replyingTo);
+  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,

@@ -6,7 +6,9 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../store/types';
 import { ApiMessage } from '../../../api/types';
 
-import { selectChat, selectIsChatWithSelf, selectUser } from '../../../modules/selectors';
+import {
+  selectChat, selectIsChatWithSelf, selectIsOwnMessage, selectUser,
+} from '../../../modules/selectors';
 import {
   getPrivateChatUserId,
   getUserFirstName, isChannel,
@@ -142,13 +144,13 @@ export default memo(withGlobal(
     const chat = selectChat(global, message.chat_id);
     const isPrivate = isPrivateChat(chat.id);
     const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat);
+    const isOwnMessage = selectIsOwnMessage(global, message);
     const isSuperGroupOrChannel = isSuperGroup(chat) || isChannel(chat);
-    const isAdminOrOwner = !isPrivate && true; // TODO Implement.
-    const isOwnMessage = true; // TODO Implement.
+    const isAdminOrOwner = !isPrivate && false; // TODO Implement.
 
-    const canPin = isChatWithSelf || isAdminOrOwner;
+    const canPin = isChatWithSelf || !isSuperGroupOrChannel || isAdminOrOwner;
     const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
-    const canDeleteForAll = canDelete && ((isPrivate && !isChatWithSelf) || isAdminOrOwner);
+    const canDeleteForAll = canDelete && !isChatWithSelf && (isOwnMessage || isPrivate || isAdminOrOwner);
 
     const contactFirstName = isPrivateChat(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))

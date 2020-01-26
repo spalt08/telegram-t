@@ -40,6 +40,11 @@ export type ApiUpdateConnectionState = {
   };
 };
 
+export type ApiUpdateCurrentUserId = {
+  '@type': 'updateCurrentUserId';
+  current_user_id: number;
+};
+
 export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: number;
@@ -113,7 +118,7 @@ export type ApiUpdateMessageImage = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState |
+  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatFullInfo |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
