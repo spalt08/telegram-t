@@ -29,3 +29,13 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
     },
   });
 }
+
+export function updateSelectedUserId(global: GlobalState, selectedId?: number) {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      selectedId,
+    },
+  };
+}

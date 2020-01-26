@@ -1,26 +1,22 @@
 import { addReducer } from '../lib/teact/teactn';
+
 import { GlobalState } from '../store/types';
+
+import { updateSelectedUserId } from './common/users';
 
 addReducer('openUserInfo', (global, actions, payload) => {
   const { id } = payload!;
 
-  return {
+  global = updateSelectedUserId(global, id);
+  global = {
     ...global,
     showRightColumn: true,
-    users: {
-      ...global.users,
-      selectedId: id,
-    },
   };
+
+  return global;
 });
 
-const clearSelectedUserId = (global: GlobalState) => ({
-  ...global,
-  users: {
-    ...global.users,
-    selectedId: undefined,
-  },
-});
+const clearSelectedUserId = (global: GlobalState) => updateSelectedUserId(global, undefined);
 
 addReducer('openChatWithInfo', clearSelectedUserId);
 addReducer('openChat', clearSelectedUserId);

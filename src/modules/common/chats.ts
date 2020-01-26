@@ -72,3 +72,13 @@ export function updateChat(global: GlobalState, chatId: number, chatUpdate: Part
     },
   });
 }
+
+export function updateSelectedChatId(global: GlobalState, selectedId?: number) {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      selectedId,
+    },
+  };
+}
