@@ -5,8 +5,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../store/types';
 
 type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
-  selectedChatId: number;
-  isReply: boolean;
+  selectedChatId?: number;
+  replyingTo?: number;
   messageText: string;
   setMessageText: Function;
   onSendMessage: Function;
@@ -17,7 +17,7 @@ const MAX_INPUT_HEIGHT = 240;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, messageText, setMessageText, onSendMessage, setChatReplyingTo,
+  selectedChatId, replyingTo, messageText, setMessageText, onSendMessage, setChatReplyingTo,
 }) => {
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
@@ -55,7 +55,7 @@ const MessageInput: FC<IProps> = ({
 
   useEffect(() => {
     requestAnimationFrame(focusInput);
-  });
+  }, [replyingTo]);
 
   return (
     <textarea
@@ -81,10 +81,15 @@ function focusInput() {
 
 export default withGlobal(
   (global) => {
-    const { chats: { selectedId: selectedChatId } } = global;
+    const { chats: { selectedId: selectedChatId, replyingToById } } = global;
+
+    if (!selectedChatId) {
+      return {};
+    }
 
     return {
       selectedChatId,
+      replyingTo: replyingToById[selectedChatId],
     };
   },
   (setGlobal, actions) => {
