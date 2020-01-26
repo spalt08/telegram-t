@@ -179,6 +179,19 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, o
         pinned_message_id: update.id,
       },
     });
+  } else if (
+    update instanceof GramJs.UpdateNotifySettings
+    && update.peer instanceof GramJs.NotifyPeer
+  ) {
+    const { silent, muteUntil } = update.notifySettings;
+
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      chat: {
+        is_muted: silent || Date.now() < muteUntil * 1000,
+      },
+    });
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {
