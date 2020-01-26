@@ -6,6 +6,8 @@ import { deleteMessages, updateMessage } from '../../common/messages';
 import { GlobalState } from '../../../store/types';
 import { selectChatMessage, selectChatMessages } from '../../selectors';
 
+const DELETING_DELAY = 300;
+
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
 
@@ -60,30 +62,45 @@ export function onUpdate(update: ApiUpdate) {
     case 'deleteMessages': {
       const { ids, chat_id } = update;
 
+      let newGlobal = global;
+
       // Channel update.
       if (chat_id) {
-        let newGlobal = deleteMessages(global, chat_id, ids);
+        ids.forEach((id) => {
+          newGlobal = updateMessage(global, chat_id, id, {
+            is_deleting: true,
+          });
 
-        const newLastMessage = findMessageWithMaxId(newGlobal, chat_id);
-        if (newLastMessage) {
-          newGlobal = updateChatLastMessage(newGlobal, chat_id, newLastMessage, true);
-        }
+          const newLastMessage = findLastMessage(newGlobal, chat_id, id);
+          if (newLastMessage) {
+            newGlobal = updateChatLastMessage(newGlobal, chat_id, newLastMessage, true);
+          }
+        });
 
         setGlobal(newGlobal);
+
+        setTimeout(() => {
+          setGlobal(deleteMessages(getGlobal(), chat_id, ids));
+        }, DELETING_DELAY);
 
         return;
       }
 
-      let newGlobal = global;
       ids.forEach((id) => {
         const chatId = findChatId(global, id);
         if (chatId) {
-          newGlobal = deleteMessages(newGlobal, chatId, [id]);
+          newGlobal = updateMessage(newGlobal, chatId, id, {
+            is_deleting: true,
+          });
 
-          const newLastMessage = findMessageWithMaxId(newGlobal, chatId);
+          const newLastMessage = findLastMessage(newGlobal, chatId, id);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
           }
+
+          setTimeout(() => {
+            setGlobal(deleteMessages(getGlobal(), chatId, [id]));
+          }, DELETING_DELAY);
         }
       });
 
@@ -118,13 +135,15 @@ function findChatId(global: GlobalState, messageId: number) {
   }));
 }
 
-function findMessageWithMaxId(global: GlobalState, chatId: number) {
+function findLastMessage(global: GlobalState, chatId: number, exceptForId: number) {
   const byId = selectChatMessages(global, chatId);
 
   if (!byId) {
     return null;
   }
 
-  const maxId = Math.max(...Object.keys(byId).map(Number));
-  return byId[maxId];
+  const ids = Object.keys(byId).map(Number);
+  const lastId = ids[ids.length - 1];
+
+  return byId[lastId !== exceptForId ? lastId : ids[ids.length - 2]];
 }

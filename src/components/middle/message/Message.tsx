@@ -264,6 +264,10 @@ function buildClassNames(message: ApiMessage, hasMedia = false, hasContextMenu =
     classNames.push('has-menu-open');
   }
 
+  if (message.is_deleting) {
+    classNames.push('is-deleting');
+  }
+
   return classNames;
 }
 

@@ -114,6 +114,7 @@ export interface ApiMessage {
     '@type': 'messageSendingStatePending' | 'messageSendingStateFailed';
   };
   forward_info?: ApiMessageForwardInfo;
+  is_deleting?: boolean;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

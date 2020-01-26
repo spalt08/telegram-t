@@ -9,6 +9,13 @@
     visibility: hidden;
   }
 
+  > .Avatar, > .content {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+    transform-origin: bottom;
+    transition: opacity 200ms, transform 200ms ease-in;
+  }
+
   &.last-in-group {
     margin-bottom: 0.625rem;
 
@@ -535,6 +542,22 @@
       .media-content, > p {
         order: 2;
       }
+    }
+  }
+}
+
+.Message.is-deleting {
+  &.own {
+    > .Avatar, > .content {
+      opacity: 0;
+      transform: scale(0.3) translateX(50%);
+    }
+  }
+
+  &:not(.own) {
+    > .Avatar, > .content {
+      opacity: 0;
+      transform: scale(0.3) translateX(-50%);
     }
   }
 }

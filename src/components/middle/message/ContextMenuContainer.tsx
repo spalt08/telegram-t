@@ -85,13 +85,13 @@ const ContextMenuContainer: FC<IProps> = ({
 
   const handleDeleteMessageForAll = useCallback(() => {
     deleteMessages({ chatId: message.chat_id, messageIds: [message.id], shouldDeleteForAll: true });
-    setIsDeleteDialogOpen(false);
-  }, [deleteMessages, message.chat_id, message.id]);
+    closeDeleteDialog();
+  }, [deleteMessages, message.chat_id, message.id, closeDeleteDialog]);
 
   const handleDeleteMessageForSelf = useCallback(() => {
     deleteMessages({ chatId: message.chat_id, messageIds: [message.id], shouldDeleteForAll: false });
-    setIsDeleteDialogOpen(false);
-  }, [deleteMessages, message.chat_id, message.id]);
+    closeDeleteDialog();
+  }, [deleteMessages, message.chat_id, message.id, closeDeleteDialog]);
 
   useEffect(() => {
     disableScrolling();

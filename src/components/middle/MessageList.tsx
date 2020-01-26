@@ -157,7 +157,7 @@ const MessageList: FC<IProps> = ({
     ) => {
       if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
         const message = messageGroup[0];
-        return <ServiceMessage key={message.date} message={message} />;
+        return <ServiceMessage key={message.id} message={message} />;
       }
 
       return messageGroup.map((message, i) => {
@@ -178,7 +178,7 @@ const MessageList: FC<IProps> = ({
 
         return (
           <Message
-            key={message.date}
+            key={message.id}
             message={message}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={i === 0 && !isPrivate && !isOwn}
