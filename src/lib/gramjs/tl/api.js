@@ -115,7 +115,7 @@ function argToBytes(x, type) {
         case 'date':
             return serializeDate(x)
         default:
-            throw new Error('unsupported')
+            return x.getBytes()
     }
 }
 
@@ -288,47 +288,14 @@ function createClasses(classesType, params) {
                                 buffers.push(f)
                             }
                         } else {
-                            switch (argsConfig[arg].type) {
-                                case 'int':
-                                    const i = Buffer.alloc(4)
-                                    i.writeInt32LE(this[arg], 0)
-                                    buffers.push(i)
-                                    break
-                                case 'long':
-                                    buffers.push(toSignedLittleBuffer(this[arg], 8))
-                                    break
-                                case 'int128':
-                                    buffers.push(toSignedLittleBuffer(this[arg], 16))
-                                    break
-                                case 'int256':
-                                    buffers.push(toSignedLittleBuffer(this[arg], 32))
-                                    break
-                                case 'double':
-                                    const d = Buffer.alloc(8)
-                                    d.writeDoubleLE(this[arg].toString(), 0)
-                                    buffers.push(d)
-                                    break
-                                case 'string':
-                                    buffers.push(serializeBytes(this[arg]))
-                                    break
-                                case 'Bool':
-                                    buffers.push(this[arg] ? Buffer.from('b5757299', 'hex') : Buffer.from('379779bc', 'hex'))
-                                    break
-                                case 'true':
-                                    break
-                                case 'bytes':
-                                    buffers.push(serializeBytes(this[arg]))
-                                    break
-                                case 'date':
-                                    buffers.push(serializeDate(this[arg]))
-                                    break
-                                default:
-                                    buffers.push(this[arg].getBytes())
-                                    let boxed = (argsConfig[arg].type.charAt(argsConfig[arg].type.indexOf('.') + 1))
-                                    boxed = boxed === boxed.toUpperCase()
-                                    if (!boxed) {
-                                        buffers.shift()
-                                    }
+                            buffers.push(argToBytes(this[arg], argsConfig[arg].type))
+
+                            if (this[arg] && typeof this[arg].getBytes === 'function') {
+                                let boxed = (argsConfig[arg].type.charAt(argsConfig[arg].type.indexOf('.') + 1))
+                                boxed = boxed === boxed.toUpperCase()
+                                if (!boxed) {
+                                    buffers.shift()
+                                }
                             }
                         }
                     }
@@ -382,7 +349,7 @@ function createClasses(classesType, params) {
                         if (argsConfig[arg].isVector) {
                             const temp = []
                             for (const x of this[arg]) {
-                                temp.push(await getInputFromResolve(utils, client, this[arg], argsConfig[arg].type))
+                                temp.push(await getInputFromResolve(utils, client, x, argsConfig[arg].type))
                             }
                             this[arg] = temp
                         } else {
