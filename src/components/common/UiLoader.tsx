@@ -7,13 +7,12 @@ import useOverlay from '../../hooks/useOverlay';
 import { getChatAvatarHash } from '../../modules/helpers';
 import { pause } from '../../util/schedulers';
 import preloadFonts from '../../util/fonts';
-import getMonkeyAnimationData from '../../util/monkeys';
 import * as mediaLoader from '../../util/mediaLoader';
 
 import './UiLoader.scss';
 
 type IProps = {
-  page: 'main' | 'authPhoneNumber' | 'authCode' | 'authPassword';
+  page: 'main' | 'authPhoneNumber';
   children: any;
 } & Pick<GlobalState, 'isUiReady'> & Pick<GlobalActions, 'setIsUiReady'>;
 
@@ -32,11 +31,6 @@ const preloadTasks = {
     preloadAvatars(),
   ]),
   authPhoneNumber: () => preloadFonts(),
-  authCode: () => Promise.all([
-    getMonkeyAnimationData('MonkeyIdle'),
-    getMonkeyAnimationData('MonkeyTracking'),
-  ]),
-  authPassword: () => getMonkeyAnimationData('MonkeyPeek'),
 };
 
 const UiLoader: FC<IProps> = ({

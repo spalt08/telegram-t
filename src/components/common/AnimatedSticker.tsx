@@ -1,10 +1,9 @@
 import React, {
-  FC, useEffect, useState,
+  FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { DEBUG } from '../../config';
 
 type IProps = {
-  id: string;
   animationData: AnyLiteral;
   width?: number;
   height?: number;
@@ -32,10 +31,11 @@ async function requireLottie() {
 }
 
 const AnimatedSticker: FC<IProps> = ({
-  id, animationData, width, height, play, noLoop, className,
+  animationData, width, height, play, noLoop, className,
 }) => {
   const [isLottieReady, setIsLottieReady] = useState(false);
   const [animation, setAnimation] = useState(null);
+  const container = useRef<HTMLDivElement>();
 
   useEffect(() => {
     if (!isLottieReady) {
@@ -50,7 +50,7 @@ const AnimatedSticker: FC<IProps> = ({
 
     if (play) {
       animation.goToAndPlay(0);
-    } else if (play === false) {
+    } else {
       animation.goToAndStop(0);
     }
   }, [play, animation]);
@@ -60,20 +60,18 @@ const AnimatedSticker: FC<IProps> = ({
       return;
     }
 
-    const container = document.getElementById(`sticker:${id}`);
-
-    if (!container) {
+    if (!container.current) {
       return;
     }
 
     setAnimation(Lottie.loadAnimation({
-      container,
+      container: container.current,
       renderer: 'svg',
       loop: !noLoop,
       autoplay: false,
       animationData,
     }));
-  }, [id, animationData, isLottieReady, animation, noLoop]);
+  }, [animationData, isLottieReady, animation, noLoop]);
 
   useEffect(() => {
     return () => {
@@ -89,7 +87,7 @@ const AnimatedSticker: FC<IProps> = ({
 
   return (
     <div
-      id={`sticker:${id}`}
+      ref={container}
       className={`AnimatedSticker ${className}`}
       // @ts-ignore
       style={style}

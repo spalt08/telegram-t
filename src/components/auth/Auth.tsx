@@ -9,14 +9,16 @@ import AuthCode from './AuthCode';
 import AuthRegister from './AuthRegister';
 import AuthPassword from './AuthPassword';
 
+import './Auth.scss';
+
 type IProps = Pick<GlobalState, 'authState'>;
 
 const Auth: FC<IProps> = ({ authState }) => {
   switch (authState) {
     case 'authorizationStateWaitCode':
-      return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;
+      return <AuthCode />;
     case 'authorizationStateWaitPassword':
-      return <UiLoader page="authPassword" key="authPassword"><AuthPassword /></UiLoader>;
+      return <AuthPassword />;
     case 'authorizationStateWaitRegistration':
       return <AuthRegister />;
     case 'authorizationStateWaitPhoneNumber':

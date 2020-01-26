@@ -9,8 +9,6 @@ import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';
 
-import './Auth.scss';
-
 type IProps = (
   Pick<GlobalState, 'authIsLoading' | 'authError'>
   & Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>
@@ -22,13 +20,16 @@ const AuthPassword: FC<IProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [peekMonkey, setPeekMonkey] = useState(undefined);
+  const [peekMonkeyData, setPeekMonkeyData] = useState(undefined);
+  const [isShownAsync, setIsShownAsync] = useState(false);
 
   useEffect(() => {
-    if (!peekMonkey) {
-      getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkey);
+    if (!peekMonkeyData) {
+      getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkeyData);
+    } else {
+      setIsShownAsync(true);
     }
-  }, [peekMonkey]);
+  }, [peekMonkeyData]);
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     if (authError) {
@@ -57,11 +58,10 @@ const AuthPassword: FC<IProps> = ({
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
-        {peekMonkey && (
+        {peekMonkeyData && (
           <AnimatedSticker
-            id="monkey-tracking"
-            animationData={peekMonkey}
-            play={false}
+            className={isShownAsync ? 'shown' : ''}
+            animationData={peekMonkeyData}
             noLoop
           />
         )}

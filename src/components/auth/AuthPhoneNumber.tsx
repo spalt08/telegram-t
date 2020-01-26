@@ -11,8 +11,6 @@ import CountryCodeInput from './CountryCodeInput';
 import Checkbox from '../ui/Checkbox';
 import Loading from '../ui/Loading';
 
-import './Auth.scss';
-
 type IProps = (
   Pick<GlobalState, (
     'connectionState' | 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'

@@ -9,8 +9,6 @@ import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 import CropModal from './CropModal';
 
-import './Auth.scss';
-
 type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'signUp' | 'clearAuthError'>;
 
 const AuthRegister: FC<IProps> = ({

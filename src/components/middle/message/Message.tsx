@@ -448,7 +448,6 @@ function renderSticker(
       )}
       {is_animated && (
         <AnimatedSticker
-          id={String(id)}
           animationData={mediaData as AnyLiteral}
           width={width}
           height={height}

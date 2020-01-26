@@ -10,8 +10,6 @@ import Loading from '../ui/Loading';
 
 import AnimatedSticker from '../common/AnimatedSticker';
 
-import './Auth.scss';
-
 type IProps = (
   Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>
   & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>
@@ -21,18 +19,24 @@ const AuthCode: FC<IProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
   const [code, setCode] = useState(undefined);
-  const [idleMonkey, setIdleMonkey] = useState(undefined);
-  const [trackingMonkey, setTrackingMonkey] = useState(undefined);
+  const [idleMonkeyData, setIdleMonkeyData] = useState(undefined);
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
   const [isTracking, setIsTracking] = useState(false);
+  const [isIdleShownAsync, setIsIdleShownAsync] = useState(false);
 
   useEffect(() => {
-    if (!idleMonkey) {
-      getMonkeyAnimationData('MonkeyIdle').then(setIdleMonkey);
+    if (!idleMonkeyData) {
+      getMonkeyAnimationData('MonkeyIdle').then(setIdleMonkeyData);
+    } else {
+      setIsIdleShownAsync(true);
     }
-    if (!trackingMonkey) {
-      getMonkeyAnimationData('MonkeyTracking').then(setTrackingMonkey);
+  }, [idleMonkeyData]);
+
+  useEffect(() => {
+    if (!trackingMonkeyData) {
+      getMonkeyAnimationData('MonkeyTracking').then(setTrackingMonkeyData);
     }
-  }, [idleMonkey, trackingMonkey]);
+  }, [trackingMonkeyData]);
 
   function onCodeChange(e: FormEvent<HTMLInputElement>) {
     if (authError) {
@@ -58,19 +62,17 @@ const AuthCode: FC<IProps> = ({
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
-        {idleMonkey && (
+        {idleMonkeyData && (
           <AnimatedSticker
-            id="monkey-idle"
-            className={isTracking ? 'hidden' : ''}
-            animationData={idleMonkey}
+            className={`${isTracking ? 'hidden' : ''} ${isIdleShownAsync ? 'shown' : ''}`}
+            animationData={idleMonkeyData}
             play
           />
         )}
-        {trackingMonkey && (
+        {trackingMonkeyData && (
           <AnimatedSticker
-            id="monkey-tracking"
-            className={!isTracking ? 'hidden' : ''}
-            animationData={trackingMonkey}
+            className={!isTracking ? 'hidden' : 'shown'}
+            animationData={trackingMonkeyData}
             play={isTracking}
             noLoop
           />
