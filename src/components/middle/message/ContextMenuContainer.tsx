@@ -7,12 +7,14 @@ import { GlobalActions } from '../../../store/types';
 import { ApiMessage } from '../../../api/types';
 
 import {
-  selectChat, selectIsChatWithSelf, selectIsOwnMessage, selectUser,
+  selectAllowedMessagedActions,
+  selectChat,
+  selectUser,
 } from '../../../modules/selectors';
 import {
   getPrivateChatUserId,
-  getUserFirstName, isChannel,
-  isPrivateChat, isSuperGroup,
+  getUserFirstName,
+  isPrivateChat,
 } from '../../../modules/helpers';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 
@@ -28,19 +30,18 @@ type IAnchorPosition = {
   y: number;
 };
 
-type IProps = Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages'> & {
+type IProps = {
   isOpen: boolean;
   message: ApiMessage;
-  isChatWithSelf?: boolean;
+  anchor: IAnchorPosition;
+  onClose: () => void;
+  onCloseAnimationEnd: () => void;
   canPin?: boolean;
   canDelete?: boolean;
   canDeleteForAll?: boolean;
-  anchor: IAnchorPosition;
   contactFirstName: string;
   closeContextMenu: () => void;
-  onClose: () => void;
-  onCloseAnimationEnd: () => void;
-};
+} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages'>;
 
 const ContextMenuContainer: FC<IProps> = ({
   isOpen,
@@ -48,10 +49,10 @@ const ContextMenuContainer: FC<IProps> = ({
   anchor,
   onClose,
   onCloseAnimationEnd,
-  contactFirstName,
   canPin,
   canDelete,
   canDeleteForAll,
+  contactFirstName,
   setChatReplyingTo,
   pinMessage,
   deleteMessages,
@@ -141,26 +142,17 @@ const ContextMenuContainer: FC<IProps> = ({
 
 export default memo(withGlobal(
   (global, { message }: IProps) => {
+    const { canPin, canDelete, canDeleteForAll } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
-    const isPrivate = isPrivateChat(chat.id);
-    const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat);
-    const isOwnMessage = selectIsOwnMessage(global, message);
-    const isSuperGroupOrChannel = isSuperGroup(chat) || isChannel(chat);
-    const isAdminOrOwner = !isPrivate && false; // TODO Implement.
-
-    const canPin = isChatWithSelf || !isSuperGroupOrChannel || isAdminOrOwner;
-    const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
-    const canDeleteForAll = canDelete && !isChatWithSelf && (isOwnMessage || isPrivate || isAdminOrOwner);
-
     const contactFirstName = isPrivateChat(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : null;
 
     return {
-      contactFirstName,
       canPin,
       canDelete,
       canDeleteForAll,
+      contactFirstName,
     };
   },
   (setGlobal, actions) => {

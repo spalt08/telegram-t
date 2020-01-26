@@ -9,7 +9,7 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 
 type IProps = {
   message: ApiMessage;
-  onUnpinMessage: () => void;
+  onUnpinMessage?: () => void;
 };
 
 const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
@@ -25,7 +25,10 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
 
   const handleUnpinMessage = useCallback(() => {
     closeUnpinConfirmation();
-    onUnpinMessage();
+
+    if (onUnpinMessage) {
+      onUnpinMessage();
+    }
   }, [onUnpinMessage]);
 
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
@@ -36,15 +39,25 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
 
   return (
     <div className="HeaderPinnedMessage-wrapper">
-      <Button
-        round
-        size="smaller"
-        color="translucent"
-        ariaLabel="Unpin message"
-        onClick={openUnpinConfirmation}
-      >
-        <i className="icon-close" />
-      </Button>
+      {onUnpinMessage && ([
+        <ConfirmDialog
+          isOpen={isUnpinDialogOpen}
+          onClose={closeUnpinConfirmation}
+          text="Would you like to unpin this message?"
+          confirmLabel="Unpin"
+          confirmHandler={handleUnpinMessage}
+        />,
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          ariaLabel="Unpin message"
+          onClick={openUnpinConfirmation}
+        >
+          <i className="icon-close" />
+        </Button>,
+      ])}
+
       <div className="HeaderPinnedMessage not-implemented" onClick={stopPropagation}>
         {renderMessagePhoto(replyThumbnail)}
         <div className="message-text">
@@ -54,13 +67,6 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
 
         <RippleEffect />
       </div>
-      <ConfirmDialog
-        isOpen={isUnpinDialogOpen}
-        onClose={closeUnpinConfirmation}
-        text="Would you like to unpin this message?"
-        confirmLabel="Unpin"
-        confirmHandler={handleUnpinMessage}
-      />
     </div>
   );
 };

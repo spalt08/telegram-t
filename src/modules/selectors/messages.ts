@@ -1,7 +1,9 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat, selectIsChatWithSelf } from './chats';
-import { getSendingState, isMessageLocal } from '../helpers';
+import {
+  getSendingState, isChannel, isMessageLocal, isPrivateChat, isSuperGroup,
+} from '../helpers';
 import { selectUser } from './users';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
@@ -49,4 +51,19 @@ export function selectSender(global: GlobalState, message: ApiMessage): ApiUser 
 
 export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): boolean {
   return message.sender_user_id === global.currentUserId;
+}
+
+export function selectAllowedMessagedActions(global: GlobalState, message: ApiMessage) {
+  const chat = selectChat(global, message.chat_id);
+  const isPrivate = isPrivateChat(chat.id);
+  const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat);
+  const isOwnMessage = selectIsOwnMessage(global, message);
+  const isSuperGroupOrChannel = isSuperGroup(chat) || isChannel(chat);
+  const isAdminOrOwner = !isPrivate && false; // TODO Implement.
+
+  const canPin = isChatWithSelf || !isSuperGroupOrChannel || isAdminOrOwner;
+  const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
+  const canDeleteForAll = canDelete && !isChatWithSelf && (isOwnMessage || isPrivate || isAdminOrOwner);
+
+  return { canPin, canDelete, canDeleteForAll };
 }

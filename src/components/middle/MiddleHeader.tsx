@@ -4,7 +4,9 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../store/types';
 import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
 import { getPrivateChatUserId, isPrivateChat } from '../../modules/helpers';
-import { selectChat, selectChatMessage, selectUser } from '../../modules/selectors';
+import {
+  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
+} from '../../modules/selectors';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import HeaderActions from './HeaderActions';
@@ -15,10 +17,11 @@ import './MiddleHeader.scss';
 type IProps = {
   chatId: number;
   pinnedMessage?: ApiMessage;
+  canUnpin?: boolean;
 } & Pick<GlobalActions, 'openChatWithInfo' | 'pinMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
-  chatId, pinnedMessage, openChatWithInfo, pinMessage,
+  chatId, pinnedMessage, canUnpin, openChatWithInfo, pinMessage,
 }) => {
   function onHeaderClick() {
     openChatWithInfo({ id: chatId });
@@ -29,16 +32,19 @@ const MiddleHeader: FC<IProps> = ({
   }
 
   return (
-    <div className="MiddleHeader" onClick={onHeaderClick}>
-      {isPrivateChat(chatId) ? (
-        <PrivateChatInfo userId={chatId} />
-      ) : (
-        <GroupChatInfo chatId={chatId} />
-      )}
+    <div className="MiddleHeader">
+      <div onClick={onHeaderClick}>
+        {isPrivateChat(chatId) ? (
+          <PrivateChatInfo userId={chatId} />
+        ) : (
+          <GroupChatInfo chatId={chatId} />
+        )}
+      </div>
+
       {pinnedMessage && (
         <HeaderPinnedMessage
           message={pinnedMessage}
-          onUnpinMessage={onUnpinMessage}
+          onUnpinMessage={canUnpin ? onUnpinMessage : undefined}
         />
       )}
       <HeaderActions />
@@ -62,8 +68,14 @@ export default withGlobal(
     if (target && target.full_info) {
       const { pinned_message_id } = target.full_info;
       const pinnedMessage = pinned_message_id && selectChatMessage(global, chatId, pinned_message_id);
+
       if (pinnedMessage) {
-        return { pinnedMessage };
+        const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
+
+        return {
+          pinnedMessage,
+          canUnpin: canPin,
+        };
       }
     }
 
