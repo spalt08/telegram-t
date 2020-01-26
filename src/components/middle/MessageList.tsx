@@ -37,9 +37,10 @@ type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 
 const LOAD_MORE_THRESHOLD_PX = 1000;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const VIEWPORT_MARGIN = 500;
+const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
-const runThrottledForScroll = throttle((cb) => cb(), 1000, true);
+const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
 
 let currentScrollOffset = 0;
 let scrollTimeout: NodeJS.Timeout | null = null;
@@ -82,9 +83,13 @@ const MessageList: FC<IProps> = ({
     const target = e.target as HTMLElement;
     currentScrollOffset = target.scrollHeight - target.scrollTop;
 
-    if (containerRef.current) {
-      determineStickyElement(containerRef.current, '.message-date-header');
+    determineStickyElement(target, '.message-date-header');
+
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
     }
+    setIsScrolling(true);
+    scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
 
     if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
       runThrottledForLoadMessages(() => {
@@ -100,12 +105,6 @@ const MessageList: FC<IProps> = ({
       setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
       playMediaInViewport();
-
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      setIsScrolling(true);
-      scrollTimeout = setTimeout(() => setIsScrolling(false), 1000);
     });
   }, [chatId, loadMoreChatMessages, setChatScrollOffset, playMediaInViewport]);
 
