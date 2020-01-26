@@ -27,11 +27,12 @@ import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
 
-type IProps = Pick<GlobalActions, 'loadChatMessages' | 'loadMoreChatMessages' | 'setChatScrollOffset'> & {
-  areMessagesLoaded?: boolean;
-  chatId?: number;
+type IProps = Pick<GlobalActions, 'loadMessages' | 'loadMoreMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
+  isLoaded?: boolean;
+  isUnread?: boolean;
   messages?: Record<number, ApiMessage>;
-  isChannelChat: boolean;
+  chatId?: number;
+  isChannelChat?: boolean;
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -40,34 +41,39 @@ const VIEWPORT_MARGIN = 500;
 const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
+const runThrottledForMarkMessagesRead = throttle((cb) => cb(), 1000, true);
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
 
 let currentScrollOffset = 0;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
-  areMessagesLoaded,
-  chatId,
+  isLoaded,
+  isUnread,
   messages,
+  chatId,
   isChannelChat,
-  loadChatMessages,
-  loadMoreChatMessages,
+  loadMessages,
+  loadMoreMessages,
+  markMessagesRead,
   setChatScrollOffset,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
-  const messagesArray = areMessagesLoaded && messages ? orderBy(toArray(messages), 'date') : [];
+  const messagesArray = isLoaded && messages ? orderBy(toArray(messages), 'date') : [];
 
-  if (!areMessagesLoaded) {
-    runThrottledForLoadMessages(() => {
-      loadChatMessages({ chatId });
-    });
-  } else if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
-    runThrottledForLoadMessages(() => {
-      loadMoreChatMessages({ chatId });
-    });
+  if (!isLoaded) {
+    runThrottledForLoadMessages(loadMessages);
+  } else {
+    if (isUnread) {
+      runThrottledForMarkMessagesRead(markMessagesRead);
+    }
+
+    if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+      runThrottledForLoadMessages(loadMoreMessages);
+    }
   }
 
   const playMediaInViewport = useCallback(() => {
@@ -96,7 +102,7 @@ const MessageList: FC<IProps> = ({
         // More than one callback can be added to the queue
         // before the messages are prepended, so we need to check again.
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMoreChatMessages({ chatId });
+          loadMoreMessages();
         }
       });
     }
@@ -106,7 +112,7 @@ const MessageList: FC<IProps> = ({
 
       playMediaInViewport();
     });
-  }, [chatId, loadMoreChatMessages, setChatScrollOffset, playMediaInViewport]);
+  }, [chatId, loadMoreMessages, setChatScrollOffset, playMediaInViewport]);
 
   useEffect(() => {
     if (chatId) {
@@ -219,7 +225,7 @@ const MessageList: FC<IProps> = ({
       className={classNames.join(' ')}
       onScroll={handleScroll}
     >
-      {areMessagesLoaded ? (
+      {isLoaded ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
           {messagesArray.length > 0 && flatten(groupMessages(messagesArray).map(renderMessageDateGroup))}
@@ -284,14 +290,20 @@ export default memo(withGlobal(
     const chat = selectChat(global, selectedId);
 
     return {
-      chatId: selectedId,
-      isChannelChat: chat && isChannel(chat),
+      isLoaded: Boolean(messages),
+      isUnread: Boolean(chat.unread_count),
       messages,
-      areMessagesLoaded: Boolean(messages),
+      chatId: selectedId,
+      isChannelChat: isChannel(chat),
     };
   },
   (setGlobal, actions) => {
-    const { loadChatMessages, loadMoreChatMessages, setChatScrollOffset } = actions;
-    return { loadChatMessages, loadMoreChatMessages, setChatScrollOffset };
+    const {
+      loadMessages, loadMoreMessages, markMessagesRead, setChatScrollOffset,
+    } = actions;
+
+    return {
+      loadMessages, loadMoreMessages, markMessagesRead, setChatScrollOffset,
+    };
   },
 )(MessageList));

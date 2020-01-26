@@ -79,19 +79,19 @@ const ContextMenuContainer: FC<IProps> = ({
   }, [setChatReplyingTo, message, closeMenu]);
 
   const handlePin = useCallback(() => {
-    pinMessage({ chatId: message.chat_id, messageId: message.id });
+    pinMessage({ messageId: message.id });
     closeMenu();
   }, [pinMessage, message, closeMenu]);
 
   const handleDeleteMessageForAll = useCallback(() => {
-    deleteMessages({ chatId: message.chat_id, messageIds: [message.id], shouldDeleteForAll: true });
+    deleteMessages({ messageIds: [message.id], shouldDeleteForAll: true });
     closeDeleteDialog();
-  }, [deleteMessages, message.chat_id, message.id, closeDeleteDialog]);
+  }, [deleteMessages, message.id, closeDeleteDialog]);
 
   const handleDeleteMessageForSelf = useCallback(() => {
-    deleteMessages({ chatId: message.chat_id, messageIds: [message.id], shouldDeleteForAll: false });
+    deleteMessages({ messageIds: [message.id], shouldDeleteForAll: false });
     closeDeleteDialog();
-  }, [deleteMessages, message.chat_id, message.id, closeDeleteDialog]);
+  }, [deleteMessages, message.id, closeDeleteDialog]);
 
   useEffect(() => {
     disableScrolling();

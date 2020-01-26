@@ -5,51 +5,79 @@ import { callSdk } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateMessages } from '../../common/messages';
 import { updateUsers } from '../../common/users';
+import { selectOpenChat } from '../../selectors';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
-addReducer('loadChatMessages', (global, actions, payload) => {
-  const { chatId } = payload!;
-  const chat = global.chats.byId[chatId];
+addReducer('loadMessages', (global) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
 
-  void loadChatMessages(chat);
+  void loadMessages(chat);
 });
 
-addReducer('loadMoreChatMessages', (global, actions, payload) => {
-  const { chatId } = payload!;
+addReducer('loadMoreMessages', (global) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
 
-  const chat = global.chats.byId[chatId];
-  const byChatId = global.messages.byChatId[chatId];
+  const byChatId = global.messages.byChatId[chat.id];
   const chatMessageIds = byChatId ? Object.keys(byChatId.byId || {}) : null;
   const lowestMessageId = chatMessageIds && chatMessageIds.length && Math.min(...chatMessageIds.map(Number));
 
-  void loadChatMessages(chat, lowestMessageId || undefined);
+  void loadMessages(chat, lowestMessageId || undefined);
 });
 
 addReducer('sendTextMessage', (global, actions, payload) => {
-  const { chatId, text } = payload!;
-  const chat = global.chats.byId[chatId];
-  const replyingTo = global.chats.replyingToById[chatId];
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
 
-  void sendTextMessage(chat, text, replyingTo);
+  const { text } = payload!;
+  const replyingTo = global.chats.replyingToById[chat.id];
+
+  void callSdk('sendMessage', { chat, text, replyingTo });
 });
 
 addReducer('pinMessage', (global, actions, payload) => {
-  const { chatId, messageId } = payload!;
-  const chat = global.chats.byId[chatId];
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
 
-  void pinMessage(chat, messageId);
+  const { messageId } = payload!;
+
+  void callSdk('pinMessage', { chat, messageId });
 });
 
 addReducer('deleteMessages', (global, actions, payload) => {
-  const { chatId, messageIds, shouldDeleteForAll } = payload!;
-  const chat = global.chats.byId[chatId];
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
 
-  void deleteMessages(chat, messageIds, shouldDeleteForAll);
+  const { messageIds, shouldDeleteForAll } = payload!;
+
+  void callSdk('deleteMessages', { chat, messageIds, shouldDeleteForAll });
 });
 
-async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
-  const result = await loadChatMessagesPart(chat, fromMessageId);
+addReducer('markMessagesRead', (global, actions, payload) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
+
+  const { maxId } = payload || {};
+
+  void callSdk('markMessagesRead', { chat, maxId });
+});
+
+async function loadMessages(chat: ApiChat, fromMessageId = 0) {
+  const result = await loadMessagesPart(chat, fromMessageId);
 
   if (!result) {
     return;
@@ -60,7 +88,7 @@ async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
   let wasLatestEmpty = !messages.length;
 
   while (messages.length < MESSAGE_SLICE_LIMIT && !wasLatestEmpty) {
-    const nextPart = await loadChatMessagesPart(chat, messages[messages.length - 1].id);
+    const nextPart = await loadMessagesPart(chat, messages[messages.length - 1].id);
 
     if (nextPart && nextPart.messages.length) {
       messages = [
@@ -82,7 +110,7 @@ async function loadChatMessages(chat: ApiChat, fromMessageId = 0) {
   setGlobal(global);
 }
 
-async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
+async function loadMessagesPart(chat: ApiChat, fromMessageId = 0) {
   const result = await callSdk('fetchMessages', {
     chat,
     fromMessageId,
@@ -94,16 +122,4 @@ async function loadChatMessagesPart(chat: ApiChat, fromMessageId = 0) {
   }
 
   return result;
-}
-
-function sendTextMessage(chat: ApiChat, text: string, replyingTo?: number) {
-  void callSdk('sendMessage', { chat, text, replyingTo });
-}
-
-function pinMessage(chat: ApiChat, messageId: number) {
-  void callSdk('pinMessage', { chat, messageId });
-}
-
-function deleteMessages(chat: ApiChat, messageIds: number[], shouldDeleteForAll?: boolean) {
-  void callSdk('deleteMessages', { chat, messageIds, shouldDeleteForAll });
 }

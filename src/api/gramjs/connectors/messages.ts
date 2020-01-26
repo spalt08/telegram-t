@@ -102,6 +102,38 @@ export async function deleteMessages({
   });
 }
 
+export async function markMessagesRead({
+  chat, maxId,
+}: {
+  chat: ApiChat; maxId?: number;
+}) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  const result = await invokeRequest(
+    isChannel
+      ? new GramJs.channels.ReadHistory({
+        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
+        maxId,
+      })
+      : new GramJs.messages.ReadHistory({
+        peer: buildInputPeer(chat.id, chat.access_hash),
+        maxId,
+      }),
+  );
+
+  if (result !== false) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: chat.id,
+      chat: {
+        // TODO Support partial reading.
+        unread_count: 0,
+        last_read_inbox_message_id: maxId,
+      },
+    });
+  }
+}
+
 function updateLocalDb(
   result: GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages,
 ) {

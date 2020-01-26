@@ -11,11 +11,9 @@ import MessageInputReply from './MessageInputReply';
 import MessageInputImage from './MessageInputImage';
 import './MiddleFooter.scss';
 
-type IProps = Pick<GlobalActions, 'sendTextMessage'> & {
-  selectedChatId: number;
-};
+type IProps = Pick<GlobalActions, 'sendTextMessage'>;
 
-const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
+const MiddleFooter: FC<IProps> = ({ sendTextMessage }) => {
   const [messageText, setMessageText] = useState('');
   const [attachedImage, setAttachedImage] = useState(null);
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
@@ -24,7 +22,6 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
   const onSendMessage = () => {
     if (messageText !== '') {
       sendTextMessage({
-        chatId: selectedChatId,
         text: messageText,
       });
       setMessageText('');
@@ -110,13 +107,7 @@ const MiddleFooter: FC<IProps> = ({ selectedChatId, sendTextMessage }) => {
 };
 
 export default withGlobal(
-  (global) => {
-    const { chats: { selectedId: selectedChatId } } = global;
-
-    return {
-      selectedChatId,
-    };
-  },
+  undefined,
   (setGlobal, actions) => {
     const { sendTextMessage } = actions;
     return { sendTextMessage };

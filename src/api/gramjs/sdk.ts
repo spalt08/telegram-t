@@ -3,7 +3,7 @@ import {
 } from './connectors/auth';
 import { fetchChats, fetchFullChat, fetchChatOnlines } from './connectors/chats';
 import {
-  fetchMessages, sendMessage, pinMessage, deleteMessages,
+  fetchMessages, sendMessage, pinMessage, deleteMessages, markMessagesRead,
 } from './connectors/messages';
 import { fetchFullUser, fetchNearestCountry } from './connectors/users';
 import { downloadMedia } from './client';
@@ -19,6 +19,7 @@ export default {
   sendMessage,
   pinMessage,
   deleteMessages,
+  markMessagesRead,
   downloadMedia,
   fetchFullChat,
   fetchChatOnlines,

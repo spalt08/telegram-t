@@ -59,8 +59,8 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' |
   // messages
-  'loadChatMessages' | 'loadMoreChatMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' | 'deleteMessages' |
-  'selectMediaMessage' |
+  'loadMessages' | 'loadMoreMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' | 'deleteMessages' |
+  'selectMediaMessage' | 'markMessagesRead' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry'
 );
