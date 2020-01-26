@@ -146,9 +146,10 @@ export default memo(withGlobal(
     const isAdminOrOwner = !isPrivate && true; // TODO Implement.
     const isOwnMessage = true; // TODO Implement.
 
-    const canPin = isPrivate || isAdminOrOwner;
+    const canPin = isChatWithSelf || isAdminOrOwner;
     const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
-    const canDeleteForAll = ((isPrivate && !isChatWithSelf) || isAdminOrOwner);
+    const canDeleteForAll = canDelete && ((isPrivate && !isChatWithSelf) || isAdminOrOwner);
+
     const contactFirstName = isPrivateChat(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : null;
