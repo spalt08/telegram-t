@@ -27,7 +27,7 @@ addReducer('loadNearestCountry', (global) => {
 });
 
 async function loadNearestCountry() {
-  const authNearestCountry = await callSdk('fetchNearestCountry', undefined);
+  const authNearestCountry = await callSdk('fetchNearestCountry');
   setGlobal({
     ...getGlobal(),
     authNearestCountry,

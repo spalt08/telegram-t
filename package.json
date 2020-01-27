@@ -16,7 +16,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged -- --fix"
+      "pre-commit": "tsc && lint-staged -- --fix"
     }
   },
   "lint-staged": {

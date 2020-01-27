@@ -31,6 +31,8 @@ const TestInsert: FC<{}> = () => {
         <input type="text" value={value} onChange={handleChange} />
         <input type="submit" className="button" onClick={insertData} value="Insert Ordered" />
       </div>
+      {/*
+       // @ts-ignore */}
       <ul teactChildrenKeyOrder="asc">
         {sortedItems.map((item) => (
           // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
