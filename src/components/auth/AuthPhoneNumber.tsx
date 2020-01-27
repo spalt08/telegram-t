@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, useCallback,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../store/types';
@@ -13,14 +15,18 @@ import Loading from '../ui/Loading';
 
 type IProps = (
   Pick<GlobalState, (
-    'connectionState' | 'authState' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+    'connectionState' |
+    'authState' | 'authPhoneNumber' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
   )> &
   Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'>
 );
 
+const MIN_NUMBER_LENGHT = 10;
+
 const AuthPhoneNumber: FC<IProps> = ({
   connectionState,
   authState,
+  authPhoneNumber,
   authIsLoading,
   authError,
   authRememberMe,
@@ -30,10 +36,12 @@ const AuthPhoneNumber: FC<IProps> = ({
   clearAuthError,
   loadNearestCountry,
 }) => {
-  const [isButtonShown, setIsButtonShown] = useState(false);
   const [country, setCountry] = useState(undefined);
-  const [phone, setPhone] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isTouched, setIsTouched] = useState(false);
+
+  const fullNumber = getNumberWithCode(phoneNumber, country);
+  const isButtonShown = fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGHT;
 
   useEffect(() => {
     if (connectionState === 'connectionStateReady' && !authNearestCountry) {
@@ -43,48 +51,46 @@ const AuthPhoneNumber: FC<IProps> = ({
 
   useEffect(() => {
     if (authNearestCountry && !country && !isTouched) {
-      const suggestedCountry = getCountryById(authNearestCountry);
-      setCountry(suggestedCountry);
+      setCountry(getCountryById(authNearestCountry));
     }
   }, [country, authNearestCountry, isTouched]);
 
-  function onCountryChange(newCountry?: Country) {
+  const parseFullNumber = useCallback((newFullNumber: string) => {
+    const suggestedCountry = getCountryFromPhoneNumber(newFullNumber);
+    const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
+      ? suggestedCountry
+      : country;
+
+    if (!newFullNumber.length) {
+      setCountry(undefined);
+    } else if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
+      setCountry(selectedCountry);
+    }
+
+    setPhoneNumber(formatPhoneNumber(newFullNumber, selectedCountry));
+  }, [country]);
+
+  useEffect(() => {
+    if (!fullNumber && authPhoneNumber) {
+      parseFullNumber(authPhoneNumber);
+    }
+  }, [fullNumber, authPhoneNumber, parseFullNumber]);
+
+  function handleCountryChange(newCountry?: Country) {
     setCountry(newCountry);
   }
 
-  function onPhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
+  function handlePhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     if (authError) {
       clearAuthError();
     }
 
     setIsTouched(true);
-    const { target } = e;
-    const suggestedCountry = getCountryFromPhoneNumber(target.value);
-    const selectedCountry = !country || (suggestedCountry && suggestedCountry.id !== country.id)
-      ? suggestedCountry
-      : country;
-
-    const phoneNumber = formatPhoneNumber(target.value, selectedCountry);
-
-    if (!country || (selectedCountry && selectedCountry.code !== country.code)) {
-      onCountryChange(selectedCountry);
-    }
-    if (!target.value.length) {
-      onCountryChange(undefined);
-    }
-
-    setPhone(phoneNumber);
-
-    if (selectedCountry && target.value.length > 3 && target.value.length > selectedCountry.code.length) {
-      target.value = getNumberWithCode(phoneNumber, selectedCountry);
-    }
-
-    setIsButtonShown(target.value.replace(/[^\d]+/g, '').length >= 10);
+    parseFullNumber(e.target.value);
   }
 
-  function onKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
-    const { target } = e;
-    setAuthRememberMe(target.checked);
+  function handleKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
+    setAuthRememberMe(e.target.checked);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -94,8 +100,7 @@ const AuthPhoneNumber: FC<IProps> = ({
       return;
     }
 
-    const phoneNumber = getNumberWithCode(phone, country);
-    setAuthPhoneNumber({ phoneNumber });
+    setAuthPhoneNumber({ phoneNumber: fullNumber });
   }
 
   return (
@@ -111,20 +116,20 @@ const AuthPhoneNumber: FC<IProps> = ({
           id="sign-in-phone-code"
           value={country}
           isLoading={!authNearestCountry && !country}
-          onChange={onCountryChange}
+          onChange={handleCountryChange}
         />
         <InputText
           id="sign-in-phone-number"
           label="Phone Number"
-          onChange={onPhoneNumberChange}
-          value={getNumberWithCode(phone, country)}
+          onChange={handlePhoneNumberChange}
+          value={fullNumber}
           error={authError}
         />
         <Checkbox
           id="sign-in-keep-session"
           label="Keep me signed in"
           checked={Boolean(authRememberMe)}
-          onChange={onKeepSessionChange}
+          onChange={handleKeepSessionChange}
         />
         {isButtonShown && (
           authState === 'authorizationStateWaitPhoneNumber' ? (
@@ -148,10 +153,10 @@ function getNumberWithCode(phoneNumber: string, country?: Country) {
 export default withGlobal(
   (global) => {
     const {
-      connectionState, authState, authIsLoading, authError, authRememberMe, authNearestCountry,
+      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
     } = global;
     return {
-      connectionState, authState, authIsLoading, authError, authRememberMe, authNearestCountry,
+      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
     };
   },
   (setGlobal, actions) => {
