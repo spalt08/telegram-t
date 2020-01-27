@@ -2,7 +2,6 @@ import {
   ApiChat,
   ApiMessage,
   ApiUser,
-  ApiGroup,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
 } from '../api/types';
@@ -19,11 +18,6 @@ export type GlobalState = {
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
     replyingToById: Record<number, number>;
-  };
-
-  groups: {
-    ids: number[];
-    byId: Record<number, ApiGroup>;
   };
 
   messages: {

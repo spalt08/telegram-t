@@ -4,8 +4,6 @@ import { ApiUser, ApiUserFullInfo } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
-  'authorizationStateWaitTdlibParameters' |
-  'authorizationStateWaitEncryptionKey' |
   'authorizationStateWaitPhoneNumber' |
   'authorizationStateWaitCode' |
   'authorizationStateWaitPassword' |

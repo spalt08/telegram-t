@@ -10,9 +10,6 @@ addReducer('openChat', (global, actions, payload) => {
 addReducer('openChatWithInfo', (global, actions, payload) => {
   const { id } = payload!;
 
-  // Only used in TdLib now.
-  localStorage.setItem('selectedChatId', id);
-
   global = updateSelectedChatId(global, id);
   global = {
     ...global,

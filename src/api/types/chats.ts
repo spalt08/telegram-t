@@ -8,12 +8,6 @@ export interface ApiChat {
   id: number;
   type: {
     '@type': ApiChatType;
-
-    // Only in TDLib.
-    user_id?: number;
-    basic_group_id?: number;
-    supergroup_id?: number;
-    is_channel?: boolean;
   };
   title?: string;
   last_message?: ApiMessage;

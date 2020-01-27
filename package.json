@@ -7,7 +7,6 @@
     "dev": "parcel src/index.html",
     "build": "npm run build:staging:gramjs",
     "build:staging:gramjs": "parcel build src/index.html --public-url ./",
-    "build:contest:tdlib": "./deploy/contest-tdlib.sh",
     "build:contest:gramjs": "./deploy/contest-gramjs.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
@@ -69,7 +68,6 @@
     "events": "^3.0.0",
     "lottie-web": "^5.5.10",
     "pako": "^1.0.10",
-    "tdweb": "^1.5.0",
     "websocket": "^1.0.30"
   }
 }

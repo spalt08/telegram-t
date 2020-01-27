@@ -1,3 +1,1 @@
-src/api/tdlib/legacy/*
 src/lib/gramjs/*
-src/api/gramjs/types/mtproto.d.ts

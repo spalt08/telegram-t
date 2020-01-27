@@ -19,11 +19,6 @@ const INITIAL_STATE: GlobalState = {
     replyingToById: {},
   },
 
-  groups: {
-    ids: [],
-    byId: {},
-  },
-
   messages: {
     byChatId: {},
   },
