@@ -189,7 +189,7 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, o
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer(update.peer.peer),
       chat: {
-        is_muted: silent || Date.now() < muteUntil * 1000,
+        is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
       },
     });
 

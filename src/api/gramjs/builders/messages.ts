@@ -18,6 +18,8 @@ import { isPeerUser } from './peers';
 import { bytesToDataUri, omitGramJsFields } from './common';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
+// Used for number fields specified as optional but are required indeed.
+const MISSING_FIELD_NUMBER = -1;
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   if (
@@ -30,15 +32,13 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
 }
 
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
-  if (
-    !(mtpMessage instanceof GramJs.Message)
-    && !(mtpMessage instanceof GramJs.MessageService)) {
+  if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
     throw new Error('Not supported');
   }
 
   const isPrivateToMe = !mtpMessage.out && isPeerUser(mtpMessage.toId);
   return isPrivateToMe
-    ? mtpMessage.fromId
+    ? mtpMessage.fromId!
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
 }
 
@@ -61,11 +61,16 @@ export function buildApiMessageFromShortChat(
   return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
+type UniversalMessage = (
+  Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
+  & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
+    'out' | 'message' | 'entities' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
+  )>
+);
+
 export function buildApiMessageWithChatId(
   chatId: number,
-  mtpMessage: Pick<Partial<GramJs.Message & GramJs.MessageService>, (
-    'id' | 'out' | 'message' | 'entities' | 'date' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
-  )>,
+  mtpMessage: UniversalMessage,
 ): ApiMessage {
   const sticker = mtpMessage.media && buildSticker(mtpMessage.media);
   const photo = mtpMessage.media && buildPhoto(mtpMessage.media);
@@ -96,7 +101,7 @@ export function buildApiMessageWithChatId(
       ...(action && { action }),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId,
+    sender_user_id: mtpMessage.fromId || MISSING_FIELD_NUMBER,
     reply_to_message_id: mtpMessage.replyToMsgId,
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
   };
@@ -108,7 +113,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessag
     from_chat_id: fwdFrom.fromId,
     origin: {
       '@type': 'messageForwardOriginUser',
-      sender_user_id: fwdFrom.fromId,
+      sender_user_id: fwdFrom.fromId || MISSING_FIELD_NUMBER,
       // TODO @gramjs Not supported?
       // sender_user_name: fwdFrom.fromName,
     },

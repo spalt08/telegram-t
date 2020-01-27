@@ -46,8 +46,8 @@ export interface ApiChatFullInfo {
 export interface ApiChatMember {
   '@type': 'chatMember';
   user_id: number;
-  inviter_id: number;
-  joined_date: number;
+  inviter_id?: number;
+  joined_date?: number;
 }
 
 export interface ApiPrivateChat extends ApiChat {

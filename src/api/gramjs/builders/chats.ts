@@ -22,7 +22,7 @@ export function buildApiChatFromDialog(
     ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
     is_pinned: dialog.pinned || false,
     is_verified: (('verified' in peerEntity) && peerEntity.verified) || false,
-    is_muted: silent || Date.now() < muteUntil * 1000,
+    is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
   };
@@ -89,8 +89,8 @@ export function buildChatMembers(participants: GramJs.TypeChatParticipants): Api
   return participants.participants.map((member) => ({
     '@type': 'chatMember',
     user_id: member.userId,
-    inviter_id: 'inviterId' in member && member.inviterId,
-    joined_date: 'date' in member && member.date,
+    inviter_id: 'inviterId' in member ? member.inviterId : undefined,
+    joined_date: 'date' in member ? member.date : undefined,
   }));
 }
 

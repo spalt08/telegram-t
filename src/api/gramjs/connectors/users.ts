@@ -10,15 +10,13 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function fetchFullUser(
-  {
-    id,
-    accessHash,
-  }: {
-    id: number;
-    accessHash?: string;
-  },
-) {
+export async function fetchFullUser({
+  id,
+  accessHash,
+}: {
+  id: number;
+  accessHash?: string;
+}) {
   const input = buildInputEntity(id, accessHash);
   if (!(input instanceof GramJs.InputUser)) {
     return;
