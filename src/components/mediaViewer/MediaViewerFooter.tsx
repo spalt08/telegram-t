@@ -35,7 +35,7 @@ const MediaViewerFooter: FC<IProps> = ({ text = '' }) => {
     return () => {
       window.removeEventListener('resize', handleResize, false);
     };
-  });
+  }, []);
 
   return (
     <div className="MediaViewerFooter" onClick={stopEvent}>

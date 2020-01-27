@@ -28,29 +28,29 @@ const MiddleFooter: FC<IProps> = ({ sendTextMessage }) => {
     }
   };
 
-  const pasteImageFromClipboard = (e: ClipboardEvent) => {
-    if (!e.clipboardData) {
-      return;
-    }
-
-    const { items } = e.clipboardData;
-    const acceptedTypes = ['image/png', 'image/jpeg', 'image/gif'];
-
-    const file = Array.from(items).find((item) => acceptedTypes.includes(item.type));
-
-    if (file) {
-      setAttachedImage(file.getAsFile());
-      e.preventDefault();
-    }
-  };
-
   useEffect(() => {
+    function pasteImageFromClipboard(e: ClipboardEvent) {
+      if (!e.clipboardData) {
+        return;
+      }
+
+      const { items } = e.clipboardData;
+      const acceptedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+
+      const file = Array.from(items).find((item) => acceptedTypes.includes(item.type));
+
+      if (file) {
+        setAttachedImage(file.getAsFile());
+        e.preventDefault();
+      }
+    }
+
     document.addEventListener('paste', pasteImageFromClipboard, false);
 
     return () => {
       document.removeEventListener('paste', pasteImageFromClipboard, false);
     };
-  });
+  }, []);
 
   const handleClearAttachedImage = useCallback(() => {
     setAttachedImage(null);

@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useState, memo, useCallback, useRef, useLayoutEffect,
+  FC, useState, memo, useCallback, useRef,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
@@ -114,16 +114,14 @@ const MessageList: FC<IProps> = ({
     });
   }, [chatId, loadMoreMessages, setChatScrollOffset, playMediaInViewport]);
 
-  useLayoutEffect(() => {
-    if (chatId) {
-      // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
-      currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
-    }
-  }, [chatId]);
-
   useLayoutEffectWithPrevDeps(([prevChatId, prevMessages]) => {
     if (chatId === prevChatId && messages === prevMessages) {
       return;
+    }
+
+    if (chatId && chatId !== prevChatId) {
+      // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
+      currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
     }
 
     if (!containerRef.current) {

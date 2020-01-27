@@ -38,7 +38,7 @@ const MessageInputReply: FC<IProps> = ({
       <Button round color="translucent" ariaLabel="Cancel replying" onClick={clearReplyingTo}>
         <i className="icon-close" />
       </Button>
-      <ReplyMessage message={message} sender={sender} className="inside-input" />
+      <ReplyMessage message={message!} sender={sender} className="inside-input" />
     </div>
   );
 };
