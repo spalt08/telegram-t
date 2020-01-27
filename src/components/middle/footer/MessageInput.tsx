@@ -53,9 +53,7 @@ const MessageInput: FC<IProps> = ({
     }
   }
 
-  useEffect(() => {
-    requestAnimationFrame(focusInput);
-  }, [replyingTo]);
+  useEffect(focusInput, [selectedChatId, replyingTo]);
 
   return (
     <textarea

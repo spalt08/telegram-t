@@ -348,7 +348,11 @@ export function useState(initial?: any) {
   ];
 }
 
-export function useEffect(effect: () => Function | void, dependencies?: any[]) {
+function useLayoutEffectBase(
+  schedulerFn: typeof onNextTick | typeof requestAnimationFrame,
+  effect: () => Function | void,
+  dependencies?: any[],
+) {
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const { cleanup } = byCursor[cursor] || {};
 
@@ -362,10 +366,10 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
 
   if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
-      onNextTick(exec);
+      schedulerFn(exec);
     }
   } else {
-    onNextTick(exec);
+    schedulerFn(exec);
   }
 
   byCursor[cursor] = {
@@ -375,6 +379,14 @@ export function useEffect(effect: () => Function | void, dependencies?: any[]) {
   };
 
   renderingInstance.hooks.effects.cursor++;
+}
+
+export function useEffect(effect: () => Function | void, dependencies?: any[]) {
+  return useLayoutEffectBase(requestAnimationFrame, effect, dependencies);
+}
+
+export function useLayoutEffect(effect: () => Function | void, dependencies?: any[]) {
+  return useLayoutEffectBase(onNextTick, effect, dependencies);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[]): T {

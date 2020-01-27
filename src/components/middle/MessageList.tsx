@@ -1,6 +1,6 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useEffect, useState, memo, useCallback, useRef,
+  FC, useState, memo, useCallback, useRef, useLayoutEffect,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
@@ -18,7 +18,7 @@ import { orderBy, toArray, flatten } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import { getPlatform, isSafari } from '../../util/environment';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import { MessageDateGroup, groupMessages } from './util/groupMessages';
 
 import Loading from '../ui/Loading';
@@ -114,14 +114,14 @@ const MessageList: FC<IProps> = ({
     });
   }, [chatId, loadMoreMessages, setChatScrollOffset, playMediaInViewport]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (chatId) {
       // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
       currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
     }
   }, [chatId]);
 
-  useEffectWithPrevDeps(([prevChatId, prevMessages]) => {
+  useLayoutEffectWithPrevDeps(([prevChatId, prevMessages]) => {
     if (chatId === prevChatId && messages === prevMessages) {
       return;
     }

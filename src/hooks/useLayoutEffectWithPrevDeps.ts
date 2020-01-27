@@ -1,9 +1,9 @@
-import { useEffect, useRef } from '../lib/teact/teact';
+import { useLayoutEffect, useRef } from '../lib/teact/teact';
 
 export default <T extends any[]>(cb: (args: T) => void, dependencies: T) => {
   // @ts-ignore TODO Fix "could be instantiated with a different subtype" issue
   const prevDeps = useRef<T>([]);
-  return useEffect(() => {
+  return useLayoutEffect(() => {
     cb(prevDeps.current);
 
     prevDeps.current = dependencies;
