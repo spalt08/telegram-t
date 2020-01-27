@@ -1,5 +1,5 @@
 import { Api } from '..';
-import { BotAuthParams, UserAuthParams } from './Auth';
+import { BotAuthParams, UserAuthParams } from './auth';
 
 declare class TelegramClient {
     constructor(...args: any)
