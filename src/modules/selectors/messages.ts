@@ -21,7 +21,7 @@ export function selectChatMessage(global: GlobalState, chatId: number, messageId
 export function selectIsUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 
-  return isMessageLocal(message) || chat.last_read_outbox_message_id < message.id;
+  return isMessageLocal(message) || (chat && chat.last_read_outbox_message_id < message.id);
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
