@@ -38,6 +38,8 @@ export interface VirtualElementComponent {
   children: VirtualElementChildren;
 }
 
+type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
+
 interface ComponentInstance {
   $element: VirtualElementComponent;
   Component: FC;
@@ -50,7 +52,7 @@ interface ComponentInstance {
       cursor: number;
       byCursor: {
         value: any;
-        setter: Function;
+        setter: StateHookSetter<any>;
       }[];
     };
     effects: {
@@ -321,15 +323,17 @@ export function setTarget($element: VirtualElement, target: Node) {
   }
 }
 
-export function useState(initial?: any) {
+export function useState<T = any, I = T>(initial?: I): [T, StateHookSetter<T>] {
   const { cursor, byCursor } = renderingInstance.hooks.state;
 
   if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
       value: initial,
-      setter: ((componentInstance) => (newValue: any) => {
+      setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
         if (byCursor[cursor].value !== newValue) {
-          byCursor[cursor].value = typeof newValue === 'function' ? newValue(byCursor[cursor].value) : newValue;
+          byCursor[cursor].value = typeof newValue === 'function'
+            ? (newValue as (current: T) => T)(byCursor[cursor].value)
+            : newValue;
 
           if (!componentInstance.forceUpdate) {
             componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
