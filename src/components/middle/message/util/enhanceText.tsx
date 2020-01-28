@@ -85,7 +85,7 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
             key={entityKey}
             onClick={stopPropagation}
             href={`tg://bot_command?command=${getBotCommand(entityText)}&bot=`}
-            className="not-implemented"
+            className="text-entity-link not-implemented"
           >
             {entityText}
           </a>,
@@ -96,13 +96,14 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
           <a
             key={entityKey}
             onClick={(event) => searchCurrentChat(event, entityText)}
+            className="text-entity-link"
           >
             {entityText}
           </a>,
         );
         break;
       case 'MessageEntityCode':
-        result.push(<code key={entityKey}>{addLineBreaks(entityText)}</code>);
+        result.push(<code className="text-entity-code" key={entityKey}>{addLineBreaks(entityText)}</code>);
         break;
       case 'MessageEntityEmail':
         result.push(
@@ -112,6 +113,7 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
             onClick={stopPropagation}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-entity-link"
           >
             {entityText}
           </a>,
@@ -119,7 +121,11 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
         break;
       case 'MessageEntityHashtag':
         result.push(
-          <a key={entityKey} onClick={(event) => searchCurrentChat(event, entityText)}>
+          <a
+            key={entityKey}
+            onClick={(event) => searchCurrentChat(event, entityText)}
+            className="text-entity-link"
+          >
             {entityText}
           </a>,
         );
@@ -139,13 +145,18 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
         break;
       case 'MessageEntityPhone':
         result.push(
-          <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
+          <a
+            key={entityKey}
+            href={`tel:${entityText}`}
+            onClick={stopPropagation}
+            className="text-entity-link"
+          >
             {entityText}
           </a>,
         );
         break;
       case 'MessageEntityPre':
-        result.push(<pre key={entityKey}>{addLineBreaks(entityText)}</pre>);
+        result.push(<pre className="text-entity-pre" key={entityKey}>{addLineBreaks(entityText)}</pre>);
         deleteLineBreakAfterPre = true;
         break;
       case 'MessageEntityStrike':

@@ -1,0 +1,81 @@
+.message-content.document {
+  padding: 0.5rem;
+
+  .document-content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .document-icon {
+      width: 3.5rem;
+      height: 3.4rem;
+      margin-right: 0.8rem;
+      padding: 0.5rem;
+      border-radius: var(--border-radius-default);
+      background: var(--color-primary);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      color: white;
+
+      .document-ext {
+        font-size: 1.2rem;
+        font-weight: 500;
+        letter-spacing: 0.05rem;
+      }
+
+      &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1rem;
+        height: 1rem;
+        border-bottom-left-radius: 0.25rem;
+        border-left: 0.5rem solid rgba(black, 0.25);
+        border-bottom: 0.5rem solid rgba(black, 0.25);
+        border-top: 0.5rem solid var(--background-color);
+        border-right: 0.5rem solid var(--background-color);
+      }
+    }
+
+    .document-info {
+      margin-top: 0.4rem;
+      margin-right: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+
+      .document-filename {
+        font-size: 1rem;
+        line-height: 1rem;
+        padding-bottom: 0.25rem;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .document-size {
+        line-height: 1rem;
+        color: var(--secondary-color);
+      }
+    }
+  }
+}
+
+// Document extension colors
+.message-content.document .document-content .document-icon {
+  &.red {
+    background-color: var(--color-error);
+  }
+
+  &.orange {
+    background-color: var(--color-warning);
+  }
+
+  &.green {
+    background-color: var(--color-text-green);
+  }
+}

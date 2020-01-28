@@ -1,4 +1,4 @@
-.ContactMessage {
+.Contact {
   display: flex;
   align-items: center;
   padding: 0.25rem;
@@ -22,15 +22,8 @@
     }
 
     .contact-phone {
-
       line-height: 1rem;
-      color: var(--color-text-secondary);
-    }
-  }
-
-  .Message.own & {
-    .contact-phone {
-      color: var(--color-text-green) !important;
+      color: var(--secondary-color);
     }
   }
 }

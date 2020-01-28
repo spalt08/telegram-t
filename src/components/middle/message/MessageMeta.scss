@@ -36,22 +36,24 @@
     left: auto;
   }
 
-  .sticker .reply-message + & {
-    right: auto;
-    left: 13.2rem;
-    bottom: 0.25rem;
-  }
+  .Message.not-own {
+    .sticker .reply-message + & {
+      right: auto;
+      left: 13.2rem;
+      bottom: 0.25rem;
+    }
 
-  .emoji-only-1 .reply-message + & {
-    left: 2.5rem;
-  }
+    .emoji-only-1 .reply-message + & {
+      left: 2.5rem;
+    }
 
-  .emoji-only-2 .reply-message + & {
-    left: 5.5rem;
-  }
+    .emoji-only-2 .reply-message + & {
+      left: 5.5rem;
+    }
 
-  .emoji-only-3 .reply-message + & {
-    left: 6.5rem;
+    .emoji-only-3 .reply-message + & {
+      left: 6.5rem;
+    }
   }
 
   .is-forwarded.media:not(.text) & {
@@ -63,9 +65,9 @@
     right: 0;
   }
 
-  .own .text &,
-  .own .document &,
-  .own .contact & {
+  .Message.own .text &,
+  .Message.own .document &,
+  .Message.own .contact & {
     color: var(--color-text-green);
   }
 

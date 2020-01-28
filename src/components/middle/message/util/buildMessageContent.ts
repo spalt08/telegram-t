@@ -7,6 +7,7 @@ import {
   getMessageDocument,
   getLastMessageText,
   getMessageContact,
+  isOwnMessage,
 } from '../../../../modules/helpers';
 import {
   ApiMessage,
@@ -34,7 +35,10 @@ export interface MessageContent {
 
 interface BuildMessageContentOptions {
   isReply?: boolean;
+  isLastInGroup?: boolean;
 }
+
+const SOLID_BACKGROUND_CLASSES = ['text', 'media', 'contact', 'document', 'is-forwarded', 'is-reply'];
 
 export function buildMessageContent(message: ApiMessage, options: BuildMessageContentOptions = {}): MessageContent {
   const text = getMessageText(message);
@@ -43,7 +47,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const document = getMessageDocument(message);
   const sticker = getMessageSticker(message);
   const contact = getMessageContact(message);
-  const classNames = ['content'];
+  const classNames = ['message-content'];
   let contentParts: TextPart | TextPart[] | undefined;
   let replyThumbnail: ApiMiniThumbnail | ApiPhotoCachedSize | undefined;
 
@@ -91,12 +95,27 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     classNames.push('is-forwarded');
   }
 
-  if (message.reply_to_message_id && !classNames.includes('sticker')) {
+  if (message.reply_to_message_id) {
     classNames.push('is-reply');
   }
 
   if (options.isReply) {
     contentParts = getLastMessageText(message);
+  }
+
+  if (
+    !classNames.includes('sticker')
+    && classNames.some((className) => SOLID_BACKGROUND_CLASSES.includes(className))
+  ) {
+    classNames.push('has-solid-background');
+
+    if (!(classNames.includes('media') && !text && !classNames.includes('is-forwarded'))) {
+      classNames.push('can-have-appendix');
+
+      if (options.isLastInGroup) {
+        classNames.push(isOwnMessage(message) ? 'has-appendix-own' : 'has-appendix-not-own');
+      }
+    }
   }
 
   classNames.push('status-read');

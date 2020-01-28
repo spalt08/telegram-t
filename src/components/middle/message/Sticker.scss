@@ -1,0 +1,79 @@
+.message-content.sticker {
+  line-height: 1.2;
+  font-size: 10rem;
+
+  &.round video, &.round img {
+    border-radius: 50% !important;
+  }
+
+  .reply-message {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: row-reverse;
+  }
+
+  .text-content {
+    margin-bottom: 1rem;
+  }
+
+  .media-inner {
+    line-height: 1;
+    font-size: 1rem;
+    flex-shrink: 0;
+
+    .full-media {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+  }
+
+  .reply-message {
+    display: flex;
+    align-items: flex-start;
+
+    > p {
+      margin-bottom: 0;
+    }
+
+    .ReplyMessage {
+      margin-left: 0.5rem;
+      border-radius: var(--border-radius-messages);
+    }
+  }
+
+  &.emoji-only-1 {
+    font-size: 5rem;
+
+    .text-content {
+      margin-bottom: 1rem;
+    }
+  }
+
+  &.emoji-only-2 {
+    font-size: 4rem;
+
+    .text-content {
+      margin-bottom: 1.1rem;
+    }
+  }
+
+  &.emoji-only-3 {
+    font-size: 3rem;
+
+    .text-content {
+      margin-bottom: 1.1rem;
+    }
+  }
+
+  .Message.own & {
+    .reply-message {
+      flex-direction: row;
+
+      .ReplyMessage {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}

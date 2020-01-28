@@ -165,19 +165,13 @@ const MessageList: FC<IProps> = ({
 
       return messageGroup.map((message, i) => {
         const isOwn = isOwnMessage(message);
-        const classNames = [];
-        if (i === 0) {
-          classNames.push('first-in-group');
-        }
-        if (i === messageGroup.length - 1) {
-          classNames.push('last-in-group');
-          if (
-            groupIndex === messageGroupsArray.length - 1
-            && dateGroupIndex === messageDateGroupsArray.length - 1
-          ) {
-            classNames.push('last-in-list');
-          }
-        }
+        const position = {
+          isFirstInGroup: i === 0,
+          isLastInGroup: i === messageGroup.length - 1,
+          isLastInList: i === messageGroup.length - 1
+            && groupIndex === messageGroupsArray.length - 1
+            && dateGroupIndex === messageDateGroupsArray.length - 1,
+        };
 
         return (
           <Message
@@ -186,7 +180,9 @@ const MessageList: FC<IProps> = ({
             showAvatar={!isPrivate && !isOwn}
             showSenderName={i === 0 && !isPrivate && !isOwn}
             loadAndPlayMedia={viewportMessageIds.includes(message.id)}
-            className={classNames.join(' ')}
+            isFirstInGroup={position.isFirstInGroup}
+            isLastInGroup={position.isLastInGroup}
+            isLastInList={position.isLastInList}
           />
         );
       });

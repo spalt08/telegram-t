@@ -1,13 +1,10 @@
-import { MouseEvent } from 'react';
 import React, {
   FC, memo, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../store/types';
-import {
-  ApiDocument, ApiMessage, ApiMessageOutgoingStatus, ApiPhoto, ApiSticker, ApiUser, ApiVideo,
-} from '../../../api/types';
+import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
 import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../modules/selectors';
 import {
@@ -15,29 +12,30 @@ import {
   getUserFullName,
   isOwnMessage,
   shouldMessageLoadMedia,
-  shouldMessagePlayVideoInline,
 } from '../../../modules/helpers';
-import { getImageDimensions, getStickerDimensions, getVideoDimensions } from '../../../util/imageDimensions';
-import { formatMediaDuration } from '../../../util/dateFormat';
-import { getDocumentInfo } from '../../../util/documentInfo';
+import { getImageDimensions, getVideoDimensions } from '../../../util/imageDimensions';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { buildMessageContent } from './util/buildMessageContent';
+import getMinMediaWidth from './util/minMediaWidth';
 
 import Avatar from '../../common/Avatar';
-import Spinner from '../../ui/Spinner';
-import AnimatedSticker from '../../common/AnimatedSticker';
 import MessageMeta from './MessageMeta';
 import ReplyMessage from '../../common/ReplyMessage';
-import ContactMessage from './ContactMessage';
 import ContextMenuContainer from './ContextMenuContainer';
+
+import Sticker from './Sticker';
+import Document from './Document';
+import Video from './Video';
+import Photo from './Photo';
+import Contact from './Contact';
 
 import './Message.scss';
 
-const MIN_MEDIA_WIDTH = 100;
-const MIN_MEDIA_WIDTH_WITH_TEXT = 200;
-const SMALL_IMAGE_THRESHOLD = 12;
-
-type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
+type MessagePositionProperties = {
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
+  isLastInList: boolean;
+};
 
 type IProps = {
   message: ApiMessage;
@@ -52,16 +50,7 @@ type IProps = {
   canDelete?: boolean;
   contactFirstName: string | null;
   outgoingStatus?: ApiMessageOutgoingStatus;
-  className?: string;
-} & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
-
-interface IRenderMediaOptions {
-  isInOwnMessage: boolean;
-  isForwarded: boolean;
-  mediaData?: string;
-  loadAndPlayMedia?: boolean;
-  hasText?: boolean;
-}
+} & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
   message,
@@ -76,7 +65,9 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   selectMediaMessage,
   openUserInfo,
-  className,
+  isFirstInGroup,
+  isLastInGroup,
+  isLastInList,
 }) => {
   const [, onDataUriUpdate] = useState(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -92,10 +83,12 @@ const Message: FC<IProps> = ({
     }
   }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
-  const containerClassNames = [
-    ...buildClassNames(message, Boolean(mediaHash), contextMenuPosition !== null),
-    className,
-  ];
+  const containerClassNames = buildClassNames(
+    message,
+    { isFirstInGroup, isLastInGroup, isLastInList },
+    Boolean(mediaHash),
+    contextMenuPosition !== null,
+  );
 
   const {
     text,
@@ -105,9 +98,9 @@ const Message: FC<IProps> = ({
     sticker,
     contact,
     className: contentClassName,
-  } = buildMessageContent(message);
-  const isText = contentClassName && contentClassName.includes('text');
-  const isSticker = contentClassName && contentClassName.includes('sticker');
+  } = buildMessageContent(message, { isLastInGroup });
+  const isText = Boolean(contentClassName && contentClassName.includes('text'));
+  const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
   const isForwarded = Boolean(message.forward_info);
 
   function openMediaMessage(): void {
@@ -155,14 +148,14 @@ const Message: FC<IProps> = ({
 
   function renderContent() {
     const classNames = ['content-inner'];
-    if (isForwarded) {
+    if (isForwarded && !sticker) {
       classNames.push('forwarded-message');
     }
     if (replyMessage) {
       classNames.push('reply-message');
     }
 
-    const renderMediaOptions: IRenderMediaOptions = {
+    const renderMediaOptions = {
       isInOwnMessage: isOwnMessage(message),
       isForwarded,
       mediaData: mediaData as string,
@@ -174,22 +167,32 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
-        {photo && renderPhoto(
-          photo,
-          openMediaMessage,
-          renderMediaOptions,
+        {photo && (
+          <Photo
+            photo={photo}
+            onClick={openMediaMessage}
+            options={renderMediaOptions}
+          />
         )}
-        {video && renderVideo(
-          video,
-          openMediaMessage,
-          renderMediaOptions,
+        {video && (
+          <Video
+            video={video}
+            onClick={openMediaMessage}
+            options={renderMediaOptions}
+          />
         )}
-        {document && renderDocument(document)}
-        {sticker && renderSticker(sticker, message.id, mediaData, loadAndPlayMedia)}
+        {document && <Document document={document} />}
+        {sticker && (
+          <Sticker
+            sticker={sticker}
+            mediaData={mediaData}
+            loadAndPlayMedia={loadAndPlayMedia}
+          />
+        )}
         {text && (
-          <p>{text}</p>
+          <p className="text-content">{text}</p>
         )}
-        {contact && <ContactMessage contact={contact} />}
+        {contact && <Contact contact={contact} />}
       </div>
     );
   }
@@ -220,7 +223,12 @@ const Message: FC<IProps> = ({
   return (
     <div className={containerClassNames.join(' ')} data-message-id={message.id}>
       {showAvatar && (
-        <Avatar size="small" user={sender} onClick={viewUser} />
+        <Avatar
+          size="small"
+          user={sender}
+          onClick={viewUser}
+          className={!isLastInGroup ? 'hidden' : ''}
+        />
       )}
       <div
         className={contentClassName}
@@ -249,11 +257,28 @@ const Message: FC<IProps> = ({
   );
 };
 
-function buildClassNames(message: ApiMessage, hasMedia = false, hasContextMenu = false) {
+function buildClassNames(
+  message: ApiMessage,
+  position: MessagePositionProperties,
+  hasMedia = false,
+  hasContextMenu = false,
+) {
   const classNames = ['Message'];
+
+  if (position.isFirstInGroup) {
+    classNames.push('first-in-group');
+  }
+  if (position.isLastInGroup) {
+    classNames.push('last-in-group');
+  }
+  if (position.isLastInList) {
+    classNames.push('last-in-list');
+  }
 
   if (isOwnMessage(message)) {
     classNames.push('own');
+  } else {
+    classNames.push('not-own');
   }
 
   if (hasMedia) {
@@ -269,198 +294,6 @@ function buildClassNames(message: ApiMessage, hasMedia = false, hasContextMenu =
   }
 
   return classNames;
-}
-
-function renderPhoto(
-  photo: ApiPhoto,
-  clickHandler: OnClickHandler,
-  options: IRenderMediaOptions,
-) {
-  const {
-    isInOwnMessage, isForwarded, mediaData, hasText,
-  } = options;
-  const { width, height } = getImageDimensions(photo, isInOwnMessage, isForwarded);
-  const thumbData = photo.minithumbnail && photo.minithumbnail.data;
-  const minMediaWidth = getMinMediaWidth(hasText);
-  const minMediaHeight = MIN_MEDIA_WIDTH;
-
-  let stretchFactor = 1;
-  if (width < minMediaWidth && minMediaWidth - width < SMALL_IMAGE_THRESHOLD) {
-    stretchFactor = minMediaWidth / width;
-  }
-  if (height * stretchFactor < minMediaHeight && minMediaHeight - height * stretchFactor < SMALL_IMAGE_THRESHOLD) {
-    stretchFactor = minMediaHeight / height;
-  }
-
-  const finalWidth = width * stretchFactor;
-  const finalHeight = height * stretchFactor;
-
-  let thumbClassName = 'thumbnail';
-  if (!mediaData) {
-    thumbClassName += ' blur';
-  }
-  if (!thumbData) {
-    thumbClassName += ' empty';
-  }
-
-  const className = finalWidth < minMediaWidth || finalHeight < minMediaHeight
-    ? 'media-content has-viewer small-image'
-    : 'media-content has-viewer';
-
-  return (
-    <div
-      className={className}
-      onClick={clickHandler}
-    >
-      <img
-        src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
-        className={thumbClassName}
-        width={finalWidth}
-        height={finalHeight}
-        alt=""
-      />
-      {!mediaData && (
-        <div className="message-media-loading">
-          <Spinner color="white" />
-        </div>
-      )}
-      <img
-        src={mediaData}
-        className={mediaData ? 'full-media fade-in' : 'full-media'}
-        width={finalWidth}
-        height={finalHeight}
-        alt=""
-      />
-    </div>
-  );
-}
-
-function renderVideo(
-  video: ApiVideo,
-  clickHandler: OnClickHandler,
-  options: IRenderMediaOptions,
-) {
-  const {
-    isInOwnMessage, isForwarded, mediaData, loadAndPlayMedia,
-  } = options;
-  const { width, height } = getVideoDimensions(video, isInOwnMessage, isForwarded);
-  const shouldPlayInline = shouldMessagePlayVideoInline(video);
-  const isInlineVideo = mediaData && loadAndPlayMedia && shouldPlayInline;
-  const isHqPreview = mediaData && !shouldPlayInline;
-  const { minithumbnail, duration } = video;
-  const thumbData = minithumbnail && minithumbnail.data;
-
-  return (
-    <div
-      className="media-content has-viewer"
-      onClick={clickHandler}
-    >
-      {isInlineVideo && (
-        <video
-          width={width}
-          height={height}
-          autoPlay
-          muted
-          loop
-          playsinline
-          /* eslint-disable-next-line react/jsx-props-no-spreading */
-          {...(thumbData && { poster: `data:image/jpeg;base64, ${thumbData}` })}
-        >
-          <source src={mediaData} />
-        </video>
-      )}
-      {!isInlineVideo && isHqPreview && (
-        <img src={mediaData} width={width} height={height} alt="" />
-      )}
-      {!isInlineVideo && !isHqPreview && (
-        <img
-          src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
-          width={width}
-          height={height}
-          alt=""
-        />
-      )}
-      {!isInlineVideo && (
-        <div className="message-media-loading">
-          <div className="message-media-play-button">
-            <i className="icon-large-play" />
-          </div>
-        </div>
-      )}
-      <div className="message-media-duration">{formatMediaDuration(duration)}</div>
-    </div>
-  );
-}
-
-function renderDocument(document: ApiDocument) {
-  const { size, extension, color } = getDocumentInfo(document);
-  const { fileName } = document;
-
-  return (
-    <div className="document-content not-implemented">
-      <div className={`document-icon ${color}`}>
-        {extension.length <= 4 && (
-          <span className="document-ext">{extension}</span>
-        )}
-      </div>
-      <div className="document-info">
-        <div className="document-filename">{fileName}</div>
-        <div className="document-size">{size}</div>
-      </div>
-    </div>
-  );
-}
-
-function renderSticker(
-  sticker: ApiSticker,
-  id: number,
-  mediaData?: string | AnyLiteral,
-  loadAndPlayMedia?: boolean,
-) {
-  const { thumbnail, is_animated } = sticker;
-  const { width, height } = getStickerDimensions(sticker);
-  const thumbData = thumbnail && thumbnail.dataUri;
-
-  let thumbClassName = 'thumbnail';
-  if (thumbData && is_animated && mediaData) {
-    thumbClassName += ' fade-out';
-  } else if (!thumbData) {
-    thumbClassName += ' empty';
-  }
-
-  return (
-    <div className="media-content">
-      <img
-        src={thumbData}
-        width={width}
-        height={height}
-        alt=""
-        className={thumbClassName}
-      />
-      {!is_animated && (
-        <img
-          src={mediaData as string}
-          width={width}
-          height={height}
-          alt=""
-          className={mediaData ? 'full-media fade-in' : 'full-media'}
-        />
-      )}
-      {is_animated && (
-        <AnimatedSticker
-          animationData={mediaData as AnyLiteral}
-          width={width}
-          height={height}
-          play={loadAndPlayMedia}
-          className={mediaData ? 'full-media fade-in' : 'full-media'}
-        />
-      )}
-    </div>
-  );
-}
-
-function getMinMediaWidth(hasText?: boolean) {
-  return hasText ? MIN_MEDIA_WIDTH_WITH_TEXT : MIN_MEDIA_WIDTH;
 }
 
 export default memo(withGlobal(

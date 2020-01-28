@@ -20,7 +20,7 @@ const MentionLink: FC<IProps> = ({ userId, user, text }) => {
     <a
       onClick={(event) => event.preventDefault()}
       title={title}
-      className="not-implemented"
+      className="text-entity-link not-implemented"
     >
       {text}
     </a>

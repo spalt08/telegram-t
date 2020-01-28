@@ -18,10 +18,11 @@ interface IProps {
   user?: ApiUser;
   isSavedMessages?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  className?: string;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages,
+  size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages, className,
 }) => {
   let imageHash: string | null = null;
 
@@ -63,9 +64,17 @@ const Avatar: FC<IProps> = ({
     content = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
   }
 
+  const classNames = ['Avatar', `size-${size}`];
+  if (showOnlineStatus && isOnline) {
+    classNames.push('online');
+  }
+  if (className) {
+    classNames.push(className);
+  }
+
   return (
     <div
-      className={`Avatar size-${size} ${showOnlineStatus && isOnline ? 'online' : ''}`}
+      className={classNames.join(' ')}
       onClick={onClick}
     >
       {content}

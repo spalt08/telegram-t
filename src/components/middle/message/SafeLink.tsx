@@ -12,6 +12,11 @@ const SafeLink: FC<IProps> = ({ url, text }) => {
     return null;
   }
 
+  const classNames = ['text-entity-link'];
+  if (text.length > 50) {
+    classNames.push('long-word-break-all');
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/anchor-is-valid
     <a
@@ -19,7 +24,7 @@ const SafeLink: FC<IProps> = ({ url, text }) => {
       title={getDecodedUrl(url)}
       target="_blank"
       rel="noopener noreferrer"
-      className={text.length > 50 ? 'long-word-break-all' : undefined}
+      className={classNames.join(' ')}
     >
       {text}
     </a>

@@ -5,7 +5,10 @@
     position: fixed;
     top: 0;
     left: 0;
+    right: 0;
+    margin: 0 auto;
     width: 100%;
+    max-width: 1680px;
     height: 100%;
     z-index: var(--z-ui-loader-mask);
     display: flex;

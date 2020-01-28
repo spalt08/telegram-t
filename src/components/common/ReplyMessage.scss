@@ -14,17 +14,13 @@
     max-width: 15rem;
     padding: 0.5rem;
     margin: 0;
-    background-color: white;
+    background-color: var(--background-color);
     box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
 
     &::before {
       left: 0.5rem;
       top: 0.5rem;
       bottom: 0.5rem;
-    }
-
-    .own & {
-      background-color: #EEFEDF;
     }
   }
 
@@ -36,20 +32,12 @@
     bottom: 0.25rem;
     left: 0.25rem;
     width: 2px;
-    background: var(--color-primary);
+    background: var(--accent-color);
     border-radius: 2px;
-
-    .own & {
-      background: var(--color-text-green);
-    }
   }
 
   &:hover {
-    background-color: rgba(var(--color-text-secondary-rgb), 0.08);
-  }
-
-  .own &:hover {
-    background-color: rgba(var(--color-text-green-rgb), 0.12);
+    background-color: var(--hover-color);
   }
 
   .reply-text {
@@ -59,10 +47,6 @@
     .sender-name {
       line-height: 1rem;
       height: 1rem;
-
-      .own & {
-        color: var(--color-text-green);
-      }
     }
 
     p {

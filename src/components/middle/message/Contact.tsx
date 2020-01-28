@@ -8,14 +8,14 @@ import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
 import Avatar from '../../common/Avatar';
 
-import './ContactMessage.scss';
+import './Contact.scss';
 
 type IProps = {
   contact: ApiContact;
   user: ApiUser;
 };
 
-const ContactMessage: FC<IProps> = ({ contact, user }) => {
+const Contact: FC<IProps> = ({ contact, user }) => {
   const {
     firstName,
     lastName,
@@ -23,7 +23,7 @@ const ContactMessage: FC<IProps> = ({ contact, user }) => {
   } = contact;
 
   return (
-    <div className="ContactMessage not-implemented">
+    <div className="Contact not-implemented">
       <Avatar size="large" user={user} />
       <div className="contact-info">
         <div className="contact-name">{`${firstName} ${lastName}`}</div>
@@ -39,4 +39,4 @@ export default withGlobal(
       user: selectUser(global, contact.userId),
     };
   },
-)(ContactMessage);
+)(Contact);
