@@ -6,7 +6,7 @@
   border-radius: 0.75rem;
   padding: 0 .45rem;
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.5rem;
   font-weight: bold;
   text-align: center;
@@ -14,12 +14,6 @@
 
   &:not(.pinned):not(.muted) {
     background: var(--color-green);
-  }
-
-  &.mac-os-fix {
-    padding-top: 0.4rem;
-    padding-bottom: 0.4rem;
-    line-height: 1;
   }
 
   &.pinned {

@@ -37,21 +37,11 @@
       display: inline-block;
       background: rgba(var(--color-text-secondary-rgb), 0.45);
       color: white;
-      font-size: 0.9rem;
+      font-size: 0.9375rem;
       font-weight: 500;
       line-height: 1.5rem;
       padding: 0 .5rem;
       border-radius: 0.75rem;
-    }
-  }
-
-  &.mac-os-fix {
-    .message-date-header,
-    .message-action-header {
-      > span {
-        line-height: 1.4rem;
-        padding-top: 0.1rem;
-      }
     }
   }
 

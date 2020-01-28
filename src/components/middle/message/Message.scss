@@ -9,7 +9,7 @@
   --max-width: 29rem;
   --accent-color: var(--color-primary);
   --secondary-color: var(--color-text-secondary);
-  --meta-safe-area-size: 2rem;
+  --meta-safe-area-size: 2.25rem;
   --deleting-translate-x: -50%;
 
   > .Avatar, > .content {
@@ -65,8 +65,9 @@
 // Border-radius styles
 .message-content,
 .media-inner,
-.message-content.media img,
-.message-content.sticker img {
+.message-content.media .media-inner img,
+.message-content.media .media-inner video,
+.message-content.sticker .media-inner img {
   border-top-left-radius: var(--border-top-left-radius);
   border-top-right-radius: var(--border-top-right-radius);
   border-bottom-left-radius: var(--border-bottom-left-radius);
@@ -120,7 +121,7 @@
       --border-bottom-right-radius: var(--border-radius-messages-small);
     }
 
-    &.last-in-group:not(:only-child) {
+    &.last-in-group:not(.first-in-group) {
       --border-top-right-radius: var(--border-radius-messages-small);
     }
 
@@ -189,11 +190,13 @@
   .text-content {
     margin: 0;
     word-break: break-word;
+    line-height: 1.3125;
   }
 
   .sender-name {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: bold;
+    line-height: 1.25rem;
     color: var(--accent-color);
   }
 
@@ -202,10 +205,11 @@
     background: var(--background-color);
   }
 
-  &.can-have-appendix {
-    padding: .35rem .5rem;
-    font-size: 0.9375rem;
+  &.can-have-appendix, &.media.is-reply {
+    padding: .375rem .5625rem;
+  }
 
+  &.can-have-appendix {
     .text-content::after {
       content: '';
       display: inline-block;

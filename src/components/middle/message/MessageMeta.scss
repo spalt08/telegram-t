@@ -2,7 +2,7 @@
 
 .MessageMeta {
   position: absolute;
-  height: 1.1rem;
+  height: 1.25rem;
   bottom: 0;
   right: 0;
   display: flex;
@@ -13,13 +13,10 @@
   color: white;
 
   .message-time {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     line-height: 1;
     margin-right: 0.1rem;
-
-    .mac-os-fix & {
-      margin-top: 0.1rem;
-    }
+    opacity: .75;
   }
 
   .text &, .document &, .contact & {

@@ -1,7 +1,6 @@
 import React, { FC } from '../../lib/teact/teact';
 
 import { ApiChat } from '../../api/types';
-import { getPlatform, isSafari } from '../../util/environment';
 import './Badge.scss';
 
 type IProps = {
@@ -14,9 +13,6 @@ const Badge: FC<IProps> = ({ chat }) => {
   const classNames = ['Badge'];
 
   if (chat.unread_count) {
-    if (getPlatform() === 'Mac OS' && !isSafari()) {
-      classNames.push('mac-os-fix');
-    }
     if (chat.is_muted) {
       classNames.push('muted');
     }

@@ -82,7 +82,7 @@
     height: 2.125rem;
     margin: 0.625rem;
     padding: 0;
-    align-self: center;
+    align-self: flex-end;
   }
 
   > .input-group {
@@ -98,6 +98,7 @@
   margin-bottom: 0;
   background: transparent !important;
   border-color: transparent !important;
+  box-shadow: none !important;
   caret-color: var(--color-text);
 
   &:not(:only-child) {

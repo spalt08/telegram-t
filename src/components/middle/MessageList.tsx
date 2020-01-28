@@ -17,7 +17,6 @@ import {
 import { orderBy, toArray, flatten } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
-import { getPlatform, isSafari } from '../../util/environment';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import { MessageDateGroup, groupMessages } from './util/groupMessages';
 
@@ -208,9 +207,6 @@ const MessageList: FC<IProps> = ({
   }
   if (isScrolling) {
     classNames.push('is-scrolling');
-  }
-  if (getPlatform() === 'Mac OS' && !isSafari()) {
-    classNames.push('mac-os-fix');
   }
 
   return (

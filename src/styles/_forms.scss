@@ -72,7 +72,7 @@
   transition: border-color 0.15s ease;
 
   font-size: 1rem;
-  line-height: 2rem;
+  line-height: 1.25rem;
 
   &:hover {
     border-color: var(--color-gray);
@@ -80,8 +80,8 @@
 
   &:focus,
   &.focus {
-    --border-width: 2px;
     border-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
     caret-color: var(--color-primary);
 
     & + label {
@@ -95,9 +95,9 @@
   }
 
   .error & {
-    --border-width: 2px;
-    caret-color: var(--color-error);
     border-color: var(--color-error);
+    box-shadow: inset 0 0 0 1px var(--color-error);
+    caret-color: var(--color-error);
   }
 }
 
