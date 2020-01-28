@@ -1,7 +1,7 @@
 import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiMiniThumbnail, ApiPhotoCachedSize } from '../../api/types';
-import { getReplyImageDimensions } from '../../util/imageDimensions';
+import { getImagePictogramDimensions } from '../../util/mediaDimensions';
 import RippleEffect from '../ui/RippleEffect';
 import Button from '../ui/Button';
 import { buildMessageContent } from './message/util/buildMessageContent';
@@ -76,7 +76,7 @@ function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
     return null;
   }
 
-  const { width, height } = getReplyImageDimensions();
+  const { width, height } = getImagePictogramDimensions();
 
   if ('dataUri' in thumbnail) {
     return (

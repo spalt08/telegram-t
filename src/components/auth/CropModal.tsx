@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
-import { getImageData, blobToFile } from '../../util/image';
+import { blobToFile, blobToDataUri } from '../../util/image';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Loading from '../ui/Loading';
@@ -40,10 +40,7 @@ async function requireCroppie() {
 
 async function processFile(imgFile: File) {
   try {
-    const imgData = await getImageData(imgFile);
-    const { url } = imgData;
     const cropContainer = document.getElementById('avatar-crop');
-
     if (!cropContainer) {
       return;
     }
@@ -65,7 +62,8 @@ async function processFile(imgFile: File) {
       });
     }
 
-    cropper.bind({ url });
+    const dataUri = await blobToDataUri(imgFile);
+    await cropper.bind({ url: dataUri });
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);

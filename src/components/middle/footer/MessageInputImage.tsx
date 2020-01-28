@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from '../../../lib/teact/teact';
 
-import { getImageData } from '../../../util/image';
+import { preloadImage } from '../../../util/image';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Button from '../../ui/Button';
+
 import './MessageInputImage.scss';
 
 type IProps = {
@@ -12,21 +13,23 @@ type IProps = {
 };
 
 const MessageInputImage: FC<IProps> = ({ image, onClearImage }) => {
-  const [imageDataUri, setImageDataUri] = useState(null);
+  const [blobUrl, setBlobUrl] = useState(null);
 
   useEffect(() => {
     if (image) {
-      getImageData(image)
-        .then((imageData) => setImageDataUri(imageData.url));
+      const newBlobUrl = URL.createObjectURL(image);
+      preloadImage(newBlobUrl).then(() => {
+        setBlobUrl(newBlobUrl);
+      });
     }
   }, [image]);
 
   useEffect(() => captureEscKeyListener(onClearImage), [onClearImage]);
 
   return (
-    <div className={`MessageInputImage${imageDataUri !== null ? ' loaded' : ''}`}>
+    <div className={`MessageInputImage${blobUrl ? ' loaded' : ''}`}>
       <div className="image-wrapper" id="messageInputImage">
-        {imageDataUri && <img src={imageDataUri} alt="" />}
+        {blobUrl && <img src={blobUrl} alt="" />}
       </div>
       <Button round color="translucent" ariaLabel="Cancel sending clipboard image" onClick={onClearImage}>
         <i className="icon-close" />
@@ -34,6 +37,5 @@ const MessageInputImage: FC<IProps> = ({ image, onClearImage }) => {
     </div>
   );
 };
-
 
 export default MessageInputImage;

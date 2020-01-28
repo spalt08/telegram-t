@@ -1,7 +1,7 @@
 import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiSticker } from '../../../api/types';
-import { getStickerDimensions } from '../../../util/imageDimensions';
+import { getStickerDimensions } from '../../../util/mediaDimensions';
 import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';

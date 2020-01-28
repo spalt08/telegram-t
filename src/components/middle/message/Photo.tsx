@@ -2,7 +2,7 @@ import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiPhoto } from '../../../api/types';
-import { getImageDimensions } from '../../../util/imageDimensions';
+import { getImageDimensions } from '../../../util/mediaDimensions';
 import getMinMediaWidth from './util/minMediaWidth';
 import Spinner from '../../ui/Spinner';
 

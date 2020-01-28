@@ -13,7 +13,7 @@ import {
   isOwnMessage,
   shouldMessageLoadMedia,
 } from '../../../modules/helpers';
-import { getImageDimensions, getVideoDimensions } from '../../../util/imageDimensions';
+import { getImageDimensions, getVideoDimensions } from '../../../util/mediaDimensions';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { buildMessageContent } from './util/buildMessageContent';
 import getMinMediaWidth from './util/minMediaWidth';

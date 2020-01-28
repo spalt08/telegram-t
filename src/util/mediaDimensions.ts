@@ -66,7 +66,7 @@ export function getVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isF
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
-export function getReplyImageDimensions() {
+export function getImagePictogramDimensions() {
   return {
     width: 2 * REM,
     height: 2 * REM,

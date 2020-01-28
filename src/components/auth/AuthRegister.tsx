@@ -1,10 +1,9 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, { FC, useRef, useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../store/types';
 
-import { insertImage } from '../../util/image';
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 import CropModal from './CropModal';
@@ -15,8 +14,8 @@ const AuthRegister: FC<IProps> = ({
   authIsLoading, authError, signUp, clearAuthError,
 }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [avatar, setAvatar] = useState(undefined);
   const [selectedFile, setSelectedFile] = useState(undefined);
+  const [croppedBlobUrl, setCroppedBlobUrl] = useState(undefined);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -59,11 +58,9 @@ const AuthRegister: FC<IProps> = ({
     setLastName(target.value);
   }
 
-  async function handleAvatarCrop(croppedImg: File) {
+  function handleAvatarCrop(croppedImg: File) {
     setSelectedFile(null);
-    setAvatar(croppedImg);
-
-    await insertImage(croppedImg, 'avatar');
+    setCroppedBlobUrl(URL.createObjectURL(croppedImg));
   }
 
   function handleModalDismiss() {
@@ -81,7 +78,7 @@ const AuthRegister: FC<IProps> = ({
       <form action="" method="post" onSubmit={handleSubmit}>
         <label
           id="avatar"
-          className={avatar ? 'filled' : ''}
+          className={croppedBlobUrl ? 'filled' : ''}
           role="button"
           tabIndex={0}
           title="Change your profile picture"
@@ -93,6 +90,7 @@ const AuthRegister: FC<IProps> = ({
             accept="image/png, image/jpeg"
           />
           <i className="icon-camera-add" />
+          {croppedBlobUrl && <img src={croppedBlobUrl} alt="Avatar" />}
         </label>
         <h2>Your Name</h2>
         <p className="note">

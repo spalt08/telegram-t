@@ -3,7 +3,7 @@ import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiVideo } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import { getVideoDimensions } from '../../../util/imageDimensions';
+import { getVideoDimensions } from '../../../util/mediaDimensions';
 import { shouldMessagePlayVideoInline } from '../../../modules/helpers';
 
 import './Media.scss';

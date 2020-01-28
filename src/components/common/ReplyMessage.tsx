@@ -8,7 +8,7 @@ import {
 } from '../../api/types';
 
 import { getUserFullName } from '../../modules/helpers';
-import { getReplyImageDimensions } from '../../util/imageDimensions';
+import { getImagePictogramDimensions } from '../../util/mediaDimensions';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 
 import RippleEffect from '../ui/RippleEffect';
@@ -46,7 +46,7 @@ function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
     return null;
   }
 
-  const { width, height } = getReplyImageDimensions();
+  const { width, height } = getImagePictogramDimensions();
 
   if ('dataUri' in thumbnail) {
     return (

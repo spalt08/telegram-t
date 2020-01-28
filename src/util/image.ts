@@ -1,24 +1,3 @@
-export async function insertImage(image: File | string, containerId: string) {
-  const previousImg = document.querySelector(`#${containerId} img`);
-  if (previousImg) {
-    previousImg.remove();
-  }
-
-  const img = document.createElement('img');
-  const container = document.getElementById(containerId);
-  if (!container) {
-    return;
-  }
-  container.appendChild(img);
-
-  try {
-    img.src = typeof image === 'string' ? image : (await getImageData(image)).url;
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
-  }
-}
-
 export function blobToDataUri(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -37,13 +16,6 @@ export function blobToDataUri(blob: Blob): Promise<string> {
   });
 }
 
-type ImageData = {
-  name: string;
-  url: string;
-  width: number;
-  height: number;
-};
-
 export function preloadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -53,13 +25,11 @@ export function preloadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function getImageData(imgFile: File): Promise<ImageData> {
-  const dataUri = await blobToDataUri(imgFile);
-  const img = await preloadImage(dataUri);
+export async function getImageDataFromFile(imgFile: File) {
+  const img = await preloadImage(URL.createObjectURL(imgFile));
 
   return {
     name: imgFile.name,
-    url: dataUri,
     width: img.width,
     height: img.height,
   };
