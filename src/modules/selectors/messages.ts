@@ -63,7 +63,7 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   const isAdminOrOwner = !isPrivate && false; // TODO Implement.
 
   const canReply = !isChatChannel;
-  const canPin = isChatWithSelf || !isSuperGroupOrChannel || isAdminOrOwner;
+  const canPin = isChatWithSelf || (isSuperGroupOrChannel && isAdminOrOwner);
   const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
   const canDeleteForAll = canDelete && !isChatWithSelf && (isOwnMessage || isPrivate || isAdminOrOwner);
 
