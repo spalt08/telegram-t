@@ -12,6 +12,8 @@ const SIZE_FOR_HASH = 256
  * @param prime{BigInteger}
  * @param g{BigInteger}
  */
+/*
+We don't support changing passwords yet
 function checkPrimeAndGoodCheck(prime, g) {
     console.error('Unsupported function `checkPrimeAndGoodCheck` call. Arguments:', prime, g)
 
@@ -54,7 +56,7 @@ function checkPrimeAndGoodCheck(prime, g) {
         throw new Error('(prime - 1) // 2 is not prime')
     }
 }
-
+*/
 /**
  *
  * @param primeBytes{Buffer}
@@ -84,7 +86,8 @@ function checkPrimeAndGood(primeBytes, g) {
             return // It's good
         }
     }
-    checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
+    throw new Error("Changing passwords unsupported")
+    //checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
 }
 
 /**

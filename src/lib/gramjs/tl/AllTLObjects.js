@@ -2,7 +2,6 @@ const api = require('./api')
 const LAYER = 105
 const tlobjects = {}
 
-const api2 = Object.values(api);
 
 for (const tl of Object.values(api)) {
     if (tl.CONSTRUCTOR_ID) {

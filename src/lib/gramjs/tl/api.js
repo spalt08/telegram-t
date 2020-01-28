@@ -5,7 +5,7 @@ const {
     serializeDate
 } = require('./generationHelpers')
 const { readBufferFromBigInt,toSignedLittleBuffer } = require('../Helpers')
-
+/*CONTEST
 const NAMED_AUTO_CASTS = new Set([
     'chatId,int'
 ])
@@ -24,6 +24,8 @@ const AUTO_CASTS = new Set([
     'InputDocument',
     'InputChatPhoto'
 ])
+
+ */
 const CACHING_SUPPORTED = typeof self !== 'undefined' && self.localStorage !== undefined
 
 const CACHE_KEY = 'GramJs:apiCache'
@@ -118,7 +120,8 @@ function argToBytes(x, type) {
             return x.getBytes()
     }
 }
-
+/*
+CONTEST
 async function getInputFromResolve(utils, client, peer, peerType) {
     switch (peerType) {
         case 'InputPeer':
@@ -147,7 +150,7 @@ async function getInputFromResolve(utils, client, peer, peerType) {
             throw new Error('unsupported peer type : ' + peerType)
     }
 }
-
+*/
 function getArgFromReader(reader, arg) {
     if (arg.isVector) {
         if (arg.useVectorId) {
@@ -329,7 +332,9 @@ function createClasses(classesType, params) {
                 }
             }
 
+            /*CONTEST
             async resolve(client, utils) {
+
                 if (classesType !== 'request') {
                     throw new Error('`resolve()` called for non-request instance')
                 }
@@ -357,7 +362,7 @@ function createClasses(classesType, params) {
                         }
                     }
                 }
-            }
+            }*/
         }
 
         if (namespace) {
