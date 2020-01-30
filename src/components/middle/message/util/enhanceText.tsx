@@ -198,7 +198,10 @@ export function addLineBreaks(part: TextPart): TextPart[] {
   return part
     .split(/\r\n|\r|\n/g)
     .reduce((parts: TextPart[], line: string, i, source) => {
-      parts.push(line);
+      // This adds non-breaking space if line was indented with spaces, to preserve the indentation
+      const trimmedLine = line.trimLeft();
+      const indentLength = line.length - trimmedLine.length;
+      parts.push(String.fromCharCode(160).repeat(indentLength) + trimmedLine);
 
       if (i !== source.length - 1) {
         parts.push(<br />);

@@ -293,6 +293,6 @@
 
 .text-entity-code, .text-entity-pre {
   color: var(--color-code);
-  white-space: inherit;
+  white-space: pre-wrap;
   margin: 0;
 }
