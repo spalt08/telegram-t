@@ -6,12 +6,8 @@ import './MediaViewerFooter.scss';
 const RESIZE_THROTTLE_MS = 500;
 
 type IProps = {
-  text: string;
+  text: string | Element | (string | Element)[];
 };
-
-function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-  e.stopPropagation();
-}
 
 const MediaViewerFooter: FC<IProps> = ({ text = '' }) => {
   const [isMultiline, setIsMultiline] = useState(false);
@@ -36,6 +32,12 @@ const MediaViewerFooter: FC<IProps> = ({ text = '' }) => {
       window.removeEventListener('resize', handleResize, false);
     };
   }, []);
+
+  function stopEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    if (text) {
+      e.stopPropagation();
+    }
+  }
 
   return (
     <div className="MediaViewerFooter" onClick={stopEvent}>

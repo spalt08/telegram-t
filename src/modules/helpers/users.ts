@@ -1,4 +1,4 @@
-import { ApiUser } from '../../api/types/index';
+import { ApiUser } from '../../api/types';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;

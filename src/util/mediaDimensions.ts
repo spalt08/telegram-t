@@ -21,9 +21,12 @@ function getAvailableHeight() {
   return 27 * REM;
 }
 
-function getDimensionsFromVideo(video: ApiVideo): IMediaDimensions | undefined {
-  if (video.minithumbnail) {
-    return video.minithumbnail;
+export function getDimensionsFromVideo(video: ApiVideo): IMediaDimensions | undefined {
+  if (video.thumbnail) {
+    return {
+      width: video.thumbnail.width,
+      height: video.thumbnail.height,
+    };
   }
 
   if (video.width && video.height) {

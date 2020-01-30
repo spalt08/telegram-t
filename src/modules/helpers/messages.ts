@@ -1,6 +1,4 @@
-import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
-
-const MAX_INLINE_VIDEO_DURATION = 10;
+import { ApiMessage } from '../../api/types';
 
 export function getLastMessageText(message: ApiMessage) {
   const {
@@ -65,100 +63,12 @@ export function getMessageText(message: ApiMessage) {
   return '%UNSUPPORTED_CONTENT%';
 }
 
-export function getMessagePhoto(message: ApiMessage) {
-  if (!message.content.photo) {
-    return undefined;
-  }
-
-  return message.content.photo;
-}
-
-export function getMessageVideo(message: ApiMessage) {
-  if (!message.content.video) {
-    return undefined;
-  }
-
-  return message.content.video;
-}
-
-export function getMessageDocument(message: ApiMessage) {
-  if (
-    !message.content.document
-    || getMessageSticker(message)
-    || getMessageVideo(message)
-  ) {
-    return undefined;
-  }
-
-  return message.content.document;
-}
-
-export function getMessageSticker(message: ApiMessage) {
-  return message.content.sticker;
-}
-
-export function getMessageContact(message: ApiMessage) {
-  return message.content.contact;
-}
-
-export function getMessageMediaHash(message: ApiMessage, isInline = false): string | null {
-  const { chat_id, content: { photo, video, sticker } } = message;
-
-  const base = `msg${chat_id}-${message.id}`;
-
-  if (photo) {
-    return `${base}?size=x`;
-  }
-
-  if (sticker) {
-    return base;
-  }
-
-  if (video) {
-    if (isInline) {
-      if (shouldMessagePlayVideoInline(video)) {
-        return base;
-      }
-
-      return `${base}?size=m`;
-    } else {
-      return base;
-    }
-  }
-
-  return null;
-}
-
-export function shouldMessageLoadMedia(message: ApiMessage) {
-  return (
-    message.content.photo
-    || message.content.sticker
-    || message.content.video
-  );
-}
-
-export function shouldMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.duration <= MAX_INLINE_VIDEO_DURATION;
-}
-
-export function getMessagePhotoInlineSize(photo: ApiPhoto) {
-  return (
-    photo.sizes.find((size) => size.type === 'm')
-    || photo.sizes.find((size) => size.type === 's')
-    || photo.minithumbnail
-  );
-}
-
-export function getMessagePhotoMaxSize(photo: ApiPhoto) {
-  return (
-    photo.sizes.find((size) => size.type === 'y')
-    || photo.sizes.find((size) => size.type === 'x')
-    || getMessagePhotoInlineSize(photo)
-  );
-}
-
 export function isOwnMessage(message: ApiMessage) {
   return message.is_outgoing;
+}
+
+export function isForwardedMessage(message: ApiMessage) {
+  return Boolean(message.forward_info);
 }
 
 export function isActionMessage(message: ApiMessage) {
@@ -175,16 +85,4 @@ export function getSendingState(message: ApiMessage) {
 
 export function isMessageLocal(message: ApiMessage) {
   return message.id < 0;
-}
-
-export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
-  return Object.keys(messages)
-    .reduce((result, id) => {
-      const messageId = Number(id);
-      if (messages[messageId].content.photo || messages[messageId].content.video) {
-        result.push(messageId);
-      }
-
-      return result;
-    }, [] as Array<number>);
 }

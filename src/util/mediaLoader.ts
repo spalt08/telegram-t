@@ -42,8 +42,8 @@ export function fetch(url: string, mediaType: Type) {
   return FETCH_PROMISES[url];
 }
 
-export function getFromMemory<T extends MemoryMedia>(url: string): T {
-  return MEMORY_CACHE[url] as T;
+export function getFromMemory<T extends Type>(url: string) {
+  return MEMORY_CACHE[url] as (T extends Type.Lottie ? AnyLiteral : string);
 }
 
 async function fetchFromCacheOrRemote(url: string, mediaType: Type) {

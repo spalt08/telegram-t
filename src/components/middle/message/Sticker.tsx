@@ -1,41 +1,53 @@
 import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiSticker } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
+
 import { getStickerDimensions } from '../../../util/mediaDimensions';
+import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
+import * as mediaLoader from '../../../util/mediaLoader';
+import useMedia from '../../../hooks/useMedia';
+
 import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';
 
 type IProps = {
-  sticker: ApiSticker;
-  mediaData?: string | AnyLiteral;
-  loadAndPlayMedia?: boolean;
+  message: ApiMessage;
+  loadAndPlay?: boolean;
 };
 
 const Sticker: FC<IProps> = ({
-  sticker, mediaData, loadAndPlayMedia,
+  message, loadAndPlay,
 }) => {
-  const { thumbnail, is_animated } = sticker;
+  const sticker = message.content.sticker!;
+  const isAnimated = sticker.is_animated;
+
+  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const mediaData = useMedia(
+    getMessageMediaHash(message, 'inline'),
+    !loadAndPlay,
+    isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
+  );
+
   const { width, height } = getStickerDimensions(sticker);
-  const thumbData = thumbnail && thumbnail.dataUri;
 
   let thumbClassName = 'thumbnail';
-  if (thumbData && is_animated && mediaData) {
+  if (thumbDataUri && isAnimated && mediaData) {
     thumbClassName += ' fade-out';
-  } else if (!thumbData) {
+  } else if (!thumbDataUri) {
     thumbClassName += ' empty';
   }
 
   return (
     <div className="media-inner">
       <img
-        src={thumbData}
+        src={thumbDataUri}
         width={width}
         height={height}
         alt=""
         className={thumbClassName}
       />
-      {!is_animated && (
+      {!isAnimated && (
         <img
           src={mediaData as string}
           width={width}
@@ -44,12 +56,12 @@ const Sticker: FC<IProps> = ({
           className={mediaData ? 'full-media fade-in' : 'full-media'}
         />
       )}
-      {is_animated && (
+      {isAnimated && (
         <AnimatedSticker
           animationData={mediaData as AnyLiteral}
           width={width}
           height={height}
-          play={loadAndPlayMedia}
+          play={loadAndPlay}
           className={mediaData ? 'full-media fade-in' : 'full-media'}
         />
       )}

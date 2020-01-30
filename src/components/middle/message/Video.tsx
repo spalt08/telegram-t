@@ -1,46 +1,47 @@
 import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiVideo } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { getVideoDimensions } from '../../../util/mediaDimensions';
-import { shouldMessagePlayVideoInline } from '../../../modules/helpers';
+import {
+  getMessageMediaHash, getMessageMediaThumbDataUri,
+  isForwardedMessage,
+  isOwnMessage,
+  canMessagePlayVideoInline,
+} from '../../../modules/helpers';
+import useMedia from '../../../hooks/useMedia';
 
 import './Media.scss';
 
-type OnClickHandler = (e: MouseEvent<HTMLDivElement>) => void;
-
-interface IRenderMediaOptions {
-  isInOwnMessage: boolean;
-  isForwarded: boolean;
-  mediaData?: string;
-  loadAndPlayMedia?: boolean;
-  hasText?: boolean;
-}
-
 type IProps = {
-  video: ApiVideo;
-  onClick: OnClickHandler;
-  options: IRenderMediaOptions;
+  message: ApiMessage;
+  loadAndPlay?: boolean;
+  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
-const Video: FC<IProps> = ({ video, onClick, options }) => {
-  const {
-    isInOwnMessage, isForwarded, mediaData, loadAndPlayMedia,
-  } = options;
-  const { width, height } = getVideoDimensions(video, isInOwnMessage, isForwarded);
-  const shouldPlayInline = shouldMessagePlayVideoInline(video);
-  const isInlineVideo = mediaData && loadAndPlayMedia && shouldPlayInline;
-  const isHqPreview = mediaData && !shouldPlayInline;
-  const { minithumbnail, duration } = video;
-  const thumbData = minithumbnail && minithumbnail.data;
+const Video: FC<IProps> = ({
+  message, loadAndPlay, onClick,
+}) => {
+  const video = message.content.video!;
+
+  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+
+  const canPlayInline = canMessagePlayVideoInline(video);
+  const shouldPlayInline = mediaData && loadAndPlay && canPlayInline;
+  const isHqPreview = mediaData && !canPlayInline;
+
+  const isOwn = isOwnMessage(message);
+  const isForwarded = isForwardedMessage(message);
+  const { width, height } = getVideoDimensions(video, isOwn, isForwarded);
 
   return (
     <div
       className="media-inner has-viewer"
       onClick={onClick}
     >
-      {isInlineVideo && (
+      {shouldPlayInline && (
         <video
           width={width}
           height={height}
@@ -48,31 +49,30 @@ const Video: FC<IProps> = ({ video, onClick, options }) => {
           muted
           loop
           playsinline
-          /* eslint-disable-next-line react/jsx-props-no-spreading */
-          {...(thumbData && { poster: `data:image/jpeg;base64, ${thumbData}` })}
+          poster={thumbDataUri}
         >
           <source src={mediaData} />
         </video>
       )}
-      {!isInlineVideo && isHqPreview && (
+      {!shouldPlayInline && isHqPreview && (
         <img src={mediaData} width={width} height={height} alt="" />
       )}
-      {!isInlineVideo && !isHqPreview && (
+      {!shouldPlayInline && !isHqPreview && (
         <img
-          src={thumbData && `data:image/jpeg;base64, ${thumbData}`}
+          src={thumbDataUri}
           width={width}
           height={height}
           alt=""
         />
       )}
-      {!isInlineVideo && (
+      {!shouldPlayInline && (
         <div className="message-media-loading">
           <div className="message-media-play-button">
             <i className="icon-large-play" />
           </div>
         </div>
       )}
-      <div className="message-media-duration">{formatMediaDuration(duration)}</div>
+      <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
     </div>
   );
 };

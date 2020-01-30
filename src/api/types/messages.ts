@@ -5,17 +5,8 @@ export interface ApiPhotoSize {
   height: number;
 }
 
-export interface ApiPhotoCachedSize {
-  '@type': 'photoCachedSize';
+export interface ApiThumbnail {
   dataUri: string;
-  type: 'm' | 'x' | 'y';
-  width: number;
-  height: number;
-}
-
-export interface ApiMiniThumbnail {
-  '@type': 'minithumbnail';
-  data: string;
   height: number;
   width: number;
 }
@@ -23,7 +14,7 @@ export interface ApiMiniThumbnail {
 export interface ApiPhoto {
   '@type': 'photo';
   has_stickers: boolean;
-  minithumbnail?: ApiMiniThumbnail;
+  thumbnail?: ApiThumbnail;
   sizes: ApiPhotoSize[];
 }
 
@@ -34,7 +25,7 @@ export interface ApiSticker {
   is_animated: boolean;
   width?: number;
   height?: number;
-  thumbnail?: ApiPhotoCachedSize;
+  thumbnail?: ApiThumbnail;
 }
 
 export interface ApiVideo {
@@ -44,7 +35,7 @@ export interface ApiVideo {
   height?: number;
   supportsStreaming: boolean;
   isRound: boolean;
-  minithumbnail?: ApiMiniThumbnail;
+  thumbnail?: ApiThumbnail;
 }
 
 export interface ApiDocument {

@@ -4,13 +4,13 @@ import {
   ApiMessage,
   ApiMessageForwardInfo,
   ApiPhoto,
-  ApiPhotoCachedSize,
   ApiPhotoSize,
   ApiSticker,
   ApiVideo,
   ApiDocument,
   ApiAction,
   ApiContact,
+  ApiThumbnail,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -145,7 +145,7 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
   const emoji = stickerAttribute.alt;
   const isAnimated = media.document.mimeType === 'application/x-tgsticker';
   const thumb = media.document.thumbs && media.document.thumbs.find((s: any) => s instanceof GramJs.PhotoCachedSize);
-  const thumbnail = thumb && buildApiPhotoCachedSize(thumb as GramJs.PhotoCachedSize);
+  const thumbnail = thumb && buildApiThumbnailFromCached(thumb as GramJs.PhotoCachedSize);
   const { w: width, h: height } = thumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
   return {
@@ -172,12 +172,12 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | null {
   return {
     '@type': 'photo',
     has_stickers: hasStickers,
-    minithumbnail: buildApiPhotoMiniThumbnail(media.photo.sizes),
+    thumbnail: buildApiThumbnailFromStripped(media.photo.sizes),
     sizes,
   };
 }
 
-function buildApiPhotoMiniThumbnail(sizes?: GramJs.TypePhotoSize[]): ApiPhoto['minithumbnail'] {
+function buildApiThumbnailFromStripped(sizes?: GramJs.TypePhotoSize[]): ApiThumbnail | undefined {
   if (!sizes || !sizes.length) {
     return undefined;
   }
@@ -189,28 +189,23 @@ function buildApiPhotoMiniThumbnail(sizes?: GramJs.TypePhotoSize[]): ApiPhoto['m
   }
 
   const realSizes = sizes.filter((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
-  const { w: width, h: height } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
+  const { w, h } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
 
   return {
-    '@type': 'minithumbnail',
-    data: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer), true),
-    width,
-    height,
+    dataUri: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer)),
+    width: w,
+    height: h,
   };
 }
 
-function buildApiPhotoCachedSize(photoSize: GramJs.PhotoCachedSize): ApiPhotoCachedSize {
-  const {
-    w, h, type, bytes,
-  } = photoSize;
+function buildApiThumbnailFromCached(photoSize: GramJs.PhotoCachedSize): ApiThumbnail | undefined {
+  const { w, h, bytes } = photoSize;
   const dataUri = bytesToDataUri(strippedPhotoToJpg(bytes as Buffer));
 
   return {
-    '@type': 'photoCachedSize',
+    dataUri,
     width: w,
     height: h,
-    type: type as ('m' | 'x' | 'y'),
-    dataUri,
   };
 }
 
@@ -256,7 +251,7 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | null {
     height,
     supportsStreaming,
     isRound,
-    minithumbnail: buildApiPhotoMiniThumbnail(media.document.thumbs),
+    thumbnail: buildApiThumbnailFromStripped(media.document.thumbs),
   };
 }
 

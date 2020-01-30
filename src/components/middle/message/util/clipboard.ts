@@ -12,7 +12,7 @@ export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => v
   const options: ICopyOptions = [];
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
-  const mediaHash = getMessageMediaHash(message);
+  const mediaHash = getMessageMediaHash(message, 'inline');
   const canImageBeCopied = photo && mediaHash && CLIPBOARD_ITEM_SUPPORTED;
   const selection = window.getSelection();
 

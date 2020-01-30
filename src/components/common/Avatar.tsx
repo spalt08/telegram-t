@@ -35,7 +35,7 @@ const Avatar: FC<IProps> = ({
   }
 
   const [, onDataUriUpdate] = useState(null);
-  const dataUri = imageHash && mediaLoader.getFromMemory<string>(imageHash);
+  const dataUri = imageHash && mediaLoader.getFromMemory<mediaLoader.Type.DataUri>(imageHash);
 
   useEffect(() => {
     if (imageHash && !dataUri) {

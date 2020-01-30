@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useRef, useState } from '../../lib/teact/teact';
+import React, { FC, useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../store/types';

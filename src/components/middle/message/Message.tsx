@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useEffect, useState,
+  FC, memo, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -7,14 +7,8 @@ import { GlobalActions } from '../../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
 import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../modules/selectors';
-import {
-  getMessageMediaHash,
-  getUserFullName,
-  isOwnMessage,
-  shouldMessageLoadMedia,
-} from '../../../modules/helpers';
+import { getMessageMediaHash, getUserFullName, isOwnMessage } from '../../../modules/helpers';
 import { getImageDimensions, getVideoDimensions } from '../../../util/mediaDimensions';
-import * as mediaLoader from '../../../util/mediaLoader';
 import { buildMessageContent } from './util/buildMessageContent';
 import getMinMediaWidth from './util/minMediaWidth';
 
@@ -43,7 +37,6 @@ type IProps = {
   showSenderName?: boolean;
   loadAndPlayMedia?: boolean;
   sender?: ApiUser;
-  mediaHash?: string;
   replyMessage?: ApiMessage;
   replyMessageSender?: ApiUser;
   originSender?: ApiUser;
@@ -57,7 +50,6 @@ const Message: FC<IProps> = ({
   showAvatar,
   showSenderName,
   loadAndPlayMedia,
-  mediaHash,
   sender,
   replyMessage,
   replyMessageSender,
@@ -69,24 +61,12 @@ const Message: FC<IProps> = ({
   isLastInGroup,
   isLastInList,
 }) => {
-  const [, onDataUriUpdate] = useState(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
-  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
-
-  useEffect(() => {
-    const isAnimatedSticker = message.content.sticker && message.content.sticker.is_animated;
-    if (mediaHash && loadAndPlayMedia && !mediaData) {
-      mediaLoader
-        .fetch(mediaHash, isAnimatedSticker ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl)
-        .then(onDataUriUpdate);
-    }
-  }, [message, mediaHash, loadAndPlayMedia, mediaData]);
 
   const containerClassNames = buildClassNames(
     message,
     { isFirstInGroup, isLastInGroup, isLastInList },
-    Boolean(mediaHash),
     contextMenuPosition !== null,
   );
 
@@ -155,38 +135,29 @@ const Message: FC<IProps> = ({
       classNames.push('reply-message');
     }
 
-    const renderMediaOptions = {
-      isInOwnMessage: isOwnMessage(message),
-      isForwarded,
-      mediaData: mediaData as string,
-      loadAndPlayMedia,
-      hasText: Boolean(text),
-    };
-
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
         {photo && (
           <Photo
-            photo={photo}
+            message={message}
+            load={loadAndPlayMedia}
             onClick={openMediaMessage}
-            options={renderMediaOptions}
           />
         )}
         {video && (
           <Video
-            video={video}
+            message={message}
+            loadAndPlay={loadAndPlayMedia}
             onClick={openMediaMessage}
-            options={renderMediaOptions}
           />
         )}
         {document && <Document document={document} />}
         {sticker && (
           <Sticker
-            sticker={sticker}
-            mediaData={mediaData}
-            loadAndPlayMedia={loadAndPlayMedia}
+            message={message}
+            loadAndPlay={loadAndPlayMedia}
           />
         )}
         {text && (
@@ -260,7 +231,6 @@ const Message: FC<IProps> = ({
 function buildClassNames(
   message: ApiMessage,
   position: MessagePositionProperties,
-  hasMedia = false,
   hasContextMenu = false,
 ) {
   const classNames = ['Message'];
@@ -281,7 +251,7 @@ function buildClassNames(
     classNames.push('not-own');
   }
 
-  if (hasMedia) {
+  if (getMessageMediaHash(message, 'inline')) {
     classNames.push('has-media');
   }
 
@@ -303,9 +273,6 @@ export default memo(withGlobal(
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
-    const shouldLoadMedia = shouldMessageLoadMedia(message);
-    const mediaHash = shouldLoadMedia ? getMessageMediaHash(message, true) : undefined;
-
     let userId;
     let originUserId;
     if (showSenderName || showAvatar) {
@@ -316,7 +283,6 @@ export default memo(withGlobal(
     }
 
     return {
-      mediaHash,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
       ...(replyMessage && {

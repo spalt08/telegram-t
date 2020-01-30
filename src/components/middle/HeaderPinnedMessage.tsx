@@ -1,11 +1,15 @@
 import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 
-import { ApiMessage, ApiMiniThumbnail, ApiPhotoCachedSize } from '../../api/types';
+import { ApiMessage } from '../../api/types';
+
 import { getImagePictogramDimensions } from '../../util/mediaDimensions';
-import RippleEffect from '../ui/RippleEffect';
-import Button from '../ui/Button';
 import { buildMessageContent } from './message/util/buildMessageContent';
+import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../modules/helpers';
+import useMedia from '../../hooks/useMedia';
+
 import ConfirmDialog from '../ui/ConfirmDialog';
+import Button from '../ui/Button';
+import RippleEffect from '../ui/RippleEffect';
 
 type IProps = {
   message: ApiMessage;
@@ -13,6 +17,10 @@ type IProps = {
 };
 
 const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
+  const { text } = buildMessageContent(message, { isReply: true });
+  const mediaThumbnail = getMessageMediaThumbDataUri(message);
+  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
+
   const [isUnpinDialogOpen, setIsUnpinDialogOpen] = useState(false);
 
   function openUnpinConfirmation() {
@@ -34,8 +42,6 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
   }
-
-  const { text, replyThumbnail } = buildMessageContent(message, { isReply: true });
 
   return (
     <div className="HeaderPinnedMessage-wrapper">
@@ -59,7 +65,7 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
       ])}
 
       <div className="HeaderPinnedMessage not-implemented" onClick={stopPropagation}>
-        {renderMessagePhoto(replyThumbnail)}
+        {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
         <div className="message-text">
           <div className="title">Pinned message</div>
           <p>{text}</p>
@@ -71,21 +77,11 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
   );
 };
 
-function renderMessagePhoto(thumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize) {
-  if (!thumbnail) {
-    return null;
-  }
-
+function renderPictogram(thumbDataUri: string, blobUrl?: string) {
   const { width, height } = getImagePictogramDimensions();
 
-  if ('dataUri' in thumbnail) {
-    return (
-      <img src={thumbnail.dataUri} width={width} height={height} alt="" />
-    );
-  }
-
   return (
-    <img src={`data:image/jpeg;base64, ${thumbnail.data}`} width={width} height={height} alt="" />
+    <img src={blobUrl || thumbDataUri} width={width} height={height} alt="" />
   );
 }
 

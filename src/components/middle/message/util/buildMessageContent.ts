@@ -15,8 +15,6 @@ import {
   ApiSticker,
   ApiVideo,
   ApiDocument,
-  ApiMiniThumbnail,
-  ApiPhotoCachedSize,
   ApiContact,
 } from '../../../../api/types';
 
@@ -29,7 +27,6 @@ export interface MessageContent {
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
-  replyThumbnail?: ApiMiniThumbnail | ApiPhotoCachedSize;
   className?: string;
 }
 
@@ -49,7 +46,6 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const contact = getMessageContact(message);
   const classNames = ['message-content'];
   let contentParts: TextPart | TextPart[] | undefined;
-  let replyThumbnail: ApiMiniThumbnail | ApiPhotoCachedSize | undefined;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
@@ -70,17 +66,10 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     } else {
       classNames.push('media');
     }
-
-    if (options.isReply) {
-      replyThumbnail = getReplyThumbnail(photo || video);
-    }
   }
 
   if (sticker) {
     classNames.push('sticker');
-    if (options.isReply) {
-      replyThumbnail = sticker.thumbnail;
-    }
   }
 
   if (document) {
@@ -127,15 +116,6 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     document,
     sticker,
     contact,
-    replyThumbnail,
     className: classNames.join(' '),
   };
-}
-
-function getReplyThumbnail(media?: ApiPhoto | ApiVideo) {
-  if (!media) {
-    return undefined;
-  }
-  const { minithumbnail } = media;
-  return minithumbnail;
 }

@@ -1,15 +1,23 @@
 import React, {
-  FC, useEffect, useState, memo, useCallback,
+  FC, useEffect, memo, useCallback,
 } from '../../lib/teact/teact';
-import usePrevious from '../../hooks/usePrevious';
 import { withGlobal } from '../../lib/teact/teactn';
-import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
+
 import { GlobalActions } from '../../store/types';
-import { getChatMediaMessageIds, getMessageMediaHash } from '../../modules/helpers';
-import * as mediaLoader from '../../util/mediaLoader';
+import { ApiMessage } from '../../api/types';
+
+import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
+import {
+  getChatMediaMessageIds,
+  getMessagePhoto,
+  getMessageVideo,
+  getMessageMediaHash,
+  getMessageMediaThumbDataUri,
+} from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
-import { ApiMessage, ApiMiniThumbnail } from '../../api/types';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import usePrevious from '../../hooks/usePrevious';
+import useMedia from '../../hooks/useMedia';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -19,30 +27,21 @@ import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
-
-type IPhotoRenderProps = {
-  selectedMediaMessageId?: number;
-  blobUrl?: string;
-  previousBlobUrl?: string;
-};
-
-type IVideoRenderProps = IPhotoRenderProps & {
-  poster?: ApiMiniThumbnail;
-};
+import { getDimensionsFromVideo } from '../../util/mediaDimensions';
 
 type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
   chatId?: number;
   selectedMediaMessageId?: number;
-  isPhoto: boolean;
-  isVideo: boolean;
-  mediaHash?: string;
-  messageText?: string;
+  message: ApiMessage;
   chatMessages: Record<number, ApiMessage>;
-  poster?: ApiMiniThumbnail;
 };
 
 const MediaViewer: FC<IProps> = ({
-  chatId, selectedMediaMessageId, isPhoto, isVideo, mediaHash, messageText, chatMessages, selectMediaMessage, poster,
+  chatId,
+  selectedMediaMessageId,
+  message,
+  chatMessages,
+  selectMediaMessage,
 }) => {
   const messageIds = getChatMediaMessageIds(chatMessages || {});
   const selectedMediaMessageIndex = selectedMediaMessageId && messageIds.indexOf(selectedMediaMessageId);
@@ -50,29 +49,34 @@ const MediaViewer: FC<IProps> = ({
   const isLast = selectedMediaMessageIndex === undefined || selectedMediaMessageIndex === messageIds.length - 1;
   const isOpen = Boolean(selectedMediaMessageId);
 
-  const [, onBlobUrlUpdate] = useState(null);
-  const blobUrl = mediaHash ? mediaLoader.getFromMemory<string>(mediaHash) : undefined;
+  let { text: messageText } = message ? buildMessageContent(message) : { text: undefined };
+  let isPhoto = message ? Boolean(getMessagePhoto(message)) : null;
+  let isVideo = message ? Boolean(getMessageVideo(message)) : null;
+
+  const thumbDataUri = message && getMessageMediaThumbDataUri(message);
+  const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
+  let blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
 
   // For correct unmount animation
   const previousProps = usePrevious({
-    blobUrl,
-    messageText,
+    message,
     chatId,
     selectedMediaMessageId,
+    messageText,
+    isPhoto,
+    isVideo,
+    blobUrlFull,
   });
 
-  const {
-    blobUrl: previousBlobUrl,
-    messageText: previousMessageText,
-    chatId: previousChatId,
-    selectedMediaMessageId: previousMediaMessageId,
-  } = previousProps;
-
-  useEffect(() => {
-    if (mediaHash && !blobUrl) {
-      mediaLoader.fetch(mediaHash, mediaLoader.Type.BlobUrl).then(onBlobUrlUpdate);
-    }
-  }, [mediaHash, blobUrl]);
+  if (!isOpen && previousProps) {
+    message = previousProps.message;
+    chatId = previousProps.chatId;
+    selectedMediaMessageId = previousProps.selectedMediaMessageId;
+    messageText = previousProps.messageText;
+    isPhoto = previousProps.isPhoto;
+    isVideo = previousProps.isVideo;
+    blobUrlFull = previousProps.blobUrlFull;
+  }
 
   const getMessageId = (fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
@@ -136,14 +140,16 @@ const MediaViewer: FC<IProps> = ({
     <AnimationFade show={isOpen}>
       <div id="MediaViewer" onClick={handleClose}>
         <div className="media-viewer-head" onClick={stopEvent}>
-          <SenderInfo chatId={chatId || previousChatId} messageId={selectedMediaMessageId || previousMediaMessageId} />
+          <SenderInfo chatId={chatId} messageId={selectedMediaMessageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
         <div className="media-viewer-content">
-          {isVideo && renderVideo({
-            selectedMediaMessageId, blobUrl, previousBlobUrl, poster,
-          })}
-          {isPhoto && renderPhoto({ selectedMediaMessageId, blobUrl, previousBlobUrl })}
+          {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+          {isVideo && renderVideo(
+            blobUrlFull,
+            blobUrlPreview || thumbDataUri,
+            getDimensionsFromVideo(message.content.video!),
+          )}
           {!isFirst && (
             <button
               type="button"
@@ -161,24 +167,36 @@ const MediaViewer: FC<IProps> = ({
             />
           )}
         </div>
-        <MediaViewerFooter text={selectedMediaMessageId ? messageText : previousMessageText} />
+        {messageText && <MediaViewerFooter text={messageText} />}
       </div>
     </AnimationFade>
   );
 };
 
-function renderVideo({
-  selectedMediaMessageId, blobUrl, previousBlobUrl, poster,
-}: IVideoRenderProps) {
-  if (selectedMediaMessageId && blobUrl) {
-    return <VideoPlayer key={blobUrl} url={blobUrl} />;
-  }
+function renderPhoto(blobUrl?: string) {
+  return blobUrl ? <img src={blobUrl} alt="" /> : <Spinner color="white" />;
+}
 
-  if (selectedMediaMessageId && !blobUrl) {
-    if (poster) {
+function renderVideo(
+  blobUrl?: string,
+  posterData?: string,
+  posterSize?: {
+    width: number;
+    height: number;
+  },
+) {
+  if (blobUrl) {
+    return <VideoPlayer key={blobUrl} url={blobUrl} />;
+  } else {
+    if (posterData && posterSize) {
       return (
         <div className="video-thumbnail">
-          <img src={`data:image/jpeg;base64, ${poster.data}`} alt="" width={poster.width} height={poster.height} />
+          <img
+            src={posterData}
+            alt=""
+            width={posterSize.width}
+            height={posterSize.height}
+          />
           <Spinner color="white" />
         </div>
       );
@@ -186,66 +204,27 @@ function renderVideo({
 
     return <Spinner color="white" />;
   }
-
-  if (!selectedMediaMessageId && previousBlobUrl) {
-    return <VideoPlayer key={previousBlobUrl} url={previousBlobUrl} />;
-  }
-
-  return null;
-}
-
-function renderPhoto({
-  selectedMediaMessageId, blobUrl, previousBlobUrl,
-}: IPhotoRenderProps) {
-  if (selectedMediaMessageId && blobUrl) {
-    return <img src={blobUrl} alt="" />;
-  }
-
-  if (selectedMediaMessageId && !blobUrl) {
-    return <Spinner color="white" />;
-  }
-
-  if (!selectedMediaMessageId && previousBlobUrl) {
-    return <img src={previousBlobUrl} alt="" />;
-  }
-
-  return null;
 }
 
 export default memo(withGlobal(
   (global) => {
-    const { chats: { selectedId: chatId }, messages: { selectedMediaMessageId } } = global;
-    if (!chatId || !selectedMediaMessageId) {
+    const { chats: { selectedId: selectedChatId }, messages: { selectedMediaMessageId } } = global;
+    if (!selectedChatId || !selectedMediaMessageId) {
       return {};
     }
 
-    const chatMessages = selectChatMessages(global, chatId);
-    const message = selectChatMessage(global, chatId, selectedMediaMessageId);
-    const mediaHash = message && getMessageMediaHash(message);
+    const chatMessages = selectChatMessages(global, selectedChatId);
+    const message = selectChatMessage(global, selectedChatId, selectedMediaMessageId);
 
-    let messageText;
-    let isPhoto = false;
-    let isVideo = false;
-    let poster;
-    if (message) {
-      const { text, photo, video } = buildMessageContent(message);
-      messageText = text;
-      isPhoto = Boolean(photo);
-      isVideo = Boolean(video);
-      if (video) {
-        poster = video.minithumbnail;
-      }
+    if (!message) {
+      return {};
     }
 
     return {
       chatId: message && message.chat_id,
       selectedMediaMessageId,
-      isPhoto,
-      isVideo,
-      mediaHash,
-      messageText,
+      message,
       chatMessages,
-      poster,
     };
   },
   (setGlobal, actions) => {
