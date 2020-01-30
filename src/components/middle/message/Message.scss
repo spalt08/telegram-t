@@ -12,7 +12,7 @@
   --meta-safe-area-size: 2.25rem;
   --deleting-translate-x: -50%;
 
-  > .Avatar, > .content {
+  > .Avatar, > .message-content {
     opacity: 1;
     transform: scale(1) translateX(0);
     transform-origin: bottom;
@@ -45,7 +45,7 @@
   }
 
   &.is-deleting {
-    > .Avatar, > .content {
+    > .Avatar, > .message-content {
       opacity: 0;
       transform: scale(0.3) translateX(var(--deleting-translate-x));
     }
