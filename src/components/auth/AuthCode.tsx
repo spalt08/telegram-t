@@ -15,6 +15,10 @@ type IProps = (
   & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>
 );
 
+const TRACKING_START_FRAME = 15;
+const TRACKING_FRAMES_PER_SYMBOL = 20;
+const TRACKING_END_FRAME = 180;
+
 const AuthCode: FC<IProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
@@ -22,6 +26,7 @@ const AuthCode: FC<IProps> = ({
   const [idleMonkeyData, setIdleMonkeyData] = useState(undefined);
   const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
   const [isTracking, setIsTracking] = useState(false);
+  const [trackingDirection, setTrackingDirection] = useState(1);
   const [isIdleShownAsync, setIsIdleShownAsync] = useState(false);
 
   useEffect(() => {
@@ -53,10 +58,36 @@ const AuthCode: FC<IProps> = ({
       setIsTracking(false);
     }
 
+    if (code && code.length > target.value.length) {
+      setTrackingDirection(-1);
+    } else {
+      setTrackingDirection(1);
+    }
     setCode(target.value);
     if (target.value.length === 5) {
       setAuthCode({ code: target.value });
     }
+  }
+
+  function getTrackingFrames() {
+    const startFrame = (code && code.length > 1) || trackingDirection < 0
+      ? TRACKING_START_FRAME + TRACKING_FRAMES_PER_SYMBOL * (code.length - 1)
+      : 0;
+    const endFrame = code.length === 5
+      ? TRACKING_END_FRAME
+      : TRACKING_START_FRAME + TRACKING_FRAMES_PER_SYMBOL * code.length;
+
+    if (trackingDirection < 1) {
+      return [
+        endFrame,
+        startFrame,
+      ];
+    }
+
+    return [
+      startFrame,
+      endFrame,
+    ];
   }
 
   return (
@@ -67,6 +98,7 @@ const AuthCode: FC<IProps> = ({
             className={`${isTracking ? 'hidden' : ''} ${isIdleShownAsync ? 'shown' : ''}`}
             animationData={idleMonkeyData}
             play
+            noLoop={isTracking}
           />
         )}
         {trackingMonkeyData && (
@@ -74,6 +106,8 @@ const AuthCode: FC<IProps> = ({
             className={!isTracking ? 'hidden' : 'shown'}
             animationData={trackingMonkeyData}
             play={isTracking}
+            playSegment={isTracking && getTrackingFrames()}
+            speed={2}
             noLoop
           />
         )}
