@@ -2,9 +2,32 @@
   position: relative;
   z-index: var(--z-modal);
 
-  &:not(.shown) {
-    visibility: hidden;
-    pointer-events: none;
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background-color: rgba(0, 0, 0, .25);
+    opacity: 0;
+    transition: opacity .15s ease;
+  }
+
+  &.open::before {
+    opacity: 1;
+  }
+
+  .modal-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .modal-backdrop {
@@ -13,9 +36,6 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(black, 0.15);
-    opacity: 0;
-    transition: opacity .3s ease;
   }
 
   .modal-dialog {
@@ -27,8 +47,6 @@
     background-color: white;
     box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
     border-radius: var(--border-radius-default);
-    opacity: 0;
-    transform: scale(0.75, 0.75);
   }
 
   .modal-header {
@@ -61,16 +79,5 @@
   .modal-content {
     flex-grow: 1;
     padding: 1rem;
-  }
-}
-
-.Modal.open {
-  .modal-backdrop {
-    opacity: 1;
-  }
-
-  .modal-dialog {
-    opacity: 1;
-    transform: scale(1, 1);
   }
 }

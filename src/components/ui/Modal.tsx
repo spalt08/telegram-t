@@ -1,6 +1,5 @@
-import React, {
-  FC, useEffect, useState,
-} from '../../lib/teact/teact';
+import React, { FC } from '../../lib/teact/teact';
+import useOverlay from '../../hooks/useOverlay';
 
 import './Modal.scss';
 
@@ -10,6 +9,7 @@ interface IProps {
   className?: string;
   children: any;
   onDismiss: () => void;
+  onCloseAnimationEnd?: () => void;
 }
 
 const Modal: FC<IProps> = (props) => {
@@ -19,31 +19,18 @@ const Modal: FC<IProps> = (props) => {
     className,
     children,
     onDismiss,
+    onCloseAnimationEnd,
   } = props;
-  const [isShown, setIsShown] = useState(false);
+  const { overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsShown(true);
-    } else {
-      setTimeout(() => setIsShown(false), 150);
-    }
-  }, [isOpen]);
-
-  let modalClassName = 'Modal';
-
-  if (isOpen) {
-    modalClassName += ' open';
-  }
-
-  if (isShown) {
-    modalClassName += ' shown';
-  }
+  const classNames = ['Modal', className, 'overlay', ...overlayClassNames];
 
   return (
-    <div className={`${modalClassName} ${className || ''}`}>
-      <div>
-        <div className="modal-backdrop" onClick={onDismiss} />
+    <div className={classNames.join(' ')} onTransitionEnd={handleCloseAnimationEnd}>
+      <div className="modal-container">
+        {isOpen && (
+          <div className="modal-backdrop" onClick={onDismiss} />
+        )}
         <div className="modal-dialog">
           <div className="modal-header">
             <div
