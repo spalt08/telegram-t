@@ -82,7 +82,8 @@ export function getPinnedMessageUsername(sender: ApiUser, plain?: boolean) {
 
 export function getServiceMessageContent(
   message: ApiMessage,
-  sender?: ApiUser,
+  originUser?: ApiUser,
+  targetUser?: ApiUser,
   targetMessage?: ApiMessage,
   options: ServiceMessageTextOptions = {},
 ) {
@@ -92,19 +93,30 @@ export function getServiceMessageContent(
   const { text } = message.content.action;
   const content: TextPart[] = [];
 
-  const processedUserText = processPlaceholder(
+  const processedOriginUserText = processPlaceholder(
     text,
-    '%user%',
-    sender
-      ? getPinnedMessageUsername(sender, options.plain)
+    '%origin_user%',
+    originUser
+      ? getPinnedMessageUsername(originUser, options.plain)
       : 'User',
   );
 
-  const rest = processedUserText.pop() as string;
-  content.push(...processedUserText);
+  const secondPart = processedOriginUserText.pop() as string;
+  content.push(...processedOriginUserText);
+
+  const processedTargetUserText = processPlaceholder(
+    secondPart,
+    '%target_user%',
+    targetUser
+      ? getPinnedMessageUsername(targetUser, options.plain)
+      : 'User',
+  );
+
+  const thirdPart = processedTargetUserText.pop() as string;
+  content.push(...processedTargetUserText);
 
   const processedMessageText = processPlaceholder(
-    rest,
+    thirdPart,
     '%message%',
     targetMessage
       ? getPinnedMessageText(targetMessage, options)

@@ -306,19 +306,19 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   }
 
   if (action instanceof GramJs.MessageActionChatCreate) {
-    text = 'Chat created';
+    text = `%origin_user% created the group «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditTitle) {
-    text = `%user% changed group name to «${action.title}»`;
+    text = `%origin_user% changed group name to «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
-    text = 'Chat photo was changed';
+    text = '%origin_user% updated group photo';
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
     text = 'Chat photo was deleted';
   } else if (action instanceof GramJs.MessageActionChatAddUser) {
-    text = '%user% was added to the chat';
+    text = '%origin_user% added %target_user% to the chat';
   } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
-    text = '%user% was removed from the chat';
+    text = '%origin_user% removed %target_user% from the chat';
   } else if (action instanceof GramJs.MessageActionChatJoinedByLink) {
-    text = '%user% joined the chat from invitation link';
+    text = '%origin_user% joined the chat from invitation link';
   } else if (action instanceof GramJs.MessageActionChannelCreate) {
     text = 'Channel created';
   } else if (action instanceof GramJs.MessageActionChatMigrateTo) {
@@ -326,13 +326,13 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   } else if (action instanceof GramJs.MessageActionChannelMigrateFrom) {
     text = 'Channel migrated';
   } else if (action instanceof GramJs.MessageActionPinMessage) {
-    text = '%user% pinned %message%';
+    text = '%origin_user% pinned %message%';
   } else if (action instanceof GramJs.MessageActionHistoryClear) {
     text = 'Chat history was cleared';
   } else if (action instanceof GramJs.MessageActionPhoneCall) {
     text = 'Phone Call';
   } else if (action instanceof GramJs.MessageActionContactSignUp) {
-    text = '%user% joined Telegram';
+    text = '%origin_user% joined Telegram';
   } else {
     text = '%ACTION_NOT_IMPLEMENTED%';
   }
@@ -340,6 +340,13 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   return {
     '@type': 'action',
     text,
+    ...('users' in action && {
+      // Api returns array of userIds, but no action currently has multiple users in it
+      targetUserId: action.users && action.users[0],
+    }),
+    ...('userId' in action && {
+      targetUserId: action.userId,
+    }),
   };
 }
 

@@ -31,6 +31,7 @@ type IProps = {
   chatId: number;
   chat: ApiChat;
   privateChatUser?: ApiUser;
+  actionTargetUser?: ApiUser;
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
@@ -41,6 +42,7 @@ type IProps = {
 const Chat: FC<IProps> = ({
   chat,
   privateChatUser,
+  actionTargetUser,
   lastMessageSender,
   lastMessageOutgoingStatus,
   actionTargetMessage,
@@ -60,6 +62,7 @@ const Chat: FC<IProps> = ({
           {getServiceMessageContent(
             last_message,
             lastMessageSender,
+            actionTargetUser,
             actionTargetMessage,
             { maxTextLength: 16, plain: true },
           )}
@@ -149,6 +152,7 @@ export default memo(withGlobal(
     const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
       ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
       : undefined;
+    const { targetUserId: actionTargetUserId } = lastMessage.content.action || {};
     const privateChatUserId = getPrivateChatUserId(chat);
     const { isUiReady } = global;
 
@@ -157,6 +161,7 @@ export default memo(withGlobal(
       lastMessageSender: selectUser(global, lastMessage.sender_user_id),
       ...(lastMessage.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
+      ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
       isUiReady,
     };

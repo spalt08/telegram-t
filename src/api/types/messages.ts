@@ -56,6 +56,7 @@ export interface ApiContact {
 export interface ApiAction {
   '@type': 'action';
   text: string;
+  targetUserId?: number;
 }
 
 export interface ApiMessageForwardInfo {
