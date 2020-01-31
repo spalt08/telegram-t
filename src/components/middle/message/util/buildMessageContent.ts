@@ -32,6 +32,7 @@ export interface MessageContent {
 
 interface BuildMessageContentOptions {
   isReply?: boolean;
+  hasReply?: boolean;
   isLastInGroup?: boolean;
 }
 
@@ -84,7 +85,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     classNames.push('is-forwarded');
   }
 
-  if (message.reply_to_message_id) {
+  if (options.hasReply) {
     classNames.push('is-reply');
   }
 

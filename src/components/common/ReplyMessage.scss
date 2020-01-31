@@ -10,16 +10,6 @@
   overflow: hidden;
   cursor: pointer;
 
-  &.deleted-message {
-    pointer-events: none;
-
-    .reply-text {
-      padding-top: 0.25rem;
-      padding-bottom: 0.25rem;
-      color: var(--accent-color);
-    }
-  }
-
   .sticker & {
     max-width: 15rem;
     padding: 0.5rem;

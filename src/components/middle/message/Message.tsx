@@ -78,7 +78,7 @@ const Message: FC<IProps> = ({
     sticker,
     contact,
     className: contentClassName,
-  } = buildMessageContent(message, { isLastInGroup });
+  } = buildMessageContent(message, { isLastInGroup, hasReply: Boolean(replyMessage) });
   const isText = Boolean(contentClassName && contentClassName.includes('text'));
   const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
   const isForwarded = Boolean(message.forward_info);
@@ -138,7 +138,7 @@ const Message: FC<IProps> = ({
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {message.reply_to_message_id && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
+        {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
         {photo && (
           <Photo
             message={message}
