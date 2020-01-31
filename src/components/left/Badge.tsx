@@ -17,6 +17,21 @@ const Badge: FC<IProps> = ({ chat }) => {
       classNames.push('muted');
     }
 
+    if (chat.unread_mention_count) {
+      return (
+        <div className="Badge-wrapper">
+          <div className="Badge mention">
+            <i className="icon-username" />
+          </div>
+          {chat.unread_count > 1 && (
+            <div className={classNames.join(' ')}>
+              {chat.unread_count}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className={classNames.join(' ')}>
         {chat.unread_count}

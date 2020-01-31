@@ -12,7 +12,7 @@
   text-align: center;
   flex-shrink: 0;
 
-  &:not(.pinned):not(.muted) {
+  &.mention, &:not(.pinned):not(.muted) {
     background: var(--color-green);
   }
 
@@ -23,5 +23,24 @@
     i {
       font-size: 1.5rem;
     }
+  }
+
+  &.mention {
+    width: 1.5rem;
+    padding: 0.25rem;
+
+    i {
+      font-size: 1rem;
+      vertical-align: super;
+    }
+  }
+}
+
+.Badge-wrapper {
+  display: flex;
+  margin-left: 1.5rem;
+
+  .Badge {
+    margin-left: 0.5rem;
   }
 }

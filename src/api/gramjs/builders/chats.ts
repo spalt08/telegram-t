@@ -18,7 +18,7 @@ export function buildApiChatFromDialog(
     last_read_outbox_message_id: dialog.readOutboxMaxId,
     last_read_inbox_message_id: dialog.readInboxMaxId,
     unread_count: dialog.unreadCount,
-    unread_mention_count: 0, // TODO
+    unread_mention_count: dialog.unreadMentionsCount,
     ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
     is_pinned: dialog.pinned || false,
     is_verified: (('verified' in peerEntity) && peerEntity.verified) || false,
