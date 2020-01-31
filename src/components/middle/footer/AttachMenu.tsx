@@ -9,23 +9,25 @@ import './AttachMenu.scss';
 
 type IProps = {
   isOpen: boolean;
-  onMediaChoose: (file: File) => void;
+  onFileSelect: (file: File, asPhoto: boolean) => void;
   onClose: () => void;
 };
 
-const AttachMenu: FC<IProps> = ({ isOpen, onMediaChoose, onClose }) => {
-  const handleMediaChoose = (e: Event) => {
-    const { files } = (e.target as HTMLInputElement);
+const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
+  const handleFileSelect = (e: Event, asPhoto: boolean) => {
+    const { files } = e.target as HTMLInputElement;
 
     if (files && files.length > 0) {
-      onMediaChoose(files[0]);
+      onFileSelect(files[0], asPhoto);
     }
   };
 
-  const handleFileSelect = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handlePhotoSelect = () => {
+    openSystemFileDialog('image/png,image/gif,image/jpeg', (e) => handleFileSelect(e, true));
+  };
 
-    openSystemFileDialog('image/png,image/gif,image/jpeg', handleMediaChoose);
+  const handleDocumentSelect = () => {
+    openSystemFileDialog('*', (e) => handleFileSelect(e, false));
   };
 
   return (
@@ -38,8 +40,8 @@ const AttachMenu: FC<IProps> = ({ isOpen, onMediaChoose, onClose }) => {
       className="AttachMenu"
       onCloseAnimationEnd={onClose}
     >
-      <MenuItem icon="photo" onClick={handleFileSelect}>Photo or Video</MenuItem>
-      <MenuItem className="not-implemented" icon="document">Document</MenuItem>
+      <MenuItem icon="photo" onClick={handlePhotoSelect}>Photo</MenuItem>
+      <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
     </Menu>
   );
 };

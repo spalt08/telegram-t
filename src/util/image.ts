@@ -26,12 +26,13 @@ export function preloadImage(url: string): Promise<HTMLImageElement> {
 }
 
 export async function getImageDataFromFile(imgFile: File) {
-  const img = await preloadImage(URL.createObjectURL(imgFile));
+  const blobUrl = URL.createObjectURL(imgFile);
+  const { width, height } = await preloadImage(blobUrl);
 
   return {
-    name: imgFile.name,
-    width: img.width,
-    height: img.height,
+    blobUrl,
+    width,
+    height,
   };
 }
 

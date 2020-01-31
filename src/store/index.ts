@@ -23,6 +23,10 @@ const INITIAL_STATE: GlobalState = {
     byChatId: {},
   },
 
+  fileTransfers: {
+    byMessageKey: {},
+  },
+
   authRememberMe: true,
 
   isUiReady: false,
@@ -65,9 +69,9 @@ function updateCache(global: GlobalState) {
     ...global,
     chats: reduceChatsForCache(global),
     messages: reduceMessagesForCache(global),
+    fileTransfers: { byMessageKey: {} },
     connectionState: undefined,
     isUiReady: false,
-    // TODO Reduce `users` and `groups`?
   };
 
   const json = JSON.stringify(reducedState);

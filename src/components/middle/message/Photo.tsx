@@ -19,13 +19,17 @@ import './Media.scss';
 type IProps = {
   message: ApiMessage;
   load?: boolean;
+  fileTransferProgress?: number;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
 const SMALL_IMAGE_THRESHOLD = 12;
 
 const Photo: FC<IProps> = ({
-  message, load, onClick,
+  message,
+  load,
+  fileTransferProgress,
+  onClick,
 }) => {
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !load);
@@ -58,7 +62,7 @@ const Photo: FC<IProps> = ({
       />
       {!mediaData && (
         <div className="message-media-loading">
-          <Spinner color="white" />
+          <Spinner color="white" progress={fileTransferProgress} />
         </div>
       )}
       <img

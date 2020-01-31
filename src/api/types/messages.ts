@@ -13,7 +13,6 @@ export interface ApiThumbnail {
 
 export interface ApiPhoto {
   '@type': 'photo';
-  has_stickers: boolean;
   thumbnail?: ApiThumbnail;
   sizes: ApiPhotoSize[];
 }

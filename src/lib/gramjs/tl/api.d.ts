@@ -17,9 +17,10 @@ namespace Api {
   type Client = any; // To be defined.
   type Utils = any; // To be defined.
 
-  type X = unknown; // TODO Verify this.
-  type Type = unknown; // TODO Verify this.
+  type X = unknown;
+  type Type = unknown;
   type Bool = boolean;
+  type int = number;
   type int128 = number;
   type int256 = number;
   type long = BigInteger;

@@ -1,4 +1,5 @@
 import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
+import { getMessageKey } from './messages';
 
 type IDimensions = {
   width: number;
@@ -52,7 +53,7 @@ export function getMessageMediaHash(
     return undefined;
   }
 
-  const base = `msg${message.chat_id}-${message.id}`;
+  const base = getMessageKey(message.chat_id, message.id);
 
   if (photo) {
     switch (target) {
@@ -121,7 +122,7 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
   }
 
   if (video.width && video.height) {
-    return video! as IDimensions;
+    return video as IDimensions;
   }
 
   return undefined;

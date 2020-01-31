@@ -37,9 +37,10 @@ const MessageInput: FC<IProps> = ({
 
   function onKeyPress(e: KeyboardEvent<HTMLTextAreaElement>) {
     const { currentTarget } = e;
-    const value = currentTarget.value.trim();
 
-    if (e.keyCode === 13 && !e.shiftKey && value.length) {
+    if (e.keyCode === 13 && !e.shiftKey) {
+      e.preventDefault();
+
       onSendMessage();
       currentTarget.removeAttribute('style');
 

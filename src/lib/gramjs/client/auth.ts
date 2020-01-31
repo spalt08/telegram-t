@@ -17,7 +17,7 @@ export interface BotAuthParams {
 }
 
 interface ApiCredentials {
-    apiId: string,
+    apiId: number,
     apiHash: string,
 }
 

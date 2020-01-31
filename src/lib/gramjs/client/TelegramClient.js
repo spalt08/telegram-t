@@ -14,6 +14,7 @@ const { UpdateConnectionState } = require("../network")
 const { FloodWaitError } = require('../errors/RPCErrorList')
 const { ConnectionTCPObfuscated } = require('../network/connection/TCPObfuscated')
 const { authFlow, checkAuthorization } = require('./auth')
+const { uploadFile } = require('./uploadFile')
 
 const DEFAULT_DC_ID = 2
 const DEFAULT_IPV4_IP = 'venus.web.telegram.org'
@@ -313,23 +314,25 @@ class TelegramClient {
             throw new Error('The part size must be evenly divisible by 4096')
         }
         const fileWriter = new BinaryWriter(Buffer.alloc(0))
-
-        let exported = dcId && this.session.dcId !== dcId
+        // We need a separate download/upload connection
+        let exported = dcId
 
         let sender
         if (exported) {
             try {
                 sender = await this._borrowExportedSender(dcId)
             } catch (e) {
+                // This should never raise
+                console.error(e)
                 if (e.message === 'DC_ID_INVALID') {
                     // Can't export a sender for the ID we are currently in
                     sender = this._sender
-                    exported = false
                 } else {
                     throw e
                 }
             }
         } else {
+            // Fallback to main sender if dcId was undefined
             sender = this._sender
         }
 
@@ -594,7 +597,8 @@ class TelegramClient {
         if (request.classType !== 'request') {
             throw new Error('You can only invoke MTProtoRequests')
         }
-        //await request.resolve(this, utils)
+        // This causes issues for now because not enough utils
+        // await request.resolve(this, utils)
 
         if (request.CONSTRUCTOR_ID in this._floodWaitedRequests) {
             const due = this._floodWaitedRequests[request.CONSTRUCTOR_ID]
@@ -675,6 +679,9 @@ class TelegramClient {
         await authFlow(this, apiCredentials, authParams)
     }
 
+    uploadFile(fileParams) {
+        return uploadFile(this, fileParams);
+    }
 
     // event region
     addEventHandler(callback, event) {

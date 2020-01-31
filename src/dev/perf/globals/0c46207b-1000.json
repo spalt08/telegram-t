@@ -1,5 +1,8 @@
 {
   "showRightColumn": true,
+  "fileTransfers": {
+    "byMessageKey": {}
+  },
   "users": {
     "byId": {
       "454000": {

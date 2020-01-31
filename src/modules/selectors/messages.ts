@@ -2,6 +2,7 @@ import { GlobalState } from '../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat, selectIsChatWithSelf } from './chats';
 import {
+  getMessageKey,
   getSendingState, isChannel, isMessageLocal, isPrivateChat, isSuperGroup,
 } from '../helpers';
 import { selectUser } from './users';
@@ -70,4 +71,11 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   return {
     canReply, canPin, canDelete, canDeleteForAll,
   };
+}
+
+export function selectFileTransferProgress(global: GlobalState, message: ApiMessage) {
+  const messageKey = getMessageKey(message.chat_id, message.id);
+  const fileTransfer = global.fileTransfers.byMessageKey[messageKey];
+
+  return fileTransfer ? fileTransfer.progress : undefined;
 }

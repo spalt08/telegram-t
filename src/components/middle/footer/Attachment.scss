@@ -1,11 +1,7 @@
-.MessageInputImage {
-  display: none;
+.Attachment {
+  display: flex;
   align-items: flex-start;
   padding: .5rem .5rem 0 .5rem;
-
-  &.loaded {
-    display: flex;
-  }
 
   & > .Button {
     flex-shrink: 0;
@@ -28,8 +24,14 @@
       border-radius: 0.25rem;
     }
   }
+
+  .document-wrapper {
+    padding: 0.09rem 0 0 0.5rem;
+    color: #333333;
+    font-weight: 500;
+  }
 }
 
-.MessageInputReply + .MessageInputImage {
+.MessageInputReply + .Attachment {
   margin-top: .75rem;
 }

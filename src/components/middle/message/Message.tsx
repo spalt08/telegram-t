@@ -6,7 +6,12 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
-import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../modules/selectors';
+import {
+  selectChatMessage,
+  selectFileTransferProgress,
+  selectOutgoingStatus,
+  selectUser,
+} from '../../../modules/selectors';
 import {
   getMessageMediaHash,
   getUserFullName,
@@ -48,6 +53,7 @@ type IProps = {
   canDelete?: boolean;
   contactFirstName: string | null;
   outgoingStatus?: ApiMessageOutgoingStatus;
+  fileTransferProgress?: number;
 } & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
@@ -60,6 +66,7 @@ const Message: FC<IProps> = ({
   replyMessageSender,
   originSender,
   outgoingStatus,
+  fileTransferProgress,
   selectMediaMessage,
   openUserInfo,
   isFirstInGroup,
@@ -150,6 +157,7 @@ const Message: FC<IProps> = ({
           <Photo
             message={message}
             load={loadAndPlayMedia}
+            fileTransferProgress={fileTransferProgress}
             onClick={openMediaMessage}
           />
         )}
@@ -293,6 +301,8 @@ export default memo(withGlobal(
       originUserId = message.forward_info.origin.sender_user_id;
     }
 
+    const fileTransferProgress = selectFileTransferProgress(global, message);
+
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
@@ -301,6 +311,7 @@ export default memo(withGlobal(
         replyMessageSender: selectUser(global, replyMessage.sender_user_id),
       }),
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
+      ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
     };
   },
   (setGlobal, actions) => {

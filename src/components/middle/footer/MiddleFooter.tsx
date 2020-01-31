@@ -4,44 +4,55 @@ import React, {
 import { GlobalActions } from '../../../store/types';
 import { withGlobal } from '../../../lib/teact/teactn';
 
+import { ApiAttachment } from '../../../api/types';
+
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
 import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
-import MessageInputImage from './MessageInputImage';
+import Attachment from './Attachment';
+
+import { getImageDataFromFile } from '../../../util/image';
+
 import './MiddleFooter.scss';
 
-type IProps = Pick<GlobalActions, 'sendTextMessage'>;
+type IProps = Pick<GlobalActions, 'sendMessage'>;
 
-const MiddleFooter: FC<IProps> = ({ sendTextMessage }) => {
+const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+
+const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
-  const [attachedImage, setAttachedImage] = useState(null);
-  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
-  const isSendButton = Boolean(messageText);
+  const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const canSend = Boolean(messageText) || Boolean(attachment);
 
   const onSendMessage = () => {
-    if (messageText !== '') {
-      sendTextMessage({
+    if (canSend) {
+      sendMessage({
         text: messageText,
+        attachment,
       });
+
       setMessageText('');
+      setAttachment(undefined);
     }
   };
 
   useEffect(() => {
-    function pasteImageFromClipboard(e: ClipboardEvent) {
+    async function pasteImageFromClipboard(e: ClipboardEvent) {
       if (!e.clipboardData) {
         return;
       }
 
       const { items } = e.clipboardData;
-      const acceptedTypes = ['image/png', 'image/jpeg', 'image/gif'];
 
-      const file = Array.from(items).find((item) => acceptedTypes.includes(item.type));
+      const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
+      const file = media && media.getAsFile();
 
       if (file) {
-        setAttachedImage(file.getAsFile());
         e.preventDefault();
+
+        setAttachment(await buildAttachment(file, true));
       }
     }
 
@@ -52,51 +63,51 @@ const MiddleFooter: FC<IProps> = ({ sendTextMessage }) => {
     };
   }, []);
 
-  const handleClearAttachedImage = useCallback(() => {
-    setAttachedImage(null);
+  const handleClearAttachedFile = useCallback(() => {
+    setAttachment(undefined);
   }, []);
 
-  const handleOpenAttachMenu = useCallback(() => {
-    setIsAttachMenuOpen(true);
+  const handleOpenMenu = useCallback(() => {
+    setIsMenuOpen(true);
   }, []);
 
-  const handleCloseAttachMenu = useCallback(() => {
-    setIsAttachMenuOpen(false);
+  const handleCloseMenu = useCallback(() => {
+    setIsMenuOpen(false);
   }, []);
 
-  const handleMediaChoose = useCallback((file: File) => {
-    setAttachedImage(file);
+  const handleFileSelect = useCallback(async (file: File, asPhoto: boolean) => {
+    setAttachment(await buildAttachment(file, asPhoto));
   }, []);
 
   return (
     <div className="MiddleFooter">
       <div id="message-compose">
         <MessageInputReply />
-        {attachedImage && <MessageInputImage image={attachedImage} onClearImage={handleClearAttachedImage} />}
+        {attachment && <Attachment attachment={attachment} onClearFile={handleClearAttachedFile} />}
         <div className="message-input-wrapper">
           <Button className="not-implemented" round color="translucent">
             <i className="icon-smile" />
           </Button>
           <MessageInput messageText={messageText} setMessageText={setMessageText} onSendMessage={onSendMessage} />
           <Button
-            className={`${isAttachMenuOpen ? 'activated' : ''}`}
+            className={`${isMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onClick={handleOpenAttachMenu}
+            onClick={handleOpenMenu}
           >
             <i className="icon-attach" />
           </Button>
           <AttachMenu
-            isOpen={isAttachMenuOpen}
-            onMediaChoose={handleMediaChoose}
-            onClose={handleCloseAttachMenu}
+            isOpen={isMenuOpen}
+            onFileSelect={handleFileSelect}
+            onClose={handleCloseMenu}
           />
         </div>
       </div>
       <Button
         round
         color="primary"
-        className={`${isSendButton ? 'send' : 'microphone not-implemented'}`}
+        className={`${canSend ? 'send' : 'microphone not-implemented'}`}
         onClick={onSendMessage}
       >
         <i className="icon-send" />
@@ -106,10 +117,17 @@ const MiddleFooter: FC<IProps> = ({ sendTextMessage }) => {
   );
 };
 
+async function buildAttachment(file: File, asPhoto: boolean): Promise<ApiAttachment> {
+  return {
+    file,
+    ...(asPhoto && { photo: await getImageDataFromFile(file) }),
+  };
+}
+
 export default withGlobal(
   undefined,
   (setGlobal, actions) => {
-    const { sendTextMessage } = actions;
-    return { sendTextMessage };
+    const { sendMessage } = actions;
+    return { sendMessage };
   },
 )(MiddleFooter);

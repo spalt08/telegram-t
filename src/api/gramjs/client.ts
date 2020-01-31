@@ -109,6 +109,10 @@ export function downloadMedia(url: string) {
   return queuedDownloadMedia(client, url);
 }
 
+export function uploadFile(file: File, onProgress: (progress: number) => void) {
+  return client.uploadFile({ file, onProgress });
+}
+
 async function loadCurrentUser() {
   const users = await invokeRequest(new GramJs.users.GetUsers({
     id: [new GramJs.InputUserSelf()],

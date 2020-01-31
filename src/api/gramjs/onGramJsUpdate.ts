@@ -86,13 +86,13 @@ export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, o
         chat_id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       }),
     });
-  } else if (
-    (originRequest instanceof GramJs.messages.SendMessage)
-    && (
-      update instanceof GramJs.UpdateMessageID
-      || update instanceof GramJs.UpdateShortSentMessage
-    )
-  ) {
+  } else if ((
+    originRequest instanceof GramJs.messages.SendMessage
+    || originRequest instanceof GramJs.messages.SendMedia
+  ) && (
+    update instanceof GramJs.UpdateMessageID
+    || update instanceof GramJs.UpdateShortSentMessage
+  )) {
     const { randomId } = originRequest;
     const localMessage = localDb.localMessages[randomId.toString()];
     if (!localMessage) {

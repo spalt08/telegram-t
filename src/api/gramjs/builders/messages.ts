@@ -10,6 +10,7 @@ import {
   ApiDocument,
   ApiAction,
   ApiContact,
+  ApiAttachment,
   ApiThumbnail,
 } from '../../types';
 
@@ -164,14 +165,12 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | null {
     return null;
   }
 
-  const hasStickers = Boolean(media.photo.hasStickers);
   const sizes = media.photo.sizes
     .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
     .map(buildApiPhotoSize);
 
   return {
     '@type': 'photo',
-    has_stickers: hasStickers,
     thumbnail: buildApiThumbnailFromStripped(media.photo.sizes),
     sizes,
   };
@@ -354,7 +353,7 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
 let localMessageCounter = -1;
 
 export function buildLocalMessage(
-  chatId: number, currentUserId: number, text: string, replyingTo?: number,
+  chatId: number, currentUserId: number, text: string, replyingTo?: number, attachment?: ApiAttachment,
 ): ApiMessage {
   const localId = localMessageCounter--;
 
@@ -367,6 +366,7 @@ export function buildLocalMessage(
         '@type': 'formattedText',
         text,
       },
+      ...(attachment && buildUploadingMedia(attachment)),
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,
@@ -376,4 +376,33 @@ export function buildLocalMessage(
     },
     ...(replyingTo && { reply_to_message_id: replyingTo }),
   };
+}
+
+function buildUploadingMedia(attachment: ApiAttachment): { photo: ApiPhoto } | { document: ApiDocument } {
+  if (attachment.photo) {
+    const { width, height, blobUrl } = attachment.photo;
+
+    return {
+      photo: {
+        '@type': 'photo',
+        thumbnail: {
+          width,
+          height,
+          dataUri: blobUrl,
+        },
+        sizes: [],
+      },
+    };
+  } else {
+    const { type: mimeType, name: fileName, size } = attachment.file;
+
+    return {
+      document: {
+        '@type': 'document',
+        mimeType,
+        fileName,
+        size,
+      },
+    };
+  }
 }

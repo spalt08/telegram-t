@@ -5,6 +5,7 @@ import { updateChat } from '../../common/chats';
 import { deleteMessages, updateMessage } from '../../common/messages';
 import { GlobalState } from '../../../store/types';
 import { selectChatMessage, selectChatMessages } from '../../selectors';
+import { getMessageKey, getMessagePhoto } from '../../helpers';
 
 const DELETING_DELAY = 200;
 
@@ -14,6 +15,13 @@ export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
     case 'newMessage': {
       const { chat_id, id, message } = update;
+
+      // Preserve HD thumbnail for uploaded photos.
+      const currentMessage = selectChatMessage(global, chat_id, id);
+      const currentPhoto = currentMessage && getMessagePhoto(currentMessage);
+      if (currentPhoto && message.content && message.content.photo) {
+        message.content.photo.thumbnail = currentPhoto.thumbnail;
+      }
 
       let newGlobal = updateMessage(global, chat_id, id, message);
 
@@ -105,6 +113,22 @@ export function onUpdate(update: ApiUpdate) {
       });
 
       setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateFileUploadProgress': {
+      const { chat_id, message_id, progress } = update;
+
+      setGlobal({
+        ...global,
+        fileTransfers: {
+          byMessageKey: {
+            ...global.fileTransfers.byMessageKey,
+            [getMessageKey(chat_id, message_id)]: { progress },
+          },
+        },
+      });
 
       break;
     }

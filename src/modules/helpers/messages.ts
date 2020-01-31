@@ -1,5 +1,9 @@
 import { ApiMessage } from '../../api/types';
 
+export function getMessageKey(chatId: number, messageId: number) {
+  return `msg${chatId}-${messageId}`;
+}
+
 export function getLastMessageText(message: ApiMessage) {
   const {
     text,

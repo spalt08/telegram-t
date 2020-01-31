@@ -27,6 +27,12 @@ export type GlobalState = {
     }>;
   };
 
+  fileTransfers: {
+    byMessageKey: Record<string, {
+      progress: number;
+    }>;
+  };
+
   // TODO Move to `auth`.
   isLoggingOut?: boolean;
   authState?: ApiUpdateAuthorizationStateType;
@@ -54,7 +60,7 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' |
   // messages
-  'loadMessages' | 'loadMoreMessages' | 'selectMessage' | 'sendTextMessage' | 'pinMessage' | 'deleteMessages' |
+  'loadMessages' | 'loadMoreMessages' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry'

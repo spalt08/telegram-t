@@ -1,7 +1,9 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiChat, OnApiUpdate } from '../../types';
+import {
+  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate,
+} from '../../types';
 
-import { invokeRequest } from '../client';
+import { invokeRequest, uploadFile } from '../client';
 import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../builders/messages';
 import { buildApiUser } from '../builders/users';
 import {
@@ -46,11 +48,15 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
 }
 
 export async function sendMessage({
-  chat, currentUserId, text, replyingTo,
+  chat, currentUserId, text, replyingTo, attachment,
 }: {
-  chat: ApiChat; currentUserId: number; text: string; replyingTo?: number;
+  chat: ApiChat;
+  currentUserId: number;
+  text: string;
+  replyingTo?: number;
+  attachment?: ApiAttachment;
 }) {
-  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo);
+  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -61,12 +67,39 @@ export async function sendMessage({
   const randomId = generateRandomBigInt();
   localDb.localMessages[randomId.toString()] = localMessage;
 
-  await invokeRequest(new GramJs.messages.SendMessage({
+  const media = attachment ? await uploadMedia(localMessage, attachment) : undefined;
+  const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
+
+  await invokeRequest(new RequestClass({
     message: text,
     peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
     ...(replyingTo && { replyToMsgId: replyingTo }),
+    ...(media && { media }),
   }), true);
+}
+
+async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) {
+  const inputFile = await uploadFile(attachment.file, (progress) => {
+    onUpdate({
+      '@type': 'updateFileUploadProgress',
+      chat_id: localMessage.chat_id,
+      message_id: localMessage.id,
+      progress,
+    });
+  });
+
+  const { file: { type: mimeType, name: fileName }, photo } = attachment;
+
+  return photo
+    ? new GramJs.InputMediaUploadedPhoto({ file: inputFile })
+    : new GramJs.InputMediaUploadedDocument({
+      file: inputFile,
+      mimeType,
+      attributes: [
+        new GramJs.DocumentAttributeFilename({ fileName }),
+      ],
+    });
 }
 
 export async function pinMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {

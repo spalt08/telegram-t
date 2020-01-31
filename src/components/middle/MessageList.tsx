@@ -135,9 +135,9 @@ const MessageList: FC<IProps> = ({
     const { scrollHeight, clientHeight } = containerRef.current;
     if (scrollHeight !== clientHeight) {
       containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
-    } else {
-      playMediaInViewport();
     }
+
+    playMediaInViewport();
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console

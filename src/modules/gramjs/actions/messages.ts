@@ -31,7 +31,7 @@ addReducer('loadMoreMessages', (global) => {
   void loadMessages(chat, lowestMessageId || undefined);
 });
 
-addReducer('sendTextMessage', (global, actions, payload) => {
+addReducer('sendMessage', (global, actions, payload) => {
   const chat = selectOpenChat(global);
   const { currentUserId } = global;
 
@@ -39,11 +39,11 @@ addReducer('sendTextMessage', (global, actions, payload) => {
     return;
   }
 
-  const { text } = payload!;
+  const { text, attachment } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
   void callSdk('sendMessage', {
-    chat, currentUserId, text, replyingTo,
+    chat, currentUserId, text, replyingTo, attachment,
   });
 });
 
