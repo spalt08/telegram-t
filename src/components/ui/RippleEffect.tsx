@@ -30,8 +30,8 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
     const exec = () => setRipples([
       ...ripples,
       {
-        x: e.pageX - position.x - (rippleSize / 2),
-        y: e.pageY - position.y - (rippleSize / 2),
+        x: e.clientX - position.x - (rippleSize / 2),
+        y: e.clientY - position.y - (rippleSize / 2),
         size: rippleSize,
       },
     ]);
