@@ -195,7 +195,7 @@
 
   .sender-name {
     font-size: 0.875rem;
-    font-weight: bold;
+    font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
   }
@@ -206,7 +206,7 @@
   }
 
   &.can-have-appendix, &.media.is-reply {
-    padding: .375rem .5625rem;
+    padding: .3125rem .5rem .375rem;
   }
 
   &.can-have-appendix {

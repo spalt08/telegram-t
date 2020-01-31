@@ -1,8 +1,10 @@
 .ReplyMessage {
   display: flex;
   align-items: center;
-  margin: 0 -.1875rem;
-  padding: .125rem .25rem .25rem .375rem;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  margin: 0 -.1875rem .0625rem;
+  padding: .1875rem .25rem .1875rem .4375rem;
   border-radius: var(--border-radius-messages-small);
   position: relative;
   overflow: hidden;
@@ -36,9 +38,9 @@
     content: '';
     display: block;
     position: absolute;
-    top: .25rem;
-    bottom: .375rem;
-    left: 0.25rem;
+    top: .3125rem;
+    bottom: .3125rem;
+    left: .3125rem;
     width: 2px;
     background: var(--accent-color);
     border-radius: 2px;
@@ -62,8 +64,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.875rem;
-      line-height: 1.125rem;
       height: 1.125rem;
       margin-bottom: 0;
 
@@ -78,17 +78,14 @@
     width: 2rem;
     height: 2rem;
     object-fit: cover;
-    border-radius: 0.25rem;
-    margin-left: 0.4rem;
+    border-radius: .25rem;
+    margin-left: .25rem;
     flex-shrink: 0;
   }
 
   &.inside-input {
-    font-size: 0.875rem;
-    line-height: 1.125rem;
     padding-left: 0.5625rem;
-    padding-bottom: .0625rem;
-    margin: 0 0 0 -0.1875rem;
+    margin: 0 0 -.125rem -0.1875rem;
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: 1fr;
@@ -97,19 +94,20 @@
     --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
 
     &::before {
-      left: 0.3125rem;
-      bottom: .1875rem;
+      bottom: .3125rem;
     }
 
-    img,
+    img {
+      margin-left: .125rem;
+    }
+
     .reply-text {
-      margin-left: .35rem;
+      margin-left: .375rem;
     }
 
     .sender-name {
-      font-weight: bold;
+      font-weight: 500;
       color: var(--accent-color);
-      line-height: .75rem;
     }
   }
 }
