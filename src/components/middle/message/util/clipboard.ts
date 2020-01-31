@@ -12,7 +12,7 @@ export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => v
   const options: ICopyOptions = [];
   const text = getMessageText(message);
   const photo = getMessagePhoto(message);
-  const mediaHash = getMessageMediaHash(message, 'inline');
+  const mediaHash = getMessageMediaHash(message, 'inline')!;
   const canImageBeCopied = photo && mediaHash && CLIPBOARD_ITEM_SUPPORTED;
   const selection = window.getSelection();
 
@@ -20,8 +20,7 @@ export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => v
     options.push({
       label: 'Copy Media',
       handler: () => {
-        const blobUrl = mediaLoader.fetch(mediaHash as string, mediaLoader.Type.BlobUrl) as Promise<string>;
-        blobUrl.then((url) => copyImageToClipboard(url));
+        mediaLoader.fetch(mediaHash, mediaLoader.Type.BlobUrl).then(copyImageToClipboard);
 
         if (afterEffect) {
           afterEffect();

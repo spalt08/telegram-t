@@ -7,7 +7,12 @@ import { GlobalActions } from '../../../store/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
 import { selectChatMessage, selectOutgoingStatus, selectUser } from '../../../modules/selectors';
-import { getMessageMediaHash, getUserFullName, isOwnMessage } from '../../../modules/helpers';
+import {
+  getMessageMediaHash,
+  getUserFullName,
+  isOwnMessage,
+  isReplyMessage,
+} from '../../../modules/helpers';
 import { getImageDimensions, getVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
 import getMinMediaWidth from './util/minMediaWidth';
@@ -138,7 +143,9 @@ const Message: FC<IProps> = ({
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
+        {replyMessage && (
+          <ReplyMessage message={replyMessage} sender={replyMessageSender} loadPictogram={loadAndPlayMedia} />
+        )}
         {photo && (
           <Photo
             message={message}
@@ -253,6 +260,10 @@ function buildClassNames(
 
   if (getMessageMediaHash(message, 'inline')) {
     classNames.push('has-media');
+  }
+
+  if (isReplyMessage(message)) {
+    classNames.push('has-reply');
   }
 
   if (hasContextMenu) {

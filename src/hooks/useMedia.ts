@@ -7,12 +7,12 @@ export default <T extends mediaLoader.Type = mediaLoader.Type.BlobUrl>(
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
   type: T = mediaLoader.Type.BlobUrl,
 ) => {
-  const [, onBlobUrlUpdate] = useState(null);
+  const [, onMediaLoad] = useState(null);
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, type).then(onBlobUrlUpdate);
+      mediaLoader.fetch(mediaHash, type).then(onMediaLoad);
     }
   }, [noLoad, mediaHash, mediaData, type]);
 

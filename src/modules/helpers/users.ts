@@ -161,9 +161,9 @@ export function isUserOnline(user: ApiUser) {
   return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-export function getUserAvatarHash(user: ApiUser): string | null {
+export function getUserAvatarHash(user: ApiUser) {
   if (!user.avatar) {
-    return null;
+    return undefined;
   }
 
   return `avatar${user.id}?${user.avatar.hash}`;

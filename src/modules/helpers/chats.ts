@@ -58,9 +58,9 @@ export function getChatLink(chat: ApiChat) {
   return username ? `t.me/${username}` : '';
 }
 
-export function getChatAvatarHash(chat: ApiChat): string | null {
+export function getChatAvatarHash(chat: ApiChat) {
   if (!chat.avatar) {
-    return null;
+    return undefined;
   }
 
   return `avatar${chat.id}?${chat.avatar.hash}`;

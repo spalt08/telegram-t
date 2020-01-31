@@ -27,9 +27,14 @@ export function getMessageContact(message: ApiMessage) {
 }
 
 export function getMessageMediaThumbDataUri(message: ApiMessage) {
-  const { thumbnail } = message.content.photo || message.content.video || message.content.sticker || {};
+  const { photo, video, sticker } = message.content;
+  const media = photo || video || sticker;
 
-  return thumbnail ? thumbnail.dataUri : undefined;
+  if (!media) {
+    return undefined;
+  }
+
+  return media.thumbnail ? media.thumbnail.dataUri : undefined;
 }
 
 export function getMessageMediaHash(
@@ -37,6 +42,11 @@ export function getMessageMediaHash(
   target: 'inline' | 'pictogram' | 'viewerPreview' | 'viewerFull',
 ) {
   const { photo, video, sticker } = message.content;
+
+  if (!(photo || video || sticker)) {
+    return undefined;
+  }
+
   const base = `msg${message.chat_id}-${message.id}`;
 
   if (photo) {

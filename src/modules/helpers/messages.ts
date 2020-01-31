@@ -67,6 +67,10 @@ export function isOwnMessage(message: ApiMessage) {
   return message.is_outgoing;
 }
 
+export function isReplyMessage(message: ApiMessage) {
+  return Boolean(message.reply_to_message_id);
+}
+
 export function isForwardedMessage(message: ApiMessage) {
   return Boolean(message.forward_info);
 }

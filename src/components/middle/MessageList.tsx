@@ -230,7 +230,7 @@ const MessageList: FC<IProps> = ({
 function findMediaMessagesInViewport(container: HTMLElement) {
   const viewportY1 = container.scrollTop;
   const viewportY2 = viewportY1 + container.clientHeight;
-  const messageEls = container.querySelectorAll('.Message.has-media');
+  const messageEls = container.querySelectorAll('.Message.has-media, .Message.has-reply');
   const visibleIds: number[] = [];
   let isFound = false;
 

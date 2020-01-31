@@ -9,17 +9,17 @@ import { selectChat, selectChatMessage, selectSender } from '../../modules/selec
 import './SenderInfo.scss';
 
 type IProps = {
-  chatId: number;
-  messageId: number;
-  message: ApiMessage;
-  isChannelChatMessage: boolean;
-  sender: ApiUser | ApiChat;
+  messageId?: number;
+  chatId?: number;
+  message?: ApiMessage;
+  isChannelChatMessage?: boolean;
+  sender?: ApiUser | ApiChat;
 };
 
 const SenderInfo: FC<IProps> = ({
-  messageId, sender, isChannelChatMessage, message,
+  sender, isChannelChatMessage, message,
 }) => {
-  if (!messageId) {
+  if (!message) {
     return null;
   }
 

@@ -1,6 +1,4 @@
-import React, {
-  FC, useEffect, useState,
-} from '../../lib/teact/teact';
+import React, { FC } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat } from '../../api/types';
 import {
@@ -8,6 +6,7 @@ import {
   getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
 } from '../../modules/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
+import useMedia from '../../hooks/useMedia';
 
 import './Avatar.scss';
 
@@ -24,7 +23,7 @@ interface IProps {
 const Avatar: FC<IProps> = ({
   size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages, className,
 }) => {
-  let imageHash: string | null = null;
+  let imageHash: string | undefined;
 
   if (!isSavedMessages) {
     if (chat) {
@@ -34,14 +33,7 @@ const Avatar: FC<IProps> = ({
     }
   }
 
-  const [, onDataUriUpdate] = useState(null);
-  const dataUri = imageHash && mediaLoader.getFromMemory<mediaLoader.Type.DataUri>(imageHash);
-
-  useEffect(() => {
-    if (imageHash && !dataUri) {
-      mediaLoader.fetch(imageHash, mediaLoader.Type.DataUri).then(onDataUriUpdate);
-    }
-  }, [imageHash, dataUri]);
+  const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
 
   let content: string | null = '';
   const isOnline = !isSavedMessages && user && isUserOnline(user);

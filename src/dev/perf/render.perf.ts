@@ -8,6 +8,7 @@ import { GlobalState } from '../../store/types';
 import { ApiMessage } from '../../api/types';
 
 const puppeteer = require('puppeteer');
+// const path = require('path');
 
 const globalState = require('./globals/0c46207b-1000.json');
 

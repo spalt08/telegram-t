@@ -19,13 +19,14 @@ const asCacheApiType = {
 
 type ParsedMedia = string | Blob | AnyLiteral;
 type MemoryMedia = string | AnyLiteral;
+type TypeToMemory<T> = T extends Type.Lottie ? AnyLiteral : string;
 
 const MEMORY_CACHE: Record<string, MemoryMedia> = {};
 const FETCH_PROMISES: Record<string, Promise<MemoryMedia | null>> = {};
 
 let pako: typeof import('../lib/pako_inflate');
 
-export function fetch(url: string, mediaType: Type) {
+export function fetch<T extends Type>(url: string, mediaType: T) {
   if (!FETCH_PROMISES[url]) {
     FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType).catch((err) => {
       if (DEBUG && process.env.NODE_ENV !== 'perf') {
@@ -39,11 +40,11 @@ export function fetch(url: string, mediaType: Type) {
     });
   }
 
-  return FETCH_PROMISES[url];
+  return FETCH_PROMISES[url] as Promise<TypeToMemory<T>>;
 }
 
 export function getFromMemory<T extends Type>(url: string) {
-  return MEMORY_CACHE[url] as (T extends Type.Lottie ? AnyLiteral : string);
+  return MEMORY_CACHE[url] as TypeToMemory<T>;
 }
 
 async function fetchFromCacheOrRemote(url: string, mediaType: Type) {

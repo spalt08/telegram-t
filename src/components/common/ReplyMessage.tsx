@@ -15,15 +15,16 @@ type IProps = {
   message: ApiMessage;
   sender?: ApiUser;
   className?: string;
+  loadPictogram?: boolean;
 };
 
 const ReplyMessage: FC<IProps> = ({
-  message, sender, className,
+  message, sender, className, loadPictogram,
 }) => {
   const { text } = buildMessageContent(message, { isReply: true });
 
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
+  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'), !loadPictogram);
 
   return (
     <div className={`ReplyMessage not-implemented ${className || ''}`}>
