@@ -2,7 +2,7 @@ import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
-import { getImageDimensions } from '../../../util/mediaDimensions';
+import { calculateInlineImageDimensions } from '../../../util/mediaDimensions';
 import getMinMediaWidth from './util/minMediaWidth';
 import Spinner from '../../ui/Spinner';
 
@@ -75,7 +75,7 @@ const Photo: FC<IProps> = ({
 function calculateDimensions(message: ApiMessage) {
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const { width, height } = getImageDimensions(message.content.photo!, isOwn, isForwarded);
+  const { width, height } = calculateInlineImageDimensions(message.content.photo!, isOwn, isForwarded);
 
   const hasText = Boolean(getMessageText(message));
   const minMediaWidth = getMinMediaWidth(hasText);

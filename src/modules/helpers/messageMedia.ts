@@ -1,5 +1,10 @@
 import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
 
+type IDimensions = {
+  width: number;
+  height: number;
+};
+
 const MAX_INLINE_VIDEO_DURATION = 10;
 
 export function getMessagePhoto(message: ApiMessage) {
@@ -89,22 +94,6 @@ export function canMessagePlayVideoInline(video: ApiVideo): boolean {
   return video.duration <= MAX_INLINE_VIDEO_DURATION;
 }
 
-export function getMessagePhotoInlineSize(photo: ApiPhoto) {
-  return (
-    photo.sizes.find((size) => size.type === 'm')
-    || photo.sizes.find((size) => size.type === 's')
-    || photo.thumbnail
-  );
-}
-
-export function getMessagePhotoMaxSize(photo: ApiPhoto) {
-  return (
-    photo.sizes.find((size) => size.type === 'y')
-    || photo.sizes.find((size) => size.type === 'x')
-    || getMessagePhotoInlineSize(photo)
-  );
-}
-
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
   return Object.keys(messages)
     .reduce((result, id) => {
@@ -115,4 +104,25 @@ export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
 
       return result;
     }, [] as Array<number>);
+}
+
+export function getPhotoDimensions(photo: ApiPhoto): IDimensions | undefined {
+  return (
+    photo.sizes.find((size) => size.type === 'x')
+    || photo.sizes.find((size) => size.type === 'm')
+    || photo.sizes.find((size) => size.type === 's')
+    || photo.thumbnail
+  );
+}
+
+export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
+  if (video.thumbnail) {
+    return video.thumbnail;
+  }
+
+  if (video.width && video.height) {
+    return video! as IDimensions;
+  }
+
+  return undefined;
 }

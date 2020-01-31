@@ -13,6 +13,7 @@ import {
   getMessageVideo,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
+  getVideoDimensions,
 } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -27,7 +28,6 @@ import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
-import { getDimensionsFromVideo } from '../../util/mediaDimensions';
 
 type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
   chatId?: number;
@@ -148,7 +148,7 @@ const MediaViewer: FC<IProps> = ({
           {isVideo && renderVideo(
             blobUrlFull,
             blobUrlPreview || thumbDataUri,
-            getDimensionsFromVideo(message.content.video!),
+            getVideoDimensions(message.content.video!),
           )}
           {!isFirst && (
             <button

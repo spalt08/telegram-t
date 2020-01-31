@@ -13,7 +13,7 @@ import {
   isOwnMessage,
   isReplyMessage,
 } from '../../../modules/helpers';
-import { getImageDimensions, getVideoDimensions } from '../../../util/mediaDimensions';
+import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
 import getMinMediaWidth from './util/minMediaWidth';
 
@@ -185,8 +185,8 @@ const Message: FC<IProps> = ({
   let style = '';
   if (photo || video) {
     const { width } = photo
-      ? getImageDimensions(photo, isOwnMessage(message), isForwarded)
-      : (video && getVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
+      ? calculateInlineImageDimensions(photo, isOwnMessage(message), isForwarded)
+      : (video && calculateVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
 
     if (width) {
       const calculatedWidth = Math.max(

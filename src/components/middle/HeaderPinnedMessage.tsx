@@ -2,7 +2,7 @@ import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
 
-import { getImagePictogramDimensions } from '../../util/mediaDimensions';
+import { getPictogramDimensions } from '../../util/mediaDimensions';
 import { buildMessageContent } from './message/util/buildMessageContent';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../modules/helpers';
 import useMedia from '../../hooks/useMedia';
@@ -78,7 +78,7 @@ const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
 };
 
 function renderPictogram(thumbDataUri: string, blobUrl?: string) {
-  const { width, height } = getImagePictogramDimensions();
+  const { width, height } = getPictogramDimensions();
 
   return (
     <img src={blobUrl || thumbDataUri} width={width} height={height} alt="" />

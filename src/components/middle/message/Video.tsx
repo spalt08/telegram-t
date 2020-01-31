@@ -3,7 +3,7 @@ import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import { getVideoDimensions } from '../../../util/mediaDimensions';
+import { calculateVideoDimensions } from '../../../util/mediaDimensions';
 import {
   getMessageMediaHash, getMessageMediaThumbDataUri,
   isForwardedMessage,
@@ -34,7 +34,7 @@ const Video: FC<IProps> = ({
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const { width, height } = getVideoDimensions(video, isOwn, isForwarded);
+  const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
 
   return (
     <div

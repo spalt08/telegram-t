@@ -3,7 +3,7 @@ import React, { FC } from '../../lib/teact/teact';
 import { ApiUser, ApiMessage } from '../../api/types';
 
 import { getUserFullName, getMessageMediaThumbDataUri, getMessageMediaHash } from '../../modules/helpers';
-import { getImagePictogramDimensions } from '../../util/mediaDimensions';
+import { getPictogramDimensions } from '../../util/mediaDimensions';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import useMedia from '../../hooks/useMedia';
 
@@ -39,7 +39,7 @@ const ReplyMessage: FC<IProps> = ({
 };
 
 function renderPictogram(thumbDataUri: string, blobUrl?: string) {
-  const { width, height } = getImagePictogramDimensions();
+  const { width, height } = getPictogramDimensions();
 
   return (
     <img src={blobUrl || thumbDataUri} width={width} height={height} alt="" />

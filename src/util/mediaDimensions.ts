@@ -1,13 +1,8 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
-import { getMessagePhotoMaxSize } from '../modules/helpers';
+import { getPhotoDimensions, getVideoDimensions } from '../modules/helpers';
 
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 const REM = 16;
-
-type IMediaDimensions = {
-  width: number;
-  height: number;
-};
 
 function getAvailableWidth(fromOwnMessage: boolean, isForwarded?: boolean) {
   const extraPadding = isForwarded ? 1.75 : 0;
@@ -19,24 +14,6 @@ function getAvailableWidth(fromOwnMessage: boolean, isForwarded?: boolean) {
 
 function getAvailableHeight() {
   return 27 * REM;
-}
-
-export function getDimensionsFromVideo(video: ApiVideo): IMediaDimensions | undefined {
-  if (video.thumbnail) {
-    return {
-      width: video.thumbnail.width,
-      height: video.thumbnail.height,
-    };
-  }
-
-  if (video.width && video.height) {
-    return {
-      width: video.width,
-      height: video.height,
-    };
-  }
-
-  return undefined;
 }
 
 function calculateDimensions(width: number, height: number, fromOwnMessage: boolean, isForwarded?: boolean) {
@@ -59,17 +36,17 @@ function calculateDimensions(width: number, height: number, fromOwnMessage: bool
   };
 }
 
-export function getImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const { width, height } = getMessagePhotoMaxSize(photo) || DEFAULT_MEDIA_DIMENSIONS;
+export function calculateInlineImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
+  const { width, height } = getPhotoDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
-export function getVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const { width, height } = getDimensionsFromVideo(video) || DEFAULT_MEDIA_DIMENSIONS;
+export function calculateVideoDimensions(video: ApiVideo, fromOwnMessage: boolean, isForwarded?: boolean) {
+  const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 
-export function getImagePictogramDimensions() {
+export function getPictogramDimensions() {
   return {
     width: 2 * REM,
     height: 2 * REM,
