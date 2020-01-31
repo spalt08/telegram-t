@@ -1,14 +1,22 @@
 .ReplyMessage {
   display: flex;
   align-items: center;
-  margin: .0625rem -.1875rem 0;
-  padding: .0625rem .25rem .25rem .375rem;
+  margin: 0 -.1875rem;
+  padding: .125rem .25rem .25rem .375rem;
   border-radius: var(--border-radius-messages-small);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  --accent-color: var(--color-primary);
-  --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
+
+  &.deleted-message {
+    pointer-events: none;
+
+    .reply-text {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      color: var(--accent-color);
+    }
+  }
 
   .sticker & {
     max-width: 15rem;
@@ -28,7 +36,7 @@
     content: '';
     display: block;
     position: absolute;
-    top: .1875rem;
+    top: .25rem;
     bottom: .375rem;
     left: 0.25rem;
     width: 2px;
@@ -85,6 +93,8 @@
     grid-template-columns: auto 1fr;
     grid-template-rows: 1fr;
     width: 100%;
+    --accent-color: var(--color-primary);
+    --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
 
     &::before {
       left: 0.3125rem;

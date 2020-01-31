@@ -138,7 +138,7 @@ const Message: FC<IProps> = ({
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {replyMessage && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
+        {message.reply_to_message_id && <ReplyMessage message={replyMessage} sender={replyMessageSender} />}
         {photo && (
           <Photo
             message={message}

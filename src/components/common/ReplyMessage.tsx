@@ -12,7 +12,7 @@ import RippleEffect from '../ui/RippleEffect';
 import './ReplyMessage.scss';
 
 type IProps = {
-  message: ApiMessage;
+  message?: ApiMessage;
   sender?: ApiUser;
   className?: string;
 };
@@ -20,9 +20,20 @@ type IProps = {
 const ReplyMessage: FC<IProps> = ({
   message, sender, className,
 }) => {
+  if (!message) {
+    return (
+      <div className={`ReplyMessage deleted-message ${className || ''}`}>
+        <div className="reply-text ">
+          <p>Deleted message</p>
+        </div>
+      </div>
+    );
+  }
+
   const { text } = buildMessageContent(message, { isReply: true });
 
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 
   return (
