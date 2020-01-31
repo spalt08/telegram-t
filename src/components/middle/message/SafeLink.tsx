@@ -5,9 +5,10 @@ import convertPunycode from '../../../lib/punycode';
 type IProps = {
   url?: string;
   text: string;
+  children?: any;
 };
 
-const SafeLink: FC<IProps> = ({ url, text }) => {
+const SafeLink: FC<IProps> = ({ url, text, children }) => {
   if (!url) {
     return null;
   }
@@ -26,7 +27,7 @@ const SafeLink: FC<IProps> = ({ url, text }) => {
       rel="noopener noreferrer"
       className={classNames.join(' ')}
     >
-      {text}
+      {children || text}
     </a>
   );
 };

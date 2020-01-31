@@ -9,10 +9,10 @@ type IProps = {
   userId?: number;
   userName?: string;
   user?: ApiUser;
-  text: string;
+  children: any;
 };
 
-const MentionLink: FC<IProps> = ({ userId, user, text }) => {
+const MentionLink: FC<IProps> = ({ userId, user, children }) => {
   const title = userId && user ? getUserFullName(user) as string : undefined;
 
   return (
@@ -22,7 +22,7 @@ const MentionLink: FC<IProps> = ({ userId, user, text }) => {
       title={title}
       className="text-entity-link not-implemented"
     >
-      {text}
+      {children}
     </a>
   );
 };
