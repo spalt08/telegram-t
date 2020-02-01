@@ -6,7 +6,7 @@ import {
   fetchMessages, sendMessage, pinMessage, deleteMessages, markMessagesRead,
 } from './connectors/messages';
 import { fetchFullUser, fetchNearestCountry } from './connectors/users';
-import { downloadMedia } from './client';
+import { destroy, downloadMedia } from './client';
 
 export default {
   provideAuthPhoneNumber,
@@ -20,6 +20,7 @@ export default {
   pinMessage,
   deleteMessages,
   markMessagesRead,
+  destroy,
   downloadMedia,
   fetchFullChat,
   fetchChatOnlines,

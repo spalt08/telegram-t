@@ -63,6 +63,10 @@ export async function init(sessionId: string) {
   }
 }
 
+export async function destroy() {
+  await client.destroy();
+}
+
 function onUpdate(update: any) {
   if (update instanceof connection.UpdateConnectionState) {
     isConnected = update.state === connection.UpdateConnectionState.states.connected;
