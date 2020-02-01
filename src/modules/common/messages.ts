@@ -25,12 +25,17 @@ export function updateMessage(
   messageId: number,
   messageUpdate: Partial<ApiMessage>,
 ) {
-  return updateMessages(global, chatId, {
-    [messageId]: {
-      ...((global.messages.byChatId[chatId] || {}).byId || {})[messageId],
-      ...messageUpdate,
-    },
-  });
+  const message = ((global.messages.byChatId[chatId] || {}).byId || {})[messageId];
+  const updatedMessage = {
+    ...message,
+    ...messageUpdate,
+  };
+
+  if (!updatedMessage.id) {
+    return global;
+  }
+
+  return updateMessages(global, chatId, { [messageId]: updatedMessage });
 }
 
 export function deleteMessages(
