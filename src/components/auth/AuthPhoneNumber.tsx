@@ -21,7 +21,7 @@ type IProps = (
   Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'>
 );
 
-const MIN_NUMBER_LENGHT = 10;
+const MIN_NUMBER_LENGTH = 10;
 
 const AuthPhoneNumber: FC<IProps> = ({
   connectionState,
@@ -37,11 +37,11 @@ const AuthPhoneNumber: FC<IProps> = ({
   loadNearestCountry,
 }) => {
   const [country, setCountry] = useState(undefined);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(undefined);
   const [isTouched, setIsTouched] = useState(false);
 
   const fullNumber = getNumberWithCode(phoneNumber, country);
-  const isButtonShown = fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGHT;
+  const canSubmit = fullNumber && fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGTH;
 
   useEffect(() => {
     if (connectionState === 'connectionStateReady' && !authNearestCountry) {
@@ -71,10 +71,10 @@ const AuthPhoneNumber: FC<IProps> = ({
   }, [country]);
 
   useEffect(() => {
-    if (!fullNumber && authPhoneNumber) {
+    if (phoneNumber === undefined && authPhoneNumber) {
       parseFullNumber(authPhoneNumber);
     }
-  }, [fullNumber, authPhoneNumber, parseFullNumber]);
+  }, [authPhoneNumber, phoneNumber, parseFullNumber]);
 
   function handleCountryChange(newCountry?: Country) {
     setCountry(newCountry);
@@ -100,7 +100,9 @@ const AuthPhoneNumber: FC<IProps> = ({
       return;
     }
 
-    setAuthPhoneNumber({ phoneNumber: fullNumber });
+    if (canSubmit) {
+      setAuthPhoneNumber({ phoneNumber: fullNumber });
+    }
   }
 
   return (
@@ -111,7 +113,7 @@ const AuthPhoneNumber: FC<IProps> = ({
         Please confirm your country and
         <br />enter your phone number.
       </p>
-      <form action="" method="post" onSubmit={handleSubmit}>
+      <form action="" onSubmit={handleSubmit}>
         <CountryCodeInput
           id="sign-in-phone-code"
           value={country}
@@ -131,7 +133,7 @@ const AuthPhoneNumber: FC<IProps> = ({
           checked={Boolean(authRememberMe)}
           onChange={handleKeepSessionChange}
         />
-        {isButtonShown && (
+        {canSubmit && (
           authState === 'authorizationStateWaitPhoneNumber' ? (
             <Button type="submit" isLoading={authIsLoading}>Next</Button>
           ) : (
@@ -143,7 +145,7 @@ const AuthPhoneNumber: FC<IProps> = ({
   );
 };
 
-function getNumberWithCode(phoneNumber: string, country?: Country) {
+function getNumberWithCode(phoneNumber: string = '', country?: Country) {
   if (!country) {
     return phoneNumber;
   }

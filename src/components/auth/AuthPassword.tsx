@@ -14,6 +14,7 @@ type IProps = (
   & Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>
 );
 
+const MIN_PASSWORD_LENGTH = 4;
 const PEEK_MONKEY_SHOW_DELAY = 900;
 const CLOSE_HANDS_FRAME = 50;
 const PEEK_OPEN_FRAME = 20;
@@ -23,7 +24,7 @@ const AuthPassword: FC<IProps> = ({
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isButtonShown, setIsButtonShown] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
   const [closeMonkeyData, setCloseMonkeyData] = useState(undefined);
   const [peekMonkeyData, setPeekMonkeyData] = useState(undefined);
   const [isCloseShownAsync, setIsCloseShownAsync] = useState(false);
@@ -57,7 +58,7 @@ const AuthPassword: FC<IProps> = ({
 
     const { target } = e;
     setPassword(target.value);
-    setIsButtonShown(target.value.length > 4);
+    setCanSubmit(target.value.length >= MIN_PASSWORD_LENGTH);
   }
 
   function togglePasswordVisibility() {
@@ -74,7 +75,9 @@ const AuthPassword: FC<IProps> = ({
       return;
     }
 
-    setAuthPassword({ password });
+    if (canSubmit) {
+      setAuthPassword({ password });
+    }
   }
 
   function getPeekFrames() {
@@ -108,7 +111,7 @@ const AuthPassword: FC<IProps> = ({
         Your account is protected with
         <br />an additional password.
       </p>
-      <form action="" method="post" onSubmit={handleSubmit}>
+      <form action="" onSubmit={handleSubmit}>
         <InputPassword
           id="sign-in-password"
           showPassword={showPassword}
@@ -117,7 +120,7 @@ const AuthPassword: FC<IProps> = ({
           value={password}
           error={authError}
         />
-        {isButtonShown && (
+        {canSubmit && (
           <Button type="submit" isLoading={authIsLoading}>Next</Button>
         )}
       </form>

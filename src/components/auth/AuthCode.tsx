@@ -15,6 +15,7 @@ type IProps = (
   & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>
 );
 
+const CODE_LENGTH = 5;
 const TRACKING_START_FRAME = 15;
 const TRACKING_FRAMES_PER_SYMBOL = 20;
 const TRACKING_END_FRAME = 180;
@@ -50,7 +51,7 @@ const AuthCode: FC<IProps> = ({
 
     const { currentTarget: target } = e;
 
-    target.value = target.value.replace(/[^\d]+/, '').substr(0, 5);
+    target.value = target.value.replace(/[^\d]+/, '').substr(0, CODE_LENGTH);
 
     if (!isTracking) {
       setIsTracking(true);
@@ -64,7 +65,7 @@ const AuthCode: FC<IProps> = ({
       setTrackingDirection(1);
     }
     setCode(target.value);
-    if (target.value.length === 5) {
+    if (target.value.length === CODE_LENGTH) {
       setAuthCode({ code: target.value });
     }
   }
@@ -73,7 +74,7 @@ const AuthCode: FC<IProps> = ({
     const startFrame = (code && code.length > 1) || trackingDirection < 0
       ? TRACKING_START_FRAME + TRACKING_FRAMES_PER_SYMBOL * (code.length - 1)
       : 0;
-    const endFrame = code.length === 5
+    const endFrame = code.length === CODE_LENGTH
       ? TRACKING_END_FRAME
       : TRACKING_START_FRAME + TRACKING_FRAMES_PER_SYMBOL * code.length;
 

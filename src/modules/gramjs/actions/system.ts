@@ -63,8 +63,13 @@ addReducer('signUp', (global, actions, payload) => {
   };
 });
 
-addReducer('returnToAuthPhoneNumber', () => {
+addReducer('returnToAuthPhoneNumber', (global) => {
   void callSdk('restartAuth');
+
+  return {
+    ...global,
+    authError: undefined,
+  };
 });
 
 addReducer('saveSession', (global, actions, payload) => {
