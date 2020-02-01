@@ -273,6 +273,9 @@ class TelegramClient {
                         },
                     ))
                     await sender.send(req)
+                } else {
+                    // A "high" request is needed to initialize the connection to "own" DC.
+                    await sender.send(new requests.users.GetUsers({ id: [new requests.InputPeerSelf({})] }))
                 }
                 sender.dcId = dcId
                 return sender
@@ -315,8 +318,7 @@ class TelegramClient {
         }
         const fileWriter = new BinaryWriter(Buffer.alloc(0))
         // We need a separate download/upload connection
-        let exported = dcId
-
+        let exported = Boolean(dcId)
         let sender
         if (exported) {
             try {
