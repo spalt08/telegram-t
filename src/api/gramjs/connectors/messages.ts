@@ -142,7 +142,7 @@ export async function markMessagesRead({
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
-  const result = await invokeRequest(
+  await invokeRequest(
     isChannel
       ? new GramJs.channels.ReadHistory({
         channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
@@ -154,17 +154,15 @@ export async function markMessagesRead({
       }),
   );
 
-  if (result !== false) {
-    onUpdate({
-      '@type': 'updateChat',
-      id: chat.id,
-      chat: {
-        // TODO Support partial reading.
-        unread_count: 0,
-        last_read_inbox_message_id: maxId,
-      },
-    });
-  }
+  onUpdate({
+    '@type': 'updateChat',
+    id: chat.id,
+    chat: {
+      // TODO Support partial reading.
+      unread_count: 0,
+      last_read_inbox_message_id: maxId,
+    },
+  });
 }
 
 function updateLocalDb(
