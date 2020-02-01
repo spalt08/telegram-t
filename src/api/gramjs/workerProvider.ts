@@ -40,10 +40,10 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
       onUpdate(data.update);
     } else if (data.type === 'sdkResponse') {
       if (data.messageId && workerPromises[data.messageId]) {
-        if (data.response) {
-          workerPromises[data.messageId].resolve(data.response);
-        } else if (data.error) {
+        if (data.error) {
           workerPromises[data.messageId].reject(data.error);
+        } else {
+          workerPromises[data.messageId].resolve(data.response);
         }
       }
     }
