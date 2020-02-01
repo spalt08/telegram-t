@@ -58,7 +58,7 @@ export type ActionTypes = (
   'setAuthRememberMe' | 'clearAuthError' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
-  'loadFullChat' | 'loadChatOnlines' |
+  'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
   'loadMessages' | 'loadMoreMessages' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' |

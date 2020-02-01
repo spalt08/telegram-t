@@ -1,10 +1,10 @@
-import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
 import { updateChat } from '../../common/chats';
 import { deleteMessages, updateMessage } from '../../common/messages';
 import { GlobalState } from '../../../store/types';
-import { selectChatMessage, selectChatMessages } from '../../selectors';
+import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
 import { getMessageKey, getMessagePhoto } from '../../helpers';
 
 const DELETING_DELAY = 200;
@@ -25,10 +25,19 @@ export function onUpdate(update: ApiUpdate) {
 
       let newGlobal = updateMessage(global, chat_id, id, message);
 
-      const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
-      newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
+      const chat = selectChat(global, chat_id);
+
+      if (chat) {
+        const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
+        newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
+      }
 
       setGlobal(newGlobal);
+
+      // Edge case: New message in an old (not loaded) chat.
+      if (!chat) {
+        getDispatch().loadTopChats();
+      }
 
       break;
     }
