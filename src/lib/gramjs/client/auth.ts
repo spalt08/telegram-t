@@ -121,13 +121,12 @@ async function signInUser(
 
     if (isPasswordRequired) {
         while (1) {
-            const password = await authParams.password();
-
-            if (!password) {
-                throw new Error('Password is empty');
-            }
-
             try {
+                const password = await authParams.password();
+                if (!password) {
+                    throw new Error('Password is empty');
+                }
+
                 const passwordSrpResult = await client.invoke(new Api.account.GetPassword());
                 const passwordSrpCheck = await computePasswordSrpCheck(passwordSrpResult, password);
                 const { user } = await client.invoke(new Api.auth.CheckPassword({
@@ -143,27 +142,29 @@ async function signInUser(
     }
 
     if (isRegistrationRequired) {
-        try {
-            const [firstName, lastName] = await authParams.firstAndLastNames();
-            if (!firstName) {
-                throw new Error('First name is required');
+        while (1) {
+            try {
+                const [firstName, lastName] = await authParams.firstAndLastNames();
+                if (!firstName) {
+                    throw new Error('First name is required');
+                }
+
+                const { user } = await client.invoke(new Api.auth.SignUp({
+                    phoneNumber,
+                    phoneCodeHash,
+                    firstName,
+                    lastName,
+                })) as Api.auth.Authorization;
+
+                if (termsOfService) {
+                    // This is a violation of Telegram rules: the user should be presented with and accept TOS.
+                    await client.invoke(new Api.help.AcceptTermsOfService({ id: termsOfService.id }));
+                }
+
+                me = user;
+            } catch (err) {
+                authParams.onError(err);
             }
-
-            const { user } = await client.invoke(new Api.auth.SignUp({
-                phoneNumber,
-                phoneCodeHash,
-                firstName,
-                lastName,
-            })) as Api.auth.Authorization;
-
-            if (termsOfService) {
-                // This is a violation of Telegram rules: the user should be presented with and accept TOS.
-                await client.invoke(new Api.help.AcceptTermsOfService({ id: termsOfService.id }));
-            }
-
-            me = user;
-        } catch (err) {
-            authParams.onError(err);
         }
     }
 
