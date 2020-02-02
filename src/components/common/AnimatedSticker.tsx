@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useLayoutEffect, useRef, useState,
+  FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { DEBUG } from '../../config';
 
@@ -12,6 +12,7 @@ type IProps = {
   speed?: number;
   noLoop?: boolean;
   className?: string;
+  onLoad?: NoneToVoidFunction;
 };
 
 type Lottie = typeof import('lottie-web/build/player/lottie_light').default;
@@ -37,12 +38,13 @@ const AnimatedSticker: FC<IProps> = ({
   className,
   playSegment,
   speed,
+  onLoad,
 }) => {
   const [animation, setAnimation] = useState(null);
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (animation || !animationData) {
       return;
     }
@@ -52,15 +54,33 @@ const AnimatedSticker: FC<IProps> = ({
         return;
       }
 
-      setAnimation(lottie.loadAnimation({
+      const newAnimation = lottie.loadAnimation({
         container: container.current,
         renderer: 'svg',
         loop: !noLoop,
         autoplay: false,
         animationData,
-      }));
+      });
+
+      if (speed) {
+        newAnimation.setSpeed(speed);
+      }
+
+      setAnimation(newAnimation);
+
+      if (onLoad) {
+        onLoad();
+      }
     });
-  }, [animationData, animation, noLoop]);
+  }, [animation, animationData, noLoop, speed, onLoad]);
+
+  useEffect(() => {
+    return () => {
+      if (animation) {
+        animation.destroy();
+      }
+    };
+  }, [animation]);
 
   useEffect(() => {
     if (!animation) {
@@ -73,14 +93,6 @@ const AnimatedSticker: FC<IProps> = ({
       animation.goToAndStop(0);
     }
   }, [play, animation]);
-
-  useEffect(() => {
-    return () => {
-      if (animation) {
-        animation.destroy();
-      }
-    };
-  }, [animation]);
 
   useEffect(() => {
     if (
@@ -98,14 +110,6 @@ const AnimatedSticker: FC<IProps> = ({
     animation.playSegments([playSegment], true);
     prevPlaySegment.current = playSegment;
   }, [playSegment, animation]);
-
-  useEffect(() => {
-    if (!animation || !speed) {
-      return;
-    }
-
-    animation.setSpeed(speed);
-  }, [speed, animation]);
 
   const style = width && height
     ? `width: ${width}px; height: ${height}px;`

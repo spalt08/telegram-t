@@ -1,5 +1,7 @@
 import { FormEvent } from 'react';
-import React, { FC, useState, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, useCallback,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../store/types';
 
@@ -26,6 +28,7 @@ const AuthCode: FC<IProps> = ({
   const [code, setCode] = useState(undefined);
   const [idleMonkeyData, setIdleMonkeyData] = useState(undefined);
   const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
+  const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);
 
@@ -40,6 +43,8 @@ const AuthCode: FC<IProps> = ({
       getMonkeyAnimationData('MonkeyTracking').then(setTrackingMonkeyData);
     }
   }, [trackingMonkeyData]);
+
+  const handleFirstMonkeyLoad = useCallback(() => setIsFirstMonkeyLoaded(true), []);
 
   function onCodeChange(e: FormEvent<HTMLInputElement>) {
     if (authError) {
@@ -91,7 +96,7 @@ const AuthCode: FC<IProps> = ({
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
-        {!idleMonkeyData && !trackingMonkeyData && (
+        {!isFirstMonkeyLoaded && (
           <div className="monkey-preview" />
         )}
         {idleMonkeyData && (
@@ -100,6 +105,7 @@ const AuthCode: FC<IProps> = ({
             animationData={idleMonkeyData}
             play
             noLoop={isTracking}
+            onLoad={handleFirstMonkeyLoad}
           />
         )}
         {trackingMonkeyData && (

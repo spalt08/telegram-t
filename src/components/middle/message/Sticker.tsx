@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, useCallback, useState } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
@@ -19,6 +19,9 @@ type IProps = {
 const Sticker: FC<IProps> = ({
   message, loadAndPlay,
 }) => {
+  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+
   const sticker = message.content.sticker!;
   const isAnimated = sticker.is_animated;
 
@@ -32,7 +35,7 @@ const Sticker: FC<IProps> = ({
   const { width, height } = getStickerDimensions(sticker);
 
   let thumbClassName = 'thumbnail';
-  if (thumbDataUri && isAnimated && mediaData) {
+  if (thumbDataUri && isAnimationLoaded) {
     thumbClassName += ' fade-out';
   } else if (!thumbDataUri) {
     thumbClassName += ' empty';
@@ -62,7 +65,8 @@ const Sticker: FC<IProps> = ({
           width={width}
           height={height}
           play={loadAndPlay}
-          className={mediaData ? 'full-media fade-in' : 'full-media'}
+          className={isAnimationLoaded ? 'full-media fade-in' : 'full-media'}
+          onLoad={handleAnimationLoad}
         />
       )}
     </div>

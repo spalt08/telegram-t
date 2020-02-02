@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, useCallback,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../store/types';
@@ -28,6 +30,7 @@ const AuthPassword: FC<IProps> = ({
   const [canSubmit, setCanSubmit] = useState(false);
   const [closeMonkeyData, setCloseMonkeyData] = useState(undefined);
   const [peekMonkeyData, setPeekMonkeyData] = useState(undefined);
+  const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
 
   useEffect(() => {
@@ -43,6 +46,8 @@ const AuthPassword: FC<IProps> = ({
       getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkeyData);
     }
   }, [peekMonkeyData]);
+
+  const handleFirstMonkeyLoad = useCallback(() => setIsFirstMonkeyLoaded(true), []);
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     if (authError) {
@@ -73,7 +78,7 @@ const AuthPassword: FC<IProps> = ({
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
-        {!closeMonkeyData && !peekMonkeyData && (
+        {!isFirstMonkeyLoaded && (
           <div className="monkey-preview" />
         )}
         {closeMonkeyData && (
@@ -82,6 +87,7 @@ const AuthPassword: FC<IProps> = ({
             animationData={closeMonkeyData}
             playSegment={SEGMENT_COVER_EYES}
             noLoop
+            onLoad={handleFirstMonkeyLoad}
           />
         )}
         {peekMonkeyData && (
