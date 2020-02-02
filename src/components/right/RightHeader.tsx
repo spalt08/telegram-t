@@ -1,13 +1,13 @@
 import React, { FC } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
+import { GlobalActions } from '../../store/types';
+
 import Button from '../ui/Button';
 
 import './RightHeader.scss';
 
-type IProps = {
-  toggleRightColumn?: Function;
-};
+type IProps = Pick<GlobalActions, 'toggleRightColumn'>;
 
 const RightHeader: FC<IProps> = ({
   toggleRightColumn,
@@ -29,7 +29,6 @@ const RightHeader: FC<IProps> = ({
           color="translucent"
           size="smaller"
           className="not-implemented"
-          onClick={() => {}}
         >
           <i className="icon-more" />
         </Button>
