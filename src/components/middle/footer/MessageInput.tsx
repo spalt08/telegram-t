@@ -4,6 +4,8 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../store/types';
 
+import { debounce } from '../../../util/schedulers';
+
 type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
   selectedChatId?: number;
   replyingTo?: number;
@@ -13,6 +15,7 @@ type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
 };
 
 const MAX_INPUT_HEIGHT = 240;
+const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 
 let isJustSent = false;
 
@@ -57,16 +60,17 @@ const MessageInput: FC<IProps> = ({
   useEffect(focusInput, [selectedChatId, replyingTo]);
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    const captureFirstTab = debounce((e: KeyboardEvent) => {
       if (e.key === 'Tab') {
+        e.preventDefault();
         requestAnimationFrame(focusInput);
       }
-    }
+    }, TAB_INDEX_PRIORITY_TIMEOUT, true, false);
 
-    document.addEventListener('keydown', handleKeyDown, false);
+    document.addEventListener('keydown', captureFirstTab, false);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown, false);
+      document.removeEventListener('keydown', captureFirstTab, false);
     };
   }, []);
 
