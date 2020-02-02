@@ -1,13 +1,13 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useState, memo, useCallback, useRef,
+  FC, useState, memo, useCallback, useRef, useEffect,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
 import { ApiMessage } from '../../api/types';
 
-import { selectChatMessages, selectChat } from '../../modules/selectors';
+import { selectChatMessages, selectOpenChat } from '../../modules/selectors';
 import {
   isOwnMessage,
   isPrivateChat,
@@ -26,12 +26,11 @@ import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
 
-type IProps = Pick<GlobalActions, 'loadMessages' | 'loadMoreMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
-  isLoaded?: boolean;
-  isUnread?: boolean;
-  messages?: Record<number, ApiMessage>;
+type IProps = Pick<GlobalActions, 'loadMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
   chatId?: number;
   isChannelChat?: boolean;
+  isUnread?: boolean;
+  messages?: Record<number, ApiMessage>;
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -40,20 +39,17 @@ const VIEWPORT_MARGIN = 500;
 const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
-const runThrottledForMarkMessagesRead = throttle((cb) => cb(), 1000, true);
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
 
 let currentScrollOffset = 0;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
-  isLoaded,
-  isUnread,
-  messages,
   chatId,
   isChannelChat,
+  isUnread,
+  messages,
   loadMessages,
-  loadMoreMessages,
   markMessagesRead,
   setChatScrollOffset,
 }) => {
@@ -61,19 +57,9 @@ const MessageList: FC<IProps> = ({
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
+  const isLoaded = Boolean(messages);
   const messagesArray = isLoaded && messages ? orderBy(toArray(messages), 'date') : [];
-
-  if (!isLoaded) {
-    runThrottledForLoadMessages(loadMessages);
-  } else {
-    if (isUnread) {
-      runThrottledForMarkMessagesRead(markMessagesRead);
-    }
-
-    if (messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
-      runThrottledForLoadMessages(loadMoreMessages);
-    }
-  }
+  const isPrivate = chatId !== undefined && isPrivateChat(chatId);
 
   const playMediaInViewport = useCallback(() => {
     requestAnimationFrame(() => {
@@ -101,7 +87,7 @@ const MessageList: FC<IProps> = ({
         // More than one callback can be added to the queue
         // before the messages are prepended, so we need to check again.
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMoreMessages();
+          loadMessages();
         }
       });
     }
@@ -111,7 +97,19 @@ const MessageList: FC<IProps> = ({
 
       playMediaInViewport();
     });
-  }, [chatId, loadMoreMessages, setChatScrollOffset, playMediaInViewport]);
+  }, [chatId, loadMessages, setChatScrollOffset, playMediaInViewport]);
+
+  useEffect(() => {
+    if (!isLoaded || messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
+      runThrottledForLoadMessages(loadMessages);
+    }
+  }, [isLoaded, loadMessages, messagesArray.length]);
+
+  useEffect(() => {
+    if (isUnread) {
+      markMessagesRead();
+    }
+  }, [isUnread, markMessagesRead]);
 
   useLayoutEffectWithPrevDeps(([prevChatId, prevMessages]) => {
     if (chatId === prevChatId && messages === prevMessages) {
@@ -145,59 +143,6 @@ const MessageList: FC<IProps> = ({
     }
   }, [chatId, messages, playMediaInViewport]);
 
-  const isPrivate = chatId && isPrivateChat(chatId);
-
-  function renderMessageDateGroup(
-    messageDateGroup: MessageDateGroup,
-    dateGroupIndex: number,
-    messageDateGroupsArray: MessageDateGroup[],
-  ) {
-    const messageGroups = messageDateGroup.messageGroups.map((
-      messageGroup,
-      groupIndex,
-      messageGroupsArray,
-    ) => {
-      if (messageGroup.length === 1 && isActionMessage(messageGroup[0])) {
-        const message = messageGroup[0];
-        return <ServiceMessage key={message.id} message={message} />;
-      }
-
-      return messageGroup.map((message, i) => {
-        const isOwn = isOwnMessage(message);
-        const position = {
-          isFirstInGroup: i === 0,
-          isLastInGroup: i === messageGroup.length - 1,
-          isLastInList: i === messageGroup.length - 1
-            && groupIndex === messageGroupsArray.length - 1
-            && dateGroupIndex === messageDateGroupsArray.length - 1,
-        };
-
-        return (
-          <Message
-            key={message.id}
-            message={message}
-            showAvatar={!isPrivate && !isOwn}
-            showSenderName={i === 0 && !isPrivate && !isOwn}
-            loadAndPlayMedia={viewportMessageIds.includes(message.id)}
-            isFirstInGroup={position.isFirstInGroup}
-            isLastInGroup={position.isLastInGroup}
-            isLastInList={position.isLastInList}
-          />
-        );
-      });
-    });
-
-    return (
-      // @ts-ignore
-      <div className="message-date-group" key={messageDateGroup.datetime} teactChildrenKeyOrder="asc">
-        <div className="message-date-header" key={0}>
-          <span>{formatHumanDate(messageDateGroup.datetime)}</span>
-        </div>
-        {flatten(messageGroups)}
-      </div>
-    );
-  }
-
   const classNames = ['MessageList', 'custom-scroll'];
   if (isPrivate || isChannelChat) {
     classNames.push('no-avatars');
@@ -210,15 +155,11 @@ const MessageList: FC<IProps> = ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={classNames.join(' ')}
-      onScroll={handleScroll}
-    >
+    <div ref={containerRef} className={classNames.join(' ')} onScroll={handleScroll}>
       {isLoaded ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
-          {messagesArray.length > 0 && flatten(groupMessages(messagesArray).map(renderMessageDateGroup))}
+          {messagesArray.length > 0 && renderMessages(messagesArray, viewportMessageIds, isPrivate)}
         </div>
       ) : (
         <Loading />
@@ -226,6 +167,70 @@ const MessageList: FC<IProps> = ({
     </div>
   );
 };
+
+function renderMessages(
+  messagesArray: ApiMessage[],
+  viewportMessageIds: number[],
+  isPrivate: boolean,
+) {
+  const dateGroups = groupMessages(messagesArray).map((
+    dateGroup: MessageDateGroup,
+    dateGroupIndex: number,
+    dateGroupsArray: MessageDateGroup[],
+  ) => {
+    const senderGroups = dateGroup.senderGroups.map((
+      senderGroup,
+      senderGroupIndex,
+      senderGroupsArray,
+    ) => {
+      if (senderGroup.length === 1 && isActionMessage(senderGroup[0])) {
+        const message = senderGroup[0];
+        return <ServiceMessage key={message.id} message={message} />;
+      }
+
+      return senderGroup.map((
+        message,
+        messageIndex,
+      ) => {
+        const isOwn = isOwnMessage(message);
+        const position = {
+          isFirstInGroup: messageIndex === 0,
+          isLastInGroup: messageIndex === senderGroup.length - 1,
+          isLastInList: (
+            messageIndex === senderGroup.length - 1
+            && senderGroupIndex === senderGroupsArray.length - 1
+            && dateGroupIndex === dateGroupsArray.length - 1
+          ),
+        };
+
+        return (
+          <Message
+            key={message.id}
+            message={message}
+            showAvatar={!isPrivate && !isOwn}
+            showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
+            loadAndPlayMedia={viewportMessageIds.includes(message.id)}
+            isFirstInGroup={position.isFirstInGroup}
+            isLastInGroup={position.isLastInGroup}
+            isLastInList={position.isLastInList}
+          />
+        );
+      });
+    });
+
+    return (
+      // @ts-ignore
+      <div className="message-date-group" key={dateGroup.datetime} teactChildrenKeyOrder="asc">
+        <div className="message-date-header" key={0}>
+          <span>{formatHumanDate(dateGroup.datetime)}</span>
+        </div>
+        {flatten(senderGroups)}
+      </div>
+    );
+  });
+
+  return flatten(dateGroups);
+}
 
 function findMediaMessagesInViewport(container: HTMLElement) {
   const viewportY1 = container.scrollTop;
@@ -270,30 +275,28 @@ function determineStickyElement(container: HTMLElement, selector: string) {
 
 export default memo(withGlobal(
   global => {
-    const { chats: { selectedId } } = global;
+    const chat = selectOpenChat(global);
 
-    if (!selectedId) {
+    if (!chat) {
       return {};
     }
 
-    const messages = selectChatMessages(global, selectedId);
-    const chat = selectChat(global, selectedId);
+    const messages = selectChatMessages(global, chat.id);
 
     return {
-      isLoaded: Boolean(messages),
+      chatId: chat.id,
+      isChannelChat: isChannel(chat),
       isUnread: Boolean(chat.unread_count),
       messages,
-      chatId: selectedId,
-      isChannelChat: isChannel(chat),
     };
   },
   (setGlobal, actions) => {
     const {
-      loadMessages, loadMoreMessages, markMessagesRead, setChatScrollOffset,
+      loadMessages, markMessagesRead, setChatScrollOffset,
     } = actions;
 
     return {
-      loadMessages, loadMoreMessages, markMessagesRead, setChatScrollOffset,
+      loadMessages, markMessagesRead, setChatScrollOffset,
     };
   },
 )(MessageList));

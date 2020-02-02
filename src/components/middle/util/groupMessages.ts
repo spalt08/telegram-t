@@ -3,42 +3,44 @@ import { ApiMessage } from '../../../api/types';
 import { isSameDay } from '../../../util/dateFormat';
 import { isActionMessage } from '../../../modules/helpers';
 
+type SenderGroup = ApiMessage[];
+
 export type MessageDateGroup = {
   datetime: number;
-  messageGroups: ApiMessage[][];
+  senderGroups: SenderGroup[];
 };
 
 export function groupMessages(messages: ApiMessage[]) {
-  const messageDateGroups: MessageDateGroup[] = [
+  const dateGroups: MessageDateGroup[] = [
     {
       datetime: messages[0].date * 1000,
-      messageGroups: [],
+      senderGroups: [],
     },
   ];
-  let currentMessageGroup: ApiMessage[] = [];
-  let currentMessageDateGroup = messageDateGroups[0];
+  let currentSenderGroup: SenderGroup = [];
+  let currentDateGroup = dateGroups[0];
 
   messages.forEach((message, index) => {
-    if (!isSameDay(currentMessageDateGroup.datetime, message.date * 1000)) {
-      if (currentMessageDateGroup && currentMessageGroup && currentMessageGroup.length) {
-        currentMessageDateGroup.messageGroups.push(currentMessageGroup);
-        currentMessageGroup = [];
+    if (!isSameDay(currentDateGroup.datetime, message.date * 1000)) {
+      if (currentDateGroup && currentSenderGroup && currentSenderGroup.length) {
+        currentDateGroup.senderGroups.push(currentSenderGroup);
+        currentSenderGroup = [];
       }
-      messageDateGroups.push({
+      dateGroups.push({
         datetime: message.date * 1000,
-        messageGroups: [],
+        senderGroups: [],
       });
-      currentMessageDateGroup = messageDateGroups[messageDateGroups.length - 1];
+      currentDateGroup = dateGroups[dateGroups.length - 1];
     }
 
     if (
-      !currentMessageGroup.length || (
-        message.sender_user_id === currentMessageGroup[currentMessageGroup.length - 1].sender_user_id
+      !currentSenderGroup.length || (
+        message.sender_user_id === currentSenderGroup[currentSenderGroup.length - 1].sender_user_id
         // Forwarded messages to chat with self.
-        && message.is_outgoing === currentMessageGroup[currentMessageGroup.length - 1].is_outgoing
+        && message.is_outgoing === currentSenderGroup[currentSenderGroup.length - 1].is_outgoing
       )
     ) {
-      currentMessageGroup.push(message);
+      currentSenderGroup.push(message);
     }
 
     if (
@@ -49,14 +51,14 @@ export function groupMessages(messages: ApiMessage[]) {
         || isActionMessage(messages[index + 1])
       )
     ) {
-      currentMessageDateGroup.messageGroups.push(currentMessageGroup);
-      currentMessageGroup = [];
+      currentDateGroup.senderGroups.push(currentSenderGroup);
+      currentSenderGroup = [];
     }
   });
 
-  if (currentMessageGroup.length) {
-    currentMessageDateGroup.messageGroups.push(currentMessageGroup);
+  if (currentSenderGroup.length) {
+    currentDateGroup.senderGroups.push(currentSenderGroup);
   }
 
-  return messageDateGroups;
+  return dateGroups;
 }
