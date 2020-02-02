@@ -25,7 +25,7 @@ const PrivateChatInfo: FC<IProps> = ({
 
   return (
     <div className="ChatInfo">
-      <Avatar size={avatarSize} user={user} isSavedMessages={user.is_self} />
+      <Avatar key={user.id} size={avatarSize} user={user} isSavedMessages={user.is_self} />
       <div>
         {user.is_self ? (
           <div className="title">Saved Messages</div>
