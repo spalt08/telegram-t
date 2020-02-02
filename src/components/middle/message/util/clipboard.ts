@@ -35,7 +35,7 @@ export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => v
       && selection.anchorNode
       && selection.anchorNode.parentNode
       && (selection.anchorNode.parentNode as HTMLElement).closest('.Message .content-inner')
-      && selection.toString() !== '');
+      && selection.toString().replace(/(?:\r\n|\r|\n)/g, '') !== '');
 
     options.push({
       label: getCopyLabel(hasSelection, canImageBeCopied),
