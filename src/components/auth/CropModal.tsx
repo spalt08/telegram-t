@@ -2,9 +2,12 @@ import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
 import { blobToFile, blobToDataUri } from '../../util/image';
+
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Loading from '../ui/Loading';
+
+import './CropModal.scss';
 
 // Change to 'base64' to get base64-encoded string
 const cropperResultOptions: Croppie.ResultOptions & { type: 'blob' } = {
@@ -108,7 +111,7 @@ const CropModal: FC<IProps> = ({ file, onChange, onDismiss }: IProps) => {
       isOpen={Boolean(file)}
       onDismiss={onDismiss}
       title="Drag to reposition"
-      className="avatar-crop-modal"
+      className="CropModal"
     >
       {isCroppieReady ? (
         <div id="avatar-crop" />
