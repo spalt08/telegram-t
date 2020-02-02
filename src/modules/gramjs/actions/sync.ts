@@ -5,7 +5,7 @@ import {
 import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../store/types';
 
-import { callSdk } from '../../../api/gramjs';
+import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateChatIds, updateChats, updateSelectedChatId } from '../../common/chats';
 import { updateUsers } from '../../common/users';
@@ -28,7 +28,7 @@ async function sync() {
 }
 
 async function loadAndReplaceChats() {
-  const result = await callSdk('fetchChats', {
+  const result = await callApi('fetchChats', {
     limit: INITIAL_CHATS_LIMIT,
   });
 
@@ -99,7 +99,7 @@ async function loadAndReplaceMessages(global: GlobalState) {
 }
 
 async function loadNewestMessages(chat: ApiChat) {
-  const result = await callSdk('fetchMessages', {
+  const result = await callApi('fetchMessages', {
     chat,
     fromMessageId: 0,
     limit: INITIAL_MESSAGES_LIMIT,

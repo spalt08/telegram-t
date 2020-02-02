@@ -1,15 +1,15 @@
 import {
   TelegramClient, sessions, Api as GramJs, connection,
-} from '../../lib/gramjs';
-import { Logger as GramJsLogger } from '../../lib/gramjs/extensions';
+} from '../../../lib/gramjs';
+import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
-import { DEBUG, DEBUG_GRAMJS } from '../../config';
+import { DEBUG, DEBUG_GRAMJS } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
   onAuthError, onAuthReady, onCurrentUserId,
-} from './connectors/auth';
-import { onGramJsUpdate } from './onGramJsUpdate';
-import queuedDownloadMedia from './connectors/media';
+} from './auth';
+import { updater } from '../updater';
+import queuedDownloadMedia from './media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -28,7 +28,7 @@ export async function init(sessionId: string) {
   );
 
   client.addEventHandler(onUpdate, gramJsUpdateEventBuilder);
-  client.addEventHandler(onGramJsUpdate, gramJsUpdateEventBuilder);
+  client.addEventHandler(updater, gramJsUpdateEventBuilder);
 
   try {
     if (DEBUG) {
@@ -94,11 +94,11 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, sho
 
   if (shouldHandleUpdates) {
     if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
-      result.updates.forEach((update) => onGramJsUpdate(update, request));
+      result.updates.forEach((update) => updater(update, request));
     } else if (result instanceof GramJs.UpdatesTooLong) {
       // TODO Implement
     } else {
-      onGramJsUpdate(result as GramJs.TypeUpdates, request);
+      updater(result as GramJs.TypeUpdates, request);
     }
   }
 

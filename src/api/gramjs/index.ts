@@ -1,2 +1,2 @@
-// export { initSdk, callSdk } from './provider';
-export { initSdk, callSdk } from './workerProvider';
+// export { initApi, callApi } from './provider';
+export { initApi, callApi } from './worker/provider';

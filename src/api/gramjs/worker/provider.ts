@@ -1,44 +1,42 @@
-import generateIdFor from '../../util/generateIdFor';
-import { OnApiUpdate } from '../types';
-import {
-  Sdk, SdkArgs, SdkResponse,
-  WorkerMessageEvent, OriginMessageData, ThenArg,
-} from './types';
+import { OnApiUpdate } from '../../types';
+import { Methods, MethodArgs, MethodResponse } from '../methods/types';
+import { WorkerMessageEvent, OriginMessageData, ThenArg } from './types';
+
+import generateIdFor from '../../../util/generateIdFor';
 
 type WorkerPromiseStore = {
-  promise: Promise<ThenArg<SdkResponse<keyof Sdk>>>;
+  promise: Promise<ThenArg<MethodResponse<keyof Methods>>>;
   resolve: Function;
   reject: Function;
 };
 
 const worker = new Worker('./worker.ts');
-// TODO Use `MessageChannel` instead.
 const workerPromises: Record<string, WorkerPromiseStore> = {};
 
-export function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
+export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   subscribeToWorker(onUpdate);
 
   return sendToWorker({
-    type: 'init',
+    type: 'initApi',
     args: {
       sessionId,
     },
   }, true);
 }
 
-export function callSdk<T extends keyof Sdk>(fnName: T, ...args: SdkArgs<T>): SdkResponse<T> {
+export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
   return sendToWorker({
-    type: 'callSdk',
+    type: 'callMethod',
     name: fnName,
     args,
-  }, true) as SdkResponse<T>;
+  }, true) as MethodResponse<T>;
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
   worker.addEventListener('message', ({ data }: WorkerMessageEvent) => {
     if (data.type === 'update') {
       onUpdate(data.update);
-    } else if (data.type === 'sdkResponse') {
+    } else if (data.type === 'methodResponse') {
       if (data.messageId && workerPromises[data.messageId]) {
         if (data.error) {
           workerPromises[data.messageId].reject(data.error);

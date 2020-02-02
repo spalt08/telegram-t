@@ -1,17 +1,15 @@
 import { OnApiUpdate } from '../types';
-import {
-  Sdk, SdkArgs, SdkResponse,
-} from './types';
+import { Methods, MethodArgs, MethodResponse } from './methods/types';
 
-import { init as initUpdater } from './onGramJsUpdate';
-import { init as initAuth } from './connectors/auth';
-import { init as initChats } from './connectors/chats';
-import { init as initMessages } from './connectors/messages';
-import { init as initUsers } from './connectors/users';
-import { init as initClient } from './client';
-import sdk from './sdk';
+import { init as initUpdater } from './updater';
+import { init as initAuth } from './methods/auth';
+import { init as initChats } from './methods/chats';
+import { init as initMessages } from './methods/messages';
+import { init as initUsers } from './methods/users';
+import { init as initClient } from './methods/client';
+import methods from './methods';
 
-export async function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
+export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   initUpdater(onUpdate);
   initAuth(onUpdate);
   initChats(onUpdate);
@@ -21,7 +19,7 @@ export async function initSdk(onUpdate: OnApiUpdate, sessionId = '') {
   await initClient(sessionId);
 }
 
-export function callSdk<T extends keyof Sdk>(fnName: T, ...args: SdkArgs<T>): SdkResponse<T> {
+export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
   // @ts-ignore
-  return sdk[fnName](...args) as SdkResponse<T>;
+  return methods[fnName](...args) as MethodResponse<T>;
 }

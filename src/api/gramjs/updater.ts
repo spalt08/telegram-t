@@ -6,9 +6,9 @@ import {
   buildApiMessageFromShort,
   buildApiMessageFromShortChat,
   resolveMessageApiChatId,
-} from './builders/messages';
-import { getApiChatIdFromMtpPeer, buildChatMembers } from './builders/chats';
-import { buildApiUserStatus } from './builders/users';
+} from './apiBuilders/messages';
+import { getApiChatIdFromMtpPeer, buildChatMembers } from './apiBuilders/chats';
+import { buildApiUserStatus } from './apiBuilders/users';
 import localDb from './localDb';
 
 let onUpdate: OnApiUpdate;
@@ -17,7 +17,7 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function onGramJsUpdate(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRequest?: GramJs.AnyRequest) {
+export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRequest?: GramJs.AnyRequest) {
   if (update instanceof connection.UpdateConnectionState) {
     const connectionState = update.state === connection.UpdateConnectionState.states.disconnected
       ? 'connectionStateConnecting'

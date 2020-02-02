@@ -1,4 +1,4 @@
-import { callSdk } from '../api/gramjs';
+import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { blobToDataUri, preloadImage } from './image';
@@ -57,7 +57,7 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
     }
   }
 
-  const remote = await callSdk('downloadMedia', url);
+  const remote = await callApi('downloadMedia', url);
 
   if (!remote || !remote.data) {
     throw new Error('Failed to fetch media');

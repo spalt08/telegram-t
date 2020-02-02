@@ -2,7 +2,7 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { callSdk } from '../../../api/gramjs';
+import { callApi } from '../../../api/gramjs';
 import { updateChatIds, updateChats } from '../../common/chats';
 import { selectChat } from '../../selectors';
 import { updateUsers } from '../../common/users';
@@ -29,7 +29,7 @@ addReducer('loadFullChat', (global, actions, payload) => {
     return;
   }
 
-  runDebouncedForFetchFullChat(() => callSdk('fetchFullChat', chat));
+  runDebouncedForFetchFullChat(() => callApi('fetchFullChat', chat));
 });
 
 addReducer('loadChatOnlines', (global, actions, payload) => {
@@ -39,7 +39,7 @@ addReducer('loadChatOnlines', (global, actions, payload) => {
     return;
   }
 
-  runDebouncedForFetchOnlines(() => callSdk('fetchChatOnlines', chat));
+  runDebouncedForFetchOnlines(() => callApi('fetchChatOnlines', chat));
 });
 
 addReducer('loadTopChats', () => {
@@ -47,7 +47,7 @@ addReducer('loadTopChats', () => {
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
-  const result = await callSdk('fetchChats', {
+  const result = await callApi('fetchChats', {
     limit: LOAD_CHATS_LIMIT,
     offsetDate,
   });
