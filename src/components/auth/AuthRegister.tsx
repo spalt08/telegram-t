@@ -26,18 +26,7 @@ const AuthRegister: FC<IProps> = ({
       return;
     }
 
-    const imgFile = target.files[0];
-    const imgExt = imgFile.name.split('.').pop();
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
-    if (
-      !imgExt
-      || !allowedExtensions.includes(imgExt)
-      || !imgFile.type.startsWith('image/')
-    ) {
-      return;
-    }
-
-    setSelectedFile(imgFile);
+    setSelectedFile(target.files[0]);
     target.value = '';
   }
 

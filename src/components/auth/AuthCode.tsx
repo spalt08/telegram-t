@@ -28,13 +28,10 @@ const AuthCode: FC<IProps> = ({
   const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);
-  const [isIdleShownAsync, setIsIdleShownAsync] = useState(false);
 
   useEffect(() => {
     if (!idleMonkeyData) {
       getMonkeyAnimationData('MonkeyIdle').then(setIdleMonkeyData);
-    } else {
-      setIsIdleShownAsync(true);
     }
   }, [idleMonkeyData]);
 
@@ -94,9 +91,12 @@ const AuthCode: FC<IProps> = ({
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
+        {!idleMonkeyData && !trackingMonkeyData && (
+          <div className="monkey-preview" />
+        )}
         {idleMonkeyData && (
           <AnimatedSticker
-            className={`${isTracking ? 'hidden' : ''} ${isIdleShownAsync ? 'shown' : ''}`}
+            className={`${isTracking ? 'hidden' : ''}`}
             animationData={idleMonkeyData}
             play
             noLoop={isTracking}

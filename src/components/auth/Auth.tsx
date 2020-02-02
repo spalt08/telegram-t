@@ -16,9 +16,9 @@ type IProps = Pick<GlobalState, 'authState'>;
 const Auth: FC<IProps> = ({ authState }) => {
   switch (authState) {
     case 'authorizationStateWaitCode':
-      return <AuthCode />;
+      return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;
     case 'authorizationStateWaitPassword':
-      return <AuthPassword />;
+      return <UiLoader page="authPassword" key="authPassword"><AuthPassword /></UiLoader>;
     case 'authorizationStateWaitRegistration':
       return <AuthRegister />;
     case 'authorizationStateWaitPhoneNumber':

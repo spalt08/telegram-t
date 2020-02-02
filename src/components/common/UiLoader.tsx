@@ -6,8 +6,14 @@ import { GlobalActions, GlobalState } from '../../store/types';
 import useOverlay from '../../hooks/useOverlay';
 import { getChatAvatarHash } from '../../modules/helpers';
 import { pause } from '../../util/schedulers';
+import { preloadImage } from '../../util/image';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
+
+// @ts-ignore
+import telegramLogoPath from '../../assets/telegram-logo.svg';
+// @ts-ignore
+import monkeyPath from '../../assets/monkey.svg';
 
 import './UiLoader.scss';
 
@@ -30,7 +36,12 @@ const preloadTasks = {
     preloadFonts(),
     preloadAvatars(),
   ]),
-  authPhoneNumber: () => preloadFonts(),
+  authPhoneNumber: () => Promise.all([
+    preloadFonts(),
+    preloadImage(telegramLogoPath),
+  ]),
+  authCode: () => preloadImage(monkeyPath),
+  authPassword: () => preloadImage(monkeyPath),
 };
 
 const UiLoader: FC<IProps> = ({

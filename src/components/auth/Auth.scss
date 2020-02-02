@@ -25,9 +25,8 @@
   }
 
   #logo {
-    background: url('../../assets/telegram_logo.svg');
     background-size: 100%;
-    background-position: center;
+    background: url('../../assets/telegram-logo.svg') center;
   }
 
   #monkey {
@@ -40,16 +39,16 @@
       width: 100%;
       height: 100%;
 
-      opacity: 1;
-      transition: opacity 300ms;
-
-      &:not(.shown) {
-        opacity: 0;
-      }
-
       &.hidden {
         display: none
       }
+    }
+
+    .monkey-preview {
+      width: 100%;
+      height: 100%;
+      background-size: 100%;
+      background: url('../../assets/monkey.svg') center;
     }
   }
 
@@ -148,45 +147,5 @@
 
   &:hover, &:focus {
     opacity: 1;
-  }
-}
-
-.avatar-crop-modal {
-  .modal-dialog {
-    height: calc(100% - 1rem);
-    max-height: 35rem;
-    position: relative;
-
-    .Button {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
-    }
-  }
-
-  #avatar-crop {
-    width: 100%;
-    max-width: 25rem;
-    margin: 0 auto;
-    position: relative;
-
-    &::before {
-      content: '';
-      display: block;
-      padding-top: 100%;
-    }
-
-    .cr-boundary {
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-radius: var(--border-radius-default);
-    }
-
-    .cr-viewport {
-      border: none;
-      box-shadow: 0 0 2000px 2000px rgba(white, 0.5);
-    }
   }
 }
