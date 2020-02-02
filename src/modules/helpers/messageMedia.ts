@@ -1,7 +1,7 @@
 import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
 import { getMessageKey } from './messages';
 
-type IDimensions = {
+export type IDimensions = {
   width: number;
   height: number;
 };
@@ -107,7 +107,14 @@ export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
     }, [] as Array<number>);
 }
 
-export function getPhotoDimensions(photo: ApiPhoto): IDimensions | undefined {
+export function getPhotoFullDimensions(photo: ApiPhoto): IDimensions | undefined {
+  return (
+    photo.sizes.find((size) => size.type === 'z')
+    || getPhotoInlineDimensions(photo)
+  );
+}
+
+export function getPhotoInlineDimensions(photo: ApiPhoto): IDimensions | undefined {
   return (
     photo.sizes.find((size) => size.type === 'x')
     || photo.sizes.find((size) => size.type === 'm')

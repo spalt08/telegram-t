@@ -1,5 +1,5 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
-import { getPhotoDimensions, getVideoDimensions } from '../modules/helpers';
+import { getPhotoInlineDimensions, getVideoDimensions } from '../modules/helpers';
 
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 const REM = 16;
@@ -37,7 +37,7 @@ function calculateDimensions(width: number, height: number, fromOwnMessage: bool
 }
 
 export function calculateInlineImageDimensions(photo: ApiPhoto, fromOwnMessage: boolean, isForwarded?: boolean) {
-  const { width, height } = getPhotoDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
+  const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
   return calculateDimensions(width, height, fromOwnMessage, isForwarded);
 }
 

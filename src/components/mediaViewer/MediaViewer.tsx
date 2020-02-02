@@ -14,6 +14,7 @@ import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getVideoDimensions,
+  getPhotoFullDimensions, IDimensions,
 } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -144,7 +145,11 @@ const MediaViewer: FC<IProps> = ({
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
         <div className="media-viewer-content">
-          {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+          {isPhoto && renderPhoto(
+            blobUrlFull || blobUrlPreview,
+            thumbDataUri,
+            getPhotoFullDimensions(message.content.photo!),
+          )}
           {isVideo && renderVideo(
             blobUrlFull,
             blobUrlPreview || thumbDataUri,
@@ -173,24 +178,37 @@ const MediaViewer: FC<IProps> = ({
   );
 };
 
-function renderPhoto(blobUrl?: string) {
-  return blobUrl ? <img src={blobUrl} alt="" /> : <Spinner color="white" />;
+function renderPhoto(blobUrl?: string, thumbDataUri?: string, thumbSize?: IDimensions) {
+  if (blobUrl) {
+    return <img src={blobUrl} alt="" />;
+  } else {
+    if (thumbDataUri && thumbSize) {
+      // TODO Opacity animation.
+      return (
+        <div className="thumbnail">
+          <img
+            src={thumbDataUri}
+            alt=""
+            // TODO This is a temporary workaround. Proper size calculation needed here.
+            // @ts-ignore
+            style={`height: ${thumbSize.height}px;`}
+          />
+          <Spinner color="white" />
+        </div>
+      );
+    }
+
+    return <Spinner color="white" />;
+  }
 }
 
-function renderVideo(
-  blobUrl?: string,
-  posterData?: string,
-  posterSize?: {
-    width: number;
-    height: number;
-  },
-) {
+function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimensions) {
   if (blobUrl) {
     return <VideoPlayer key={blobUrl} url={blobUrl} />;
   } else {
     if (posterData && posterSize) {
       return (
-        <div className="video-thumbnail">
+        <div className="thumbnail">
           <img
             src={posterData}
             alt=""
