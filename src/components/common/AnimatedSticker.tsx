@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useRef, useState,
+  FC, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { DEBUG } from '../../config';
 
@@ -14,21 +14,17 @@ type IProps = {
   className?: string;
 };
 
-type LottieModule = typeof import('lottie-web/build/player/lottie_light').default;
-let Lottie: LottieModule;
+type Lottie = typeof import('lottie-web/build/player/lottie_light').default;
+let lottie: Lottie;
 
 async function requireLottie() {
   try {
-    Lottie = await import('lottie-web/build/player/lottie_light') as unknown as LottieModule;
-
-    return true;
+    lottie = await import('lottie-web/build/player/lottie_light') as unknown as Lottie;
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-
-    return false;
   }
 }
 
@@ -42,16 +38,29 @@ const AnimatedSticker: FC<IProps> = ({
   playSegment,
   speed,
 }) => {
-  const [isLottieReady, setIsLottieReady] = useState(false);
   const [animation, setAnimation] = useState(null);
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
 
-  useEffect(() => {
-    if (!isLottieReady) {
-      requireLottie().then(setIsLottieReady);
+  useLayoutEffect(() => {
+    if (animation || !animationData) {
+      return;
     }
-  }, [isLottieReady]);
+
+    requireLottie().then(() => {
+      if (!container.current) {
+        return;
+      }
+
+      setAnimation(lottie.loadAnimation({
+        container: container.current,
+        renderer: 'svg',
+        loop: !noLoop,
+        autoplay: false,
+        animationData,
+      }));
+    });
+  }, [animationData, animation, noLoop]);
 
   useEffect(() => {
     if (!animation) {
@@ -64,24 +73,6 @@ const AnimatedSticker: FC<IProps> = ({
       animation.goToAndStop(0);
     }
   }, [play, animation]);
-
-  useEffect(() => {
-    if (animation || !animationData || !isLottieReady) {
-      return;
-    }
-
-    if (!container.current) {
-      return;
-    }
-
-    setAnimation(Lottie.loadAnimation({
-      container: container.current,
-      renderer: 'svg',
-      loop: !noLoop,
-      autoplay: false,
-      animationData,
-    }));
-  }, [animationData, isLottieReady, animation, noLoop]);
 
   useEffect(() => {
     return () => {
