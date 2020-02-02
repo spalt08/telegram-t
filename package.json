@@ -12,7 +12,8 @@
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
     "perf:test": "TS_NODE_COMPILER_OPTIONS='{\"isolatedModules\":false}' ts-node src/dev/perf/render.perf.ts",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "gramjs:types": "node ./src/lib/gramjs/tl/types-generator/generate.js"
   },
   "husky": {
     "hooks": {
