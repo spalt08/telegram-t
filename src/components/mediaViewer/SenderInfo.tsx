@@ -1,14 +1,17 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useCallback } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+import { GlobalActions } from '../../store/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
-import Avatar from '../common/Avatar';
+
 import { getUserFullName, isChannel } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
-import { withGlobal } from '../../lib/teact/teactn';
 import { selectChat, selectChatMessage, selectSender } from '../../modules/selectors';
+
+import Avatar from '../common/Avatar';
 
 import './SenderInfo.scss';
 
-type IProps = {
+type IProps = Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'openChatWithInfo'> & {
   messageId?: number;
   chatId?: number;
   message?: ApiMessage;
@@ -17,14 +20,25 @@ type IProps = {
 };
 
 const SenderInfo: FC<IProps> = ({
-  sender, isChannelChatMessage, message,
+  sender, isChannelChatMessage, message, selectMediaMessage, openUserInfo, openChatWithInfo,
 }) => {
+  const openSenderInfo = useCallback(() => {
+    if (sender) {
+      selectMediaMessage({ id: null });
+      if (isChannelChatMessage) {
+        openChatWithInfo({ id: sender.id });
+      } else {
+        openUserInfo({ id: sender.id });
+      }
+    }
+  }, [sender, openUserInfo, openChatWithInfo, selectMediaMessage]);
+
   if (!message) {
     return null;
   }
 
   return (
-    <div className="SenderInfo">
+    <div className="SenderInfo" onClick={openSenderInfo}>
       {isChannelChatMessage ? (
         <Avatar size="medium" chat={sender as ApiChat} />
       ) : (
@@ -66,4 +80,8 @@ export default withGlobal((global, { chatId, messageId }) => {
     sender,
     message,
   };
+},
+(setGlobal, actions) => {
+  const { selectMediaMessage, openUserInfo, openChatWithInfo } = actions;
+  return { selectMediaMessage, openUserInfo, openChatWithInfo };
 })(SenderInfo);

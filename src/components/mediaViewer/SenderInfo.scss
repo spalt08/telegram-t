@@ -3,6 +3,12 @@
   align-content: center;
   color: white;
   opacity: .5;
+  transition: .15s opacity;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
 
   .Avatar {
     margin-right: 1rem;

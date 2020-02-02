@@ -63,6 +63,9 @@ const Avatar: FC<IProps> = ({
   if (className) {
     classNames.push(className);
   }
+  if (onClick) {
+    classNames.push('action');
+  }
 
   return (
     <div
