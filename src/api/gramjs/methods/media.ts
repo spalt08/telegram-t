@@ -1,7 +1,7 @@
 import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 
 import localDb from '../localDb';
-import { getEntityTypeById } from '../inputHelpers';
+import { getEntityTypeById } from '../gramjsBuilders';
 
 export default async function downloadMedia(client: TelegramClient, url: string): Promise<{
   data: Buffer | null;

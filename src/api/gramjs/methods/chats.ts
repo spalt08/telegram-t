@@ -1,18 +1,18 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiChat } from '../../types';
 
-import { invokeRequest } from '../client';
+import { invokeRequest } from './client';
 import {
   buildApiChatFromDialog,
   getPeerKey,
   buildChatMembers,
   buildChatInviteLink,
-} from '../builders/chats';
-import { buildApiMessage } from '../builders/messages';
-import { buildApiUser } from '../builders/users';
+} from '../apiBuilders/chats';
+import { buildApiMessage } from '../apiBuilders/messages';
+import { buildApiUser } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
-import { buildInputEntity, buildInputPeer } from '../inputHelpers';
+import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 
 let onUpdate: OnApiUpdate;
 
@@ -20,15 +20,13 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function fetchChats(
-  {
-    limit,
-    offsetDate,
-  }: {
-    limit: number;
-    offsetDate?: number;
-  },
-) {
+export async function fetchChats({
+  limit,
+  offsetDate,
+}: {
+  limit: number;
+  offsetDate?: number;
+}) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
     limit,

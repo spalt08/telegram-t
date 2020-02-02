@@ -1,8 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate } from '../../types';
 
-import { invokeRequest } from '../client';
-import { buildInputEntity } from '../inputHelpers';
+import { invokeRequest } from './client';
+import { buildInputEntity } from '../gramjsBuilders';
 
 let onUpdate: OnApiUpdate;
 

@@ -2,12 +2,12 @@ import { addReducer, getDispatch } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../store/types';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
-import { initSdk, callSdk } from '../../../api/gramjs';
+import { initApi, callApi } from '../../../api/gramjs';
 import onUpdate from '../updaters';
 
 addReducer('init', (global: GlobalState) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
-  void initSdk(onUpdate, sessionId);
+  void initApi(onUpdate, sessionId);
 
   return {
     ...global,
@@ -18,7 +18,7 @@ addReducer('init', (global: GlobalState) => {
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
-  void callSdk('provideAuthPhoneNumber', phoneNumber);
+  void callApi('provideAuthPhoneNumber', phoneNumber);
 
   return {
     ...global,
@@ -30,7 +30,7 @@ addReducer('setAuthPhoneNumber', (global, actions, payload) => {
 addReducer('setAuthCode', (global, actions, payload) => {
   const { code } = payload!;
 
-  void callSdk('provideAuthCode', code);
+  void callApi('provideAuthCode', code);
 
   return {
     ...global,
@@ -42,7 +42,7 @@ addReducer('setAuthCode', (global, actions, payload) => {
 addReducer('setAuthPassword', (global, actions, payload) => {
   const { password } = payload!;
 
-  void callSdk('provideAuthPassword', password);
+  void callApi('provideAuthPassword', password);
 
   return {
     ...global,
@@ -54,7 +54,7 @@ addReducer('setAuthPassword', (global, actions, payload) => {
 addReducer('signUp', (global, actions, payload) => {
   const { firstName, lastName } = payload!;
 
-  void callSdk('provideAuthRegistration', { firstName, lastName });
+  void callApi('provideAuthRegistration', { firstName, lastName });
 
   return {
     ...global,
@@ -64,7 +64,7 @@ addReducer('signUp', (global, actions, payload) => {
 });
 
 addReducer('returnToAuthPhoneNumber', (global) => {
-  void callSdk('restartAuth');
+  void callApi('restartAuth');
 
   return {
     ...global,
@@ -82,7 +82,7 @@ addReducer('signOut', () => {
 });
 
 async function signOut() {
-  await callSdk('destroy');
+  await callApi('destroy');
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 
   getDispatch().init();

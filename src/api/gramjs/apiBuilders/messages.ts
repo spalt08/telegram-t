@@ -16,7 +16,7 @@ import {
 
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
-import { bytesToDataUri, omitGramJsFields } from './common';
+import { bytesToDataUri, omitGramJsFields } from './helpers';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
 // Used for number fields specified as optional but are required indeed.

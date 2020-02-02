@@ -1,6 +1,6 @@
 import { addReducer, setGlobal, getGlobal } from '../../../lib/teact/teactn';
 
-import { callSdk } from '../../../api/gramjs';
+import { callApi } from '../../../api/gramjs';
 import { selectUser } from '../../selectors';
 import { debounce } from '../../../util/schedulers';
 
@@ -15,7 +15,7 @@ addReducer('loadFullUser', (global, actions, payload) => {
 
   const { id, access_hash: accessHash } = user;
 
-  runDebouncedForFetchFullUser(() => callSdk('fetchFullUser', { id, accessHash }));
+  runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
 });
 
 addReducer('loadNearestCountry', (global) => {
@@ -27,7 +27,7 @@ addReducer('loadNearestCountry', (global) => {
 });
 
 async function loadNearestCountry() {
-  const authNearestCountry = await callSdk('fetchNearestCountry');
+  const authNearestCountry = await callApi('fetchNearestCountry');
   setGlobal({
     ...getGlobal(),
     authNearestCountry,

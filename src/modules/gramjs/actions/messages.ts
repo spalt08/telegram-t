@@ -1,7 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat } from '../../../api/types';
 
-import { callSdk } from '../../../api/gramjs';
+import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateMessages } from '../../common/messages';
 import { updateUsers } from '../../common/users';
@@ -33,7 +33,7 @@ addReducer('sendMessage', (global, actions, payload) => {
   const { text, attachment } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
-  void callSdk('sendMessage', {
+  void callApi('sendMessage', {
     chat, currentUserId, text, replyingTo, attachment,
   });
 });
@@ -46,7 +46,7 @@ addReducer('pinMessage', (global, actions, payload) => {
 
   const { messageId } = payload!;
 
-  void callSdk('pinMessage', { chat, messageId });
+  void callApi('pinMessage', { chat, messageId });
 });
 
 addReducer('deleteMessages', (global, actions, payload) => {
@@ -57,7 +57,7 @@ addReducer('deleteMessages', (global, actions, payload) => {
 
   const { messageIds, shouldDeleteForAll } = payload!;
 
-  void callSdk('deleteMessages', { chat, messageIds, shouldDeleteForAll });
+  void callApi('deleteMessages', { chat, messageIds, shouldDeleteForAll });
 });
 
 addReducer('markMessagesRead', (global, actions, payload) => {
@@ -68,7 +68,7 @@ addReducer('markMessagesRead', (global, actions, payload) => {
 
   const { maxId } = payload || {};
 
-  void callSdk('markMessagesRead', { chat, maxId });
+  void callApi('markMessagesRead', { chat, maxId });
 });
 
 async function loadMessages(chat: ApiChat, fromMessageId = 0) {
@@ -106,7 +106,7 @@ async function loadMessages(chat: ApiChat, fromMessageId = 0) {
 }
 
 async function loadMessagesPart(chat: ApiChat, fromMessageId = 0) {
-  const result = await callSdk('fetchMessages', {
+  const result = await callApi('fetchMessages', {
     chat,
     fromMessageId,
     limit: MESSAGE_SLICE_LIMIT,

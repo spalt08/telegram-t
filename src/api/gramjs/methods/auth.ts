@@ -1,8 +1,6 @@
 import { errors } from '../../../lib/gramjs';
+import { ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType, OnApiUpdate } from '../../types';
 
-import {
-  ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType, OnApiUpdate,
-} from '../../types';
 import { DEBUG } from '../../../config';
 
 const ApiErrors: { [k: string]: string } = {

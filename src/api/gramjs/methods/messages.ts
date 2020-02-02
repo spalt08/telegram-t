@@ -3,12 +3,12 @@ import {
   ApiChat, ApiAttachment, ApiMessage, OnApiUpdate,
 } from '../../types';
 
-import { invokeRequest, uploadFile } from '../client';
-import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../builders/messages';
-import { buildApiUser } from '../builders/users';
+import { invokeRequest, uploadFile } from './client';
+import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../apiBuilders/messages';
+import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity, buildInputPeer, generateRandomBigInt, getEntityTypeById,
-} from '../inputHelpers';
+} from '../gramjsBuilders';
 import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;

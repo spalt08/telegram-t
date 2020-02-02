@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
-import { Api as GramJs } from '../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
-import { generateRandomBytes, readBigIntFromBuffer } from '../../lib/gramjs/Helpers';
+import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
 export function getEntityTypeById(chatOrUserId: number) {
   if (chatOrUserId > 0) {

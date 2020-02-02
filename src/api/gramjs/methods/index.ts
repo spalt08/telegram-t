@@ -1,14 +1,16 @@
+import { destroy, downloadMedia } from './client';
 import {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
-} from './connectors/auth';
-import { fetchChats, fetchFullChat, fetchChatOnlines } from './connectors/chats';
+} from './auth';
+import { fetchChats, fetchFullChat, fetchChatOnlines } from './chats';
 import {
   fetchMessages, sendMessage, pinMessage, deleteMessages, markMessagesRead,
-} from './connectors/messages';
-import { fetchFullUser, fetchNearestCountry } from './connectors/users';
-import { destroy, downloadMedia } from './client';
+} from './messages';
+import { fetchFullUser, fetchNearestCountry } from './users';
 
 export default {
+  destroy,
+  downloadMedia,
   provideAuthPhoneNumber,
   provideAuthCode,
   provideAuthPassword,
@@ -20,8 +22,6 @@ export default {
   pinMessage,
   deleteMessages,
   markMessagesRead,
-  destroy,
-  downloadMedia,
   fetchFullChat,
   fetchChatOnlines,
   fetchFullUser,
