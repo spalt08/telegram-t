@@ -1,0 +1,39 @@
+.CropModal {
+  .modal-dialog {
+    height: calc(100% - 1rem);
+    max-height: 35rem;
+    position: relative;
+
+    .Button {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+    }
+  }
+
+  #avatar-crop {
+    width: 100%;
+    max-width: 25rem;
+    margin: 0 auto;
+    position: relative;
+
+    &::before {
+      content: '';
+      display: block;
+      padding-top: 100%;
+    }
+
+    .cr-boundary {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: var(--border-radius-default);
+    }
+
+    .cr-viewport {
+      border: none;
+      box-shadow: 0 0 2000px 2000px rgba(white, 0.5);
+    }
+  }
+}
