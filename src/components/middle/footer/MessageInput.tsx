@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent } from 'react';
+import { ChangeEvent } from 'react';
 import React, { FC, useEffect } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -19,7 +19,7 @@ let isJustSent = false;
 const MessageInput: FC<IProps> = ({
   selectedChatId, replyingTo, messageText, setMessageText, onSendMessage, setChatReplyingTo,
 }) => {
-  function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
+  function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
       isJustSent = false;
       return;
@@ -35,7 +35,7 @@ const MessageInput: FC<IProps> = ({
     currentTarget.style.overflowY = currentTarget.scrollHeight <= MAX_INPUT_HEIGHT ? 'hidden' : 'auto';
   }
 
-  function onKeyPress(e: KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     const { currentTarget } = e;
 
     if (e.keyCode === 13 && !e.shiftKey) {
@@ -56,6 +56,20 @@ const MessageInput: FC<IProps> = ({
 
   useEffect(focusInput, [selectedChatId, replyingTo]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Tab') {
+        requestAnimationFrame(focusInput);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, false);
+    };
+  }, []);
+
   return (
     <textarea
       id="message-input-text"
@@ -63,8 +77,8 @@ const MessageInput: FC<IProps> = ({
       placeholder="Message"
       rows={1}
       autoComplete="off"
-      onChange={onChange}
-      onKeyPress={onKeyPress}
+      onChange={handleChange}
+      onKeyPress={handleKeyPress}
       value={messageText}
     />
   );
