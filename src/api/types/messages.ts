@@ -1,6 +1,6 @@
 export interface ApiPhotoSize {
   '@type': 'photoSize';
-  type: 's' | 'm' | 'x' | 'y';
+  type: 's' | 'm' | 'x' | 'y' | 'z';
   width: number;
   height: number;
 }
