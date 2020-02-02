@@ -31,7 +31,7 @@ export async function authFlow(
         : await signInBot(client, apiCredentials, authParams);
 
     // TODO @logger
-    console.log('Signed in successfully as', utils.getDisplayName(me));
+    client._log.info('Signed in successfully as', utils.getDisplayName(me));
 }
 
 
