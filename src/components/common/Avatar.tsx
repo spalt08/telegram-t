@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat } from '../../api/types';
 import {
@@ -23,9 +23,10 @@ interface IProps {
 const Avatar: FC<IProps> = ({
   size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages, className,
 }) => {
+  const isDeleted = user && isDeletedUser(user);
   let imageHash: string | undefined;
 
-  if (!isSavedMessages) {
+  if (!isSavedMessages && !isDeleted) {
     if (chat) {
       imageHash = getChatAvatarHash(chat);
     } else if (user) {
@@ -34,29 +35,40 @@ const Avatar: FC<IProps> = ({
   }
 
   const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
+  const [isImageShown, setIsImageShown] = useState(dataUri);
 
-  let content: string | null = '';
-  const isOnline = !isSavedMessages && user && isUserOnline(user);
+  useEffect(() => {
+    if (dataUri) {
+      setIsImageShown(true);
+    }
+  }, [dataUri]);
+
+  let image: string | null = '';
+  let placeholder: string | null = '';
 
   if (isSavedMessages) {
-    content = <i className="icon-avatar-saved-messages" />;
-  } else if (dataUri) {
-    content = (
-      <img src={dataUri} alt="" />
-    );
-  } else if (user) {
-    const userName = getUserFullName(user);
-    if (isDeletedUser(user)) {
-      content = <i className="icon-avatar-deleted-account" />;
-    } else {
-      content = userName ? getFirstLetters(userName).slice(0, 2) : null;
+    image = <i className="icon-avatar-saved-messages" />;
+  } else if (isDeleted) {
+    image = <i className="icon-avatar-deleted-account" />;
+  } else {
+    if (dataUri) {
+      image = <img src={dataUri} className={isImageShown ? 'shown' : ''} alt="" />;
     }
-  } else if (chat) {
-    const title = getChatTitle(chat);
-    content = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
+
+    if (!isImageShown) {
+      if (user) {
+        const userName = getUserFullName(user);
+        placeholder = userName ? getFirstLetters(userName).slice(0, 2) : null;
+      } else if (chat) {
+        const title = getChatTitle(chat);
+        placeholder = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
+      }
+    }
   }
 
+  const isOnline = !isSavedMessages && user && isUserOnline(user);
   const classNames = ['Avatar', `size-${size}`];
+
   if (showOnlineStatus && isOnline) {
     classNames.push('online');
   }
@@ -72,7 +84,8 @@ const Avatar: FC<IProps> = ({
       className={classNames.join(' ')}
       onClick={onClick}
     >
-      {content}
+      {placeholder}
+      {image}
     </div>
   );
 };

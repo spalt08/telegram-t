@@ -71,6 +71,7 @@ function updateCache(global: GlobalState) {
     messages: reduceMessagesForCache(global),
     fileTransfers: { byMessageKey: {} },
     connectionState: undefined,
+    lastSyncTime: undefined,
     isUiReady: false,
   };
 

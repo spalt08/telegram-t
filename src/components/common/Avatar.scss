@@ -1,4 +1,5 @@
 .Avatar {
+  position: relative;
   flex: none;
   align-items: center;
   justify-content: center;
@@ -8,10 +9,20 @@
   background: var(--color-primary);
   color: white;
   display: flex;
+  overflow: hidden;
 
   img {
-    border-radius: 50%;
-    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: opacity 150ms;
+
+    &:not(.shown) {
+      opacity: 0;
+    }
   }
 
   i {
