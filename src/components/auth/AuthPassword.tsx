@@ -15,9 +15,10 @@ type IProps = (
 );
 
 const MIN_PASSWORD_LENGTH = 4;
-const PEEK_MONKEY_SHOW_DELAY = 900;
-const CLOSE_HANDS_FRAME = 50;
-const PEEK_OPEN_FRAME = 20;
+const PEEK_MONKEY_SHOW_DELAY = 700;
+const SEGMENT_COVER_EYES = [0, 50];
+const SEGMENT_UNCOVER_EYE = [0, 20];
+const SEGMENT_COVER_EYE = [20, 0];
 
 const AuthPassword: FC<IProps> = ({
   authIsLoading, authError, setAuthPassword, clearAuthError,
@@ -27,15 +28,13 @@ const AuthPassword: FC<IProps> = ({
   const [canSubmit, setCanSubmit] = useState(false);
   const [closeMonkeyData, setCloseMonkeyData] = useState(undefined);
   const [peekMonkeyData, setPeekMonkeyData] = useState(undefined);
-  const [isCloseShownAsync, setIsCloseShownAsync] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
-  const [canAnimate, setCanAnimate] = useState(false);
 
   useEffect(() => {
     if (!closeMonkeyData) {
       getMonkeyAnimationData('MonkeyClose').then(setCloseMonkeyData);
     } else {
-      setIsCloseShownAsync(true);
+      setTimeout(() => setIsPeekShown(true), PEEK_MONKEY_SHOW_DELAY);
     }
   }, [closeMonkeyData]);
 
@@ -44,12 +43,6 @@ const AuthPassword: FC<IProps> = ({
       getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkeyData);
     }
   }, [peekMonkeyData]);
-
-  useEffect(() => {
-    if (isCloseShownAsync) {
-      setTimeout(() => setIsPeekShown(true), PEEK_MONKEY_SHOW_DELAY);
-    }
-  }, [isCloseShownAsync]);
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     if (authError) {
@@ -62,9 +55,6 @@ const AuthPassword: FC<IProps> = ({
   }
 
   function togglePasswordVisibility() {
-    if (!canAnimate) {
-      setCanAnimate(true);
-    }
     setShowPassword(!showPassword);
   }
 
@@ -80,20 +70,17 @@ const AuthPassword: FC<IProps> = ({
     }
   }
 
-  function getPeekFrames() {
-    return showPassword
-      ? [0, PEEK_OPEN_FRAME]
-      : [PEEK_OPEN_FRAME, 0];
-  }
-
   return (
     <div id="auth-code-form" className="auth-form">
       <div id="monkey">
+        {!closeMonkeyData && !peekMonkeyData && (
+          <div className="monkey-preview" />
+        )}
         {closeMonkeyData && (
           <AnimatedSticker
-            className={isCloseShownAsync ? 'shown' : ''}
+            className={isPeekShown ? 'hidden' : 'shown'}
             animationData={closeMonkeyData}
-            playSegment={[0, CLOSE_HANDS_FRAME]}
+            playSegment={SEGMENT_COVER_EYES}
             noLoop
           />
         )}
@@ -101,7 +88,7 @@ const AuthPassword: FC<IProps> = ({
           <AnimatedSticker
             className={isPeekShown ? 'shown' : 'hidden'}
             animationData={peekMonkeyData}
-            playSegment={canAnimate && getPeekFrames()}
+            playSegment={showPassword ? SEGMENT_UNCOVER_EYE : SEGMENT_COVER_EYE}
             noLoop
           />
         )}
