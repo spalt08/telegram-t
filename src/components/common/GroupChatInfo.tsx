@@ -5,6 +5,8 @@ import { ApiChat } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../store/types';
 import { getChatTypeString, getChatTitle } from '../../modules/helpers';
 import { selectChat } from '../../modules/selectors';
+import { formatInteger } from '../../util/textFormat';
+
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 
@@ -29,7 +31,7 @@ const GroupChatInfo: FC<IProps> = ({
   }, [chat.id, loadChatOnlines, loadFullChat, lastSyncTime]);
 
   const groupStatus = getGroupStatus(chat);
-  const onlineStatus = chat.online_count ? `, ${chat.online_count} online` : '';
+  const onlineStatus = chat.online_count ? `, ${formatInteger(chat.online_count)} online` : '';
 
   return (
     <div className="ChatInfo">
@@ -57,7 +59,7 @@ function getGroupStatus(chat: ApiChat) {
   const { member_count } = chat.full_info;
 
   return member_count
-    ? `${member_count} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+    ? `${formatInteger(member_count)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
     : chatTypeString;
 }
 
