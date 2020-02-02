@@ -43,6 +43,15 @@
     }
   }
 
+  .AnimatedSticker {
+    // It runs simultaneously with thumbnail fade-out.
+    opacity: 0.5;
+
+    &.fade-in {
+      opacity: 1;
+    }
+  }
+
   &.emoji-only-1 {
     font-size: 5rem;
 
