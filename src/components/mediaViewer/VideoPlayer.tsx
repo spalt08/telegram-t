@@ -13,7 +13,7 @@ function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
 const VideoPlayer: FC<IProps> = ({ url }) => {
   const [hasSize, setHasSize] = useState(false);
 
-  function handleMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {
+  function handleLoadedMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {
     const videoEl = e.currentTarget;
 
     if (videoEl.videoWidth > 0) {
@@ -32,7 +32,7 @@ const VideoPlayer: FC<IProps> = ({ url }) => {
         // @ts-ignore
         style={style}
         id="media-viewer-video"
-        onLoadedMetadata={handleMetadata}
+        onLoadedMetadata={handleLoadedMetadata}
       >
         <source src={url} />
       </video>

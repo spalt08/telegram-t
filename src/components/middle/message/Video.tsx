@@ -12,6 +12,8 @@ import {
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 
+import Spinner from '../../ui/Spinner';
+
 import './Media.scss';
 
 type IProps = {
@@ -29,19 +31,38 @@ const Video: FC<IProps> = ({
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
 
   const canPlayInline = canMessagePlayVideoInline(video);
-  const shouldPlayInline = mediaData && loadAndPlay && canPlayInline;
+  const isInline = mediaData && loadAndPlay && canPlayInline;
   const isHqPreview = mediaData && !canPlayInline;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
   const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
 
+  let thumbClassName = 'thumbnail blur';
+  if (!thumbDataUri) {
+    thumbClassName += ' empty';
+  }
+
   return (
     <div
       className="media-inner has-viewer"
       onClick={onClick}
+      // @ts-ignore
+      style={`height: ${height}px;`}
     >
-      {shouldPlayInline && (
+      {!isInline && !isHqPreview && ([
+        <img
+          src={thumbDataUri}
+          className={thumbClassName}
+          width={width}
+          height={height}
+          alt=""
+        />,
+        <div className="message-media-loading">
+          <Spinner color="white" />
+        </div>,
+      ])}
+      {isInline && (
         <video
           width={width}
           height={height}
@@ -54,24 +75,19 @@ const Video: FC<IProps> = ({
           <source src={mediaData} />
         </video>
       )}
-      {!shouldPlayInline && isHqPreview && (
-        <img src={mediaData} width={width} height={height} alt="" />
-      )}
-      {!shouldPlayInline && !isHqPreview && (
+      {isHqPreview && ([
         <img
-          src={thumbDataUri}
+          src={mediaData}
           width={width}
           height={height}
           alt=""
-        />
-      )}
-      {!shouldPlayInline && (
+        />,
         <div className="message-media-loading">
           <div className="message-media-play-button">
             <i className="icon-large-play" />
           </div>
-        </div>
-      )}
+        </div>,
+      ])}
       <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
     </div>
   );
