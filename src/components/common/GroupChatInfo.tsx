@@ -33,7 +33,7 @@ const GroupChatInfo: FC<IProps> = ({
 
   return (
     <div className="ChatInfo">
-      <Avatar size={avatarSize} chat={chat} />
+      <Avatar key={chat.id} size={avatarSize} chat={chat} />
       <div>
         <div className="title">
           {getChatTitle(chat)}

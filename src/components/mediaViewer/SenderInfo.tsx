@@ -31,18 +31,18 @@ const SenderInfo: FC<IProps> = ({
         openUserInfo({ id: sender.id });
       }
     }
-  }, [sender, openUserInfo, openChatWithInfo, selectMediaMessage]);
+  }, [sender, selectMediaMessage, isChannelChatMessage, openChatWithInfo, openUserInfo]);
 
-  if (!message) {
+  if (!message || !sender) {
     return null;
   }
 
   return (
     <div className="SenderInfo" onClick={openSenderInfo}>
       {isChannelChatMessage ? (
-        <Avatar size="medium" chat={sender as ApiChat} />
+        <Avatar key={sender.id} size="medium" chat={sender as ApiChat} />
       ) : (
-        <Avatar size="medium" user={sender as ApiUser} />
+        <Avatar key={sender.id} size="medium" user={sender as ApiUser} />
       )}
       <div className="meta">
         <div className="title">
