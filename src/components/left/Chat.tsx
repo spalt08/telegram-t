@@ -15,7 +15,7 @@ import {
   getPrivateChatUserId,
 } from '../../modules/helpers';
 import {
-  selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectChatMessages,
+  selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
 
@@ -36,7 +36,6 @@ type IProps = {
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   selected: boolean;
-  areMessagesLoaded: boolean;
   isUiReady: boolean;
 } & Pick<GlobalActions, 'openChat'>;
 
@@ -48,7 +47,6 @@ const Chat: FC<IProps> = ({
   lastMessageOutgoingStatus,
   actionTargetMessage,
   selected,
-  areMessagesLoaded,
   isUiReady,
   openChat,
 }) => {
@@ -112,7 +110,7 @@ const Chat: FC<IProps> = ({
           <Badge chat={chat} />
         </div>
       </div>
-      <RippleEffect delayed={areMessagesLoaded && !selected} />
+      <RippleEffect delayed={!selected} />
     </div>
   );
 };
@@ -150,12 +148,12 @@ export default memo(withGlobal(
     }
 
     const lastMessage = chat.last_message;
-    const privateChatUserId = getPrivateChatUserId(chat);
-    const { targetUserId: actionTargetUserId } = lastMessage.content.action || {};
     // TODO: Works for only recent messages that are already loaded in the store
     const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
       ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
       : undefined;
+    const { targetUserId: actionTargetUserId } = lastMessage.content.action || {};
+    const privateChatUserId = getPrivateChatUserId(chat);
     const { isUiReady } = global;
 
     return {
@@ -165,7 +163,6 @@ export default memo(withGlobal(
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
-      areMessagesLoaded: Boolean(selectChatMessages(global, chatId)),
       isUiReady,
     };
   },
