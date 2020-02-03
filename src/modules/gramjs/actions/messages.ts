@@ -5,17 +5,18 @@ import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateMessages } from '../../common/messages';
 import { updateUsers } from '../../common/users';
-import { selectChatMessages, selectOpenChat } from '../../selectors';
+import { selectChat, selectChatMessages, selectOpenChat } from '../../selectors';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
-addReducer('loadMessages', (global) => {
-  const chat = selectOpenChat(global);
+addReducer('loadMessages', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  const messages = selectChatMessages(global, chat.id);
+  const messages = selectChatMessages(global, chatId);
   const chatMessageIds = messages ? Object.keys(messages) : [];
   const lowestMessageId = chatMessageIds.length ? Math.min(...chatMessageIds.map(Number)) : undefined;
 
