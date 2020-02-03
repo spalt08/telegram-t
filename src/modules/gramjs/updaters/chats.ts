@@ -1,7 +1,8 @@
 import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
-import { updateChat } from '../../common/chats';
+
+import { updateChat } from '../../reducers';
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();

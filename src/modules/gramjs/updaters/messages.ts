@@ -1,8 +1,7 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
-import { updateChat } from '../../common/chats';
-import { deleteMessages, updateMessage } from '../../common/messages';
+import { updateChat, deleteChatMessages, updateChatMessage } from '../../reducers';
 import { GlobalState } from '../../../store/types';
 import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
 import { getMessageKey, getMessagePhoto } from '../../helpers';
@@ -23,7 +22,7 @@ export function onUpdate(update: ApiUpdate) {
         message.content.photo.thumbnail = currentPhoto.thumbnail;
       }
 
-      let newGlobal = updateMessage(global, chat_id, id, message);
+      let newGlobal = updateChatMessage(global, chat_id, id, message);
 
       const chat = selectChat(global, chat_id);
 
@@ -49,7 +48,7 @@ export function onUpdate(update: ApiUpdate) {
         return;
       }
 
-      let newGlobal = updateMessage(global, chat_id, id, message);
+      let newGlobal = updateChatMessage(global, chat_id, id, message);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
@@ -62,11 +61,11 @@ export function onUpdate(update: ApiUpdate) {
     case 'updateMessageSendSucceeded': {
       const { chat_id, old_message_id, message } = update;
 
-      let newGlobal = updateMessage(global, chat_id, message.id, {
+      let newGlobal = updateChatMessage(global, chat_id, message.id, {
         ...selectChatMessage(global, chat_id, old_message_id),
         ...message,
       });
-      newGlobal = deleteMessages(newGlobal, chat_id, [old_message_id]);
+      newGlobal = deleteChatMessages(newGlobal, chat_id, [old_message_id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
@@ -84,7 +83,7 @@ export function onUpdate(update: ApiUpdate) {
       // Channel update.
       if (chat_id) {
         ids.forEach((id) => {
-          newGlobal = updateMessage(global, chat_id, id, {
+          newGlobal = updateChatMessage(global, chat_id, id, {
             is_deleting: true,
           });
 
@@ -97,7 +96,7 @@ export function onUpdate(update: ApiUpdate) {
         setGlobal(newGlobal);
 
         setTimeout(() => {
-          setGlobal(deleteMessages(getGlobal(), chat_id, ids));
+          setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
         }, DELETING_DELAY);
 
         return;
@@ -106,7 +105,7 @@ export function onUpdate(update: ApiUpdate) {
       ids.forEach((id) => {
         const chatId = findChatId(global, id);
         if (chatId) {
-          newGlobal = updateMessage(newGlobal, chatId, id, {
+          newGlobal = updateChatMessage(newGlobal, chatId, id, {
             is_deleting: true,
           });
 
@@ -116,7 +115,7 @@ export function onUpdate(update: ApiUpdate) {
           }
 
           setTimeout(() => {
-            setGlobal(deleteMessages(getGlobal(), chatId, [id]));
+            setGlobal(deleteChatMessages(getGlobal(), chatId, [id]));
           }, DELETING_DELAY);
         }
       });
