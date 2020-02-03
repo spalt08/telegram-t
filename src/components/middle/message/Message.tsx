@@ -214,6 +214,7 @@ const Message: FC<IProps> = ({
           user={sender}
           onClick={viewUser}
           className={!isLastInGroup ? 'hidden' : ''}
+          noAnimate
         />
       )}
       <div

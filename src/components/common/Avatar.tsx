@@ -18,10 +18,18 @@ interface IProps {
   isSavedMessages?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   className?: string;
+  noAnimate?: boolean;
 }
 
 const Avatar: FC<IProps> = ({
-  size = 'large', chat, user, showOnlineStatus, onClick, isSavedMessages, className,
+  size = 'large',
+  chat,
+  user,
+  showOnlineStatus,
+  onClick,
+  isSavedMessages,
+  className,
+  noAnimate,
 }) => {
   const isDeleted = user && isDeletedUser(user);
   let imageHash: string | undefined;
@@ -35,7 +43,7 @@ const Avatar: FC<IProps> = ({
   }
 
   const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
-  const [isImageShown, setIsImageShown] = useState(dataUri);
+  const [isImageShown, setIsImageShown] = useState(noAnimate || dataUri);
 
   useEffect(() => {
     if (dataUri) {
