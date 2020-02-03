@@ -1,7 +1,8 @@
 import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
-import { updateUser } from '../../common/users';
+
+import { updateUser } from '../../reducers';
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();

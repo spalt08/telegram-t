@@ -1,5 +1,11 @@
 type CollectionByKey<Member> = Record<number | string, Member>;
 
+type OrderDirection = 'asc' | 'desc';
+
+interface OrderCallback<T> {
+  (member: T): any;
+}
+
 export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key: keyof T) {
   return collection.reduce((byKey: CollectionByKey<T>, member: T) => {
     byKey[member[key]] = member;
@@ -8,9 +14,14 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
-type OrderDirection = 'asc' | 'desc';
-interface OrderCallback<T> {
-  (member: T): any;
+export function mapValues<M extends any>(
+  byKey: CollectionByKey<M>,
+  callback: (member: M, key: string, originalByKey: CollectionByKey<M>) => M,
+): CollectionByKey<M> {
+  return Object.keys(byKey).reduce((newByKey: CollectionByKey<M>, key) => {
+    newByKey[key] = callback(byKey[key], key, byKey);
+    return newByKey;
+  }, {});
 }
 
 export function orderBy<T>(

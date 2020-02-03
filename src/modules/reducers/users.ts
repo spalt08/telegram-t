@@ -1,21 +1,19 @@
 import { ApiUser } from '../../api/types';
 import { GlobalState } from '../../store/types';
 
-export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>, shouldReplaceExisting = false) {
+export function replaceUsers(global: GlobalState, byId: Record<number, ApiUser>) {
   return {
     ...global,
     users: {
       ...global.users,
-      byId: {
-        ...(!shouldReplaceExisting && global.users.byId),
-        ...byId,
-      },
+      byId,
     },
   };
 }
 
 export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>) {
-  const user = global.users.byId[userId];
+  const { byId } = global.users;
+  const user = byId[userId];
   const updatedUser = {
     ...user,
     ...userUpdate,
@@ -25,7 +23,20 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
     return global;
   }
 
-  return updateUsers(global, { [userId]: updatedUser });
+  return replaceUsers(global, {
+    ...byId,
+    [userId]: updatedUser,
+  });
+}
+
+export function updateUsers(global: GlobalState, byId: Record<number, ApiUser>) {
+  let newGlobal = global;
+
+  Object.keys(byId).forEach((id) => {
+    newGlobal = updateUser(newGlobal, Number(id), byId[Number(id)]);
+  });
+
+  return newGlobal;
 }
 
 export function updateSelectedUserId(global: GlobalState, selectedId?: number) {

@@ -1,5 +1,5 @@
-import { addReducer } from '../lib/teact/teactn';
-import { updateChatReplyingTo, updateChatScrollOffset, updateSelectedChatId } from './common/chats';
+import { addReducer } from '../../lib/teact/teactn';
+import { updateChatReplyingTo, updateChatScrollOffset, updateSelectedChatId } from '../reducers';
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;

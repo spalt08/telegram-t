@@ -1,4 +1,4 @@
-import { addReducer } from '../lib/teact/teactn';
+import { addReducer } from '../../lib/teact/teactn';
 
 addReducer('setIsUiReady', (global, actions, payload) => {
   const { isUiReady } = payload!;

@@ -3,9 +3,8 @@ import {
 } from '../../../lib/teact/teactn';
 
 import { callApi } from '../../../api/gramjs';
-import { updateChatIds, updateChats } from '../../common/chats';
+import { updateChatIds, updateChats, updateUsers } from '../../reducers';
 import { selectChat } from '../../selectors';
-import { updateUsers } from '../../common/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
 
