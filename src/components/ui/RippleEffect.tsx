@@ -13,7 +13,7 @@ interface Ripple {
 
 const ANIMATION_DURATION_MS = 700;
 // Workaround for flickering when rendering messages. The value is heuristic.
-const DELAY_MS = 80;
+const DELAY_MS = 90;
 
 const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
   const [ripples, setRipples] = useState([]);
