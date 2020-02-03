@@ -13,10 +13,16 @@ interface Ripple {
 
 const ANIMATION_DURATION_MS = 700;
 // Workaround for flickering when rendering messages. The value is heuristic.
-const DELAY_MS = 90;
+const DELAY_MS = 80;
 
 const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
   const [ripples, setRipples] = useState([]);
+
+  const cleanUpDebounced = useMemo(() => {
+    return debounce(() => {
+      setRipples([]);
+    }, ANIMATION_DURATION_MS, false);
+  }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (e.button !== 0) {
@@ -27,14 +33,18 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
     const position = container.getBoundingClientRect() as DOMRect;
 
     const rippleSize = container.offsetWidth / 2;
-    const exec = () => setRipples([
-      ...ripples,
-      {
-        x: e.clientX - position.x - (rippleSize / 2),
-        y: e.clientY - position.y - (rippleSize / 2),
-        size: rippleSize,
-      },
-    ]);
+    const exec = () => {
+      setRipples([
+        ...ripples,
+        {
+          x: e.clientX - position.x - (rippleSize / 2),
+          y: e.clientY - position.y - (rippleSize / 2),
+          size: rippleSize,
+        },
+      ]);
+
+      cleanUpDebounced();
+    };
 
     if (delayed) {
       setTimeout(() => {
@@ -43,16 +53,10 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
     } else {
       exec();
     }
-  }, [ripples, delayed]);
-
-  const cleanUp = useMemo(() => {
-    return debounce(() => {
-      setRipples([]);
-    }, ANIMATION_DURATION_MS + DELAY_MS, false);
-  }, []);
+  }, [delayed, ripples, cleanUpDebounced]);
 
   return (
-    <div className="ripple-container" onMouseDown={handleMouseDown} onMouseUp={cleanUp}>
+    <div className="ripple-container" onMouseDown={handleMouseDown}>
       {ripples.map(({ x, y, size }: Ripple) => (
         <span
           // @ts-ignore
