@@ -87,7 +87,7 @@ const MessageList: FC<IProps> = ({
         // More than one callback can be added to the queue
         // before the messages are prepended, so we need to check again.
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMessages();
+          loadMessages({ chatId });
         }
       });
     }
@@ -101,9 +101,9 @@ const MessageList: FC<IProps> = ({
 
   useEffect(() => {
     if (!isLoaded || messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
-      runThrottledForLoadMessages(loadMessages);
+      runThrottledForLoadMessages(() => loadMessages({ chatId }));
     }
-  }, [isLoaded, loadMessages, messagesArray.length]);
+  }, [isLoaded, loadMessages, messagesArray.length, chatId]);
 
   useEffect(() => {
     if (isUnread) {
