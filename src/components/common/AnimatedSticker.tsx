@@ -1,7 +1,6 @@
 import React, {
   FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { DEBUG } from '../../config';
 
 type IProps = {
   animationData: AnyLiteral;
@@ -16,17 +15,16 @@ type IProps = {
 };
 
 type Lottie = typeof import('lottie-web/build/player/lottie_light').default;
+let lottiePromise: Promise<Lottie>;
 let lottie: Lottie;
 
-async function requireLottie() {
-  try {
-    lottie = await import('lottie-web/build/player/lottie_light') as unknown as Lottie;
-  } catch (err) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
+async function ensureLottie() {
+  if (!lottiePromise) {
+    lottiePromise = import('lottie-web/build/player/lottie_light') as unknown as Promise<Lottie>;
+    lottie = await lottiePromise;
   }
+
+  return lottiePromise;
 }
 
 const AnimatedSticker: FC<IProps> = ({
@@ -49,7 +47,7 @@ const AnimatedSticker: FC<IProps> = ({
       return;
     }
 
-    requireLottie().then(() => {
+    const exec = () => {
       if (!container.current) {
         return;
       }
@@ -71,7 +69,15 @@ const AnimatedSticker: FC<IProps> = ({
       if (onLoad) {
         onLoad();
       }
-    });
+    };
+
+    if (lottie) {
+      exec();
+    } else {
+      ensureLottie().then(() => {
+        requestAnimationFrame(exec);
+      });
+    }
   }, [animation, animationData, noLoop, speed, onLoad]);
 
   useEffect(() => {
