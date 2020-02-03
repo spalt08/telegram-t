@@ -38,29 +38,24 @@ const Video: FC<IProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
 
-  let thumbClassName = 'thumbnail blur';
-  if (!thumbDataUri) {
-    thumbClassName += ' empty';
-  }
-
   return (
     <div
       className="media-inner has-viewer"
       onClick={onClick}
-      // @ts-ignore
-      style={`height: ${height}px;`}
     >
       {!isInline && !isHqPreview && ([
         <img
           src={thumbDataUri}
-          className={thumbClassName}
+          className={`thumbnail blur ${!thumbDataUri ? 'empty' : ''}`}
           width={width}
           height={height}
           alt=""
         />,
-        <div className="message-media-loading">
-          <Spinner color="white" />
-        </div>,
+        loadAndPlay && (
+          <div className="message-media-loading">
+            <Spinner color="white" />
+          </div>
+        ),
       ])}
       {isInline && (
         <video

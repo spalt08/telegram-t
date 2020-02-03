@@ -60,7 +60,7 @@ const Photo: FC<IProps> = ({
         height={height}
         alt=""
       />
-      {!mediaData && (
+      {!mediaData && load && (
         <div className="message-media-loading">
           <Spinner color="white" progress={fileTransferProgress} />
         </div>
