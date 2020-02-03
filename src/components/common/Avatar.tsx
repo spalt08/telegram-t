@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat } from '../../api/types';
 import {
-  getChatAvatarHash, getChatTitle, isPrivateChat,
+  getChatAvatarHash, getChatTitle, isChatPrivate,
   getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
 } from '../../modules/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
@@ -69,7 +69,7 @@ const Avatar: FC<IProps> = ({
         placeholder = userName ? getFirstLetters(userName).slice(0, 2) : null;
       } else if (chat) {
         const title = getChatTitle(chat);
-        placeholder = title && getFirstLetters(title).slice(0, isPrivateChat(chat.id) ? 2 : 1);
+        placeholder = title && getFirstLetters(title).slice(0, isChatPrivate(chat.id) ? 2 : 1);
       }
     }
   }

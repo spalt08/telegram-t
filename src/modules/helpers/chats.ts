@@ -1,14 +1,18 @@
 import { ApiChat, ApiUser } from '../../api/types';
 
-export function isPrivateChat(chatId: number) {
+export function isChatPrivate(chatId: number) {
   return chatId > 0;
 }
 
-export function isSuperGroup(chat: ApiChat) {
+export function isChatBasicGroup(chat: ApiChat) {
+  return chat.type['@type'] === 'chatTypeBasicGroup';
+}
+
+export function isChatSuperGroup(chat: ApiChat) {
   return chat.type['@type'] === 'chatTypeSuperGroup';
 }
 
-export function isChannel(chat: ApiChat) {
+export function isChatChannel(chat: ApiChat) {
   return chat.type['@type'] === 'chatTypeChannel';
 }
 

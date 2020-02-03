@@ -3,7 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
 import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
-import { getPrivateChatUserId, isPrivateChat } from '../../modules/helpers';
+import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
   selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
 } from '../../modules/selectors';
@@ -34,7 +34,7 @@ const MiddleHeader: FC<IProps> = ({
   return (
     <div className="MiddleHeader">
       <div onClick={onHeaderClick}>
-        {isPrivateChat(chatId) ? (
+        {isChatPrivate(chatId) ? (
           <PrivateChatInfo userId={chatId} />
         ) : (
           <GroupChatInfo chatId={chatId} />
@@ -60,7 +60,7 @@ export default withGlobal(
     }
 
     let target: ApiChat | ApiUser | undefined = chat;
-    if (isPrivateChat(chatId)) {
+    if (isChatPrivate(chatId)) {
       const id = chat && getPrivateChatUserId(chat);
       target = id ? selectUser(global, id) : undefined;
     }
