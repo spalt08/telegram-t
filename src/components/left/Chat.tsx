@@ -10,7 +10,7 @@ import {
   getChatTitle,
   getLastMessageText,
   getUserFirstName,
-  isPrivateChat,
+  isChatPrivate,
   isActionMessage,
   getPrivateChatUserId,
 } from '../../modules/helpers';
@@ -118,7 +118,7 @@ const Chat: FC<IProps> = ({
 function buildClassNames(chat: ApiChat, isSelected: boolean) {
   const classNames = ['Chat'];
 
-  classNames.push(isPrivateChat(chat.id) ? 'private' : 'group');
+  classNames.push(isChatPrivate(chat.id) ? 'private' : 'group');
 
   if (isSelected) {
     classNames.push('selected');
@@ -128,7 +128,7 @@ function buildClassNames(chat: ApiChat, isSelected: boolean) {
 }
 
 function getSenderName(chatId: number, sender?: ApiUser) {
-  if (!sender || isPrivateChat(chatId)) {
+  if (!sender || isChatPrivate(chatId)) {
     return undefined;
   }
 

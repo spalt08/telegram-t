@@ -3,7 +3,7 @@ import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat, selectIsChatWithSelf } from './chats';
 import {
   getMessageKey,
-  getSendingState, isChannel, isMessageLocal, isPrivateChat, isSuperGroup,
+  getSendingState, isChatBasicGroup, isChatChannel, isMessageLocal, isChatPrivate, isChatSuperGroup,
 } from '../helpers';
 import { selectUser } from './users';
 
@@ -56,17 +56,20 @@ export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): bo
 
 export function selectAllowedMessagedActions(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
-  const isPrivate = isPrivateChat(chat.id);
+  const isPrivate = isChatPrivate(chat.id);
   const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat);
-  const isChatChannel = isChannel(chat);
-  const isOwnMessage = selectIsOwnMessage(global, message);
-  const isSuperGroupOrChannel = isChatChannel || isSuperGroup(chat);
-  const isAdminOrOwner = !isPrivate && false; // TODO Implement.
+  const isBasicGroup = isChatBasicGroup(chat);
+  const isSuperGroup = isChatSuperGroup(chat);
+  const isChannel = isChatChannel(chat);
 
-  const canReply = !isChatChannel;
-  const canPin = isChatWithSelf || (isSuperGroupOrChannel && isAdminOrOwner);
-  const canDelete = isOwnMessage || !isSuperGroupOrChannel || isAdminOrOwner;
-  const canDeleteForAll = canDelete && !isChatWithSelf && (isOwnMessage || isPrivate || isAdminOrOwner);
+  const isOwnMessage = selectIsOwnMessage(global, message);
+  const isAdminOrOwner = !isPrivate && false; // TODO Implement.
+  const isSuperGroupOrChannelAdmin = (isSuperGroup || isChannel) && isAdminOrOwner;
+
+  const canReply = !isChannel;
+  const canPin = isChatWithSelf || isBasicGroup || isSuperGroupOrChannelAdmin;
+  const canDelete = isPrivate || isBasicGroup || isSuperGroupOrChannelAdmin || isOwnMessage;
+  const canDeleteForAll = canDelete && ((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin);
 
   return {
     canReply, canPin, canDelete, canDeleteForAll,

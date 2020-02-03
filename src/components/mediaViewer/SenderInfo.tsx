@@ -3,7 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../store/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
-import { getUserFullName, isChannel } from '../../modules/helpers';
+import { getUserFullName, isChatChannel } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
 import { selectChat, selectChatMessage, selectSender } from '../../modules/selectors';
 
@@ -68,7 +68,7 @@ export default withGlobal((global, { chatId, messageId }) => {
     return {};
   }
 
-  if (chat && isChannel(chat)) {
+  if (chat && isChatChannel(chat)) {
     sender = chat;
     isChannelChatMessage = true;
   } else {

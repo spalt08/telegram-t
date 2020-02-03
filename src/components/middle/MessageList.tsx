@@ -10,9 +10,9 @@ import { ApiMessage } from '../../api/types';
 import { selectChatMessages, selectOpenChat } from '../../modules/selectors';
 import {
   isOwnMessage,
-  isPrivateChat,
+  isChatPrivate,
   isActionMessage,
-  isChannel,
+  isChatChannel,
 } from '../../modules/helpers';
 import { orderBy, toArray, flatten } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
@@ -59,7 +59,7 @@ const MessageList: FC<IProps> = ({
 
   const isLoaded = Boolean(messages);
   const messagesArray = isLoaded && messages ? orderBy(toArray(messages), 'date') : [];
-  const isPrivate = chatId !== undefined && isPrivateChat(chatId);
+  const isPrivate = chatId !== undefined && isChatPrivate(chatId);
 
   const playMediaInViewport = useCallback(() => {
     requestAnimationFrame(() => {
@@ -285,7 +285,7 @@ export default memo(withGlobal(
 
     return {
       chatId: chat.id,
-      isChannelChat: isChannel(chat),
+      isChannelChat: isChatChannel(chat),
       isUnread: Boolean(chat.unread_count),
       messages,
     };

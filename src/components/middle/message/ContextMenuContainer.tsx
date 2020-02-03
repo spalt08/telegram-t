@@ -14,7 +14,7 @@ import {
 import {
   getPrivateChatUserId,
   getUserFirstName,
-  isPrivateChat,
+  isChatPrivate,
 } from '../../../modules/helpers';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 
@@ -149,7 +149,7 @@ export default memo(withGlobal(
       canReply, canPin, canDelete, canDeleteForAll,
     } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
-    const contactFirstName = isPrivateChat(chat.id)
+    const contactFirstName = isChatPrivate(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : null;
 

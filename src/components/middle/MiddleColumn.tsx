@@ -3,7 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
 import { selectChat } from '../../modules/selectors';
-import { isChannel } from '../../modules/helpers';
+import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import Button from '../ui/Button';
@@ -100,7 +100,7 @@ export default withGlobal(
     const selectedChat = selectedChatId && areChatsLoaded
       ? selectChat(global, selectedChatId)
       : undefined;
-    const isChannelChat = selectedChat && isChannel(selectedChat);
+    const isChannelChat = selectedChat && isChatChannel(selectedChat);
 
     return {
       selectedChatId,
