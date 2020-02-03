@@ -63,7 +63,7 @@ const Avatar: FC<IProps> = ({
       image = <img src={dataUri} className={isImageShown ? 'shown' : ''} alt="" />;
     }
 
-    if (!isImageShown) {
+    if (!dataUri || !isImageShown) {
       if (user) {
         const userName = getUserFullName(user);
         placeholder = userName ? getFirstLetters(userName).slice(0, 2) : null;
