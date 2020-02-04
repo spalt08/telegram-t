@@ -10,7 +10,6 @@
     "build:contest:gramjs": "./deploy/contest-gramjs.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
-    "perf:test": "TS_NODE_COMPILER_OPTIONS='{\"isolatedModules\":false}' ts-node src/dev/perf/render.perf.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "gramjs:types": "node ./src/lib/gramjs/tl/types-generator/generate.js"
@@ -31,7 +30,6 @@
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@types/croppie": "^2.5.4",
     "@types/css-font-loading-module": "0.0.2",
-    "@types/puppeteer": "^2.0.0",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.3",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
@@ -53,7 +51,6 @@
     "parcel": "^1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
     "postcss-modules": "^1.5.0",
-    "puppeteer": "^2.0.0",
     "react": "^16.11.0",
     "sass": "^1.23.3",
     "shx": "^0.3.2",
