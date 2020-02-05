@@ -22,6 +22,13 @@ addReducer('loadMessages', (global, actions, payload) => {
   void loadMessages(chat, lowestMessageId);
 });
 
+addReducer('loadMessage', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+  const chat = selectChat(global, chatId);
+
+  void callApi('fetchMessage', { chat, messageId });
+});
+
 addReducer('sendMessage', (global, actions, payload) => {
   const chat = selectOpenChat(global);
   const { currentUserId } = global;

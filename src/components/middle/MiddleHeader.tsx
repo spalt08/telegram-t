@@ -7,6 +7,7 @@ import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
   selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
 } from '../../modules/selectors';
+import useEnsureMessage from '../../hooks/useEnsureMessage';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import HeaderActions from './HeaderActions';
@@ -16,13 +17,21 @@ import './MiddleHeader.scss';
 
 type IProps = {
   chatId: number;
+  pinnedMessageId?: number;
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
 } & Pick<GlobalActions, 'openChatWithInfo' | 'pinMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
-  chatId, pinnedMessage, canUnpin, openChatWithInfo, pinMessage,
+  chatId,
+  pinnedMessageId,
+  pinnedMessage,
+  canUnpin,
+  openChatWithInfo,
+  pinMessage,
 }) => {
+  useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
+
   function onHeaderClick() {
     openChatWithInfo({ id: chatId });
   }
@@ -73,8 +82,13 @@ export default withGlobal(
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
 
         return {
+          pinnedMessageId: pinned_message_id,
           pinnedMessage,
           canUnpin: canPin,
+        };
+      } else {
+        return {
+          pinnedMessageId: pinned_message_id,
         };
       }
     }

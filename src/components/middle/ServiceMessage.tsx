@@ -7,6 +7,8 @@ import {
 } from '../../api/types';
 import { selectUser, selectChatMessage } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
+import useEnsureMessage from '../../hooks/useEnsureMessage';
+import useEnsureUserFromMessage from '../../hooks/useEnsureUserFromMessage';
 
 type IProps = {
   message: ApiMessage;
@@ -17,18 +19,24 @@ type IProps = {
 
 const ServiceMessage: FC<IProps> = ({
   message, sender, actionTargetUser, actionTargetMessage,
-}) => (
-  <div className="message-action-header">
-    <span>
-      {getServiceMessageContent(
-        message,
-        sender,
-        actionTargetUser,
-        actionTargetMessage,
-      )}
-    </span>
-  </div>
-);
+}) => {
+  const { targetUserId: actionTargetUserId } = message.content.action || {};
+  useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
+  useEnsureUserFromMessage(message.chat_id, message.id, actionTargetUserId, actionTargetUser);
+
+  return (
+    <div className="message-action-header">
+      <span>
+        {getServiceMessageContent(
+          message,
+          sender,
+          actionTargetUser,
+          actionTargetMessage,
+        )}
+      </span>
+    </div>
+  );
+};
 
 export default memo(withGlobal(
   (global, { message }: IProps) => {
@@ -39,7 +47,6 @@ export default memo(withGlobal(
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
-      // TODO: Works for only recent messages that are already loaded in the store
       ...(actionTargetMessageId && {
         actionTargetMessage: selectChatMessage(global, message.chat_id, actionTargetMessageId),
       }),

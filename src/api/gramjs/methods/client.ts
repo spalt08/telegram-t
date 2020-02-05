@@ -74,7 +74,7 @@ function onUpdate(update: any) {
 }
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, shouldHandleUpdates = false) {
-  if (DEBUG) {
+  if (DEBUG && process.env.NODE_ENV !== 'perf') {
     if (!isConnected) {
       // eslint-disable-next-line no-console
       console.warn(`[GramJs/client] INVOKE ${request.className} ERROR: Client is not connected`);

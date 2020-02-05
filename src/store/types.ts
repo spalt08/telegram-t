@@ -61,9 +61,9 @@ export type ActionTypes = (
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
   'loadMessages' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
-  'selectMediaMessage' | 'markMessagesRead' |
+  'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry'
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

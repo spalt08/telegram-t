@@ -4,9 +4,9 @@ import {
 } from './auth';
 import { fetchChats, fetchFullChat, fetchChatOnlines } from './chats';
 import {
-  fetchMessages, sendMessage, pinMessage, deleteMessages, markMessagesRead,
+  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead,
 } from './messages';
-import { fetchFullUser, fetchNearestCountry } from './users';
+import { fetchFullUser, fetchNearestCountry, fetchUserFromMessage } from './users';
 
 export default {
   destroy,
@@ -18,6 +18,7 @@ export default {
   restartAuth,
   fetchChats,
   fetchMessages,
+  fetchMessage,
   sendMessage,
   pinMessage,
   deleteMessages,
@@ -25,5 +26,6 @@ export default {
   fetchFullChat,
   fetchChatOnlines,
   fetchFullUser,
+  fetchUserFromMessage,
   fetchNearestCountry,
 };

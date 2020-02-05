@@ -94,3 +94,7 @@ export function getSendingState(message: ApiMessage) {
 export function isMessageLocal(message: ApiMessage) {
   return message.id < 0;
 }
+
+export function getMessageAction(message: ApiMessage) {
+  return message.content.action;
+}

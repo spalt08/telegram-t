@@ -6,6 +6,12 @@ import { debounce } from '../../../util/schedulers';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 
+addReducer('loadUserFromMessage', (global, actions, payload) => {
+  const { chatId, userId, messageId } = payload!;
+
+  void callApi('fetchUserFromMessage', { chatId, userId, messageId });
+});
+
 addReducer('loadFullUser', (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);

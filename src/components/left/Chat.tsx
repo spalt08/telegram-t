@@ -13,11 +13,14 @@ import {
   isChatPrivate,
   isActionMessage,
   getPrivateChatUserId,
+  getMessageAction,
 } from '../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
+import useEnsureMessage from '../../hooks/useEnsureMessage';
+import useEnsureUserFromMessage from '../../hooks/useEnsureUserFromMessage';
 
 import Avatar from '../common/Avatar';
 import RippleEffect from '../ui/RippleEffect';
@@ -50,8 +53,29 @@ const Chat: FC<IProps> = ({
   isUiReady,
   openChat,
 }) => {
+  const { last_message } = chat;
+  const lastMessageAction = last_message && getMessageAction(last_message);
+
+  const actionTargetMessageId = last_message && lastMessageAction
+    && last_message.reply_to_message_id;
+  const actionTargetUserId = last_message && lastMessageAction
+    && lastMessageAction.targetUserId;
+
+  useEnsureMessage(chat.id, actionTargetMessageId, actionTargetMessage);
+  useEnsureUserFromMessage(
+    chat.id,
+    last_message && last_message.id,
+    last_message && last_message.sender_user_id,
+    lastMessageSender,
+  );
+  useEnsureUserFromMessage(
+    chat.id,
+    last_message && last_message.id,
+    actionTargetUserId,
+    actionTargetUser,
+  );
+
   function renderLastMessage() {
-    const { last_message } = chat;
     if (!last_message) {
       return null;
     }
@@ -147,19 +171,19 @@ export default memo(withGlobal(
       return null;
     }
 
-    const lastMessage = chat.last_message;
-    // TODO: Works for only recent messages that are already loaded in the store
-    const actionTargetMessage = lastMessage.content.action && lastMessage.reply_to_message_id
-      ? selectChatMessage(global, lastMessage.chat_id, lastMessage.reply_to_message_id)
+    const { last_message } = chat;
+    const lastMessageAction = last_message && getMessageAction(last_message);
+    const actionTargetMessage = lastMessageAction && last_message.reply_to_message_id
+      ? selectChatMessage(global, last_message.chat_id, last_message.reply_to_message_id)
       : undefined;
-    const { targetUserId: actionTargetUserId } = lastMessage.content.action || {};
+    const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
     const { isUiReady } = global;
 
     return {
       chat,
-      lastMessageSender: selectUser(global, lastMessage.sender_user_id),
-      ...(lastMessage.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage) }),
+      lastMessageSender: selectUser(global, last_message.sender_user_id),
+      ...(last_message.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, last_message) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,

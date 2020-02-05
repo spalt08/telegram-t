@@ -7,8 +7,6 @@ type IProps = {
   chat: ApiChat;
 };
 
-// TODO Support mentions.
-
 const Badge: FC<IProps> = ({ chat }) => {
   const classNames = ['Badge'];
 

@@ -67,7 +67,6 @@ function processEntity(
     case 'MessageEntityCode':
       return <code className="text-entity-code" key={entityKey}>{addLineBreaks(entityText)}</code>;
     case 'MessageEntityEmail':
-      // TODO check children
       return (
         <a
           key={entityKey}
@@ -81,7 +80,6 @@ function processEntity(
         </a>
       );
     case 'MessageEntityHashtag':
-      // TODO check children
       return (
         <a
           key={entityKey}
@@ -107,7 +105,6 @@ function processEntity(
       );
     case 'MessageEntityPhone':
       return (
-        // TODO check children
         <a
           key={entityKey}
           href={`tel:${entityText}`}

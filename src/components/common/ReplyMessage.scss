@@ -45,8 +45,9 @@
     margin-left: 0.5rem;
 
     .sender-name {
-      line-height: 1rem !important;
-      height: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       margin-bottom: 0.125rem;
     }
 

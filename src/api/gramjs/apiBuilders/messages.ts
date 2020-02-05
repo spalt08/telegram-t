@@ -296,7 +296,6 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | null {
   };
 }
 
-// TODO add supplementing information
 function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   let text = '';
 

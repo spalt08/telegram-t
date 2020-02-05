@@ -21,6 +21,8 @@ import {
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
 import getMinMediaWidth from './util/minMediaWidth';
+import useEnsureMessage from '../../../hooks/useEnsureMessage';
+import useEnsureUserFromMessage from '../../../hooks/useEnsureUserFromMessage';
 
 import Avatar from '../../common/Avatar';
 import MessageMeta from './MessageMeta';
@@ -75,6 +77,26 @@ const Message: FC<IProps> = ({
 }) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
+
+  useEnsureUserFromMessage(
+    message.chat_id,
+    message.id,
+    showAvatar || showSenderName ? message.sender_user_id : undefined,
+    sender,
+  );
+  useEnsureMessage(message.chat_id, message.reply_to_message_id, replyMessage);
+  useEnsureUserFromMessage(
+    message.chat_id,
+    message.id,
+    message.forward_info && message.forward_info.origin.sender_user_id,
+    originSender,
+  );
+  useEnsureUserFromMessage(
+    message.chat_id,
+    message.id,
+    replyMessage && replyMessage.sender_user_id,
+    replyMessageSender,
+  );
 
   const containerClassNames = buildClassNames(
     message,
@@ -288,7 +310,6 @@ function buildClassNames(
 
 export default memo(withGlobal(
   (global, { message, showSenderName, showAvatar }: IProps) => {
-    // TODO: Works for only recent messages that are already loaded in the store
     const replyMessage = message.reply_to_message_id
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
@@ -316,7 +337,13 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { selectMediaMessage, openUserInfo } = actions;
-    return { selectMediaMessage, openUserInfo };
+    const {
+      selectMediaMessage,
+      openUserInfo,
+    } = actions;
+    return {
+      selectMediaMessage,
+      openUserInfo,
+    };
   },
 )(Message));

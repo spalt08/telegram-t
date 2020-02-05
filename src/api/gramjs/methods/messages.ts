@@ -47,6 +47,38 @@ export async function fetchMessages({ chat, fromMessageId, limit }: {
   };
 }
 
+export async function fetchMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  const result = await invokeRequest(
+    isChannel
+      ? new GramJs.channels.GetMessages({
+        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
+        id: [new GramJs.InputMessageID({ id: messageId })],
+      })
+      : new GramJs.messages.GetMessages({
+        id: [new GramJs.InputMessageID({ id: messageId })],
+      }),
+  );
+
+  if (result instanceof GramJs.messages.MessagesNotModified) {
+    return;
+  }
+
+  const message = result.messages[0] && buildApiMessage(result.messages[0]);
+
+  if (!message) {
+    return;
+  }
+
+  onUpdate({
+    '@type': 'newMessage',
+    id: message.id,
+    chat_id: chat.id,
+    message,
+  });
+}
+
 export async function sendMessage({
   chat, currentUserId, text, replyingTo, attachment,
 }: {
