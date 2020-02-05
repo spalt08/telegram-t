@@ -289,9 +289,6 @@ class TelegramClient {
                         },
                     ))
                     await sender.send(req)
-                } else {
-                    // A "high" request is needed to initialize the connection to "own" DC.
-                    await sender.send(new requests.users.GetUsers({ id: [new requests.InputPeerSelf({})] }))
                 }
                 sender.dcId = dcId
                 return sender
