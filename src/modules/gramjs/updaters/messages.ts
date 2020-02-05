@@ -95,9 +95,7 @@ export function onUpdate(update: ApiUpdate) {
 
         setGlobal(newGlobal);
 
-        setTimeout(() => {
-          setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
-        }, DELETING_DELAY);
+        scheduleDeleting(chat_id, ids);
 
         return;
       }
@@ -114,9 +112,7 @@ export function onUpdate(update: ApiUpdate) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
           }
 
-          setTimeout(() => {
-            setGlobal(deleteChatMessages(getGlobal(), chatId, [id]));
-          }, DELETING_DELAY);
+          scheduleDeleting(chatId, [id]);
         }
       });
 
@@ -178,4 +174,15 @@ function findLastMessage(global: GlobalState, chatId: number, exceptForId: numbe
   const lastId = ids[ids.length - 1];
 
   return byId[lastId !== exceptForId ? lastId : ids[ids.length - 2]];
+}
+
+// The animation will start in two frames (TeactN `runCallbacks` + Teact `forceUpdate`), so should the timeout.
+function scheduleDeleting(chatId: number, messageIds: number[]) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        setGlobal(deleteChatMessages(getGlobal(), chatId, messageIds));
+      }, DELETING_DELAY);
+    });
+  });
 }
