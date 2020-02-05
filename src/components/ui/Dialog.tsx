@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 
-import useOverlay from '../../hooks/useOverlay';
+import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import './Dialog.scss';
@@ -25,7 +25,7 @@ const Dialog: FC<IProps> = (props) => {
     onClose,
     onCloseAnimationEnd,
   } = props;
-  const { isShown, overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
+  const { isShown, transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
@@ -33,7 +33,7 @@ const Dialog: FC<IProps> = (props) => {
     return null;
   }
 
-  const classNames = ['Dialog', className, 'overlay', ...overlayClassNames];
+  const classNames = ['Dialog', className, 'overlay', ...transitionClassNames];
   if (className) {
     classNames.push(className);
   }
@@ -48,8 +48,8 @@ const Dialog: FC<IProps> = (props) => {
           <div className="backdrop" onClick={onClose} />
         )}
         <div
-          className={['dialog', 'overlay', ...overlayClassNames].join(' ')}
-          onTransitionEnd={handleCloseAnimationEnd}
+          className={['dialog', 'overlay', ...transitionClassNames].join(' ')}
+          onTransitionEnd={handleHideTransitionEnd}
         >
           <div className="header">
             {title}

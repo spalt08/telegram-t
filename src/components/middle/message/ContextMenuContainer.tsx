@@ -21,7 +21,7 @@ import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import MessageContextMenu from './MessageContextMenu';
 import Dialog from '../../ui/Dialog';
 import Button from '../../ui/Button';
-import useOverlay from '../../../hooks/useOverlay';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import './ContextMenuContainer.scss';
 
@@ -59,7 +59,7 @@ const ContextMenuContainer: FC<IProps> = ({
   pinMessage,
   deleteMessages,
 }) => {
-  const { overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
+  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -106,8 +106,8 @@ const ContextMenuContainer: FC<IProps> = ({
 
   return (
     <div
-      className={['ContextMenuContainer', ...overlayClassNames].join(' ')}
-      onTransitionEnd={handleCloseAnimationEnd}
+      className={['ContextMenuContainer', ...transitionClassNames].join(' ')}
+      onTransitionEnd={handleHideTransitionEnd}
     >
       <MessageContextMenu
         message={message}

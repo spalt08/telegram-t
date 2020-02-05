@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 
-import useOverlay from '../../hooks/useOverlay';
+import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import './Menu.scss';
@@ -31,8 +31,8 @@ const Menu: FC<IProps> = (props) => {
     onCloseAnimationEnd,
     onClose,
   } = props;
-  const { overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
-  const bubbleClassNames = ['bubble', positionY, positionX, 'overlay', ...overlayClassNames].join(' ');
+  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const bubbleClassNames = ['bubble', positionY, positionX, 'overlay', ...transitionClassNames].join(' ');
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
@@ -45,7 +45,7 @@ const Menu: FC<IProps> = (props) => {
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <ul
         className={bubbleClassNames}
-        onTransitionEnd={handleCloseAnimationEnd}
+        onTransitionEnd={handleHideTransitionEnd}
         onClick={autoClose ? onClose : undefined}
       >
         {children}

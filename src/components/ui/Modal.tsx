@@ -1,5 +1,5 @@
 import React, { FC } from '../../lib/teact/teact';
-import useOverlay from '../../hooks/useOverlay';
+import useShowTransition from '../../hooks/useShowTransition';
 
 import './Modal.scss';
 
@@ -21,12 +21,12 @@ const Modal: FC<IProps> = (props) => {
     onDismiss,
     onCloseAnimationEnd,
   } = props;
-  const { overlayClassNames, handleCloseAnimationEnd } = useOverlay(isOpen, onCloseAnimationEnd);
+  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
 
-  const classNames = ['Modal', className, 'overlay', ...overlayClassNames];
+  const classNames = ['Modal', className, 'overlay', ...transitionClassNames];
 
   return (
-    <div className={classNames.join(' ')} onTransitionEnd={handleCloseAnimationEnd}>
+    <div className={classNames.join(' ')} onTransitionEnd={handleHideTransitionEnd}>
       <div className="modal-container">
         {isOpen && (
           <div className="modal-backdrop" onClick={onDismiss} />

@@ -3,7 +3,7 @@ import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../../store/types';
 
-import useOverlay from '../../hooks/useOverlay';
+import useShowTransition from '../../hooks/useShowTransition';
 import { getChatAvatarHash } from '../../modules/helpers';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/image';
@@ -47,7 +47,7 @@ const preloadTasks = {
 const UiLoader: FC<IProps> = ({
   page, children, isUiReady, setIsUiReady,
 }) => {
-  const { isShown, overlayClassNames, handleCloseAnimationEnd } = useOverlay(!isUiReady, undefined, true);
+  const { isShown, transitionClassNames, handleHideTransitionEnd } = useShowTransition(!isUiReady, undefined, true);
 
   useEffect(() => {
     Promise.race([
@@ -68,8 +68,8 @@ const UiLoader: FC<IProps> = ({
       {isShown && (
         <div
           key={page}
-          className={['mask', 'overlay', ...overlayClassNames].join(' ')}
-          onTransitionEnd={handleCloseAnimationEnd}
+          className={['mask', 'overlay', ...transitionClassNames].join(' ')}
+          onTransitionEnd={handleHideTransitionEnd}
         >
           {page === 'main' ? (
             [
