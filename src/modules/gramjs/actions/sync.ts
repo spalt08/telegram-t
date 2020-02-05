@@ -69,6 +69,9 @@ async function loadAndReplaceMessages(global: GlobalState) {
     if (newSelectedChatId !== selectedChatId) {
       global = updateSelectedChatId(global, newSelectedChatId);
     } else if (result) {
+      const byId = buildCollectionByKey(result.messages, 'id');
+      const listedIds = Object.keys(byId).map(Number);
+
       let selectedMediaMessageId;
       const currentSelectedMessageMediaId = global.messages.selectedMediaMessageId;
       if (currentSelectedMessageMediaId) {
@@ -82,7 +85,8 @@ async function loadAndReplaceMessages(global: GlobalState) {
         selectedMediaMessageId,
         byChatId: {
           [selectedChatId]: {
-            byId: buildCollectionByKey(result.messages, 'id'),
+            byId,
+            listedIds,
           },
         },
       };

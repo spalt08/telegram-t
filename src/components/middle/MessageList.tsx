@@ -1,24 +1,20 @@
 import { UIEvent } from 'react';
 import React, {
-  FC, useState, memo, useCallback, useRef, useEffect,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
-import { ApiMessage } from '../../api/types';
 
-import { selectChatMessages, selectOpenChat } from '../../modules/selectors';
+import { selectChatMessageListedIds, selectChatMessagesByIds, selectOpenChat } from '../../modules/selectors';
 import {
-  isOwnMessage,
-  isChatPrivate,
-  isActionMessage,
-  isChatChannel,
+  isActionMessage, isChatChannel, isChatPrivate, isOwnMessage,
 } from '../../modules/helpers';
-import { orderBy, toArray, flatten } from '../../util/iteratees';
+import { flatten, orderBy } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import { MessageDateGroup, groupMessages } from './util/groupMessages';
+import { groupMessages, MessageDateGroup } from './util/groupMessages';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';
@@ -26,11 +22,11 @@ import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
 
-type IProps = Pick<GlobalActions, 'loadMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
+type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | 'setChatScrollOffset'> & {
   chatId?: number;
   isChannelChat?: boolean;
   isUnread?: boolean;
-  messages?: Record<number, ApiMessage>;
+  messageIds?: number[];
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -48,17 +44,24 @@ const MessageList: FC<IProps> = ({
   chatId,
   isChannelChat,
   isUnread,
-  messages,
-  loadMessages,
+  messageIds,
+  loadMessagesForList,
   markMessagesRead,
   setChatScrollOffset,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
+  const messageGroups = useMemo(() => {
+    if (!chatId || !messageIds) {
+      return undefined;
+    }
 
-  const isLoaded = Boolean(messages);
-  const messagesArray = isLoaded && messages ? orderBy(toArray(messages), 'date') : [];
+    return groupMessages(orderBy(selectChatMessagesByIds(getGlobal(), chatId, messageIds), 'date'));
+  }, [chatId, messageIds]);
+
+  const isLoaded = Boolean(messageIds);
+  const messagesCount = messageIds ? messageIds.length : 0;
   const isPrivate = chatId !== undefined && isChatPrivate(chatId);
 
   const playMediaInViewport = useCallback(() => {
@@ -87,7 +90,7 @@ const MessageList: FC<IProps> = ({
         // More than one callback can be added to the queue
         // before the messages are prepended, so we need to check again.
         if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMessages({ chatId });
+          loadMessagesForList({ chatId });
         }
       });
     }
@@ -97,13 +100,13 @@ const MessageList: FC<IProps> = ({
 
       playMediaInViewport();
     });
-  }, [chatId, loadMessages, setChatScrollOffset, playMediaInViewport]);
+  }, [chatId, loadMessagesForList, setChatScrollOffset, playMediaInViewport]);
 
   useEffect(() => {
-    if (!isLoaded || messagesArray.length < LOAD_MORE_WHEN_LESS_THAN) {
-      runThrottledForLoadMessages(() => loadMessages({ chatId }));
+    if (!isLoaded || messagesCount < LOAD_MORE_WHEN_LESS_THAN) {
+      runThrottledForLoadMessages(() => loadMessagesForList({ chatId }));
     }
-  }, [isLoaded, loadMessages, messagesArray.length, chatId]);
+  }, [isLoaded, loadMessagesForList, messagesCount, chatId]);
 
   useEffect(() => {
     if (isUnread) {
@@ -111,8 +114,8 @@ const MessageList: FC<IProps> = ({
     }
   }, [isUnread, markMessagesRead]);
 
-  useLayoutEffectWithPrevDeps(([prevChatId, prevMessages]) => {
-    if (chatId === prevChatId && messages === prevMessages) {
+  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds]) => {
+    if (chatId === prevChatId && messageIds === prevMessageIds) {
       return;
     }
 
@@ -141,7 +144,7 @@ const MessageList: FC<IProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messages, playMediaInViewport]);
+  }, [chatId, messageIds, playMediaInViewport]);
 
   const classNames = ['MessageList', 'custom-scroll'];
   if (isPrivate || isChannelChat) {
@@ -159,7 +162,7 @@ const MessageList: FC<IProps> = ({
       {isLoaded ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
-          {messagesArray.length > 0 && renderMessages(messagesArray, viewportMessageIds, isPrivate)}
+          {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
         </div>
       ) : (
         <Loading />
@@ -169,11 +172,11 @@ const MessageList: FC<IProps> = ({
 };
 
 function renderMessages(
-  messagesArray: ApiMessage[],
+  messageGroups: MessageDateGroup[],
   viewportMessageIds: number[],
   isPrivate: boolean,
 ) {
-  const dateGroups = groupMessages(messagesArray).map((
+  const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
     dateGroupIndex: number,
     dateGroupsArray: MessageDateGroup[],
@@ -206,7 +209,8 @@ function renderMessages(
         return (
           <Message
             key={message.id}
-            message={message}
+            chatId={message.chat_id}
+            messageId={message.id}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
             loadAndPlayMedia={viewportMessageIds.includes(message.id)}
@@ -281,22 +285,22 @@ export default memo(withGlobal(
       return {};
     }
 
-    const messages = selectChatMessages(global, chat.id);
+    const messageIds = selectChatMessageListedIds(global, chat.id);
 
     return {
       chatId: chat.id,
       isChannelChat: isChatChannel(chat),
       isUnread: Boolean(chat.unread_count),
-      messages,
+      messageIds,
     };
   },
   (setGlobal, actions) => {
     const {
-      loadMessages, markMessagesRead, setChatScrollOffset,
+      loadMessagesForList, markMessagesRead, setChatScrollOffset,
     } = actions;
 
     return {
-      loadMessages, markMessagesRead, setChatScrollOffset,
+      loadMessagesForList, markMessagesRead, setChatScrollOffset,
     };
   },
 )(MessageList));

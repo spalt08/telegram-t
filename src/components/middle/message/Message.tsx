@@ -44,6 +44,8 @@ type MessagePositionProperties = {
 };
 
 type IProps = {
+  chatId: number;
+  messageId: number;
   message: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
@@ -59,6 +61,8 @@ type IProps = {
 } & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
+  chatId,
+  messageId,
   message,
   showAvatar,
   showSenderName,
@@ -79,21 +83,21 @@ const Message: FC<IProps> = ({
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
 
   useEnsureUserFromMessage(
-    message.chat_id,
-    message.id,
+    chatId,
+    messageId,
     showAvatar || showSenderName ? message.sender_user_id : undefined,
     sender,
   );
-  useEnsureMessage(message.chat_id, message.reply_to_message_id, replyMessage);
+  useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
   useEnsureUserFromMessage(
-    message.chat_id,
-    message.id,
+    chatId,
+    messageId,
     message.forward_info && message.forward_info.origin.sender_user_id,
     originSender,
   );
   useEnsureUserFromMessage(
-    message.chat_id,
-    message.id,
+    chatId,
+    messageId,
     replyMessage && replyMessage.sender_user_id,
     replyMessageSender,
   );
@@ -118,7 +122,7 @@ const Message: FC<IProps> = ({
   const isForwarded = Boolean(message.forward_info);
 
   function openMediaMessage(): void {
-    selectMediaMessage({ id: message.id });
+    selectMediaMessage({ id: messageId });
   }
 
   function handleBeforeContextMenu(e: React.MouseEvent) {
@@ -229,7 +233,7 @@ const Message: FC<IProps> = ({
   }
 
   return (
-    <div className={containerClassNames.join(' ')} data-message-id={message.id}>
+    <div className={containerClassNames.join(' ')} data-message-id={messageId}>
       {showAvatar && (
         <Avatar
           size="small"
@@ -309,9 +313,17 @@ function buildClassNames(
 }
 
 export default memo(withGlobal(
-  (global, { message, showSenderName, showAvatar }: IProps) => {
+  (global, {
+    chatId, messageId, showSenderName, showAvatar,
+  }: IProps) => {
+    const message = selectChatMessage(global, chatId, messageId);
+
+    if (!message) {
+      return {};
+    }
+
     const replyMessage = message.reply_to_message_id
-      ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
+      ? selectChatMessage(global, chatId, message.reply_to_message_id)
       : undefined;
 
     let userId;
@@ -326,6 +338,7 @@ export default memo(withGlobal(
     const fileTransferProgress = selectFileTransferProgress(global, message);
 
     return {
+      message,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
       ...(replyMessage && {
