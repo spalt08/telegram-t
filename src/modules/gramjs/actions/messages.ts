@@ -3,30 +3,29 @@ import { ApiChat } from '../../../api/types';
 
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { replaceChatMessagesById, updateUsers } from '../../reducers';
-import { selectChat, selectChatMessages, selectOpenChat } from '../../selectors';
+import { addChatMessageListedIds, replaceChatMessagesById, updateChatMessage, updateUsers } from '../../reducers';
+import { selectChat, selectChatMessageListedIds, selectOpenChat } from '../../selectors';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
-addReducer('loadMessages', (global, actions, payload) => {
+addReducer('loadMessagesForList', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  const messages = selectChatMessages(global, chatId);
-  const chatMessageIds = messages ? Object.keys(messages) : [];
-  const lowestMessageId = chatMessageIds.length ? Math.min(...chatMessageIds.map(Number)) : undefined;
+  const listedIds = selectChatMessageListedIds(global, chatId);
+  const lowestMessageId = listedIds ? Math.min(...listedIds) : undefined;
 
-  void loadMessages(chat, lowestMessageId);
+  void loadMessagesForList(chat, lowestMessageId);
 });
 
 addReducer('loadMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
   const chat = selectChat(global, chatId);
 
-  void callApi('fetchMessage', { chat, messageId });
+  void loadMessage(chat, messageId);
 });
 
 addReducer('sendMessage', (global, actions, payload) => {
@@ -78,7 +77,7 @@ addReducer('markMessagesRead', (global, actions, payload) => {
   void callApi('markMessagesRead', { chat, maxId });
 });
 
-async function loadMessages(chat: ApiChat, fromMessageId = 0) {
+async function loadMessagesForList(chat: ApiChat, fromMessageId = 0) {
   const result = await loadMessagesPart(chat, fromMessageId);
 
   if (!result) {
@@ -106,10 +105,14 @@ async function loadMessages(chat: ApiChat, fromMessageId = 0) {
     }
   }
 
-  let global = getGlobal();
-  global = replaceChatMessagesById(global, chat.id, buildCollectionByKey(messages, 'id'));
-  global = updateUsers(global, buildCollectionByKey(users, 'id'));
-  setGlobal(global);
+  const byId = buildCollectionByKey(messages, 'id');
+  const ids = Object.keys(byId).map(Number);
+
+  let newGlobal = getGlobal();
+  newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
+  newGlobal = addChatMessageListedIds(newGlobal, chat.id, ids);
+  newGlobal = updateUsers(newGlobal, buildCollectionByKey(users, 'id'));
+  setGlobal(newGlobal);
 }
 
 async function loadMessagesPart(chat: ApiChat, fromMessageId = 0) {
@@ -124,4 +127,14 @@ async function loadMessagesPart(chat: ApiChat, fromMessageId = 0) {
   }
 
   return result;
+}
+
+async function loadMessage(chat: ApiChat, messageId: number) {
+  const message = await callApi('fetchMessage', { chat, messageId });
+
+  if (!message) {
+    return;
+  }
+
+  setGlobal(updateChatMessage(getGlobal(), chat.id, messageId, message));
 }

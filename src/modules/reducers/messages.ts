@@ -1,8 +1,8 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage } from '../../api/types';
-import { selectChatMessages } from '../selectors';
+import { selectChatMessageListedIds, selectChatMessages } from '../selectors';
 
-export function replaceChatMessages(global: GlobalState, chatId: number, newById: Record<number, ApiMessage>) {
+function replaceChatMessages(global: GlobalState, chatId: number, newById: Record<number, ApiMessage>): GlobalState {
   return {
     ...global,
     messages: {
@@ -10,6 +10,7 @@ export function replaceChatMessages(global: GlobalState, chatId: number, newById
       byChatId: {
         ...global.messages.byChatId,
         [chatId]: {
+          ...global.messages.byChatId[chatId],
           byId: newById,
         },
       },
@@ -17,19 +18,38 @@ export function replaceChatMessages(global: GlobalState, chatId: number, newById
   };
 }
 
-// This is a shallow version of a full update reducer.
-export function replaceChatMessagesById(global: GlobalState, chatId: number, newById: Record<number, ApiMessage>) {
-  const byId = selectChatMessages(global, chatId) || {};
+function replaceChatMessageListedIds(
+  global: GlobalState, chatId: number, newListedIds: number[] | undefined,
+): GlobalState {
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {
+        ...global.messages.byChatId,
+        [chatId]: {
+          ...global.messages.byChatId[chatId],
+          listedIds: newListedIds,
+        },
+      },
+    },
+  };
+}
+
+export function replaceChatMessagesById(
+  global: GlobalState, chatId: number, updatedById: Record<number, ApiMessage>,
+): GlobalState {
+  const byId = selectChatMessages(global, chatId);
 
   return replaceChatMessages(global, chatId, {
     ...byId,
-    ...newById,
+    ...updatedById,
   });
 }
 
 export function updateChatMessage(
   global: GlobalState, chatId: number, messageId: number, messageUpdate: Partial<ApiMessage>,
-) {
+): GlobalState {
   const byId = selectChatMessages(global, chatId) || {};
   const message = byId[messageId];
   const updatedMessage = {
@@ -51,13 +71,40 @@ export function deleteChatMessages(
   global: GlobalState,
   chatId: number,
   messageIds: number[],
-) {
+): GlobalState {
   const byId = selectChatMessages(global, chatId) || {};
+  let listedIds = selectChatMessageListedIds(global, chatId);
   const newById = { ...byId };
 
   messageIds.forEach((messageId) => {
     delete newById[messageId];
+
+    if (listedIds) {
+      const index = listedIds.indexOf(messageId);
+      if (index !== -1) {
+        listedIds = Array.prototype.concat(listedIds.slice(0, index), listedIds.slice(index + 1));
+      }
+    }
   });
 
-  return replaceChatMessages(global, chatId, newById);
+  let newGlobal = global;
+
+  newGlobal = replaceChatMessages(newGlobal, chatId, newById);
+  newGlobal = replaceChatMessageListedIds(newGlobal, chatId, listedIds);
+
+  return newGlobal;
+}
+
+export function addChatMessageListedIds(global: GlobalState, chatId: number, messageIds: number[]): GlobalState {
+  let listedIds = selectChatMessageListedIds(global, chatId);
+
+  messageIds.forEach((messageId) => {
+    if (!listedIds) {
+      listedIds = [messageId];
+    } else if (!listedIds.includes(messageId)) {
+      listedIds = [...listedIds, messageId];
+    }
+  });
+
+  return replaceChatMessageListedIds(global, chatId, listedIds);
 }

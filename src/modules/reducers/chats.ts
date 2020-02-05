@@ -1,7 +1,7 @@
 import { GlobalState } from '../../store/types';
 import { ApiChat } from '../../api/types';
 
-export function replaceChatIds(global: GlobalState, newIds: number[]) {
+export function replaceChatIds(global: GlobalState, newIds: number[]): GlobalState {
   return {
     ...global,
     chats: {
@@ -11,7 +11,7 @@ export function replaceChatIds(global: GlobalState, newIds: number[]) {
   };
 }
 
-export function updateChatIds(global: GlobalState, idsUpdate: number[]) {
+export function updateChatIds(global: GlobalState, idsUpdate: number[]): GlobalState {
   const ids = global.chats.ids || [];
   const newIds = (ids && ids.length) ? idsUpdate.filter((id) => !ids.includes(id)) : idsUpdate;
 
@@ -21,7 +21,7 @@ export function updateChatIds(global: GlobalState, idsUpdate: number[]) {
   ]);
 }
 
-export function replaceChats(global: GlobalState, newById: Record<number, ApiChat>) {
+export function replaceChats(global: GlobalState, newById: Record<number, ApiChat>): GlobalState {
   return {
     ...global,
     chats: {
@@ -31,7 +31,7 @@ export function replaceChats(global: GlobalState, newById: Record<number, ApiCha
   };
 }
 
-export function updateChat(global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>) {
+export function updateChat(global: GlobalState, chatId: number, chatUpdate: Partial<ApiChat>): GlobalState {
   const { byId } = global.chats;
   const chat = byId[chatId];
   const updatedChat = {
@@ -49,7 +49,7 @@ export function updateChat(global: GlobalState, chatId: number, chatUpdate: Part
   });
 }
 
-export function updateChats(global: GlobalState, updatedById: Record<number, ApiChat>) {
+export function updateChats(global: GlobalState, updatedById: Record<number, ApiChat>): GlobalState {
   let newGlobal = global;
 
   Object.keys(updatedById).forEach((id) => {
@@ -59,7 +59,7 @@ export function updateChats(global: GlobalState, updatedById: Record<number, Api
   return newGlobal;
 }
 
-export function updateSelectedChatId(global: GlobalState, selectedId?: number) {
+export function updateSelectedChatId(global: GlobalState, selectedId?: number): GlobalState {
   return {
     ...global,
     chats: {
@@ -73,7 +73,7 @@ export function updateChatScrollOffset(
   global: GlobalState,
   chatId: number,
   scrollOffset: number,
-) {
+): GlobalState {
   return {
     ...global,
     chats: {
@@ -90,7 +90,7 @@ export function updateChatReplyingTo(
   global: GlobalState,
   chatId: number,
   messageId: number,
-) {
+): GlobalState {
   return {
     ...global,
     chats: {

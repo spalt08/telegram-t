@@ -8,9 +8,22 @@ import {
 import { selectUser } from './users';
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
-  const byChatId = global.messages.byChatId[chatId];
+  const messages = global.messages.byChatId[chatId];
 
-  return byChatId ? byChatId.byId : null;
+  return messages ? messages.byId : null;
+}
+
+// This method is not optimal (new `[]` is returned) and should be used with memoization.
+export function selectChatMessagesByIds(global: GlobalState, chatId: number, messageIds: number[]) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messageIds.map((id) => messages.byId[id]) : [];
+}
+
+export function selectChatMessageListedIds(global: GlobalState, chatId: number) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messages.listedIds : undefined;
 }
 
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
