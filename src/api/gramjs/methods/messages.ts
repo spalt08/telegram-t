@@ -61,22 +61,17 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
       }),
   );
 
-  if (result instanceof GramJs.messages.MessagesNotModified) {
-    return;
+  if (!result || result instanceof GramJs.messages.MessagesNotModified) {
+    return undefined;
   }
 
-  const message = result.messages[0] && buildApiMessage(result.messages[0]);
+  const message = result.messages[0];
 
-  if (!message) {
-    return;
+  if (!message || !(message instanceof GramJs.Message)) {
+    return undefined;
   }
 
-  onUpdate({
-    '@type': 'newMessage',
-    id: message.id,
-    chat_id: chat.id,
-    message,
-  });
+  return buildApiMessage(message);
 }
 
 export async function sendMessage({

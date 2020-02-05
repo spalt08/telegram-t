@@ -26,6 +26,7 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   if (
     !(mtpMessage instanceof GramJs.Message)
     && !(mtpMessage instanceof GramJs.MessageService)) {
+    debugger
     throw new Error('Not supported');
   }
 

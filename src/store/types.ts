@@ -24,6 +24,7 @@ export type GlobalState = {
     selectedMediaMessageId?: number;
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
+      listedIds?: number[];
     }>;
   };
 
@@ -60,7 +61,7 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
-  'loadMessages' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
+  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'

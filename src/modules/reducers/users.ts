@@ -1,7 +1,7 @@
 import { GlobalState } from '../../store/types';
 import { ApiUser } from '../../api/types';
 
-export function replaceUsers(global: GlobalState, newById: Record<number, ApiUser>) {
+export function replaceUsers(global: GlobalState, newById: Record<number, ApiUser>): GlobalState {
   return {
     ...global,
     users: {
@@ -11,7 +11,7 @@ export function replaceUsers(global: GlobalState, newById: Record<number, ApiUse
   };
 }
 
-export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>) {
+export function updateUser(global: GlobalState, userId: number, userUpdate: Partial<ApiUser>): GlobalState {
   const { byId } = global.users;
   const user = byId[userId];
   const updatedUser = {
@@ -29,7 +29,7 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
   });
 }
 
-export function updateUsers(global: GlobalState, updatedById: Record<number, ApiUser>) {
+export function updateUsers(global: GlobalState, updatedById: Record<number, ApiUser>): GlobalState {
   let newGlobal = global;
 
   Object.keys(updatedById).forEach((id) => {
@@ -39,7 +39,7 @@ export function updateUsers(global: GlobalState, updatedById: Record<number, Api
   return newGlobal;
 }
 
-export function updateSelectedUserId(global: GlobalState, selectedId?: number) {
+export function updateSelectedUserId(global: GlobalState, selectedId?: number): GlobalState {
   return {
     ...global,
     users: {
