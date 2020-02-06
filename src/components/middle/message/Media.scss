@@ -36,6 +36,7 @@
 
     opacity: 1;
     transition: opacity 250ms;
+    will-change: opacity;
 
     &:not(.open) {
       opacity: 0;

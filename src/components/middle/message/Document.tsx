@@ -18,7 +18,9 @@ const Document: FC<IProps> = ({ message, fileTransferProgress, onCancelTransfer 
   const { extension } = getDocumentInfo(document);
   const { fileName, size } = document;
 
-  const { isUploading, isDownloading, transferProgress } = getMessageTransferParams(message, fileTransferProgress);
+  const {
+    isUploading, isDownloading, transferProgress,
+  } = getMessageTransferParams(message, fileTransferProgress, false);
 
   return (
     <File

@@ -46,7 +46,7 @@ const Photo: FC<IProps> = ({
   } = useShowTransition(!mediaData && load);
   const {
     isUploading, isDownloading, transferProgress, isHighQualityThumb,
-  } = getMessageTransferParams(message, fileTransferProgress);
+  } = getMessageTransferParams(message, fileTransferProgress, !mediaData);
   const isTransferring = isUploading || isDownloading;
 
   let className = 'media-inner';

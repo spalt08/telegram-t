@@ -33,11 +33,11 @@ const Video: FC<IProps> = ({
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
   const {
-    isShown: isProgressSpinnerShown,
-    transitionClassNames: ProgressSpinnerClassNames,
-    handleHideTransitionEnd: handleProgressSpinnerTransitionEnd,
+    isShown: isSpinnerShown,
+    transitionClassNames: spinnerClassNames,
+    handleHideTransitionEnd: handleSpinnerTransitionEnd,
   } = useShowTransition(!mediaData && loadAndPlay);
-  const { transferProgress } = getMessageTransferParams(message);
+  const { transferProgress } = getMessageTransferParams(message, undefined, !mediaData);
 
   const canPlayInline = canMessagePlayVideoInline(video);
   const isInline = mediaData && loadAndPlay && canPlayInline;
@@ -52,23 +52,15 @@ const Video: FC<IProps> = ({
       className="media-inner has-viewer"
       onClick={onClick}
     >
-      {!mediaData && ([
+      {!mediaData && (
         <img
           src={thumbDataUri}
           className={`thumbnail blur ${!thumbDataUri ? 'empty' : ''}`}
           width={width}
           height={height}
           alt=""
-        />,
-        isProgressSpinnerShown && (
-          <div
-            className={['message-media-loading', ...ProgressSpinnerClassNames].join(' ')}
-            onTransitionEnd={handleProgressSpinnerTransitionEnd}
-          >
-            <ProgressSpinner progress={transferProgress} />
-          </div>
-        ),
-      ])}
+        />
+      )}
       {isInline && (
         <video
           width={width}
@@ -95,6 +87,14 @@ const Video: FC<IProps> = ({
           </div>
         </div>,
       ])}
+      {isSpinnerShown && (
+        <div
+          className={['message-media-loading', ...spinnerClassNames].join(' ')}
+          onTransitionEnd={handleSpinnerTransitionEnd}
+        >
+          <ProgressSpinner progress={transferProgress} />
+        </div>
+      )}
       <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
     </div>
   );

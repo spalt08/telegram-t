@@ -141,13 +141,21 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
   return undefined;
 }
 
-export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number) {
+export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number, isDownloadNeeded = false) {
   const isUploading = isMessageLocal(message);
   // TODO Temporary solution.
-  const isDownloading = !isUploading && typeof fileTransferProgress === 'number' && fileTransferProgress < 100;
+  const isDownloading = !isUploading && isDownloadNeeded;
   const thumbnail = getMessageMediaThumbnail(message);
   const isHighQualityThumb = thumbnail ? thumbnail.isHighQuality : false;
-  const transferProgress = isHighQualityThumb && !isUploading ? 100 : (fileTransferProgress || 0.15);
+
+  let transferProgress = 0;
+  if (isUploading) {
+    transferProgress = fileTransferProgress || 0;
+  } else if (isHighQualityThumb) {
+    transferProgress = 1;
+  } else if (isDownloading) {
+    transferProgress = fileTransferProgress || 0.15;
+  }
 
   return {
     isUploading, isDownloading, transferProgress, isHighQualityThumb,
