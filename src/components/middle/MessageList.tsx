@@ -56,7 +56,7 @@ const MessageList: FC<IProps> = ({
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
   const messageGroups = useMemo(() => {
-    if (!chatId || !messageIds || !messagesById) {
+    if (!chatId || !messageIds || !messagesById || !messageIds.length) {
       return undefined;
     }
 
