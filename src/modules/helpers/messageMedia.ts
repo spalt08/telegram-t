@@ -147,7 +147,7 @@ export function getMessageTransferParams(message: ApiMessage, fileTransferProgre
   const isDownloading = !isUploading && typeof fileTransferProgress === 'number' && fileTransferProgress < 100;
   const thumbnail = getMessageMediaThumbnail(message);
   const isHighQualityThumb = thumbnail ? thumbnail.isHighQuality : false;
-  const transferProgress = isHighQualityThumb && !isUploading ? 100 : fileTransferProgress || 0;
+  const transferProgress = isHighQualityThumb && !isUploading ? 100 : (fileTransferProgress || 0.15);
 
   return {
     isUploading, isDownloading, transferProgress, isHighQualityThumb,
