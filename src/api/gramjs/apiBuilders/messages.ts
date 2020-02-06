@@ -92,7 +92,6 @@ export function buildApiMessageWithChatId(
     chat_id: chatId,
     is_outgoing: Boolean(mtpMessage.out) || (isChatWithSelf && !mtpMessage.fwdFrom),
     content: {
-      '@type': 'message',
       ...(text && { text }),
       ...(sticker && { sticker }),
       ...(photo && { photo }),
@@ -150,7 +149,6 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | null {
   const { w: width, h: height } = thumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
   return {
-    '@type': 'sticker',
     id: String(media.document.id),
     emoji,
     is_animated: isAnimated,
@@ -170,7 +168,6 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | null {
     .map(buildApiPhotoSize);
 
   return {
-    '@type': 'photo',
     thumbnail: buildApiThumbnailFromStripped(media.photo.sizes),
     sizes,
   };
@@ -212,7 +209,6 @@ function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   const { w, h, type } = photoSize;
 
   return {
-    '@type': 'photoSize',
     width: w,
     height: h,
     type: type as ('m' | 'x' | 'y'),
@@ -244,7 +240,6 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | null {
   } = videoAttr;
 
   return {
-    '@type': 'video',
     duration,
     width,
     height,
@@ -268,7 +263,6 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | null {
     .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
 
   return {
-    '@type': 'document',
     size,
     mimeType,
     fileName: (docAttr && docAttr.fileName) || 'File',
@@ -288,7 +282,6 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | null {
   } = media;
 
   return {
-    '@type': 'contact',
     firstName,
     lastName,
     phoneNumber,
@@ -336,7 +329,6 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   }
 
   return {
-    '@type': 'action',
     text,
     ...('users' in action && {
       // Api returns array of userIds, but no action currently has multiple users in it
@@ -360,7 +352,6 @@ export function buildLocalMessage(
     id: localId,
     chat_id: chatId,
     content: {
-      '@type': 'message',
       text: {
         '@type': 'formattedText',
         text,
@@ -383,7 +374,6 @@ function buildUploadingMedia(attachment: ApiAttachment): { photo: ApiPhoto } | {
 
     return {
       photo: {
-        '@type': 'photo',
         thumbnail: {
           width,
           height,
@@ -398,7 +388,6 @@ function buildUploadingMedia(attachment: ApiAttachment): { photo: ApiPhoto } | {
 
     return {
       document: {
-        '@type': 'document',
         mimeType,
         fileName,
         size,
