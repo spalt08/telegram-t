@@ -44,8 +44,6 @@ type MessagePositionProperties = {
 };
 
 type IProps = {
-  chatId: number;
-  messageId: number;
   message: ApiMessage;
   showAvatar?: boolean;
   showSenderName?: boolean;
@@ -61,8 +59,6 @@ type IProps = {
 } & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
 
 const Message: FC<IProps> = ({
-  chatId,
-  messageId,
   message,
   showAvatar,
   showSenderName,
@@ -79,6 +75,8 @@ const Message: FC<IProps> = ({
   isLastInGroup,
   isLastInList,
 }) => {
+  const { chat_id: chatId, id: messageId } = message;
+
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
 
@@ -88,13 +86,13 @@ const Message: FC<IProps> = ({
     showAvatar || showSenderName ? message.sender_user_id : undefined,
     sender,
   );
-  useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
   useEnsureUserFromMessage(
     chatId,
     messageId,
     message.forward_info && message.forward_info.origin.sender_user_id,
     originSender,
   );
+  useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
   useEnsureUserFromMessage(
     chatId,
     messageId,
@@ -313,17 +311,10 @@ function buildClassNames(
 }
 
 export default memo(withGlobal(
-  (global, {
-    chatId, messageId, showSenderName, showAvatar,
-  }: IProps) => {
-    const message = selectChatMessage(global, chatId, messageId);
-
-    if (!message) {
-      return {};
-    }
-
+  (global, ownProps: IProps) => {
+    const { message, showSenderName, showAvatar } = ownProps;
     const replyMessage = message.reply_to_message_id
-      ? selectChatMessage(global, chatId, message.reply_to_message_id)
+      ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
 
     let userId;

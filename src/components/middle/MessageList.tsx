@@ -4,9 +4,10 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
+import { ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../store/types';
 
-import { selectChatMessageListedIds, selectChatMessagesByIds, selectOpenChat } from '../../modules/selectors';
+import { selectChatMessageListedIds, selectChatMessages, selectOpenChat } from '../../modules/selectors';
 import {
   isActionMessage, isChatChannel, isChatPrivate, isOwnMessage,
 } from '../../modules/helpers';
@@ -27,6 +28,7 @@ type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | '
   isChannelChat?: boolean;
   isUnread?: boolean;
   messageIds?: number[];
+  messagesById?: Record<number, ApiMessage>;
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1000;
@@ -45,6 +47,7 @@ const MessageList: FC<IProps> = ({
   isChannelChat,
   isUnread,
   messageIds,
+  messagesById,
   loadMessagesForList,
   markMessagesRead,
   setChatScrollOffset,
@@ -53,12 +56,13 @@ const MessageList: FC<IProps> = ({
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
   const messageGroups = useMemo(() => {
-    if (!chatId || !messageIds) {
+    if (!chatId || !messageIds || !messagesById) {
       return undefined;
     }
 
-    return groupMessages(orderBy(selectChatMessagesByIds(getGlobal(), chatId, messageIds), 'date'));
-  }, [chatId, messageIds]);
+    const listedMessages = messageIds.map((id) => messagesById[id]);
+    return groupMessages(orderBy(listedMessages, 'date'));
+  }, [chatId, messageIds, messagesById]);
 
   const isLoaded = Boolean(messageIds);
   const messagesCount = messageIds ? messageIds.length : 0;
@@ -209,8 +213,7 @@ function renderMessages(
         return (
           <Message
             key={message.id}
-            chatId={message.chat_id}
-            messageId={message.id}
+            message={message}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
             loadAndPlayMedia={viewportMessageIds.includes(message.id)}
@@ -285,13 +288,12 @@ export default memo(withGlobal(
       return {};
     }
 
-    const messageIds = selectChatMessageListedIds(global, chat.id);
-
     return {
       chatId: chat.id,
       isChannelChat: isChatChannel(chat),
       isUnread: Boolean(chat.unread_count),
-      messageIds,
+      messageIds: selectChatMessageListedIds(global, chat.id),
+      messagesById: selectChatMessages(global, chat.id),
     };
   },
   (setGlobal, actions) => {
