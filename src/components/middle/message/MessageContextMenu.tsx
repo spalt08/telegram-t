@@ -1,6 +1,4 @@
-import React, {
-  FC, useEffect, useState,
-} from '../../../lib/teact/teact';
+import React, { FC, useEffect, useState } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
@@ -67,18 +65,25 @@ const MessageContextMenu: FC<IProps> = ({
 
       if (x + menuRect.width + SCROLLBAR_WIDTH < rootRect.width + rootRect.left) {
         setPositionX('left');
-      }
-      if (y + menuRect.height + SCROLLBAR_WIDTH < rootRect.height + rootRect.top) {
-        setPositionY('top');
-      } else if (y - menuRect.height < rootRect.top + headerHeight) {
-        y = rootRect.top + headerHeight + menuRect.height;
+        x += 3;
+      } else {
+        setPositionX('right');
+        x -= 3;
       }
 
-      x += positionX === 'left' ? 3 : -3;
+      if (y + menuRect.height + SCROLLBAR_WIDTH < rootRect.height + rootRect.top) {
+        setPositionY('top');
+      } else {
+        setPositionY('bottom');
+
+        if (y - menuRect.height < rootRect.top + headerHeight) {
+          y = rootRect.top + headerHeight + menuRect.height;
+        }
+      }
 
       setStyle(`left: ${x - messageRect.left}px; top: ${y - messageRect.top}px;`);
     }
-  }, [message, anchor, positionX]);
+  }, [message, anchor]);
 
   return (
     <Menu
