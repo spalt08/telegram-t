@@ -111,7 +111,7 @@ const Message: FC<IProps> = ({
     text,
     photo,
     video,
-    document,
+    document: messageDocument,
     sticker,
     contact,
     className: contentClassName,
@@ -144,6 +144,8 @@ const Message: FC<IProps> = ({
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    const container = document.querySelector('.MessageList') as HTMLDivElement;
+    container.classList.add('has-menu-open');
   }
 
   function handleContextMenuClose() {
@@ -152,6 +154,8 @@ const Message: FC<IProps> = ({
 
   function handleContextMenuHide() {
     setContextMenuPosition(null);
+    const container = document.querySelector('.MessageList') as HTMLDivElement;
+    container.classList.remove('has-menu-open');
   }
 
   function renderSenderName(user?: ApiUser) {
@@ -198,7 +202,7 @@ const Message: FC<IProps> = ({
             onClick={openMediaMessage}
           />
         )}
-        {document && (
+        {messageDocument && (
           <Document
             message={message}
             fileTransferProgress={fileTransferProgress}

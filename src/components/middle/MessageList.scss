@@ -6,6 +6,11 @@
   height: calc(100% - 1.1rem);
   overflow-y: auto;
   overflow-x: hidden;
+  mask-image: linear-gradient(to top, transparent 0.1rem, black 1rem);
+
+  &.has-menu-open {
+    mask-image: none;
+  }
 
   &.no-avatars .Message > .Avatar {
     display: none;
@@ -20,7 +25,7 @@
     justify-content: flex-end;
     flex-direction: column;
     padding: 1rem;
-    padding-bottom: .1rem;
+    padding-bottom: .5rem;
   }
 
   &.bottom-padding {

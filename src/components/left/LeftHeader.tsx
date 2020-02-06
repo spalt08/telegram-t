@@ -38,7 +38,7 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
       <DropdownMenu
         trigger={MenuButton}
       >
-        <MenuItem className="not-implemented" disabled icon="new-group">New Group</MenuItem>
+        <MenuItem className="not-implemented" disabled icon="group">New Group</MenuItem>
         <MenuItem className="not-implemented" disabled icon="user">Contacts</MenuItem>
         <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
         <MenuItem className="not-implemented" disabled icon="saved-messages">Saved</MenuItem>

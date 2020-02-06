@@ -116,12 +116,12 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       </div>
       <Button
         round
-        color="primary"
+        color="secondary"
         className={`${canSend ? 'send' : 'microphone not-implemented'}`}
         onClick={handleSend}
       >
         <i className="icon-send" />
-        <i className="icon-microphone" />
+        <i className="icon-microphone-alt" />
       </Button>
     </div>
   );
