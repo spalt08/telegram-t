@@ -143,7 +143,8 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
 
 export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number) {
   const isUploading = isMessageLocal(message);
-  const isDownloading = !isUploading && typeof fileTransferProgress === 'number';
+  // TODO Temporary solution.
+  const isDownloading = !isUploading && typeof fileTransferProgress === 'number' && fileTransferProgress < 100;
   const thumbnail = getMessageMediaThumbnail(message);
   const isHighQualityThumb = thumbnail ? thumbnail.isHighQuality : false;
   const transferProgress = isHighQualityThumb && !isUploading ? 100 : fileTransferProgress || 0;
