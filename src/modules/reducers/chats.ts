@@ -13,7 +13,11 @@ export function replaceChatIds(global: GlobalState, newIds: number[]): GlobalSta
 
 export function updateChatIds(global: GlobalState, idsUpdate: number[]): GlobalState {
   const ids = global.chats.ids || [];
-  const newIds = (ids && ids.length) ? idsUpdate.filter((id) => !ids.includes(id)) : idsUpdate;
+  const newIds = ids.length ? idsUpdate.filter((id) => !ids.includes(id)) : idsUpdate;
+
+  if (!newIds.length) {
+    return global;
+  }
 
   return replaceChatIds(global, [
     ...ids,

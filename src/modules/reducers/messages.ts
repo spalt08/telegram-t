@@ -95,16 +95,16 @@ export function deleteChatMessages(
   return newGlobal;
 }
 
-export function addChatMessageListedIds(global: GlobalState, chatId: number, messageIds: number[]): GlobalState {
-  let listedIds = selectChatMessageListedIds(global, chatId);
+export function updateChatMessageListedIds(global: GlobalState, chatId: number, idsUpdate: number[]): GlobalState {
+  const listedIds = selectChatMessageListedIds(global, chatId) || [];
+  const newIds = listedIds.length ? idsUpdate.filter((id) => !listedIds.includes(id)) : idsUpdate;
 
-  messageIds.forEach((messageId) => {
-    if (!listedIds) {
-      listedIds = [messageId];
-    } else if (!listedIds.includes(messageId)) {
-      listedIds = [...listedIds, messageId];
-    }
-  });
+  if (!newIds.length) {
+    return global;
+  }
 
-  return replaceChatMessageListedIds(global, chatId, listedIds);
+  return replaceChatMessageListedIds(global, chatId, [
+    ...listedIds,
+    ...newIds,
+  ]);
 }
