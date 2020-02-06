@@ -144,8 +144,7 @@ const Message: FC<IProps> = ({
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    const container = document.querySelector('.MessageList') as HTMLDivElement;
-    container.classList.add('has-menu-open');
+    document.body.classList.add('is-message-menu-open');
   }
 
   function handleContextMenuClose() {
@@ -154,8 +153,7 @@ const Message: FC<IProps> = ({
 
   function handleContextMenuHide() {
     setContextMenuPosition(null);
-    const container = document.querySelector('.MessageList') as HTMLDivElement;
-    container.classList.remove('has-menu-open');
+    document.body.classList.remove('is-message-menu-open');
   }
 
   function renderSenderName(user?: ApiUser) {

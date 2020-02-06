@@ -8,7 +8,7 @@
   overflow-x: hidden;
   mask-image: linear-gradient(to top, transparent 0.1rem, black 1rem);
 
-  &.has-menu-open {
+  body.is-message-menu-open & {
     mask-image: none;
   }
 

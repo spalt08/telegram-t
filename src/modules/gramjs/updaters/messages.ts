@@ -8,7 +8,7 @@ import { GlobalState } from '../../../store/types';
 import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
 import { getMessageKey, getMessagePhoto } from '../../helpers';
 
-const ANIMATION_DELAY = 500;
+const ANIMATION_DELAY = 300;
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
@@ -147,21 +147,6 @@ export function onUpdate(update: ApiUpdate) {
           },
         },
       });
-
-      if (progress === 1) {
-        setTimeout(() => {
-          const newGlobal = getGlobal();
-          const byMessageKey = { ...newGlobal.fileTransfers.byMessageKey };
-          delete byMessageKey[messageKey];
-
-          setGlobal({
-            ...newGlobal,
-            fileTransfers: {
-              byMessageKey,
-            },
-          });
-        }, ANIMATION_DELAY);
-      }
 
       break;
     }
