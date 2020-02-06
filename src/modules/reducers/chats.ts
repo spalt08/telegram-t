@@ -70,6 +70,9 @@ export function updateSelectedChatId(global: GlobalState, selectedId?: number): 
       ...global.chats,
       selectedId,
     },
+    messageSearch: {
+      isActive: false,
+    },
   };
 }
 

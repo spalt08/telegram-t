@@ -49,6 +49,11 @@ export type GlobalState = {
   currentUserId?: number;
   showRightColumn: boolean;
   lastSyncTime?: number;
+
+  messageSearch: {
+    isActive: boolean;
+    query?: string;
+  };
 };
 
 export type ActionTypes = (
@@ -63,6 +68,8 @@ export type ActionTypes = (
   // messages
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' |'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' |
+  // message search
+  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
 );

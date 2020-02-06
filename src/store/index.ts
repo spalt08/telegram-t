@@ -7,6 +7,9 @@ import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_
 
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
+  messageSearch: {
+    isActive: false,
+  },
 
   users: {
     byId: {},
@@ -73,6 +76,7 @@ function updateCache(global: GlobalState) {
     connectionState: undefined,
     lastSyncTime: undefined,
     isUiReady: false,
+    messageSearch: { isActive: false },
   };
 
   const json = JSON.stringify(reducedState);

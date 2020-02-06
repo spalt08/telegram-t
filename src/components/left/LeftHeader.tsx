@@ -6,7 +6,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
-import SearchInput from './SearchInput';
+import SearchInput from '../ui/SearchInput';
 import './LeftHeader.scss';
 
 type IProps = Pick<GlobalActions, 'signOut'>;
@@ -46,7 +46,7 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <SearchInput />
+      <SearchInput onChange={() => {}} />
 
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}

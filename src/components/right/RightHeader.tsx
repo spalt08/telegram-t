@@ -6,41 +6,68 @@ import { GlobalActions } from '../../store/types';
 import Button from '../ui/Button';
 
 import './RightHeader.scss';
+import SearchInput from '../ui/SearchInput';
 
-type IProps = Pick<GlobalActions, 'toggleRightColumn'>;
+type IProps = {
+  isSearch: boolean;
+  searchQuery?: string;
+} & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch' | 'setMessageSearchQuery'>;
 
 const RightHeader: FC<IProps> = ({
+  isSearch,
+  searchQuery,
   toggleRightColumn,
+  closeMessageSearch,
+  setMessageSearchQuery,
 }) => {
+  function renderRegularHeader() {
+    return [
+      <h3>Info</h3>,
+      <Button
+        round
+        color="translucent"
+        size="smaller"
+        className="more-button not-implemented"
+      >
+        <i className="icon-more" />
+      </Button>,
+    ];
+  }
+
+  function renderSearch() {
+    return <SearchInput value={searchQuery} onChange={onSearchQueryChange} />;
+  }
+
+  function onSearchQueryChange(query: string) {
+    setMessageSearchQuery({ query });
+  }
+
   return (
     <div className="RightHeader">
       <Button
         round
         color="translucent"
         size="smaller"
-        onClick={toggleRightColumn}
+        onClick={isSearch ? closeMessageSearch : toggleRightColumn}
       >
         <i className="icon-close" />
       </Button>
-      <h3>Info</h3>
-      <div className="actions">
-        <Button
-          round
-          color="translucent"
-          size="smaller"
-          className="not-implemented"
-        >
-          <i className="icon-more" />
-        </Button>
-      </div>
+      {isSearch ? renderSearch() : renderRegularHeader()}
     </div>
   );
 };
 
 export default withGlobal(
-  undefined,
+  (global) => {
+    const { messageSearch } = global;
+
+    return {
+      isSearch: messageSearch.isActive,
+      searchQuery: messageSearch.query,
+    };
+  },
   (setGlobal, actions) => {
-    const { toggleRightColumn } = actions;
-    return { toggleRightColumn };
+    const { toggleRightColumn, closeMessageSearch, setMessageSearchQuery } = actions;
+    return { toggleRightColumn, closeMessageSearch, setMessageSearchQuery };
   },
 )(RightHeader);
