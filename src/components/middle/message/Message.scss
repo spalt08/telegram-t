@@ -147,6 +147,14 @@
     --border-top-left-radius: 0;
     --border-top-right-radius: 0;
   }
+
+  &.document {
+    padding: .5rem !important;
+
+    .File + .text-content {
+      margin-top: .5rem;
+    }
+  }
 }
 
 // Bubble appendix styles

@@ -388,6 +388,7 @@ function buildUploadingMedia(attachment: ApiAttachment): { photo: ApiPhoto } | {
           width,
           height,
           dataUri: blobUrl,
+          isHighQuality: true,
         },
         sizes: [],
       },

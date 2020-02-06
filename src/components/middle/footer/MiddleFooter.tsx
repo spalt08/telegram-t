@@ -26,7 +26,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const canSend = Boolean(messageText) || Boolean(attachment);
 
-  const onSendMessage = () => {
+  const handleSend = useCallback(() => {
     if (canSend) {
       sendMessage({
         text: messageText,
@@ -36,7 +36,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       setMessageText('');
       setAttachment(undefined);
     }
-  };
+  }, [attachment, canSend, messageText, sendMessage]);
 
   useEffect(() => {
     async function pasteImageFromClipboard(e: ClipboardEvent) {
@@ -63,7 +63,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     };
   }, []);
 
-  const handleClearAttachedFile = useCallback(() => {
+  const handleClearAttachment = useCallback(() => {
     setAttachment(undefined);
   }, []);
 
@@ -81,14 +81,24 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   return (
     <div className="MiddleFooter">
+      <Attachment
+        attachment={attachment}
+        caption={messageText}
+        onCaptionUpdate={setMessageText}
+        onSend={handleSend}
+        onClear={handleClearAttachment}
+      />
       <div id="message-compose">
         <MessageInputReply />
-        {attachment && <Attachment attachment={attachment} onClearFile={handleClearAttachedFile} />}
         <div className="message-input-wrapper">
           <Button className="not-implemented" round color="translucent">
             <i className="icon-smile" />
           </Button>
-          <MessageInput messageText={messageText} setMessageText={setMessageText} onSendMessage={onSendMessage} />
+          <MessageInput
+            messageText={!attachment ? messageText : ''}
+            onUpdate={setMessageText}
+            onSend={handleSend}
+          />
           <Button
             className={`${isMenuOpen ? 'activated' : ''}`}
             round
@@ -108,7 +118,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
         round
         color="primary"
         className={`${canSend ? 'send' : 'microphone not-implemented'}`}
-        onClick={onSendMessage}
+        onClick={handleSend}
       >
         <i className="icon-send" />
         <i className="icon-microphone" />

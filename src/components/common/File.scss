@@ -1,0 +1,134 @@
+.File {
+  --secondary-color: var(--color-text-secondary);
+
+  .Message.own & {
+    --secondary-color: var(--color-text-green);
+  }
+
+  display: flex;
+  align-items: center;
+
+  .file-icon-container {
+    position: relative;
+  }
+
+  .file-progress,
+  .file-icon {
+    width: 3.375rem;
+    height: 3.375rem;
+    margin-right: .75rem;
+    border-radius: var(--border-radius-messages-small);
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    opacity: 1;
+    transition: opacity 250ms;
+
+    &:not(.open) {
+      opacity: 0;
+    }
+  }
+
+  .file-icon {
+    padding: 1rem .75rem .5rem;
+    align-items: flex-end;
+    flex-shrink: 0;
+    position: relative;
+    color: white;
+
+    .file-ext {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1.125rem;
+      height: 1.125rem;
+      border-bottom-left-radius: 0.25rem;
+      border-left: .5625rem solid rgba(black, 0.25);
+      border-bottom: .5625rem solid rgba(black, 0.25);
+      border-top: .5625rem solid var(--background-color);
+      border-right: .5625rem solid var(--background-color);
+    }
+  }
+
+  .file-info {
+    margin-top: .1875rem;
+    margin-right: .125rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .file-name {
+    font-size: 1rem;
+    line-height: 1rem;
+    padding-bottom: .25rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-size {
+    font-size: .875rem;
+    line-height: .9375rem;
+    color: var(--secondary-color);
+  }
+
+  &.smaller {
+    --background-color: #fff;
+    --border-radius-messages-small: .3125rem;
+
+    .file-icon {
+      width: 3rem;
+      height: 3rem;
+      padding-bottom: .375rem;
+
+      &::after {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.5rem;
+      }
+    }
+
+    .file-info {
+      margin-top: .125rem;
+    }
+
+    .file-name {
+      font-weight: 400;
+    }
+
+    .file-size {
+      line-height: 1rem;
+    }
+  }
+}
+
+// Document extension colors
+.File .file-progress,
+.File .file-icon {
+  &.red {
+    background-color: var(--color-error);
+  }
+
+  &.orange {
+    background-color: var(--color-warning);
+  }
+
+  &.green {
+    background-color: var(--color-text-green);
+  }
+}

@@ -102,7 +102,7 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
     onUpdate({
       '@type': 'updateMessageSendSucceeded',
       chat_id: localMessage.chat_id,
-      old_message_id: localMessage.id,
+      local_id: localMessage.id,
       message: {
         ...localMessage,
         id: update.id,

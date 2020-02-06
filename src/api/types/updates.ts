@@ -72,14 +72,14 @@ export type ApiUpdateEditMessage = {
 export type ApiUpdateMessageSendSucceeded = {
   '@type': 'updateMessageSendSucceeded';
   chat_id: number;
-  old_message_id: number;
+  local_id: number;
   message: ApiMessage;
 };
 
 export type ApiUpdateMessageSendFailed = {
   '@type': 'updateMessageSendFailed';
   chat_id: number;
-  old_message_id: number;
+  local_id: number;
   sending_state: {
     '@type': 'messageSendingStateFailed';
   };

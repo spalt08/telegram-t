@@ -212,11 +212,11 @@ function renderMessages(
 
         return (
           <Message
-            key={message.id}
+            key={message.prev_local_id || message.id}
             message={message}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
-            loadAndPlayMedia={viewportMessageIds.includes(message.id)}
+            loadAndPlayMedia={viewportMessageIds.includes(message.prev_local_id || message.id)}
             isFirstInGroup={position.isFirstInGroup}
             isLastInGroup={position.isLastInGroup}
             isLastInList={position.isLastInList}

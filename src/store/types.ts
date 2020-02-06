@@ -61,7 +61,7 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
-  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'pinMessage' | 'deleteMessages' |
+  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' |'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
