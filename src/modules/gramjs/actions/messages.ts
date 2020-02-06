@@ -3,7 +3,9 @@ import { ApiChat } from '../../../api/types';
 
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { addChatMessageListedIds, replaceChatMessagesById, updateChatMessage, updateUsers } from '../../reducers';
+import {
+  updateChatMessageListedIds, replaceChatMessagesById, updateChatMessage, updateUsers,
+} from '../../reducers';
 import { selectChat, selectChatMessageListedIds, selectOpenChat } from '../../selectors';
 
 const MESSAGE_SLICE_LIMIT = 50;
@@ -110,7 +112,7 @@ async function loadMessagesForList(chat: ApiChat, fromMessageId = 0) {
 
   let newGlobal = getGlobal();
   newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
-  newGlobal = addChatMessageListedIds(newGlobal, chat.id, ids);
+  newGlobal = updateChatMessageListedIds(newGlobal, chat.id, ids);
   newGlobal = updateUsers(newGlobal, buildCollectionByKey(users, 'id'));
   setGlobal(newGlobal);
 }

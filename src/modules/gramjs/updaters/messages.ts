@@ -2,7 +2,7 @@ import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
 import {
-  updateChat, deleteChatMessages, updateChatMessage, addChatMessageListedIds,
+  updateChat, deleteChatMessages, updateChatMessage, updateChatMessageListedIds,
 } from '../../reducers';
 import { GlobalState } from '../../../store/types';
 import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
@@ -26,7 +26,7 @@ export function onUpdate(update: ApiUpdate) {
 
       let newGlobal = global;
       newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
-      newGlobal = addChatMessageListedIds(newGlobal, chat_id, [id]);
+      newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [id]);
 
       const chat = selectChat(newGlobal, chat_id);
 
@@ -73,6 +73,7 @@ export function onUpdate(update: ApiUpdate) {
         ...message,
       });
       newGlobal = deleteChatMessages(newGlobal, chat_id, [old_message_id]);
+      newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [message.id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
