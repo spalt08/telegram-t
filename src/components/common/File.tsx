@@ -58,7 +58,9 @@ const File: FC<IProps> = ({
       </div>
       <div className="file-info">
         <div className="file-name">{name}</div>
-        <div className="file-size">{transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}</div>
+        <div className="file-size">
+          {isUploading && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
+        </div>
       </div>
     </div>
   );
