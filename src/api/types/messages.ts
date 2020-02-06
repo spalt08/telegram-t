@@ -1,5 +1,4 @@
 export interface ApiPhotoSize {
-  '@type': 'photoSize';
   type: 's' | 'm' | 'x' | 'y' | 'z';
   width: number;
   height: number;
@@ -13,13 +12,11 @@ export interface ApiThumbnail {
 }
 
 export interface ApiPhoto {
-  '@type': 'photo';
   thumbnail?: ApiThumbnail;
   sizes: ApiPhotoSize[];
 }
 
 export interface ApiSticker {
-  '@type': 'sticker';
   id: string;
   emoji: string;
   is_animated: boolean;
@@ -29,7 +26,6 @@ export interface ApiSticker {
 }
 
 export interface ApiVideo {
-  '@type': 'video';
   duration: number;
   width?: number;
   height?: number;
@@ -39,14 +35,12 @@ export interface ApiVideo {
 }
 
 export interface ApiDocument {
-  '@type': 'document';
   fileName: string;
   size: number;
   mimeType: string;
 }
 
 export interface ApiContact {
-  '@type': 'contact';
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -54,7 +48,6 @@ export interface ApiContact {
 }
 
 export interface ApiAction {
-  '@type': 'action';
   text: string;
   targetUserId?: number;
 }
@@ -88,8 +81,6 @@ export interface ApiMessage {
   id: number;
   chat_id: number;
   content: {
-    // TODO Enum
-    '@type': string;
     text?: ApiFormattedText;
     photo?: ApiPhoto;
     video?: ApiVideo;
