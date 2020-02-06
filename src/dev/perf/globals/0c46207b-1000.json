@@ -3,6 +3,9 @@
   "fileTransfers": {
     "byMessageKey": {}
   },
+  "messageSearch": {
+    "isActive": false
+  },
   "users": {
     "byId": {
       "454000": {

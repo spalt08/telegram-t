@@ -1,4 +1,5 @@
 import { ApiMessage } from '../../api/types';
+import searchWords from '../../util/searchWords';
 
 export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
@@ -65,6 +66,11 @@ export function getMessageText(message: ApiMessage) {
   }
 
   return '%UNSUPPORTED_CONTENT%';
+}
+
+export function searchMessageText(message: ApiMessage, query: string) {
+  const text = getMessageText(message);
+  return text && searchWords(text, query);
 }
 
 export function isOwnMessage(message: ApiMessage) {

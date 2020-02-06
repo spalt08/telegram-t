@@ -2,9 +2,11 @@ import React, { FC } from '../../lib/teact/teact';
 
 import Button from '../ui/Button';
 
-type IProps = {};
+type IProps = {
+  onSearchClick: () => void;
+};
 
-const HeaderActions: FC<IProps> = () => {
+const HeaderActions: FC<IProps> = ({ onSearchClick }) => {
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
   }
@@ -15,8 +17,7 @@ const HeaderActions: FC<IProps> = () => {
         round
         color="translucent"
         size="smaller"
-        className="not-implemented"
-        onClick={() => { }}
+        onClick={onSearchClick}
       >
         <i className="icon-search" />
       </Button>

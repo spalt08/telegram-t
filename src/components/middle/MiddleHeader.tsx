@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
@@ -15,12 +15,14 @@ import HeaderPinnedMessage from './HeaderPinnedMessage';
 
 import './MiddleHeader.scss';
 
+const SEARCH_FOCUS_DELAY_MS = 50;
+
 type IProps = {
   chatId: number;
   pinnedMessageId?: number;
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
-} & Pick<GlobalActions, 'openChatWithInfo' | 'pinMessage'>;
+} & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageSearch' | 'pinMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
   chatId,
@@ -28,21 +30,32 @@ const MiddleHeader: FC<IProps> = ({
   pinnedMessage,
   canUnpin,
   openChatWithInfo,
+  openMessageSearch,
   pinMessage,
 }) => {
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
-  function onHeaderClick() {
+  const handleHeaderClick = useCallback(() => {
     openChatWithInfo({ id: chatId });
-  }
+  }, [openChatWithInfo, chatId]);
 
-  function onUnpinMessage() {
+  const handleSearchClick = useCallback(() => {
+    openMessageSearch({ id: chatId });
+    setTimeout(() => {
+      const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }, SEARCH_FOCUS_DELAY_MS);
+  }, [openMessageSearch, chatId]);
+
+  const handleUnpinMessage = useCallback(() => {
     pinMessage({ chatId, messageId: 0 });
-  }
+  }, [pinMessage, chatId]);
 
   return (
     <div className="MiddleHeader">
-      <div onClick={onHeaderClick}>
+      <div onClick={handleHeaderClick}>
         {isChatPrivate(chatId) ? (
           <PrivateChatInfo userId={chatId} />
         ) : (
@@ -53,10 +66,12 @@ const MiddleHeader: FC<IProps> = ({
       {pinnedMessage && (
         <HeaderPinnedMessage
           message={pinnedMessage}
-          onUnpinMessage={canUnpin ? onUnpinMessage : undefined}
+          onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
         />
       )}
-      <HeaderActions />
+      <HeaderActions
+        onSearchClick={handleSearchClick}
+      />
     </div>
   );
 };
@@ -96,7 +111,7 @@ export default withGlobal(
     return null;
   },
   (setGlobal, actions) => {
-    const { openChatWithInfo, pinMessage } = actions;
-    return { openChatWithInfo, pinMessage };
+    const { openChatWithInfo, openMessageSearch, pinMessage } = actions;
+    return { openChatWithInfo, openMessageSearch, pinMessage };
   },
 )(MiddleHeader);
