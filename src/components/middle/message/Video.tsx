@@ -5,14 +5,17 @@ import { ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { calculateVideoDimensions } from '../../../util/mediaDimensions';
 import {
-  getMessageMediaHash, getMessageMediaThumbDataUri,
+  getMessageMediaHash,
+  getMessageMediaThumbDataUri,
   isForwardedMessage,
   isOwnMessage,
   canMessagePlayVideoInline,
+  getMessageTransferParams,
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
+import useShowTransition from '../../../hooks/useShowTransition';
 
-import Spinner from '../../ui/Spinner';
+import ProgressSpinner from '../../ui/ProgressSpinner';
 
 import './Media.scss';
 
@@ -29,6 +32,12 @@ const Video: FC<IProps> = ({
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+  const {
+    isShown: isProgressSpinnerShown,
+    transitionClassNames: ProgressSpinnerClassNames,
+    handleHideTransitionEnd: handleProgressSpinnerTransitionEnd,
+  } = useShowTransition(!mediaData && loadAndPlay);
+  const { transferProgress } = getMessageTransferParams(message);
 
   const canPlayInline = canMessagePlayVideoInline(video);
   const isInline = mediaData && loadAndPlay && canPlayInline;
@@ -43,7 +52,7 @@ const Video: FC<IProps> = ({
       className="media-inner has-viewer"
       onClick={onClick}
     >
-      {!isInline && !isHqPreview && ([
+      {!mediaData && ([
         <img
           src={thumbDataUri}
           className={`thumbnail blur ${!thumbDataUri ? 'empty' : ''}`}
@@ -51,9 +60,12 @@ const Video: FC<IProps> = ({
           height={height}
           alt=""
         />,
-        loadAndPlay && (
-          <div className="message-media-loading">
-            <Spinner color="white" />
+        isProgressSpinnerShown && (
+          <div
+            className={['message-media-loading', ...ProgressSpinnerClassNames].join(' ')}
+            onTransitionEnd={handleProgressSpinnerTransitionEnd}
+          >
+            <ProgressSpinner progress={transferProgress} />
           </div>
         ),
       ])}
@@ -77,7 +89,7 @@ const Video: FC<IProps> = ({
           height={height}
           alt=""
         />,
-        <div className="message-media-loading">
+        <div className="message-media-loading open shown">
           <div className="message-media-play-button">
             <i className="icon-large-play" />
           </div>
