@@ -6,7 +6,6 @@ import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
-import Button from '../ui/Button';
 import MessageList from './MessageList';
 import MiddleFooter from './footer/MiddleFooter';
 import MiddleHeader from './MiddleHeader';
@@ -34,7 +33,6 @@ const MiddleColumn: FC<IProps> = (props) => {
   return (
     <div id="MiddleColumn">
       {renderSelectedChat(props)}
-      {renderOpenChatScreen(props)}
     </div>
   );
 };
@@ -53,40 +51,6 @@ function renderSelectedChat(props: IProps) {
       {!isChannelChat && (
         <MiddleFooter />
       )}
-    </div>
-  );
-}
-
-function renderOpenChatScreen(props: IProps) {
-  const { selectedChatId, areChatsLoaded } = props;
-
-  if (selectedChatId || !areChatsLoaded) {
-    return null;
-  }
-
-  return (
-    <div className="select-chat-note">
-      <i className="icon-chats-placeholder" />
-      <h2>
-        Open Chat
-        <br />
-        or create a new one
-      </h2>
-
-      <div className="create-chat-buttons">
-        <Button className="not-implemented" round color="secondary">
-          <i className="icon-new-private" />
-          <span>Private</span>
-        </Button>
-        <Button className="not-implemented" round color="secondary">
-          <i className="icon-new-group" />
-          <span>Group</span>
-        </Button>
-        <Button className="not-implemented" round color="secondary">
-          <i className="icon-new-channel" />
-          <span>Channel</span>
-        </Button>
-      </div>
     </div>
   );
 }

@@ -169,7 +169,7 @@ const MessageList: FC<IProps> = ({
           {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
         </div>
       ) : (
-        <Loading />
+        <Loading color="white" />
       )}
     </div>
   );

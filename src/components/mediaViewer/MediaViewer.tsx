@@ -55,7 +55,7 @@ const MediaViewer: FC<IProps> = ({
   let isVideo = message ? Boolean(getMessageVideo(message)) : null;
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
-  const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
+  let blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
   let blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
 
   // For correct unmount animation
@@ -67,6 +67,7 @@ const MediaViewer: FC<IProps> = ({
     isPhoto,
     isVideo,
     blobUrlFull,
+    blobUrlPreview,
   });
 
   if (!isOpen && previousProps) {
@@ -77,6 +78,7 @@ const MediaViewer: FC<IProps> = ({
     isPhoto = previousProps.isPhoto;
     isVideo = previousProps.isVideo;
     blobUrlFull = previousProps.blobUrlFull;
+    blobUrlPreview = previousProps.blobUrlPreview;
   }
 
   const getMessageId = (fromId: number, direction: number): number => {

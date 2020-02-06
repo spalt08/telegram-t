@@ -29,6 +29,19 @@
     font-size: x-small;
   }
 
+  &.with-background {
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.125rem;
+      top: -0.125rem;
+      bottom: -0.125rem;
+      right: -0.125rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.25);
+    }
+  }
+
   &.white {
     > div {
       background-image: url('../../assets/spinner-white.svg');
