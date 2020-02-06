@@ -9,6 +9,7 @@ export interface ApiThumbnail {
   dataUri: string;
   height: number;
   width: number;
+  isHighQuality?: boolean;
 }
 
 export interface ApiPhoto {
@@ -106,6 +107,7 @@ export interface ApiMessage {
   };
   forward_info?: ApiMessageForwardInfo;
   is_deleting?: boolean;
+  prev_local_id?: number;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

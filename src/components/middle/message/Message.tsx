@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useState,
+  FC, memo, useCallback, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -56,7 +56,7 @@ type IProps = {
   contactFirstName: string | null;
   outgoingStatus?: ApiMessageOutgoingStatus;
   fileTransferProgress?: number;
-} & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo'>;
+} & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>;
 
 const Message: FC<IProps> = ({
   message,
@@ -70,6 +70,7 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   fileTransferProgress,
   selectMediaMessage,
+  cancelSendingMessage,
   openUserInfo,
   isFirstInGroup,
   isLastInGroup,
@@ -122,6 +123,10 @@ const Message: FC<IProps> = ({
   function openMediaMessage(): void {
     selectMediaMessage({ id: messageId });
   }
+
+  const handleCancelTransfer = useCallback(() => {
+    cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
+  }, [cancelSendingMessage, message.chat_id, message.id]);
 
   function handleBeforeContextMenu(e: React.MouseEvent) {
     if (e.button === 2) {
@@ -183,6 +188,7 @@ const Message: FC<IProps> = ({
             load={loadAndPlayMedia}
             fileTransferProgress={fileTransferProgress}
             onClick={openMediaMessage}
+            onCancelTransfer={handleCancelTransfer}
           />
         )}
         {video && (
@@ -192,7 +198,13 @@ const Message: FC<IProps> = ({
             onClick={openMediaMessage}
           />
         )}
-        {document && <Document document={document} />}
+        {document && (
+          <Document
+            message={message}
+            fileTransferProgress={fileTransferProgress}
+            onCancelTransfer={handleCancelTransfer}
+          />
+        )}
         {sticker && (
           <Sticker
             message={message}
@@ -343,10 +355,12 @@ export default memo(withGlobal(
   (setGlobal, actions) => {
     const {
       selectMediaMessage,
+      cancelSendingMessage,
       openUserInfo,
     } = actions;
     return {
       selectMediaMessage,
+      cancelSendingMessage,
       openUserInfo,
     };
   },

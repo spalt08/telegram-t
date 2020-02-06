@@ -8,7 +8,7 @@ import { GlobalState } from '../../../store/types';
 import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
 import { getMessageKey, getMessagePhoto } from '../../helpers';
 
-const DELETING_DELAY = 200;
+const ANIMATION_DELAY = 500;
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
@@ -65,14 +65,15 @@ export function onUpdate(update: ApiUpdate) {
     }
 
     case 'updateMessageSendSucceeded': {
-      const { chat_id, old_message_id, message } = update;
+      const { chat_id, local_id, message } = update;
 
       let newGlobal = global;
       newGlobal = updateChatMessage(newGlobal, chat_id, message.id, {
-        ...selectChatMessage(newGlobal, chat_id, old_message_id),
+        ...selectChatMessage(newGlobal, chat_id, local_id),
         ...message,
+        prev_local_id: local_id,
       });
-      newGlobal = deleteChatMessages(newGlobal, chat_id, [old_message_id]);
+      newGlobal = deleteChatMessages(newGlobal, chat_id, [local_id]);
       newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [message.id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
@@ -103,7 +104,9 @@ export function onUpdate(update: ApiUpdate) {
 
         setGlobal(newGlobal);
 
-        scheduleDeleting(chat_id, ids);
+        setTimeout(() => {
+          setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
+        }, ANIMATION_DELAY);
 
         return;
       }
@@ -120,7 +123,9 @@ export function onUpdate(update: ApiUpdate) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
           }
 
-          scheduleDeleting(chatId, [id]);
+          setTimeout(() => {
+            setGlobal(deleteChatMessages(getGlobal(), chatId, [id]));
+          }, ANIMATION_DELAY);
         }
       });
 
@@ -131,16 +136,32 @@ export function onUpdate(update: ApiUpdate) {
 
     case 'updateFileUploadProgress': {
       const { chat_id, message_id, progress } = update;
+      const messageKey = getMessageKey(chat_id, message_id);
 
       setGlobal({
         ...global,
         fileTransfers: {
           byMessageKey: {
             ...global.fileTransfers.byMessageKey,
-            [getMessageKey(chat_id, message_id)]: { progress },
+            [messageKey]: { progress },
           },
         },
       });
+
+      if (progress === 1) {
+        setTimeout(() => {
+          const newGlobal = getGlobal();
+          const byMessageKey = { ...newGlobal.fileTransfers.byMessageKey };
+          delete byMessageKey[messageKey];
+
+          setGlobal({
+            ...newGlobal,
+            fileTransfers: {
+              byMessageKey,
+            },
+          });
+        }, ANIMATION_DELAY);
+      }
 
       break;
     }
@@ -182,15 +203,4 @@ function findLastMessage(global: GlobalState, chatId: number, exceptForId: numbe
   const lastId = ids[ids.length - 1];
 
   return byId[lastId !== exceptForId ? lastId : ids[ids.length - 2]];
-}
-
-// The animation will start in two frames (TeactN `runCallbacks` + Teact `forceUpdate`), so should the timeout.
-function scheduleDeleting(chatId: number, messageIds: number[]) {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        setGlobal(deleteChatMessages(getGlobal(), chatId, messageIds));
-      }, DELETING_DELAY);
-    });
-  });
 }

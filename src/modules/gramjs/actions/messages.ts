@@ -46,6 +46,10 @@ addReducer('sendMessage', (global, actions, payload) => {
   });
 });
 
+addReducer('cancelSendingMessage', () => {
+  // const { chatId, messageId } = payload!;
+});
+
 addReducer('pinMessage', (global, actions, payload) => {
   const chat = selectOpenChat(global);
   if (!chat) {

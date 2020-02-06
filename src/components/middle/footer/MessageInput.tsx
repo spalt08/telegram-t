@@ -6,13 +6,13 @@ import { GlobalActions } from '../../../store/types';
 
 import { debounce } from '../../../util/schedulers';
 
-type IProps = Pick<GlobalActions, 'setChatReplyingTo'> & {
+type IProps = {
   selectedChatId?: number;
   replyingTo?: number;
   messageText: string;
-  setMessageText: Function;
-  onSendMessage: Function;
-};
+  onUpdate: Function;
+  onSend: Function;
+} & Pick<GlobalActions, 'setChatReplyingTo'>;
 
 const MAX_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
@@ -20,7 +20,7 @@ const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, replyingTo, messageText, setMessageText, onSendMessage, setChatReplyingTo,
+  selectedChatId, replyingTo, messageText, onUpdate, onSend, setChatReplyingTo,
 }) => {
   function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
@@ -29,7 +29,7 @@ const MessageInput: FC<IProps> = ({
     }
 
     const { currentTarget } = e;
-    setMessageText(currentTarget.value);
+    onUpdate(currentTarget.value);
     if (currentTarget.scrollHeight !== currentTarget.offsetHeight) {
       currentTarget.style.height = 'auto';
       currentTarget.style.height = `${Math.min(currentTarget.scrollHeight, MAX_INPUT_HEIGHT)}px`;
@@ -44,7 +44,7 @@ const MessageInput: FC<IProps> = ({
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
 
-      onSendMessage();
+      onSend();
       currentTarget.removeAttribute('style');
 
       setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });

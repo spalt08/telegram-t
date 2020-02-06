@@ -13,8 +13,13 @@ export function getFileSizeString(bytes: number) {
   return `${(bytes / (1024)).toFixed(1)} KB`;
 }
 
-export function getFileExtension(document: ApiDocument) {
+export function getDocumentExtension(document: ApiDocument) {
   const { fileName, mimeType } = document;
+
+  return getFileExtension(fileName, mimeType);
+}
+
+export function getFileExtension(fileName: string, mimeType: string) {
   if (fileName && fileName.indexOf('.') !== -1) {
     return fileName.split('.').pop();
   } else {
@@ -46,7 +51,7 @@ export function getColorFromExtension(extension: string) {
 
 export function getDocumentInfo(document: ApiDocument) {
   const { size } = document;
-  const extension = getFileExtension(document) || '';
+  const extension = getDocumentExtension(document) || '';
 
   return {
     size: getFileSizeString(size),

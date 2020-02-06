@@ -1,5 +1,5 @@
 import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
-import { getMessageKey } from './messages';
+import { getMessageKey, isMessageLocal } from './messages';
 
 export type IDimensions = {
   width: number;
@@ -32,7 +32,7 @@ export function getMessageContact(message: ApiMessage) {
   return message.content.contact;
 }
 
-export function getMessageMediaThumbDataUri(message: ApiMessage) {
+export function getMessageMediaThumbnail(message: ApiMessage) {
   const { photo, video, sticker } = message.content;
   const media = photo || video || sticker;
 
@@ -40,7 +40,13 @@ export function getMessageMediaThumbDataUri(message: ApiMessage) {
     return undefined;
   }
 
-  return media.thumbnail ? media.thumbnail.dataUri : undefined;
+  return media.thumbnail;
+}
+
+export function getMessageMediaThumbDataUri(message: ApiMessage) {
+  const thumbnail = getMessageMediaThumbnail(message);
+
+  return thumbnail ? thumbnail.dataUri : undefined;
 }
 
 export function getMessageMediaHash(
@@ -133,4 +139,16 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
   }
 
   return undefined;
+}
+
+export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number) {
+  const isUploading = isMessageLocal(message);
+  const isDownloading = !isUploading && typeof fileTransferProgress === 'number';
+  const thumbnail = getMessageMediaThumbnail(message);
+  const isHighQualityThumb = thumbnail ? thumbnail.isHighQuality : false;
+  const transferProgress = isHighQualityThumb && !isUploading ? 100 : fileTransferProgress || 0;
+
+  return {
+    isUploading, isDownloading, transferProgress, isHighQualityThumb,
+  };
 }

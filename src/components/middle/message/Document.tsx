@@ -1,30 +1,36 @@
 import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiDocument } from '../../../api/types';
-import { getDocumentInfo } from '../../../util/documentInfo';
+import { ApiMessage } from '../../../api/types';
 
-import './Document.scss';
+import { getDocumentInfo } from '../../../util/documentInfo';
+import { getMessageTransferParams } from '../../../modules/helpers';
+
+import File from '../../common/File';
 
 type IProps = {
-  document: ApiDocument;
+  message: ApiMessage;
+  fileTransferProgress?: number;
+  onCancelTransfer?: () => void;
 };
 
-const Document: FC<IProps> = ({ document }) => {
-  const { size, extension, color } = getDocumentInfo(document);
-  const { fileName } = document;
+const Document: FC<IProps> = ({ message, fileTransferProgress, onCancelTransfer }) => {
+  const document = message.content.document!;
+  const { extension } = getDocumentInfo(document);
+  const { fileName, size } = document;
+
+  const { isUploading, isDownloading, transferProgress } = getMessageTransferParams(message, fileTransferProgress);
 
   return (
-    <div className="document-content not-implemented">
-      <div className={`document-icon ${color}`}>
-        {extension.length <= 4 && (
-          <span className="document-ext">{extension}</span>
-        )}
-      </div>
-      <div className="document-info">
-        <div className="document-filename">{fileName}</div>
-        <div className="document-size">{size}</div>
-      </div>
-    </div>
+    <File
+      className={!(isUploading || isDownloading) ? 'not-implemented' : ''}
+      name={fileName}
+      extension={extension}
+      size={size}
+      isUploading={isUploading}
+      isDownloading={isDownloading}
+      transferProgress={transferProgress}
+      onCancelTransfer={onCancelTransfer}
+    />
   );
 };
 

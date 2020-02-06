@@ -10,6 +10,7 @@ interface IProps {
   className?: string;
   isOpen?: boolean;
   transparentBackdrop?: boolean;
+  header?: FC;
   children: any;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
@@ -21,6 +22,7 @@ const Dialog: FC<IProps> = (props) => {
     className,
     isOpen,
     transparentBackdrop,
+    header,
     children,
     onClose,
     onCloseAnimationEnd,
@@ -51,9 +53,12 @@ const Dialog: FC<IProps> = (props) => {
           className={['dialog', 'overlay', ...transitionClassNames].join(' ')}
           onTransitionEnd={handleHideTransitionEnd}
         >
-          <div className="header">
-            {title}
-          </div>
+          {header}
+          {!header && title && (
+            <div className="title">
+              {title}
+            </div>
+          )}
           <div className="content">
             {children}
           </div>
