@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useEffect } from '../../../lib/teact/teact';
+import React, { FC, useEffect, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../store/types';
@@ -22,6 +22,14 @@ let isJustSent = false;
 const MessageInput: FC<IProps> = ({
   selectedChatId, replyingTo, messageText, onUpdate, onSend, setChatReplyingTo,
 }) => {
+  const inputRef = useRef<HTMLTextAreaElement>();
+
+  function focusInput() {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }
+
   function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
     if (isJustSent) {
       isJustSent = false;
@@ -76,6 +84,7 @@ const MessageInput: FC<IProps> = ({
 
   return (
     <textarea
+      ref={inputRef}
       id="message-input-text"
       className="form-control custom-scroll"
       placeholder="Message"
@@ -87,14 +96,6 @@ const MessageInput: FC<IProps> = ({
     />
   );
 };
-
-function focusInput() {
-  const input = document.getElementById('message-input-text');
-
-  if (input) {
-    input.focus();
-  }
-}
 
 export default withGlobal(
   (global) => {
