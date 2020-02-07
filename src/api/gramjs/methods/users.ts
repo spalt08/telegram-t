@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate } from '../../types';
+import { ApiChat, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from './client';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
@@ -12,15 +12,17 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export async function fetchUserFromMessage({
-  chatId, userId, messageId,
+  chat, userId, messageId,
 }: {
-  chatId: number; userId: number; messageId: number;
+  chat: ApiChat; userId: number; messageId: number;
 }) {
-  const peer = buildInputPeer(chatId);
-
   const users = await invokeRequest(
     new GramJs.users.GetUsers({
-      id: [new GramJs.InputUserFromMessage({ peer, msgId: messageId, userId })],
+      id: [new GramJs.InputUserFromMessage({
+        peer: buildInputPeer(chat.id, chat.access_hash),
+        msgId: messageId,
+        userId,
+      })],
     }),
   );
 

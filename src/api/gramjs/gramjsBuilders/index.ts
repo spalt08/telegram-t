@@ -14,16 +14,20 @@ export function getEntityTypeById(chatOrUserId: number) {
 }
 
 export function buildInputPeer(chatOrUserId: number, accessHash?: string): GramJs.TypeInputPeer {
-  if (chatOrUserId > 0) {
-    return new GramJs.InputPeerUser({
-      userId: chatOrUserId,
-      accessHash: BigInt(accessHash!),
-    });
-  } else if (chatOrUserId <= -1000000000) {
-    return new GramJs.InputPeerChannel({
-      channelId: -chatOrUserId,
-      accessHash: BigInt(accessHash!),
-    });
+  if (chatOrUserId > 0 || chatOrUserId <= -1000000000) {
+    if (!accessHash) {
+      throw new Error('Missing `accessHash`');
+    }
+
+    return chatOrUserId > 0
+      ? new GramJs.InputPeerUser({
+        userId: chatOrUserId,
+        accessHash: BigInt(accessHash),
+      })
+      : new GramJs.InputPeerChannel({
+        channelId: -chatOrUserId,
+        accessHash: BigInt(accessHash),
+      });
   } else {
     return new GramJs.InputPeerChat({
       chatId: -chatOrUserId,
