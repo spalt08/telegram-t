@@ -24,10 +24,9 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const canSend = Boolean(messageText) || Boolean(attachment);
 
   const handleSend = useCallback(() => {
-    if (canSend) {
+    if (messageText || attachment) {
       sendMessage({
         text: messageText,
         attachment,
@@ -36,7 +35,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       setMessageText('');
       setAttachment(undefined);
     }
-  }, [attachment, canSend, messageText, sendMessage]);
+  }, [messageText, attachment, sendMessage]);
 
   useEffect(() => {
     async function pasteImageFromClipboard(e: ClipboardEvent) {
@@ -117,7 +116,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       <Button
         round
         color="secondary"
-        className={`${canSend ? 'send' : 'microphone not-implemented'}`}
+        className={`${messageText && !attachment ? 'send' : 'microphone not-implemented'}`}
         onClick={handleSend}
       >
         <i className="icon-send" />

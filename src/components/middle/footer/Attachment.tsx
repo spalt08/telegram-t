@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect, useRef,
+} from '../../../lib/teact/teact';
 
 import { ApiAttachment } from '../../../api/types';
 
@@ -21,14 +23,24 @@ type IProps = {
   onClear: () => void;
 };
 
+let isJustSent = false;
+
 const Attachment: FC<IProps> = ({
   attachment, caption, onCaptionUpdate, onSend, onClear,
 }) => {
   const prevAttachment = usePrevious(attachment);
   const isOpen = Boolean(attachment);
   const renderingAttachment = attachment || prevAttachment;
+  const inputRef = useRef<HTMLInputElement>();
+
+  function focusInput() {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }
 
   useEffect(() => captureEscKeyListener(onClear), [onClear]);
+  useEffect(focusInput, [isOpen]);
 
   const sendAttachment = useCallback(() => {
     if (isOpen) {
@@ -37,6 +49,11 @@ const Attachment: FC<IProps> = ({
   }, [isOpen, onSend]);
 
   function handleCaptionChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (isJustSent) {
+      isJustSent = false;
+      return;
+    }
+
     const { value } = e.target;
 
     onCaptionUpdate(value);
@@ -45,6 +62,12 @@ const Attachment: FC<IProps> = ({
   function handleCaptionKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       sendAttachment();
+
+      // Disable `onChange` following immediately after `onKeyPress`.
+      isJustSent = true;
+      setTimeout(() => {
+        isJustSent = false;
+      }, 0);
     }
   }
 
@@ -87,6 +110,7 @@ const Attachment: FC<IProps> = ({
       )}
 
       <InputText
+        ref={inputRef}
         placeholder="Add a caption..."
         value={caption}
         onChange={handleCaptionChange}

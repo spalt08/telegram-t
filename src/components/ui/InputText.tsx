@@ -1,7 +1,8 @@
-import { ChangeEvent, FormEvent } from 'react';
+import { ChangeEvent, FormEvent, RefObject } from 'react';
 import React, { FC } from '../../lib/teact/teact';
 
 interface IProps {
+  ref?: RefObject<HTMLInputElement>;
   id?: string;
   value?: string;
   label?: string;
@@ -13,6 +14,7 @@ interface IProps {
 }
 
 const InputText: FC<IProps> = ({
+  ref,
   id,
   value,
   label,
@@ -33,6 +35,7 @@ const InputText: FC<IProps> = ({
   return (
     <div className={className}>
       <input
+        ref={ref}
         className="form-control"
         type="text"
         id={id}
