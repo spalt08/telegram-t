@@ -71,12 +71,10 @@ const UiLoader: FC<IProps> = ({
           className={['mask', 'overlay', ...transitionClassNames].join(' ')}
           onTransitionEnd={handleHideTransitionEnd}
         >
-          {page === 'main' ? (
-            [
-              <div className="left" />,
-              <div className="middle" />,
-            ]
-          ) : (
+          {page === 'main' ? [
+            <div className="left" />,
+            <div className="middle" />,
+          ] : (
             <div className="blank" />
           )}
         </div>
