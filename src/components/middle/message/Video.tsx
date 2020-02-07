@@ -52,7 +52,7 @@ const Video: FC<IProps> = ({
       className="media-inner has-viewer"
       onClick={onClick}
     >
-      {!mediaData && (
+      {!isInline && !isHqPreview && (
         <img
           src={thumbDataUri}
           className={`thumbnail blur ${!thumbDataUri ? 'empty' : ''}`}
