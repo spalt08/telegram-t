@@ -2,6 +2,17 @@
   @return red($color) + ", " + green($color) + ", " + blue($color);
 }
 
+@function blend-normal ($foreground, $background) {
+  $opacity: opacity($foreground);
+  $background-opacity: opacity($background);
+
+  // calculate opacity
+  $bm-red: red($foreground) * $opacity + red($background) * $background-opacity * (1 - $opacity);
+  $bm-green: green($foreground) * $opacity + green($background) * $background-opacity * (1 - $opacity);
+  $bm-blue: blue($foreground) * $opacity + blue($background) * $background-opacity * (1 - $opacity);
+  @return rgb($bm-red, $bm-green, $bm-blue);
+}
+
 $color-primary: #4ea4f6;
 $color-primary-shade: #51aaff;
 $color-primary-shade-2: #4b9dec;
@@ -10,6 +21,7 @@ $color-links: #52a1ef;
 
 $color-text-green: #4fae4e;
 $color-green: #4dcd5e;
+$color-light-green: #eefedf;
 
 $color-error: #e53935;
 
@@ -28,6 +40,8 @@ $color-chat-hover: #f4f4f5;
 
 :root {
   --color-background: #{$color-white};
+  --color-background-own: #{$color-light-green};
+  --color-background-own-rgb: #{toRGB($color-light-green)};
   --color-text: #{$color-black};
   --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
@@ -55,6 +69,9 @@ $color-chat-hover: #f4f4f5;
 
   --color-code: #{mix($color-links, $color-text-secondary, 50%)};
   --color-code-own: #{mix($color-text-green, $color-text-secondary, 50%)};
+
+  --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
+  --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
 
   --color-gray: #{$color-gray};
 

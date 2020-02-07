@@ -26,11 +26,13 @@
 
   .media:not(.text) &,
   .Message.own .sticker & {
-    background: rgba(0,0,0, 0.2);
+    background: rgba(0, 0, 0, .2);
     color: white !important;
-    bottom: 0.25rem;
-    right: 0.25rem;
+    bottom: .25rem;
+    right: .25rem;
     left: auto;
+    height: 1.125rem;
+    padding: 0 .3125rem 0 .375rem;
   }
 
   .Message.not-own {
@@ -70,15 +72,8 @@
 
   .MessageOutgoingStatus {
     display: inline-block;
-    height: 1.125rem;
+    line-height: 1;
     font-size: 1.1875rem;
     margin-left: -.1875rem;
-
-    .text &, .contact &, .document &, .media & {
-      @include icon-styles() {
-        position: relative;
-        top: -0.2rem;
-      }
-    }
   }
 }

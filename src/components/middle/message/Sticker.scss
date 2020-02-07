@@ -76,7 +76,13 @@
     }
   }
 
+  .Message.not-own & {
+    --hover-color: var(--color-reply-hover);
+  }
+
   .Message.own & {
+    --hover-color: var(--color-reply-own-hover);
+
     .reply-message {
       flex-direction: row;
 
