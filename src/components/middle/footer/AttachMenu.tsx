@@ -9,21 +9,25 @@ import './AttachMenu.scss';
 
 type IProps = {
   isOpen: boolean;
-  onFileSelect: (file: File, asPhoto: boolean) => void;
+  onFileSelect: (file: File, isQuick: boolean) => void;
   onClose: () => void;
 };
 
 const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
-  const handleFileSelect = (e: Event, asPhoto: boolean) => {
+  const handleFileSelect = (e: Event, isQuick: boolean) => {
     const { files } = e.target as HTMLInputElement;
 
     if (files && files.length > 0) {
-      onFileSelect(files[0], asPhoto);
+      onFileSelect(
+        files[0],
+        // TODO Support quick video.
+        isQuick && files[0].type.startsWith('image/'),
+      );
     }
   };
 
-  const handlePhotoSelect = () => {
-    openSystemFileDialog('image/png,image/gif,image/jpeg', (e) => handleFileSelect(e, true));
+  const handleQuickSelect = () => {
+    openSystemFileDialog('image/png,image/gif,image/jpeg,video/mp4,video/avi', (e) => handleFileSelect(e, true));
   };
 
   const handleDocumentSelect = () => {
@@ -40,7 +44,7 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
       className="AttachMenu"
       onCloseAnimationEnd={onClose}
     >
-      <MenuItem icon="photo" onClick={handlePhotoSelect}>Photo</MenuItem>
+      <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
       <MenuItem icon="poll" className="not-implemented">Poll</MenuItem>
     </Menu>

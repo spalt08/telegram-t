@@ -116,16 +116,15 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) 
     });
   });
 
-  const { file: { type: mimeType, name: fileName }, photo } = attachment;
+  const { file: { type: mimeType, name: fileName }, quick } = attachment;
+  const isPhoto = quick && mimeType.startsWith('image/');
 
-  return photo
+  return isPhoto
     ? new GramJs.InputMediaUploadedPhoto({ file: inputFile })
     : new GramJs.InputMediaUploadedDocument({
       file: inputFile,
       mimeType,
-      attributes: [
-        new GramJs.DocumentAttributeFilename({ fileName }),
-      ],
+      attributes: [new GramJs.DocumentAttributeFilename({ fileName })],
     });
 }
 

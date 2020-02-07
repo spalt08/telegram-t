@@ -5,9 +5,9 @@ export * from './updates';
 
 export interface ApiAttachment {
   file: File;
-  photo?: {
+  quick?: {
+    blobUrl: string;
     width: number;
     height: number;
-    blobUrl: string;
   };
 }

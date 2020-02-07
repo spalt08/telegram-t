@@ -19,6 +19,7 @@ import './MiddleFooter.scss';
 type IProps = Pick<GlobalActions, 'sendMessage'>;
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
 
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
@@ -74,8 +75,8 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     setIsMenuOpen(false);
   }, []);
 
-  const handleFileSelect = useCallback(async (file: File, asPhoto: boolean) => {
-    setAttachment(await buildAttachment(file, asPhoto));
+  const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
+    setAttachment(await buildAttachment(file, isQuick));
   }, []);
 
   return (
@@ -126,10 +127,21 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   );
 };
 
-async function buildAttachment(file: File, asPhoto: boolean): Promise<ApiAttachment> {
+async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachment> {
+  if (!isQuick || file.size >= MAX_QUICK_FILE_SIZE) {
+    return { file };
+  }
+
   return {
     file,
-    ...(asPhoto && { photo: await getImageDataFromFile(file) }),
+    quick: file.type.startsWith('image/')
+      ? await getImageDataFromFile(file)
+      // TODO Can we extract dimensions from video file?
+      : {
+        blobUrl: URL.createObjectURL(file),
+        width: 300,
+        height: 300,
+      },
   };
 }
 
