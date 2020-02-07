@@ -58,7 +58,7 @@ export interface ApiMessageForwardInfo {
   from_message_id?: number;
   origin: {
     '@type': 'messageForwardOriginUser';
-    sender_user_id: number;
+    sender_user_id?: number;
     sender_user_name?: string;
   };
 }
@@ -91,7 +91,7 @@ export interface ApiMessage {
   };
   date: number;
   is_outgoing: boolean;
-  sender_user_id: number;
+  sender_user_id?: number;
   reply_to_message_id?: number;
   sending_state?: {
     '@type': 'messageSendingStatePending' | 'messageSendingStateFailed';

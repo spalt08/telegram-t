@@ -19,8 +19,6 @@ import { isPeerUser } from './peers';
 import { bytesToDataUri, omitGramJsFields } from './helpers';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
-// Used for number fields specified as optional but are required indeed.
-const MISSING_FIELD_NUMBER = -1;
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   if (
@@ -101,7 +99,7 @@ export function buildApiMessageWithChatId(
       ...(action && { action }),
     },
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId || MISSING_FIELD_NUMBER,
+    sender_user_id: mtpMessage.fromId,
     reply_to_message_id: mtpMessage.replyToMsgId,
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
   };
@@ -113,7 +111,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessag
     from_chat_id: fwdFrom.fromId,
     origin: {
       '@type': 'messageForwardOriginUser',
-      sender_user_id: fwdFrom.fromId || MISSING_FIELD_NUMBER,
+      sender_user_id: fwdFrom.fromId,
       // TODO @gramjs Not supported?
       // sender_user_name: fwdFrom.fromName,
     },

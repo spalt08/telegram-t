@@ -330,6 +330,9 @@ export default memo(withGlobal(
     const replyMessage = message.reply_to_message_id
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
+    const replyMessageSender = replyMessage && replyMessage.sender_user_id
+      ? selectUser(global, replyMessage.sender_user_id)
+      : undefined;
 
     let userId;
     let originUserId;
@@ -348,7 +351,7 @@ export default memo(withGlobal(
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
       ...(replyMessage && {
         replyMessage,
-        replyMessageSender: selectUser(global, replyMessage.sender_user_id),
+        replyMessageSender,
       }),
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),

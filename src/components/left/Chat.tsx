@@ -166,15 +166,20 @@ function getSenderName(chatId: number, sender?: ApiUser) {
 export default memo(withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
+    const { last_message } = chat;
 
-    if (!chat || !chat.last_message) {
+    if (!chat || !last_message) {
       return null;
     }
 
-    const { last_message } = chat;
-    const lastMessageAction = last_message && getMessageAction(last_message);
-    const actionTargetMessage = lastMessageAction && last_message.reply_to_message_id
-      ? selectChatMessage(global, last_message.chat_id, last_message.reply_to_message_id)
+    const {
+      sender_user_id, chat_id, reply_to_message_id, is_outgoing,
+    } = last_message;
+
+    const lastMessageSender = sender_user_id && selectUser(global, sender_user_id);
+    const lastMessageAction = getMessageAction(last_message);
+    const actionTargetMessage = lastMessageAction && reply_to_message_id
+      ? selectChatMessage(global, chat_id, reply_to_message_id)
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
@@ -182,8 +187,8 @@ export default memo(withGlobal(
 
     return {
       chat,
-      lastMessageSender: selectUser(global, last_message.sender_user_id),
-      ...(last_message.is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, last_message) }),
+      ...(lastMessageSender && { lastMessageSender }),
+      ...(is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, last_message) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
