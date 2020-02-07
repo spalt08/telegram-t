@@ -6,8 +6,10 @@ Something went wrong and we need to refresh the app.
 Do you want to re-login?
 Confirm if it happens constantly.`;
 
-window.onerror = handleError;
-window.addEventListener('unhandledrejection', handleError);
+if (process.env.NODE_ENV !== 'development') {
+  window.onerror = handleError;
+  window.addEventListener('unhandledrejection', handleError);
+}
 
 let isReloading = false;
 
