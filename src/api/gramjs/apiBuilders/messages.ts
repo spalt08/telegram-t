@@ -366,24 +366,40 @@ export function buildLocalMessage(
   };
 }
 
-function buildUploadingMedia(attachment: ApiAttachment): { photo: ApiPhoto } | { document: ApiDocument } {
-  if (attachment.photo) {
-    const { width, height, blobUrl } = attachment.photo;
+function buildUploadingMedia(
+  attachment: ApiAttachment,
+): { photo: ApiPhoto } | { video: ApiVideo } | { document: ApiDocument } {
+  const { type: mimeType, name: fileName, size } = attachment.file;
 
-    return {
-      photo: {
-        thumbnail: {
-          width,
-          height,
-          dataUri: blobUrl,
-          isHighQuality: true,
+  if (attachment.quick) {
+    const { width, height, blobUrl } = attachment.quick;
+
+    if (mimeType.startsWith('image/')) {
+      return {
+        photo: {
+          thumbnail: {
+            width,
+            height,
+            dataUri: blobUrl,
+            isHighQuality: true,
+          },
+          sizes: [],
         },
-        sizes: [],
-      },
-    };
+      };
+    } else {
+      return {
+        video: {
+          duration: 0,
+          thumbnail: {
+            width,
+            height,
+            dataUri: blobUrl,
+            isHighQuality: true,
+          },
+        },
+      };
+    }
   } else {
-    const { type: mimeType, name: fileName, size } = attachment.file;
-
     return {
       document: {
         mimeType,

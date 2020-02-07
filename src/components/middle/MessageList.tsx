@@ -209,6 +209,10 @@ function renderMessages(
             && dateGroupIndex === dateGroupsArray.length - 1
           ),
         };
+        const loadAndPlayMedia = (
+          viewportMessageIds.includes(message.id)
+          || (message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
+        );
 
         return (
           <Message
@@ -216,7 +220,7 @@ function renderMessages(
             message={message}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
-            loadAndPlayMedia={viewportMessageIds.includes(message.prev_local_id || message.id)}
+            loadAndPlayMedia={loadAndPlayMedia}
             isFirstInGroup={position.isFirstInGroup}
             isLastInGroup={position.isLastInGroup}
             isLastInList={position.isLastInList}

@@ -29,8 +29,8 @@ export interface ApiVideo {
   duration: number;
   width?: number;
   height?: number;
-  supportsStreaming: boolean;
-  isRound: boolean;
+  supportsStreaming?: boolean;
+  isRound?: boolean;
   thumbnail?: ApiThumbnail;
 }
 

@@ -29,9 +29,10 @@ const Attachment: FC<IProps> = ({
   attachment, caption, onCaptionUpdate, onSend, onClear,
 }) => {
   const prevAttachment = usePrevious(attachment);
-  const isOpen = Boolean(attachment);
   const renderingAttachment = attachment || prevAttachment;
+  const isOpen = Boolean(attachment);
   const inputRef = useRef<HTMLInputElement>();
+  const photo = renderingAttachment && renderingAttachment.file.type.startsWith('image/') && renderingAttachment.quick;
 
   function focusInput() {
     if (isOpen && inputRef.current) {
@@ -81,7 +82,7 @@ const Attachment: FC<IProps> = ({
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachment" onClick={onClear}>
           <i className="icon-close" />
         </Button>
-        <div className="caption">{renderingAttachment.photo ? 'Send Photo' : 'Send File'}</div>
+        <div className="caption">{photo ? 'Send Photo' : 'Send File'}</div>
         <Button color="primary" size="smaller" className="send" onClick={sendAttachment}>Send</Button>
       </div>
     );
@@ -93,12 +94,12 @@ const Attachment: FC<IProps> = ({
 
   return (
     <Dialog isOpen={isOpen} onClose={onClear} header={renderHeader()} className="Attachment">
-      {renderingAttachment.photo && (
+      {photo && (
         <div className="image-wrapper">
-          <img src={renderingAttachment.photo.blobUrl} alt="" />
+          <img src={photo.blobUrl} alt="" />
         </div>
       )}
-      {!renderingAttachment.photo && (
+      {!photo && (
         <div className="document-wrapper">
           <File
             name={renderingAttachment.file.name}
