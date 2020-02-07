@@ -1,15 +1,16 @@
 import { addReducer, setGlobal, getGlobal } from '../../../lib/teact/teactn';
 
 import { callApi } from '../../../api/gramjs';
-import { selectUser } from '../../selectors';
+import { selectChat, selectUser } from '../../selectors';
 import { debounce } from '../../../util/schedulers';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 
 addReducer('loadUserFromMessage', (global, actions, payload) => {
   const { chatId, userId, messageId } = payload!;
+  const chat = selectChat(global, chatId);
 
-  void callApi('fetchUserFromMessage', { chatId, userId, messageId });
+  void callApi('fetchUserFromMessage', { chat, userId, messageId });
 });
 
 addReducer('loadFullUser', (global, actions, payload) => {
