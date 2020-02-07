@@ -48,7 +48,7 @@ export default withGlobal(
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
     const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
     const message = replyingTo ? selectChatMessage(global, selectedChatId!, replyingTo) : undefined;
-    const sender = message && selectUser(global, message.sender_user_id);
+    const sender = message && message.sender_user_id && selectUser(global, message.sender_user_id);
 
     return {
       selectedChatId,

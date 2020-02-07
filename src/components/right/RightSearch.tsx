@@ -57,7 +57,7 @@ const RightSearch: FC<IProps> = ({ chat, query, searchResults }) => {
       <p className="helper-text">{renderHelperText()}</p>
 
       {searchResults.map(({ user, message }) => (
-        <div className="search-result-message not-implemented" onClick={() => {}}>
+        <div className="search-result-message not-implemented">
           <Avatar chat={isChatChannel(chat) ? chat : undefined} user={user} />
           <div className="info">
             <div className="title">
@@ -105,7 +105,7 @@ export default withGlobal(
 
     const searchResults = foundMessages.map((message) => ({
       message,
-      user: selectUser(global, message.sender_user_id),
+      user: message.sender_user_id && selectUser(global, message.sender_user_id),
     }));
 
     return {
