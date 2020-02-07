@@ -42,6 +42,7 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
     >
       <MenuItem icon="photo" onClick={handlePhotoSelect}>Photo</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
+      <MenuItem icon="poll" className="not-implemented">Poll</MenuItem>
     </Menu>
   );
 };
