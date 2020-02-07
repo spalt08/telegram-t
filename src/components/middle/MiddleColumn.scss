@@ -1,9 +1,23 @@
 #MiddleColumn {
   display: flex;
   justify-content: center;
-  background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
-  background-size: cover;
   height: 100%;
+  position: relative;
+  z-index: 1;
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
+    background-size: cover;
+    will-change: transform;
+    z-index: -1;
+  }
 
   .messages-layout {
     display: flex;
