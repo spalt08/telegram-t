@@ -5,6 +5,10 @@ export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
 }
 
+export function getMessageRenderKey(message: ApiMessage) {
+  return message.prev_local_id || message.id;
+}
+
 export function getLastMessageText(message: ApiMessage) {
   const {
     text,

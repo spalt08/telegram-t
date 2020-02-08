@@ -9,6 +9,7 @@ import { GlobalActions } from '../../store/types';
 
 import { selectChatMessageListedIds, selectChatMessages, selectOpenChat } from '../../modules/selectors';
 import {
+  getMessageRenderKey,
   isActionMessage, isChatChannel, isChatPrivate, isOwnMessage,
 } from '../../modules/helpers';
 import { flatten, orderBy } from '../../util/iteratees';
@@ -216,7 +217,7 @@ function renderMessages(
 
         return (
           <Message
-            key={message.prev_local_id || message.id}
+            key={getMessageRenderKey(message)}
             message={message}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
@@ -231,8 +232,8 @@ function renderMessages(
 
     return (
       // @ts-ignore
-      <div className="message-date-group" key={dateGroup.datetime} teactChildrenKeyOrder="asc">
-        <div className="message-date-header" key={0}>
+      <div className="message-date-group" key={dateGroup.key}>
+        <div className="message-date-header" key={-Infinity}>
           <span>{formatHumanDate(dateGroup.datetime)}</span>
         </div>
         {flatten(senderGroups)}
