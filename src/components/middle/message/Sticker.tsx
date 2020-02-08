@@ -10,6 +10,7 @@ import useMedia from '../../../hooks/useMedia';
 import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 type IProps = {
   message: ApiMessage;
@@ -32,10 +33,15 @@ const Sticker: FC<IProps> = ({
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );
 
+  const {
+    shouldRender: shouldFullMediaRender,
+    transitionClassNames: fullMediaClassNames,
+  } = useShowTransition(isAnimated ? isAnimationLoaded : mediaData);
+
   const { width, height } = getStickerDimensions(sticker);
 
   let thumbClassName = 'thumbnail';
-  if (thumbDataUri && isAnimationLoaded) {
+  if (thumbDataUri && isAnimationLoaded && fullMediaClassNames.includes('open')) {
     thumbClassName += ' fade-out';
   } else if (!thumbDataUri) {
     thumbClassName += ' empty';
@@ -50,22 +56,22 @@ const Sticker: FC<IProps> = ({
         alt=""
         className={thumbClassName}
       />
-      {!isAnimated && (
+      {(!isAnimated && shouldFullMediaRender) && (
         <img
           src={mediaData as string}
           width={width}
           height={height}
           alt=""
-          className={mediaData ? 'full-media fade-in' : 'full-media'}
+          className={['full-media', ...fullMediaClassNames].join(' ')}
         />
       )}
-      {isAnimated && (
+      {isAnimated && mediaData && (
         <AnimatedSticker
           animationData={mediaData as AnyLiteral}
           width={width}
           height={height}
           play={loadAndPlay}
-          className={isAnimationLoaded ? 'full-media fade-in' : 'full-media'}
+          className={['full-media', ...fullMediaClassNames].join(' ')}
           onLoad={handleAnimationLoad}
         />
       )}
