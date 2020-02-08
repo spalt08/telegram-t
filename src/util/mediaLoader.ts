@@ -1,7 +1,7 @@
 import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
-import { blobToDataUri, preloadImage } from './image';
+import { blobToDataUri, preloadImage } from './files';
 
 // We cache avatars as Data URI for faster initial load
 // and messages media as Blob for smaller size.

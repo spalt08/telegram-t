@@ -64,6 +64,10 @@ export function getMessageMediaHash(
   if (photo) {
     switch (target) {
       case 'inline':
+        if (hasMessageLocalBlobUrl(message)) {
+          return undefined;
+        }
+
         return `${base}?size=x`;
       case 'pictogram':
         return `${base}?size=m`;
@@ -77,6 +81,10 @@ export function getMessageMediaHash(
   if (video) {
     switch (target) {
       case 'inline':
+        if (hasMessageLocalBlobUrl(message)) {
+          return undefined;
+        }
+
         return canMessagePlayVideoInline(video) ? base : `${base}?size=m`;
       case 'pictogram':
         return `${base}?size=m`;
@@ -95,6 +103,12 @@ export function getMessageMediaHash(
   }
 
   return undefined;
+}
+
+export function hasMessageLocalBlobUrl(message: ApiMessage) {
+  const { photo, video } = message.content;
+
+  return (photo && photo.blobUrl) || (video && video.blobUrl);
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
@@ -130,10 +144,6 @@ export function getPhotoInlineDimensions(photo: ApiPhoto): IDimensions | undefin
 }
 
 export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
-  if (video.thumbnail) {
-    return video.thumbnail;
-  }
-
   if (video.width && video.height) {
     return video as IDimensions;
   }
@@ -143,21 +153,17 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
 
 export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number, isDownloadNeeded = false) {
   const isUploading = isMessageLocal(message);
-  // TODO Temporary solution.
   const isDownloading = !isUploading && isDownloadNeeded;
-  const thumbnail = getMessageMediaThumbnail(message);
-  const isHighQualityThumb = thumbnail ? thumbnail.isHighQuality : false;
+  const isTransferring = isUploading || isDownloading;
 
-  let transferProgress = 0;
+  let transferProgress = 1;
   if (isUploading) {
     transferProgress = fileTransferProgress || 0;
-  } else if (isHighQualityThumb) {
-    transferProgress = 1;
   } else if (isDownloading) {
     transferProgress = fileTransferProgress || 0.15;
   }
 
   return {
-    isUploading, isDownloading, transferProgress, isHighQualityThumb,
+    isUploading, isDownloading, isTransferring, transferProgress,
   };
 }

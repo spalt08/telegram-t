@@ -36,17 +36,27 @@ const Photo: FC<IProps> = ({
   onClick,
   onCancelTransfer,
 }) => {
+  const photo = message.content.photo!;
+
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const { width, height, isSmall } = calculateDimensions(message);
+  const localBlobUrl = load ? photo.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !load);
+
+  const {
+    isTransferring, transferProgress,
+  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
+
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!mediaData && load);
+  } = useShowTransition(isTransferring && load);
+
   const {
-    isUploading, isDownloading, transferProgress, isHighQualityThumb,
-  } = getMessageTransferParams(message, fileTransferProgress, !mediaData);
-  const isTransferring = isUploading || isDownloading;
+    shouldRender: shouldFullMediaRender,
+    transitionClassNames: fullMediaClassNames,
+  } = useShowTransition(Boolean(mediaData));
+
+  const { width, height, isSmall } = calculateDimensions(message);
 
   let className = 'media-inner';
   if (!isTransferring) {
@@ -57,7 +67,7 @@ const Photo: FC<IProps> = ({
   }
 
   let thumbClassName = 'thumbnail';
-  if (!mediaData && !isHighQualityThumb) {
+  if (!mediaData && !localBlobUrl) {
     thumbClassName += ' blur';
   }
   if (!thumbDataUri) {
@@ -69,28 +79,30 @@ const Photo: FC<IProps> = ({
       className={className}
       onClick={!isTransferring ? onClick : undefined}
     >
-      {isTransferring && (
-        <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
-      )}
       <img
-        src={thumbDataUri}
+        src={localBlobUrl || thumbDataUri}
         className={thumbClassName}
         width={width}
         height={height}
         alt=""
       />
+      {shouldFullMediaRender && (
+        <img
+          src={mediaData}
+          className={['full-media', ...fullMediaClassNames].join(' ')}
+          width={width}
+          height={height}
+          alt=""
+        />
+      )}
       {shouldSpinnerRender && (
         <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}
-      <img
-        src={mediaData}
-        className={mediaData ? 'full-media fade-in' : 'full-media'}
-        width={width}
-        height={height}
-        alt=""
-      />
+      {isTransferring && (
+        <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
+      )}
     </div>
   );
 };

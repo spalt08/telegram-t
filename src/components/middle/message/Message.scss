@@ -248,8 +248,12 @@
     opacity: 0;
     transition: opacity .3s ease;
 
-    &.fade-in {
+    &.open {
       opacity: 1;
+    }
+
+    &:not(.shown) {
+      display: none;
     }
   }
 

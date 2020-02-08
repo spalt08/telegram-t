@@ -22,39 +22,59 @@ import './Media.scss';
 type IProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
+  fileTransferProgress?: number;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  onCancelTransfer?: () => void;
 };
 
 const Video: FC<IProps> = ({
-  message, loadAndPlay, onClick,
+  message,
+  loadAndPlay,
+  fileTransferProgress,
+  onClick,
+  onCancelTransfer,
 }) => {
   const video = message.content.video!;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const localBlobUrl = loadAndPlay ? video.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+
+  const {
+    isTransferring, transferProgress,
+  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!mediaData && loadAndPlay);
-  const { transferProgress } = getMessageTransferParams(message, undefined, !mediaData);
+  } = useShowTransition(isTransferring && loadAndPlay);
 
-  const canPlayInline = canMessagePlayVideoInline(video);
-  const isInline = mediaData && loadAndPlay && canPlayInline;
+  const canPlayInline = localBlobUrl || canMessagePlayVideoInline(video);
+  const isInline = canPlayInline && loadAndPlay && (mediaData || localBlobUrl);
   const isHqPreview = mediaData && !canPlayInline;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
   const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
 
+  let className = 'media-inner';
+  if (!isTransferring) {
+    className += ' has-viewer';
+  }
+
+  let thumbClassName = 'thumbnail blur';
+  if (!thumbDataUri) {
+    thumbClassName += ' empty';
+  }
+
   return (
     <div
-      className="media-inner has-viewer"
-      onClick={onClick}
+      className={className}
+      onClick={!isTransferring ? onClick : undefined}
     >
       {!isInline && !isHqPreview && (
         <img
           src={thumbDataUri}
-          className={`thumbnail blur ${!thumbDataUri ? 'empty' : ''}`}
+          className={thumbClassName}
           width={width}
           height={height}
           alt=""
@@ -70,7 +90,7 @@ const Video: FC<IProps> = ({
           playsinline
           poster={thumbDataUri}
         >
-          <source src={mediaData} />
+          <source src={mediaData || localBlobUrl} />
         </video>
       )}
       {isHqPreview && ([
@@ -88,10 +108,14 @@ const Video: FC<IProps> = ({
       ])}
       {shouldSpinnerRender && (
         <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
-          <ProgressSpinner progress={transferProgress} />
+          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}
-      <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
+      {isTransferring ? (
+        <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
+      ) : (
+        <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
+      )}
     </div>
   );
 };

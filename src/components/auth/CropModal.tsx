@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
-import { blobToFile, blobToDataUri } from '../../util/image';
+import { blobToFile, blobToDataUri } from '../../util/files';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';

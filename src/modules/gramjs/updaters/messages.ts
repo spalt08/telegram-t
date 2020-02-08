@@ -6,7 +6,7 @@ import {
 } from '../../reducers';
 import { GlobalState } from '../../../store/types';
 import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
-import { getMessageKey, getMessagePhoto } from '../../helpers';
+import { getMessageKey, getMessagePhoto, getMessageVideo } from '../../helpers';
 
 const ANIMATION_DELAY = 300;
 
@@ -17,11 +17,18 @@ export function onUpdate(update: ApiUpdate) {
     case 'newMessage': {
       const { chat_id, id, message } = update;
 
-      // Preserve HD thumbnail for uploaded photos.
+      // Preserve local blob URL uploaded media.
       const currentMessage = selectChatMessage(global, chat_id, id);
-      const currentPhoto = currentMessage && getMessagePhoto(currentMessage);
-      if (currentPhoto && message.content && message.content.photo) {
-        message.content.photo.thumbnail = currentPhoto.thumbnail;
+      const currentPhotoOrVideo = currentMessage && (
+        getMessagePhoto(currentMessage) || getMessageVideo(currentMessage)
+      );
+      if (currentPhotoOrVideo && message.content) {
+        if (message.content.photo) {
+          message.content.photo.blobUrl = currentPhotoOrVideo.blobUrl;
+          message.content.photo.thumbnail = currentPhotoOrVideo.thumbnail;
+        } else if (message.content.video) {
+          message.content.video.blobUrl = currentPhotoOrVideo.blobUrl;
+        }
       }
 
       let newGlobal = global;

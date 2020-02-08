@@ -14,7 +14,7 @@ import {
 } from '../../../modules/selectors';
 import {
   getMessageMediaHash,
-  getUserFullName,
+  getUserFullName, hasMessageLocalBlobUrl,
   isOwnMessage,
   isReplyMessage,
 } from '../../../modules/helpers';
@@ -197,7 +197,9 @@ const Message: FC<IProps> = ({
           <Video
             message={message}
             loadAndPlay={loadAndPlayMedia}
+            fileTransferProgress={fileTransferProgress}
             onClick={openMediaMessage}
+            onCancelTransfer={handleCancelTransfer}
           />
         )}
         {messageDocument && (
@@ -305,7 +307,7 @@ function buildClassNames(
     classNames.push('not-own');
   }
 
-  if (getMessageMediaHash(message, 'inline')) {
+  if (getMessageMediaHash(message, 'inline') || hasMessageLocalBlobUrl(message)) {
     classNames.push('has-media');
   }
 

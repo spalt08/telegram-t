@@ -18,11 +18,7 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
     const { files } = e.target as HTMLInputElement;
 
     if (files && files.length > 0) {
-      onFileSelect(
-        files[0],
-        // TODO Support quick video.
-        isQuick && files[0].type.startsWith('image/'),
-      );
+      onFileSelect(files[0], isQuick);
     }
   };
 

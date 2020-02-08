@@ -338,7 +338,6 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | null {
   };
 }
 
-// We only support 100000 local pending messages here and expect it will not interfere with real IDs.
 let localMessageCounter = -1;
 
 export function buildLocalMessage(
@@ -381,21 +380,18 @@ function buildUploadingMedia(
             width,
             height,
             dataUri: blobUrl,
-            isHighQuality: true,
           },
           sizes: [],
+          blobUrl,
         },
       };
     } else {
       return {
         video: {
           duration: 0,
-          thumbnail: {
-            width,
-            height,
-            dataUri: blobUrl,
-            isHighQuality: true,
-          },
+          width,
+          height,
+          blobUrl,
         },
       };
     }

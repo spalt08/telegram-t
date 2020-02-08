@@ -12,7 +12,7 @@ import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import Attachment from './Attachment';
 
-import { getImageDataFromFile } from '../../../util/image';
+import { getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 
 import './MiddleFooter.scss';
 
@@ -136,12 +136,7 @@ async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachm
     file,
     quick: file.type.startsWith('image/')
       ? await getImageDataFromFile(file)
-      // TODO Can we extract dimensions from video file?
-      : {
-        blobUrl: URL.createObjectURL(file),
-        width: 300,
-        height: 300,
-      },
+      : await getVideoDataFromFile(file),
   };
 }
 

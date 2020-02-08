@@ -6,7 +6,7 @@ import { GlobalActions, GlobalState } from '../../store/types';
 import useShowTransition from '../../hooks/useShowTransition';
 import { getChatAvatarHash } from '../../modules/helpers';
 import { pause } from '../../util/schedulers';
-import { preloadImage } from '../../util/image';
+import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 

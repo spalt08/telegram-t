@@ -8,12 +8,12 @@ export interface ApiThumbnail {
   dataUri: string;
   height: number;
   width: number;
-  isHighQuality?: boolean;
 }
 
 export interface ApiPhoto {
   thumbnail?: ApiThumbnail;
   sizes: ApiPhotoSize[];
+  blobUrl?: string;
 }
 
 export interface ApiSticker {
@@ -32,6 +32,7 @@ export interface ApiVideo {
   supportsStreaming?: boolean;
   isRound?: boolean;
   thumbnail?: ApiThumbnail;
+  blobUrl?: string;
 }
 
 export interface ApiDocument {
