@@ -33,9 +33,8 @@ const Video: FC<IProps> = ({
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
   const {
-    isShown: isSpinnerShown,
+    shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-    handleHideTransitionEnd: handleSpinnerTransitionEnd,
   } = useShowTransition(!mediaData && loadAndPlay);
   const { transferProgress } = getMessageTransferParams(message, undefined, !mediaData);
 
@@ -87,11 +86,8 @@ const Video: FC<IProps> = ({
           </div>
         </div>,
       ])}
-      {isSpinnerShown && (
-        <div
-          className={['message-media-loading', ...spinnerClassNames].join(' ')}
-          onTransitionEnd={handleSpinnerTransitionEnd}
-        >
+      {shouldSpinnerRender && (
+        <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} />
         </div>
       )}

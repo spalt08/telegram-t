@@ -31,7 +31,7 @@ const Menu: FC<IProps> = (props) => {
     onCloseAnimationEnd,
     onClose,
   } = props;
-  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
   const bubbleClassNames = ['bubble', positionY, positionX, 'overlay', ...transitionClassNames].join(' ');
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
@@ -43,11 +43,7 @@ const Menu: FC<IProps> = (props) => {
         <div className="backdrop" onClick={onClose} onContextMenu={onClose} />
       )}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <ul
-        className={bubbleClassNames}
-        onTransitionEnd={handleHideTransitionEnd}
-        onClick={autoClose ? onClose : undefined}
-      >
+      <ul className={bubbleClassNames} onClick={autoClose ? onClose : undefined}>
         {children}
       </ul>
     </div>

@@ -27,11 +27,11 @@ const Dialog: FC<IProps> = (props) => {
     onClose,
     onCloseAnimationEnd,
   } = props;
-  const { isShown, transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
-  if (!isShown) {
+  if (!shouldRender) {
     return null;
   }
 
@@ -49,10 +49,7 @@ const Dialog: FC<IProps> = (props) => {
         {isOpen && (
           <div className="backdrop" onClick={onClose} />
         )}
-        <div
-          className={['dialog', 'overlay', ...transitionClassNames].join(' ')}
-          onTransitionEnd={handleHideTransitionEnd}
-        >
+        <div className={['dialog', 'overlay', ...transitionClassNames].join(' ')}>
           {header}
           {!header && title && (
             <div className="title">

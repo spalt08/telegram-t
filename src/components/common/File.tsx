@@ -32,9 +32,8 @@ const File: FC<IProps> = ({
   onCancelTransfer,
 }) => {
   const {
-    isShown: isSpinnerShown,
+    shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-    handleHideTransitionEnd: handleSpinnerTransitionEnd,
   } = useShowTransition(isUploading || isDownloading, undefined, true);
   const color = getColorFromExtension(extension);
   const sizeString = getFileSizeString(size);
@@ -47,11 +46,8 @@ const File: FC<IProps> = ({
             <span className="file-ext">{extension}</span>
           )}
         </div>
-        {isSpinnerShown && (
-          <div
-            className={['file-progress', color, ...spinnerClassNames].join(' ')}
-            onTransitionEnd={handleSpinnerTransitionEnd}
-          >
+        {shouldSpinnerRender && (
+          <div className={['file-progress', color, ...spinnerClassNames].join(' ')}>
             <ProgressSpinner progress={transferProgress} radius={22} smaller={smaller} onClick={onCancelTransfer} />
           </div>
         )}

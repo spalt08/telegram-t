@@ -1,43 +1,51 @@
-import { TransitionEvent } from 'react';
-import { useCallback, useEffect, useState } from '../lib/teact/teact';
+import { useEffect, useRef, useState } from '../lib/teact/teact';
 
-export default (isOpen = false, onHideTransitionEnd?: () => void, noOpenTransition = false) => {
-  const [isShown, setIsShown] = useState(isOpen);
+const CLOSE_DURATION = 350;
+
+export default (isOpen = false, onCloseTransitionEnd?: () => void, noOpenTransition = false) => {
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const closeTimeoutRef = useRef<number>();
   // СSS class should be added in a separate tick to turn on CSS transition.
   const [hasAsyncOpenClassName, setHasAsyncOpenClassName] = useState(false);
-  const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
 
   useEffect(() => {
-    setHasAsyncOpenClassName(isOpen && isShown);
+    setHasAsyncOpenClassName(isOpen && shouldRender);
 
-    if (isOpen && !isShown) {
-      setIsShown(true);
+    if (isOpen) {
+      setShouldRender(true);
+
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+    } else if (!closeTimeoutRef.current) {
+      closeTimeoutRef.current = window.setTimeout(() => {
+        if (isOpen) {
+          return;
+        }
+
+        setShouldRender(false);
+
+        if (onCloseTransitionEnd) {
+          onCloseTransitionEnd();
+        }
+
+        closeTimeoutRef.current = null;
+      }, CLOSE_DURATION);
     }
-  }, [isOpen, isShown]);
-
-  const handleHideTransitionEnd = useCallback((e: TransitionEvent<HTMLElement>) => {
-    if (isOpen || e.target !== e.currentTarget) {
-      return;
-    }
-
-    setIsShown(false);
-
-    if (onHideTransitionEnd) {
-      onHideTransitionEnd();
-    }
-  }, [isOpen, onHideTransitionEnd]);
+  }, [isOpen, shouldRender, onCloseTransitionEnd]);
 
   const transitionClassNames = [];
+  const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
   if (hasOpenClassName) {
     transitionClassNames.push('open');
   }
-  if (isShown) {
+  if (shouldRender) {
     transitionClassNames.push('shown');
   }
 
   return {
-    isShown,
+    shouldRender,
     transitionClassNames,
-    handleHideTransitionEnd,
   };
 };

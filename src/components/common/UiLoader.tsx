@@ -47,7 +47,7 @@ const preloadTasks = {
 const UiLoader: FC<IProps> = ({
   page, children, isUiReady, setIsUiReady,
 }) => {
-  const { isShown, transitionClassNames, handleHideTransitionEnd } = useShowTransition(!isUiReady, undefined, true);
+  const { shouldRender, transitionClassNames } = useShowTransition(!isUiReady, undefined, true);
 
   useEffect(() => {
     Promise.race([
@@ -65,12 +65,8 @@ const UiLoader: FC<IProps> = ({
 
   return (
     <div id="UiLoader">
-      {isShown && (
-        <div
-          key={page}
-          className={['mask', 'overlay', ...transitionClassNames].join(' ')}
-          onTransitionEnd={handleHideTransitionEnd}
-        >
+      {shouldRender && (
+        <div key={page} className={['mask', 'overlay', ...transitionClassNames].join(' ')}>
           {page === 'main' ? [
             <div className="left" />,
             <div className="middle" />,

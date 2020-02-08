@@ -59,7 +59,7 @@ const ContextMenuContainer: FC<IProps> = ({
   pinMessage,
   deleteMessages,
 }) => {
-  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -105,10 +105,7 @@ const ContextMenuContainer: FC<IProps> = ({
   }, []);
 
   return (
-    <div
-      className={['ContextMenuContainer', ...transitionClassNames].join(' ')}
-      onTransitionEnd={handleHideTransitionEnd}
-    >
+    <div className={['ContextMenuContainer', ...transitionClassNames].join(' ')}>
       <MessageContextMenu
         message={message}
         isOpen={isMenuOpen}

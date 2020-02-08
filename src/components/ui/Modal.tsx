@@ -21,12 +21,12 @@ const Modal: FC<IProps> = (props) => {
     onDismiss,
     onCloseAnimationEnd,
   } = props;
-  const { transitionClassNames, handleHideTransitionEnd } = useShowTransition(isOpen, onCloseAnimationEnd);
+  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
 
   const classNames = ['Modal', className, 'overlay', ...transitionClassNames];
 
   return (
-    <div className={classNames.join(' ')} onTransitionEnd={handleHideTransitionEnd}>
+    <div className={classNames.join(' ')}>
       <div className="modal-container">
         {isOpen && (
           <div className="modal-backdrop" onClick={onDismiss} />

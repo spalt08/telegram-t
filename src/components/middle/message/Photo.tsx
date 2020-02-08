@@ -40,9 +40,8 @@ const Photo: FC<IProps> = ({
   const { width, height, isSmall } = calculateDimensions(message);
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !load);
   const {
-    isShown: isSpinnerShown,
+    shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-    handleHideTransitionEnd: handleSpinnerTransitionEnd,
   } = useShowTransition(!mediaData && load);
   const {
     isUploading, isDownloading, transferProgress, isHighQualityThumb,
@@ -80,11 +79,8 @@ const Photo: FC<IProps> = ({
         height={height}
         alt=""
       />
-      {isSpinnerShown && (
-        <div
-          className={['message-media-loading', ...spinnerClassNames].join(' ')}
-          onTransitionEnd={handleSpinnerTransitionEnd}
-        >
+      {shouldSpinnerRender && (
+        <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}
