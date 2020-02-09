@@ -61,7 +61,7 @@ export type ActionTypes = (
   'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' | 'clearAuthError' |
+  'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |

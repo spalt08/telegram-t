@@ -6,7 +6,9 @@ import { fetchChats, fetchFullChat, fetchChatOnlines } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead,
 } from './messages';
-import { fetchFullUser, fetchNearestCountry, fetchUserFromMessage } from './users';
+import {
+  fetchFullUser, fetchNearestCountry, fetchUserFromMessage, uploadProfilePhoto,
+} from './users';
 
 export default {
   destroy,
@@ -28,4 +30,5 @@ export default {
   fetchFullUser,
   fetchUserFromMessage,
   fetchNearestCountry,
+  uploadProfilePhoto,
 };

@@ -57,7 +57,7 @@ const ChatList: FC<IProps> = ({
           ))}
         </div>
       ) : loadedChatIds && loadedChatIds.length === 0 ? (
-        <div className="no-chats">Chat list empty.</div>
+        <div className="no-chats">Chat list is empty.</div>
       ) : (
         <Loading />
       )

@@ -162,6 +162,7 @@ async function signInUser(
                 }
 
                 me = user;
+                break;
             } catch (err) {
                 authParams.onError(err);
             }

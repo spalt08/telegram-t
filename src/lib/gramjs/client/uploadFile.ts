@@ -6,7 +6,7 @@ import { getAppropriatedPartSize } from '../Utils';
 
 export interface UploadFileParams {
     file: File;
-    onProgress: (
+    onProgress?: (
         progress: number, // Float between 0 and 1.
     ) => void;
 }
@@ -31,7 +31,9 @@ export async function uploadFile(
     // We always upload from the DC we are in.
     const sender = await client._borrowExportedSender(client.session.dcId);
 
-    onProgress(0);
+    if (onProgress) {
+        onProgress(0);
+    }
 
     for (let i = 0; i < partCount; i++) {
         const bytes = buffer.slice(i * partSize, (i + 1) * partSize);
@@ -50,7 +52,7 @@ export async function uploadFile(
                 }),
         );
 
-        if (result) {
+        if (result && onProgress) {
             onProgress((i + 1) / partCount);
         }
     }

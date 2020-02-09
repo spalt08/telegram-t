@@ -8,14 +8,18 @@ import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 import CropModal from './CropModal';
 
-type IProps = Pick<GlobalState, 'authIsLoading' | 'authError'> & Pick<GlobalActions, 'signUp' | 'clearAuthError'>;
+type IProps = (
+  Pick<GlobalState, 'authIsLoading' | 'authError'>
+  & Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadProfilePhoto'>
+);
 
 const AuthRegister: FC<IProps> = ({
-  authIsLoading, authError, signUp, clearAuthError,
+  authIsLoading, authError, signUp, clearAuthError, uploadProfilePhoto,
 }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(undefined);
-  const [croppedBlobUrl, setCroppedBlobUrl] = useState(undefined);
+  const [selectedFile, setSelectedFile] = useState();
+  const [croppedFile, setCroppedFile] = useState();
+  const [croppedBlobUrl, setCroppedBlobUrl] = useState();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -48,18 +52,27 @@ const AuthRegister: FC<IProps> = ({
   }
 
   function handleAvatarCrop(croppedImg: File) {
-    setSelectedFile(null);
+    setSelectedFile(undefined);
+    setCroppedFile(croppedImg);
+
+    if (croppedBlobUrl) {
+      URL.revokeObjectURL(croppedBlobUrl);
+    }
     setCroppedBlobUrl(URL.createObjectURL(croppedImg));
   }
 
   function handleModalDismiss() {
-    setSelectedFile(null);
+    setSelectedFile(undefined);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     signUp({ firstName, lastName });
+
+    if (croppedFile) {
+      uploadProfilePhoto({ file: croppedFile });
+    }
   }
 
   return (
@@ -114,7 +127,7 @@ export default withGlobal(
     return { authIsLoading, authError };
   },
   (setGlobal, actions) => {
-    const { signUp, clearAuthError } = actions;
-    return { signUp, clearAuthError };
+    const { signUp, clearAuthError, uploadProfilePhoto } = actions;
+    return { signUp, clearAuthError, uploadProfilePhoto };
   },
 )(AuthRegister);

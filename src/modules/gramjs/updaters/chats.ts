@@ -3,6 +3,7 @@ import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiUpdate } from '../../../api/types';
 
 import { updateChat } from '../../reducers';
+import { selectChat } from '../../selectors';
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
@@ -19,10 +20,13 @@ export function onUpdate(update: ApiUpdate) {
         return;
       }
 
-      const currentUnreadCount = global.chats.byId[update.chat_id].unread_count || 0;
+      const chat = selectChat(global, update.chat_id);
+      if (!chat) {
+        return;
+      }
 
       setGlobal(updateChat(global, update.chat_id, {
-        unread_count: currentUnreadCount + 1,
+        unread_count: chat.unread_count ? chat.unread_count + 1 : 1,
       }));
 
       break;

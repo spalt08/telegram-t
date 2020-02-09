@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiChat, OnApiUpdate } from '../../types';
 
-import { invokeRequest } from './client';
+import { invokeRequest, uploadFile } from './client';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 
@@ -73,4 +73,10 @@ export async function fetchNearestCountry() {
   const { country } = dcInfo;
 
   return country;
+}
+
+export async function uploadProfilePhoto(file: File) {
+  const inputFile = await uploadFile(file);
+  const request = new GramJs.photos.UploadProfilePhoto({ file: inputFile });
+  await invokeRequest(request);
 }

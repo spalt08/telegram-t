@@ -51,6 +51,12 @@ addReducer('setAuthPassword', (global, actions, payload) => {
   };
 });
 
+addReducer('uploadProfilePhoto', (global, actions, payload) => {
+  const { file } = payload!;
+
+  void callApi('uploadProfilePhoto', file);
+});
+
 addReducer('signUp', (global, actions, payload) => {
   const { firstName, lastName } = payload!;
 
