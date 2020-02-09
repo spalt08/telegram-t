@@ -18,7 +18,7 @@ addReducer('loadMessagesForList', (global, actions, payload) => {
   }
 
   const listedIds = selectChatMessageListedIds(global, chatId);
-  const lowestMessageId = listedIds ? Math.min(...listedIds) : undefined;
+  const lowestMessageId = listedIds && listedIds.length ? Math.min(...listedIds) : undefined;
 
   void loadMessagesForList(chat, lowestMessageId);
 });
