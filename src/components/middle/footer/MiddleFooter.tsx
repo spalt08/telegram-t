@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { GlobalActions } from '../../../store/types';
 import { withGlobal } from '../../../lib/teact/teactn';
@@ -25,6 +25,7 @@ const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
 const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 
+// TODO This component renders a lot when typing and it has many children. Consider refactoring.
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
@@ -133,7 +134,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     <div className="MiddleFooter">
       <Attachment
         attachment={attachment}
-        caption={messageText}
+        caption={attachment ? messageText : ''}
         onCaptionUpdate={setMessageText}
         onSend={handleSend}
         onClear={handleClearAttachment}
@@ -190,10 +191,10 @@ async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachm
   };
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   undefined,
   (setGlobal, actions) => {
     const { sendMessage } = actions;
     return { sendMessage };
   },
-)(MiddleFooter);
+)(MiddleFooter));

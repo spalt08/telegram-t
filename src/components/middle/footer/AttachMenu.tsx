@@ -1,4 +1,4 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { openSystemFileDialog } from '../../../util/systemFileDialog';
 
@@ -47,4 +47,4 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
   );
 };
 
-export default AttachMenu;
+export default memo(AttachMenu);

@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useEffect,
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../store/types';
@@ -43,7 +45,7 @@ const MessageInputReply: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global) => {
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
     const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
@@ -61,4 +63,4 @@ export default withGlobal(
     const { setChatReplyingTo } = actions;
     return { setChatReplyingTo };
   },
-)(MessageInputReply);
+)(MessageInputReply));

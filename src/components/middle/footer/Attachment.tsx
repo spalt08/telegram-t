@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 
 import { ApiAttachment } from '../../../api/types';
@@ -121,4 +121,4 @@ const Attachment: FC<IProps> = ({
   );
 };
 
-export default Attachment;
+export default memo(Attachment);

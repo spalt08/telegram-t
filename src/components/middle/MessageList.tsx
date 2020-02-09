@@ -78,6 +78,8 @@ const MessageList: FC<IProps> = ({
     });
   }, [viewportMessageIds]);
 
+  // TODO @perf This component renders a lot and it has a lot of children.
+  //  Consider extracting messages renderer to a separate component.
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     currentScrollOffset = target.scrollHeight - target.scrollTop;
