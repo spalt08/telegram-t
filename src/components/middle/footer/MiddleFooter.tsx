@@ -12,31 +12,81 @@ import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import Attachment from './Attachment';
 
-import { getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
+import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 
 import './MiddleFooter.scss';
+import * as voiceRecording from '../../../util/voiceRecording';
 
 type IProps = Pick<GlobalActions, 'sendMessage'>;
+type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
+const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
+const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
 
-  const handleSend = useCallback(() => {
-    if (messageText || attachment) {
+  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (messageText && !attachment);
+
+  const handleSend = useCallback(async () => {
+    let currentAttachment = attachment;
+
+    if (activeVoiceRecording) {
+      try {
+        const { blob, duration, waveForm } = await activeVoiceRecording.stop();
+        currentAttachment = {
+          file: blobToFile(blob, VOICE_RECORDING_FILENAME),
+          voice: { duration, waveForm },
+        };
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+
+      setActiveVoiceRecording(undefined);
+    }
+
+    if (messageText || currentAttachment) {
       sendMessage({
         text: messageText,
-        attachment,
+        attachment: currentAttachment,
       });
 
       setMessageText('');
       setAttachment(undefined);
     }
-  }, [messageText, attachment, sendMessage]);
+  }, [messageText, attachment, activeVoiceRecording, sendMessage]);
+
+  const handleRecordVoice = useCallback(async () => {
+    try {
+      // TODO Visualize bitrate
+      const stop = await voiceRecording.start((/* tickVolume: number */) => {
+      });
+
+      setActiveVoiceRecording({ stop });
+      // TODO This is temprorary
+      setMessageText('Recording...');
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, []);
+
+  // TODO Add Stop button
+  // const handleStopRecordingVoice = useCallback(async () => {
+  //   try {
+  //     await activeVoiceRecording!.stop();
+  //   } catch (err) {
+  //     // eslint-disable-next-line no-console
+  //     console.error(err);
+  //   }
+  //   setActiveVoiceRecording(undefined);
+  // }, [activeVoiceRecording]);
 
   useEffect(() => {
     async function pasteImageFromClipboard(e: ClipboardEvent) {
@@ -117,8 +167,8 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       <Button
         round
         color="secondary"
-        className={`${messageText && !attachment ? 'send' : 'microphone not-implemented'}`}
-        onClick={handleSend}
+        className={`${isMainButtonSend ? 'send' : 'microphone'}`}
+        onClick={isMainButtonSend ? handleSend : handleRecordVoice}
       >
         <i className="icon-send" />
         <i className="icon-microphone-alt" />

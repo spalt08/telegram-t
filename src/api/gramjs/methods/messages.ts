@@ -116,16 +116,27 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) 
     });
   });
 
-  const { file: { type: mimeType, name: fileName }, quick } = attachment;
-  const isPhoto = quick && mimeType.startsWith('image/');
+  const { file: { type: mimeType, name: fileName }, quick, voice } = attachment;
 
-  return isPhoto
-    ? new GramJs.InputMediaUploadedPhoto({ file: inputFile })
-    : new GramJs.InputMediaUploadedDocument({
-      file: inputFile,
-      mimeType,
-      attributes: [new GramJs.DocumentAttributeFilename({ fileName })],
-    });
+  if (quick && mimeType.startsWith('image/')) {
+    return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
+  }
+
+  const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName })];
+  if (voice) {
+    const reducedWaveForm = voice.waveForm.slice(voice.waveForm.length / 2 - 32);
+    attributes.push(new GramJs.DocumentAttributeAudio({
+      voice: true,
+      duration: voice.duration,
+      waveform: Buffer.from(reducedWaveForm),
+    }));
+  }
+
+  return new GramJs.InputMediaUploadedDocument({
+    file: inputFile,
+    mimeType,
+    attributes,
+  });
 }
 
 export async function pinMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {

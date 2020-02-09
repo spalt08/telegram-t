@@ -17,10 +17,10 @@ export function blobToDataUri(blob: Blob): Promise<string> {
 }
 
 export function blobToFile(blob: Blob, fileName: string) {
-  const file = blob as any;
-  file.lastModified = new Date();
-  file.name = fileName;
-  return file as File;
+  return new File([blob], fileName, {
+    lastModified: Date.now(),
+    type: blob.type,
+  });
 }
 
 export async function getImageDataFromFile(file: File) {

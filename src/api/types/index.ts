@@ -10,4 +10,8 @@ export interface ApiAttachment {
     width: number;
     height: number;
   };
+  voice?: {
+    duration: number;
+    waveForm: number[];
+  };
 }
