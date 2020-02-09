@@ -184,7 +184,8 @@ const Message: FC<IProps> = ({
         {replyMessage && (
           <ReplyMessage message={replyMessage} sender={replyMessageSender} loadPictogram={loadAndPlayMedia} />
         )}
-        {photo && (
+        {/* eslint-disable no-nested-ternary */}
+        {photo ? (
           <Photo
             message={message}
             load={loadAndPlayMedia}
@@ -192,8 +193,7 @@ const Message: FC<IProps> = ({
             onClick={openMediaMessage}
             onCancelTransfer={handleCancelTransfer}
           />
-        )}
-        {video && (
+        ) : video ? (
           <Video
             message={message}
             loadAndPlay={loadAndPlayMedia}
@@ -201,24 +201,22 @@ const Message: FC<IProps> = ({
             onClick={openMediaMessage}
             onCancelTransfer={handleCancelTransfer}
           />
-        )}
-        {messageDocument && (
+        ) : messageDocument ? (
           <Document
             message={message}
             fileTransferProgress={fileTransferProgress}
             onCancelTransfer={handleCancelTransfer}
           />
-        )}
-        {sticker && (
+        ) : sticker ? (
           <Sticker
             message={message}
             loadAndPlay={loadAndPlayMedia}
           />
-        )}
-        {text && (
-          <p className="text-content">{text}</p>
-        )}
-        {contact && <Contact contact={contact} />}
+        ) : contact ? (
+          <Contact contact={contact} />
+        ) : null}
+        {/* eslint-enable no-nested-ternary */}
+        {text && <p className="text-content">{text}</p>}
       </div>
     );
   }
