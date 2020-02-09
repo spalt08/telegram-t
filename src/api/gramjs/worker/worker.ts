@@ -2,6 +2,8 @@ import { ApiUpdate } from '../../types';
 import { OriginMessageEvent, WorkerMessageData } from './types';
 import { initApi, callApi } from '../provider';
 
+handleErrors();
+
 onmessage = async (message: OriginMessageEvent) => {
   const { data } = message;
 
@@ -35,6 +37,21 @@ onmessage = async (message: OriginMessageEvent) => {
     }
   }
 };
+
+function handleErrors() {
+  // eslint-disable-next-line no-restricted-globals
+  self.onerror = (e) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    sendToOrigin({ type: 'unhandledError', error: { message: 'Uncaught exception in worker' } });
+  };
+  // eslint-disable-next-line no-restricted-globals
+  self.addEventListener('unhandledrejection', (e) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    sendToOrigin({ type: 'unhandledError', error: { message: 'Uncaught rejection in worker' } });
+  });
+}
 
 function onUpdate(update: ApiUpdate) {
   sendToOrigin({

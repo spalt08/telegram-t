@@ -44,6 +44,8 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
           workerPromises[data.messageId].resolve(data.response);
         }
       }
+    } else if (data.type === 'unhandledError') {
+      throw data;
     }
   });
 }

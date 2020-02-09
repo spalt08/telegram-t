@@ -11,6 +11,9 @@ export type WorkerMessageData = {
   type: 'methodResponse';
   response?: ThenArg<MethodResponse<keyof Methods>>;
   error?: AnyLiteral;
+} | {
+  type: 'unhandledError';
+  error?: AnyLiteral;
 };
 
 export interface WorkerMessageEvent {
