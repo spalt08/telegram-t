@@ -166,10 +166,13 @@ function getSenderName(chatId: number, sender?: ApiUser) {
 export default memo(withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
-    const { last_message } = chat;
+    if (!chat) {
+      return {};
+    }
 
-    if (!chat || !last_message) {
-      return null;
+    const { last_message } = chat;
+    if (!last_message) {
+      return {};
     }
 
     const {
