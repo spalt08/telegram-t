@@ -37,7 +37,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
     if (data.type === 'update') {
       onUpdate(data.update);
     } else if (data.type === 'methodResponse') {
-      if (data.messageId && workerPromises[data.messageId]) {
+      if (workerPromises[data.messageId]) {
         if (data.error) {
           workerPromises[data.messageId].reject(data.error);
         } else {

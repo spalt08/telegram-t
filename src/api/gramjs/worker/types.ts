@@ -10,10 +10,10 @@ export type WorkerMessageData = {
   messageId: number;
   type: 'methodResponse';
   response?: ThenArg<MethodResponse<keyof Methods>>;
-  error?: AnyLiteral;
+  error?: { message: string };
 } | {
   type: 'unhandledError';
-  error?: AnyLiteral;
+  error?: { message: string };
 };
 
 export interface WorkerMessageEvent {

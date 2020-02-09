@@ -25,11 +25,14 @@ onmessage = async (message: OriginMessageEvent) => {
           });
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+
         if (messageId) {
           sendToOrigin({
             type: 'methodResponse',
             messageId,
-            error,
+            error: { message: error.message },
           });
         }
       }

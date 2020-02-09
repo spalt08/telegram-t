@@ -85,24 +85,30 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(request: T, sho
     console.log(`[GramJs/client] INVOKE ${request.className}`);
   }
 
-  const result = await client.invoke(request);
+  try {
+    const result = await client.invoke(request);
 
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
-  }
-
-  if (shouldHandleUpdates) {
-    if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
-      result.updates.forEach((update) => updater(update, request));
-    } else if (result instanceof GramJs.UpdatesTooLong) {
-      // TODO Implement
-    } else {
-      updater(result as GramJs.TypeUpdates, request);
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/client] INVOKE RESPONSE ${request.className}`, result);
     }
-  }
 
-  return result;
+    if (shouldHandleUpdates) {
+      if (result instanceof GramJs.Updates || result instanceof GramJs.UpdatesCombined) {
+        result.updates.forEach((update) => updater(update, request));
+      } else if (result instanceof GramJs.UpdatesTooLong) {
+        // TODO Implement
+      } else {
+        updater(result as GramJs.TypeUpdates, request);
+      }
+    }
+
+    return result;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    return undefined;
+  }
 }
 
 export function downloadMedia(url: string) {
@@ -113,7 +119,7 @@ export function downloadMedia(url: string) {
   return queuedDownloadMedia(client, url);
 }
 
-export function uploadFile(file: File, onProgress: (progress: number) => void) {
+export function uploadFile(file: File, onProgress?: (progress: number) => void) {
   return client.uploadFile({ file, onProgress });
 }
 
