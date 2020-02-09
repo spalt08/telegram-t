@@ -109,6 +109,12 @@ async function initMediaRecorder(stream: MediaStream) {
 }
 
 function subscribeToAnalyzer(stream: MediaStream, cb: Function) {
+  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContext) {
+    return () => {
+    };
+  }
+
   const audioCtx = new AudioContext();
   const source = audioCtx.createMediaStreamSource(stream);
   const analyser = audioCtx.createAnalyser();
