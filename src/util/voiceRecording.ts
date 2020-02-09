@@ -22,7 +22,6 @@ interface OpusMediaRecorder extends MediaRecorder {
 const RECORDER_PARAMS = { mimeType: 'audio/ogg; codecs=opus' };
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
-let isNativeMediaRecorder: boolean;
 let opusMediaRecorderPromise: Promise<OpusMediaRecorder>;
 let OpusMediaRecorder: OpusMediaRecorder;
 
@@ -41,24 +40,20 @@ export function isSupported() {
 }
 
 export async function start(analyzerCallback: Function) {
-  const { stream, mediaRecorder } = await requestRecording();
-
   const chunks: Blob[] = [];
   const waveForm: number[] = [];
   const startedAt = Date.now();
 
-  function releaseStream() {
-    stream.getTracks().forEach((track) => {
-      track.stop();
-    });
-  }
+  const { stream, release: releaseStream } = await requestStream();
 
   const releaseAnalyzer = subscribeToAnalyzer(stream, (volume: number) => {
     waveForm.push((volume - 128) * 2);
     analyzerCallback(volume);
   });
 
+  let mediaRecorder: MediaRecorder | OpusMediaRecorder;
   try {
+    mediaRecorder = await initMediaRecorder(stream);
     mediaRecorder.start();
   } catch (err) {
     releaseAnalyzer();
@@ -87,10 +82,19 @@ export async function start(analyzerCallback: Function) {
   });
 }
 
-async function requestRecording() {
+async function requestStream() {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const release = () => {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  };
 
-  isNativeMediaRecorder = typeof MediaRecorder !== 'undefined'
+  return { stream, release };
+}
+
+async function initMediaRecorder(stream: MediaStream) {
+  const isNativeMediaRecorder = typeof MediaRecorder !== 'undefined'
     && MediaRecorder.isTypeSupported(RECORDER_PARAMS.mimeType);
 
   let mediaRecorder: MediaRecorder | OpusMediaRecorder;
@@ -101,7 +105,7 @@ async function requestRecording() {
     mediaRecorder = new OpusMediaRecorder(stream, RECORDER_PARAMS, POLYFILL_OPTIONS);
   }
 
-  return { stream, mediaRecorder };
+  return mediaRecorder;
 }
 
 function subscribeToAnalyzer(stream: MediaStream, cb: Function) {
