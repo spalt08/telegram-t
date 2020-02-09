@@ -13,6 +13,10 @@ import CountryCodeInput from './CountryCodeInput';
 import Checkbox from '../ui/Checkbox';
 import Loading from '../ui/Loading';
 
+// @ts-ignore
+import monkeyPath from '../../assets/monkey.svg';
+import { preloadImage } from '../../util/files';
+
 type IProps = (
   Pick<GlobalState, (
     'connectionState' |
@@ -22,6 +26,8 @@ type IProps = (
 );
 
 const MIN_NUMBER_LENGTH = 10;
+
+let monkeyPreloadPromise: Promise<HTMLImageElement>;
 
 const AuthPhoneNumber: FC<IProps> = ({
   connectionState,
@@ -83,6 +89,10 @@ const AuthPhoneNumber: FC<IProps> = ({
   function handlePhoneNumberChange(e: ChangeEvent<HTMLInputElement>) {
     if (authError) {
       clearAuthError();
+    }
+
+    if (!monkeyPreloadPromise) {
+      monkeyPreloadPromise = preloadImage(monkeyPath);
     }
 
     setIsTouched(true);
