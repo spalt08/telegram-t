@@ -53,25 +53,24 @@ html, body {
 }
 
 .custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 90, 90, 0) transparent;
+  transition: scrollbar-color .3s ease;
+
   &::-webkit-scrollbar {
-    width: .25rem;
+    width: .35rem;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(78, 78, 78, 0.3);
-    border-radius: .125rem;
+    background-color: rgba(90, 90, 90, 0);
+    border-radius: 0.35rem;
   }
 
-  @media (min-width: 1367px) {
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(78, 78, 78, 0);
-      -webkit-transition: background-color .3s ease;
-    }
+  &:hover {
+    scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
 
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        background-color: rgba(78, 78, 78, 0.3);
-      }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(90, 90, 90, 0.3);
     }
   }
 }
