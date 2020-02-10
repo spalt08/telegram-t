@@ -34,6 +34,7 @@ import Document from './Document';
 import Video from './Video';
 import Photo from './Photo';
 import Contact from './Contact';
+import WebPage from './WebPage';
 
 import './Message.scss';
 
@@ -114,6 +115,7 @@ const Message: FC<IProps> = ({
     document: messageDocument,
     sticker,
     contact,
+    webPage,
     className: contentClassName,
   } = buildMessageContent(message, { isLastInGroup, hasReply: Boolean(replyMessage) });
   const isText = Boolean(contentClassName && contentClassName.includes('text'));
@@ -212,6 +214,13 @@ const Message: FC<IProps> = ({
           />
         ) : contact ? (
           <Contact contact={contact} />
+        ) : webPage ? (
+          <WebPage
+            message={message}
+            load={loadAndPlayMedia}
+            onMediaClick={openMediaMessage}
+            onCancelMediaTransfer={handleCancelTransfer}
+          />
         ) : null}
         {/* eslint-enable no-nested-ternary */}
         {text && <p className="text-content">{text}</p>}

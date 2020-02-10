@@ -236,5 +236,13 @@ function isMessageWithMedia(message: GramJs.Message) {
       ));
   }
 
+  if (
+    media instanceof GramJs.MessageMediaWebPage
+    && media.webpage instanceof GramJs.WebPage
+    && media.webpage.photo instanceof GramJs.Photo
+  ) {
+    return true;
+  }
+
   return false;
 }

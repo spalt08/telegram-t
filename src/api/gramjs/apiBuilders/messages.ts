@@ -12,6 +12,7 @@ import {
   ApiContact,
   ApiAttachment,
   ApiThumbnail,
+  ApiWebPage,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -77,6 +78,7 @@ export function buildApiMessageWithChatId(
   const video = mtpMessage.media && buildVideo(mtpMessage.media);
   const document = mtpMessage.media && buildDocument(mtpMessage.media);
   const contact = mtpMessage.media && buildContact(mtpMessage.media);
+  const webPage = mtpMessage.media && buildWebPage(mtpMessage.media);
   const text = mtpMessage.message && {
     '@type': 'formattedText' as const,
     text: mtpMessage.message,
@@ -99,6 +101,7 @@ export function buildApiMessageWithChatId(
       ...(document && { document }),
       ...(contact && { contact }),
       ...(action && { action }),
+      ...(webPage && { webPage }),
     },
     date: mtpMessage.date,
     sender_user_id: mtpMessage.fromId,
@@ -288,6 +291,42 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | null {
     lastName,
     phoneNumber,
     userId,
+  };
+}
+
+function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | null {
+  if (
+    !(media instanceof GramJs.MessageMediaWebPage)
+    || !(media.webpage instanceof GramJs.WebPage)
+  ) {
+    return null;
+  }
+
+  const {
+    id,
+    url,
+    displayUrl,
+    siteName,
+    title,
+    description,
+    photo,
+  } = media.webpage;
+
+  return {
+    id: Number(id),
+    url,
+    displayUrl,
+    siteName,
+    title,
+    description,
+    // TODO support video and embed
+    photo: photo && photo instanceof GramJs.Photo
+      ? {
+        thumbnail: buildApiThumbnailFromStripped(photo.sizes),
+        sizes: photo.sizes
+          .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
+          .map(buildApiPhotoSize),
+      } : undefined,
   };
 }
 

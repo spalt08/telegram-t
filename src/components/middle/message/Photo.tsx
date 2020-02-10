@@ -6,6 +6,8 @@ import { calculateInlineImageDimensions } from '../../../util/mediaDimensions';
 import getMinMediaWidth from './util/minMediaWidth';
 import {
   getMessageText,
+  getMessagePhoto,
+  getMessageWebPagePhoto,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessageTransferParams,
@@ -36,7 +38,7 @@ const Photo: FC<IProps> = ({
   onClick,
   onCancelTransfer,
 }) => {
-  const photo = message.content.photo!;
+  const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const localBlobUrl = load ? photo.blobUrl : undefined;
@@ -64,6 +66,9 @@ const Photo: FC<IProps> = ({
   }
   if (isSmall) {
     className += ' small-image';
+  }
+  if (width === height) {
+    className += ' square-image';
   }
 
   let thumbClassName = 'thumbnail';
@@ -110,7 +115,9 @@ const Photo: FC<IProps> = ({
 function calculateDimensions(message: ApiMessage) {
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const { width, height } = calculateInlineImageDimensions(message.content.photo!, isOwn, isForwarded);
+  const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
+  const isWebPagePhoto = Boolean(getMessageWebPagePhoto(message));
+  const { width, height } = calculateInlineImageDimensions(photo, isOwn, isForwarded, isWebPagePhoto);
 
   const hasText = Boolean(getMessageText(message));
   const minMediaWidth = getMinMediaWidth(hasText);

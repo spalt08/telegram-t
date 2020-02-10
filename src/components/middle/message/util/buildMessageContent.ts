@@ -8,6 +8,7 @@ import {
   getLastMessageText,
   getMessageContact,
   isOwnMessage,
+  getMessageWebPage,
 } from '../../../../modules/helpers';
 import {
   ApiMessage,
@@ -16,6 +17,7 @@ import {
   ApiVideo,
   ApiDocument,
   ApiContact,
+  ApiWebPage,
 } from '../../../../api/types';
 
 import { TextPart, enhanceTextParts } from './enhanceText';
@@ -27,6 +29,7 @@ export interface MessageContent {
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
+  webPage?: ApiWebPage;
   className?: string;
 }
 
@@ -45,6 +48,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const document = getMessageDocument(message);
   const sticker = getMessageSticker(message);
   const contact = getMessageContact(message);
+  const webPage = getMessageWebPage(message);
   const classNames = ['message-content'];
   let contentParts: TextPart | TextPart[] | undefined;
 
@@ -79,6 +83,14 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
 
   if (contact) {
     classNames.push('contact');
+  }
+
+  if (webPage) {
+    classNames.push('web-page');
+
+    if (webPage.photo) {
+      classNames.push('media');
+    }
   }
 
   if (message.forward_info && !classNames.includes('sticker')) {
@@ -117,6 +129,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     document,
     sticker,
     contact,
+    webPage,
     className: classNames.join(' '),
   };
 }

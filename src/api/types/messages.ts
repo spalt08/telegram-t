@@ -53,6 +53,16 @@ export interface ApiAction {
   targetUserId?: number;
 }
 
+export interface ApiWebPage {
+  id: number;
+  url: string;
+  displayUrl: string;
+  siteName?: string;
+  title?: string;
+  description?: string;
+  photo?: ApiPhoto;
+}
+
 export interface ApiMessageForwardInfo {
   '@type': 'messageForwardInfo';
   from_chat_id?: number;
@@ -89,6 +99,7 @@ export interface ApiMessage {
     sticker?: ApiSticker;
     contact?: ApiContact;
     action?: ApiAction;
+    webPage?: ApiWebPage;
   };
   date: number;
   is_outgoing: boolean;

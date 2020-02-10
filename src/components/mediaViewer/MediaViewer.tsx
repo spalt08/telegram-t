@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../store/types';
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiVideo } from '../../api/types';
 
 import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
 import {
@@ -15,6 +15,7 @@ import {
   getMessageMediaThumbDataUri,
   getVideoDimensions,
   IDimensions,
+  getMessageWebPagePhoto,
 } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -33,8 +34,8 @@ import './MediaViewer.scss';
 type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
   chatId?: number;
   selectedMediaMessageId?: number;
-  message: ApiMessage;
-  chatMessages: Record<number, ApiMessage>;
+  message?: ApiMessage;
+  chatMessages?: Record<number, ApiMessage>;
 };
 
 const MediaViewer: FC<IProps> = ({
@@ -44,14 +45,17 @@ const MediaViewer: FC<IProps> = ({
   chatMessages,
   selectMediaMessage,
 }) => {
-  const messageIds = getChatMediaMessageIds(chatMessages || {});
-  const selectedMediaMessageIndex = selectedMediaMessageId && messageIds.indexOf(selectedMediaMessageId);
-  const isFirst = selectedMediaMessageIndex === undefined || selectedMediaMessageIndex === 0;
-  const isLast = selectedMediaMessageIndex === undefined || selectedMediaMessageIndex === messageIds.length - 1;
+  const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
+  const messageIds = isWebPagePhoto && selectedMediaMessageId
+    ? [selectedMediaMessageId]
+    : getChatMediaMessageIds(chatMessages || {});
+  const selectedMediaMessageIndex = selectedMediaMessageId ? messageIds.indexOf(selectedMediaMessageId) : -1;
+  const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
+  const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(selectedMediaMessageId);
 
   let { text: messageText } = message ? buildMessageContent(message) : { text: undefined };
-  let isPhoto = message ? Boolean(getMessagePhoto(message)) : null;
+  let isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
   let isVideo = message ? Boolean(getMessageVideo(message)) : null;
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
@@ -132,10 +136,16 @@ const MediaViewer: FC<IProps> = ({
   }
 
   function selectPreviousMedia() {
+    if (isFirst) {
+      return;
+    }
     selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, -1) : null });
   }
 
   function selectNextMedia() {
+    if (isLast) {
+      return;
+    }
     selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, 1) : null });
   }
 
@@ -151,7 +161,7 @@ const MediaViewer: FC<IProps> = ({
           {isVideo && renderVideo(
             blobUrlFull,
             blobUrlPreview || thumbDataUri,
-            getVideoDimensions(message.content.video!),
+            message && getVideoDimensions(getMessageVideo(message) as ApiVideo),
           )}
           {!isFirst && (
             <button

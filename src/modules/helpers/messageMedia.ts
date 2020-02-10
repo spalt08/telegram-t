@@ -1,4 +1,8 @@
-import { ApiMessage, ApiPhoto, ApiVideo } from '../../api/types';
+import {
+  ApiMessage,
+  ApiPhoto,
+  ApiVideo,
+} from '../../api/types';
 import { getMessageKey, isMessageLocal } from './messages';
 
 export type IDimensions = {
@@ -7,6 +11,13 @@ export type IDimensions = {
 };
 
 const MAX_INLINE_VIDEO_DURATION = 10;
+
+export function getMessageMedia(message: ApiMessage) {
+  return getMessagePhoto(message)
+    || getMessageVideo(message)
+    || getMessageSticker(message)
+    || getMessageWebPagePhoto(message);
+}
 
 export function getMessagePhoto(message: ApiMessage) {
   return message.content.photo;
@@ -32,9 +43,17 @@ export function getMessageContact(message: ApiMessage) {
   return message.content.contact;
 }
 
+export function getMessageWebPage(message: ApiMessage) {
+  return message.content.webPage;
+}
+
+export function getMessageWebPagePhoto(message: ApiMessage) {
+  const webPage = getMessageWebPage(message);
+  return webPage ? webPage.photo : undefined;
+}
+
 export function getMessageMediaThumbnail(message: ApiMessage) {
-  const { photo, video, sticker } = message.content;
-  const media = photo || video || sticker;
+  const media = getMessageMedia(message);
 
   if (!media) {
     return undefined;
@@ -54,14 +73,15 @@ export function getMessageMediaHash(
   target: 'inline' | 'pictogram' | 'viewerPreview' | 'viewerFull',
 ) {
   const { photo, video, sticker } = message.content;
+  const webPagePhoto = getMessageWebPagePhoto(message);
 
-  if (!(photo || video || sticker)) {
+  if (!(photo || video || sticker || webPagePhoto)) {
     return undefined;
   }
 
   const base = getMessageKey(message.chat_id, message.id);
 
-  if (photo) {
+  if (photo || webPagePhoto) {
     switch (target) {
       case 'inline':
         if (hasMessageLocalBlobUrl(message)) {
@@ -117,14 +137,14 @@ export function canMessagePlayVideoInline(video: ApiVideo): boolean {
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
   return Object.keys(messages)
-    .reduce((result, id) => {
+    .reduce((result: number[], id) => {
       const messageId = Number(id);
-      if (messages[messageId].content.photo || messages[messageId].content.video) {
+      if (getMessagePhoto(messages[messageId]) || getMessageVideo(messages[messageId])) {
         result.push(messageId);
       }
 
       return result;
-    }, [] as Array<number>);
+    }, []);
 }
 
 export function getPhotoFullDimensions(photo: ApiPhoto): IDimensions | undefined {
