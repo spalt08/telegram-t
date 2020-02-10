@@ -1,6 +1,8 @@
 import React, { FC } from '../../lib/teact/teact';
 
 import { ApiChat } from '../../api/types';
+import { formatIntegerCompact } from '../../util/textFormat';
+
 import './Badge.scss';
 
 type IProps = {
@@ -32,7 +34,7 @@ const Badge: FC<IProps> = ({ chat }) => {
 
     return (
       <div className={classNames.join(' ')}>
-        {chat.unread_count}
+        {formatIntegerCompact(chat.unread_count)}
       </div>
     );
   } else if (chat.is_pinned) {

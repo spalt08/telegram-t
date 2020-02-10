@@ -63,7 +63,8 @@ export function buildApiMessageFromShortChat(
 type UniversalMessage = (
   Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
-    'out' | 'message' | 'entities' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' | 'media' | 'action'
+    'out' | 'message' | 'entities' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' |
+    'media' | 'action' | 'views' | 'editDate' | 'editHide'
   )>
 );
 
@@ -84,6 +85,7 @@ export function buildApiMessageWithChatId(
   const action = mtpMessage.action && buildAction(mtpMessage.action);
   const toId = mtpMessage.toId ? getApiChatIdFromMtpPeer(mtpMessage.toId) : undefined;
   const isChatWithSelf = Boolean(toId) && mtpMessage.fromId === toId;
+  const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
 
   return {
     id: mtpMessage.id,
@@ -102,6 +104,8 @@ export function buildApiMessageWithChatId(
     sender_user_id: mtpMessage.fromId,
     reply_to_message_id: mtpMessage.replyToMsgId,
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
+    views: mtpMessage.views,
+    ...(isEdited && { isEdited }),
   };
 }
 

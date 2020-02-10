@@ -303,6 +303,14 @@ function buildClassNames(
     classNames.push('not-own');
   }
 
+  if (message.views) {
+    classNames.push('has-views');
+  }
+
+  if (message.isEdited) {
+    classNames.push('was-edited');
+  }
+
   if (getMessageMediaHash(message, 'inline') || hasMessageLocalBlobUrl(message)) {
     classNames.push('has-media');
   }

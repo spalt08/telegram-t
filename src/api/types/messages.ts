@@ -100,6 +100,8 @@ export interface ApiMessage {
   forward_info?: ApiMessageForwardInfo;
   is_deleting?: boolean;
   prev_local_id?: number;
+  views?: number;
+  isEdited?: boolean;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

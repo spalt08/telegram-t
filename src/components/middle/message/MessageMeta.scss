@@ -16,18 +16,33 @@
     font-size: 0.75rem;
     line-height: 1;
     margin-right: .1875rem;
-    opacity: .75;
+    white-space: nowrap;
   }
 
-  .text &, .document &, .contact & {
-    color: var(--color-text-meta);
+  .message-views {
+    font-size: 0.75rem;
+    line-height: 1;
+    margin-left: .1875rem;
+  }
+
+  .icon-channelviews {
+    margin-left: 0.125rem;
+    margin-right: 0.375rem;
+    font-size: 1.125rem;
+    position: relative;
+    top: -0.0625rem;
+  }
+
+  .has-solid-background & {
+    color: rgba(var(--color-text-meta-rgb), 0.75);
     background: none;
   }
 
   .media:not(.text) &,
-  .Message.own .sticker & {
-    background: rgba(0, 0, 0, .2);
+  .Message .sticker & {
+    background: rgba(0,0,0, 0.2);
     color: white !important;
+    opacity: 1;
     bottom: .25rem;
     right: .25rem;
     left: auto;
@@ -35,38 +50,22 @@
     padding: 0 .3125rem 0 .375rem;
   }
 
-  .Message.not-own {
-    .sticker .reply-message + & {
-      right: auto;
-      left: 13.2rem;
-      bottom: 0.25rem;
-    }
-
-    .emoji-only-1 .reply-message + & {
-      left: 2.5rem;
-    }
-
-    .emoji-only-2 .reply-message + & {
-      left: 5.5rem;
-    }
-
-    .emoji-only-3 .reply-message + & {
-      left: 6.5rem;
-    }
-  }
-
   .is-forwarded.media:not(.text) & {
     bottom: 0.9rem;
     right: 0.8rem;
   }
 
-  .emoji-only-1 &, .emoji-only-2 &, .emoji-only-3 & {
+  .emoji-only & {
     right: 0;
   }
 
-  .Message.own .text &,
-  .Message.own .document &,
-  .Message.own .contact & {
+  .Message.not-own.has-views .emoji-only &,
+  .Message.not-own.was-edited .emoji-only & {
+    left: 60%;
+    right: auto;
+  }
+
+  .Message.own .has-solid-background & {
     color: var(--color-text-green);
   }
 
@@ -75,5 +74,25 @@
     line-height: 1;
     font-size: 1.1875rem;
     margin-left: -.1875rem;
+  }
+}
+
+.Message.not-own {
+  .sticker .reply-message + .MessageMeta {
+    right: auto;
+    left: 13.2rem;
+    bottom: 0.25rem;
+  }
+
+  .emoji-only-1 .reply-message + .MessageMeta {
+    left: 2.5rem;
+  }
+
+  .emoji-only-2 .reply-message + .MessageMeta {
+    left: 5.5rem;
+  }
+
+  .emoji-only-3 .reply-message + .MessageMeta {
+    left: 6.5rem;
   }
 }

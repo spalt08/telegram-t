@@ -53,7 +53,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
 
     if (!photo && emojiOnlyCount) {
       classNames.push('sticker');
-      classNames.push(`emoji-only-${emojiOnlyCount}`);
+      classNames.push(`emoji-only emoji-only-${emojiOnlyCount}`);
       contentParts = text;
     } else {
       classNames.push('text');
