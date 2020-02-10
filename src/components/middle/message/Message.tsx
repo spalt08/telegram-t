@@ -214,16 +214,17 @@ const Message: FC<IProps> = ({
           />
         ) : contact ? (
           <Contact contact={contact} />
-        ) : webPage ? (
+        ) : null}
+        {/* eslint-enable no-nested-ternary */}
+        {text && <p className="text-content">{text}</p>}
+        {webPage && (
           <WebPage
             message={message}
             load={loadAndPlayMedia}
             onMediaClick={openMediaMessage}
             onCancelMediaTransfer={handleCancelTransfer}
           />
-        ) : null}
-        {/* eslint-enable no-nested-ternary */}
-        {text && <p className="text-content">{text}</p>}
+        )}
       </div>
     );
   }
