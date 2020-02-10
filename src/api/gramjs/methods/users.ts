@@ -26,7 +26,7 @@ export async function fetchUserFromMessage({
     }),
   );
 
-  if (!(users[0] instanceof GramJs.User)) {
+  if (!users || !(users[0] instanceof GramJs.User)) {
     return;
   }
 
@@ -52,6 +52,10 @@ export async function fetchFullUser({
   }
   const fullInfo = await invokeRequest(new GramJs.users.GetFullUser({ id: input }));
 
+  if (!fullInfo) {
+    return;
+  }
+
   const { about, commonChatsCount, pinnedMsgId } = fullInfo;
 
   onUpdate({
@@ -70,9 +74,7 @@ export async function fetchFullUser({
 export async function fetchNearestCountry() {
   const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc());
 
-  const { country } = dcInfo;
-
-  return country;
+  return dcInfo ? dcInfo.country : undefined;
 }
 
 export async function uploadProfilePhoto(file: File) {

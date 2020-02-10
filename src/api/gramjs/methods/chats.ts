@@ -33,7 +33,7 @@ export async function fetchChats({
     offsetDate,
   }));
 
-  if (result instanceof GramJs.messages.DialogsNotModified) {
+  if (!result || result instanceof GramJs.messages.DialogsNotModified) {
     return null;
   }
 
@@ -84,6 +84,11 @@ export async function fetchChatOnlines(chat: ApiChat) {
   const peer = buildInputPeer(id, access_hash);
 
   const result = await invokeRequest(new GramJs.messages.GetOnlines({ peer }));
+
+  if (!result) {
+    return;
+  }
+
   const { onlines } = result;
 
   onUpdate({
@@ -96,7 +101,7 @@ export async function fetchChatOnlines(chat: ApiChat) {
 async function getFullChatInfo(chatId: number) {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 
-  if (!(result.fullChat instanceof GramJs.ChatFull)) {
+  if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
     return undefined;
   }
 
@@ -121,7 +126,7 @@ async function getFullChatInfo(chatId: number) {
 async function getFullChannelInfo(channel: GramJs.InputChannel) {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
 
-  if (!(result.fullChat instanceof GramJs.ChannelFull)) {
+  if (!result || !(result.fullChat instanceof GramJs.ChannelFull)) {
     return undefined;
   }
 
