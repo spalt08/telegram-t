@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useMemo, useState,
+  FC, memo, useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { debounce } from '../../util/schedulers';
 
@@ -14,9 +14,11 @@ interface Ripple {
 const ANIMATION_DURATION_MS = 700;
 // Workaround for flickering when rendering messages. The value is heuristic.
 const DELAY_MS = 90;
+const MAX_ACTUAL_DELAY_MS = 200;
 
 const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
   const [ripples, setRipples] = useState([]);
+  const lastClickAtRef = useRef<number>();
 
   const cleanUpDebounced = useMemo(() => {
     return debounce(() => {
@@ -47,7 +49,12 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
     };
 
     if (delayed) {
+      lastClickAtRef.current = Date.now();
       setTimeout(() => {
+        if (Date.now() - lastClickAtRef.current! > MAX_ACTUAL_DELAY_MS) {
+          return;
+        }
+
         exec();
       }, DELAY_MS);
     } else {
