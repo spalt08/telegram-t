@@ -6,11 +6,6 @@
   height: calc(100% - 1.1rem);
   overflow-y: auto;
   overflow-x: hidden;
-  mask-image: linear-gradient(to top, transparent 0.1rem, black 1rem);
-
-  body.is-message-menu-open & {
-    mask-image: none;
-  }
 
   &.no-avatars .Message > .Avatar {
     display: none;
