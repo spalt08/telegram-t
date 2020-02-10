@@ -23,7 +23,7 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
   };
 
   const handleQuickSelect = () => {
-    openSystemFileDialog('image/png,image/gif,image/jpeg,video/mp4,video/avi', (e) => handleFileSelect(e, true));
+    openSystemFileDialog('image/png,image/gif,image/jpeg,video/mp4,video/avi,video/quicktime', (e) => handleFileSelect(e, true));
   };
 
   const handleDocumentSelect = () => {

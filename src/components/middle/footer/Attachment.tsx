@@ -33,6 +33,7 @@ const Attachment: FC<IProps> = ({
   const isOpen = Boolean(attachment);
   const inputRef = useRef<HTMLInputElement>();
   const photo = renderingAttachment && renderingAttachment.file.type.startsWith('image/') && renderingAttachment.quick;
+  const video = renderingAttachment && renderingAttachment.file.type.startsWith('video/') && renderingAttachment.quick;
 
   function focusInput() {
     if (isOpen && inputRef.current) {
@@ -82,7 +83,8 @@ const Attachment: FC<IProps> = ({
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachment" onClick={onClear}>
           <i className="icon-close" />
         </Button>
-        <div className="caption">{photo ? 'Send Photo' : 'Send File'}</div>
+        {/* eslint-disable-next-line no-nested-ternary */}
+        <div className="caption">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
         <Button color="primary" size="smaller" className="send" onClick={sendAttachment}>Send</Button>
       </div>
     );
@@ -94,12 +96,13 @@ const Attachment: FC<IProps> = ({
 
   return (
     <Dialog isOpen={isOpen} onClose={onClear} header={renderHeader()} className="Attachment">
-      {photo && (
-        <div className="image-wrapper">
-          <img src={photo.blobUrl} alt="" />
+      {(photo || video) && (
+        <div className="media-wrapper">
+          {photo && <img src={photo.blobUrl} alt="" />}
+          {video && <video src={video.blobUrl} autoPlay muted loop />}
         </div>
       )}
-      {!photo && (
+      {!photo && !video && (
         <div className="document-wrapper">
           <File
             name={renderingAttachment.file.name}
