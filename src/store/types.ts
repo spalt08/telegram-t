@@ -26,6 +26,7 @@ export type GlobalState = {
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
       listedIds?: number[];
+      viewportIds?: number[];
     }>;
   };
 

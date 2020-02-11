@@ -4,24 +4,71 @@ import { ApiChat } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  updateChatMessageListedIds, replaceChatMessagesById, updateChatMessage, updateUsers,
+  updateChatMessageListedIds,
+  replaceChatMessagesById,
+  updateChatMessage,
+  updateUsers,
+  replaceChatMessageViewportIds,
 } from '../../reducers';
-import { selectChat, selectChatMessageListedIds, selectOpenChat } from '../../selectors';
+import {
+  selectChat, selectChatMessageListedIds, selectChatMessageViewportIds, selectOpenChat,
+} from '../../selectors';
+import { GlobalState } from '../../../store/types';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
 addReducer('loadMessagesForList', (global, actions, payload) => {
-  const { chatId } = payload!;
+  const { chatId, direction } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
-    return;
+    return undefined;
   }
 
-  const listedIds = selectChatMessageListedIds(global, chatId);
-  const lowestMessageId = listedIds && listedIds.length ? Math.min(...listedIds) : undefined;
+  if (direction) {
+    const { newViewportIds, anchorId } = getUpdatedViewportIds(global, chatId, direction);
+    if (newViewportIds) {
+      return replaceChatMessageViewportIds(global, chatId, newViewportIds);
+    } else if (anchorId) {
+      void loadMessagesForList(chat, anchorId, direction);
+    }
+  } else {
+    void loadMessagesForList(chat);
+  }
 
-  void loadMessagesForList(chat, lowestMessageId);
+  return undefined;
 });
+
+function getUpdatedViewportIds(global: GlobalState, chatId: number, direction?: 1 | -1, force = false) {
+  const listedIds = selectChatMessageListedIds(global, chatId);
+  const viewportIds = selectChatMessageViewportIds(global, chatId);
+
+  if (!listedIds) {
+    return {};
+  }
+
+  if (!viewportIds) {
+    return { newViewportIds: listedIds };
+  }
+
+  const anchorId = direction === -1 ? viewportIds[0] : viewportIds[viewportIds.length - 1];
+  const indexInListed = listedIds.indexOf(anchorId);
+  const newViewportIds = listedIds.slice(
+    Math.max((direction === 1 ? indexInListed + 1 : indexInListed) - MESSAGE_SLICE_LIMIT, 0),
+    (direction === 1 ? indexInListed + 1 : indexInListed) + MESSAGE_SLICE_LIMIT,
+  );
+
+  if (force || newViewportIds.length === MESSAGE_SLICE_LIMIT * 2) {
+    if (
+      viewportIds[0] === newViewportIds[0]
+      && viewportIds[viewportIds.length - 1] === newViewportIds[newViewportIds.length - 1]
+    ) {
+      return { newViewportIds: viewportIds };
+    }
+    return { newViewportIds };
+  } else {
+    return { anchorId };
+  }
+}
 
 addReducer('loadMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
@@ -83,33 +130,19 @@ addReducer('markMessagesRead', (global, actions, payload) => {
   void callApi('markMessagesRead', { chat, maxId });
 });
 
-async function loadMessagesForList(chat: ApiChat, fromMessageId = 0) {
-  const result = await loadMessagesPart(chat, fromMessageId);
+async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?: 1 | -1) {
+  const result = await callApi('fetchMessages', {
+    chat,
+    offsetId,
+    limit: MESSAGE_SLICE_LIMIT,
+    ...(direction === 1 && { addOffset: -MESSAGE_SLICE_LIMIT }),
+  });
 
   if (!result) {
     return;
   }
 
-  let { messages, users } = result;
-
-  let wasLatestEmpty = !messages.length;
-
-  while (messages.length < MESSAGE_SLICE_LIMIT && !wasLatestEmpty) {
-    const nextPart = await loadMessagesPart(chat, messages[messages.length - 1].id);
-
-    if (nextPart && nextPart.messages.length) {
-      messages = [
-        ...messages,
-        ...nextPart.messages,
-      ];
-      users = [
-        ...users,
-        ...nextPart.users,
-      ];
-    } else {
-      wasLatestEmpty = true;
-    }
-  }
+  const { messages, users } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
   const ids = Object.keys(byId).map(Number);
@@ -118,21 +151,11 @@ async function loadMessagesForList(chat: ApiChat, fromMessageId = 0) {
   newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
   newGlobal = updateChatMessageListedIds(newGlobal, chat.id, ids);
   newGlobal = updateUsers(newGlobal, buildCollectionByKey(users, 'id'));
+
+  const { newViewportIds } = getUpdatedViewportIds(newGlobal, chat.id, direction, true);
+  newGlobal = replaceChatMessageViewportIds(newGlobal, chat.id, newViewportIds!);
+
   setGlobal(newGlobal);
-}
-
-async function loadMessagesPart(chat: ApiChat, fromMessageId = 0) {
-  const result = await callApi('fetchMessages', {
-    chat,
-    fromMessageId,
-    limit: MESSAGE_SLICE_LIMIT,
-  });
-
-  if (!result) {
-    return null;
-  }
-
-  return result;
 }
 
 async function loadMessage(chat: ApiChat, messageId: number) {

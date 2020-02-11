@@ -7,10 +7,18 @@ import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 import { ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../store/types';
 
-import { selectChatMessageListedIds, selectChatMessages, selectOpenChat } from '../../modules/selectors';
+import {
+  selectChatMessages,
+  selectChatMessageViewportIds,
+  selectIsChatMessageViewportLatest,
+  selectOpenChat,
+} from '../../modules/selectors';
 import {
   getMessageRenderKey,
-  isActionMessage, isChatChannel, isChatPrivate, isOwnMessage,
+  isActionMessage,
+  isChatChannel,
+  isChatPrivate,
+  isOwnMessage,
 } from '../../modules/helpers';
 import { flatten, orderBy } from '../../util/iteratees';
 import { throttle } from '../../util/schedulers';
@@ -30,9 +38,10 @@ type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | '
   isUnread?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
+  isLatest: boolean;
 };
 
-const LOAD_MORE_THRESHOLD_PX = 1000;
+const LOAD_MORE_THRESHOLD_PX = 1500;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const VIEWPORT_MARGIN = 500;
 const HIDE_STICKY_TIMEOUT = 450;
@@ -41,6 +50,9 @@ const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
 
 let currentScrollOffset = 0;
+let currentAnchorId: number | undefined;
+let currentAnchorOffset: number;
+
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
@@ -49,6 +61,7 @@ const MessageList: FC<IProps> = ({
   isUnread,
   messageIds,
   messagesById,
+  isLatest,
   loadMessagesForList,
   markMessagesRead,
   setChatScrollOffset,
@@ -81,25 +94,56 @@ const MessageList: FC<IProps> = ({
   // TODO @perf This component renders a lot and it has a lot of children.
   //  Consider extracting messages renderer to a separate component.
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    currentScrollOffset = target.scrollHeight - target.scrollTop;
+    const container = e.target as HTMLElement;
 
-    determineStickyElement(target, '.message-date-header');
-
+    setIsScrolling(true);
     if (scrollTimeout) {
       clearTimeout(scrollTimeout);
     }
-    setIsScrolling(true);
     scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
 
-    if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-      runThrottledForLoadMessages(() => {
-        // More than one callback can be added to the queue
-        // before the messages are prepended, so we need to check again.
-        if (target.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-          loadMessagesForList({ chatId });
+    const { scrollTop, scrollHeight, offsetHeight } = container;
+    currentScrollOffset = scrollHeight - scrollTop;
+
+    if (scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+      const anchor = container.querySelector('.Message') as HTMLElement;
+      if (anchor) {
+        const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
+        if (newAnchorScreenOffset > currentAnchorOffset) {
+          runThrottledForLoadMessages(() => {
+            // More than one callback can be added to the queue
+            // before the messages are prepended, so we need to check again.
+            // eslint-disable-next-line no-shadow
+            const { scrollTop } = container;
+            if (scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+              loadMessagesForList({ chatId, direction: -1 });
+            }
+          });
         }
-      });
+
+        currentAnchorId = Number(anchor.dataset.messageId);
+        currentAnchorOffset = newAnchorScreenOffset;
+      }
+    } else if (!isLatest && (scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX)) {
+      const allMessages = container.querySelectorAll('.Message');
+      const anchor = allMessages[allMessages.length - 1] as HTMLElement;
+      if (anchor) {
+        const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
+        if (newAnchorScreenOffset < currentAnchorOffset) {
+          runThrottledForLoadMessages(() => {
+            // More than one callback can be added to the queue
+            // before the messages are prepended, so we need to check again.
+            // eslint-disable-next-line no-shadow
+            const { scrollTop, scrollHeight, offsetHeight } = container;
+            if (!isLatest && (scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX)) {
+              loadMessagesForList({ chatId, direction: 1 });
+            }
+          });
+        }
+
+        currentAnchorId = Number(anchor.dataset.messageId);
+        currentAnchorOffset = newAnchorScreenOffset;
+      }
     }
 
     runThrottledForScroll(() => {
@@ -107,7 +151,9 @@ const MessageList: FC<IProps> = ({
 
       playMediaInViewport();
     });
-  }, [chatId, loadMessagesForList, setChatScrollOffset, playMediaInViewport]);
+
+    determineStickyElement(container, '.message-date-header');
+  }, [chatId, loadMessagesForList, isLatest, setChatScrollOffset, playMediaInViewport]);
 
   useEffect(() => {
     if (!isLoaded || messagesCount < LOAD_MORE_WHEN_LESS_THAN) {
@@ -129,6 +175,7 @@ const MessageList: FC<IProps> = ({
     if (chatId && chatId !== prevChatId) {
       // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
       currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
+      currentAnchorId = undefined;
     }
 
     if (!containerRef.current) {
@@ -140,9 +187,17 @@ const MessageList: FC<IProps> = ({
       console.time('scrollTop');
     }
 
-    const { scrollHeight, clientHeight } = containerRef.current;
-    if (scrollHeight !== clientHeight) {
+    const { scrollTop, scrollHeight, offsetHeight } = containerRef.current;
+    const isScrolledDown = currentScrollOffset === offsetHeight;
+    const anchor = currentAnchorId ? document.getElementById(`message${currentAnchorId}`) : undefined;
+
+    if (!anchor || (isLatest && isScrolledDown)) {
       containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
+    } else {
+      const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
+      const newScrollTop = scrollTop + (newAnchorScreenOffset - currentAnchorOffset);
+      currentScrollOffset = scrollHeight - newScrollTop;
+      containerRef.current.scrollTop = newScrollTop;
     }
 
     playMediaInViewport();
@@ -299,8 +354,9 @@ export default memo(withGlobal(
       chatId: chat.id,
       isChannelChat: isChatChannel(chat),
       isUnread: Boolean(chat.unread_count),
-      messageIds: selectChatMessageListedIds(global, chat.id),
+      messageIds: selectChatMessageViewportIds(global, chat.id),
       messagesById: selectChatMessages(global, chat.id),
+      isLatest: selectIsChatMessageViewportLatest(global, chat.id),
     };
   },
   (setGlobal, actions) => {

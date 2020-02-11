@@ -6,6 +6,7 @@
   height: calc(100% - 1.1rem);
   overflow-y: auto;
   overflow-x: hidden;
+  overflow-anchor: none;
 
   &.no-avatars .Message > .Avatar {
     display: none;

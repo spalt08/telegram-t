@@ -90,6 +90,7 @@ async function loadAndReplaceMessages(global: GlobalState) {
           [selectedChatId]: {
             byId,
             listedIds,
+            viewportIds: listedIds,
           },
         },
       };
@@ -109,7 +110,6 @@ async function loadAndReplaceMessages(global: GlobalState) {
 async function loadNewestMessages(chat: ApiChat) {
   const result = await callApi('fetchMessages', {
     chat,
-    fromMessageId: 0,
     limit: INITIAL_MESSAGES_LIMIT,
   });
 

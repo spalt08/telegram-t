@@ -18,6 +18,18 @@ export function selectChatMessageListedIds(global: GlobalState, chatId: number) 
   return messages ? messages.listedIds : undefined;
 }
 
+export function selectChatMessageViewportIds(global: GlobalState, chatId: number) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messages.viewportIds : undefined;
+}
+
+export function selectIsChatMessageViewportLatest(global: GlobalState, chatId: number) {
+  const { listedIds, viewportIds } = global.messages.byChatId[chatId] || {};
+
+  return listedIds && viewportIds && listedIds[listedIds.length - 1] === viewportIds[viewportIds.length - 1];
+}
+
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
   const chatMessages = selectChatMessages(global, chatId);
 

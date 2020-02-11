@@ -17,13 +17,17 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export async function fetchMessages({ chat, fromMessageId, limit }: {
+export async function fetchMessages({
+  chat, offsetId, addOffset, limit,
+}: {
   chat: ApiChat;
-  fromMessageId: number;
+  offsetId?: number;
+  addOffset?: number;
   limit: number;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetHistory({
-    offsetId: fromMessageId,
+    offsetId,
+    addOffset,
     limit,
     peer: buildInputPeer(chat.id, chat.access_hash),
   }));

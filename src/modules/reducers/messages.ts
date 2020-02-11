@@ -1,8 +1,14 @@
 import { GlobalState } from '../../store/types';
 import { ApiMessage } from '../../api/types';
-import { selectChatMessageListedIds, selectChatMessages } from '../selectors';
+import { selectChatMessageListedIds, selectChatMessages, selectChatMessageViewportIds } from '../selectors';
 
-function replaceChatMessages(global: GlobalState, chatId: number, newById: Record<number, ApiMessage>): GlobalState {
+type MessageStoreSections = {
+  byId: Record<number, ApiMessage>;
+  listedIds?: number[];
+  viewportIds?: number[];
+};
+
+function replaceStoreSection(global: GlobalState, chatId: number, update: Partial<MessageStoreSections>): GlobalState {
   return {
     ...global,
     messages: {
@@ -11,29 +17,33 @@ function replaceChatMessages(global: GlobalState, chatId: number, newById: Recor
         ...global.messages.byChatId,
         [chatId]: {
           ...global.messages.byChatId[chatId],
-          byId: newById,
+          ...update,
         },
       },
     },
   };
 }
 
+function replaceChatMessages(global: GlobalState, chatId: number, newById: Record<number, ApiMessage>): GlobalState {
+  return replaceStoreSection(global, chatId, {
+    byId: newById,
+  });
+}
+
 function replaceChatMessageListedIds(
   global: GlobalState, chatId: number, newListedIds: number[] | undefined,
 ): GlobalState {
-  return {
-    ...global,
-    messages: {
-      ...global.messages,
-      byChatId: {
-        ...global.messages.byChatId,
-        [chatId]: {
-          ...global.messages.byChatId[chatId],
-          listedIds: newListedIds,
-        },
-      },
-    },
-  };
+  return replaceStoreSection(global, chatId, {
+    listedIds: newListedIds,
+  });
+}
+
+export function replaceChatMessageViewportIds(
+  global: GlobalState, chatId: number, newViewportIds: number[] | undefined,
+): GlobalState {
+  return replaceStoreSection(global, chatId, {
+    viewportIds: newViewportIds,
+  });
 }
 
 export function replaceChatMessagesById(
@@ -73,8 +83,10 @@ export function deleteChatMessages(
   messageIds: number[],
 ): GlobalState {
   const byId = selectChatMessages(global, chatId) || {};
-  let listedIds = selectChatMessageListedIds(global, chatId);
   const newById = { ...byId };
+
+  let listedIds = selectChatMessageListedIds(global, chatId);
+  let viewportIds = selectChatMessageViewportIds(global, chatId);
 
   messageIds.forEach((messageId) => {
     delete newById[messageId];
@@ -85,17 +97,29 @@ export function deleteChatMessages(
         listedIds = Array.prototype.concat(listedIds.slice(0, index), listedIds.slice(index + 1));
       }
     }
+
+    if (viewportIds) {
+      const index = viewportIds.indexOf(messageId);
+      if (index !== -1) {
+        viewportIds = Array.prototype.concat(viewportIds.slice(0, index), viewportIds.slice(index + 1));
+      }
+    }
   });
 
   let newGlobal = global;
 
   newGlobal = replaceChatMessages(newGlobal, chatId, newById);
   newGlobal = replaceChatMessageListedIds(newGlobal, chatId, listedIds);
+  newGlobal = replaceChatMessageViewportIds(newGlobal, chatId, viewportIds);
 
   return newGlobal;
 }
 
-export function updateChatMessageListedIds(global: GlobalState, chatId: number, idsUpdate: number[]): GlobalState {
+export function updateChatMessageListedIds(
+  global: GlobalState,
+  chatId: number,
+  idsUpdate: number[],
+): GlobalState {
   const listedIds = selectChatMessageListedIds(global, chatId) || [];
   const newIds = listedIds.length ? idsUpdate.filter((id) => !listedIds.includes(id)) : idsUpdate;
 
@@ -103,8 +127,31 @@ export function updateChatMessageListedIds(global: GlobalState, chatId: number, 
     return global;
   }
 
-  return replaceChatMessageListedIds(global, chatId, [
+  return replaceChatMessageListedIds(global, chatId, orderListedIds([
     ...listedIds,
+    ...newIds,
+  ]));
+}
+
+// Expected result: `[1, 2, ..., n, -1, -2, ..., -n]`
+function orderListedIds(listedIds: number[]) {
+  return listedIds.sort((a, b) => (a > 0 && b > 0 ? a - b : b - a));
+}
+
+export function updateChatMessageViewportIds(
+  global: GlobalState,
+  chatId: number,
+  idsUpdate: number[],
+): GlobalState {
+  const viewportIds = selectChatMessageViewportIds(global, chatId) || [];
+  const newIds = viewportIds.length ? idsUpdate.filter((id) => !viewportIds.includes(id)) : idsUpdate;
+
+  if (!newIds.length) {
+    return global;
+  }
+
+  return replaceChatMessageViewportIds(global, chatId, [
+    ...viewportIds,
     ...newIds,
   ]);
 }

@@ -18,7 +18,7 @@ type IProps = {
   selectedChatId: number;
 } & Pick<GlobalActions, 'loadMoreChats'>;
 
-const LOAD_MORE_THRESHOLD_PX = 1000;
+const LOAD_MORE_THRESHOLD_PX = 1500;
 
 const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 
