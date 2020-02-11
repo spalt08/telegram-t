@@ -51,6 +51,7 @@ $color-chat-hover: #f4f4f5;
   --color-text-green: #{$color-text-green};
   --color-text-green-rgb: #{toRGB($color-text-green)};
   --color-borders: #{$color-borders};
+  --color-webpage-initial-background: #{$color-dark-gray};
 
   --color-primary: #{$color-primary};
   --color-primary-shade: #{mix($color-primary, $color-black, 92%)};

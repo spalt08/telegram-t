@@ -73,16 +73,19 @@ async function loadAndReplaceMessages(global: GlobalState) {
       const listedIds = Object.keys(byId).map(Number);
 
       let selectedMediaMessageId;
+      let mediaReverseOrder;
       const currentSelectedMessageMediaId = global.messages.selectedMediaMessageId;
       if (currentSelectedMessageMediaId) {
         const newIds = result.messages.map(({ id }) => id);
         if (newIds.includes(currentSelectedMessageMediaId)) {
           selectedMediaMessageId = currentSelectedMessageMediaId;
+          mediaReverseOrder = global.messages.mediaReverseOrder;
         }
       }
 
       messages = {
         selectedMediaMessageId,
+        mediaReverseOrder,
         byChatId: {
           [selectedChatId]: {
             byId,

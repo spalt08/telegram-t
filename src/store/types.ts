@@ -22,6 +22,7 @@ export type GlobalState = {
 
   messages: {
     selectedMediaMessageId?: number;
+    mediaReverseOrder?: boolean;
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
       listedIds?: number[];

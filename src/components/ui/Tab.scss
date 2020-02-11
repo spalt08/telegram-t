@@ -1,0 +1,27 @@
+.Tab {
+  flex: 1 1 auto;
+  appearance: none;
+  background: none;
+  width: auto;
+  margin: 0;
+  border: none;
+  padding: .625rem 1.5rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &,
+  &:active,
+  &:focus {
+    outline: none;
+  }
+  &.active {
+    pointer-events: none;
+    cursor: default;
+    color: var(--color-primary);
+  }
+
+  &:not(.active):hover {
+    color: var(--color-primary-shade);
+  }
+}

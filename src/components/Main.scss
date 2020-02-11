@@ -18,7 +18,7 @@
 }
 
 #RightColumn {
-  overflow: auto;
+  overflow-y: scroll;
 
   @media (min-width: 1680px) {
     border-right: 1px solid var(--color-borders);

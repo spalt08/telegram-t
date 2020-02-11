@@ -27,12 +27,18 @@ export function getMessageVideo(message: ApiMessage) {
   return message.content.video;
 }
 
+export function getMessageAudio(message: ApiMessage) {
+  const { document } = message.content;
+
+  return document && document.mimeType.startsWith('audio') ? document : undefined;
+}
+
 export function getMessageSticker(message: ApiMessage) {
   return message.content.sticker;
 }
 
 export function getMessageDocument(message: ApiMessage) {
-  if (getMessageSticker(message) || getMessageVideo(message)) {
+  if (getMessageSticker(message) || getMessageVideo(message) || getMessageAudio(message)) {
     return undefined;
   }
 
@@ -135,8 +141,8 @@ export function canMessagePlayVideoInline(video: ApiVideo): boolean {
   return video.duration <= MAX_INLINE_VIDEO_DURATION;
 }
 
-export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
-  return Object.keys(messages)
+export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {
+  const ids = Object.keys(messages)
     .reduce((result: number[], id) => {
       const messageId = Number(id);
       if (getMessagePhoto(messages[messageId]) || getMessageVideo(messages[messageId])) {
@@ -145,6 +151,8 @@ export function getChatMediaMessageIds(messages: Record<number, ApiMessage>) {
 
       return result;
     }, []);
+
+  return reverseOrder ? ids.reverse() : ids;
 }
 
 export function getPhotoFullDimensions(photo: ApiPhoto): IDimensions | undefined {
@@ -186,4 +194,38 @@ export function getMessageTransferParams(message: ApiMessage, fileTransferProgre
   return {
     isUploading, isDownloading, isTransferring, transferProgress,
   };
+}
+
+export function getMessageContentIds(
+  messages: Record<number, ApiMessage>, contentType: 'media' | 'document' | 'webPage' | 'audio',
+) {
+  let validator: Function;
+
+  switch (contentType) {
+    case 'audio':
+      validator = getMessageAudio;
+      break;
+
+    case 'document':
+      validator = getMessageDocument;
+      break;
+
+    case 'media':
+      validator = (message: ApiMessage) => getMessagePhoto(message) || getMessageVideo(message);
+      break;
+
+    case 'webPage':
+      validator = getMessageWebPage;
+      break;
+  }
+
+  return Object.keys(messages)
+    .reduce((result, id) => {
+      const messageId = Number(id);
+      if (validator(messages[messageId])) {
+        result.push(messageId);
+      }
+
+      return result;
+    }, [] as Array<number>);
 }

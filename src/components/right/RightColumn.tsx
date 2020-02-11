@@ -8,6 +8,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import RightHeader from './RightHeader';
 import RightColumnInfo from './RightColumnInfo';
 import RightSearch from './RightSearch';
+import SharedMedia from './sharedMedia/SharedMedia';
 
 import './RightColumn.scss';
 
@@ -43,10 +44,13 @@ const RightColumn: FC<IProps> = ({
   }
 
   return (
-    <div id="RightColumn">
+    <div id="RightColumn" className="custom-scroll">
       <RightHeader />
       {!isSearch && areChatsLoaded && (
         <RightColumnInfo chatId={selectedChatId} userId={selectedUserId} />
+      )}
+      {!isSearch && areChatsLoaded && (
+        <SharedMedia />
       )}
       {isSearch && areChatsLoaded && (
         <RightSearch chatId={selectedChatId} />

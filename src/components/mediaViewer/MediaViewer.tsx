@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, memo, useCallback,
+  FC, useEffect, memo, useCallback, useMemo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -34,6 +34,7 @@ import './MediaViewer.scss';
 type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
   chatId?: number;
   selectedMediaMessageId?: number;
+  mediaReverseOrder?: boolean;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
 };
@@ -41,14 +42,17 @@ type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
 const MediaViewer: FC<IProps> = ({
   chatId,
   selectedMediaMessageId,
+  mediaReverseOrder,
   message,
   chatMessages,
   selectMediaMessage,
 }) => {
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
-  const messageIds = isWebPagePhoto && selectedMediaMessageId
-    ? [selectedMediaMessageId]
-    : getChatMediaMessageIds(chatMessages || {});
+  const messageIds = useMemo(() => {
+    return isWebPagePhoto && selectedMediaMessageId
+      ? [selectedMediaMessageId]
+      : getChatMediaMessageIds(chatMessages || {}, mediaReverseOrder);
+  }, [isWebPagePhoto, selectedMediaMessageId, chatMessages]);
   const selectedMediaMessageIndex = selectedMediaMessageId ? messageIds.indexOf(selectedMediaMessageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
@@ -139,14 +143,20 @@ const MediaViewer: FC<IProps> = ({
     if (isFirst) {
       return;
     }
-    selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, -1) : null });
+    selectMediaMessage({
+      id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, -1) : null,
+      isReversed: mediaReverseOrder,
+    });
   }
 
   function selectNextMedia() {
     if (isLast) {
       return;
     }
-    selectMediaMessage({ id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, 1) : null });
+    selectMediaMessage({
+      id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, 1) : null,
+      isReversed: mediaReverseOrder,
+    });
   }
 
   return (
@@ -214,7 +224,7 @@ function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimens
 
 export default memo(withGlobal(
   (global) => {
-    const { chats: { selectedId: selectedChatId }, messages: { selectedMediaMessageId } } = global;
+    const { chats: { selectedId: selectedChatId }, messages: { selectedMediaMessageId, mediaReverseOrder } } = global;
     if (!selectedChatId || !selectedMediaMessageId) {
       return {};
     }
@@ -229,6 +239,7 @@ export default memo(withGlobal(
     return {
       chatId: message && message.chat_id,
       selectedMediaMessageId,
+      mediaReverseOrder,
       message,
       chatMessages,
     };

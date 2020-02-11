@@ -11,6 +11,7 @@ import './WebPage.scss';
 type IProps = {
   message: ApiMessage;
   load?: boolean;
+  showUrl?: boolean;
   onMediaClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -18,6 +19,7 @@ type IProps = {
 const WebPage: FC<IProps> = ({
   message,
   load,
+  showUrl,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
@@ -31,7 +33,7 @@ const WebPage: FC<IProps> = ({
   } = getMessageWebPage(message)!;
 
   return (
-    <div className="WebPage">
+    <div className={`WebPage ${!photo ? 'without-photo' : ''}`} data-initial={displayUrl.charAt(0)}>
       {photo && (
         <Photo
           message={message}
@@ -40,7 +42,9 @@ const WebPage: FC<IProps> = ({
           onCancelTransfer={onCancelMediaTransfer}
         />
       )}
-      <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">{siteName || displayUrl}</a>
+      <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
+        {showUrl ? url : siteName || displayUrl}
+      </a>
       {title && <p className="site-title">{title}</p>}
       {description && <p className="site-description">{description}</p>}
     </div>
