@@ -59,6 +59,8 @@ type IProps = {
   fileTransferProgress?: number;
 } & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>;
 
+const NBSP = '\u00A0';
+
 const Message: FC<IProps> = ({
   message,
   showAvatar,
@@ -107,7 +109,8 @@ const Message: FC<IProps> = ({
     { isFirstInGroup, isLastInGroup, isLastInList },
     contextMenuPosition !== null,
   );
-
+  const isForwarded = Boolean(message.forward_info);
+  const isReply = Boolean(message.reply_to_message_id);
   const {
     text,
     photo,
@@ -117,10 +120,9 @@ const Message: FC<IProps> = ({
     contact,
     webPage,
     className: contentClassName,
-  } = buildMessageContent(message, { isLastInGroup, hasReply: Boolean(replyMessage) });
+  } = buildMessageContent(message, { isLastInGroup, hasReply: isReply });
   const isText = Boolean(contentClassName && contentClassName.includes('text'));
   const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
-  const isForwarded = Boolean(message.forward_info);
 
   function openMediaMessage(): void {
     selectMediaMessage({ id: messageId });
@@ -165,7 +167,7 @@ const Message: FC<IProps> = ({
     }
 
     return (
-      <div className="sender-name">{getUserFullName(user)}</div>
+      <div className="sender-name">{user ? getUserFullName(user) : NBSP}</div>
     );
   }
 
@@ -174,14 +176,14 @@ const Message: FC<IProps> = ({
     if (isForwarded && !sticker) {
       classNames.push('forwarded-message');
     }
-    if (replyMessage) {
+    if (isReply) {
       classNames.push('reply-message');
     }
 
     return (
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {replyMessage && (
+        {isReply && (
           <ReplyMessage message={replyMessage} sender={replyMessageSender} loadPictogram={loadAndPlayMedia} />
         )}
         {/* eslint-disable no-nested-ternary */}
@@ -253,7 +255,7 @@ const Message: FC<IProps> = ({
   }
 
   return (
-    <div className={containerClassNames.join(' ')} data-message-id={messageId}>
+    <div id={`message${messageId}`} className={containerClassNames.join(' ')} data-message-id={messageId}>
       {showAvatar && (
         <Avatar
           size="small"

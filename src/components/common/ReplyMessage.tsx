@@ -12,25 +12,27 @@ import RippleEffect from '../ui/RippleEffect';
 import './ReplyMessage.scss';
 
 type IProps = {
-  message: ApiMessage;
+  message?: ApiMessage;
   sender?: ApiUser;
   className?: string;
   loadPictogram?: boolean;
 };
 
+const NBSP = '\u00A0';
+
 const ReplyMessage: FC<IProps> = ({
   message, sender, className, loadPictogram,
 }) => {
-  const { text } = buildMessageContent(message, { isReply: true });
+  const text = message ? buildMessageContent(message, { isReply: true }).text : NBSP;
 
-  const mediaThumbnail = getMessageMediaThumbDataUri(message);
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'), !loadPictogram);
+  const mediaThumbnail = message && getMessageMediaThumbDataUri(message);
+  const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
 
   return (
     <div className={`ReplyMessage not-implemented ${className || ''}`}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="reply-text">
-        <div className="sender-name">{getUserFullName(sender)}</div>
+        <div className="sender-name">{sender ? getUserFullName(sender) : NBSP}</div>
         <p>{text}</p>
       </div>
       <RippleEffect />
