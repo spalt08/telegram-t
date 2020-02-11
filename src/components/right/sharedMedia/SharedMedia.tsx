@@ -4,10 +4,10 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../store/types';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMessage, ApiPrivateChat } from '../../../api/types';
 
-import { selectChatMessages } from '../../../modules/selectors';
-import { getMessageContentIds } from '../../../modules/helpers';
+import { selectChat, selectChatMessages } from '../../../modules/selectors';
+import { getMessageContentIds, getPrivateChatUserId } from '../../../modules/helpers';
 
 import TabList from '../../ui/TabList';
 import WebPage from '../../middle/message/WebPage';
@@ -40,7 +40,7 @@ const SharedMedia: FC<IProps> = ({ chatMessages, selectMediaMessage }) => {
   const [activeTab, setActiveTab] = useState(0);
   const currentContent = CONTENT[activeTab];
   const messageIds = useMemo(
-    () => getMessageContentIds(chatMessages, currentContent).reverse(),
+    () => (chatMessages ? getMessageContentIds(chatMessages, currentContent).reverse() : []),
     [chatMessages, currentContent],
   );
 
@@ -106,15 +106,15 @@ function renderAudioList(messageAudioIds: number[], messages: Record<number, Api
 
 export default memo(withGlobal(
   (global) => {
-    const { chats: { selectedId: selectedChatId } } = global;
+    const { chats, users } = global;
+
+    const selectedChatId = users.selectedId || chats.selectedId;
     if (!selectedChatId) {
       return {};
     }
 
-    const chatMessages = selectChatMessages(global, selectedChatId);
-
     return {
-      chatMessages,
+      chatMessages: selectChatMessages(global, selectedChatId),
     };
   },
   (setGlobal, actions) => {
