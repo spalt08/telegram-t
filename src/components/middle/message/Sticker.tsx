@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useState } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useRef, useState,
+} from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
@@ -32,11 +34,13 @@ const Sticker: FC<IProps> = ({
     !loadAndPlay,
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );
+  const isMediaLoaded = Boolean(mediaData);
+  const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
 
   const {
     shouldRender: shouldFullMediaRender,
     transitionClassNames: fullMediaClassNames,
-  } = useShowTransition(isAnimated ? isAnimationLoaded : mediaData);
+  } = useShowTransition(isAnimated ? isAnimationLoaded : isMediaLoaded, undefined, isMediaPreloadedRef.current!);
 
   const { width, height } = getStickerDimensions(sticker);
 
@@ -65,7 +69,7 @@ const Sticker: FC<IProps> = ({
           className={['full-media', ...fullMediaClassNames].join(' ')}
         />
       )}
-      {isAnimated && mediaData && (
+      {isAnimated && isMediaLoaded && (
         <AnimatedSticker
           animationData={mediaData as AnyLiteral}
           width={width}

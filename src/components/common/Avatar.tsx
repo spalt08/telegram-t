@@ -49,7 +49,7 @@ const Avatar: FC<IProps> = ({
   const {
     shouldRender: shouldImageRender,
     transitionClassNames: imageClassNames,
-  } = useShowTransition(isImageLoaded, undefined, noAnimate || isImagePreloadedRef.current as boolean);
+  } = useShowTransition(isImageLoaded, undefined, noAnimate || isImagePreloadedRef.current!);
 
   let content: string | null = '';
 

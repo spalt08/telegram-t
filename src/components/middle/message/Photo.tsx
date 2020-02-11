@@ -1,5 +1,5 @@
 import { MouseEvent } from 'react';
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, useRef } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { calculateInlineImageDimensions } from '../../../util/mediaDimensions';
@@ -43,10 +43,12 @@ const Photo: FC<IProps> = ({
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const localBlobUrl = load ? photo.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !load);
+  const isMediaLoaded = Boolean(mediaData);
+  const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
 
   const {
     isTransferring, transferProgress,
-  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
+  } = getMessageTransferParams(message, fileTransferProgress, !isMediaLoaded && !localBlobUrl);
 
   const {
     shouldRender: shouldSpinnerRender,
@@ -56,7 +58,7 @@ const Photo: FC<IProps> = ({
   const {
     shouldRender: shouldFullMediaRender,
     transitionClassNames: fullMediaClassNames,
-  } = useShowTransition(Boolean(mediaData));
+  } = useShowTransition(isMediaLoaded, undefined, isMediaPreloadedRef.current!);
 
   const { width, height, isSmall } = calculateDimensions(message);
 
@@ -72,7 +74,7 @@ const Photo: FC<IProps> = ({
   }
 
   let thumbClassName = 'thumbnail';
-  if (!mediaData && !localBlobUrl) {
+  if (!isMediaLoaded && !localBlobUrl) {
     thumbClassName += ' blur';
   }
   if (!thumbDataUri) {
