@@ -1,4 +1,4 @@
-type Scheduler = typeof requestAnimationFrame | typeof onNextTick | typeof runNow;
+type Scheduler = typeof requestAnimationFrame | typeof onTickEnd | typeof runNow;
 
 export function debounce<F extends AnyToVoidFunction>(
   fn: F,
@@ -68,7 +68,7 @@ export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
 }
 
 export function throttleWithNextTick<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(onNextTick, fn);
+  return throttleWith(onTickEnd, fn);
 }
 
 export function throttleWithNow<F extends AnyToVoidFunction>(fn: F) {
@@ -94,8 +94,15 @@ export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler
   };
 }
 
-export function onNextTick(cb: NoneToVoidFunction) {
+export function onTickEnd(cb: NoneToVoidFunction) {
   Promise.resolve().then(cb);
+}
+
+// RAF itself may be slow, so we want to postpone it to the tick end.
+export function onTickEndThenRaf(cb: NoneToVoidFunction) {
+  onTickEnd(() => {
+    requestAnimationFrame(cb);
+  });
 }
 
 function runNow(fn: NoneToVoidFunction) {

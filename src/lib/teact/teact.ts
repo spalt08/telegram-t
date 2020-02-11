@@ -1,4 +1,4 @@
-import { onNextTick, throttleWithRaf } from '../../util/schedulers';
+import { onTickEnd, onTickEndThenRaf, throttleWithRaf } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
 
@@ -353,7 +353,7 @@ export function useState<T = any, I = T>(initial?: I): [T, StateHookSetter<T>] {
 }
 
 function useLayoutEffectBase(
-  schedulerFn: typeof onNextTick | typeof requestAnimationFrame,
+  schedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
   effect: () => Function | void,
   dependencies?: any[],
 ) {
@@ -386,11 +386,11 @@ function useLayoutEffectBase(
 }
 
 export function useEffect(effect: () => Function | void, dependencies?: any[]) {
-  return useLayoutEffectBase(requestAnimationFrame, effect, dependencies);
+  return useLayoutEffectBase(onTickEndThenRaf, effect, dependencies);
 }
 
 export function useLayoutEffect(effect: () => Function | void, dependencies?: any[]) {
-  return useLayoutEffectBase(onNextTick, effect, dependencies);
+  return useLayoutEffectBase(onTickEnd, effect, dependencies);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[]): T {
