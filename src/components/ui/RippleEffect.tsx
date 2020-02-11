@@ -45,7 +45,9 @@ const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
         },
       ]);
 
-      cleanUpDebounced();
+      requestAnimationFrame(() => {
+        cleanUpDebounced();
+      });
     };
 
     if (delayed) {
