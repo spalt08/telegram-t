@@ -1,4 +1,7 @@
 .SharedMedia {
+  display: flex;
+  flex-direction: column-reverse;
+
   .TabList {
     background: #fff;
   }

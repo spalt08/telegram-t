@@ -4,10 +4,10 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../store/types';
 
-import { ApiMessage, ApiPrivateChat } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
 
-import { selectChat, selectChatMessages } from '../../../modules/selectors';
-import { getMessageContentIds, getPrivateChatUserId } from '../../../modules/helpers';
+import { selectChatMessages } from '../../../modules/selectors';
+import { getMessageContentIds } from '../../../modules/helpers';
 
 import TabList from '../../ui/TabList';
 import WebPage from '../../middle/message/WebPage';
@@ -50,8 +50,6 @@ const SharedMedia: FC<IProps> = ({ chatMessages, selectMediaMessage }) => {
 
   return (
     <div className="SharedMedia">
-      <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />
-
       <div className={`content ${(TABS[activeTab] || '').toLowerCase()}`}>
         {/* eslint-disable no-nested-ternary */}
         {currentContent === 'media' ? (
@@ -65,6 +63,7 @@ const SharedMedia: FC<IProps> = ({ chatMessages, selectMediaMessage }) => {
         ) : null}
         {/* eslint-enable no-nested-ternary */}
       </div>
+      <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />
     </div>
   );
 };
