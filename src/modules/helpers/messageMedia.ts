@@ -38,7 +38,8 @@ export function getMessageSticker(message: ApiMessage) {
 }
 
 export function getMessageDocument(message: ApiMessage) {
-  if (getMessageSticker(message) || getMessageVideo(message) || getMessageAudio(message)) {
+  // TODO Voice messages should be filtered out too (but not regular `audio`).
+  if (getMessageSticker(message) || getMessageVideo(message)) {
     return undefined;
   }
 
