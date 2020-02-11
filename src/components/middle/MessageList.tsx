@@ -167,7 +167,7 @@ const MessageList: FC<IProps> = ({
     }
   }, [isUnread, markMessagesRead]);
 
-  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds]) => {
+  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds, prevIsLatest]) => {
     if (chatId === prevChatId && messageIds === prevMessageIds) {
       return;
     }
@@ -191,7 +191,7 @@ const MessageList: FC<IProps> = ({
     const isScrolledDown = currentScrollOffset === offsetHeight;
     const anchor = currentAnchorId ? document.getElementById(`message${currentAnchorId}`) : undefined;
 
-    if (!anchor || (isLatest && isScrolledDown)) {
+    if (!anchor || (prevIsLatest && isScrolledDown)) {
       containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
     } else {
       const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
@@ -206,7 +206,7 @@ const MessageList: FC<IProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, playMediaInViewport]);
+  }, [chatId, messageIds, isLatest, playMediaInViewport]);
 
   const classNames = ['MessageList', 'custom-scroll'];
   if (isPrivate || isChannelChat) {

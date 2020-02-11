@@ -5,7 +5,7 @@ import {
   updateChat, deleteChatMessages, updateChatMessage, updateChatMessageListedIds, updateChatMessageViewportIds,
 } from '../../reducers';
 import { GlobalState } from '../../../store/types';
-import { selectChat, selectChatMessage, selectChatMessages } from '../../selectors';
+import { selectChat, selectChatMessage, selectChatMessages, selectIsChatMessageViewportLatest } from '../../selectors';
 import { getMessageKey, getMessagePhoto, getMessageVideo } from '../../helpers';
 
 const ANIMATION_DELAY = 300;
@@ -33,8 +33,10 @@ export function onUpdate(update: ApiUpdate) {
 
       let newGlobal = global;
       newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
+      if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
+        newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [id]);
+      }
       newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [id]);
-      newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [id]);
 
       const chat = selectChat(newGlobal, chat_id);
 
@@ -82,8 +84,10 @@ export function onUpdate(update: ApiUpdate) {
         prev_local_id: local_id,
       });
       newGlobal = deleteChatMessages(newGlobal, chat_id, [local_id]);
+      if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
+        newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [message.id]);
+      }
       newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [message.id]);
-      newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [message.id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
