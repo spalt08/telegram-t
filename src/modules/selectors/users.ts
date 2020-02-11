@@ -1,4 +1,4 @@
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 
 export function selectUser(global: GlobalState, userId: number) {
   return global.users.byId[userId];

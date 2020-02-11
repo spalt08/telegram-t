@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import React, { FC, useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalState, GlobalActions } from '../../store/types';
+import { GlobalState, GlobalActions } from '../../global/types';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';

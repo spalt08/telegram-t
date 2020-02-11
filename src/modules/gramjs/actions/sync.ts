@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teactn';
 
 import { ApiChat } from '../../../api/types';
-import { GlobalState } from '../../../store/types';
+import { GlobalState } from '../../../global/types';
 
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';

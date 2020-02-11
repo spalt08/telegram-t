@@ -1,7 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { GlobalActions } from '../../../store/types';
+import { GlobalActions } from '../../../global/types';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { ApiAttachment } from '../../../api/types';

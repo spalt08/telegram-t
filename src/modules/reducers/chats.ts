@@ -1,4 +1,4 @@
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
 export function replaceChatIds(global: GlobalState, newIds: number[]): GlobalState {

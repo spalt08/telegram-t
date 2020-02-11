@@ -1,4 +1,4 @@
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 import { ApiUser } from '../../api/types';
 
 export function replaceUsers(global: GlobalState, newById: Record<number, ApiUser>): GlobalState {

@@ -1,4 +1,4 @@
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat, selectIsChatWithSelf } from './chats';
 import {

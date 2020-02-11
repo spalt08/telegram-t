@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../../store/types';
+import { GlobalActions, GlobalState } from '../../global/types';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import { getChatAvatarHash } from '../../modules/helpers';

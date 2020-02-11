@@ -1,6 +1,6 @@
 import { addReducer } from '../../lib/teact/teactn';
 
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 
 import { updateSelectedUserId } from '../reducers';
 

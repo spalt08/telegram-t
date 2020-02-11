@@ -1,7 +1,7 @@
 import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../store/types';
+import { GlobalActions } from '../../global/types';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import Button from '../ui/Button';

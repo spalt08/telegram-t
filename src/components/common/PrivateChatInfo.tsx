@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiUser } from '../../api/types';
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
-import { GlobalActions, GlobalState } from '../../store/types';
+import { GlobalActions, GlobalState } from '../../global/types';
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 

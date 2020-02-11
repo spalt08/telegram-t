@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalState, GlobalActions } from '../../store/types';
+import { GlobalState, GlobalActions } from '../../global/types';
 import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../util/phoneNumber';
 
 import Button from '../ui/Button';

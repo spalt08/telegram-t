@@ -2,7 +2,7 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../store/types';
+import { GlobalActions, GlobalState } from '../../global/types';
 import { getChatTypeString, getChatTitle } from '../../modules/helpers';
 import { selectChat } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';

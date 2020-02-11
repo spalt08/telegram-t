@@ -1,6 +1,6 @@
 import { addReducer, getDispatch } from '../../../lib/teact/teactn';
 
-import { GlobalState } from '../../../store/types';
+import { GlobalState } from '../../../global/types';
 import { GRAMJS_SESSION_ID_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 import onUpdate from '../updaters';

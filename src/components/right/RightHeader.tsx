@@ -1,7 +1,7 @@
 import React, { FC } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../store/types';
+import { GlobalActions } from '../../global/types';
 
 import Button from '../ui/Button';
 

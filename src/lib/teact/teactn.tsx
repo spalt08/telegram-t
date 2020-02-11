@@ -7,7 +7,7 @@ import generateIdFor from '../../util/generateIdFor';
 import { throttleWithRaf } from '../../util/schedulers';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
-import { GlobalState, GlobalActions, ActionTypes } from '../../store/types';
+import { GlobalState, GlobalActions, ActionTypes } from '../../global/types';
 
 export default React;
 

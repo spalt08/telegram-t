@@ -13,7 +13,7 @@ import {
 import {
   selectChat, selectChatMessageListedIds, selectChatMessageViewportIds, selectOpenChat,
 } from '../../selectors';
-import { GlobalState } from '../../../store/types';
+import { GlobalState } from '../../../global/types';
 
 const MESSAGE_SLICE_LIMIT = 50;
 

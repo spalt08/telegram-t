@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
-import { GlobalActions } from '../../store/types';
+import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { getUserFullName, isChatChannel } from '../../modules/helpers';

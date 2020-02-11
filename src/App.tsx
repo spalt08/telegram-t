@@ -1,7 +1,7 @@
 import { FC } from './lib/teact/teact';
 import React, { withGlobal } from './lib/teact/teactn';
 
-import { GlobalState } from './store/types';
+import { GlobalState } from './global/types';
 import Auth from './components/auth/Auth';
 import Main from './components/Main';
 // import Test from './pages/test/Test';

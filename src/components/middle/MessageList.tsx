@@ -5,7 +5,7 @@ import React, {
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage } from '../../api/types';
-import { GlobalActions } from '../../store/types';
+import { GlobalActions } from '../../global/types';
 
 import {
   selectChatMessages,

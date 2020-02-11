@@ -1,5 +1,5 @@
 import React, { withGlobal } from '../../lib/teact/teactn';
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 import SubTest from './SubTest';
 import { FC } from '../../lib/teact/teact';
 

@@ -1,5 +1,5 @@
 import { ApiChat } from '../../api/types';
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 
 import { getPrivateChatUserId } from '../helpers';
 import { selectUser } from './users';

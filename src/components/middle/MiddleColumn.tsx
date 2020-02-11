@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalActions } from '../../store/types';
+import { GlobalActions } from '../../global/types';
 import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';

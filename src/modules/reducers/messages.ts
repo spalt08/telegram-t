@@ -1,4 +1,4 @@
-import { GlobalState } from '../../store/types';
+import { GlobalState } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 import { selectChatMessageListedIds, selectChatMessages, selectChatMessageViewportIds } from '../selectors';
 

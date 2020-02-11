@@ -2,7 +2,7 @@ import React, {
   FC, useState, memo, useMemo, useCallback,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
-import { GlobalActions } from '../../../store/types';
+import { GlobalActions } from '../../../global/types';
 
 import { ApiMessage } from '../../../api/types';
 

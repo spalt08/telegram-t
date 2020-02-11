@@ -2,7 +2,7 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
-import { GlobalActions, GlobalState } from '../../store/types';
+import { GlobalActions, GlobalState } from '../../global/types';
 import { selectUser } from '../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 

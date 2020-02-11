@@ -3,7 +3,7 @@ import './util/handleError';
 import React, { getDispatch, getGlobal } from './lib/teact/teactn';
 import TeactDOM from './lib/teact/teact-dom';
 
-import './store';
+import './global';
 import './modules';
 
 import App from './App';
