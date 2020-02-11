@@ -124,21 +124,28 @@ const Message: FC<IProps> = ({
   const isText = Boolean(contentClassName && contentClassName.includes('text'));
   const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
 
-  function openMediaMessage(): void {
+  const handleAvatarClick = useCallback(() => {
+    if (!sender) {
+      return;
+    }
+    openUserInfo({ id: sender.id });
+  }, [openUserInfo, sender]);
+
+  const handleMediaClick = useCallback((): void => {
     selectMediaMessage({ id: messageId });
-  }
+  }, [messageId, selectMediaMessage]);
 
   const handleCancelTransfer = useCallback(() => {
     cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
   }, [cancelSendingMessage, message.chat_id, message.id]);
 
-  function handleBeforeContextMenu(e: React.MouseEvent) {
+  const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (e.button === 2) {
       e.currentTarget.classList.add('no-selection');
     }
-  }
+  }, []);
 
-  function handleContextMenu(e: React.MouseEvent) {
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.currentTarget.classList.remove('no-selection');
 
@@ -148,15 +155,15 @@ const Message: FC<IProps> = ({
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-  }
+  }, [contextMenuPosition]);
 
-  function handleContextMenuClose() {
+  const handleContextMenuClose = useCallback(() => {
     setIsContextMenuOpen(false);
-  }
+  }, []);
 
-  function handleContextMenuHide() {
+  const handleContextMenuHide = useCallback(() => {
     setContextMenuPosition(null);
-  }
+  }, []);
 
   function renderSenderName(user?: ApiUser) {
     if (
@@ -191,7 +198,7 @@ const Message: FC<IProps> = ({
             message={message}
             load={loadAndPlayMedia}
             fileTransferProgress={fileTransferProgress}
-            onClick={openMediaMessage}
+            onClick={handleMediaClick}
             onCancelTransfer={handleCancelTransfer}
           />
         )}
@@ -200,7 +207,7 @@ const Message: FC<IProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             fileTransferProgress={fileTransferProgress}
-            onClick={openMediaMessage}
+            onClick={handleMediaClick}
             onCancelTransfer={handleCancelTransfer}
           />
         )}
@@ -227,19 +234,12 @@ const Message: FC<IProps> = ({
           <WebPage
             message={message}
             load={loadAndPlayMedia}
-            onMediaClick={openMediaMessage}
+            onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelTransfer}
           />
         )}
       </div>
     );
-  }
-
-  function viewUser() {
-    if (!sender) {
-      return;
-    }
-    openUserInfo({ id: sender.id });
   }
 
   let style = '';
@@ -249,11 +249,7 @@ const Message: FC<IProps> = ({
       : (video && calculateVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
 
     if (width) {
-      const calculatedWidth = Math.max(
-        getMinMediaWidth(Boolean(text)),
-        width,
-      );
-
+      const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
       style = `width: ${calculatedWidth}px`;
     }
   }
@@ -264,7 +260,7 @@ const Message: FC<IProps> = ({
         <Avatar
           size="small"
           user={sender}
-          onClick={viewUser}
+          onClick={handleAvatarClick}
           className={!isLastInGroup ? 'hidden' : ''}
           noAnimate
         />
