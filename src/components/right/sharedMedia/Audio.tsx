@@ -1,6 +1,6 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 
-import { ApiDocument, ApiMessage } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
 
 import { getDocumentExtension } from '../../../util/documentInfo';
 import { getMessageAudio } from '../../../modules/helpers';
@@ -12,10 +12,10 @@ type IProps = {
 };
 
 const Audio: FC<IProps> = ({ message }) => {
-  const document = getMessageAudio(message) as ApiDocument;
+  const audio = getMessageAudio(message)!;
 
   return (
-    <File size={document.size} name={document.fileName} smaller extension={getDocumentExtension(document)} />
+    <File size={audio.size} name={audio.fileName} smaller extension={getDocumentExtension(audio)} />
   );
 };
 

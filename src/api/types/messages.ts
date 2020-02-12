@@ -35,6 +35,20 @@ export interface ApiVideo {
   blobUrl?: string;
 }
 
+export interface ApiAudio {
+  size: number;
+  mimeType: string;
+  fileName: string;
+  duration: number;
+  performer?: string;
+  title?: string;
+}
+
+export interface ApiVoice {
+  duration: number;
+  waveform?: Buffer;
+}
+
 export interface ApiDocument {
   fileName: string;
   size: number;
@@ -131,6 +145,8 @@ export interface ApiMessage {
     poll?: ApiPoll;
     action?: ApiAction;
     webPage?: ApiWebPage;
+    audio?: ApiAudio;
+    voice?: ApiVoice;
   };
   date: number;
   is_outgoing: boolean;

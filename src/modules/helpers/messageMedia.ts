@@ -19,6 +19,10 @@ export function getMessageMedia(message: ApiMessage) {
     || getMessageWebPagePhoto(message);
 }
 
+export function getMessageContent(message: ApiMessage) {
+  return message.content;
+}
+
 export function getMessagePhoto(message: ApiMessage) {
   return message.content.photo;
 }
@@ -28,9 +32,11 @@ export function getMessageVideo(message: ApiMessage) {
 }
 
 export function getMessageAudio(message: ApiMessage) {
-  const { document } = message.content;
+  return message.content.audio;
+}
 
-  return document && document.mimeType.startsWith('audio') ? document : undefined;
+export function getMessageVoice(message: ApiMessage) {
+  return message.content.voice;
 }
 
 export function getMessageSticker(message: ApiMessage) {
@@ -38,11 +44,6 @@ export function getMessageSticker(message: ApiMessage) {
 }
 
 export function getMessageDocument(message: ApiMessage) {
-  // TODO Voice messages should be filtered out too (but not regular `audio`).
-  if (getMessageSticker(message) || getMessageVideo(message)) {
-    return undefined;
-  }
-
   return message.content.document;
 }
 

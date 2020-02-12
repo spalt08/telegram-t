@@ -39,10 +39,10 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
     if (activeVoiceRecording) {
       try {
-        const { blob, duration, waveForm } = await activeVoiceRecording.stop();
+        const { blob, duration, waveform } = await activeVoiceRecording.stop();
         currentAttachment = {
           file: blobToFile(blob, VOICE_RECORDING_FILENAME),
-          voice: { duration, waveForm },
+          voice: { duration, waveform },
         };
       } catch (err) {
         // eslint-disable-next-line no-console

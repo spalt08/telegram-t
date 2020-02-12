@@ -1,21 +1,17 @@
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import {
   getMessageText,
-  getMessagePhoto,
-  getMessageSticker,
-  getMessageVideo,
-  getMessageDocument,
   getLastMessageText,
-  getMessageContact,
+  getMessageContent,
   isOwnMessage,
-  getMessagePoll,
-  getMessageWebPage,
 } from '../../../../modules/helpers';
 import {
   ApiMessage,
-  ApiPhoto,
   ApiSticker,
+  ApiPhoto,
   ApiVideo,
+  ApiAudio,
+  ApiVoice,
   ApiDocument,
   ApiContact,
   ApiPoll,
@@ -28,6 +24,8 @@ export interface MessageContent {
   text?: TextPart | TextPart[];
   photo?: ApiPhoto;
   video?: ApiVideo;
+  audio?: ApiAudio;
+  voice?: ApiVoice;
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
@@ -42,17 +40,15 @@ interface BuildMessageContentOptions {
   isLastInGroup?: boolean;
 }
 
-const SOLID_BACKGROUND_CLASSES = ['text', 'media', 'contact', 'document', 'poll', 'is-forwarded', 'is-reply'];
+const SOLID_BACKGROUND_CLASSES = [
+  'text', 'media', 'audio', 'voice', 'document', 'contact', 'poll', 'webPage', 'is-forwarded', 'is-reply',
+];
 
 export function buildMessageContent(message: ApiMessage, options: BuildMessageContentOptions = {}): MessageContent {
   const text = getMessageText(message);
-  const photo = getMessagePhoto(message);
-  const video = getMessageVideo(message);
-  const document = getMessageDocument(message);
-  const sticker = getMessageSticker(message);
-  const contact = getMessageContact(message);
-  const poll = getMessagePoll(message);
-  const webPage = getMessageWebPage(message);
+  const {
+    sticker, photo, video, audio, voice, document, poll, webPage, contact,
+  } = getMessageContent(message);
   const classNames = ['message-content'];
   let contentParts: TextPart | TextPart[] | undefined;
 
@@ -69,31 +65,25 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     }
   }
 
-  if (photo || video) {
+  if (sticker) {
+    classNames.push('sticker');
+  } else if (photo || video) {
     if (video && video.isRound) {
       classNames.push('round', 'sticker');
     } else {
       classNames.push('media');
     }
-  }
-
-  if (sticker) {
-    classNames.push('sticker');
-  }
-
-  if (document) {
+  } else if (audio) {
+    classNames.push('audio');
+  } else if (voice) {
+    classNames.push('voice');
+  } else if (document) {
     classNames.push('document');
-  }
-
-  if (contact) {
+  } else if (contact) {
     classNames.push('contact');
-  }
-
-  if (poll) {
+  } else if (poll) {
     classNames.push('poll');
-  }
-
-  if (webPage) {
+  } else if (webPage) {
     classNames.push('web-page');
 
     if (webPage.photo) {
@@ -139,6 +129,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     contact,
     poll,
     webPage,
+    voice,
     className: classNames.join(' '),
   };
 }

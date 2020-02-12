@@ -1,6 +1,8 @@
 import { ApiMessage } from '../../api/types';
 import searchWords from '../../util/searchWords';
 
+const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
+
 export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
 }
@@ -14,6 +16,8 @@ export function getLastMessageText(message: ApiMessage) {
     text,
     photo,
     video,
+    audio,
+    voice,
     document,
     sticker,
     contact,
@@ -42,6 +46,14 @@ export function getLastMessageText(message: ApiMessage) {
     return `Sticker ${sticker.emoji}`;
   }
 
+  if (audio) {
+    return 'Audio';
+  }
+
+  if (voice) {
+    return 'Voice Message';
+  }
+
   if (document) {
     return document.fileName;
   }
@@ -54,28 +66,22 @@ export function getLastMessageText(message: ApiMessage) {
     return `(Poll) ${poll.summary.question}`;
   }
 
-  return '%UNSUPPORTED_CONTENT%';
+  return CONTENT_NOT_SUPPORTED;
 }
 
 export function getMessageText(message: ApiMessage) {
   const {
-    text,
-    document,
-    photo,
-    video,
-    sticker,
-    contact,
-    poll,
+    text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
   } = message.content;
   if (text) {
     return text.text;
   }
 
-  if (sticker || document || photo || video || contact || poll) {
+  if (sticker || photo || video || audio || voice || document || contact || poll || webPage) {
     return undefined;
   }
 
-  return '%UNSUPPORTED_CONTENT%';
+  return CONTENT_NOT_SUPPORTED;
 }
 
 export function searchMessageText(message: ApiMessage, query: string) {

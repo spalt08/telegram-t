@@ -12,6 +12,6 @@ export interface ApiAttachment {
   };
   voice?: {
     duration: number;
-    waveForm: number[];
+    waveform: number[];
   };
 }

@@ -147,6 +147,8 @@ const Message: FC<IProps> = ({
     text,
     photo,
     video,
+    audio,
+    voice,
     document: messageDocument,
     sticker,
     contact,
@@ -235,6 +237,12 @@ const Message: FC<IProps> = ({
             onClick={isReplyInViewport ? handleReplyClick : undefined}
           />
         )}
+        {sticker && (
+          <Sticker
+            message={message}
+            loadAndPlay={loadAndPlayMedia}
+          />
+        )}
         {photo && (
           <Photo
             message={message}
@@ -253,17 +261,17 @@ const Message: FC<IProps> = ({
             onCancelTransfer={handleCancelTransfer}
           />
         )}
+        {audio && (
+          <p className="text-content">%AUDIO_FILE% Filename: {audio.fileName}. Title {audio.title}</p>
+        )}
+        {voice && (
+          <p className="text-content">%VOICE_MESSAGE% Duration: {voice.duration}</p>
+        )}
         {messageDocument && (
           <Document
             message={message}
             fileTransferProgress={fileTransferProgress}
             onCancelTransfer={handleCancelTransfer}
-          />
-        )}
-        {sticker && (
-          <Sticker
-            message={message}
-            loadAndPlay={loadAndPlayMedia}
           />
         )}
         {contact && (

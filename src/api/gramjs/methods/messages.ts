@@ -128,11 +128,11 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) 
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName })];
   if (voice) {
-    const reducedWaveForm = voice.waveForm.slice(voice.waveForm.length / 2 - 32);
+    const reducedWaveform = voice.waveform.slice(voice.waveform.length / 2 - 32);
     attributes.push(new GramJs.DocumentAttributeAudio({
       voice: true,
       duration: voice.duration,
-      waveform: Buffer.from(reducedWaveForm),
+      waveform: Buffer.from(reducedWaveform),
     }));
   }
 

@@ -9,7 +9,7 @@ const POLYFILL_OPTIONS = {
   },
 };
 
-export type Result = { blob: Blob; duration: number; waveForm: number[] };
+export type Result = { blob: Blob; duration: number; waveform: number[] };
 
 type MediaRecorderParameters = ConstructorParameters<typeof MediaRecorder>;
 
@@ -41,13 +41,13 @@ export function isSupported() {
 
 export async function start(analyzerCallback: Function) {
   const chunks: Blob[] = [];
-  const waveForm: number[] = [];
+  const waveform: number[] = [];
   const startedAt = Date.now();
 
   const { stream, release: releaseStream } = await requestStream();
 
   const releaseAnalyzer = subscribeToAnalyzer(stream, (volume: number) => {
-    waveForm.push((volume - 128) * 2);
+    waveform.push((volume - 128) * 2);
     analyzerCallback(volume);
   });
 
@@ -71,7 +71,7 @@ export async function start(analyzerCallback: Function) {
       resolve({
         blob: new Blob(chunks, BLOB_PARAMS),
         duration: Math.round((Date.now() - startedAt) / 1000),
-        waveForm,
+        waveform,
       });
     };
     mediaRecorder.onerror = reject;
