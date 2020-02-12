@@ -33,6 +33,8 @@ const INITIAL_STATE: GlobalState = {
   authRememberMe: true,
 
   isUiReady: false,
+
+  recentEmojis: [],
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
 

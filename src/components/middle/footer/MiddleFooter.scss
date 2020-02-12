@@ -17,9 +17,9 @@
     box-shadow: 0 0 .5rem .5rem #84a686;
     background: #84a686;
 
-    @media screen and (min-height: 1100px)  {
-      box-shadow: 0 0 .5rem .5rem #729d7b;
-      background: #729d7b;
+    @media screen and (min-height: 750px)  {
+      box-shadow: 0 0 .5rem .5rem #759b72;
+      background: #759b72;
     }
   }
 
@@ -90,10 +90,10 @@
   > .Button {
     flex-shrink: 0;
     background: none !important;
-    width: 2.125rem;
-    height: 2.125rem;
-    margin: 0.625rem;
-    padding: 0;
+    width: 3.375rem;
+    height: 3.375rem;
+    margin: 0;
+    padding: 0.625rem;
     align-self: flex-end;
   }
 

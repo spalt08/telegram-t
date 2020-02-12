@@ -8,6 +8,7 @@ import { ApiAttachment } from '../../../api/types';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
+import StickerMenu from './StickerMenu';
 import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import Attachment from './Attachment';
@@ -29,7 +30,8 @@ const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const [messageText, setMessageText] = useState('');
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+  const [isStickerMenuOpen, setIsStickerMenuOpen] = useState(false);
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
 
   const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (messageText && !attachment);
@@ -60,6 +62,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
       setMessageText('');
       setAttachment(undefined);
+      setIsStickerMenuOpen(false);
     }
   }, [messageText, attachment, activeVoiceRecording, sendMessage]);
 
@@ -118,17 +121,35 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     setAttachment(undefined);
   }, []);
 
-  const handleOpenMenu = useCallback(() => {
-    setIsMenuOpen(true);
+  const handleOpenAttachMenu = useCallback(() => {
+    setIsAttachMenuOpen(true);
   }, []);
 
-  const handleCloseMenu = useCallback(() => {
-    setIsMenuOpen(false);
+  const handleCloseAttachMenu = useCallback(() => {
+    setIsAttachMenuOpen(false);
   }, []);
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
     setAttachment(await buildAttachment(file, isQuick));
   }, []);
+
+  const handleOpenStickerMenu = useCallback(() => {
+    setIsStickerMenuOpen(true);
+  }, []);
+
+  const handleCloseStickerMenu = useCallback(() => {
+    setIsStickerMenuOpen(false);
+  }, []);
+
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    const messageInput = document.getElementById('message-input-text') as HTMLInputElement;
+    const selectionStart = messageInput.selectionStart || 0;
+    const selectionEnd = messageInput.selectionEnd || 0;
+    setMessageText(`${messageText.substring(0, selectionStart)}${emoji}${messageText.substring(selectionEnd)}`);
+    requestAnimationFrame(() => {
+      messageInput.setSelectionRange(selectionStart + emoji.length, selectionStart + emoji.length);
+    });
+  }, [messageText]);
 
   return (
     <div className="MiddleFooter">
@@ -142,26 +163,38 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       <div id="message-compose">
         <MessageInputReply />
         <div className="message-input-wrapper">
-          <Button className="not-implemented" round color="translucent">
+          <Button
+            className={`${isStickerMenuOpen ? 'activated' : ''}`}
+            round
+            color="translucent"
+            onMouseEnter={handleOpenStickerMenu}
+            onFocus={handleOpenStickerMenu}
+          >
             <i className="icon-smile" />
           </Button>
           <MessageInput
             messageText={!attachment ? messageText : ''}
             onUpdate={setMessageText}
             onSend={handleSend}
+            isStickerMenuOpen={isStickerMenuOpen}
           />
           <Button
-            className={`${isMenuOpen ? 'activated' : ''}`}
+            className={`${isAttachMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onClick={handleOpenMenu}
+            onClick={handleOpenAttachMenu}
           >
             <i className="icon-attach" />
           </Button>
           <AttachMenu
-            isOpen={isMenuOpen}
+            isOpen={isAttachMenuOpen}
             onFileSelect={handleFileSelect}
-            onClose={handleCloseMenu}
+            onClose={handleCloseAttachMenu}
+          />
+          <StickerMenu
+            isOpen={isStickerMenuOpen}
+            onClose={handleCloseStickerMenu}
+            onEmojiSelect={handleEmojiSelect}
           />
         </div>
       </div>

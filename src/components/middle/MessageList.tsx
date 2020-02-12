@@ -44,6 +44,7 @@ type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | '
 const LOAD_MORE_THRESHOLD_PX = 1500;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const VIEWPORT_MARGIN = 500;
+const STICKY_OFFSET_TOP = 71; // MiddleHeader Height + 10px
 const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
@@ -347,11 +348,11 @@ function areArraysEqual(arr1: any[], arr2: any[]) {
 
 function determineStickyElement(container: HTMLElement, selector: string) {
   const allElements = container.querySelectorAll(selector);
-  const containerTop = container.getBoundingClientRect().top;
+  const containerTop = container.scrollTop;
 
   Array.from(allElements).forEach((el) => {
-    const currentTop = el.getBoundingClientRect().top;
-    el.classList.toggle('is-sticky', currentTop - containerTop === 10);
+    const currentTop = (el as HTMLElement).offsetTop;
+    el.classList.toggle('is-sticky', currentTop - containerTop === STICKY_OFFSET_TOP);
   });
 }
 

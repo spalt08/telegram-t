@@ -1,0 +1,25 @@
+.EmojiButton {
+  outline: none !important;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--border-radius-messages-small);
+  background-color: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: absolute;
+  overflow: hidden;
+  font-size: 1.75rem;
+  line-height: 2.5rem;
+  transition: background-color .15s ease;
+
+  .mac-os-fix & {
+    line-height: inherit;
+  }
+
+  &:hover {
+    background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+  }
+}

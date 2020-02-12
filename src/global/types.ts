@@ -53,6 +53,8 @@ export type GlobalState = {
   showRightColumn: boolean;
   lastSyncTime?: number;
 
+  recentEmojis: string[];
+
   messageSearch: {
     isActive: boolean;
     query?: string;
@@ -61,7 +63,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system and UI
-  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' |
+  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |

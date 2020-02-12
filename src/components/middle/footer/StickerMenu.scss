@@ -1,0 +1,52 @@
+.StickerMenu {
+  .TabList {
+    position: relative;
+    height: 3rem;
+  }
+
+  .Tab {
+    width: 33.33333333%;
+
+    &:nth-child(1).active ~ .active-tab {
+      width: 2.75rem;
+      left: 16.5%;
+      margin-left: -1.5rem;
+    }
+
+    &:nth-child(2).active ~ .active-tab {
+      width: 4rem;
+      left: 50%;
+      margin-left: -2.25rem;
+    }
+
+    &:nth-child(3).active ~ .active-tab {
+      width: 2.375rem;
+      left: 83%;
+      margin-left: -1.375rem;
+    }
+  }
+
+  &-main {
+    width: 26.25rem;
+    height: 23.25rem;
+  }
+
+  .picker-tab {
+    &:not(.active) {
+      display: none;
+    }
+  }
+
+  .backdrop {
+    position: absolute;
+    top: -1rem;
+    right: auto;
+    width: 3.5rem;
+  }
+
+  .bubble {
+    padding: 0;
+    width: 26.25rem;
+    overflow: hidden;
+  }
+}

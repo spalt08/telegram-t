@@ -56,11 +56,11 @@ const MessageContextMenu: FC<IProps> = ({
       const emptyRect = {
         width: 0, left: 0, height: 0, top: 0,
       };
-      const menuEl = document.querySelector('.MessageContextMenu .bubble');
+      const menuEl = document.querySelector<HTMLDivElement>('.MessageContextMenu .bubble');
       const rootEl = document.querySelector('.MessageList');
       const headerHeight = (document.querySelector('.MiddleHeader') as HTMLElement).offsetHeight;
       const rootRect = rootEl ? rootEl.getBoundingClientRect() : emptyRect;
-      const menuRect = menuEl ? menuEl.getBoundingClientRect() : emptyRect;
+      const menuRect = menuEl ? { width: menuEl.offsetWidth, height: menuEl.offsetHeight } : emptyRect;
       const messageRect = messageEl.getBoundingClientRect();
 
       if (x + menuRect.width + SCROLLBAR_WIDTH < rootRect.width + rootRect.left) {

@@ -1,4 +1,4 @@
-import { MouseEvent } from 'react';
+import { MouseEvent as ReactMouseEvent, FocusEvent } from 'react';
 
 import React, { FC } from '../../lib/teact/teact';
 
@@ -6,11 +6,15 @@ import Spinner from './Spinner';
 import './Button.scss';
 import RippleEffect from './RippleEffect';
 
-type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
+type OnMouseEnterHandler = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
 interface IProps {
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
+  onMouseEnter?: Function;
+  onFocus?: Function;
   children: any;
   size?: 'default' | 'smaller';
   color?: 'primary' | 'secondary' | 'danger' | 'translucent' | 'translucent-white';
@@ -24,6 +28,8 @@ interface IProps {
 const Button: FC<IProps> = ({
   type = 'button',
   onClick,
+  onMouseEnter,
+  onFocus,
   children,
   size = 'default',
   color = 'primary',
@@ -55,6 +61,8 @@ const Button: FC<IProps> = ({
       type={type}
       className={combinedClass}
       onClick={onClick ? onClick as OnClickHandler : undefined}
+      onMouseEnter={onMouseEnter ? onMouseEnter as OnMouseEnterHandler : undefined}
+      onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
       aria-label={ariaLabel}
     >
       {isLoading ? (

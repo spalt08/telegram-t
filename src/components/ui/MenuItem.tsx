@@ -2,6 +2,8 @@ import React, { FC } from '../../lib/teact/teact';
 
 import RippleEffect from './RippleEffect';
 
+import './MenuItem.scss';
+
 type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 interface IProps {

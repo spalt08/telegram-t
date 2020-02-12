@@ -10,6 +10,7 @@ type IProps = {
   selectedChatId?: number;
   replyingTo?: number;
   messageText: string;
+  isStickerMenuOpen: boolean;
   onUpdate: Function;
   onSend: Function;
 } & Pick<GlobalActions, 'setChatReplyingTo'>;
@@ -20,7 +21,7 @@ const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, replyingTo, messageText, onUpdate, onSend, setChatReplyingTo,
+  selectedChatId, replyingTo, messageText, onUpdate, onSend, setChatReplyingTo, isStickerMenuOpen,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>();
 
@@ -65,7 +66,7 @@ const MessageInput: FC<IProps> = ({
     }
   }
 
-  useEffect(focusInput, [selectedChatId, replyingTo]);
+  useEffect(focusInput, [selectedChatId, replyingTo, isStickerMenuOpen, messageText]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {

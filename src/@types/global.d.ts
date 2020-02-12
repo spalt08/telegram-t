@@ -13,6 +13,21 @@ type Country = {
   code: string;
 };
 
+type EmojiCategory = {
+  id: string;
+  name: string;
+  emojis: string[];
+};
+
+type Emoji = {
+  id: string;
+  colons: string;
+  native: string;
+  skin?: number;
+};
+
+type EmojiWithSkins = Record<number, Emoji>;
+
 declare module '*.png';
 
 declare module '../lib/pako_inflate' {

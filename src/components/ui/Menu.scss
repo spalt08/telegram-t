@@ -25,54 +25,30 @@
     width: 13.5rem;
     z-index: var(--z-menu-bubble);
 
+    transform: scale(0.2);
+    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
+
+    &.open {
+      transform: scale(1);
+    }
+
     --offset-y: calc(100% + 0.5rem);
     --offset-x: 0;
 
     &.top {
       top: var(--offset-y);
     }
+
     &.bottom {
       bottom: var(--offset-y);
     }
+
     &.left {
       left: var(--offset-x);
     }
+
     &.right {
       right: var(--offset-x);
-    }
-
-    button {
-      width: 100%;
-      background: none;
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      position: relative;
-      overflow: hidden;
-      white-space: nowrap;
-      color: var(--color-text);
-      --ripple-color: rgba(0, 0, 0, .08);
-
-      &:not([disabled]) {
-        cursor: pointer;
-
-        &:hover, &:focus {
-          background-color: var(--color-chat-hover);
-        }
-      }
-
-      &[disabled] {
-        opacity: 0.5;
-      }
-
-      i {
-        font-size: 1.5rem;
-        margin-right: 2rem;
-        opacity: 0.5;
-      }
     }
   }
 }
