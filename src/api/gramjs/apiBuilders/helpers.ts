@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-export function bytesToDataUri(bytes: Uint8Array, shouldOmitPrefix = false, mimeType: string = 'image/jpg') {
+export function bytesToDataUri(bytes: Buffer, shouldOmitPrefix = false, mimeType: string = 'image/jpg') {
   const prefix = shouldOmitPrefix ? '' : `data:${mimeType};base64,`;
 
   return `${prefix}${btoa(

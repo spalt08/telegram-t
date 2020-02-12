@@ -196,7 +196,7 @@ function buildApiThumbnailFromStripped(sizes?: GramJs.TypePhotoSize[]): ApiThumb
   const { w, h } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
 
   return {
-    dataUri: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes as Buffer)),
+    dataUri: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes)),
     width: w,
     height: h,
   };
@@ -204,7 +204,7 @@ function buildApiThumbnailFromStripped(sizes?: GramJs.TypePhotoSize[]): ApiThumb
 
 function buildApiThumbnailFromCached(photoSize: GramJs.PhotoCachedSize): ApiThumbnail | undefined {
   const { w, h, bytes } = photoSize;
-  const dataUri = bytesToDataUri(strippedPhotoToJpg(bytes as Buffer));
+  const dataUri = bytesToDataUri(strippedPhotoToJpg(bytes));
 
   return {
     dataUri,

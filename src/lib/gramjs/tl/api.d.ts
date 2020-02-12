@@ -11,7 +11,6 @@ namespace Api {
   type I<T extends AnyClass> = InstanceType<T>;
   type ValuesOf<T> = T[keyof T];
   type AnyLiteral = Record<string, any>;
-  type Buffer = Uint8Array;
 
   type Reader = any; // To be defined.
   type Client = any; // To be defined.
@@ -24,7 +23,7 @@ namespace Api {
   type int128 = number;
   type int256 = number;
   type long = BigInteger;
-  type bytes = string | Uint8Array;
+  type bytes = Buffer;
 
   class VirtualClass<Args extends AnyLiteral> {
     static CONSTRUCTOR_ID: number;
@@ -266,7 +265,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-  
+
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -6114,7 +6113,7 @@ namespace Api {
   }> {
     entries: Api.TypeTlsBlock[];
   };
-  
+
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<void> {};
@@ -7322,7 +7321,7 @@ namespace Api {
   }>, Api.TypeDestroySessionRes> {
     sessionId: long;
   };
-  
+
 
   export namespace auth {
     export class SendCode extends Request<Partial<{

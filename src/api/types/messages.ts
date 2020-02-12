@@ -50,13 +50,13 @@ export interface ApiContact {
 
 export interface PollAnswer {
   text: string;
-  option: string | Uint8Array;
+  option: Buffer;
 }
 
 export interface PollAnswerVote {
   chosen?: true;
   correct?: true;
-  option: string | Uint8Array;
+  option: Buffer;
   voters: number;
 }
 

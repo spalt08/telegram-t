@@ -156,7 +156,7 @@ namespace Api {
   type int128 = number;
   type int256 = number;
   type long = BigInteger;
-  type bytes = string | Uint8Array;
+  type bytes = Buffer;
 
   class VirtualClass<Args extends AnyLiteral> {
     static CONSTRUCTOR_ID: number;
