@@ -48,6 +48,36 @@ export interface ApiContact {
   userId: number;
 }
 
+export interface PollAnswer {
+  text: string;
+  option: string | Uint8Array;
+}
+
+export interface PollAnswerVote {
+  chosen?: true;
+  correct?: true;
+  option: string | Uint8Array;
+  voters: number;
+}
+
+export interface ApiPoll {
+  id: number;
+  summary: {
+    closed?: true;
+    publicVoters?: true;
+    multipleChoice?: true;
+    quiz?: true;
+    question: string;
+    answers: PollAnswer[];
+  };
+  results: {
+    min?: true;
+    results?: PollAnswerVote[];
+    totalVoters?: number;
+    recentVoters?: number[];
+  };
+}
+
 export interface ApiAction {
   text: string;
   targetUserId?: number;
@@ -98,6 +128,7 @@ export interface ApiMessage {
     document?: ApiDocument;
     sticker?: ApiSticker;
     contact?: ApiContact;
+    poll?: ApiPoll;
     action?: ApiAction;
     webPage?: ApiWebPage;
   };

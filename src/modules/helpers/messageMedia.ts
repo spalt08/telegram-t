@@ -50,6 +50,10 @@ export function getMessageContact(message: ApiMessage) {
   return message.content.contact;
 }
 
+export function getMessagePoll(message: ApiMessage) {
+  return message.content.poll;
+}
+
 export function getMessageWebPage(message: ApiMessage) {
   return message.content.webPage;
 }

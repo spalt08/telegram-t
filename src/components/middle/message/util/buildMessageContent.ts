@@ -8,6 +8,7 @@ import {
   getLastMessageText,
   getMessageContact,
   isOwnMessage,
+  getMessagePoll,
   getMessageWebPage,
 } from '../../../../modules/helpers';
 import {
@@ -17,6 +18,7 @@ import {
   ApiVideo,
   ApiDocument,
   ApiContact,
+  ApiPoll,
   ApiWebPage,
 } from '../../../../api/types';
 
@@ -29,6 +31,7 @@ export interface MessageContent {
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
+  poll?: ApiPoll;
   webPage?: ApiWebPage;
   className?: string;
 }
@@ -39,7 +42,7 @@ interface BuildMessageContentOptions {
   isLastInGroup?: boolean;
 }
 
-const SOLID_BACKGROUND_CLASSES = ['text', 'media', 'contact', 'document', 'is-forwarded', 'is-reply'];
+const SOLID_BACKGROUND_CLASSES = ['text', 'media', 'contact', 'document', 'poll', 'is-forwarded', 'is-reply'];
 
 export function buildMessageContent(message: ApiMessage, options: BuildMessageContentOptions = {}): MessageContent {
   const text = getMessageText(message);
@@ -48,6 +51,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   const document = getMessageDocument(message);
   const sticker = getMessageSticker(message);
   const contact = getMessageContact(message);
+  const poll = getMessagePoll(message);
   const webPage = getMessageWebPage(message);
   const classNames = ['message-content'];
   let contentParts: TextPart | TextPart[] | undefined;
@@ -83,6 +87,10 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
 
   if (contact) {
     classNames.push('contact');
+  }
+
+  if (poll) {
+    classNames.push('poll');
   }
 
   if (webPage) {
@@ -129,6 +137,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     document,
     sticker,
     contact,
+    poll,
     webPage,
     className: classNames.join(' '),
   };

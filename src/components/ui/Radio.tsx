@@ -1,25 +1,31 @@
 import { ChangeEvent } from 'react';
 import React, { FC } from '../../lib/teact/teact';
 
-import './Checkbox.scss';
+import './Radio.scss';
 
 interface IProps {
   id?: string;
+  name: string;
   label: string;
+  value: string;
   checked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const Checkbox: FC<IProps> = ({
+const Radio: FC<IProps> = ({
   id,
   label,
+  value,
+  name,
   checked,
   onChange,
 }) => {
   return (
-    <label className="Checkbox">
+    <label className="Radio">
       <input
-        type="checkbox"
+        type="radio"
+        name={name}
+        value={value}
         id={id}
         checked={checked}
         onChange={onChange}
@@ -29,4 +35,4 @@ const Checkbox: FC<IProps> = ({
   );
 };
 
-export default Checkbox;
+export default Radio;

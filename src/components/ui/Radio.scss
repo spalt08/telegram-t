@@ -1,0 +1,55 @@
+.Radio {
+  display: block;
+  position: relative;
+  padding-left: 2.5rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  line-height: 1.5rem;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    z-index: var(--z-below);
+    opacity: 0;
+  }
+
+  span {
+    &::before, &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0.375rem;
+      top: 0.125rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    &::before {
+      border: 2px solid var(--color-borders);
+      border-radius: 50%;
+      background-color: white;
+      transition: border-color .1s ease;
+    }
+
+    &::after {
+      left: 0.6875rem;
+      top: 0.4375rem;
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      background: var(--color-primary);
+      opacity: 0;
+      transition: opacity .1s ease;
+    }
+  }
+
+  input:checked ~ span {
+    &::before {
+      border-color: var(--color-primary);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}

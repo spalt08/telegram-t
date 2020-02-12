@@ -1,6 +1,6 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 
-import { ApiDocument, ApiMessage } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
 
 import { getDocumentExtension } from '../../../util/documentInfo';
 import { getMessageDocument } from '../../../modules/helpers';

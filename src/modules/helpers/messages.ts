@@ -17,6 +17,7 @@ export function getLastMessageText(message: ApiMessage) {
     document,
     sticker,
     contact,
+    poll,
   } = message.content;
 
   if (photo) {
@@ -49,6 +50,10 @@ export function getLastMessageText(message: ApiMessage) {
     return 'Contact';
   }
 
+  if (poll) {
+    return `(Poll) ${poll.summary.question}`;
+  }
+
   return '%UNSUPPORTED_CONTENT%';
 }
 
@@ -60,12 +65,13 @@ export function getMessageText(message: ApiMessage) {
     video,
     sticker,
     contact,
+    poll,
   } = message.content;
   if (text) {
     return text.text;
   }
 
-  if (sticker || document || photo || video || contact) {
+  if (sticker || document || photo || video || contact || poll) {
     return undefined;
   }
 

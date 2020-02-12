@@ -12,6 +12,7 @@ import {
   ApiContact,
   ApiAttachment,
   ApiThumbnail,
+  ApiPoll,
   ApiWebPage,
 } from '../../types';
 
@@ -78,6 +79,7 @@ export function buildApiMessageWithChatId(
   const video = mtpMessage.media && buildVideo(mtpMessage.media);
   const document = mtpMessage.media && buildDocument(mtpMessage.media);
   const contact = mtpMessage.media && buildContact(mtpMessage.media);
+  const poll = mtpMessage.media && buildPoll(mtpMessage.media);
   const webPage = mtpMessage.media && buildWebPage(mtpMessage.media);
   const text = mtpMessage.message && {
     '@type': 'formattedText' as const,
@@ -100,6 +102,7 @@ export function buildApiMessageWithChatId(
       ...(video && { video }),
       ...(document && { document }),
       ...(contact && { contact }),
+      ...(poll && { poll }),
       ...(action && { action }),
       ...(webPage && { webPage }),
     },
@@ -291,6 +294,20 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | null {
     lastName,
     phoneNumber,
     userId,
+  };
+}
+
+function buildPoll(media: GramJs.TypeMessageMedia): ApiPoll | null {
+  if (!(media instanceof GramJs.MessageMediaPoll)) {
+    return null;
+  }
+
+  const { id, ...summary } = media.poll;
+
+  return {
+    id: Number(id),
+    summary,
+    results: media.results,
   };
 }
 

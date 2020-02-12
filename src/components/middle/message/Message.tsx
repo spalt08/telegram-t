@@ -36,6 +36,7 @@ import Document from './Document';
 import Video from './Video';
 import Photo from './Photo';
 import Contact from './Contact';
+import Poll from './Poll';
 import WebPage from './WebPage';
 
 import './Message.scss';
@@ -149,10 +150,10 @@ const Message: FC<IProps> = ({
     document: messageDocument,
     sticker,
     contact,
+    poll,
     webPage,
     className: contentClassName,
   } = buildMessageContent(message, { isLastInGroup, hasReply: isReply });
-  const isText = Boolean(contentClassName && contentClassName.includes('text'));
   const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
 
   const handleAvatarClick = useCallback(() => {
@@ -203,7 +204,7 @@ const Message: FC<IProps> = ({
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
-      || (!user || !isText || photo)
+      || !user || photo || video || sticker
     ) {
       return null;
     }
@@ -268,9 +269,10 @@ const Message: FC<IProps> = ({
         {contact && (
           <Contact contact={contact} />
         )}
-        {text && (
-          <p className="text-content">{text}</p>
+        {poll && (
+          <Poll messageId={message.id} poll={poll} />
         )}
+        {text && <p className="text-content">{text}</p>}
         {webPage && (
           <WebPage
             message={message}
