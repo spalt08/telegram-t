@@ -191,7 +191,9 @@ const MessageList: FC<IProps> = ({
     const isScrolledDown = currentScrollOffset === offsetHeight;
     const anchor = currentAnchorId ? document.getElementById(`message${currentAnchorId}`) : undefined;
 
-    if (!anchor || (prevIsLatest && isScrolledDown)) {
+    if (prevIsLatest && isScrolledDown) {
+      scrollToLastMessage(containerRef.current);
+    } else if (!anchor) {
       containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
     } else {
       const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
@@ -220,7 +222,7 @@ const MessageList: FC<IProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={classNames.join(' ')} onScroll={handleScroll}>
+    <div ref={containerRef} id="MessageList" className={classNames.join(' ')} onScroll={handleScroll}>
       {isLoaded ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
@@ -299,6 +301,17 @@ function renderMessages(
   });
 
   return flatten(dateGroups);
+}
+
+function scrollToLastMessage(container: HTMLElement) {
+  // One RAF causes a redundant animation when deleting
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }
+    });
+  });
 }
 
 function findMediaMessagesInViewport(container: HTMLElement) {
