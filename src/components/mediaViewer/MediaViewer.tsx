@@ -52,7 +52,7 @@ const MediaViewer: FC<IProps> = ({
     return isWebPagePhoto && selectedMediaMessageId
       ? [selectedMediaMessageId]
       : getChatMediaMessageIds(chatMessages || {}, mediaReverseOrder);
-  }, [isWebPagePhoto, selectedMediaMessageId, chatMessages]);
+  }, [isWebPagePhoto, selectedMediaMessageId, chatMessages, mediaReverseOrder]);
   const selectedMediaMessageIndex = selectedMediaMessageId ? messageIds.indexOf(selectedMediaMessageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;

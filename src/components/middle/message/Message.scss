@@ -13,6 +13,23 @@
   --meta-safe-area-size: var(--meta-safe-area-base);
   --deleting-translate-x: -50%;
 
+  &::before {
+    content: "";
+    position: absolute;
+    top: -0.25rem;
+    bottom: -0.25rem;
+    left: -999rem;
+    right: -999rem;
+    background: rgba(81, 170, 255, 0.2);
+
+    opacity: 0;
+    transition: opacity 500ms;
+  }
+
+  &.focused::before {
+    opacity: 1;
+  }
+
   > .Avatar, > .message-content {
     opacity: 1;
     transform: scale(1) translateX(0);

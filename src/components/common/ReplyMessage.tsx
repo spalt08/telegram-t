@@ -16,12 +16,13 @@ type IProps = {
   sender?: ApiUser;
   className?: string;
   loadPictogram?: boolean;
+  onClick?: NoneToVoidFunction;
 };
 
 const NBSP = '\u00A0';
 
 const ReplyMessage: FC<IProps> = ({
-  message, sender, className, loadPictogram,
+  message, sender, className, loadPictogram, onClick,
 }) => {
   const text = message ? buildMessageContent(message, { isReply: true }).text : NBSP;
 
@@ -29,7 +30,7 @@ const ReplyMessage: FC<IProps> = ({
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
 
   return (
-    <div className={`ReplyMessage not-implemented ${className || ''}`}>
+    <div className={`ReplyMessage ${className || ''}`} onClick={onClick}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="reply-text">
         <div className="sender-name">{sender ? getUserFullName(sender) : NBSP}</div>

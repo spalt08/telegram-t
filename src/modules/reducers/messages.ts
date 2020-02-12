@@ -6,6 +6,7 @@ type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
   listedIds?: number[];
   viewportIds?: number[];
+  focusedMessageId?: number;
 };
 
 function replaceStoreSection(global: GlobalState, chatId: number, update: Partial<MessageStoreSections>): GlobalState {
@@ -154,4 +155,10 @@ export function updateChatMessageViewportIds(
     ...viewportIds,
     ...newIds,
   ]);
+}
+
+export function updateFocusedMessageId(global: GlobalState, chatId: number, focusedMessageId?: number) {
+  return replaceStoreSection(global, chatId, {
+    focusedMessageId,
+  });
 }

@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -7,7 +7,9 @@ import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
 import {
+  selectChatFocusedMessageId,
   selectChatMessage,
+  selectChatMessageViewportIds,
   selectFileTransferProgress,
   selectOutgoingStatus,
   selectUser,
@@ -44,20 +46,26 @@ type MessagePositionProperties = {
   isLastInList: boolean;
 };
 
-type IProps = {
-  message: ApiMessage;
-  showAvatar?: boolean;
-  showSenderName?: boolean;
-  loadAndPlayMedia?: boolean;
-  sender?: ApiUser;
-  replyMessage?: ApiMessage;
-  replyMessageSender?: ApiUser;
-  originSender?: ApiUser;
-  canDelete?: boolean;
-  contactFirstName: string | null;
-  outgoingStatus?: ApiMessageOutgoingStatus;
-  fileTransferProgress?: number;
-} & MessagePositionProperties & Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>;
+type IProps = (
+  {
+    message: ApiMessage;
+    showAvatar?: boolean;
+    showSenderName?: boolean;
+    loadAndPlayMedia?: boolean;
+    sender?: ApiUser;
+    replyMessage?: ApiMessage;
+    replyMessageSender?: ApiUser;
+    isReplyInViewport?: boolean;
+    originSender?: ApiUser;
+    canDelete?: boolean;
+    contactFirstName: string | null;
+    outgoingStatus?: ApiMessageOutgoingStatus;
+    fileTransferProgress?: number;
+    isFocused?: boolean;
+  }
+  & MessagePositionProperties
+  & Pick<GlobalActions, 'focusMessage' | 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>
+);
 
 const NBSP = '\u00A0';
 
@@ -69,17 +77,22 @@ const Message: FC<IProps> = ({
   sender,
   replyMessage,
   replyMessageSender,
+  isReplyInViewport,
   originSender,
   outgoingStatus,
   fileTransferProgress,
+  focusMessage,
   selectMediaMessage,
   cancelSendingMessage,
   openUserInfo,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
+  isFocused,
 }) => {
   const { chat_id: chatId, id: messageId } = message;
+
+  const elementRef = useRef<HTMLDivElement>();
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
@@ -104,10 +117,28 @@ const Message: FC<IProps> = ({
     replyMessageSender,
   );
 
+  useEffect(() => {
+    const messagesContainer = document.getElementById('MessageList');
+    if (isFocused && elementRef.current && messagesContainer) {
+      const offset = elementRef.current.offsetTop - messagesContainer.scrollTop;
+      if (offset < -2000) {
+        messagesContainer.scrollTop += (offset + 2000);
+      } else if (offset > 1000) {
+        messagesContainer.scrollTop += (offset - 2000);
+      }
+
+      elementRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [isFocused, chatId, focusMessage]);
+
   const containerClassNames = buildClassNames(
     message,
     { isFirstInGroup, isLastInGroup, isLastInList },
     contextMenuPosition !== null,
+    isFocused,
   );
   const isForwarded = Boolean(message.forward_info);
   const isReply = Boolean(message.reply_to_message_id);
@@ -130,6 +161,10 @@ const Message: FC<IProps> = ({
     }
     openUserInfo({ id: sender.id });
   }, [openUserInfo, sender]);
+
+  const handleReplyClick = useCallback((): void => {
+    focusMessage({ chatId, messageId: message.reply_to_message_id });
+  }, [focusMessage, chatId, message.reply_to_message_id]);
 
   const handleMediaClick = useCallback((): void => {
     selectMediaMessage({ id: messageId });
@@ -191,7 +226,13 @@ const Message: FC<IProps> = ({
       <div className={classNames.join(' ')}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {isReply && (
-          <ReplyMessage message={replyMessage} sender={replyMessageSender} loadPictogram={loadAndPlayMedia} />
+          <ReplyMessage
+            className={isReplyInViewport ? '' : 'not-implemented '}
+            message={replyMessage}
+            sender={replyMessageSender}
+            loadPictogram={loadAndPlayMedia}
+            onClick={isReplyInViewport ? handleReplyClick : undefined}
+          />
         )}
         {photo && (
           <Photo
@@ -255,7 +296,12 @@ const Message: FC<IProps> = ({
   }
 
   return (
-    <div id={`message${messageId}`} className={containerClassNames.join(' ')} data-message-id={messageId}>
+    <div
+      ref={elementRef}
+      id={`message${messageId}`}
+      className={containerClassNames.join(' ')}
+      data-message-id={messageId}
+    >
       {showAvatar && (
         <Avatar
           size="small"
@@ -296,6 +342,7 @@ function buildClassNames(
   message: ApiMessage,
   position: MessagePositionProperties,
   hasContextMenu = false,
+  isFocused = false,
 ) {
   const classNames = ['Message'];
 
@@ -335,6 +382,10 @@ function buildClassNames(
     classNames.push('has-menu-open');
   }
 
+  if (isFocused) {
+    classNames.push('focused');
+  }
+
   if (message.is_deleting) {
     classNames.push('is-deleting');
   }
@@ -345,12 +396,16 @@ function buildClassNames(
 export default memo(withGlobal(
   (global, ownProps: IProps) => {
     const { message, showSenderName, showAvatar } = ownProps;
+
     const replyMessage = message.reply_to_message_id
       ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
       : undefined;
     const replyMessageSender = replyMessage && replyMessage.sender_user_id
       ? selectUser(global, replyMessage.sender_user_id)
       : undefined;
+    const viewportIds = selectChatMessageViewportIds(global, message.chat_id);
+    const isReplyInViewport = message.reply_to_message_id && viewportIds
+      && viewportIds.includes(message.reply_to_message_id);
 
     let userId;
     let originUserId;
@@ -362,6 +417,7 @@ export default memo(withGlobal(
     }
 
     const fileTransferProgress = selectFileTransferProgress(global, message);
+    const isFocused = message.id === selectChatFocusedMessageId(global, message.chat_id);
 
     return {
       message,
@@ -370,18 +426,22 @@ export default memo(withGlobal(
       ...(replyMessage && {
         replyMessage,
         replyMessageSender,
+        isReplyInViewport,
       }),
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
+      isFocused,
     };
   },
   (setGlobal, actions) => {
     const {
+      focusMessage,
       selectMediaMessage,
       cancelSendingMessage,
       openUserInfo,
     } = actions;
     return {
+      focusMessage,
       selectMediaMessage,
       cancelSendingMessage,
       openUserInfo,

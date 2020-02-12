@@ -2,10 +2,16 @@ import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage } from '../../../api/types';
 import {
-  updateChat, deleteChatMessages, updateChatMessage, updateChatMessageListedIds, updateChatMessageViewportIds,
+  updateChat,
+  deleteChatMessages,
+  updateChatMessage,
+  updateChatMessageListedIds,
+  updateChatMessageViewportIds,
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
-import { selectChat, selectChatMessage, selectChatMessages, selectIsChatMessageViewportLatest } from '../../selectors';
+import {
+  selectChat, selectChatMessage, selectChatMessages, selectIsChatMessageViewportLatest,
+} from '../../selectors';
 import { getMessageKey, getMessagePhoto, getMessageVideo } from '../../helpers';
 
 const ANIMATION_DELAY = 300;

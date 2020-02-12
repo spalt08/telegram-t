@@ -36,6 +36,12 @@ export function selectChatMessage(global: GlobalState, chatId: number, messageId
   return chatMessages ? chatMessages[messageId] : null;
 }
 
+export function selectChatFocusedMessageId(global: GlobalState, chatId: number) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messages.focusedMessageId : undefined;
+}
+
 export function selectIsUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 

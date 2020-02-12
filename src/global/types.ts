@@ -21,13 +21,14 @@ export type GlobalState = {
   };
 
   messages: {
-    selectedMediaMessageId?: number;
-    mediaReverseOrder?: boolean;
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
       listedIds?: number[];
       viewportIds?: number[];
+      focusedMessageId?: number;
     }>;
+    selectedMediaMessageId?: number;
+    mediaReverseOrder?: boolean;
   };
 
   fileTransfers: {
@@ -68,8 +69,8 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
-  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' |'pinMessage' | 'deleteMessages' |
-  'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' |
+  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
+  'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   // message search
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' |
   // users
