@@ -1,0 +1,54 @@
+.WebPagePreview {
+  display: flex;
+  align-items: center;
+  margin-bottom: -.75rem;
+  padding-right: 0.625rem;
+  padding-top: 0.45rem;
+
+  // TODO: Remove this when support for disabling webpage preview is added
+  padding-left: 3.375rem;
+
+  --accent-color: var(--color-primary);
+
+  .MessageInputReply + & {
+    margin-top: 0.75rem;
+  }
+
+  & > .Button {
+    flex-shrink: 0;
+    background: none !important;
+    width: 2.125rem;
+    height: 2.125rem;
+    margin: 0 0.625rem;
+    padding: 0;
+    align-self: center;
+  }
+
+  .WebPage {
+    flex-grow: 1;
+    margin: 0.1875rem 0 0.1875rem 0.125rem;
+    padding-left: .22rem;
+
+    .site-title {
+      margin-bottom: 0;
+    }
+
+    &.without-photo::before {
+      content: attr(data-initial);
+      width: 2rem;
+      height: 2rem;
+      float: left;
+      margin-top: .075rem;
+      margin-right: 0.375rem;
+      background-color: var(--color-webpage-initial-background);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--border-radius-messages-small);
+      text-transform: uppercase;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+  }
+}

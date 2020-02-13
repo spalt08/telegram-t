@@ -5,6 +5,7 @@ import {
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
   ApiMessageSearchMediaType,
+  ApiWebPage,
 } from '../api/types';
 
 export type GlobalState = {
@@ -56,6 +57,8 @@ export type GlobalState = {
 
   recentEmojis: string[];
 
+  webPagePreview?: ApiWebPage;
+
   messageSearch: {
     isTextSearch: boolean;
     query?: string;
@@ -78,6 +81,7 @@ export type ActionTypes = (
   // messages
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
+  'loadWebPagePreview' | 'clearWebPagePreview' |
   // message search
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' |

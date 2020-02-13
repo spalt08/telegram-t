@@ -80,6 +80,7 @@ function updateCache(global: GlobalState) {
     lastSyncTime: undefined,
     isUiReady: false,
     messageSearch: { isTextSearch: false },
+    webPagePreview: undefined,
   };
 
   const json = JSON.stringify(reducedState);

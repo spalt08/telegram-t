@@ -130,6 +130,26 @@ addReducer('markMessagesRead', (global, actions, payload) => {
   void callApi('markMessagesRead', { chat, maxId });
 });
 
+addReducer('loadWebPagePreview', (global, actions, payload) => {
+  const { text } = payload!;
+  void loadWebPagePreview(text);
+});
+
+addReducer('clearWebPagePreview', (global) => {
+  setGlobal({
+    ...global,
+    webPagePreview: undefined,
+  });
+});
+
+async function loadWebPagePreview(message: string) {
+  const webPagePreview = await callApi('fetchWebPagePreview', { message });
+  setGlobal({
+    ...getGlobal(),
+    webPagePreview,
+  });
+}
+
 async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?: 1 | -1) {
   const result = await callApi('fetchMessages', {
     chat,

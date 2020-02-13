@@ -8,6 +8,7 @@ import {
   buildApiMessage,
   buildLocalMessage,
   resolveMessageApiChatId,
+  buildWebPage,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -269,6 +270,14 @@ export async function searchMessages({
     totalCount,
     nextOffsetId,
   };
+}
+
+export async function fetchWebPagePreview({ message }: { message: string }) {
+  const preview = await invokeRequest(new GramJs.messages.GetWebPagePreview({
+    message,
+  }));
+
+  return preview && buildWebPage(preview);
 }
 
 function updateLocalDb(

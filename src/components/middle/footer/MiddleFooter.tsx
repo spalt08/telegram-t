@@ -12,11 +12,12 @@ import StickerMenu from './StickerMenu';
 import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import Attachment from './Attachment';
+import WebPagePreview from './WebPagePreview';
 
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
+import * as voiceRecording from '../../../util/voiceRecording';
 
 import './MiddleFooter.scss';
-import * as voiceRecording from '../../../util/voiceRecording';
 
 type IProps = Pick<GlobalActions, 'sendMessage'>;
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
@@ -162,6 +163,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       />
       <div id="message-compose">
         <MessageInputReply />
+        <WebPagePreview messageText={!attachment ? messageText : ''} />
         <div className="message-input-wrapper">
           <Button
             className={`${isStickerMenuOpen ? 'activated' : ''}`}

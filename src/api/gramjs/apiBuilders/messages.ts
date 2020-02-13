@@ -386,7 +386,7 @@ function buildPoll(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
   };
 }
 
-function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undefined {
+export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undefined {
   if (
     !(media instanceof GramJs.MessageMediaWebPage)
     || !(media.webpage instanceof GramJs.WebPage)
