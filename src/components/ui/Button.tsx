@@ -6,13 +6,13 @@ import Spinner from './Spinner';
 import './Button.scss';
 import RippleEffect from './RippleEffect';
 
-type OnClickHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
-type OnMouseEnterHandler = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
 interface IProps {
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
+  onMouseDown?: Function;
   onMouseEnter?: Function;
   onFocus?: Function;
   children: any;
@@ -28,6 +28,7 @@ interface IProps {
 const Button: FC<IProps> = ({
   type = 'button',
   onClick,
+  onMouseDown,
   onMouseEnter,
   onFocus,
   children,
@@ -60,8 +61,9 @@ const Button: FC<IProps> = ({
     <button
       type={type}
       className={combinedClass}
-      onClick={onClick ? onClick as OnClickHandler : undefined}
-      onMouseEnter={onMouseEnter ? onMouseEnter as OnMouseEnterHandler : undefined}
+      onClick={onClick ? onClick as MouseEventHandler : undefined}
+      onMouseDown={onMouseDown ? onMouseDown as MouseEventHandler : undefined}
+      onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
       onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
       aria-label={ariaLabel}
     >

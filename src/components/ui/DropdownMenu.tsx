@@ -5,7 +5,7 @@ import './DropdownMenu.scss';
 
 interface IProps {
   className?: string;
-  trigger: FC<{ onClick: () => void; isOpen?: boolean }>;
+  trigger: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   children: any;
@@ -41,7 +41,7 @@ const DropdownMenu: FC<IProps> = (props) => {
 
   return (
     <div className={`DropdownMenu ${className || ''}`} onKeyDown={handleKeyDown}>
-      {trigger({ onClick: toggleIsOpen, isOpen })}
+      {trigger({ onTrigger: toggleIsOpen, isOpen })}
 
       <Menu
         isOpen={isOpen}

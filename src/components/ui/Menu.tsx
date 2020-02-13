@@ -36,7 +36,10 @@ const Menu: FC<IProps> = (props) => {
     onMouseLeave,
   } = props;
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
-  const bubbleClassNames = ['bubble', positionY, positionX, 'overlay', ...transitionClassNames].join(' ');
+  const bubbleClassNames = [
+    'bubble', 'custom-scroll', positionY, positionX,
+    'overlay', ...transitionClassNames,
+  ].join(' ');
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
   const backDropHandler = noCloseOnBackdrop ? undefined : onClose;
@@ -50,17 +53,17 @@ const Menu: FC<IProps> = (props) => {
       style={style}
     >
       {isOpen && (
-        <div className="backdrop" onClick={backDropHandler} onContextMenu={backDropHandler} />
+        <div className="backdrop" onMouseDown={backDropHandler} />
       )}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <ul
+      <div
         className={bubbleClassNames}
         // @ts-ignore teact feature
         style={`transform-origin: ${positionY} ${positionX}`}
         onClick={autoClose ? onClose : undefined}
       >
         {children}
-      </ul>
+      </div>
     </div>
   );
 };

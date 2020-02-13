@@ -13,12 +13,33 @@
       opacity: 0.5;
       --spinner-size: 1.5rem;
     }
+
+    .icon-down {
+      position: absolute;
+      top: 1rem;
+      right: 0.875rem;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      transform: scaleY(1);
+      transition: color .2s ease, transform .2s ease;
+
+      &.open {
+        color: var(--color-primary);
+        transform: scaleY(-1);
+      }
+    }
   }
 
   .bubble {
     width: 100%;
     max-height: 23.5rem;
     overflow-y: auto;
+    transform-origin: top center !important;
+    transform: scale(0.95);
+
+    &.open {
+      transform: scaleY(1);
+    }
   }
 
   .MenuItem {

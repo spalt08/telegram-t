@@ -101,12 +101,12 @@ const CountryCodeInput: FC<IProps> = (props) => {
     }
   }
 
-  const CodeInput: FC<{ onClick: () => void; isOpen?: boolean }> = ({ onClick, isOpen }) => {
-    const handleClick = () => {
+  const CodeInput: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => {
+    const handleTrigger = () => {
       if (isOpen) {
         return;
       }
-      onClick();
+      onTrigger();
     };
 
     const inputValue = filter !== undefined
@@ -122,14 +122,16 @@ const CountryCodeInput: FC<IProps> = (props) => {
           value={inputValue}
           placeholder="Country"
           autoComplete="off"
-          onClick={handleClick}
-          onFocus={handleClick}
+          onClick={handleTrigger}
+          onFocus={handleTrigger}
           onInput={onInput}
           onKeyDown={onInputKeyDown}
         />
         <label>Country</label>
-        {isLoading && (
+        {isLoading ? (
           <Spinner color="black" />
+        ) : (
+          <i onClick={handleTrigger} className={`icon-down ${isOpen ? 'open' : ''}`} />
         )}
       </div>
     );

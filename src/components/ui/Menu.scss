@@ -26,7 +26,7 @@
     z-index: var(--z-menu-bubble);
 
     transform: scale(0.2);
-    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
+    transition: opacity 0.15s ease-out, transform 0.2s ease-out !important;
 
     &.open {
       transform: scale(1);

@@ -11,8 +11,8 @@ import './LeftHeader.scss';
 
 type IProps = Pick<GlobalActions, 'signOut'>;
 
-const MenuButton: FC<{ onClick: () => void; isOpen?: boolean }> = ({ onClick, isOpen }) => (
-  <Button round size="smaller" color="translucent" className={isOpen ? 'active' : ''} onClick={onClick}>
+const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => (
+  <Button round size="smaller" color="translucent" className={isOpen ? 'active' : ''} onMouseDown={onTrigger}>
     <i className="icon-menu" />
   </Button>
 );
