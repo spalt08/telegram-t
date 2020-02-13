@@ -68,6 +68,7 @@ type IProps = (
   & Pick<GlobalActions, 'focusMessage' | 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>
 );
 
+const FOCUSING_MAX_DISTANCE = 2000;
 const NBSP = '\u00A0';
 
 const Message: FC<IProps> = ({
@@ -122,10 +123,10 @@ const Message: FC<IProps> = ({
     const messagesContainer = document.getElementById('MessageList');
     if (isFocused && elementRef.current && messagesContainer) {
       const offset = elementRef.current.offsetTop - messagesContainer.scrollTop;
-      if (offset < -2000) {
-        messagesContainer.scrollTop += (offset + 2000);
-      } else if (offset > 1000) {
-        messagesContainer.scrollTop += (offset - 2000);
+      if (offset < -FOCUSING_MAX_DISTANCE) {
+        messagesContainer.scrollTop += (offset + FOCUSING_MAX_DISTANCE);
+      } else if (offset > FOCUSING_MAX_DISTANCE) {
+        messagesContainer.scrollTop += (offset - FOCUSING_MAX_DISTANCE);
       }
 
       elementRef.current.scrollIntoView({
