@@ -3,7 +3,7 @@ import { updateSelectedChatId } from '../reducers';
 
 addReducer('openMessageSearch', (global, actions, payload) => {
   const { id } = payload!;
-  if (id === global.chats.selectedId && global.messageSearch.isActive) {
+  if (id === global.chats.selectedId && global.messageSearch.isTextSearch) {
     return global;
   }
 
@@ -12,7 +12,7 @@ addReducer('openMessageSearch', (global, actions, payload) => {
     ...global,
     showRightColumn: true,
     messageSearch: {
-      isActive: true,
+      isTextSearch: true,
     },
   };
 
@@ -24,7 +24,7 @@ addReducer('closeMessageSearch', (global) => {
     ...global,
     showRightColumn: false,
     messageSearch: {
-      isActive: false,
+      isTextSearch: false,
     },
   };
 });
@@ -40,8 +40,25 @@ addReducer('setMessageSearchQuery', (global, actions, payload) => {
   return {
     ...global,
     messageSearch: {
-      isActive: true,
+      isTextSearch: true,
       query,
+    },
+  };
+});
+
+addReducer('setMessageSearchMediaType', (global, actions, payload) => {
+  const { mediaType } = payload!;
+  const currentMediaType = global.messageSearch.mediaType;
+
+  if (mediaType === currentMediaType) {
+    return undefined;
+  }
+
+  return {
+    ...global,
+    messageSearch: {
+      isTextSearch: false,
+      mediaType,
     },
   };
 });

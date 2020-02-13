@@ -75,7 +75,7 @@ export function updateSelectedChatId(global: GlobalState, selectedId?: number): 
       selectedId,
     },
     messageSearch: {
-      isActive: false,
+      isTextSearch: false,
     },
   };
 }

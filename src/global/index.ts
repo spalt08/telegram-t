@@ -9,7 +9,7 @@ import { filterKeys } from '../util/iteratees';
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
   messageSearch: {
-    isActive: false,
+    isTextSearch: false,
   },
 
   users: {
@@ -79,7 +79,7 @@ function updateCache(global: GlobalState) {
     connectionState: undefined,
     lastSyncTime: undefined,
     isUiReady: false,
-    messageSearch: { isActive: false },
+    messageSearch: { isTextSearch: false },
   };
 
   const json = JSON.stringify(reducedState);

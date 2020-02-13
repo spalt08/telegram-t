@@ -4,6 +4,7 @@ import {
   ApiUser,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
+  ApiMessageSearchMediaType,
 } from '../api/types';
 
 export type GlobalState = {
@@ -56,8 +57,9 @@ export type GlobalState = {
   recentEmojis: string[];
 
   messageSearch: {
-    isActive: boolean;
+    isTextSearch: boolean;
     query?: string;
+    mediaType?: ApiMessageSearchMediaType;
     totalCount?: number;
     nextOffsetId?: number;
     foundIds?: number[];
@@ -77,7 +79,8 @@ export type ActionTypes = (
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   // message search
-  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'searchMessages' |
+  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
+  'searchMessages' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
 );

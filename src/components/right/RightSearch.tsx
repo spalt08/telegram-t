@@ -2,6 +2,7 @@ import React, { FC, useMemo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+
 import {
   selectUser,
   selectChatMessages,
@@ -15,16 +16,16 @@ import {
   getUserFullName,
 } from '../../modules/helpers';
 import { TextPart } from '../middle/message/util/enhanceText';
-
-import Avatar from '../common/Avatar';
 import LastMessageMeta from '../left/LastMessageMeta';
-import RippleEffect from '../ui/RippleEffect';
-
-import './RightSearch.scss';
-import InfiniteScroll from '../ui/InfiniteScroll';
 import { GlobalActions } from '../../global/types';
 import { orderBy } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+
+import RippleEffect from '../ui/RippleEffect';
+import InfiniteScroll from '../ui/InfiniteScroll';
+import Avatar from '../common/Avatar';
+
+import './RightSearch.scss';
 
 type IProps = {
   chat: ApiChat;

@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat } from '../../../api/types';
+import { ApiChat, ApiMessageSearchMediaType } from '../../../api/types';
 
 import { callApi } from '../../../api/gramjs';
 import { selectOpenChat } from '../../selectors';
@@ -14,18 +14,18 @@ const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 addReducer('searchMessages', (global) => {
   const chat = selectOpenChat(global);
-  const { query, nextOffsetId: offsetId } = global.messageSearch;
+  const { query, mediaType, nextOffsetId: offsetId } = global.messageSearch;
 
-  if (!chat || !query) {
+  if (!chat || !(query || mediaType)) {
     return;
   }
 
-  runDebouncedForSearch(() => searchMessages(chat, query, offsetId));
+  runDebouncedForSearch(() => searchMessages(chat, query, mediaType, offsetId));
 });
 
-async function searchMessages(chat: ApiChat, query: string, offsetId?: number) {
+async function searchMessages(chat: ApiChat, query?: string, mediaType?: ApiMessageSearchMediaType, offsetId?: number) {
   const result = await callApi('searchMessages', {
-    chat, query, limit: SEARCH_LIMIT, offsetId,
+    chat, query, mediaType, limit: SEARCH_LIMIT, offsetId,
   });
 
   if (!result) {

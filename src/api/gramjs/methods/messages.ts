@@ -1,12 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate,
+  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate, ApiMessageSearchMediaType,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
-  buildApiMessageWithoutMedia,
   buildLocalMessage,
   resolveMessageApiChatId,
 } from '../apiBuilders/messages';
@@ -211,18 +210,33 @@ export async function markMessagesRead({
 }
 
 export async function searchMessages({
-  chat, query, ...pagination
+  chat, query, mediaType, ...pagination
 }: {
   chat: ApiChat;
-  query: string;
+  query?: string;
+  mediaType?: ApiMessageSearchMediaType;
   offsetId?: number;
   addOffset?: number;
   limit: number;
 }) {
+  let filter = new GramJs.InputMessagesFilterEmpty();
+  switch (mediaType) {
+    case 'media':
+      filter = new GramJs.InputMessagesFilterPhotoVideo();
+      break;
+    case 'document':
+    case 'webPage':
+      filter = new GramJs.InputMessagesFilterDocument();
+      break;
+    case 'audio':
+      filter = new GramJs.InputMessagesFilterMusic();
+      break;
+  }
+
   const result = await invokeRequest(new GramJs.messages.Search({
     peer: buildInputPeer(chat.id, chat.access_hash),
-    q: query,
-    filter: new GramJs.InputMessagesFilterEmpty(),
+    filter,
+    q: query || '',
     ...pagination,
   }));
 
@@ -234,12 +248,17 @@ export async function searchMessages({
     return undefined;
   }
 
-  const messages = result.messages.map(buildApiMessageWithoutMedia);
+  updateLocalDb(result);
+
+  const messages = result.messages.map(buildApiMessage);
   const users = result.users.map(buildApiUser);
-  const totalCount = result instanceof GramJs.messages.MessagesSlice ? result.count : messages.length;
-  const nextOffsetId = result instanceof GramJs.messages.MessagesSlice && messages.length
-    ? messages[messages.length - 1].id
-    : undefined;
+
+  let totalCount = messages.length;
+  let nextOffsetId: number | undefined;
+  if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
+    totalCount = result.count;
+    nextOffsetId = messages[messages.length - 1].id;
+  }
 
   return {
     messages,

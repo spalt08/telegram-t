@@ -4,7 +4,7 @@
     "byMessageKey": {}
   },
   "messageSearch": {
-    "isActive": false
+    "isTextSearch": false
   },
   "users": {
     "byId": {

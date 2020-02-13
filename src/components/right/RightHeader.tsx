@@ -64,7 +64,7 @@ export default withGlobal(
     const { messageSearch } = global;
 
     return {
-      isSearch: messageSearch.isActive,
+      isSearch: messageSearch.isTextSearch,
       searchQuery: messageSearch.query,
     };
   },

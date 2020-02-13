@@ -40,11 +40,18 @@ export function updateUsers(global: GlobalState, updatedById: Record<number, Api
 }
 
 export function updateSelectedUserId(global: GlobalState, selectedId?: number): GlobalState {
+  if (global.users.selectedId === selectedId) {
+    return global;
+  }
+
   return {
     ...global,
     users: {
       ...global.users,
       selectedId,
+    },
+    messageSearch: {
+      isTextSearch: false,
     },
   };
 }
