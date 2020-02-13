@@ -30,7 +30,7 @@ const Sticker: FC<IProps> = ({
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(
-    getMessageMediaHash(message, 'inline'),
+    sticker.localMediaHash || getMessageMediaHash(message, 'inline'),
     !loadAndPlay,
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );

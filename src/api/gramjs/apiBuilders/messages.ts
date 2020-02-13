@@ -385,7 +385,7 @@ function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAc
     text = 'Chat photo was deleted';
   } else if (action instanceof GramJs.MessageActionChatAddUser) {
     text = !senderId || senderId === targetUserId
-      ? '%target_use% joined the group'
+      ? '%target_user% joined the group'
       : '%origin_user% added %target_user% to the group';
   } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
     text = !senderId || senderId === targetUserId

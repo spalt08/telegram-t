@@ -35,7 +35,7 @@ const INITIAL_STATE: GlobalState = {
 
   isUiReady: false,
 
-  recentEmojis: [],
+  recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],
   stickers: {
     all: {
       byId: {},

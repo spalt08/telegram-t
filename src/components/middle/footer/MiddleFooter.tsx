@@ -152,14 +152,14 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     });
   }, [messageText]);
 
-  const handleStickerSelect = (sticker: ApiSticker) => {
+  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     sendMessage({ sticker });
 
     setMessageText('');
     setActiveVoiceRecording(undefined);
     setAttachment(undefined);
     setIsStickerMenuOpen(false);
-  };
+  }, [sendMessage]);
 
   return (
     <div className="MiddleFooter">

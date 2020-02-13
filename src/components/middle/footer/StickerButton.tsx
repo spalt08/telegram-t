@@ -22,23 +22,27 @@ interface IProps {
 const StickerButton: FC<IProps> = ({
   sticker, top, left, onStickerSelect,
 }) => {
-  const handleClick = useCallback(
-    () => onStickerSelect(sticker),
-    [sticker, onStickerSelect],
-  );
-
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 
   const isAnimated = sticker.is_animated;
 
+  const localMediaHash = `sticker${sticker.id}`;
   const mediaData = useMedia(
-    `sticker${sticker.id}`,
+    localMediaHash,
     undefined,
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );
   const isMediaLoaded = Boolean(mediaData);
   const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
+
+  const handleClick = useCallback(
+    () => onStickerSelect({
+      ...sticker,
+      localMediaHash,
+    }),
+    [onStickerSelect, sticker, localMediaHash],
+  );
 
   const {
     shouldRender: shouldFullMediaRender,

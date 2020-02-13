@@ -23,6 +23,7 @@ export interface ApiSticker {
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
+  localMediaHash?: string;
 }
 
 export interface ApiStickerSet {
