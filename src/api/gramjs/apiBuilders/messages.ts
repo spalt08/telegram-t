@@ -110,7 +110,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     };
   }
 
-  const action = mtpMessage.action && buildAction(mtpMessage.action);
+  const action = mtpMessage.action && buildAction(mtpMessage.action, mtpMessage.fromId);
   if (action) {
     content.action = action;
   }
@@ -422,12 +422,17 @@ function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undefined {
   };
 }
 
-function buildAction(action: GramJs.TypeMessageAction): ApiAction | undefined {
-  let text = '';
-
+function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAction | undefined {
   if (action instanceof GramJs.MessageActionEmpty) {
     return undefined;
   }
+
+  let text = '';
+
+  const targetUserId = 'users' in action
+    // Api returns array of userIds, but no action currently has multiple users in it
+    ? action.users && action.users[0]
+    : ('userId' in action && action.userId) || undefined;
 
   if (action instanceof GramJs.MessageActionChatCreate) {
     text = `%origin_user% created the group «${action.title}»`;
@@ -438,9 +443,13 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | undefined {
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
     text = 'Chat photo was deleted';
   } else if (action instanceof GramJs.MessageActionChatAddUser) {
-    text = '%origin_user% added %target_user% to the chat';
+    text = !senderId || senderId === targetUserId
+      ? '%target_use% joined the group'
+      : '%origin_user% added %target_user% to the group';
   } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
-    text = '%origin_user% removed %target_user% from the chat';
+    text = !senderId || senderId === targetUserId
+      ? '%target_user% left the group'
+      : '%origin_user% removed %target_user% from the group';
   } else if (action instanceof GramJs.MessageActionChatJoinedByLink) {
     text = '%origin_user% joined the chat from invitation link';
   } else if (action instanceof GramJs.MessageActionChannelCreate) {
@@ -463,13 +472,7 @@ function buildAction(action: GramJs.TypeMessageAction): ApiAction | undefined {
 
   return {
     text,
-    ...('users' in action && {
-      // Api returns array of userIds, but no action currently has multiple users in it
-      targetUserId: action.users && action.users[0],
-    }),
-    ...('userId' in action && {
-      targetUserId: action.userId,
-    }),
+    targetUserId,
   };
 }
 

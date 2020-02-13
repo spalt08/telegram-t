@@ -7,9 +7,11 @@ type TextPart = string | Element;
 interface ServiceMessageTextOptions {
   maxTextLength?: number;
   plain?: boolean;
+  isReply?: boolean;
 }
 
 const DEFAULT_MAX_TEXT_LENGTH = 30;
+const NBSP = '\u00A0';
 
 function processPlaceholder(text: string, placeholder: string, replaceValue?: TextPart): TextPart[] {
   const placeholderPosition = text.indexOf(placeholder);
@@ -97,7 +99,7 @@ export function getServiceMessageContent(
     text,
     '%origin_user%',
     originUser
-      ? getPinnedMessageUsername(originUser, options.plain)
+      ? (!options.isReply && getPinnedMessageUsername(originUser, options.plain)) || NBSP
       : 'User',
   );
 
@@ -122,6 +124,10 @@ export function getServiceMessageContent(
       ? getPinnedMessageText(targetMessage, options)
       : 'a message',
   );
+
+  if (options.plain) {
+    return processedMessageText.join('').trim();
+  }
 
   content.push(...processedMessageText);
   return content;

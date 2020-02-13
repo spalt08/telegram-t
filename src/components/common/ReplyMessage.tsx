@@ -2,12 +2,18 @@ import React, { FC } from '../../lib/teact/teact';
 
 import { ApiUser, ApiMessage } from '../../api/types';
 
-import { getUserFullName, getMessageMediaThumbDataUri, getMessageMediaHash } from '../../modules/helpers';
+import {
+  getUserFullName,
+  getMessageMediaThumbDataUri,
+  getMessageMediaHash,
+  isActionMessage,
+} from '../../modules/helpers';
 import { getPictogramDimensions } from '../../util/mediaDimensions';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import useMedia from '../../hooks/useMedia';
 
 import RippleEffect from '../ui/RippleEffect';
+import ServiceMessage from '../middle/ServiceMessage';
 
 import './ReplyMessage.scss';
 
@@ -24,8 +30,6 @@ const NBSP = '\u00A0';
 const ReplyMessage: FC<IProps> = ({
   message, sender, className, loadPictogram, onClick,
 }) => {
-  const text = message ? buildMessageContent(message, { isReply: true }).text : NBSP;
-
   const mediaThumbnail = message && getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
 
@@ -33,8 +37,17 @@ const ReplyMessage: FC<IProps> = ({
     <div className={`ReplyMessage ${className || ''}`} onClick={onClick}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="reply-text">
-        <div className="sender-name">{sender ? getUserFullName(sender) : NBSP}</div>
-        <p>{text}</p>
+        <div className="sender-name">{(sender && getUserFullName(sender)) || NBSP}</div>
+        <p>
+          {/* eslint-disable-next-line no-nested-ternary */}
+          {!message ? (
+            NBSP
+          ) : isActionMessage(message) ? (
+            <ServiceMessage message={message} isReply />
+          ) : (
+            buildMessageContent(message, { isReply: true }).text
+          )}
+        </p>
       </div>
       <RippleEffect />
     </div>

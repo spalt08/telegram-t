@@ -15,25 +15,31 @@ type IProps = {
   sender?: ApiUser;
   actionTargetUser?: ApiUser;
   actionTargetMessage?: ApiMessage;
+  isReply?: boolean;
 };
 
 const ServiceMessage: FC<IProps> = ({
-  message, sender, actionTargetUser, actionTargetMessage,
+  message, sender, actionTargetUser, actionTargetMessage, isReply,
 }) => {
   const { targetUserId: actionTargetUserId } = message.content.action || {};
   useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
   useEnsureUserFromMessage(message.chat_id, message.id, actionTargetUserId, actionTargetUser);
 
+  const content = getServiceMessageContent(
+    message,
+    sender,
+    actionTargetUser,
+    actionTargetMessage,
+    isReply ? { isReply, plain: true } : undefined,
+  );
+
+  if (isReply) {
+    return <span className="reply-action-message">{content}</span>;
+  }
+
   return (
     <div className="message-action-header">
-      <span>
-        {getServiceMessageContent(
-          message,
-          sender,
-          actionTargetUser,
-          actionTargetMessage,
-        )}
-      </span>
+      <span>{content}</span>
     </div>
   );
 };
