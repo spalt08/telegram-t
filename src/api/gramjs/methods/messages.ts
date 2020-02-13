@@ -257,7 +257,10 @@ export async function searchMessages({
   let nextOffsetId: number | undefined;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
     totalCount = result.count;
-    nextOffsetId = messages[messages.length - 1].id;
+
+    if (messages.length) {
+      nextOffsetId = messages[messages.length - 1].id;
+    }
   }
 
   return {
