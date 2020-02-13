@@ -2,6 +2,8 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
+import { ApiSticker } from '../../types';
+import localDb from '../localDb';
 
 export function getEntityTypeById(chatOrUserId: number) {
   if (chatOrUserId > 0) {
@@ -49,6 +51,31 @@ export function buildInputEntity(chatOrUserId: number, accessHash?: string) {
   } else {
     return -chatOrUserId;
   }
+}
+
+export function buildInputStickerSet(id: string, accessHash: string) {
+  return new GramJs.InputStickerSetID({
+    id: BigInt(id),
+    accessHash: BigInt(accessHash),
+  });
+}
+
+export function buildInputMediaDocumentFromSticker(sticker: ApiSticker) {
+  const document = localDb.documents[sticker.id];
+
+  if (!document) {
+    return undefined;
+  }
+
+  const { id, accessHash, fileReference } = document;
+
+  const inputDocument = new GramJs.InputDocument({
+    id,
+    accessHash,
+    fileReference,
+  });
+
+  return new GramJs.InputMediaDocument({ id: inputDocument });
 }
 
 export function generateRandomBigInt() {

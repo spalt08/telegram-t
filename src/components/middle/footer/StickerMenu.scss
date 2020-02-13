@@ -50,3 +50,37 @@
     overflow: hidden;
   }
 }
+
+.symbol-set {
+  margin-bottom: 1rem;
+
+  &-name {
+    font-size: 1rem;
+    line-height: 1.6875rem;
+    font-weight: 500;
+    margin: 0;
+    padding-left: 0.5rem;
+    color: rgba(var(--color-text-secondary-rgb), 0.75);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &-container {
+    position: relative;
+    opacity: 0;
+    transition: opacity .3s ease;
+
+    &.open {
+      opacity: 1;
+    }
+  }
+
+  &-button {
+    flex-shrink: 0;
+    width: 2.125rem !important;
+    height: 2.125rem;
+    margin: 0 0.25rem;
+    padding: 0;
+  }
+}

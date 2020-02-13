@@ -36,6 +36,14 @@ const INITIAL_STATE: GlobalState = {
   isUiReady: false,
 
   recentEmojis: [],
+  stickers: {
+    all: {
+      byId: {},
+    },
+    recent: {
+      stickers: [],
+    },
+  },
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
 
@@ -80,6 +88,14 @@ function updateCache(global: GlobalState) {
     lastSyncTime: undefined,
     isUiReady: false,
     messageSearch: { isTextSearch: false },
+    stickers: {
+      all: {
+        byId: {},
+      },
+      recent: {
+        stickers: [],
+      },
+    },
     webPagePreview: undefined,
   };
 

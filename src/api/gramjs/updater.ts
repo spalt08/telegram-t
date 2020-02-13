@@ -49,7 +49,7 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
         localDb.messages[messageFullId] = update.message;
       }
 
-      message = buildApiMessage(update.message);
+      message = buildApiMessage(update.message)!;
     }
 
     onUpdate({
@@ -67,7 +67,7 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
       localDb.messages[messageFullId] = update.message;
     }
 
-    const message = buildApiMessage(update.message);
+    const message = buildApiMessage(update.message)!;
 
     onUpdate({
       '@type': 'editMessage',

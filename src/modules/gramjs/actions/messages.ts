@@ -1,5 +1,7 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+
 import { ApiChat } from '../../../api/types';
+import { GlobalState } from '../../../global/types';
 
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -13,7 +15,6 @@ import {
 import {
   selectChat, selectChatMessageListedIds, selectChatMessageViewportIds, selectOpenChat,
 } from '../../selectors';
-import { GlobalState } from '../../../global/types';
 
 const MESSAGE_SLICE_LIMIT = 50;
 
@@ -85,11 +86,11 @@ addReducer('sendMessage', (global, actions, payload) => {
     return;
   }
 
-  const { text, attachment } = payload!;
+  const { text, attachment, sticker } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
   void callApi('sendMessage', {
-    chat, currentUserId, text, replyingTo, attachment,
+    chat, currentUserId, text, replyingTo, attachment, sticker,
   });
 });
 

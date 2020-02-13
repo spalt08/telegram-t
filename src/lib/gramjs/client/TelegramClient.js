@@ -399,18 +399,18 @@ class TelegramClient {
         }
     }
 
-    async downloadMedia(message, args = {
+    async downloadMedia(messageOrMedia, args = {
         sizeType: null,
         progressCallback: null,
     }) {
         let date
         let media
-        if (message instanceof constructors.Message) {
-            date = message.date
-            media = message.media
+        if (messageOrMedia instanceof constructors.Message) {
+            date = messageOrMedia.date
+            media = messageOrMedia.media
         } else {
             date = new Date().getTime()
-            media = message
+            media = messageOrMedia
         }
         if (typeof media == 'string') {
             throw new Error('not implemented')
@@ -559,13 +559,10 @@ class TelegramClient {
         )
     }
 
-    async _downloadDocument(media, args) {
-        if (!(media instanceof constructors.MessageMediaDocument)) {
-            return
+    async _downloadDocument(doc, args) {
+        if (doc instanceof constructors.MessageMediaDocument) {
+            doc = doc.document
         }
-
-        const doc = media.document
-
         if (!(doc instanceof constructors.Document)) {
             return
         }

@@ -4,7 +4,7 @@ import React, {
 import { GlobalActions } from '../../../global/types';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiAttachment } from '../../../api/types';
+import { ApiAttachment, ApiSticker } from '../../../api/types';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
@@ -152,6 +152,15 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     });
   }, [messageText]);
 
+  const handleStickerSelect = (sticker: ApiSticker) => {
+    sendMessage({ sticker });
+
+    setMessageText('');
+    setActiveVoiceRecording(undefined);
+    setAttachment(undefined);
+    setIsStickerMenuOpen(false);
+  };
+
   return (
     <div className="MiddleFooter">
       <Attachment
@@ -197,6 +206,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
             isOpen={isStickerMenuOpen}
             onClose={handleCloseStickerMenu}
             onEmojiSelect={handleEmojiSelect}
+            onStickerSelect={handleStickerSelect}
           />
         </div>
       </div>

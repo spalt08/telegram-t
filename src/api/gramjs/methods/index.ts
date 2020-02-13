@@ -10,6 +10,9 @@ import {
 import {
   fetchFullUser, fetchNearestCountry, fetchUserFromMessage, uploadProfilePhoto,
 } from './users';
+import {
+  fetchStickers, fetchRecentStickers, fetchStickerSet,
+} from './stickers';
 
 export default {
   destroy,
@@ -34,4 +37,7 @@ export default {
   fetchUserFromMessage,
   fetchNearestCountry,
   uploadProfilePhoto,
+  fetchStickers,
+  fetchRecentStickers,
+  fetchStickerSet,
 };

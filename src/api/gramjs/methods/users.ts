@@ -30,7 +30,7 @@ export async function fetchUserFromMessage({
     return;
   }
 
-  const user = buildApiUser(users[0]);
+  const user = buildApiUser(users[0])!;
 
   onUpdate({
     '@type': 'updateUser',

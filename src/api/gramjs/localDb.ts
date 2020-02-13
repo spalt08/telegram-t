@@ -7,6 +7,7 @@ interface LocalDb {
   chats: Record<number, GramJs.Chat | GramJs.Channel>;
   users: Record<number, GramJs.User>;
   messages: Record<string, GramJs.Message>;
+  documents: Record<string, GramJs.Document>;
 }
 
 export default {
@@ -14,4 +15,5 @@ export default {
   chats: {},
   users: {},
   messages: {},
+  documents: {},
 } as LocalDb;

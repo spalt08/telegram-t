@@ -1,7 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
-export function buildApiUser(mtpUser: GramJs.User): ApiUser {
+export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
+  if (!(mtpUser instanceof GramJs.User)) {
+    return undefined;
+  }
+
   const avatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
     && { hash: mtpUser.photo.photoId.toString() };
 

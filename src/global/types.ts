@@ -4,6 +4,8 @@ import {
   ApiUser,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
+  ApiStickerSet,
+  ApiSticker,
   ApiMessageSearchMediaType,
   ApiWebPage,
 } from '../api/types';
@@ -56,6 +58,16 @@ export type GlobalState = {
   lastSyncTime?: number;
 
   recentEmojis: string[];
+  stickers: {
+    all: {
+      hash?: number;
+      byId: Record<string, ApiStickerSet>;
+    };
+    recent: {
+      hash?: number;
+      stickers: ApiSticker[];
+    };
+  };
 
   webPagePreview?: ApiWebPage;
 
@@ -71,7 +83,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system and UI
-  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' |
+  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
@@ -79,14 +91,16 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
-  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
+  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' |'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
-  'loadWebPagePreview' | 'clearWebPagePreview' |
   // message search
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage' |
+  // misc
+  'loadStickers' | 'loadRecentStickers' | 'loadStickerSet' |
+  'loadWebPagePreview' | 'clearWebPagePreview'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

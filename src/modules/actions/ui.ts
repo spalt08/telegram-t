@@ -39,3 +39,34 @@ addReducer('addRecentEmoji', (global, action, payload) => {
     recentEmojis: newEmojis,
   };
 });
+
+addReducer('addRecentSticker', (global, action, payload) => {
+  const { sticker } = payload!;
+  const { all, recent } = global.stickers;
+  if (!recent) {
+    return {
+      ...global,
+      stickers: {
+        all,
+        recent: {
+          hash: 0,
+          stickers: [sticker],
+        },
+      },
+    };
+  }
+
+  const newStickers = recent.stickers.filter((s) => s.id !== sticker.id);
+  newStickers.unshift(sticker);
+
+  return {
+    ...global,
+    stickers: {
+      all,
+      recent: {
+        ...recent,
+        stickers: newStickers,
+      },
+    },
+  };
+});

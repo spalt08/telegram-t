@@ -1,5 +1,4 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 import {
   ApiMessage,
   ApiMessageForwardInfo,
@@ -13,30 +12,30 @@ import {
   ApiAction,
   ApiContact,
   ApiAttachment,
-  ApiThumbnail,
   ApiPoll,
   ApiWebPage,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
-import { bytesToDataUri, omitGramJsFields } from './helpers';
+import { omitGramJsFields } from './helpers';
+import { buildStickerFromDocument } from './stickers';
+import { buildApiThumbnailFromStripped } from './common';
 
-const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
-
-export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
+export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
+  const chatId = resolveMessageApiChatId(mtpMessage);
   if (
-    !(mtpMessage instanceof GramJs.Message)
-    && !(mtpMessage instanceof GramJs.MessageService)) {
-    throw new Error('Not supported');
+    !chatId
+    || !(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
+    return undefined;
   }
 
-  return buildApiMessageWithChatId(resolveMessageApiChatId(mtpMessage), mtpMessage);
+  return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
-    throw new Error('Not supported');
+    return undefined;
   }
 
   const isPrivateToMe = !mtpMessage.out && isPeerUser(mtpMessage.toId);
@@ -155,33 +154,7 @@ function buildSticker(media: GramJs.TypeMessageMedia): ApiSticker | undefined {
     return undefined;
   }
 
-  const stickerAttribute = media.document.attributes
-    .find((attr: any): attr is GramJs.DocumentAttributeSticker => (
-      attr instanceof GramJs.DocumentAttributeSticker
-    ));
-  const sizeAttribute = media.document.attributes
-    .find((attr: any): attr is GramJs.DocumentAttributeImageSize => (
-      attr instanceof GramJs.DocumentAttributeImageSize
-    ));
-
-  if (!stickerAttribute) {
-    return undefined;
-  }
-
-  const emoji = stickerAttribute.alt;
-  const isAnimated = media.document.mimeType === 'application/x-tgsticker';
-  const thumb = media.document.thumbs && media.document.thumbs.find((s: any) => s instanceof GramJs.PhotoCachedSize);
-  const thumbnail = thumb && buildApiThumbnailFromCached(thumb as GramJs.PhotoCachedSize);
-  const { w: width, h: height } = thumb as GramJs.PhotoCachedSize || sizeAttribute || {};
-
-  return {
-    id: String(media.document.id),
-    emoji,
-    is_animated: isAnimated,
-    width,
-    height,
-    thumbnail,
-  };
+  return buildStickerFromDocument(media.document);
 }
 
 function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
@@ -196,38 +169,6 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
   return {
     thumbnail: buildApiThumbnailFromStripped(media.photo.sizes),
     sizes,
-  };
-}
-
-function buildApiThumbnailFromStripped(sizes?: GramJs.TypePhotoSize[]): ApiThumbnail | undefined {
-  if (!sizes || !sizes.length) {
-    return undefined;
-  }
-
-  const thumb = sizes.find((s: any) => s instanceof GramJs.PhotoStrippedSize);
-
-  if (!thumb) {
-    return undefined;
-  }
-
-  const realSizes = sizes.filter((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
-  const { w, h } = realSizes && realSizes.length ? realSizes[realSizes.length - 1] : DEFAULT_THUMB_SIZE;
-
-  return {
-    dataUri: bytesToDataUri(strippedPhotoToJpg((thumb as GramJs.PhotoStrippedSize).bytes)),
-    width: w,
-    height: h,
-  };
-}
-
-function buildApiThumbnailFromCached(photoSize: GramJs.PhotoCachedSize): ApiThumbnail | undefined {
-  const { w, h, bytes } = photoSize;
-  const dataUri = bytesToDataUri(strippedPhotoToJpg(bytes));
-
-  return {
-    dataUri,
-    width: w,
-    height: h,
   };
 }
 
@@ -479,7 +420,12 @@ function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAc
 let localMessageCounter = -1;
 
 export function buildLocalMessage(
-  chatId: number, currentUserId: number, text: string, replyingTo?: number, attachment?: ApiAttachment,
+  chatId: number,
+  currentUserId: number,
+  text?: string,
+  replyingTo?: number,
+  attachment?: ApiAttachment,
+  sticker?: ApiSticker,
 ): ApiMessage {
   const localId = localMessageCounter--;
 
@@ -487,11 +433,14 @@ export function buildLocalMessage(
     id: localId,
     chat_id: chatId,
     content: {
-      text: {
-        '@type': 'formattedText',
-        text,
-      },
+      ...(text && {
+        text: {
+          '@type': 'formattedText',
+          text,
+        },
+      }),
       ...(attachment && buildUploadingMedia(attachment)),
+      ...(sticker && { sticker }),
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,

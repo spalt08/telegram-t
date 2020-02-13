@@ -1,6 +1,12 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate, ApiMessageSearchMediaType, ApiUser,
+  ApiChat,
+  ApiAttachment,
+  ApiMessage,
+  OnApiUpdate,
+  ApiMessageSearchMediaType,
+  ApiUser,
+  ApiSticker,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
@@ -12,7 +18,11 @@ import {
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildInputEntity, buildInputPeer, generateRandomBigInt, getEntityTypeById,
+  buildInputEntity,
+  buildInputPeer,
+  generateRandomBigInt,
+  getEntityTypeById,
+  buildInputMediaDocumentFromSticker,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 
@@ -46,8 +56,8 @@ export async function fetchMessages({
 
   updateLocalDb(result);
 
-  const messages = result.messages.map(buildApiMessage);
-  const users = result.users.map(buildApiUser);
+  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
 
   return {
     messages,
@@ -83,15 +93,21 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
 }
 
 export async function sendMessage({
-  chat, currentUserId, text, replyingTo, attachment,
+  chat,
+  currentUserId,
+  text,
+  replyingTo,
+  attachment,
+  sticker,
 }: {
   chat: ApiChat;
   currentUserId: number;
-  text: string;
+  text?: string;
   replyingTo?: number;
   attachment?: ApiAttachment;
+  sticker?: ApiSticker;
 }) {
-  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment);
+  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment, sticker);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -102,11 +118,17 @@ export async function sendMessage({
   const randomId = generateRandomBigInt();
   localDb.localMessages[randomId.toString()] = localMessage;
 
-  const media = attachment ? await uploadMedia(localMessage, attachment) : undefined;
+  let media: GramJs.TypeInputMedia | undefined;
+  if (attachment) {
+    media = await uploadMedia(localMessage, attachment);
+  } else if (sticker) {
+    media = buildInputMediaDocumentFromSticker(sticker);
+  }
+
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
 
   await invokeRequest(new RequestClass({
-    message: text,
+    message: text || '',
     peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
     ...(replyingTo && { replyToMsgId: replyingTo }),
@@ -251,8 +273,8 @@ export async function searchMessages({
 
   updateLocalDb(result);
 
-  const messages = result.messages.map(buildApiMessage);
-  const users = result.users.map(buildApiUser);
+  const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
 
   let totalCount = messages.length;
   let nextOffsetId: number | undefined;

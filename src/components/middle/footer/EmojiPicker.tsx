@@ -82,10 +82,8 @@ const EmojiPicker: FC<IProps> = ({
     const categoryEl = document.getElementById(`emoji-category-${category}`);
     if (categoryEl) {
       isScrollingProgrammatically = true;
-      categoryEl.scrollIntoView({
-        behavior: 'smooth',
-      });
-      setTimeout(() => { isScrollingProgrammatically = false; }, 500);
+      categoryEl.scrollIntoView();
+      requestAnimationFrame(() => { isScrollingProgrammatically = false; });
     }
   }, [currentCategory]);
 
@@ -131,7 +129,7 @@ const EmojiPicker: FC<IProps> = ({
 
     return icon && (
       <Button
-        className={`emoji-category-button ${category.id === currentCategory ? 'activated' : ''}`}
+        className={`symbol-set-button ${category.id === currentCategory ? 'activated' : ''}`}
         round
         color="translucent"
         onClick={() => selectCategory(category.id)}
@@ -173,7 +171,7 @@ const EmojiPicker: FC<IProps> = ({
 };
 
 function determineVisibleCategory(container: HTMLElement) {
-  const allElements = container.querySelectorAll('.emoji-category');
+  const allElements = container.querySelectorAll('.symbol-set');
   const containerTop = container.scrollTop;
   const containerBottom = containerTop + container.clientHeight;
 

@@ -2,9 +2,12 @@ import React, {
   FC, memo, useState, useRef,
 } from '../../../lib/teact/teact';
 
+import { ApiSticker } from '../../../api/types';
+
 import Menu from '../../ui/Menu';
 import TabList from '../../ui/TabList';
 import EmojiPicker from './EmojiPicker';
+import StickerPicker from './StickerPicker';
 
 import './StickerMenu.scss';
 
@@ -24,9 +27,12 @@ type IProps = {
   isOpen: boolean;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
+  onStickerSelect: (sticker: ApiSticker) => void;
 };
 
-const StickerMenu: FC<IProps> = ({ isOpen, onClose, onEmojiSelect }) => {
+const StickerMenu: FC<IProps> = ({
+  isOpen, onClose, onEmojiSelect, onStickerSelect,
+}) => {
   const [activeTab, setActiveTab] = useState(0);
   const selectedScreen = CONTENT[activeTab];
   const isActivated = useRef(false);
@@ -53,7 +59,10 @@ const StickerMenu: FC<IProps> = ({ isOpen, onClose, onEmojiSelect }) => {
             className={`picker-tab ${selectedScreen === 'emoji' ? 'active' : ''}`}
             onEmojiSelect={onEmojiSelect}
           />,
-          <div className={`picker-tab ${selectedScreen === 'gif' ? 'active' : ''}`} />,
+          <StickerPicker
+            className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`}
+            onStickerSelect={onStickerSelect}
+          />,
           <div className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`} />,
         ]}
       </div>

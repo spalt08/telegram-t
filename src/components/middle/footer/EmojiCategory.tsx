@@ -59,11 +59,11 @@ const EmojiCategory: FC<IProps> = ({ data, category, onEmojiSelect }) => {
     <div
       key={category.id}
       id={`emoji-category-${category.id}`}
-      className="emoji-category"
+      className="symbol-set"
     >
-      <p className="emoji-category-name">{category.name}</p>
+      <p className="symbol-set-name">{category.name}</p>
       <div
-        className={['emoji-category-container', ...transitionClassNames].join(' ')}
+        className={['symbol-set-container', ...transitionClassNames].join(' ')}
         // @ts-ignore teact feature
         style={`height: ${categoryHeight}px`}
       >

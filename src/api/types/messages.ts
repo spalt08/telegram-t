@@ -25,6 +25,19 @@ export interface ApiSticker {
   thumbnail?: ApiThumbnail;
 }
 
+export interface ApiStickerSet {
+  archived?: true;
+  isAnimated?: true;
+  installedDate?: number;
+  id: string;
+  accessHash: string;
+  title: string;
+  thumbnail?: ApiThumbnail;
+  count: number;
+  hash: number;
+  stickers: ApiSticker[];
+}
+
 export interface ApiVideo {
   duration: number;
   width?: number;

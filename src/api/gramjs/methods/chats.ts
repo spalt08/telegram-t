@@ -1,5 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate, ApiChat } from '../../types';
+import {
+  OnApiUpdate, ApiChat, ApiMessage, ApiUser,
+} from '../../types';
 
 import { invokeRequest } from './client';
 import {
@@ -39,7 +41,10 @@ export async function fetchChats({
 
   updateLocalDb(result);
 
-  const lastMessagesByChatId = buildCollectionByKey(result.messages.map(buildApiMessage), 'chat_id');
+  const lastMessagesByChatId = buildCollectionByKey(
+    result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any),
+    'chat_id',
+  );
   const peersByKey = preparePeers(result);
   const chats: ApiChat[] = [];
 
@@ -54,7 +59,7 @@ export async function fetchChats({
     chats.push(chat);
   });
 
-  const users = result.users.map(buildApiUser);
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
   const chatIds = chats.map((chat) => chat.id);
 
   return {

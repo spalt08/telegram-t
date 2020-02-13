@@ -3,23 +3,27 @@ import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
 
+type EntityType = 'msg' | 'sticker' | 'channel' | 'chat' | 'user';
+
 export default async function downloadMedia(client: TelegramClient, url: string): Promise<{
   data: Buffer | null;
   mimeType?: string;
 } | null> {
-  const mediaMatch = url.match(/(avatar|msg)([-\d]+)(\?size=\w)?/);
+  const mediaMatch = url.match(/(avatar|msg|sticker)([-\d]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return null;
   }
 
-  let entityType = mediaMatch[1];
+  let entityType: EntityType;
   let entityId: string | number = mediaMatch[2];
   const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : null;
-  let entity: GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Message | undefined;
+  let entity: GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Message | GramJs.Document | undefined;
 
-  if (entityType === 'avatar') {
+  if (mediaMatch[1] === 'avatar') {
     entityType = getEntityTypeById(Number(entityId));
     entityId = Math.abs(Number(entityId));
+  } else {
+    entityType = mediaMatch[1] as 'msg' | 'sticker';
   }
 
   switch (entityType) {
@@ -33,15 +37,21 @@ export default async function downloadMedia(client: TelegramClient, url: string)
     case 'msg':
       entity = localDb.messages[entityId as string];
       break;
+    case 'sticker':
+      entity = localDb.documents[entityId as string];
+      break;
   }
 
   if (!entity) {
     return null;
   }
 
-  if (entityType === 'msg') {
+  if (entityType === 'msg' || entityType === 'sticker') {
     const data = await client.downloadMedia(entity, { sizeType });
-    const mimeType = getMediaMimeType(entity as GramJs.Message, Boolean(sizeType));
+    const mimeType = entity instanceof GramJs.Message
+      ? getMessageMediaMimeType(entity, Boolean(sizeType))
+      : (entity as GramJs.Document).mimeType;
+
     return { mimeType, data };
   } else {
     const data = await client.downloadProfilePhoto(entity, false);
@@ -50,7 +60,7 @@ export default async function downloadMedia(client: TelegramClient, url: string)
   }
 }
 
-function getMediaMimeType(message: GramJs.Message, isThumb = false) {
+function getMessageMediaMimeType(message: GramJs.Message, isThumb = false) {
   if (!message || !message.media) {
     return undefined;
   }
