@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate, ApiMessageSearchMediaType,
+  ApiChat, ApiAttachment, ApiMessage, OnApiUpdate, ApiMessageSearchMediaType, ApiUser,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
@@ -210,9 +210,9 @@ export async function markMessagesRead({
 }
 
 export async function searchMessages({
-  chat, query, mediaType, ...pagination
+  chatOrUser, query, mediaType, ...pagination
 }: {
-  chat: ApiChat;
+  chatOrUser: ApiChat | ApiUser;
   query?: string;
   mediaType?: ApiMessageSearchMediaType;
   offsetId?: number;
@@ -234,7 +234,7 @@ export async function searchMessages({
   }
 
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chatOrUser.id, chatOrUser.access_hash),
     filter,
     q: query || '',
     ...pagination,
