@@ -64,6 +64,10 @@ export function updateChats(global: GlobalState, updatedById: Record<number, Api
 }
 
 export function updateSelectedChatId(global: GlobalState, selectedId?: number): GlobalState {
+  if (global.chats.selectedId === selectedId) {
+    return global;
+  }
+
   return {
     ...global,
     chats: {

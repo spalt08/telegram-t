@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -11,7 +11,7 @@ import SearchInput from '../ui/SearchInput';
 type IProps = {
   isSearch: boolean;
   searchQuery?: string;
-} & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch' | 'setMessageSearchQuery'>;
+} & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'searchMessages'>;
 
 const RightHeader: FC<IProps> = ({
   isSearch,
@@ -19,7 +19,13 @@ const RightHeader: FC<IProps> = ({
   toggleRightColumn,
   closeMessageSearch,
   setMessageSearchQuery,
+  searchMessages,
 }) => {
+  const handleSearchQueryChange = useCallback((query: string) => {
+    setMessageSearchQuery({ query });
+    searchMessages();
+  }, [searchMessages, setMessageSearchQuery]);
+
   function renderRegularHeader() {
     return [
       <h3>Info</h3>,
@@ -35,11 +41,7 @@ const RightHeader: FC<IProps> = ({
   }
 
   function renderSearch() {
-    return <SearchInput value={searchQuery} onChange={onSearchQueryChange} />;
-  }
-
-  function onSearchQueryChange(query: string) {
-    setMessageSearchQuery({ query });
+    return <SearchInput value={searchQuery} onChange={handleSearchQueryChange} />;
   }
 
   return (
@@ -67,7 +69,11 @@ export default withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { toggleRightColumn, closeMessageSearch, setMessageSearchQuery } = actions;
-    return { toggleRightColumn, closeMessageSearch, setMessageSearchQuery };
+    const {
+      toggleRightColumn, closeMessageSearch, setMessageSearchQuery, searchMessages,
+    } = actions;
+    return {
+      toggleRightColumn, closeMessageSearch, setMessageSearchQuery, searchMessages,
+    };
   },
 )(RightHeader);

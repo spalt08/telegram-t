@@ -4,6 +4,7 @@ import { GlobalState } from './types';
 
 import { throttle } from '../util/schedulers';
 import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
+import { filterKeys } from '../util/iteratees';
 
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
@@ -111,7 +112,15 @@ function reduceMessagesForCache(global: GlobalState) {
 
   if (global.chats.ids) {
     global.chats.ids.forEach((chatId) => {
-      byChatId[chatId] = global.messages.byChatId[chatId];
+      const current = global.messages.byChatId[chatId];
+      if (!current || !current.listedIds) {
+        return;
+      }
+
+      byChatId[chatId] = {
+        ...global.messages.byChatId[chatId],
+        byId: filterKeys(current.byId, current.listedIds),
+      };
     });
   }
 

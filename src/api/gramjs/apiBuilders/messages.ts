@@ -34,6 +34,16 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage {
   return buildApiMessageWithChatId(resolveMessageApiChatId(mtpMessage), mtpMessage);
 }
 
+export function buildApiMessageWithoutMedia(mtpMessage: GramJs.TypeMessage): ApiMessage {
+  if (
+    !(mtpMessage instanceof GramJs.Message)
+    && !(mtpMessage instanceof GramJs.MessageService)) {
+    throw new Error('Not supported');
+  }
+
+  return buildApiMessageWithChatId(resolveMessageApiChatId(mtpMessage), mtpMessage, true);
+}
+
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
     throw new Error('Not supported');
@@ -75,6 +85,7 @@ type UniversalMessage = (
 export function buildApiMessageWithChatId(
   chatId: number,
   mtpMessage: UniversalMessage,
+  noMedia = false,
 ): ApiMessage {
   const { message, entities, media } = mtpMessage;
 
@@ -88,7 +99,7 @@ export function buildApiMessageWithChatId(
     };
   }
 
-  if (media) {
+  if (media && !noMedia) {
     const sticker = buildSticker(media);
     const photo = buildPhoto(media);
     const video = buildVideo(media);

@@ -31,11 +31,16 @@ addReducer('closeMessageSearch', (global) => {
 
 addReducer('setMessageSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
+  const currentQuery = global.messageSearch.query;
+
+  if (query === currentQuery) {
+    return undefined;
+  }
 
   return {
     ...global,
     messageSearch: {
-      ...global.messageSearch,
+      isActive: true,
       query,
     },
   };

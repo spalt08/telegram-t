@@ -1,5 +1,4 @@
 import { ApiMessage } from '../../api/types';
-import searchWords from '../../util/searchWords';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 
@@ -82,11 +81,6 @@ export function getMessageText(message: ApiMessage) {
   }
 
   return CONTENT_NOT_SUPPORTED;
-}
-
-export function searchMessageText(message: ApiMessage, query: string) {
-  const text = getMessageText(message);
-  return text && searchWords(text, query);
 }
 
 export function isOwnMessage(message: ApiMessage) {

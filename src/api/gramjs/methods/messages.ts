@@ -4,7 +4,12 @@ import {
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
-import { buildApiMessage, buildLocalMessage, resolveMessageApiChatId } from '../apiBuilders/messages';
+import {
+  buildApiMessage,
+  buildApiMessageWithoutMedia,
+  buildLocalMessage,
+  resolveMessageApiChatId,
+} from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity, buildInputPeer, generateRandomBigInt, getEntityTypeById,
@@ -18,7 +23,8 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export async function fetchMessages({
-  chat, offsetId, addOffset, limit,
+  chat,
+  ...pagination
 }: {
   chat: ApiChat;
   offsetId?: number;
@@ -26,10 +32,8 @@ export async function fetchMessages({
   limit: number;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetHistory({
-    offsetId,
-    addOffset,
-    limit,
     peer: buildInputPeer(chat.id, chat.access_hash),
+    ...pagination,
   }));
 
   if (
@@ -37,7 +41,7 @@ export async function fetchMessages({
     || result instanceof GramJs.messages.MessagesNotModified
     || !result.messages
   ) {
-    return null;
+    return undefined;
   }
 
   updateLocalDb(result);
@@ -204,6 +208,45 @@ export async function markMessagesRead({
       last_read_inbox_message_id: maxId,
     },
   });
+}
+
+export async function searchMessages({
+  chat, query, ...pagination
+}: {
+  chat: ApiChat;
+  query: string;
+  offsetId?: number;
+  addOffset?: number;
+  limit: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.Search({
+    peer: buildInputPeer(chat.id, chat.access_hash),
+    q: query,
+    filter: new GramJs.InputMessagesFilterEmpty(),
+    ...pagination,
+  }));
+
+  if (
+    !result
+    || result instanceof GramJs.messages.MessagesNotModified
+    || !result.messages
+  ) {
+    return undefined;
+  }
+
+  const messages = result.messages.map(buildApiMessageWithoutMedia);
+  const users = result.users.map(buildApiUser);
+  const totalCount = result instanceof GramJs.messages.MessagesSlice ? result.count : messages.length;
+  const nextOffsetId = result instanceof GramJs.messages.MessagesSlice && messages.length
+    ? messages[messages.length - 1].id
+    : undefined;
+
+  return {
+    messages,
+    users,
+    totalCount,
+    nextOffsetId,
+  };
 }
 
 function updateLocalDb(

@@ -14,6 +14,16 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
+export function filterKeys<M extends any>(
+  byKey: CollectionByKey<M>,
+  newKeys: (string | number)[],
+): CollectionByKey<M> {
+  return newKeys.reduce((newByKey: CollectionByKey<M>, key) => {
+    newByKey[key] = byKey[key];
+    return newByKey;
+  }, {});
+}
+
 export function mapValues<M extends any>(
   byKey: CollectionByKey<M>,
   callback: (member: M, key: string, originalByKey: CollectionByKey<M>) => M,
@@ -94,4 +104,16 @@ export function flatten(array: any[]) {
       return result;
     }
   }, []);
+}
+
+export function unique(array: any[]) {
+  return Array.from(new Set(array));
+}
+
+export function areSortedArraysEqual(array1: any[], array2: any[]) {
+  if (array1.length !== array2.length) {
+    return false;
+  }
+
+  return array1.every((item, i) => item === array2[i]);
 }

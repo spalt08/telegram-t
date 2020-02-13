@@ -58,6 +58,9 @@ export type GlobalState = {
   messageSearch: {
     isActive: boolean;
     query?: string;
+    totalCount?: number;
+    nextOffsetId?: number;
+    foundIds?: number[];
   };
 };
 
@@ -74,7 +77,7 @@ export type ActionTypes = (
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   // message search
-  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' |
+  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'searchMessages' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage'
 );

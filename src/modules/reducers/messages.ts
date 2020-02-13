@@ -58,6 +58,21 @@ export function replaceChatMessagesById(
   });
 }
 
+export function addChatMessagesById(
+  global: GlobalState, chatId: number, newById: Record<number, ApiMessage>,
+): GlobalState {
+  const byId = selectChatMessages(global, chatId);
+
+  if (byId && Object.keys(newById).every((newId) => Boolean(byId[Number(newId)]))) {
+    return global;
+  }
+
+  return replaceChatMessages(global, chatId, {
+    ...newById,
+    ...byId,
+  });
+}
+
 export function updateChatMessage(
   global: GlobalState, chatId: number, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): GlobalState {

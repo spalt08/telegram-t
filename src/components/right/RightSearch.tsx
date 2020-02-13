@@ -1,11 +1,15 @@
-import React, { FC } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import React, { FC, useMemo } from '../../lib/teact/teact';
+import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
-import { selectChatMessages, selectUser, selectChat } from '../../modules/selectors';
+import {
+  selectUser,
+  selectChatMessages,
+  selectChatMessageViewportIds,
+  selectOpenChat,
+} from '../../modules/selectors';
 import {
   getMessageText,
-  searchMessageText,
   getChatTitle,
   isChatChannel,
   getUserFullName,
@@ -17,63 +21,88 @@ import LastMessageMeta from '../left/LastMessageMeta';
 import RippleEffect from '../ui/RippleEffect';
 
 import './RightSearch.scss';
-
-type SearchResult = {
-  message: ApiMessage;
-  user: ApiUser;
-};
+import InfiniteScroll from '../ui/InfiniteScroll';
+import { GlobalActions } from '../../global/types';
+import { orderBy } from '../../util/iteratees';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 type IProps = {
-  chatId: number;
   chat: ApiChat;
+  messagesById: Record<number, ApiMessage>;
+  viewportIds?: number[];
   query?: string;
-  searchResults: SearchResult[];
-};
+  totalCount?: number;
+  foundIds?: number[];
+} & Pick<GlobalActions, 'searchMessages' | 'focusMessage'>;
 
-const RightSearch: FC<IProps> = ({ chat, query, searchResults }) => {
-  function renderHelperText() {
-    if (!query) {
-      return 'Search messages';
+const RightSearch: FC<IProps> = ({
+  chat,
+  messagesById,
+  viewportIds,
+  query,
+  totalCount,
+  foundIds,
+  searchMessages,
+  focusMessage,
+}) => {
+  const foundResults = useMemo(() => {
+    if (!query || !foundIds || !foundIds.length) {
+      return MEMO_EMPTY_ARRAY;
     }
 
-    if (searchResults.length === 1) {
-      return '1 message found';
-    }
+    const results = foundIds.map((id) => {
+      const message = messagesById[id];
 
-    return `${searchResults.length || 'No'} messages found`;
-  }
+      return {
+        message,
+        user: message.sender_user_id ? selectUser(getGlobal(), message.sender_user_id) : undefined,
+        onClick: viewportIds && viewportIds.includes(id)
+          ? () => focusMessage({ chatId: chat.id, messageId: id })
+          : undefined,
+      };
+    });
 
-  function renderSearchResultText(message: ApiMessage) {
-    const text = getMessageText(message);
-    if (!text || !query) {
-      return <p className="subtitle">{text}</p>;
-    }
+    return orderBy(results, ({ message }) => message.date, 'desc');
+  }, [chat.id, focusMessage, foundIds, messagesById, query, viewportIds]);
 
-    return <p className="subtitle">{processSearchResult(text, query)}</p>;
-  }
+  const renderSearchResult = ({
+    message, user, onClick,
+  }: {
+    message: ApiMessage; user?: ApiUser; onClick?: NoneToVoidFunction;
+  }) => {
+    return (
+      <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
+        <Avatar chat={isChatChannel(chat) ? chat : undefined} user={user} />
+        <div className="info">
+          <div className="title">
+            <h3>{isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
+            <LastMessageMeta message={message} />
+          </div>
+          <p className="subtitle">{highlightMatches(getMessageText(message)!, query!)}</p>
+        </div>
+        <RippleEffect />
+      </div>
+    );
+  };
 
   return (
-    <div className="RightSearch custom-scroll">
-      <p className="helper-text">{renderHelperText()}</p>
-
-      {searchResults.map(({ user, message }) => (
-        <div className="search-result-message not-implemented">
-          <Avatar chat={isChatChannel(chat) ? chat : undefined} user={user} />
-          <div className="info">
-            <div className="title">
-              <h3>{isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
-              <LastMessageMeta message={message} />
-            </div>
-            {renderSearchResultText(message)}
-          </div>
-          <RippleEffect />
-        </div>
-      ))}
-    </div>
+    <InfiniteScroll className="RightSearch custom-scroll" items={foundResults} onLoadMore={searchMessages}>
+      <p className="helper-text">
+        {/* eslint-disable-next-line no-nested-ternary */}
+        {!query ? (
+          'Search messages'
+        ) : totalCount === 1 ? (
+          '1 message found'
+        ) : (
+          `${(foundResults.length && (totalCount || foundResults.length)) || 'No'} messages found`
+        )}
+      </p>
+      {foundResults.map(renderSearchResult)}
+    </InfiniteScroll>
   );
 };
 
-function processSearchResult(text: string, query: string): TextPart[] {
+function highlightMatches(text: string, query: string): TextPart[] {
   const lowerCaseText = text.toLowerCase();
   const queryPosition = lowerCaseText.indexOf(query.toLowerCase());
   if (queryPosition < 0) {
@@ -89,29 +118,28 @@ function processSearchResult(text: string, query: string): TextPart[] {
 }
 
 export default withGlobal(
-  (global, { chatId }: IProps) => {
-    const { messageSearch } = global;
-    const chat = selectChat(global, chatId);
-    const messages = selectChatMessages(global, chatId);
-    if (!messages || !chat) {
+  (global) => {
+    const chat = selectOpenChat(global);
+    const messagesById = chat && selectChatMessages(global, chat.id);
+
+    if (!chat || !messagesById) {
       return {};
     }
 
-    const foundMessages = Object.values(messages)
-      .filter((message) => (
-        messageSearch.query && searchMessageText(message, messageSearch.query)
-      ))
-      .sort((message1, message2) => message2.date - message1.date);
-
-    const searchResults = foundMessages.map((message) => ({
-      message,
-      user: message.sender_user_id && selectUser(global, message.sender_user_id),
-    }));
+    const viewportIds = selectChatMessageViewportIds(global, chat.id);
+    const { query, totalCount, foundIds } = global.messageSearch;
 
     return {
       chat,
-      query: messageSearch.query,
-      searchResults,
+      messagesById,
+      viewportIds,
+      query,
+      totalCount,
+      foundIds,
     };
+  },
+  (global, actions) => {
+    const { searchMessages, focusMessage } = actions;
+    return { searchMessages, focusMessage };
   },
 )(RightSearch);
