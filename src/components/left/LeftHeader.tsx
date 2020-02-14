@@ -46,7 +46,7 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <SearchInput onChange={() => {}} />
+      <SearchInput className="not-implemented" onChange={() => {}} />
 
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}

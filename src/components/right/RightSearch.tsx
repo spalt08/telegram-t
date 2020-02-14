@@ -71,6 +71,11 @@ const RightSearch: FC<IProps> = ({
   }: {
     message: ApiMessage; user?: ApiUser; onClick?: NoneToVoidFunction;
   }) => {
+    const text = getMessageText(message);
+    if (!text) {
+      return null;
+    }
+
     return (
       <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
         <Avatar chat={isChatChannel(chat) ? chat : undefined} user={user} />
@@ -79,7 +84,7 @@ const RightSearch: FC<IProps> = ({
             <h3>{isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{highlightMatches(getMessageText(message)!, query!)}</p>
+          <p className="subtitle">{highlightMatches(text, query!)}</p>
         </div>
         <RippleEffect />
       </div>

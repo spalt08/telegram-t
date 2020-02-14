@@ -4,17 +4,18 @@ import './SearchInput.scss';
 
 type IProps = {
   value?: string;
+  className?: string;
   onChange: (value: string) => void;
 };
 
-const SearchInput: FC<IProps> = ({ value, onChange }) => {
+const SearchInput: FC<IProps> = ({ value, className, onChange }) => {
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { currentTarget } = event;
     onChange(currentTarget.value);
   }
 
   return (
-    <div className="SearchInput">
+    <div className={`SearchInput ${className || ''}`}>
       <input
         type="text"
         placeholder="Search"
