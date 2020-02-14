@@ -248,8 +248,10 @@ export async function searchMessages({
       filter = new GramJs.InputMessagesFilterPhotoVideo();
       break;
     case 'document':
-    case 'webPage':
       filter = new GramJs.InputMessagesFilterDocument();
+      break;
+    case 'webPage':
+      filter = new GramJs.InputMessagesFilterUrl();
       break;
     case 'audio':
       filter = new GramJs.InputMessagesFilterMusic();
