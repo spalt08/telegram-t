@@ -50,6 +50,12 @@
     > span {
       color: #ffffff;
     }
+
+    &.with-background {
+      > div {
+        background-image: url('../../assets/spinner-white-thin.svg');
+      }
+    }
   }
 
   &.blue {
