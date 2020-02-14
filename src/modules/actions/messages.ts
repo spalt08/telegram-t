@@ -5,15 +5,15 @@ const BLUR_DELAY = 2000;
 
 let blurTimeout: number;
 
-addReducer('selectMediaMessage', (global, actions, payload) => {
-  const { id, isReversed = false } = payload!;
+addReducer('openMediaViewer', (global, actions, payload) => {
+  const { chatId, messageId, isReversed = false } = payload!;
 
   return {
     ...global,
-    messages: {
-      ...global.messages,
-      selectedMediaMessageId: id,
-      mediaReverseOrder: isReversed,
+    mediaViewer: {
+      chatId,
+      messageId,
+      isReversed,
     },
   };
 });

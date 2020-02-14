@@ -11,7 +11,7 @@ import Avatar from '../common/Avatar';
 
 import './SenderInfo.scss';
 
-type IProps = Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'openChatWithInfo'> & {
+type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openUserInfo' | 'openChatWithInfo'> & {
   messageId?: number;
   chatId?: number;
   message?: ApiMessage;
@@ -20,18 +20,18 @@ type IProps = Pick<GlobalActions, 'selectMediaMessage' | 'openUserInfo' | 'openC
 };
 
 const SenderInfo: FC<IProps> = ({
-  sender, isChannelChatMessage, message, selectMediaMessage, openUserInfo, openChatWithInfo,
+  sender, isChannelChatMessage, message, openMediaViewer, openUserInfo, openChatWithInfo,
 }) => {
   const openSenderInfo = useCallback(() => {
     if (sender) {
-      selectMediaMessage({ id: null });
+      openMediaViewer({ chatId: undefined, messageId: undefined });
       if (isChannelChatMessage) {
         openChatWithInfo({ id: sender.id });
       } else {
         openUserInfo({ id: sender.id });
       }
     }
-  }, [sender, selectMediaMessage, isChannelChatMessage, openChatWithInfo, openUserInfo]);
+  }, [sender, openMediaViewer, isChannelChatMessage, openChatWithInfo, openUserInfo]);
 
   if (!message || !sender) {
     return null;
@@ -82,6 +82,6 @@ export default withGlobal((global, { chatId, messageId }) => {
   };
 },
 (setGlobal, actions) => {
-  const { selectMediaMessage, openUserInfo, openChatWithInfo } = actions;
-  return { selectMediaMessage, openUserInfo, openChatWithInfo };
+  const { openMediaViewer, openUserInfo, openChatWithInfo } = actions;
+  return { openMediaViewer, openUserInfo, openChatWithInfo };
 })(SenderInfo);

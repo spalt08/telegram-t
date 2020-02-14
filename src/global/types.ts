@@ -11,6 +11,22 @@ import {
 } from '../api/types';
 
 export type GlobalState = {
+  showRightColumn: boolean;
+  isUiReady: boolean;
+  connectionState?: ApiUpdateConnectionStateType;
+  currentUserId?: number;
+  lastSyncTime?: number;
+
+  // TODO Move to `auth`.
+  isLoggingOut?: boolean;
+  authState?: ApiUpdateAuthorizationStateType;
+  authPhoneNumber?: string;
+  authIsLoading?: boolean;
+  authError?: string;
+  authRememberMe?: boolean;
+  authIsSessionRemembered?: boolean;
+  authNearestCountry?: string;
+
   users: {
     byId: Record<number, ApiUser>;
     selectedId?: number;
@@ -31,8 +47,7 @@ export type GlobalState = {
       viewportIds?: number[];
       focusedMessageId?: number;
     }>;
-    selectedMediaMessageId?: number;
-    mediaReverseOrder?: boolean;
+    isReversed?: boolean;
   };
 
   fileTransfers: {
@@ -41,23 +56,8 @@ export type GlobalState = {
     }>;
   };
 
-  // TODO Move to `auth`.
-  isLoggingOut?: boolean;
-  authState?: ApiUpdateAuthorizationStateType;
-  authPhoneNumber?: string;
-  authIsLoading?: boolean;
-  authError?: string;
-  authRememberMe?: boolean;
-  authIsSessionRemembered?: boolean;
-  authNearestCountry?: string;
-
-  isUiReady: boolean;
-  connectionState?: ApiUpdateConnectionStateType;
-  currentUserId?: number;
-  showRightColumn: boolean;
-  lastSyncTime?: number;
-
   recentEmojis: string[];
+
   stickers: {
     all: {
       hash?: number;
@@ -69,8 +69,6 @@ export type GlobalState = {
     };
   };
 
-  webPagePreview?: ApiWebPage;
-
   messageSearch: {
     isTextSearch: boolean;
     query?: string;
@@ -79,6 +77,14 @@ export type GlobalState = {
     nextOffsetId?: number;
     foundIds?: number[];
   };
+
+  mediaViewer: {
+    chatId?: number;
+    messageId?: number;
+    isReversed?: boolean;
+  };
+
+  webPagePreview?: ApiWebPage;
 };
 
 export type ActionTypes = (
@@ -91,14 +97,15 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
   // messages
-  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' |'pinMessage' | 'deleteMessages' |
-  'selectMediaMessage' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
+  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
+  'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   // message search
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage' |
   // misc
+  'openMediaViewer' |
   'loadStickers' | 'loadRecentStickers' | 'loadStickerSet' |
   'loadWebPagePreview' | 'clearWebPagePreview'
 );

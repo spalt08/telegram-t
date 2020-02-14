@@ -31,32 +31,32 @@ import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
 
-type IProps = Pick<GlobalActions, 'selectMediaMessage'> & {
+type IProps = Pick<GlobalActions, 'openMediaViewer'> & {
   chatId?: number;
-  selectedMediaMessageId?: number;
-  mediaReverseOrder?: boolean;
+  messageId?: number;
+  isReversed?: boolean;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
 };
 
 const MediaViewer: FC<IProps> = ({
   chatId,
-  selectedMediaMessageId,
-  mediaReverseOrder,
+  messageId,
+  isReversed,
   message,
   chatMessages,
-  selectMediaMessage,
+  openMediaViewer,
 }) => {
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
   const messageIds = useMemo(() => {
-    return isWebPagePhoto && selectedMediaMessageId
-      ? [selectedMediaMessageId]
-      : getChatMediaMessageIds(chatMessages || {}, mediaReverseOrder);
-  }, [isWebPagePhoto, selectedMediaMessageId, chatMessages, mediaReverseOrder]);
-  const selectedMediaMessageIndex = selectedMediaMessageId ? messageIds.indexOf(selectedMediaMessageId) : -1;
+    return isWebPagePhoto && messageId
+      ? [messageId]
+      : getChatMediaMessageIds(chatMessages || {}, isReversed);
+  }, [isWebPagePhoto, messageId, chatMessages, isReversed]);
+  const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
-  const isOpen = Boolean(selectedMediaMessageId);
+  const isOpen = Boolean(messageId);
 
   let { text: messageText } = message ? buildMessageContent(message) : { text: undefined };
   let isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
@@ -70,7 +70,7 @@ const MediaViewer: FC<IProps> = ({
   const previousProps = usePrevious({
     message,
     chatId,
-    selectedMediaMessageId,
+    messageId,
     messageText,
     isPhoto,
     isVideo,
@@ -81,7 +81,7 @@ const MediaViewer: FC<IProps> = ({
   if (!isOpen && previousProps) {
     message = previousProps.message;
     chatId = previousProps.chatId;
-    selectedMediaMessageId = previousProps.selectedMediaMessageId;
+    messageId = previousProps.messageId;
     messageText = previousProps.messageText;
     isPhoto = previousProps.isPhoto;
     isVideo = previousProps.isVideo;
@@ -99,8 +99,8 @@ const MediaViewer: FC<IProps> = ({
   };
 
   const closeMediaViewer = useCallback(() => {
-    selectMediaMessage({ id: null });
-  }, [selectMediaMessage]);
+    openMediaViewer({ chatId: undefined, messageId: undefined });
+  }, [openMediaViewer]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(closeMediaViewer) : undefined), [closeMediaViewer, isOpen]);
 
@@ -143,9 +143,10 @@ const MediaViewer: FC<IProps> = ({
     if (isFirst) {
       return;
     }
-    selectMediaMessage({
-      id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, -1) : null,
-      isReversed: mediaReverseOrder,
+    openMediaViewer({
+      chatId,
+      messageId: messageId ? getMessageId(messageId, -1) : undefined,
+      isReversed,
     });
   }
 
@@ -153,9 +154,10 @@ const MediaViewer: FC<IProps> = ({
     if (isLast) {
       return;
     }
-    selectMediaMessage({
-      id: selectedMediaMessageId ? getMessageId(selectedMediaMessageId, 1) : null,
-      isReversed: mediaReverseOrder,
+    openMediaViewer({
+      chatId,
+      messageId: messageId ? getMessageId(messageId, 1) : undefined,
+      isReversed,
     });
   }
 
@@ -163,7 +165,7 @@ const MediaViewer: FC<IProps> = ({
     <AnimationFade show={isOpen}>
       <div id="MediaViewer" onClick={handleClose}>
         <div className="media-viewer-head" onClick={stopEvent}>
-          <SenderInfo chatId={chatId} messageId={selectedMediaMessageId} />
+          <SenderInfo chatId={chatId} messageId={messageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
         <div className="media-viewer-content">
@@ -224,28 +226,28 @@ function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimens
 
 export default memo(withGlobal(
   (global) => {
-    const { chats: { selectedId: selectedChatId }, messages: { selectedMediaMessageId, mediaReverseOrder } } = global;
-    if (!selectedChatId || !selectedMediaMessageId) {
+    const { chatId, messageId, isReversed } = global.mediaViewer;
+    if (!chatId || !messageId) {
       return {};
     }
 
-    const chatMessages = selectChatMessages(global, selectedChatId);
-    const message = selectChatMessage(global, selectedChatId, selectedMediaMessageId);
+    const chatMessages = selectChatMessages(global, chatId);
+    const message = selectChatMessage(global, chatId, messageId);
 
     if (!message) {
       return {};
     }
 
     return {
-      chatId: message && message.chat_id,
-      selectedMediaMessageId,
-      mediaReverseOrder,
+      chatId,
+      messageId,
+      isReversed,
       message,
       chatMessages,
     };
   },
   (setGlobal, actions) => {
-    const { selectMediaMessage } = actions;
-    return { selectMediaMessage };
+    const { openMediaViewer } = actions;
+    return { openMediaViewer };
   },
 )(MediaViewer));

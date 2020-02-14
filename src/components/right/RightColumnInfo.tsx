@@ -27,7 +27,7 @@ type IProps = {
   userId?: number;
   resolvedUserId?: number;
   chatMessages: Record<number, ApiMessage>;
-} & Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'selectMediaMessage'>;
+} & Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
 
 const TAB_TITLES = [
   'Media',
@@ -49,7 +49,7 @@ const RightColumnInfo: FC<IProps> = ({
   chatMessages,
   setMessageSearchMediaType,
   searchMessages,
-  selectMediaMessage,
+  openMediaViewer,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [mediaType, setMediaType] = useState();
@@ -68,9 +68,9 @@ const RightColumnInfo: FC<IProps> = ({
     setMessageSearchMediaType({ mediaType });
   }, [mediaType, setMessageSearchMediaType]);
 
-  const handleSelectMedia = useCallback((id) => {
-    selectMediaMessage({ id, isReversed: true });
-  }, [selectMediaMessage]);
+  const handleSelectMedia = useCallback((messageId) => {
+    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isReversed: true });
+  }, [chatId, resolvedUserId, openMediaViewer]);
 
   return (
     <InfiniteScroll
@@ -140,7 +140,7 @@ export default withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { setMessageSearchMediaType, searchMessages, selectMediaMessage } = actions;
-    return { setMessageSearchMediaType, searchMessages, selectMediaMessage };
+    const { setMessageSearchMediaType, searchMessages, openMediaViewer } = actions;
+    return { setMessageSearchMediaType, searchMessages, openMediaViewer };
   },
 )(RightColumnInfo);

@@ -65,7 +65,7 @@ type IProps = (
     isFocused?: boolean;
   }
   & MessagePositionProperties
-  & Pick<GlobalActions, 'focusMessage' | 'selectMediaMessage' | 'openUserInfo' | 'cancelSendingMessage'>
+  & Pick<GlobalActions, 'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage'>
 );
 
 const FOCUSING_MAX_DISTANCE = 2000;
@@ -84,7 +84,7 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   fileTransferProgress,
   focusMessage,
-  selectMediaMessage,
+  openMediaViewer,
   cancelSendingMessage,
   openUserInfo,
   isFirstInGroup,
@@ -171,8 +171,8 @@ const Message: FC<IProps> = ({
   }, [focusMessage, chatId, message.reply_to_message_id]);
 
   const handleMediaClick = useCallback((): void => {
-    selectMediaMessage({ id: messageId });
-  }, [messageId, selectMediaMessage]);
+    openMediaViewer({ chatId, messageId });
+  }, [chatId, messageId, openMediaViewer]);
 
   const handleCancelTransfer = useCallback(() => {
     cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
@@ -447,13 +447,13 @@ export default memo(withGlobal(
   (setGlobal, actions) => {
     const {
       focusMessage,
-      selectMediaMessage,
+      openMediaViewer,
       cancelSendingMessage,
       openUserInfo,
     } = actions;
     return {
       focusMessage,
-      selectMediaMessage,
+      openMediaViewer,
       cancelSendingMessage,
       openUserInfo,
     };

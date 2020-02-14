@@ -8,9 +8,9 @@ import { filterKeys } from '../util/iteratees';
 
 const INITIAL_STATE: GlobalState = {
   showRightColumn: true,
-  messageSearch: {
-    isTextSearch: false,
-  },
+  isUiReady: false,
+
+  authRememberMe: true,
 
   users: {
     byId: {},
@@ -31,11 +31,8 @@ const INITIAL_STATE: GlobalState = {
     byMessageKey: {},
   },
 
-  authRememberMe: true,
-
-  isUiReady: false,
-
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],
+
   stickers: {
     all: {
       byId: {},
@@ -44,6 +41,12 @@ const INITIAL_STATE: GlobalState = {
       stickers: [],
     },
   },
+
+  messageSearch: {
+    isTextSearch: false,
+  },
+
+  mediaViewer: {},
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
 
@@ -81,13 +84,12 @@ function updateCache(global: GlobalState) {
 
   const reducedState: GlobalState = {
     ...global,
+    connectionState: undefined,
+    isUiReady: false,
+    lastSyncTime: undefined,
     chats: reduceChatsForCache(global),
     messages: reduceMessagesForCache(global),
     fileTransfers: { byMessageKey: {} },
-    connectionState: undefined,
-    lastSyncTime: undefined,
-    isUiReady: false,
-    messageSearch: { isTextSearch: false },
     stickers: {
       all: {
         byId: {},
@@ -96,6 +98,8 @@ function updateCache(global: GlobalState) {
         stickers: [],
       },
     },
+    messageSearch: { isTextSearch: false },
+    mediaViewer: {},
     webPagePreview: undefined,
   };
 
