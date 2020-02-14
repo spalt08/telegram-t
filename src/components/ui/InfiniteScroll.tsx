@@ -33,10 +33,10 @@ const InfiniteScroll: FC = ({
   const onLoadMoreDebounced = useMemo(() => debounce(onLoadMore, 1000, true, false), [onLoadMore, items]);
 
   useEffect(() => {
-    if (items.length < preloadBackwards) {
+    if (items && items.length < preloadBackwards) {
       onLoadMoreDebounced({ direction: BACKWARDS });
     }
-  }, [items.length, onLoadMoreDebounced, preloadBackwards]);
+  }, [items, onLoadMoreDebounced, preloadBackwards]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;

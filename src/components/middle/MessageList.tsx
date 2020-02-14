@@ -209,8 +209,10 @@ const MessageList: FC<IProps> = ({
       containerRef.current.scrollTop = newScrollTop;
     }
 
-    currentAnchorId = lastMessage.id;
-    currentAnchorTop = lastMessage.getBoundingClientRect().top;
+    if (lastMessage) {
+      currentAnchorId = lastMessage.id;
+      currentAnchorTop = lastMessage.getBoundingClientRect().top;
+    }
 
     playMediaInViewport();
 
