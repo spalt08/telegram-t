@@ -92,6 +92,8 @@ addReducer('sendMessage', (global, actions, payload) => {
   void callApi('sendMessage', {
     chat, currentUserId, text, replyingTo, attachment, sticker,
   });
+
+  actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
 });
 
 addReducer('cancelSendingMessage', () => {

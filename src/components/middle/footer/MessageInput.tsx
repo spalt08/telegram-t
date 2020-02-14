@@ -2,8 +2,6 @@ import { ChangeEvent } from 'react';
 import React, { FC, useEffect, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
-
 import { debounce } from '../../../util/schedulers';
 
 type IProps = {
@@ -13,7 +11,7 @@ type IProps = {
   isStickerMenuOpen: boolean;
   onUpdate: Function;
   onSend: Function;
-} & Pick<GlobalActions, 'setChatReplyingTo'>;
+};
 
 const MAX_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
@@ -21,7 +19,7 @@ const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, replyingTo, messageText, onUpdate, onSend, setChatReplyingTo, isStickerMenuOpen,
+  selectedChatId, replyingTo, messageText, onUpdate, onSend, isStickerMenuOpen,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>();
 
@@ -55,8 +53,6 @@ const MessageInput: FC<IProps> = ({
 
       onSend();
       currentTarget.removeAttribute('style');
-
-      setChatReplyingTo({ chatId: selectedChatId, messageId: undefined });
 
       // Disable `onChange` following immediately after `onKeyPress`.
       isJustSent = true;
@@ -110,9 +106,5 @@ export default withGlobal(
       selectedChatId,
       replyingTo: replyingToById[selectedChatId],
     };
-  },
-  (setGlobal, actions) => {
-    const { setChatReplyingTo } = actions;
-    return { setChatReplyingTo };
   },
 )(MessageInput);
