@@ -1,14 +1,14 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
 import { toArray, orderBy } from '../../util/iteratees';
-import { throttle } from '../../util/schedulers';
 
-import Chat from './Chat';
+import InfiniteScroll from '../ui/InfiniteScroll';
 import Loading from '../ui/Loading';
+import Chat from './Chat';
 
 import './ChatList.scss';
 
@@ -18,33 +18,15 @@ type IProps = {
   selectedChatId: number;
 } & Pick<GlobalActions, 'loadMoreChats'>;
 
-const LOAD_MORE_THRESHOLD_PX = 1500;
-
-const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
-
 const ChatList: FC<IProps> = ({
   chats, loadedChatIds, selectedChatId, loadMoreChats,
 }) => {
   const chatArrays = loadedChatIds ? prepareChats(chats, loadedChatIds) : undefined;
 
-  const handleScroll = useCallback((e) => {
-    const target = e.target as HTMLElement;
-
-    if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
-      runThrottledForLoadChats(() => {
-        // More than one callback can be added to the queue
-        // before the chats are appended, so we need to check again.
-        if (target.scrollHeight - (target.scrollTop + target.clientHeight) <= LOAD_MORE_THRESHOLD_PX) {
-          loadMoreChats();
-        }
-      });
-    }
-  }, [loadMoreChats]);
-
   return (
-    <div className="ChatList custom-scroll" onScroll={handleScroll}>{
-      // eslint-disable-next-line no-nested-ternary
-      loadedChatIds && loadedChatIds.length && chatArrays ? (
+    <InfiniteScroll className="ChatList custom-scroll" items={loadedChatIds} onLoadMore={loadMoreChats}>
+      {/* eslint-disable-next-line no-nested-ternary */}
+      {loadedChatIds && loadedChatIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map(({ id }) => (
             <Chat key={id} chatId={id} selected={id === selectedChatId} />
@@ -60,9 +42,8 @@ const ChatList: FC<IProps> = ({
         <div className="no-chats">Chat list is empty.</div>
       ) : (
         <Loading />
-      )
-    }
-    </div>
+      )}
+    </InfiniteScroll>
   );
 };
 
