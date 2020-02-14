@@ -1,7 +1,13 @@
 import { ApiMessage } from '../../../api/types';
 
 import { isSameDay } from '../../../util/dateFormat';
-import { getMessageRenderKey, isActionMessage } from '../../../modules/helpers';
+import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
+import {
+  getMessageRenderKey,
+  isActionMessage,
+  getMessageSticker,
+  getMessageText,
+} from '../../../modules/helpers';
 
 type SenderGroup = ApiMessage[];
 
@@ -46,16 +52,21 @@ export function groupMessages(messages: ApiMessage[]) {
       currentSenderGroup.push(message);
     }
 
-    if (
-      messages[index + 1] && (
+    if (messages[index + 1]) {
+      const text = getMessageText(messages[index + 1]);
+      const sticker = getMessageSticker(messages[index + 1]);
+      const isSticker = sticker || (text && parseEmojiOnlyString(text));
+
+      if (
         message.sender_user_id !== messages[index + 1].sender_user_id
         || message.is_outgoing !== messages[index + 1].is_outgoing
         || isActionMessage(message)
         || isActionMessage(messages[index + 1])
-      )
-    ) {
-      currentDateGroup.senderGroups.push(currentSenderGroup);
-      currentSenderGroup = [];
+        || isSticker
+      ) {
+        currentDateGroup.senderGroups.push(currentSenderGroup);
+        currentSenderGroup = [];
+      }
     }
   });
 
