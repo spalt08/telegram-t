@@ -19,7 +19,7 @@ const UserLink: FC<IProps> = ({
   }, [sender, openUserInfo]);
 
   if (!sender) {
-    return null;
+    return children;
   }
 
   return (

@@ -5,6 +5,7 @@ import { getUserFullName } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 
 import UserLink from './UserLink';
+import MessageLink from './MessageLink';
 
 type TextPart = string | Element;
 interface ServiceMessageTextOptions {
@@ -30,7 +31,7 @@ function processPlaceholder(text: string, placeholder: string, replaceValue?: Te
   return content;
 }
 
-export function getPinnedMessageText(message: ApiMessage, options: ServiceMessageTextOptions = {}) {
+function getMessageContent(message: ApiMessage, options: ServiceMessageTextOptions = {}) {
   const {
     text,
     photo,
@@ -56,29 +57,26 @@ export function getPinnedMessageText(message: ApiMessage, options: ServiceMessag
     messageText = `a ${text} sticker`;
   }
 
+  if (options.plain) {
+    return showQuotes ? `«${messageText}»` : messageText;
+  }
+
   if (showQuotes) {
-    if (options.plain) {
-      return `«${messageText}»`;
-    }
     return (
       <span>
         &laquo;
-        <span className="action-link not-implemented">{messageText}</span>
+        <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
         &raquo;
       </span>
     );
   }
 
-  if (options.plain) {
-    return messageText;
-  }
-
   return (
-    <span className="action-link not-implemented">{messageText}</span>
+    <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
   );
 }
 
-export function getPinnedMessageUsername(sender: ApiUser, plain?: boolean) {
+function getUserContent(sender: ApiUser, plain?: boolean) {
   if (plain) {
     return getUserFullName(sender);
   }
@@ -102,7 +100,7 @@ export function getServiceMessageContent(
     text,
     '%origin_user%',
     originUser
-      ? (!options.isReply && getPinnedMessageUsername(originUser, options.plain)) || NBSP
+      ? (!options.isReply && getUserContent(originUser, options.plain)) || NBSP
       : 'User',
   );
 
@@ -113,7 +111,7 @@ export function getServiceMessageContent(
     secondPart,
     '%target_user%',
     targetUser
-      ? getPinnedMessageUsername(targetUser, options.plain)
+      ? getUserContent(targetUser, options.plain)
       : 'User',
   );
 
@@ -124,7 +122,7 @@ export function getServiceMessageContent(
     thirdPart,
     '%message%',
     targetMessage
-      ? getPinnedMessageText(targetMessage, options)
+      ? getMessageContent(targetMessage, options)
       : 'a message',
   );
 
