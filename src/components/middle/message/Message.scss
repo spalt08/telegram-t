@@ -42,6 +42,10 @@
 
   .is-channel & {
     --max-width: 100%;
+
+    @media (max-width: 1499px) {
+      --max-width: calc(50vw - 2.35rem);
+    }
   }
 
   &.has-menu-open .message-content,
