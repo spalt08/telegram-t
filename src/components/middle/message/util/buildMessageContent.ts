@@ -21,6 +21,7 @@ import {
 import { TextPart, enhanceTextParts } from './enhanceText';
 
 export interface MessageContent {
+  isEmojiOnly: boolean;
   text?: TextPart | TextPart[];
   photo?: ApiPhoto;
   video?: ApiVideo;
@@ -50,7 +51,9 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     sticker, photo, video, audio, voice, document, poll, webPage, contact,
   } = getMessageContent(message);
   const classNames = ['message-content'];
+
   let contentParts: TextPart | TextPart[] | undefined;
+  let isEmojiOnly = false;
 
   if (text) {
     const emojiOnlyCount = parseEmojiOnlyString(text);
@@ -59,6 +62,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       classNames.push('sticker');
       classNames.push(`emoji-only emoji-only-${emojiOnlyCount}`);
       contentParts = text;
+      isEmojiOnly = true;
     } else {
       classNames.push('text');
       contentParts = !message.content.text ? text : enhanceTextParts(message.content.text);
@@ -121,6 +125,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
   classNames.push('status-read');
 
   return {
+    isEmojiOnly,
     text: contentParts,
     photo,
     video,

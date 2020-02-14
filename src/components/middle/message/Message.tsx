@@ -145,6 +145,7 @@ const Message: FC<IProps> = ({
   const isForwarded = Boolean(message.forward_info);
   const isReply = Boolean(message.reply_to_message_id);
   const {
+    isEmojiOnly,
     text,
     photo,
     video,
@@ -207,7 +208,7 @@ const Message: FC<IProps> = ({
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
-      || !user || photo || video || sticker
+      || !user || photo || video || sticker || isEmojiOnly
     ) {
       return null;
     }
