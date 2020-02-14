@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiMessage, ApiPrivateChat } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
-import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
+import { getMessageContentIds, getPrivateChatUserId, getMessageAudio } from '../../modules/helpers';
 import { selectChat, selectChatMessages } from '../../modules/selectors';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -18,7 +18,7 @@ import GroupExtra from './GroupExtra';
 import Media from './sharedMedia/Media';
 import Document from './sharedMedia/Document';
 import WebPage from '../middle/message/WebPage';
-import Audio from './sharedMedia/Audio';
+import Audio from '../middle/message/Audio';
 
 import './RightColumnInfo.scss';
 
@@ -111,7 +111,13 @@ const RightColumnInfo: FC<IProps> = ({
             ))
           ) : mediaType === 'audio' ? (
             messageIds.map((id: number) => (
-              <Audio key={id} message={chatMessages[id]} />
+              <Audio
+                key={id}
+                audio={getMessageAudio(chatMessages[id])!}
+                isOwn={false}
+                smaller
+                date={chatMessages[id].date}
+              />
             ))
           ) : null}
           {/* eslint-enable no-nested-ternary */}

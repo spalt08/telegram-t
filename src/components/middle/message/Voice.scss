@@ -1,0 +1,34 @@
+.Voice {
+  display: flex;
+  align-items: center;
+
+  &.own {
+    --color-text-secondary: var(--accent-color);
+    .Button {
+      --color-primary: var(--color-text-green);
+      --color-primary-shade: var(--color-green);
+      --color-white: var(--color-background-own);
+    }
+  }
+
+  .toggle-play {
+    margin-right: .75rem;
+    width: 3.375rem;
+    height: 3.375rem;
+
+    i {
+      font-size: 1.9375rem;
+      margin: -.0625rem 0 0 .25rem;
+    }
+  }
+
+  .voice-duration {
+    margin: .25rem 0 0;
+    font-size: .875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .waveform {
+    margin-left: 1px;
+  }
+}

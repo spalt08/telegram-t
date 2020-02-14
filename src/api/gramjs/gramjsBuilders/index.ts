@@ -5,6 +5,9 @@ import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/H
 import { ApiSticker } from '../../types';
 import localDb from '../localDb';
 
+const WAVEFORM_LENGTH = 63;
+const WAVEFORM_MAX_VALUE = 255;
+
 export function getEntityTypeById(chatOrUserId: number) {
   if (chatOrUserId > 0) {
     return 'user';
@@ -80,4 +83,22 @@ export function buildInputMediaDocumentFromSticker(sticker: ApiSticker) {
 
 export function generateRandomBigInt() {
   return readBigIntFromBuffer(generateRandomBytes(8), false);
+}
+
+export function reduceWaveform(waveform: number[]) {
+  const precision = Math.floor(waveform.length / WAVEFORM_LENGTH);
+  const reduced: number[] = [];
+  let max = 0;
+
+  for (let i = 0; i < WAVEFORM_LENGTH + 1; i++) {
+    const part = waveform.slice(i * precision, (i + 1) * precision);
+    const sum = part.reduce((acc, spike) => acc + spike, 0);
+    const value = sum / part.length;
+    reduced.push(value);
+    if (value > max) {
+      max = value;
+    }
+  }
+
+  return reduced.map((v) => Math.round((v / max) * WAVEFORM_MAX_VALUE));
 }

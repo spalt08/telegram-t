@@ -38,6 +38,8 @@ import Photo from './Photo';
 import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
+import Audio from './Audio';
+import Voice from './Voice';
 
 import './Message.scss';
 
@@ -264,10 +266,10 @@ const Message: FC<IProps> = ({
           />
         )}
         {audio && (
-          <p className="text-content">%AUDIO_FILE% Filename: {audio.fileName}. Title {audio.title}</p>
+          <Audio audio={audio} isOwn={isOwnMessage(message)} />
         )}
         {voice && (
-          <p className="text-content">%VOICE_MESSAGE% Duration: {voice.duration}</p>
+          <Voice voice={voice} isOwn={isOwnMessage(message)} />
         )}
         {messageDocument && (
           <Document

@@ -1,15 +1,17 @@
-import { MouseEvent as ReactMouseEvent, FocusEvent } from 'react';
+import { MouseEvent as ReactMouseEvent, FocusEvent, RefObject } from 'react';
 
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useRef } from '../../lib/teact/teact';
 
 import Spinner from './Spinner';
-import './Button.scss';
 import RippleEffect from './RippleEffect';
+
+import './Button.scss';
 
 type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
 interface IProps {
+  ref?: RefObject<HTMLButtonElement>;
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
   onMouseDown?: Function;
@@ -26,6 +28,7 @@ interface IProps {
 }
 
 const Button: FC<IProps> = ({
+  ref,
   type = 'button',
   onClick,
   onMouseDown,
@@ -40,6 +43,10 @@ const Button: FC<IProps> = ({
   isLoading,
   ariaLabel,
 }) => {
+  let containerRef = useRef<HTMLButtonElement>();
+  if (ref) {
+    containerRef = ref;
+  }
   let combinedClass = 'Button';
   combinedClass += ` ${size} ${color}`;
 
@@ -59,6 +66,7 @@ const Button: FC<IProps> = ({
   return (
     // eslint-disable-next-line react/button-has-type
     <button
+      ref={containerRef}
       type={type}
       className={combinedClass}
       onClick={onClick ? onClick as MouseEventHandler : undefined}

@@ -129,6 +129,7 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
     text: contentParts,
     photo,
     video,
+    audio,
     document,
     sticker,
     contact,

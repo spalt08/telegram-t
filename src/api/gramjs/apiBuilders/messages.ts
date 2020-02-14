@@ -21,6 +21,7 @@ import { isPeerUser } from './peers';
 import { omitGramJsFields } from './helpers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
+import { reduceWaveform } from '../gramjsBuilders';
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
   const chatId = resolveMessageApiChatId(mtpMessage);
@@ -270,7 +271,10 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
 
   const { duration, waveform } = audioAttribute;
 
-  return { duration, waveform };
+  return {
+    duration,
+    waveform: waveform ? Array.from(waveform) : undefined,
+  };
 }
 
 function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | undefined {
@@ -454,7 +458,7 @@ export function buildLocalMessage(
 
 function buildUploadingMedia(
   attachment: ApiAttachment,
-): { photo: ApiPhoto } | { video: ApiVideo } | { document: ApiDocument } {
+): ApiMessage['content'] {
   const { type: mimeType, name: fileName, size } = attachment.file;
 
   if (attachment.quick) {
@@ -482,6 +486,23 @@ function buildUploadingMedia(
         },
       };
     }
+  } else if (attachment.voice) {
+    const { duration, waveform } = attachment.voice;
+    return {
+      voice: {
+        duration,
+        waveform: reduceWaveform(waveform),
+      },
+    };
+  } else if (mimeType.startsWith('audio/')) {
+    return {
+      audio: {
+        mimeType,
+        fileName,
+        size,
+        duration: 200, // Arbitrary.
+      },
+    };
   } else {
     return {
       document: {

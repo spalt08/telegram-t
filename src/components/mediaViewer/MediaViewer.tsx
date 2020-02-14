@@ -206,7 +206,7 @@ const MediaViewer: FC<IProps> = ({
             />
           )}
         </div>
-        {hasFooter && <MediaViewerFooter text={messageText} />}
+        {hasFooter && <MediaViewerFooter text={messageText!} />}
       </div>
     </AnimationFade>
   );

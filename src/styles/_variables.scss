@@ -75,6 +75,7 @@ $color-chat-hover: #f4f4f5;
   --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
   --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
 
+  --color-white: #{$color-white};
   --color-gray: #{$color-gray};
 
   --color-chat-hover: #{$color-chat-hover};

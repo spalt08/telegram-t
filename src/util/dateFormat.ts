@@ -116,3 +116,30 @@ export function formatMediaDuration(duration: number) {
 
   return string;
 }
+
+export function formatVoiceRecordDuration(durationInMs: number) {
+  const parts = [];
+
+  let milliseconds = durationInMs % 1000;
+  durationInMs -= milliseconds;
+  milliseconds = Math.floor(milliseconds / 10);
+
+  durationInMs = Math.floor(durationInMs / 1000);
+  const seconds = durationInMs % 60;
+  durationInMs -= seconds;
+
+  durationInMs = Math.floor(durationInMs / 60);
+  const minutes = durationInMs % 60;
+  durationInMs -= minutes;
+
+  durationInMs = Math.floor(durationInMs / 60);
+  const hours = durationInMs % 60;
+
+  if (hours > 0) {
+    parts.push(padStart(String(hours), 2, '0'));
+  }
+  parts.push(padStart(String(minutes), hours > 0 ? 2 : 1, '0'));
+  parts.push(padStart(String(seconds), 2, '0'));
+
+  return `${parts.join(':')},${padStart(String(milliseconds), 2, '0')}`;
+}

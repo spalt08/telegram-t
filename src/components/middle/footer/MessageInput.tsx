@@ -7,7 +7,7 @@ import { debounce } from '../../../util/schedulers';
 type IProps = {
   selectedChatId?: number;
   replyingTo?: number;
-  messageText: string;
+  text: string;
   isStickerMenuOpen: boolean;
   onUpdate: Function;
   onSend: Function;
@@ -19,7 +19,7 @@ const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, replyingTo, messageText, onUpdate, onSend, isStickerMenuOpen,
+  selectedChatId, replyingTo, text, onUpdate, onSend, isStickerMenuOpen,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>();
 
@@ -62,7 +62,7 @@ const MessageInput: FC<IProps> = ({
     }
   }
 
-  useEffect(focusInput, [selectedChatId, replyingTo, isStickerMenuOpen, messageText]);
+  useEffect(focusInput, [selectedChatId, replyingTo, isStickerMenuOpen, text]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
@@ -89,7 +89,7 @@ const MessageInput: FC<IProps> = ({
       autoComplete="off"
       onChange={handleChange}
       onKeyPress={handleKeyPress}
-      value={messageText}
+      value={text}
     />
   );
 };

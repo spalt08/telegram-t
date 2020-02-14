@@ -1,10 +1,14 @@
 import React, {
-  FC, memo, useCallback, useEffect, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { GlobalActions } from '../../../global/types';
 import { withGlobal } from '../../../lib/teact/teactn';
 
+import { GlobalActions } from '../../../global/types';
 import { ApiAttachment, ApiSticker } from '../../../api/types';
+
+import { formatVoiceRecordDuration } from '../../../util/dateFormat';
+import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
+import * as voiceRecording from '../../../util/voiceRecording';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
@@ -13,9 +17,6 @@ import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import Attachment from './Attachment';
 import WebPagePreview from './WebPagePreview';
-
-import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
-import * as voiceRecording from '../../../util/voiceRecording';
 
 import './MiddleFooter.scss';
 
@@ -27,71 +28,25 @@ const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
 const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 
-// TODO This component renders a lot when typing and it has many children. Consider refactoring.
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
-  const [messageText, setMessageText] = useState('');
+  const [text, setText] = useState('');
+  const textRef = useRef(text);
+
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+
   const [isStickerMenuOpen, setIsStickerMenuOpen] = useState(false);
+
+  const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
+  const [startRecordTime, setStartRecordTime] = useState();
+  const [currentRecordTime, setCurrentRecordTime] = useState();
 
-  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (messageText && !attachment);
+  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (text && !attachment);
 
-  const handleSend = useCallback(async () => {
-    let currentAttachment = attachment;
-
-    if (activeVoiceRecording) {
-      try {
-        const { blob, duration, waveform } = await activeVoiceRecording.stop();
-        currentAttachment = {
-          file: blobToFile(blob, VOICE_RECORDING_FILENAME),
-          voice: { duration, waveform },
-        };
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-
-      setActiveVoiceRecording(undefined);
-    }
-
-    if (messageText || currentAttachment) {
-      sendMessage({
-        text: messageText,
-        attachment: currentAttachment,
-      });
-
-      setMessageText('');
-      setAttachment(undefined);
-      setIsStickerMenuOpen(false);
-    }
-  }, [messageText, attachment, activeVoiceRecording, sendMessage]);
-
-  const handleRecordVoice = useCallback(async () => {
-    try {
-      // TODO Visualize bitrate
-      const stop = await voiceRecording.start((/* tickVolume: number */) => {
-      });
-
-      setActiveVoiceRecording({ stop });
-      // TODO This is temprorary
-      setMessageText('Recording...');
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }, []);
-
-  // TODO Add Stop button
-  // const handleStopRecordingVoice = useCallback(async () => {
-  //   try {
-  //     await activeVoiceRecording!.stop();
-  //   } catch (err) {
-  //     // eslint-disable-next-line no-console
-  //     console.error(err);
-  //   }
-  //   setActiveVoiceRecording(undefined);
-  // }, [activeVoiceRecording]);
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
 
   useEffect(() => {
     async function pasteImageFromClipboard(e: ClipboardEvent) {
@@ -118,10 +73,6 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     };
   }, []);
 
-  const handleClearAttachment = useCallback(() => {
-    setAttachment(undefined);
-  }, []);
-
   const handleOpenAttachMenu = useCallback(() => {
     setIsAttachMenuOpen(true);
   }, []);
@@ -132,6 +83,10 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
     setAttachment(await buildAttachment(file, isQuick));
+  }, []);
+
+  const handleClearAttachment = useCallback(() => {
+    setAttachment(undefined);
   }, []);
 
   const handleOpenStickerMenu = useCallback(() => {
@@ -146,33 +101,94 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     const messageInput = document.getElementById('message-input-text') as HTMLInputElement;
     const selectionStart = messageInput.selectionStart || 0;
     const selectionEnd = messageInput.selectionEnd || 0;
-    setMessageText(`${messageText.substring(0, selectionStart)}${emoji}${messageText.substring(selectionEnd)}`);
+    setText(`${textRef.current.substring(0, selectionStart)}${emoji}${textRef.current.substring(selectionEnd)}`);
     requestAnimationFrame(() => {
       messageInput.setSelectionRange(selectionStart + emoji.length, selectionStart + emoji.length);
     });
-  }, [messageText]);
+  }, []);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     sendMessage({ sticker });
-
-    setMessageText('');
-    setActiveVoiceRecording(undefined);
-    setAttachment(undefined);
     setIsStickerMenuOpen(false);
   }, [sendMessage]);
+
+  const handleRecordVoice = useCallback(async () => {
+    try {
+      const stop = await voiceRecording.start((tickVolume: number) => {
+        if (recordButtonRef.current) {
+          const volumeLevel = ((tickVolume - 128) / 127) * 2;
+          const volumeFactor = volumeLevel ? 0.25 + volumeLevel * 0.75 : 0;
+          if (Date.now() % 4 === 0) {
+            recordButtonRef.current.style.boxShadow = `0 0 0 ${volumeFactor * 50}px rgba(0,0,0,.15)`;
+          }
+          setCurrentRecordTime(Date.now());
+        }
+      });
+      setStartRecordTime(Date.now());
+      setCurrentRecordTime(Date.now());
+
+      setActiveVoiceRecording({ stop });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, []);
+
+  const stopRecordingVoice = useCallback(() => {
+    setActiveVoiceRecording(undefined);
+    setStartRecordTime(undefined);
+    setCurrentRecordTime(undefined);
+    if (recordButtonRef.current) {
+      recordButtonRef.current.style.boxShadow = 'none';
+    }
+
+    try {
+      return activeVoiceRecording!.stop();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      return undefined;
+    }
+  }, [activeVoiceRecording]);
+
+  const handleSend = useCallback(async () => {
+    let currentAttachment = attachment;
+
+    if (activeVoiceRecording) {
+      const record = await stopRecordingVoice();
+      if (record) {
+        const { blob, duration, waveform } = record;
+        currentAttachment = {
+          file: blobToFile(blob, VOICE_RECORDING_FILENAME),
+          voice: { duration, waveform },
+        };
+      }
+    }
+
+    if (textRef.current || currentAttachment) {
+      sendMessage({
+        text: textRef.current,
+        attachment: currentAttachment,
+      });
+
+      setText('');
+      setAttachment(undefined);
+      setIsStickerMenuOpen(false);
+    }
+  }, [activeVoiceRecording, attachment, sendMessage, stopRecordingVoice]);
 
   return (
     <div className="MiddleFooter">
       <Attachment
         attachment={attachment}
-        caption={attachment ? messageText : ''}
-        onCaptionUpdate={setMessageText}
+        caption={attachment ? text : ''}
+        onCaptionUpdate={setText}
         onSend={handleSend}
         onClear={handleClearAttachment}
       />
       <div id="message-compose">
         <MessageInputReply />
-        <WebPagePreview messageText={!attachment ? messageText : ''} />
+        <WebPagePreview messageText={!attachment ? text : ''} />
         <div className="message-input-wrapper">
           <Button
             className={`${isStickerMenuOpen ? 'activated' : ''}`}
@@ -184,19 +200,26 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
             <i className="icon-smile" />
           </Button>
           <MessageInput
-            messageText={!attachment ? messageText : ''}
-            onUpdate={setMessageText}
+            text={!attachment ? text : ''}
+            onUpdate={setText}
             onSend={handleSend}
             isStickerMenuOpen={isStickerMenuOpen}
           />
-          <Button
-            className={`${isAttachMenuOpen ? 'activated' : ''}`}
-            round
-            color="translucent"
-            onMouseDown={handleOpenAttachMenu}
-          >
-            <i className="icon-attach" />
-          </Button>
+          {!activeVoiceRecording && (
+            <Button
+              className={`${isAttachMenuOpen ? 'activated' : ''}`}
+              round
+              color="translucent"
+              onMouseDown={handleOpenAttachMenu}
+            >
+              <i className="icon-attach" />
+            </Button>
+          )}
+          {activeVoiceRecording && (
+            <span className="recording-state">
+              {formatVoiceRecordDuration(currentRecordTime - startRecordTime)}
+            </span>
+          )}
           <AttachMenu
             isOpen={isAttachMenuOpen}
             onFileSelect={handleFileSelect}
@@ -210,10 +233,21 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
           />
         </div>
       </div>
+      {activeVoiceRecording && (
+        <Button
+          round
+          color="danger"
+          className="cancel"
+          onClick={stopRecordingVoice}
+        >
+          <i className="icon-delete" />
+        </Button>
+      )}
       <Button
+        ref={recordButtonRef}
         round
         color="secondary"
-        className={`${isMainButtonSend ? 'send' : 'microphone'}`}
+        className={`${isMainButtonSend ? 'send' : 'microphone'} ${activeVoiceRecording ? 'recording' : ''}`}
         onClick={isMainButtonSend ? handleSend : handleRecordVoice}
       >
         <i className="icon-send" />

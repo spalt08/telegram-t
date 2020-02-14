@@ -22,7 +22,7 @@ import {
   buildInputPeer,
   generateRandomBigInt,
   getEntityTypeById,
-  buildInputMediaDocumentFromSticker,
+  buildInputMediaDocumentFromSticker, reduceWaveform,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 
@@ -154,11 +154,11 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) 
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName })];
   if (voice) {
-    const reducedWaveform = voice.waveform.slice(voice.waveform.length / 2 - 32);
+    const { duration, waveform } = voice;
     attributes.push(new GramJs.DocumentAttributeAudio({
       voice: true,
-      duration: voice.duration,
-      waveform: Buffer.from(reducedWaveform),
+      duration,
+      waveform: Buffer.from(reduceWaveform(waveform)),
     }));
   }
 

@@ -17,7 +17,7 @@
     box-shadow: 0 0 .5rem .5rem #84a686;
     background: #84a686;
 
-    @media screen and (min-height: 750px)  {
+    @media screen and (min-height: 750px) {
       box-shadow: 0 0 .5rem .5rem #759b72;
       background: #759b72;
     }
@@ -30,6 +30,21 @@
     .icon-send,
     .icon-microphone-alt {
       position: absolute;
+    }
+
+    &.cancel {
+      position: relative;
+      z-index: 1;
+
+      &:hover, &.active {
+        background: var(--color-chat-hover);
+      }
+    }
+
+    &.recording {
+      position: relative;
+      z-index: 0;
+      transition: .1s box-shadow;
     }
 
     &.send {
@@ -46,6 +61,8 @@
       .icon-microphone-alt {
         animation: hide-icon .4s forwards ease-out;
       }
+
+      transition: box-shadow 200ms ease-out;
     }
 
     &.microphone {
@@ -67,6 +84,7 @@
   border-bottom-right-radius: 0;
   box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
   position: relative;
+  z-index: 1;
 
   &::before {
     content: '';
@@ -100,6 +118,26 @@
   > .input-group {
     flex-grow: 1;
     margin-bottom: 0;
+  }
+
+  .recording-state {
+    display: inline-block;
+    position: relative;
+    line-height: 3.5rem;
+    height: 3.5rem;
+    padding: 0 3.125rem 0 1rem;
+
+    &::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--color-error);
+      border-radius: 5px;
+      position: absolute;
+      top: 50%;
+      margin-top: -5px;
+      right: 1.375rem;
+    }
   }
 }
 

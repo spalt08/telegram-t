@@ -60,7 +60,7 @@ export interface ApiAudio {
 
 export interface ApiVoice {
   duration: number;
-  waveform?: Buffer;
+  waveform?: number[];
 }
 
 export interface ApiDocument {

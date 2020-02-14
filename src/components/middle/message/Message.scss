@@ -184,6 +184,19 @@
       margin-top: .5rem;
     }
   }
+
+  &.voice {
+    padding: .5rem !important;
+
+    .Voice + .text-content {
+      margin-top: .5rem;
+    }
+  }
+
+  &.audio {
+    min-width: 17.1875rem;
+    padding: .5rem .5rem .8125rem !important;
+  }
 }
 
 // Bubble appendix styles
