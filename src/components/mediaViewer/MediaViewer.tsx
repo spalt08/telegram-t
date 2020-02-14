@@ -1,11 +1,12 @@
 import React, {
-  FC, useEffect, memo, useCallback, useMemo,
+  FC, useEffect, memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, ApiVideo } from '../../api/types';
+import { ApiMessage } from '../../api/types';
 
+import { calculateMediaViewerVideoDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../../util/mediaDimensions';
 import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
 import {
   getChatMediaMessageIds,
@@ -47,6 +48,7 @@ const MediaViewer: FC<IProps> = ({
   chatMessages,
   openMediaViewer,
 }) => {
+  const [, onMediaQueryChanged] = useState(null);
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
@@ -65,6 +67,15 @@ const MediaViewer: FC<IProps> = ({
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   let blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
   let blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
+
+  useEffect(() => {
+    const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
+    mql.addEventListener('change', onMediaQueryChanged);
+
+    return () => {
+      mql.addEventListener('change', onMediaQueryChanged);
+    };
+  }, [onMediaQueryChanged]);
 
   // For correct unmount animation
   const previousProps = usePrevious({
@@ -88,6 +99,9 @@ const MediaViewer: FC<IProps> = ({
     blobUrlFull = previousProps.blobUrlFull;
     blobUrlPreview = previousProps.blobUrlPreview;
   }
+
+  const hasFooter = Boolean(messageText);
+  const videoDimensions = message && isVideo ? getVideoDimensions(getMessageVideo(message)!)! : undefined;
 
   const getMessageId = (fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
@@ -163,7 +177,7 @@ const MediaViewer: FC<IProps> = ({
 
   return (
     <AnimationFade show={isOpen}>
-      <div id="MediaViewer" onClick={handleClose}>
+      <div id="MediaViewer" onClick={handleClose} className={`${messageText ? 'footer' : ''}`}>
         <div className="media-viewer-head" onClick={stopEvent}>
           <SenderInfo chatId={chatId} messageId={messageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
@@ -173,7 +187,7 @@ const MediaViewer: FC<IProps> = ({
           {isVideo && renderVideo(
             blobUrlFull,
             blobUrlPreview || thumbDataUri,
-            message && getVideoDimensions(getMessageVideo(message) as ApiVideo),
+            message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
           )}
           {!isFirst && (
             <button
@@ -192,7 +206,7 @@ const MediaViewer: FC<IProps> = ({
             />
           )}
         </div>
-        {messageText && <MediaViewerFooter text={messageText} />}
+        {hasFooter && <MediaViewerFooter text={messageText} />}
       </div>
     </AnimationFade>
   );

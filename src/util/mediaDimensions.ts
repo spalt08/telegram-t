@@ -1,6 +1,7 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
-import { getPhotoInlineDimensions, getVideoDimensions } from '../modules/helpers';
+import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../modules/helpers';
 
+export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };
 const REM = 16;
 
@@ -47,6 +48,22 @@ function calculateDimensions(
   };
 }
 
+function getMediaViewerAvailableDimensions(withFooter: boolean) {
+  const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const bodyWidth = document.body.clientWidth;
+  const bodyHeight = document.body.clientHeight;
+  let occupiedHeight = 8.25;
+  if (withFooter) {
+    occupiedHeight = mql.matches ? 11.5 : 16.5;
+  }
+
+  return {
+    width: bodyWidth - rem,
+    height: bodyHeight - occupiedHeight * rem,
+  };
+}
+
 export function calculateInlineImageDimensions(
   photo: ApiPhoto,
   fromOwnMessage: boolean,
@@ -77,5 +94,24 @@ export function getStickerDimensions(sticker: ApiSticker) {
   return {
     width: baseWidth,
     height: aspectRatio ? baseWidth * aspectRatio : baseWidth,
+  };
+}
+
+export function calculateMediaViewerVideoDimensions({ width, height }: IDimensions, withFooter: boolean): IDimensions {
+  const aspectRatio = height / width;
+  const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(withFooter);
+  const calculatedWidth = Math.min(width, availableWidth);
+  const calculatedHeight = Math.round(calculatedWidth * aspectRatio);
+
+  if (calculatedHeight > availableHeight) {
+    return {
+      width: Math.round(availableHeight / aspectRatio),
+      height: availableHeight,
+    };
+  }
+
+  return {
+    width: calculatedWidth,
+    height: Math.round(calculatedWidth * aspectRatio),
   };
 }
