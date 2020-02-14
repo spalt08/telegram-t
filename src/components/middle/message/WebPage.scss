@@ -5,6 +5,7 @@
   border-left: 0.125rem solid var(--accent-color);
   font-size: 0.875rem;
   line-height: 1.125rem;
+  max-width: 29rem;
 
   .media-inner {
     margin: 0 !important;
@@ -14,19 +15,35 @@
       border-radius: var(--border-radius-messages-small) !important;
     }
 
-    &.small-image, &.square-image {
-      float: right;
-      margin-bottom: 1rem !important;
-    }
-
     &.square-image {
-      width: 6.25rem;
-      height: 6.25rem;
+      width: 5rem;
+      height: 5rem;
+      min-height: 0;
+      margin-bottom: 0 !important;
 
       img {
         width: 100%;
         height: 100%;
       }
+    }
+  }
+
+  &.with-square-photo {
+    display: flex;
+    margin-bottom: 1rem;
+
+    .WebPage-text {
+      order: 1;
+      padding-right: 1rem;
+    }
+
+    .site-description::after {
+      display: none;
+    }
+
+    .media-inner {
+      order: 2;
+      flex-shrink: 0;
     }
   }
 

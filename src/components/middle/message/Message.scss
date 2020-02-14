@@ -57,6 +57,10 @@
     --deleting-translate-x: 50%;
   }
 
+  .is-channel & {
+    --max-width: 100%;
+  }
+
   &.has-menu-open .message-content,
   &.has-menu-open .Avatar {
     z-index: var(--z-message-highlighted);
@@ -265,7 +269,7 @@
   }
 
   &.can-have-appendix {
-    .text-content::after {
+    .text-content:last-child::after {
       content: '';
       display: inline-block;
       width: var(--meta-safe-area-size);

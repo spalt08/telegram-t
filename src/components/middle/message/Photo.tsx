@@ -2,17 +2,13 @@ import { MouseEvent } from 'react';
 import React, { FC, useRef } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
-import { calculateInlineImageDimensions } from '../../../util/mediaDimensions';
-import getMinMediaWidth from './util/minMediaWidth';
+import { calculateMediaDimensions } from './util/mediaDimensions';
 import {
-  getMessageText,
   getMessagePhoto,
   getMessageWebPagePhoto,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessageTransferParams,
-  isForwardedMessage,
-  isOwnMessage,
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -28,8 +24,6 @@ type IProps = {
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelTransfer?: () => void;
 };
-
-const SMALL_IMAGE_THRESHOLD = 12;
 
 const Photo: FC<IProps> = ({
   message,
@@ -60,7 +54,7 @@ const Photo: FC<IProps> = ({
     transitionClassNames: fullMediaClassNames,
   } = useShowTransition(isMediaLoaded, undefined, isMediaPreloadedRef.current!);
 
-  const { width, height, isSmall } = calculateDimensions(message);
+  const { width, height, isSmall } = calculateMediaDimensions(message);
 
   let className = 'media-inner';
   if (!isTransferring) {
@@ -113,34 +107,5 @@ const Photo: FC<IProps> = ({
     </div>
   );
 };
-
-function calculateDimensions(message: ApiMessage) {
-  const isOwn = isOwnMessage(message);
-  const isForwarded = isForwardedMessage(message);
-  const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
-  const isWebPagePhoto = Boolean(getMessageWebPagePhoto(message));
-  const { width, height } = calculateInlineImageDimensions(photo, isOwn, isForwarded, isWebPagePhoto);
-
-  const hasText = Boolean(getMessageText(message));
-  const minMediaWidth = getMinMediaWidth(hasText);
-  const minMediaHeight = getMinMediaWidth(false);
-
-  let stretchFactor = 1;
-  if (width < minMediaWidth && minMediaWidth - width < SMALL_IMAGE_THRESHOLD) {
-    stretchFactor = minMediaWidth / width;
-  }
-  if (height * stretchFactor < minMediaHeight && minMediaHeight - height * stretchFactor < SMALL_IMAGE_THRESHOLD) {
-    stretchFactor = minMediaHeight / height;
-  }
-
-  const finalWidth = width * stretchFactor;
-  const finalHeight = height * stretchFactor;
-
-  return {
-    width: finalWidth,
-    height: finalHeight,
-    isSmall: finalWidth < minMediaWidth || finalHeight < minMediaHeight,
-  };
-}
 
 export default Photo;

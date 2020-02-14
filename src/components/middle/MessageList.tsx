@@ -229,6 +229,9 @@ const MessageList: FC<IProps> = ({
     classNames.push('no-avatars');
   }
   if (isChannelChat) {
+    classNames.push('is-channel');
+  }
+  if (isChannelChat) {
     classNames.push('bottom-padding');
   }
   if (isScrolling) {

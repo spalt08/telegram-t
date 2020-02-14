@@ -22,7 +22,7 @@ import {
 } from '../../../modules/helpers';
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
-import getMinMediaWidth from './util/minMediaWidth';
+import { getMinMediaWidth } from './util/mediaDimensions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useEnsureUserFromMessage from '../../../hooks/useEnsureUserFromMessage';
 
