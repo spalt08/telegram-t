@@ -8,6 +8,7 @@ const POLYFILL_OPTIONS = {
     return new Worker('../../node_modules/opus-media-recorder/encoderWorker.js');
   },
 };
+const MIN_RECORDING_TIME = 1000;
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 
@@ -75,10 +76,17 @@ export async function start(analyzerCallback: Function) {
       });
     };
     mediaRecorder.onerror = reject;
-    mediaRecorder.stop();
 
-    releaseAnalyzer();
-    releaseStream();
+    const delayStop = Math.max(0, startedAt + MIN_RECORDING_TIME - Date.now());
+    setTimeout(
+      () => {
+        mediaRecorder.stop();
+
+        releaseAnalyzer();
+        releaseStream();
+      },
+      delayStop,
+    );
   });
 }
 

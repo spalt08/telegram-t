@@ -86,15 +86,19 @@ export function generateRandomBigInt() {
 }
 
 export function reduceWaveform(waveform: number[]) {
-  const precision = Math.floor(waveform.length / WAVEFORM_LENGTH);
-  const reduced: number[] = [];
+  const reduced: number[] = new Array(WAVEFORM_LENGTH).fill(0);
+  const precision = Math.ceil(waveform.length / WAVEFORM_LENGTH);
   let max = 0;
 
   for (let i = 0; i < WAVEFORM_LENGTH + 1; i++) {
     const part = waveform.slice(i * precision, (i + 1) * precision);
+    if (!part.length) {
+      break;
+    }
+
     const sum = part.reduce((acc, spike) => acc + spike, 0);
     const value = sum / part.length;
-    reduced.push(value);
+    reduced[i] = value;
     if (value > max) {
       max = value;
     }

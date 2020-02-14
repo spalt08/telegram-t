@@ -118,7 +118,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
         if (recordButtonRef.current) {
           const volumeLevel = ((tickVolume - 128) / 127) * 2;
           const volumeFactor = volumeLevel ? 0.25 + volumeLevel * 0.75 : 0;
-          if (Date.now() % 4 === 0) {
+          if (activeVoiceRecording && Date.now() % 4 === 0) {
             recordButtonRef.current.style.boxShadow = `0 0 0 ${volumeFactor * 50}px rgba(0,0,0,.15)`;
           }
           setCurrentRecordTime(Date.now());
