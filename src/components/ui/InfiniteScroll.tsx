@@ -5,28 +5,17 @@ import React, {
 
 import { debounce } from '../../util/schedulers';
 
-export type OnLoadMore = ({
-  offsetId,
-  direction,
-}: {
-  offsetId?: number;
-  direction?: number;
-}) => void;
-
 interface IProps {
   className?: string;
-  onLoadMore: OnLoadMore;
+  onLoadMore: AnyToVoidFunction;
   items: any[];
   sensitiveHeight?: number;
   preloadBackwards?: number;
-  reversed?: boolean;
-  withForwards?: boolean;
   children: any;
 }
 
-const DEFAULT_SENSITIVE_HEIGHT = 1000;
+const DEFAULT_SENSITIVE_HEIGHT = 1200;
 const DEFAULT_PRELOAD_BACKWARDS = 50;
-const FORWARDS = 1;
 const BACKWARDS = -1;
 
 const InfiniteScroll: FC = ({
@@ -35,16 +24,13 @@ const InfiniteScroll: FC = ({
   items,
   sensitiveHeight = DEFAULT_SENSITIVE_HEIGHT,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
-  reversed,
-  withForwards,
   children,
 }: IProps) => {
   const containerRef = useRef<HTMLDivElement>();
+  const anchorTopRef = useRef<number>(undefined);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onLoadMoreDebounced = useMemo(() => debounce(onLoadMore, 1000, true, false), [onLoadMore, items]);
-
-  const scrollTopRef = useRef<number>(0);
-  const anchorOffsetRef = useRef<number>(undefined);
 
   useEffect(() => {
     if (items.length < preloadBackwards) {
@@ -52,43 +38,24 @@ const InfiniteScroll: FC = ({
     }
   }, [items.length, onLoadMoreDebounced, preloadBackwards]);
 
-  const shouldHandleTop = reversed ? true : withForwards;
-  const shouldHandleBottom = reversed ? withForwards : true;
-
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;
-
     const { scrollTop, scrollHeight, offsetHeight } = container;
-
-    const isNearTop = scrollTop <= sensitiveHeight;
     const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= sensitiveHeight;
 
-    scrollTopRef.current = scrollTop;
-
-    if (shouldHandleTop && isNearTop) {
-      const anchor = container.firstElementChild as HTMLElement;
-      if (anchor) {
-        const newAnchorOffset = anchor.getBoundingClientRect().top;
-        const isMovingUp = typeof anchorOffsetRef.current === 'number' && newAnchorOffset > anchorOffsetRef.current;
-        anchorOffsetRef.current = newAnchorOffset;
-
-        if (isMovingUp) {
-          onLoadMoreDebounced({ direction: reversed ? BACKWARDS : FORWARDS });
-        }
-      }
-    } else if (shouldHandleBottom && isNearBottom) {
+    if (isNearBottom) {
       const anchor = container.lastElementChild as HTMLElement;
       if (anchor) {
-        const newAnchorOffset = anchor.getBoundingClientRect().top;
-        const isMovingDown = typeof anchorOffsetRef.current === 'number' && newAnchorOffset < anchorOffsetRef.current;
-        anchorOffsetRef.current = newAnchorOffset;
+        const newAnchorTop = anchor.getBoundingClientRect().top;
+        const isMovingDown = typeof anchorTopRef.current === 'number' && newAnchorTop < anchorTopRef.current;
+        anchorTopRef.current = newAnchorTop;
 
         if (isMovingDown) {
-          onLoadMoreDebounced({ direction: reversed ? FORWARDS : BACKWARDS });
+          onLoadMoreDebounced({ direction: BACKWARDS });
         }
       }
     }
-  }, [onLoadMoreDebounced, reversed, sensitiveHeight, shouldHandleBottom, shouldHandleTop]);
+  }, [onLoadMoreDebounced, sensitiveHeight]);
 
   return (
     <div ref={containerRef} className={className} onScroll={handleScroll}>
