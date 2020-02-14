@@ -30,9 +30,8 @@
     }
   }
 
-  .message-date-header,
+  .Message,
   .message-action-header {
-    text-align: center;
     position: relative;
 
     &::before {
@@ -40,19 +39,46 @@
       position: absolute;
       top: -0.25rem;
       bottom: -0.25rem;
-      left: -3rem;
-      right: -3rem;
+      left: -4rem;
+      right: -4rem;
       background: var(--color-primary);
       border-radius: var(--border-radius-messages-small);
       z-index: -1;
 
       opacity: 0;
       transition: opacity 500ms;
+
+      .no-right-column & {
+        left: -17rem;
+        right: -17rem;
+      }
+
+      @media (max-width: 1659px) {
+        left: -0.75rem;
+        right: -0.75rem;
+
+        .no-right-column & {
+          left: calc((75vw - var(--messages-container-width) + 1rem) * -0.5);
+          right: calc((75vw - var(--messages-container-width) + 1rem) * -0.5);
+        }
+      }
+
+      @media (max-width: 889px) {
+        .no-right-column & {
+          left: -0.75rem;
+          right: -0.75rem;
+        }
+      }
     }
 
     &.focused::before {
       opacity: 0.2;
     }
+  }
+
+  .message-date-header,
+  .message-action-header {
+    text-align: center;
 
     > span {
       display: inline-block;

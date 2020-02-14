@@ -13,24 +13,6 @@
   --meta-safe-area-size: var(--meta-safe-area-base);
   --deleting-translate-x: -50%;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: -0.25rem;
-    bottom: -0.25rem;
-    left: -3rem;
-    right: -3rem;
-    background: var(--color-primary);
-    border-radius: var(--border-radius-messages-small);
-
-    opacity: 0;
-    transition: opacity 500ms;
-  }
-
-  &.focused::before {
-    opacity: 0.2;
-  }
-
   > .Avatar, > .message-content {
     opacity: 1;
     transform: scale(1) translateX(0);

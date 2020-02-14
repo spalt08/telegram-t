@@ -16,10 +16,11 @@ type IProps = Pick<GlobalActions, 'openChat'> & {
   selectedChatId: number;
   isChannelChat: boolean;
   areChatsLoaded: boolean;
+  showRightColumn: boolean;
 };
 
 const MiddleColumn: FC<IProps> = (props) => {
-  const { selectedChatId, openChat } = props;
+  const { selectedChatId, openChat, showRightColumn } = props;
   const isChatOpen = Boolean(selectedChatId);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const MiddleColumn: FC<IProps> = (props) => {
   }, [isChatOpen, openChat]);
 
   return (
-    <div id="MiddleColumn">
+    <div id="MiddleColumn" className={showRightColumn ? '' : 'no-right-column'}>
       {renderSelectedChat(props)}
     </div>
   );
@@ -57,7 +58,7 @@ function renderSelectedChat(props: IProps) {
 
 export default withGlobal(
   (global) => {
-    const { chats } = global;
+    const { chats, showRightColumn } = global;
     const selectedChatId = chats.selectedId;
     const areChatsLoaded = Boolean(chats.ids);
 
@@ -70,6 +71,7 @@ export default withGlobal(
       selectedChatId,
       isChannelChat,
       areChatsLoaded,
+      showRightColumn,
     };
   },
   (setGlobal, actions) => {
