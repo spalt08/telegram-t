@@ -1,11 +1,13 @@
-import React, { FC, memo } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useRef, useEffect,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import {
   ApiUser,
   ApiMessage,
 } from '../../api/types';
-import { selectUser, selectChatMessage } from '../../modules/selectors';
+import { selectUser, selectChatMessage, selectChatFocusedMessageId } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useEnsureUserFromMessage from '../../hooks/useEnsureUserFromMessage';
@@ -16,14 +18,35 @@ type IProps = {
   actionTargetUser?: ApiUser;
   actionTargetMessage?: ApiMessage;
   isReply?: boolean;
+  isFocused: boolean;
 };
 
+const FOCUSING_MAX_DISTANCE = 2000;
+
 const ServiceMessage: FC<IProps> = ({
-  message, sender, actionTargetUser, actionTargetMessage, isReply,
+  message, sender, actionTargetUser, actionTargetMessage, isReply, isFocused,
 }) => {
   const { targetUserId: actionTargetUserId } = message.content.action || {};
   useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
   useEnsureUserFromMessage(message.chat_id, message.id, actionTargetUserId, actionTargetUser);
+  const elementRef = useRef<HTMLDivElement>();
+
+  useEffect(() => {
+    const messagesContainer = document.getElementById('MessageList');
+    if (isFocused && elementRef.current && messagesContainer) {
+      const offset = elementRef.current.offsetTop - messagesContainer.scrollTop;
+      if (offset < -FOCUSING_MAX_DISTANCE) {
+        messagesContainer.scrollTop += (offset + FOCUSING_MAX_DISTANCE);
+      } else if (offset > FOCUSING_MAX_DISTANCE) {
+        messagesContainer.scrollTop += (offset - FOCUSING_MAX_DISTANCE);
+      }
+
+      elementRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [isFocused, message.chat_id]);
 
   const content = getServiceMessageContent(
     message,
@@ -37,8 +60,13 @@ const ServiceMessage: FC<IProps> = ({
     return <span className="reply-action-message">{content}</span>;
   }
 
+  const classNames = ['message-action-header'];
+  if (isFocused) {
+    classNames.push('focused');
+  }
+
   return (
-    <div className="message-action-header">
+    <div ref={elementRef} className={classNames.join(' ')}>
       <span>{content}</span>
     </div>
   );
@@ -49,6 +77,7 @@ export default memo(withGlobal(
     const userId = message.sender_user_id;
     const { targetUserId: actionTargetUserId } = message.content.action || {};
     const actionTargetMessageId = message.reply_to_message_id;
+    const isFocused = message.id === selectChatFocusedMessageId(global, message.chat_id);
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),
@@ -56,6 +85,7 @@ export default memo(withGlobal(
       ...(actionTargetMessageId && {
         actionTargetMessage: selectChatMessage(global, message.chat_id, actionTargetMessageId),
       }),
+      isFocused,
     };
   },
 )(ServiceMessage));
