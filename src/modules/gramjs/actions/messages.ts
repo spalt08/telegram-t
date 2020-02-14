@@ -19,16 +19,16 @@ import {
 const MESSAGE_SLICE_LIMIT = 50;
 
 addReducer('loadMessagesForList', (global, actions, payload) => {
-  const { chatId, direction } = payload!;
-  const chat = selectChat(global, chatId);
+  const { direction } = payload || {};
+  const chat = selectOpenChat(global);
   if (!chat) {
     return undefined;
   }
 
   if (direction) {
-    const { newViewportIds, anchorId } = getUpdatedViewportIds(global, chatId, direction);
+    const { newViewportIds, anchorId } = getUpdatedViewportIds(global, chat.id, direction);
     if (newViewportIds) {
-      return replaceChatMessageViewportIds(global, chatId, newViewportIds);
+      return replaceChatMessageViewportIds(global, chat.id, newViewportIds);
     } else if (anchorId) {
       void loadMessagesForList(chat, anchorId, direction);
     }

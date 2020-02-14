@@ -21,7 +21,7 @@ import {
   isOwnMessage,
 } from '../../modules/helpers';
 import { flatten, orderBy } from '../../util/iteratees';
-import { throttle } from '../../util/schedulers';
+import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import { groupMessages, MessageDateGroup } from './util/groupMessages';
@@ -43,16 +43,19 @@ type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | '
 
 const LOAD_MORE_THRESHOLD_PX = 1500;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
+const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MARGIN = 500;
 const STICKY_OFFSET_TOP = 71; // MiddleHeader Height + 10px
 const HIDE_STICKY_TIMEOUT = 450;
 
-const runThrottledForLoadMessages = throttle((cb) => cb(), 1000, true);
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
+const scrollToLastMessage = throttle((container: Element) => {
+  container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+}, 300, true);
 
 let currentScrollOffset = 0;
-let currentAnchorId: number | undefined;
-let currentAnchorOffset: number;
+let currentAnchorId: string | undefined;
+let currentAnchorTop: number;
 
 let scrollTimeout: NodeJS.Timeout | null = null;
 
@@ -79,10 +82,6 @@ const MessageList: FC<IProps> = ({
     return groupMessages(orderBy(listedMessages, 'date'));
   }, [chatId, messageIds, messagesById]);
 
-  const isLoaded = Boolean(messageIds);
-  const messagesCount = messageIds ? messageIds.length : 0;
-  const isPrivate = chatId !== undefined && isChatPrivate(chatId);
-
   const playMediaInViewport = useCallback(() => {
     requestAnimationFrame(() => {
       const newViewportMessageIds = findMediaMessagesInViewport(containerRef.current!);
@@ -92,60 +91,63 @@ const MessageList: FC<IProps> = ({
     });
   }, [viewportMessageIds]);
 
-  // TODO @perf This component renders a lot and it has a lot of children.
-  //  Consider extracting messages renderer to a separate component.
+  const loadMessagesDebounced = useMemo(
+    () => debounce(loadMessagesForList, 1000, true, false),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadMessagesForList, messageIds],
+  );
+
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;
+
+    const { scrollTop, scrollHeight, offsetHeight } = container;
+    currentScrollOffset = scrollHeight - scrollTop;
+
+    const isNearTop = scrollTop <= LOAD_MORE_THRESHOLD_PX;
+    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX;
+    const currentAnchor = currentAnchorId && document.getElementById(currentAnchorId);
+
+    if (isNearTop) {
+      const itemEls = container.querySelectorAll('.Message');
+      const newAnchor = itemEls[0];
+      if (newAnchor) {
+        const newMovingOffset = newAnchor.getBoundingClientRect().top;
+        const isMovingUp = (
+          currentAnchor && currentAnchorTop !== undefined && newMovingOffset > currentAnchorTop
+        );
+
+        currentAnchorId = newAnchor.id;
+        currentAnchorTop = newMovingOffset;
+
+        if (isMovingUp) {
+          loadMessagesDebounced({ direction: -1 });
+        }
+      }
+    } else if (!isLatest && isNearBottom) {
+      const itemEls = container.querySelectorAll('.Message');
+      const newAnchor = itemEls[itemEls.length - 1];
+      if (newAnchor) {
+        const newMovingOffset = newAnchor.getBoundingClientRect().top;
+        const isMovingDown = (
+          currentAnchor && currentAnchorTop !== undefined && newMovingOffset < currentAnchorTop
+        );
+
+        currentAnchorId = newAnchor.id;
+        currentAnchorTop = newMovingOffset;
+
+        if (isMovingDown) {
+          loadMessagesDebounced({ direction: 1 });
+        }
+      }
+    } else if (currentAnchor) {
+      currentAnchorTop = currentAnchor.getBoundingClientRect().top;
+    }
 
     setIsScrolling(true);
     if (scrollTimeout) {
       clearTimeout(scrollTimeout);
     }
     scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
-
-    const { scrollTop, scrollHeight, offsetHeight } = container;
-    currentScrollOffset = scrollHeight - scrollTop;
-
-    if (scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-      const anchor = container.querySelector('.Message') as HTMLElement;
-      if (anchor) {
-        const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
-        if (newAnchorScreenOffset > currentAnchorOffset) {
-          runThrottledForLoadMessages(() => {
-            // More than one callback can be added to the queue
-            // before the messages are prepended, so we need to check again.
-            // eslint-disable-next-line no-shadow
-            const { scrollTop } = container;
-            if (scrollTop <= LOAD_MORE_THRESHOLD_PX) {
-              loadMessagesForList({ chatId, direction: -1 });
-            }
-          });
-        }
-
-        currentAnchorId = Number(anchor.dataset.messageId);
-        currentAnchorOffset = newAnchorScreenOffset;
-      }
-    } else if (!isLatest && (scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX)) {
-      const allMessages = container.querySelectorAll('.Message');
-      const anchor = allMessages[allMessages.length - 1] as HTMLElement;
-      if (anchor) {
-        const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
-        if (newAnchorScreenOffset < currentAnchorOffset) {
-          runThrottledForLoadMessages(() => {
-            // More than one callback can be added to the queue
-            // before the messages are prepended, so we need to check again.
-            // eslint-disable-next-line no-shadow
-            const { scrollTop, scrollHeight, offsetHeight } = container;
-            if (!isLatest && (scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX)) {
-              loadMessagesForList({ chatId, direction: 1 });
-            }
-          });
-        }
-
-        currentAnchorId = Number(anchor.dataset.messageId);
-        currentAnchorOffset = newAnchorScreenOffset;
-      }
-    }
 
     runThrottledForScroll(() => {
       setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
@@ -154,13 +156,13 @@ const MessageList: FC<IProps> = ({
     });
 
     determineStickyElement(container, '.message-date-header');
-  }, [chatId, loadMessagesForList, isLatest, setChatScrollOffset, playMediaInViewport]);
+  }, [chatId, isLatest, loadMessagesDebounced, playMediaInViewport, setChatScrollOffset]);
 
   useEffect(() => {
-    if (!isLoaded || messagesCount < LOAD_MORE_WHEN_LESS_THAN) {
-      runThrottledForLoadMessages(() => loadMessagesForList({ chatId }));
+    if (!messageIds || (messageIds.length < LOAD_MORE_WHEN_LESS_THAN)) {
+      loadMessagesDebounced();
     }
-  }, [isLoaded, loadMessagesForList, messagesCount, chatId]);
+  }, [messageIds, loadMessagesDebounced]);
 
   useEffect(() => {
     if (isUnread) {
@@ -189,19 +191,26 @@ const MessageList: FC<IProps> = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = containerRef.current;
-    const isScrolledDown = currentScrollOffset === offsetHeight;
-    const anchor = currentAnchorId ? document.getElementById(`message${currentAnchorId}`) : undefined;
+    const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
 
-    if (prevIsLatest && isScrolledDown) {
+    const itemEls = containerRef.current.querySelectorAll('.Message');
+    const lastMessage = itemEls[itemEls.length - 1];
+    const isNewMessage = lastMessage && (lastMessage.id !== currentAnchorId);
+    const isScrolledDown = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
+
+    if (prevIsLatest && isScrolledDown && isNewMessage) {
       scrollToLastMessage(containerRef.current);
     } else if (!anchor) {
       containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
     } else {
-      const newAnchorScreenOffset = anchor.getBoundingClientRect().top;
-      const newScrollTop = scrollTop + (newAnchorScreenOffset - currentAnchorOffset);
+      const newAnchorTop = anchor.getBoundingClientRect().top;
+      const newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
       currentScrollOffset = scrollHeight - newScrollTop;
       containerRef.current.scrollTop = newScrollTop;
     }
+
+    currentAnchorId = lastMessage.id;
+    currentAnchorTop = lastMessage.getBoundingClientRect().top;
 
     playMediaInViewport();
 
@@ -210,6 +219,8 @@ const MessageList: FC<IProps> = ({
       console.timeEnd('scrollTop');
     }
   }, [chatId, messageIds, isLatest, playMediaInViewport]);
+
+  const isPrivate = chatId !== undefined && isChatPrivate(chatId);
 
   const classNames = ['MessageList', 'custom-scroll'];
   if (isPrivate || isChannelChat) {
@@ -224,7 +235,7 @@ const MessageList: FC<IProps> = ({
 
   return (
     <div ref={containerRef} id="MessageList" className={classNames.join(' ')} onScroll={handleScroll}>
-      {isLoaded ? (
+      {messageIds ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">
           {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
@@ -302,17 +313,6 @@ function renderMessages(
   });
 
   return flatten(dateGroups);
-}
-
-function scrollToLastMessage(container: HTMLElement) {
-  // One RAF causes a redundant animation when deleting
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      if (container) {
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-      }
-    });
-  });
 }
 
 function findMediaMessagesInViewport(container: HTMLElement) {
