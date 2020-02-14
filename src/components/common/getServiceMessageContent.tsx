@@ -1,7 +1,10 @@
 import React from '../../lib/teact/teact';
+
 import { ApiMessage, ApiUser } from '../../api/types';
 import { getUserFullName } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
+
+import UserLink from './UserLink';
 
 type TextPart = string | Element;
 interface ServiceMessageTextOptions {
@@ -79,7 +82,7 @@ export function getPinnedMessageUsername(sender: ApiUser, plain?: boolean) {
   if (plain) {
     return getUserFullName(sender);
   }
-  return <span className="action-link not-implemented">{getUserFullName(sender)}</span>;
+  return <UserLink className="action-link" sender={sender}>{getUserFullName(sender)}</UserLink>;
 }
 
 export function getServiceMessageContent(
