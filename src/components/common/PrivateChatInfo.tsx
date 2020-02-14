@@ -2,20 +2,22 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
+import { GlobalActions, GlobalState } from '../../global/types';
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
-import { GlobalActions, GlobalState } from '../../global/types';
+
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 
 type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullUser'> & {
   userId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
+  isSavedMessages: boolean;
   user: ApiUser;
 };
 
 const PrivateChatInfo: FC<IProps> = ({
-  lastSyncTime, user, avatarSize = 'medium', loadFullUser,
+  lastSyncTime, user, avatarSize = 'medium', isSavedMessages, loadFullUser,
 }) => {
   useEffect(() => {
     if (lastSyncTime && user.is_self) {
@@ -25,9 +27,9 @@ const PrivateChatInfo: FC<IProps> = ({
 
   return (
     <div className="ChatInfo">
-      <Avatar key={user.id} size={avatarSize} user={user} isSavedMessages={user.is_self} />
+      <Avatar key={user.id} size={avatarSize} user={user} isSavedMessages={isSavedMessages} />
       <div>
-        {user.is_self ? (
+        {isSavedMessages ? (
           <div className="title">Saved Messages</div>
         ) : (
           <div className="title">
@@ -35,7 +37,7 @@ const PrivateChatInfo: FC<IProps> = ({
             {user.is_verified && <VerifiedIcon />}
           </div>
         )}
-        {!user.is_self && (
+        {!isSavedMessages && (
           <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>{getUserStatus(user)}</div>
         )}
       </div>
@@ -45,10 +47,14 @@ const PrivateChatInfo: FC<IProps> = ({
 
 export default withGlobal(
   (global, { userId }: IProps) => {
-    const { lastSyncTime } = global;
+    const { lastSyncTime, chats } = global;
     const user = selectUser(global, userId);
 
-    return { lastSyncTime, user };
+    return {
+      lastSyncTime,
+      user,
+      isSavedMessages: user.is_self && user.id === chats.selectedId,
+    };
   },
   (setGlobal, actions) => {
     const { loadFullUser } = actions;
