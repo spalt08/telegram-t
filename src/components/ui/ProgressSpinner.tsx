@@ -6,13 +6,15 @@ const ProgressSpinner: FC<{
   radius?: number;
   progress?: number;
   smaller?: boolean;
+  transparent?: boolean;
   onClick?: () => void;
 }> = ({
-  radius = 28,
   progress = 0,
   smaller,
+  transparent,
   onClick,
 }) => {
+  const radius = smaller ? 25 : 28;
   const strokeWidth = 2;
   const circleRadius = radius - strokeWidth * 2;
   const borderRadius = radius - 1;
@@ -59,7 +61,7 @@ const ProgressSpinner: FC<{
   return (
     <div
       ref={container}
-      className={`ProgressSpinner not-implemented ${smaller ? 'smaller' : ''}`}
+      className={`ProgressSpinner not-implemented ${smaller ? 'smaller' : ''} ${transparent ? 'transparent' : ''}`}
       // @ts-ignore teact feature
       style={`width: ${borderRadius * 2}px; height: ${borderRadius * 2}px`}
       onClick={handleClick}

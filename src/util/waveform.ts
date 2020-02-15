@@ -2,14 +2,19 @@ type IWaveformProps = {
   width: number;
   height: number;
   fillStyle: string;
+  progressFillStyle: string;
   spikeWidth: number;
   spikeStep: number;
   spikeRadius: number;
 };
 
-export function renderWaveformToDataUri(spikes: number[], {
-  width, height, fillStyle, spikeWidth, spikeStep, spikeRadius,
-}: IWaveformProps) {
+export function renderWaveformToDataUri(
+  spikes: number[],
+  progress: number,
+  {
+    width, height, fillStyle, progressFillStyle, spikeWidth, spikeStep, spikeRadius,
+  }: IWaveformProps,
+) {
   const scale = 255 / height;
 
   const c = document.createElement('canvas');
@@ -21,8 +26,9 @@ export function renderWaveformToDataUri(spikes: number[], {
   const ctx = c.getContext('2d')!;
   ctx.scale(2, 2);
 
-  ctx.fillStyle = fillStyle;
   spikes.forEach((item, i) => {
+    ctx.globalAlpha = (i / spikes.length >= progress) ? 0.5 : 1;
+    ctx.fillStyle = progress > i / spikes.length ? progressFillStyle : fillStyle;
     roundedRectangle(ctx, i * spikeStep, height, spikeWidth, Math.max(2, item / scale), spikeRadius);
     ctx.fill();
   });

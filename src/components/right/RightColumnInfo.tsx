@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiMessage, ApiPrivateChat } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
-import { getMessageContentIds, getPrivateChatUserId, getMessageAudio } from '../../modules/helpers';
+import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
 import { selectChat, selectChatMessages } from '../../modules/selectors';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -104,18 +104,17 @@ const RightColumnInfo: FC<IProps> = ({
             messageIds.map((id: number) => (
               <WebPage
                 key={id}
+                inSharedMedia
                 message={chatMessages[id]}
                 load
-                inSharedMedia
               />
             ))
           ) : mediaType === 'audio' ? (
             messageIds.map((id: number) => (
               <Audio
                 key={id}
-                audio={getMessageAudio(chatMessages[id])!}
-                isOwn={false}
-                smaller
+                inSharedMedia
+                message={chatMessages[id]}
                 date={chatMessages[id].date}
               />
             ))

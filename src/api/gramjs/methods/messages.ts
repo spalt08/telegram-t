@@ -22,7 +22,8 @@ import {
   buildInputPeer,
   generateRandomBigInt,
   getEntityTypeById,
-  buildInputMediaDocumentFromSticker, reduceWaveform,
+  buildInputMediaDocumentFromSticker,
+  reduceWaveform,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 
@@ -335,6 +336,7 @@ function isMessageWithMedia(message: GramJs.Message) {
       .some((attr: any) => (
         attr instanceof GramJs.DocumentAttributeSticker
         || attr instanceof GramJs.DocumentAttributeVideo
+        || attr instanceof GramJs.DocumentAttributeAudio
       ));
   }
 

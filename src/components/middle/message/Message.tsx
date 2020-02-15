@@ -39,7 +39,6 @@ import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
 import Audio from './Audio';
-import Voice from './Voice';
 
 import './Message.scss';
 
@@ -265,11 +264,13 @@ const Message: FC<IProps> = ({
             onCancelTransfer={handleCancelTransfer}
           />
         )}
-        {audio && (
-          <Audio audio={audio} isOwn={isOwnMessage(message)} />
-        )}
-        {voice && (
-          <Voice voice={voice} isOwn={isOwnMessage(message)} />
+        {(audio || voice) && (
+          <Audio
+            message={message}
+            loadAndPlay={loadAndPlayMedia}
+            fileTransferProgress={fileTransferProgress}
+            onCancelTransfer={handleCancelTransfer}
+          />
         )}
         {messageDocument && (
           <Document
