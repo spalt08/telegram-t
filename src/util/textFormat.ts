@@ -23,3 +23,13 @@ export function formatIntegerCompact(views: number) {
   const millions = views / 1000000;
   return `${formatFixedNumber(millions)}M`;
 }
+
+export function getFirstLetters(phrase: string) {
+  return phrase
+    .replace(/[^\wа-яё\s]+/gi, '')
+    .trim()
+    .split(/\s+/)
+    .map((word: string) => word.length && word[0])
+    .join('')
+    .toUpperCase();
+}

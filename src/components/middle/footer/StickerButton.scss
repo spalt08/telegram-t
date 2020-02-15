@@ -12,14 +12,24 @@
   background-color: transparent;
   cursor: pointer;
   flex-shrink: 0;
-  position: absolute;
   overflow: hidden;
   font-size: 1.75rem;
   transition: background-color .15s ease;
 
+  &.absolute-position {
+    position: absolute;
+  }
+
+  &.set-button {
+    width: 2.75rem !important;
+    height: 2.75rem;
+    margin: 0 0.5rem;
+  }
+
   img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
   }
 
   &:hover {

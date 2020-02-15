@@ -85,26 +85,22 @@
 
     &:nth-child(1).active ~ .active-tab {
       width: 2.75rem;
-      left: 12.5%;
-      margin-left: -1.5rem;
+      --pos: calc(12.5% - 1.625rem);
     }
 
     &:nth-child(2).active ~ .active-tab {
       width: 2.25rem;
-      left: 37.5%;
-      margin-left: -1.3125rem;
+      --pos: calc(37.5% - 1.3125rem);
     }
 
     &:nth-child(3).active ~ .active-tab {
       width: 2.375rem;
-      left: 62.5%;
-      margin-left: -1.375rem;
+      --pos: calc(62.5% - 1.375rem);
     }
 
     &:nth-child(4).active ~ .active-tab {
       width: 2.5625rem;
-      left: 87.5%;
-      margin-left: -1.5rem;
+      --pos: calc(87.5% - 1.4375rem);
     }
   }
 

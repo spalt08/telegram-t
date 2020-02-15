@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useState, useRef,
+  FC, memo, useState, useRef, useCallback,
 } from '../../../lib/teact/teact';
 
 import { ApiSticker } from '../../../api/types';
@@ -23,6 +23,9 @@ const CONTENT = [
   'gif',
 ];
 
+const MENU_CLOSE_TIMEOUT = 250;
+let closeTimeout: NodeJS.Timeout | null = null;
+
 type IProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -36,10 +39,27 @@ const StickerMenu: FC<IProps> = ({
   const [activeTab, setActiveTab] = useState(0);
   const selectedScreen = CONTENT[activeTab];
   const isActivated = useRef(false);
+  const isMouseInside = useRef(false);
 
   if (!isActivated.current && isOpen) {
     isActivated.current = true;
   }
+
+  const handleMouseEnter = useCallback(() => {
+    isMouseInside.current = true;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    isMouseInside.current = false;
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    closeTimeout = setTimeout(() => {
+      if (!isMouseInside.current) {
+        onClose();
+      }
+    }, MENU_CLOSE_TIMEOUT);
+  }, [onClose]);
 
   return (
     <Menu
@@ -49,7 +69,8 @@ const StickerMenu: FC<IProps> = ({
       onClose={onClose}
       className="StickerMenu"
       onCloseAnimationEnd={onClose}
-      onMouseLeave={onClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       noCloseOnBackdrop
     >
       <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />

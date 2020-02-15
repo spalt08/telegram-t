@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent } from 'react';
+import { WheelEvent } from 'react';
 import React, {
   FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
@@ -7,12 +7,15 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { throttle } from '../../../util/schedulers';
+import { getFirstLetters } from '../../../util/textFormat';
+import determineVisibleSymbolSet from '../util/determineVisibleSymbolSet';
 
 import Loading from '../../ui/Loading';
+import Button from '../../ui/Button';
 import StickerSet from './StickerSet';
+import StickerButton from './StickerButton';
 
 import './StickerPicker.scss';
-import Button from '../../ui/Button';
 
 type IProps = {
   className: string;
@@ -24,12 +27,8 @@ type IProps = {
 type PartialStickerSet = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
 
 let isScrollingProgrammatically = false;
-let isDown = false;
-let startX: number;
-let scrollLeft: number = 0;
 
 const runThrottledForScroll = throttle((cb) => cb(), 100, false);
-const VIEWPORT_MARGIN = 100;
 
 const StickerPicker: FC<IProps> = ({
   className,
@@ -113,7 +112,7 @@ const StickerPicker: FC<IProps> = ({
         if (!containerRef.current) {
           return;
         }
-        const visibleSet = determineVisibleSet(containerRef.current);
+        const visibleSet = determineVisibleSymbolSet(containerRef.current);
         if (visibleSet && visibleSet !== currentSet) {
           setCurrentSet(visibleSet);
           requestAnimationFrame(() => {
@@ -125,28 +124,16 @@ const StickerPicker: FC<IProps> = ({
     [containerRef, currentSet, scrollToCurrentSetButton],
   );
 
-  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!footerRef.current) {
-      return;
-    }
-    isDown = true;
-    startX = e.pageX - footerRef.current.offsetLeft;
-    scrollLeft = footerRef.current.scrollLeft;
-  }, []);
+  const handleFooterScroll = useCallback(
+    (e: WheelEvent<HTMLDivElement>) => {
+      if (!footerRef.current) {
+        return;
+      }
 
-  const handleMouseUp = useCallback(() => {
-    isDown = false;
-  }, []);
-
-  const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!isDown || !footerRef.current) {
-      return;
-    }
-    e.preventDefault();
-    const x = e.pageX - footerRef.current.offsetLeft;
-    const walk = (x - startX) * 3;
-    footerRef.current.scrollLeft = scrollLeft - walk;
-  }, []);
+      footerRef.current.scrollLeft += e.deltaY / 4;
+    },
+    [footerRef],
+  );
 
   const allStickerSets = useMemo(() => {
     const allSets: PartialStickerSet[] = Object.values(stickerSets);
@@ -164,21 +151,33 @@ const StickerPicker: FC<IProps> = ({
   }, [stickerSets, recentStickers]);
 
   function renderStickerSetButton(set: PartialStickerSet) {
+    const setCover = set.stickers[0];
+    if (!setCover || set.id === 'recent') {
+      return (
+        <Button
+          className={`symbol-set-button sticker-set-button ${set.id === currentSet ? 'activated' : ''}`}
+          round
+          color="translucent"
+          onClick={() => selectSet(set.id)}
+          ariaLabel={set.title}
+        >
+          {set.id === 'recent' ? (
+            <i className="icon-recent" />
+          ) : (
+            <span className="sticker-set-initial">{getFirstLetters(set.title).slice(0, 2)}</span>
+          )}
+        </Button>
+      );
+    }
+
     return (
-      <Button
+      <StickerButton
         className={`symbol-set-button sticker-set-button ${set.id === currentSet ? 'activated' : ''}`}
-        round
-        color="translucent"
-        onClick={() => selectSet(set.id)}
-        ariaLabel={set.title}
-      >
-        {set.id === 'recent' ? (
-          <i className="icon-recent" />
-        ) : (
-          // Temp
-          <i className="icon-smile" />
-        )}
-      </Button>
+        setButton
+        sticker={setCover}
+        title={set.title}
+        onStickerSelect={() => selectSet(set.id)}
+      />
     );
   }
 
@@ -217,35 +216,13 @@ const StickerPicker: FC<IProps> = ({
       <div
         ref={footerRef}
         className="StickerMenu-footer StickerPicker-footer"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onWheel={handleFooterScroll}
       >
         {allStickerSets.map(renderStickerSetButton)}
       </div>
     </div>
   );
 };
-
-function determineVisibleSet(container: HTMLElement) {
-  const allElements = container.querySelectorAll('.symbol-set');
-  const containerTop = container.scrollTop;
-  const containerBottom = containerTop + container.clientHeight;
-
-  const firstVisibleElement = Array.from(allElements).find((el) => {
-    const currentTop = (el as HTMLElement).offsetTop;
-    const currentBottom = currentTop + (el as HTMLElement).offsetHeight;
-    return currentTop <= containerBottom - VIEWPORT_MARGIN && currentBottom >= containerTop + VIEWPORT_MARGIN;
-  });
-
-  if (!firstVisibleElement) {
-    return undefined;
-  }
-
-  const n = firstVisibleElement.id.lastIndexOf('-');
-  return firstVisibleElement.id.substring(n + 1);
-}
 
 export default memo(withGlobal(
   global => {

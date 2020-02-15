@@ -6,6 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../../global/types';
 import { throttle } from '../../../util/schedulers';
 import { getPlatform } from '../../../util/environment';
+import determineVisibleSymbolSet from '../util/determineVisibleSymbolSet';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -48,7 +49,6 @@ async function ensureEmojiData() {
 }
 
 const runThrottledForScroll = throttle((cb) => cb(), 100, false);
-const VIEWPORT_MARGIN = 100;
 
 const EmojiPicker: FC<IProps> = ({
   className, onEmojiSelect, recentEmojis, addRecentEmoji,
@@ -97,7 +97,7 @@ const EmojiPicker: FC<IProps> = ({
         if (!containerRef.current) {
           return;
         }
-        const visibleCategory = determineVisibleCategory(containerRef.current);
+        const visibleCategory = determineVisibleSymbolSet(containerRef.current);
         if (visibleCategory && visibleCategory !== currentCategory) {
           setCurrentCategory(visibleCategory);
         }
@@ -169,25 +169,6 @@ const EmojiPicker: FC<IProps> = ({
     </div>
   );
 };
-
-function determineVisibleCategory(container: HTMLElement) {
-  const allElements = container.querySelectorAll('.symbol-set');
-  const containerTop = container.scrollTop;
-  const containerBottom = containerTop + container.clientHeight;
-
-  const firstVisibleElement = Array.from(allElements).find((el) => {
-    const currentTop = (el as HTMLElement).offsetTop;
-    const currentBottom = currentTop + (el as HTMLElement).offsetHeight;
-    return currentTop <= containerBottom - VIEWPORT_MARGIN && currentBottom >= containerTop + VIEWPORT_MARGIN;
-  });
-
-  if (!firstVisibleElement) {
-    return undefined;
-  }
-
-  const n = firstVisibleElement.id.lastIndexOf('-');
-  return firstVisibleElement.id.substring(n + 1);
-}
 
 export default memo(withGlobal(
   global => {

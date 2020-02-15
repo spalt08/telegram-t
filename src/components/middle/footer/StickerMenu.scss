@@ -1,7 +1,15 @@
 .StickerMenu {
+  --menu-width: 26.25rem;
+
   .TabList {
     position: relative;
     height: 3rem;
+
+    .active-tab {
+      transform-origin: left;
+      transition: width 300ms ease-in-out, transform 300ms ease-in-out;
+      will-change: width, transform;
+    }
   }
 
   .Tab {
@@ -9,25 +17,22 @@
 
     &:nth-child(1).active ~ .active-tab {
       width: 2.75rem;
-      left: 16.5%;
-      margin-left: -1.5rem;
+      transform: translateX(calc(0.165 * var(--menu-width) - 1.5625rem));
     }
 
     &:nth-child(2).active ~ .active-tab {
       width: 4rem;
-      left: 50%;
-      margin-left: -2.25rem;
+      transform: translateX(calc(0.5 * var(--menu-width) - 2.25rem));
     }
 
     &:nth-child(3).active ~ .active-tab {
       width: 2.375rem;
-      left: 83%;
-      margin-left: -1.375rem;
+      transform: translateX(calc(0.83 * var(--menu-width) - 1.3125rem));
     }
   }
 
   &-main {
-    width: 26.25rem;
+    width: var(--menu-width);
     height: 23.25rem;
   }
 
@@ -46,7 +51,7 @@
 
   .bubble {
     padding: 0;
-    width: 26.25rem;
+    width: var(--menu-width);
     overflow: hidden;
   }
 }

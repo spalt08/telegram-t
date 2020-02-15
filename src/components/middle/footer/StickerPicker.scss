@@ -15,7 +15,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     user-select: none;
-    cursor: move;
 
     scrollbar-width: none;
     scrollbar-color: rgba(0,0,0,0);
@@ -42,5 +41,6 @@
     width: 2.75rem !important;
     height: 2.75rem;
     margin: 0 0.5rem;
+    border-radius: var(--border-radius-messages-small);
   }
 }

@@ -5,6 +5,7 @@ import { ApiMessage, ApiWebPage } from '../../../api/types';
 
 import { getMessagePlainText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './util/mediaDimensions';
+
 import Photo from './Photo';
 
 import './WebPage.scss';
@@ -87,7 +88,6 @@ const WebPage: FC<IProps> = ({
         />
       )}
       <div className="WebPage-text">
-
         <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
           {inSharedMedia ? url : siteName || displayUrl}
         </a>

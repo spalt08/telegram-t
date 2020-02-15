@@ -17,10 +17,10 @@
     background-color: var(--color-primary);
     transition: width 300ms ease-in-out, left 300ms ease-in-out;
     pointer-events: none;
-    margin-left: -.25rem;
     padding-right: .5rem;
     box-sizing: content-box;
     transform: translate3d(0, 0, 0);
-    will-change: width, left, margin-left;
+    left: var(--pos, 0);
+    will-change: width, left;
   }
 }

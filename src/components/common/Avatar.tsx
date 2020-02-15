@@ -6,10 +6,11 @@ import {
   getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
 } from '../../modules/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
+import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
+import useShowTransition from '../../hooks/useShowTransition';
 
 import './Avatar.scss';
-import useShowTransition from '../../hooks/useShowTransition';
 
 interface IProps {
   size?: 'small' | 'medium' | 'large' | 'jumbo';
@@ -89,15 +90,5 @@ const Avatar: FC<IProps> = ({
     </div>
   );
 };
-
-function getFirstLetters(phrase: string) {
-  return phrase
-    .replace(/[^\wа-яё\s]+/gi, '')
-    .trim()
-    .split(/\s+/)
-    .map((word: string) => word.length && word[0])
-    .join('')
-    .toUpperCase();
-}
 
 export default Avatar;

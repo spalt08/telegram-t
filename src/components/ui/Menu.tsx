@@ -16,6 +16,7 @@ interface IProps {
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
   onClose?: () => void;
+  onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: any;
 }
@@ -33,6 +34,7 @@ const Menu: FC<IProps> = (props) => {
     onKeyDown,
     onCloseAnimationEnd,
     onClose,
+    onMouseEnter,
     onMouseLeave,
   } = props;
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
@@ -48,6 +50,7 @@ const Menu: FC<IProps> = (props) => {
     <div
       className={`Menu ${className || ''}`}
       onKeyDown={isOpen ? onKeyDown : undefined}
+      onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
       // @ts-ignore teact feature
       style={style}
