@@ -70,12 +70,20 @@ const MediaViewer: FC<IProps> = ({
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
-    mql.addEventListener('change', onMediaQueryChanged);
+    if (typeof mql.addEventListener === 'function') {
+      mql.addEventListener('change', onMediaQueryChanged);
+    } else if (typeof mql.addListener === 'function') {
+      mql.addListener(onMediaQueryChanged);
+    }
 
     return () => {
-      mql.addEventListener('change', onMediaQueryChanged);
+      if (typeof mql.removeEventListener === 'function') {
+        mql.removeEventListener('change', onMediaQueryChanged);
+      } else if (typeof mql.removeListener === 'function') {
+        mql.removeListener(onMediaQueryChanged);
+      }
     };
-  }, [onMediaQueryChanged]);
+  }, []);
 
   // For correct unmount animation
   const previousProps = usePrevious({
