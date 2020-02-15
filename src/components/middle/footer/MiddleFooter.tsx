@@ -210,7 +210,8 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
               color="translucent"
-              onMouseDown={handleOpenAttachMenu}
+              onMouseEnter={handleOpenAttachMenu}
+              onFocus={handleOpenAttachMenu}
             >
               <i className="icon-attach" />
             </Button>

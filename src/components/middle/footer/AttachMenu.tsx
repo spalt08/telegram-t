@@ -1,4 +1,6 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, {
+  FC, memo, useRef, useCallback,
+} from '../../../lib/teact/teact';
 
 import { openSystemFileDialog } from '../../../util/systemFileDialog';
 
@@ -13,7 +15,28 @@ type IProps = {
   onClose: () => void;
 };
 
+const MENU_CLOSE_TIMEOUT = 250;
+let closeTimeout: NodeJS.Timeout | null = null;
+
 const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
+  const isMouseInside = useRef(false);
+
+  const handleMouseEnter = useCallback(() => {
+    isMouseInside.current = true;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    isMouseInside.current = false;
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    closeTimeout = setTimeout(() => {
+      if (!isMouseInside.current) {
+        onClose();
+      }
+    }, MENU_CLOSE_TIMEOUT);
+  }, [onClose]);
+
   const handleFileSelect = (e: Event, isQuick: boolean) => {
     const { files } = e.target as HTMLInputElement;
 
@@ -42,6 +65,9 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
       onClose={onClose}
       className="AttachMenu"
       onCloseAnimationEnd={onClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      noCloseOnBackdrop
     >
       <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
