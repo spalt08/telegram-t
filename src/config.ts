@@ -1,4 +1,4 @@
-export const DEBUG = true;
+export const DEBUG = process.env.NODE_ENV !== 'production';
 export const DEBUG_GRAMJS = false;
 
 export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
