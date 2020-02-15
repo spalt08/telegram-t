@@ -34,6 +34,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+  const canOpenAttachMenu = useRef(true);
 
   const [isStickerMenuOpen, setIsStickerMenuOpen] = useState(false);
 
@@ -74,7 +75,9 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   }, []);
 
   const handleOpenAttachMenu = useCallback(() => {
-    setIsAttachMenuOpen(true);
+    if (canOpenAttachMenu.current) {
+      setIsAttachMenuOpen(true);
+    }
   }, []);
 
   const handleCloseAttachMenu = useCallback(() => {
@@ -128,6 +131,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       setCurrentRecordTime(Date.now());
 
       setActiveVoiceRecording({ stop });
+      canOpenAttachMenu.current = false;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -141,6 +145,9 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
     if (recordButtonRef.current) {
       recordButtonRef.current.style.boxShadow = 'none';
     }
+    setTimeout(() => {
+      canOpenAttachMenu.current = true;
+    }, 250);
 
     try {
       return activeVoiceRecording!.stop();
