@@ -24,13 +24,15 @@ const WebPagePreview: FC<IProps> = ({
   loadWebPagePreview,
   clearWebPagePreview,
 }) => {
+  const hasPreview = Boolean(webPagePreview);
+
   useEffect(() => {
     if (messageText.length && messageText.match(RE_LINK)) {
       runThrottledForWebPagePreview(() => loadWebPagePreview({ text: messageText }));
     } else {
       clearWebPagePreview();
     }
-  }, [clearWebPagePreview, loadWebPagePreview, messageText]);
+  }, [clearWebPagePreview, loadWebPagePreview, messageText, hasPreview]);
 
   if (!webPagePreview) {
     return null;

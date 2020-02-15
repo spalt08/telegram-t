@@ -106,7 +106,7 @@ const RightColumnInfo: FC<IProps> = ({
                 key={id}
                 message={chatMessages[id]}
                 load
-                showUrl
+                inSharedMedia
               />
             ))
           ) : mediaType === 'audio' ? (

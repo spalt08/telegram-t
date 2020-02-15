@@ -1,9 +1,9 @@
 import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMessage, ApiWebPage } from '../../../api/types';
 
-import { getMessageWebPage } from '../../../modules/helpers';
+import { getMessagePlainText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import Photo from './Photo';
 
 import './WebPage.scss';
@@ -11,7 +11,7 @@ import './WebPage.scss';
 type IProps = {
   message: ApiMessage;
   load?: boolean;
-  showUrl?: boolean;
+  inSharedMedia?: boolean; // TODO Extract as a separate component.
   onMediaClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -19,10 +19,28 @@ type IProps = {
 const WebPage: FC<IProps> = ({
   message,
   load,
-  showUrl,
+  inSharedMedia,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
+  const webPage = getMessageWebPage(message);
+  let linkData: ApiWebPage | undefined = webPage;
+
+  if (!webPage && inSharedMedia) {
+    const link = matchLinkInMessageText(message);
+    if (link && link.length >= 2) {
+      linkData = {
+        siteName: link[1].replace(/^www./, ''),
+        url: link[0],
+        description: getMessagePlainText(message),
+      } as ApiWebPage;
+    }
+  }
+
+  if (!linkData) {
+    return null;
+  }
+
   const {
     siteName,
     url,
@@ -30,10 +48,9 @@ const WebPage: FC<IProps> = ({
     title,
     description,
     photo,
-  } = getMessageWebPage(message)!;
-
+  } = linkData;
   return (
-    <div className={`WebPage ${!photo ? 'without-photo' : ''}`} data-initial={displayUrl.charAt(0)}>
+    <div className={`WebPage ${!photo ? 'without-photo' : ''}`} data-initial={(siteName || displayUrl)[0]}>
       {photo && (
         <Photo
           message={message}
@@ -43,9 +60,9 @@ const WebPage: FC<IProps> = ({
         />
       )}
       <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
-        {showUrl ? url : siteName || displayUrl}
+        {inSharedMedia ? url : siteName || displayUrl}
       </a>
-      {title && <p className="site-title">{title}</p>}
+      <p className="site-title">{inSharedMedia ? title || siteName : title}</p>
       {description && <p className="site-description">{description}</p>}
     </div>
   );

@@ -8,7 +8,7 @@ import {
 
 import {
   getChatTitle,
-  getLastMessageText,
+  getMessagePlainText,
   getUserFirstName,
   isChatPrivate,
   isActionMessage,
@@ -101,7 +101,7 @@ const Chat: FC<IProps> = ({
         {senderName && (
           <span className="sender-name">{senderName}</span>
         )}
-        {getLastMessageText(last_message)}
+        {getMessagePlainText(last_message)}
       </p>
     );
   }

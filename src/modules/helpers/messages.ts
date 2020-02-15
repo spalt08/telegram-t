@@ -1,6 +1,7 @@
 import { ApiMessage } from '../../api/types';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
+const RE_LINK = /([-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?/;
 
 export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
@@ -10,7 +11,7 @@ export function getMessageRenderKey(message: ApiMessage) {
   return message.prev_local_id || message.id;
 }
 
-export function getLastMessageText(message: ApiMessage) {
+export function getMessagePlainText(message: ApiMessage, hasPictogram = false) {
   const {
     text,
     photo,
@@ -25,14 +26,14 @@ export function getLastMessageText(message: ApiMessage) {
 
   if (photo) {
     if (text && text.text.length) {
-      return `(Photo) ${text.text}`;
+      return `${!hasPictogram ? '(Photo) ' : ''}${text.text}`;
     }
     return 'Photo';
   }
 
   if (video) {
     if (text && text.text.length) {
-      return `(Video) ${text.text}`;
+      return `${!hasPictogram ? '(Video) ' : ''}${text.text}`;
     }
     return 'Video';
   }
@@ -81,6 +82,12 @@ export function getMessageText(message: ApiMessage) {
   }
 
   return CONTENT_NOT_SUPPORTED;
+}
+
+export function matchLinkInMessageText(message: ApiMessage) {
+  const { text } = message.content;
+
+  return text && text.text.match(RE_LINK);
 }
 
 export function isOwnMessage(message: ApiMessage) {

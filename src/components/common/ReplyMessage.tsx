@@ -7,9 +7,9 @@ import {
   getMessageMediaThumbDataUri,
   getMessageMediaHash,
   isActionMessage,
+  getMessagePlainText,
 } from '../../modules/helpers';
 import { getPictogramDimensions } from '../../util/mediaDimensions';
-import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import useMedia from '../../hooks/useMedia';
 
 import RippleEffect from '../ui/RippleEffect';
@@ -45,7 +45,7 @@ const ReplyMessage: FC<IProps> = ({
           ) : isActionMessage(message) ? (
             <ServiceMessage message={message} isReply />
           ) : (
-            buildMessageContent(message, { isReply: true }).text
+            getMessagePlainText(message, true)
           )}
         </p>
       </div>

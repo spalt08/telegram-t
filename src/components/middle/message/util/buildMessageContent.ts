@@ -1,7 +1,7 @@
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import {
   getMessageText,
-  getLastMessageText,
+  getMessagePlainText,
   getMessageContent,
   isOwnMessage,
 } from '../../../../modules/helpers';
@@ -36,7 +36,7 @@ export interface MessageContent {
 }
 
 interface BuildMessageContentOptions {
-  isReply?: boolean;
+  isPlain?: boolean;
   hasReply?: boolean;
   isLastInGroup?: boolean;
 }
@@ -65,8 +65,12 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
       isEmojiOnly = true;
     } else {
       classNames.push('text');
-      contentParts = !message.content.text ? text : enhanceTextParts(message.content.text);
+      contentParts = !message.content.text || options.isPlain ? text : enhanceTextParts(message.content.text);
     }
+  }
+
+  if (options.isPlain) {
+    contentParts = getMessagePlainText(message);
   }
 
   if (sticker) {
@@ -101,10 +105,6 @@ export function buildMessageContent(message: ApiMessage, options: BuildMessageCo
 
   if (options.hasReply) {
     classNames.push('is-reply');
-  }
-
-  if (options.isReply) {
-    contentParts = getLastMessageText(message);
   }
 
   if (

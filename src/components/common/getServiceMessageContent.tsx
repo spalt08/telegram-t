@@ -34,7 +34,7 @@ export function getPinnedMessageText(message: ApiMessage, options: ServiceMessag
     video,
     document,
     sticker,
-  } = buildMessageContent(message, { isReply: true });
+  } = buildMessageContent(message, { isPlain: true });
 
   const maxTextLength = options.maxTextLength || DEFAULT_MAX_TEXT_LENGTH;
 

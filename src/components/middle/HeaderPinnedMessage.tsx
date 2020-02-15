@@ -3,8 +3,7 @@ import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 import { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../../util/mediaDimensions';
-import { buildMessageContent } from './message/util/buildMessageContent';
-import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../modules/helpers';
+import { getMessageMediaHash, getMessageMediaThumbDataUri, getMessagePlainText } from '../../modules/helpers';
 import useMedia from '../../hooks/useMedia';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -17,7 +16,7 @@ type IProps = {
 };
 
 const HeaderPinnedMessage: FC<IProps> = ({ message, onUnpinMessage }) => {
-  const { text } = buildMessageContent(message, { isReply: true });
+  const text = getMessagePlainText(message, true);
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
 

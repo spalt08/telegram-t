@@ -3,7 +3,7 @@ import {
   ApiPhoto,
   ApiVideo,
 } from '../../api/types';
-import { getMessageKey, isMessageLocal } from './messages';
+import { getMessageKey, matchLinkInMessageText, isMessageLocal } from './messages';
 
 export type IDimensions = {
   width: number;
@@ -221,7 +221,7 @@ export function getMessageContentIds(
       break;
 
     case 'webPage':
-      validator = getMessageWebPage;
+      validator = (message: ApiMessage) => getMessageWebPage(message) || matchLinkInMessageText(message);
       break;
   }
 
