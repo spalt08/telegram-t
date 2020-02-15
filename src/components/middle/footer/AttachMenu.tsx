@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useRef, useCallback,
+  FC, memo, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
 import { openSystemFileDialog } from '../../../util/systemFileDialog';
@@ -20,6 +20,19 @@ let closeTimeout: NodeJS.Timeout | null = null;
 
 const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
   const isMouseInside = useRef(false);
+
+  useEffect(() => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    if (isOpen) {
+      closeTimeout = setTimeout(() => {
+        if (!isMouseInside.current) {
+          onClose();
+        }
+      }, MENU_CLOSE_TIMEOUT * 2);
+    }
+  }, [isOpen, onClose]);
 
   const handleMouseEnter = useCallback(() => {
     isMouseInside.current = true;

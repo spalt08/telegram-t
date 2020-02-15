@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useState, useRef, useCallback,
+  FC, memo, useState, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
 import { ApiSticker } from '../../../api/types';
@@ -44,6 +44,19 @@ const StickerMenu: FC<IProps> = ({
   if (!isActivated.current && isOpen) {
     isActivated.current = true;
   }
+
+  useEffect(() => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+    }
+    if (isOpen) {
+      closeTimeout = setTimeout(() => {
+        if (!isMouseInside.current) {
+          onClose();
+        }
+      }, MENU_CLOSE_TIMEOUT * 2);
+    }
+  }, [isOpen, onClose]);
 
   const handleMouseEnter = useCallback(() => {
     isMouseInside.current = true;
