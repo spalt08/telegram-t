@@ -7,18 +7,22 @@ import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 
 import {
+  selectChat,
   selectChatFocusedMessageId,
   selectChatMessage,
   selectChatMessageViewportIds,
   selectFileTransferProgress,
+  selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
 } from '../../../modules/selectors';
 import {
   getMessageMediaHash,
-  getUserFullName, hasMessageLocalBlobUrl,
+  getUserFullName,
+  hasMessageLocalBlobUrl,
   isOwnMessage,
   isReplyMessage,
+  isForwardedMessage,
 } from '../../../modules/helpers';
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
@@ -64,6 +68,7 @@ type IProps = (
     outgoingStatus?: ApiMessageOutgoingStatus;
     fileTransferProgress?: number;
     isFocused?: boolean;
+    isChatWithSelf?: boolean;
   }
   & MessagePositionProperties
   & Pick<GlobalActions, (
@@ -87,6 +92,7 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   fileTransferProgress,
   isFocused,
+  isChatWithSelf,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
@@ -140,14 +146,17 @@ const Message: FC<IProps> = ({
     }
   }, [isFocused, chatId, focusMessage]);
 
+  const isOwn = isOwnMessage(message);
+  const isReply = isReplyMessage(message);
+  const isForwarded = isForwardedMessage(message);
+
   const containerClassNames = buildClassNames(
     message,
     { isFirstInGroup, isLastInGroup, isLastInList },
     contextMenuPosition !== null,
+    isOwn,
     isFocused,
   );
-  const isForwarded = Boolean(message.forward_info);
-  const isReply = Boolean(message.reply_to_message_id);
   const {
     isEmojiOnly,
     text,
@@ -162,6 +171,7 @@ const Message: FC<IProps> = ({
     webPage,
     className: contentClassName,
   } = buildMessageContent(message, { isLastInGroup, hasReply: isReply });
+
   const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
 
   const handleAvatarClick = useCallback(() => {
@@ -276,7 +286,7 @@ const Message: FC<IProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             fileTransferProgress={fileTransferProgress}
-            onReadMedia={voice ? handleReadMedia : undefined}
+            onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelTransfer={handleCancelTransfer}
           />
         )}
@@ -309,8 +319,8 @@ const Message: FC<IProps> = ({
   let style = '';
   if (photo || video) {
     const { width } = photo
-      ? calculateInlineImageDimensions(photo, isOwnMessage(message), isForwarded)
-      : (video && calculateVideoDimensions(video, isOwnMessage(message), isForwarded)) || {};
+      ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
+      : (video && calculateVideoDimensions(video, isOwn, isForwarded)) || {};
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
@@ -365,6 +375,7 @@ function buildClassNames(
   message: ApiMessage,
   position: MessagePositionProperties,
   hasContextMenu = false,
+  isOwn = false,
   isFocused = false,
 ) {
   const classNames = ['Message'];
@@ -379,7 +390,7 @@ function buildClassNames(
     classNames.push('last-in-list');
   }
 
-  if (isOwnMessage(message)) {
+  if (isOwn) {
     classNames.push('own');
   } else {
     classNames.push('not-own');
@@ -442,6 +453,9 @@ export default memo(withGlobal(
     const fileTransferProgress = selectFileTransferProgress(global, message);
     const isFocused = message.id === selectChatFocusedMessageId(global, message.chat_id);
 
+    const chat = selectChat(global, message.chat_id);
+    const isChatWithSelf = chat && selectIsChatWithSelf(global, chat);
+
     return {
       message,
       ...(userId && { sender: selectUser(global, userId) }),
@@ -454,6 +468,7 @@ export default memo(withGlobal(
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
       isFocused,
+      isChatWithSelf,
     };
   },
   (setGlobal, actions) => {
