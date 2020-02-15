@@ -37,7 +37,7 @@ const Menu: FC<IProps> = (props) => {
   } = props;
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
   const bubbleClassNames = [
-    'bubble', 'custom-scroll', positionY, positionX,
+    'bubble', 'menu-container', 'custom-scroll', positionY, positionX,
     'overlay', ...transitionClassNames,
   ].join(' ');
 

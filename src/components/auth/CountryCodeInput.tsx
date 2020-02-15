@@ -77,7 +77,7 @@ const CountryCodeInput: FC<IProps> = (props) => {
   }
 
   function onKeyDown(e: React.KeyboardEvent<any>) {
-    const dropdown = document.querySelector('.CountryCodeInput ul') as Element;
+    const dropdown = document.querySelector('.CountryCodeInput .menu-container') as Element;
     if (e.keyCode !== 38 && e.keyCode !== 40) {
       return;
     }
