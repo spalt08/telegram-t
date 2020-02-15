@@ -53,7 +53,7 @@ export default withGlobal(
     return {
       lastSyncTime,
       user,
-      isSavedMessages: user.is_self && user.id === chats.selectedId,
+      isSavedMessages: user && user.is_self && user.id === chats.selectedId,
     };
   },
   (setGlobal, actions) => {
