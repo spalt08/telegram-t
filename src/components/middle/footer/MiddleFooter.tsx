@@ -39,7 +39,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
-  const [startRecordTime, setStartRecordTime] = useState();
+  const startRecordTimeRef = useRef<number>();
   const [currentRecordTime, setCurrentRecordTime] = useState();
 
   const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (text && !attachment);
@@ -118,13 +118,13 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
         if (recordButtonRef.current) {
           const volumeLevel = ((tickVolume - 128) / 127) * 2;
           const volumeFactor = volumeLevel ? 0.25 + volumeLevel * 0.75 : 0;
-          if (activeVoiceRecording && Date.now() % 4 === 0) {
+          if (startRecordTimeRef.current && Date.now() % 4 === 0) {
             recordButtonRef.current.style.boxShadow = `0 0 0 ${volumeFactor * 50}px rgba(0,0,0,.15)`;
           }
           setCurrentRecordTime(Date.now());
         }
       });
-      setStartRecordTime(Date.now());
+      startRecordTimeRef.current = Date.now();
       setCurrentRecordTime(Date.now());
 
       setActiveVoiceRecording({ stop });
@@ -136,7 +136,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const stopRecordingVoice = useCallback(() => {
     setActiveVoiceRecording(undefined);
-    setStartRecordTime(undefined);
+    startRecordTimeRef.current = null;
     setCurrentRecordTime(undefined);
     if (recordButtonRef.current) {
       recordButtonRef.current.style.boxShadow = 'none';
@@ -217,7 +217,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
           )}
           {activeVoiceRecording && (
             <span className="recording-state">
-              {formatVoiceRecordDuration(currentRecordTime - startRecordTime)}
+              {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
           <AttachMenu
