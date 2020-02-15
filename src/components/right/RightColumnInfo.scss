@@ -113,12 +113,19 @@
       grid-gap: .25rem;
     }
 
-    &.document-list,
+    &.document-list {
+      padding: 1.25rem;
+
+      & .File + .File {
+        margin-top: 1.25rem;
+      }
+    }
+
     &.audio-list {
       padding: 1.25rem;
 
       & .Audio + .Audio {
-        margin-top: 1.25rem;
+        margin-top: 1.6875rem;
       }
     }
 

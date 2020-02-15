@@ -77,6 +77,7 @@
   .content {
     align-self: center;
     margin-top: .4375rem;
+    min-width: 0;
   }
 
   .title {
@@ -105,7 +106,7 @@
   .performer,
   .date {
     font-size: .875rem;
-    line-height: 1;
+    line-height: 1.25;
     color: var(--color-text-secondary);
     margin: 0;
   }
@@ -121,7 +122,7 @@
       height: 2px;
       border-radius: 1px;
       left: -.375rem;
-      top: 50%;
+      top: .5rem;
       background: var(--color-text-secondary);
     }
   }
