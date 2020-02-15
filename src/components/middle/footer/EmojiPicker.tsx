@@ -112,6 +112,9 @@ const EmojiPicker: FC<IProps> = ({
   }, [addRecentEmoji, onEmojiSelect]);
 
   const allEmojiCategories = useMemo(() => {
+    if (isLoading) {
+      return [];
+    }
     const allCategories = [...emojiCategories];
     if (recentEmojis && recentEmojis.length) {
       allCategories.unshift({
@@ -122,7 +125,7 @@ const EmojiPicker: FC<IProps> = ({
     }
 
     return allCategories;
-  }, [emojiCategories, recentEmojis]);
+  }, [emojiCategories, recentEmojis, isLoading]);
 
   function renderEmojiCategoryButton(category: EmojiCategory) {
     const icon = ICONS_BY_CATEGORY[category.id];

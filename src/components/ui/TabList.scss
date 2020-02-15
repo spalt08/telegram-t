@@ -21,6 +21,5 @@
     box-sizing: content-box;
     transform: translate3d(0, 0, 0);
     left: var(--pos, 0);
-    will-change: width, left;
   }
 }
