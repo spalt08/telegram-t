@@ -73,40 +73,19 @@ type UniversalMessage = (
 );
 
 export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalMessage): ApiMessage {
-  const { message, entities, media } = mtpMessage;
-
   let content: ApiMessage['content'] = {};
 
-  if (message) {
-    content.text = {
-      '@type': 'formattedText' as const,
-      text: message,
-      ...(entities && { entities: entities.map(omitGramJsFields) }),
+  if (mtpMessage.message) {
+    content = {
+      ...content,
+      ...buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
     };
   }
 
-  if (media) {
-    const sticker = buildSticker(media);
-    const photo = buildPhoto(media);
-    const video = buildVideo(media);
-    const audio = buildAudio(media);
-    const voice = buildVoice(media);
-    const document = !(sticker || video || audio || voice) && buildDocument(media);
-    const contact = buildContact(media);
-    const poll = buildPoll(media);
-    const webPage = buildWebPage(media);
-
+  if (mtpMessage.media) {
     content = {
       ...content,
-      ...(sticker && { sticker }),
-      ...(photo && { photo }),
-      ...(video && { video }),
-      ...(audio && { audio }),
-      ...(voice && { voice }),
-      ...(document && { document }),
-      ...(contact && { contact }),
-      ...(poll && { poll }),
-      ...(webPage && { webPage }),
+      ...buildMessageMediaContent(mtpMessage.media),
     };
   }
 
@@ -133,6 +112,50 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     ...(isEdited && { isEdited }),
     ...(isMediaUnread && { isMediaUnread }),
   };
+}
+
+export function buildMessageTextContent(
+  message: string,
+  entities?: GramJs.TypeMessageEntity[],
+): ApiMessage['content'] {
+  return {
+    text: {
+      '@type': 'formattedText' as const,
+      text: message,
+      ...(entities && { entities: entities.map(omitGramJsFields) }),
+    },
+  };
+}
+
+export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMessage['content'] | undefined {
+  const sticker = buildSticker(media);
+  if (sticker) return { sticker };
+
+  const photo = buildPhoto(media);
+  if (photo) return { photo };
+
+  const video = buildVideo(media);
+  if (video) return { video };
+
+  const audio = buildAudio(media);
+  if (audio) return { audio };
+
+  const voice = buildVoice(media);
+  if (voice) return { voice };
+
+  const document = buildDocument(media);
+  if (document) return { document };
+
+  const contact = buildContact(media);
+  if (contact) return { contact };
+
+  const poll = buildPoll(media);
+  if (poll) return { poll };
+
+  const webPage = buildWebPage(media);
+  if (webPage) return { webPage };
+
+  return undefined;
 }
 
 function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessageForwardInfo {

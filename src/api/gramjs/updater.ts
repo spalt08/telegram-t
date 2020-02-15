@@ -1,14 +1,15 @@
 import { Api as GramJs, connection } from '../../lib/gramjs';
-import { OnApiUpdate } from '../types';
+import { ApiMessage, OnApiUpdate } from '../types';
 
 import {
   buildApiMessage,
   buildApiMessageFromShort,
-  buildApiMessageFromShortChat,
+  buildApiMessageFromShortChat, buildMessageMediaContent, buildMessageTextContent,
   resolveMessageApiChatId,
 } from './apiBuilders/messages';
 import { getApiChatIdFromMtpPeer, buildChatMembers } from './apiBuilders/chats';
 import { buildApiUserStatus } from './apiBuilders/users';
+import { buildMessageFromUpdateShortSent } from './gramjsBuilders';
 import localDb from './localDb';
 
 let onUpdate: OnApiUpdate;
@@ -99,12 +100,37 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
       throw new Error('Local message not found');
     }
 
+    let newContent: ApiMessage['content'] | undefined;
+    if (update instanceof GramJs.UpdateShortSentMessage) {
+      if (localMessage.content.text && update.entities) {
+        newContent = {
+          ...buildMessageTextContent(localMessage.content.text.text, update.entities),
+        };
+      }
+      if (update.media) {
+        newContent = {
+          ...newContent,
+          ...buildMessageMediaContent(update.media),
+        };
+      }
+
+      const mtpMessage = buildMessageFromUpdateShortSent(update.id, localMessage.chat_id, update);
+      const messageFullId = `${localMessage.chat_id}-${update.id}`;
+      localDb.messages[messageFullId] = mtpMessage;
+    }
+
     onUpdate({
       '@type': 'updateMessageSendSucceeded',
       chat_id: localMessage.chat_id,
       local_id: localMessage.id,
       message: {
         ...localMessage,
+        ...(newContent && {
+          content: {
+            ...localMessage.content,
+            ...newContent,
+          },
+        }),
         id: update.id,
         sending_state: undefined,
       },

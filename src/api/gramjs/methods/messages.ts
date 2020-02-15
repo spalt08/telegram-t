@@ -90,6 +90,9 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
     return undefined;
   }
 
+  const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
+  localDb.messages[messageFullId] = message;
+
   return buildApiMessage(message);
 }
 

@@ -34,7 +34,7 @@ const WebPagePreview: FC<IProps> = ({
     }
   }, [clearWebPagePreview, loadWebPagePreview, messageText, hasPreview]);
 
-  if (!webPagePreview) {
+  if (!webPagePreview || !messageText.length) {
     return null;
   }
 

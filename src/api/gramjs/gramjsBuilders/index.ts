@@ -18,6 +18,22 @@ export function getEntityTypeById(chatOrUserId: number) {
   }
 }
 
+export function buildPeer(chatOrUserId: number): GramJs.TypePeer {
+  if (chatOrUserId > 0) {
+    return new GramJs.PeerUser({
+      userId: chatOrUserId,
+    });
+  } else if (chatOrUserId <= -1000000000) {
+    return new GramJs.PeerChannel({
+      channelId: -chatOrUserId,
+    });
+  } else {
+    return new GramJs.PeerChat({
+      chatId: -chatOrUserId,
+    });
+  }
+}
+
 export function buildInputPeer(chatOrUserId: number, accessHash?: string): GramJs.TypeInputPeer {
   if (chatOrUserId > 0 || chatOrUserId <= -1000000000) {
     if (!accessHash) {
@@ -105,4 +121,18 @@ export function reduceWaveform(waveform: number[]) {
   }
 
   return reduced.map((v) => Math.round((v / max) * WAVEFORM_MAX_VALUE));
+}
+
+export function buildMessageFromUpdateShortSent(
+  id: number,
+  chatId: number,
+  update: GramJs.UpdateShortSentMessage,
+) {
+  // This is not a proper message, but we only need these fields for downloading media through `localDb`.
+  return new GramJs.Message({
+    id,
+    toId: buildPeer(chatId),
+    fromId: chatId,
+    media: update.media,
+  } as GramJs.Message);
 }
