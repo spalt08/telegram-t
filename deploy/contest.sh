@@ -12,7 +12,7 @@ rm -rf ${OUT_DIR};
 mkdir -p ${OUT_DIR};
 
 rm -rf .cache/ dist/;
-npx parcel build src/index.html -d ${OUT_DIR}/dist --public-url ./ --no-source-maps --no-minify;
+npx parcel build src/index.html -d ${OUT_DIR}/dist --public-url ./ --no-source-maps;
 
 rm -rf .cache/ dist/;
 npx parcel build src/index.html -d ${OUT_DIR}/src --public-url ./ --no-minify;
