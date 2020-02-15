@@ -14,7 +14,7 @@ import './StickerMenu.scss';
 const TABS = [
   'Emoji',
   'Stickers',
-  'GIFs',
+  '-GIFs',
 ];
 
 const CONTENT = [
@@ -84,7 +84,7 @@ const StickerMenu: FC<IProps> = ({
             className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`}
             onStickerSelect={onStickerSelect}
           />,
-          <div className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`} />,
+          <div className={`picker-tab ${selectedScreen === 'gif' ? 'active' : ''}`} />,
         ]}
       </div>
     </Menu>

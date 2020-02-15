@@ -20,13 +20,16 @@ const TabList: FC<IProps> = ({ activeTab, tabs, onSwitchTab }) => {
   return (
     <div className="TabList">
       {tabs.map((title, index: number) => {
+        const isNotImplemented = title.startsWith('-');
+
         return (
           <Tab
             key={title}
             id={index}
-            title={title}
+            title={isNotImplemented ? title.replace(/^-/, '') : title}
             active={index === activeTab}
-            onClick={handleTabClick}
+            className={isNotImplemented ? 'not-implemented' : undefined}
+            onClick={isNotImplemented ? undefined : handleTabClick}
           />
         );
       })}
