@@ -7,11 +7,14 @@ import Button from '../ui/Button';
 
 import './RightHeader.scss';
 import SearchInput from '../ui/SearchInput';
+import { debounce } from '../../util/schedulers';
 
 type IProps = {
   isSearch: boolean;
   searchQuery?: string;
 } & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'searchMessages'>;
+
+const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 const RightHeader: FC<IProps> = ({
   isSearch,
@@ -23,7 +26,7 @@ const RightHeader: FC<IProps> = ({
 }) => {
   const handleSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
-    searchMessages();
+    runDebouncedForSearch(searchMessages);
   }, [searchMessages, setMessageSearchQuery]);
 
   function renderRegularHeader() {

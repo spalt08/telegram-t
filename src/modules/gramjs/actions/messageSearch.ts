@@ -6,11 +6,8 @@ import { callApi } from '../../../api/gramjs';
 import { selectOpenChat, selectOpenUser } from '../../selectors';
 import { areSortedArraysEqual, buildCollectionByKey, unique } from '../../../util/iteratees';
 import { addChatMessagesById, updateUsers } from '../../reducers';
-import { debounce } from '../../../util/schedulers';
 
 const SEARCH_LIMIT = 50;
-
-const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 addReducer('searchMessages', (global) => {
   const chatOrUser = selectOpenUser(global) || selectOpenChat(global);
@@ -20,7 +17,7 @@ addReducer('searchMessages', (global) => {
     return;
   }
 
-  runDebouncedForSearch(() => searchMessages(chatOrUser, query, mediaType, offsetId));
+  void searchMessages(chatOrUser, query, mediaType, offsetId);
 });
 
 async function searchMessages(
