@@ -88,6 +88,13 @@
     margin: .25rem 0 0;
     font-size: .875rem;
     color: var(--color-text-secondary);
+
+    span {
+      margin-left: 0.25rem;
+      font-size: 1.25rem;
+      line-height: .875rem;
+      vertical-align: middle;
+    }
   }
 
   .waveform {

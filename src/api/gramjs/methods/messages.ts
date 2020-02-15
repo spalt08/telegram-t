@@ -233,6 +233,20 @@ export async function markMessagesRead({
   });
 }
 
+export async function readMessageContents({ messageId }: { messageId: number }) {
+  await invokeRequest(new GramJs.messages.ReadMessageContents({
+    id: [messageId],
+  }), true);
+
+  onUpdate({
+    '@type': 'updateMessages',
+    ids: [messageId],
+    messageUpdate: {
+      isMediaUnread: false,
+    },
+  });
+}
+
 export async function searchMessages({
   chatOrUser, query, mediaType, ...pagination
 }: {

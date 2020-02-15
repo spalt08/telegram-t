@@ -109,6 +109,14 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
         sending_state: undefined,
       },
     });
+  } else if (update instanceof GramJs.UpdateReadMessagesContents) {
+    onUpdate({
+      '@type': 'updateMessages',
+      ids: update.messages,
+      messageUpdate: {
+        isMediaUnread: false,
+      },
+    });
 
     // Chats
   } else if (update instanceof GramJs.UpdateReadHistoryInbox) {

@@ -63,8 +63,8 @@ export function onUpdate(update: ApiUpdate) {
 
     case 'editMessage': {
       const { chat_id, id, message } = update;
-      const currentMessage = selectChatMessage(global, chat_id, id);
 
+      const currentMessage = selectChatMessage(global, chat_id, id);
       if (!currentMessage) {
         return;
       }
@@ -145,6 +145,23 @@ export function onUpdate(update: ApiUpdate) {
           setTimeout(() => {
             setGlobal(deleteChatMessages(getGlobal(), chatId, [id]));
           }, ANIMATION_DELAY);
+        }
+      });
+
+      setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateMessages': {
+      const { ids, messageUpdate } = update;
+
+      let newGlobal = global;
+
+      ids.forEach((id) => {
+        const chatId = findChatId(newGlobal, id);
+        if (chatId) {
+          newGlobal = updateChatMessage(newGlobal, chatId, id, messageUpdate);
         }
       });
 

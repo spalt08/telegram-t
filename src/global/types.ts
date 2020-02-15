@@ -99,10 +99,9 @@ export type ActionTypes = (
   // messages
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' |
-  'loadWebPagePreview' | 'clearWebPagePreview' |
   // message search
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
-  'searchMessages' |
+  'searchMessages' | 'readMessageContents' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage' |
   // misc

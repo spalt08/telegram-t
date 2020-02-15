@@ -68,7 +68,7 @@ type UniversalMessage = (
   Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
     'out' | 'message' | 'entities' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' |
-    'media' | 'action' | 'views' | 'editDate' | 'editHide'
+    'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread'
   )>
 );
 
@@ -118,6 +118,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
   const toId = mtpMessage.toId ? getApiChatIdFromMtpPeer(mtpMessage.toId) : undefined;
   const isChatWithSelf = Boolean(toId) && mtpMessage.fromId === toId;
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
+  const isMediaUnread = mtpMessage.mediaUnread;
 
   return {
     id: mtpMessage.id,
@@ -130,6 +131,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
     views: mtpMessage.views,
     ...(isEdited && { isEdited }),
+    ...(isMediaUnread && { isMediaUnread }),
   };
 }
 

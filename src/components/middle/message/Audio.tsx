@@ -21,6 +21,7 @@ type IProps = {
   fileTransferProgress?: number;
   inSharedMedia?: boolean;
   date?: number;
+  onReadMedia?: () => void;
   onCancelTransfer?: () => void;
 };
 
@@ -29,8 +30,11 @@ const Audio: FC<IProps> = ({
   fileTransferProgress,
   inSharedMedia,
   date,
+  onReadMedia,
   onCancelTransfer,
 }) => {
+  const { content: { audio, voice }, isMediaUnread } = message;
+
   const audioRef = useRef<HTMLAudioElement>();
   const [isActive, setIsActive] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
@@ -49,10 +53,10 @@ const Audio: FC<IProps> = ({
   }, []);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
+    const audioEl = audioRef.current;
+    if (audioEl) {
       requestAnimationFrame(() => {
-        setProgress(audio.currentTime / audio.duration);
+        setProgress(audioEl.currentTime / audioEl.duration);
       });
     }
   }, [progress]);
@@ -60,23 +64,27 @@ const Audio: FC<IProps> = ({
   useEffect(() => {
     if (mediaData) {
       if (!audioRef.current) {
-        const audio = new window.Audio(mediaData);
-        audio.addEventListener('timeupdate', () => {
-          setProgress(audio.currentTime / audio.duration);
+        const audioEl = new window.Audio(mediaData);
+        audioEl.addEventListener('timeupdate', () => {
+          setProgress(audioEl.currentTime / audioEl.duration);
         });
-        audio.addEventListener('ended', () => {
+        audioEl.addEventListener('ended', () => {
           setIsActive(false);
         });
-        audioRef.current = audio;
+        audioRef.current = audioEl;
       }
 
       if (isActive) {
         audioRef.current.play();
+
+        if (onReadMedia && isMediaUnread) {
+          onReadMedia();
+        }
       } else {
         audioRef.current.pause();
       }
     }
-  }, [mediaData, isActive]);
+  }, [mediaData, isActive, isMediaUnread, onReadMedia]);
 
   useEffect(() => {
     return () => {
@@ -86,7 +94,6 @@ const Audio: FC<IProps> = ({
     };
   }, []);
 
-  const { audio, voice } = message.content;
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(() => voice && renderWaveform(voice, progress, isOwn), [voice, progress, isOwn]);
 
@@ -123,7 +130,7 @@ const Audio: FC<IProps> = ({
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent smaller={inSharedMedia} />
         </div>
       )}
-      {audio ? renderAudio(audio, progress, date) : renderVoice(voice!, renderedWaveform)}
+      {audio ? renderAudio(audio, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}
     </div>
   );
 };
@@ -150,11 +157,14 @@ function renderAudio(audio: ApiAudio, progress: number, date?: number) {
   );
 }
 
-function renderVoice(voice: ApiVoice, renderedWaveform: any) {
+function renderVoice(voice: ApiVoice, renderedWaveform: any, isMediaUnread?: boolean) {
   return (
     <div className="content">
       {renderedWaveform}
-      <p className="voice-duration">{formatMediaDuration(voice.duration)}</p>
+      <p className="voice-duration">
+        {formatMediaDuration(voice.duration)}
+        {isMediaUnread && <span>&bull;</span>}
+      </p>
     </div>
   );
 }

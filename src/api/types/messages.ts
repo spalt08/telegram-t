@@ -174,6 +174,7 @@ export interface ApiMessage {
   prev_local_id?: number;
   views?: number;
   isEdited?: boolean;
+  isMediaUnread?: boolean;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

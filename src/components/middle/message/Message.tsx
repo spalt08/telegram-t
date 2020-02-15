@@ -66,7 +66,9 @@ type IProps = (
     isFocused?: boolean;
   }
   & MessagePositionProperties
-  & Pick<GlobalActions, 'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage'>
+  & Pick<GlobalActions, (
+    'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
+  )>
 );
 
 const FOCUSING_MAX_DISTANCE = 2000;
@@ -84,14 +86,15 @@ const Message: FC<IProps> = ({
   originSender,
   outgoingStatus,
   fileTransferProgress,
-  focusMessage,
-  openMediaViewer,
-  cancelSendingMessage,
-  openUserInfo,
+  isFocused,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
-  isFocused,
+  focusMessage,
+  openMediaViewer,
+  openUserInfo,
+  cancelSendingMessage,
+  readMessageContents,
 }) => {
   const { chat_id: chatId, id: messageId } = message;
 
@@ -175,6 +178,10 @@ const Message: FC<IProps> = ({
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({ chatId, messageId });
   }, [chatId, messageId, openMediaViewer]);
+
+  const handleReadMedia = useCallback((): void => {
+    readMessageContents({ messageId });
+  }, [messageId, readMessageContents]);
 
   const handleCancelTransfer = useCallback(() => {
     cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
@@ -269,6 +276,7 @@ const Message: FC<IProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             fileTransferProgress={fileTransferProgress}
+            onReadMedia={voice ? handleReadMedia : undefined}
             onCancelTransfer={handleCancelTransfer}
           />
         )}
@@ -454,12 +462,14 @@ export default memo(withGlobal(
       openMediaViewer,
       cancelSendingMessage,
       openUserInfo,
+      readMessageContents,
     } = actions;
     return {
       focusMessage,
       openMediaViewer,
       cancelSendingMessage,
       openUserInfo,
+      readMessageContents,
     };
   },
 )(Message));
