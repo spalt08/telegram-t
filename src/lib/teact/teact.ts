@@ -358,9 +358,9 @@ function useLayoutEffectBase(
   dependencies?: any[],
 ) {
   const { cursor, byCursor } = renderingInstance.hooks.effects;
-  const { cleanup } = byCursor[cursor] || {};
 
   const exec = () => {
+    const { cleanup } = byCursor[cursor];
     if (typeof cleanup === 'function') {
       cleanup();
     }
@@ -379,7 +379,7 @@ function useLayoutEffectBase(
   byCursor[cursor] = {
     effect,
     dependencies,
-    cleanup,
+    cleanup: byCursor[cursor] ? byCursor[cursor].cleanup : undefined,
   };
 
   renderingInstance.hooks.effects.cursor++;
