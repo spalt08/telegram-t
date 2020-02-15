@@ -41,7 +41,8 @@ const Attachment: FC<IProps> = ({
     }
   }
 
-  useEffect(() => captureEscKeyListener(onClear), [onClear]);
+  useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
+
   useEffect(focusInput, [isOpen]);
 
   const sendAttachment = useCallback(() => {
