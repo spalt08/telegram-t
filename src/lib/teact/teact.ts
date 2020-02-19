@@ -118,13 +118,22 @@ function createElement(
 }
 
 function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
+  let parsedChildren: any | any[] | undefined;
+  if (children.length === 0) {
+    parsedChildren = undefined;
+  } else if (children.length === 1) {
+    [parsedChildren] = children;
+  } else {
+    parsedChildren = children;
+  }
+
   const componentInstance: ComponentInstance = {
     $element: {} as VirtualElementComponent,
     Component,
     name: Component.name,
     props: {
       ...props,
-      ...(children.length && { children }),
+      ...(parsedChildren && { children: parsedChildren }),
     },
     isMounted: false,
     hooks: {
