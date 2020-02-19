@@ -1,9 +1,9 @@
 import { useState } from '../lib/teact/teact';
 
 export default () => {
-  const [, setRandom] = useState(0);
+  const [, setTrigger] = useState<boolean>(false);
 
   return () => {
-    setRandom(Math.random());
+    setTrigger((trigger) => !trigger);
   };
 };
