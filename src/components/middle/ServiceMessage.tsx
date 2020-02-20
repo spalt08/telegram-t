@@ -10,7 +10,6 @@ import {
 import { selectUser, selectChatMessage, selectChatFocusedMessageId } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
-import useEnsureUserFromMessage from '../../hooks/useEnsureUserFromMessage';
 
 type IProps = {
   message: ApiMessage;
@@ -28,9 +27,7 @@ const ServiceMessage: FC<IProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>();
 
-  const { targetUserId: actionTargetUserId } = message.content.action || {};
   useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
-  useEnsureUserFromMessage(message.chat_id, actionTargetMessage, actionTargetUserId, actionTargetUser);
 
   useEffect(() => {
     const messagesContainer = document.getElementById('MessageList');

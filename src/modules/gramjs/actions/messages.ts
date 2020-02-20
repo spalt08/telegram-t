@@ -188,11 +188,14 @@ async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?
 }
 
 async function loadMessage(chat: ApiChat, messageId: number) {
-  const message = await callApi('fetchMessage', { chat, messageId });
+  const result = await callApi('fetchMessage', { chat, messageId });
 
-  if (!message) {
+  if (!result) {
     return;
   }
 
-  setGlobal(updateChatMessage(getGlobal(), chat.id, messageId, message));
+  let newGlobal = getGlobal();
+  newGlobal = updateChatMessage(newGlobal, chat.id, messageId, result.message);
+  newGlobal = updateUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
+  setGlobal(newGlobal);
 }

@@ -20,7 +20,6 @@ import {
 } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
-import useEnsureUserFromMessage from '../../hooks/useEnsureUserFromMessage';
 
 import Avatar from '../common/Avatar';
 import RippleEffect from '../ui/RippleEffect';
@@ -54,31 +53,16 @@ const Chat: FC<IProps> = ({
   openChat,
 }) => {
   const { last_message } = chat;
+  const isAction = last_message && isActionMessage(last_message);
 
-  const lastMessageAction = last_message && getMessageAction(last_message);
-  const actionTargetMessageId = lastMessageAction && last_message!.reply_to_message_id;
-  const actionTargetUserId = lastMessageAction && lastMessageAction.targetUserId;
-
-  useEnsureMessage(chat.id, actionTargetMessageId, actionTargetMessage);
-  useEnsureUserFromMessage(
-    chat.id,
-    last_message,
-    last_message && last_message.sender_user_id,
-    lastMessageSender,
-  );
-  useEnsureUserFromMessage(
-    chat.id,
-    last_message,
-    actionTargetUserId,
-    actionTargetUser,
-  );
+  useEnsureMessage(chat.id, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
 
   function renderLastMessage() {
     if (!last_message) {
       return null;
     }
 
-    if (isActionMessage(last_message)) {
+    if (isAction) {
       return (
         <p className="last-message">
           {getServiceMessageContent(

@@ -84,16 +84,24 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
     return undefined;
   }
 
-  const message = result.messages[0];
-
-  if (!message || !(message instanceof GramJs.Message)) {
+  const mtpMessage = result.messages[0];
+  if (!mtpMessage) {
     return undefined;
   }
 
-  const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
-  localDb.messages[messageFullId] = message;
+  const message = mtpMessage && buildApiMessage(mtpMessage);
+  if (!message) {
+    return undefined;
+  }
 
-  return buildApiMessage(message);
+  if (mtpMessage instanceof GramJs.Message) {
+    const messageFullId = `${resolveMessageApiChatId(mtpMessage)}-${mtpMessage.id}`;
+    localDb.messages[messageFullId] = mtpMessage;
+  }
+
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+
+  return { message, users };
 }
 
 export async function sendMessage({

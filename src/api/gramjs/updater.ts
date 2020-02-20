@@ -8,9 +8,13 @@ import {
   resolveMessageApiChatId,
 } from './apiBuilders/messages';
 import { getApiChatIdFromMtpPeer, buildChatMembers } from './apiBuilders/chats';
-import { buildApiUserStatus } from './apiBuilders/users';
+import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import { buildMessageFromUpdateShortSent } from './gramjsBuilders';
 import localDb from './localDb';
+
+type Update = (
+  (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
+) | typeof connection.UpdateConnectionState;
 
 let onUpdate: OnApiUpdate;
 
@@ -18,7 +22,7 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRequest?: GramJs.AnyRequest) {
+export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   if (update instanceof connection.UpdateConnectionState) {
     const connectionState = update.state === connection.UpdateConnectionState.states.disconnected
       ? 'connectionStateConnecting'
@@ -51,6 +55,24 @@ export function updater(update: GramJs.TypeUpdate | GramJs.TypeUpdates, originRe
       }
 
       message = buildApiMessage(update.message)!;
+    }
+
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities && entities.length) {
+      entities
+        .map(buildApiUser)
+        .forEach((user) => {
+          if (!user) {
+            return;
+          }
+
+          onUpdate({
+            '@type': 'updateUser',
+            id: user.id,
+            user,
+          });
+        });
     }
 
     onUpdate({

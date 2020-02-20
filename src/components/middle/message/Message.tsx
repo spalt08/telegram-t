@@ -28,7 +28,6 @@ import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../
 import { buildMessageContent } from './util/buildMessageContent';
 import { getMinMediaWidth } from './util/mediaDimensions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
-import useEnsureUserFromMessage from '../../../hooks/useEnsureUserFromMessage';
 
 import Avatar from '../../common/Avatar';
 import MessageMeta from './MessageMeta';
@@ -109,25 +108,7 @@ const Message: FC<IProps> = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
 
-  useEnsureUserFromMessage(
-    chatId,
-    message,
-    showAvatar || showSenderName ? message.sender_user_id : undefined,
-    sender,
-  );
-  useEnsureUserFromMessage(
-    chatId,
-    message,
-    message.forward_info && message.forward_info.origin.sender_user_id,
-    originSender,
-  );
   useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
-  useEnsureUserFromMessage(
-    chatId,
-    replyMessage,
-    replyMessage && replyMessage.sender_user_id,
-    replyMessageSender,
-  );
 
   useEffect(() => {
     const messagesContainer = document.getElementById('MessageList');

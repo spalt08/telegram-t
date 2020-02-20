@@ -103,7 +103,7 @@ export type ActionTypes = (
   'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadUserFromMessage' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' |
   // misc
   'openMediaViewer' |
   'loadStickers' | 'loadRecentStickers' | 'loadStickerSet' |

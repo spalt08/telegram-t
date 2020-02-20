@@ -1,42 +1,13 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiChat, OnApiUpdate } from '../../types';
+import { OnApiUpdate } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
-import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
-import { buildApiUser } from '../apiBuilders/users';
+import { buildInputEntity } from '../gramjsBuilders';
 
 let onUpdate: OnApiUpdate;
 
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
-}
-
-export async function fetchUserFromMessage({
-  chat, userId, messageId,
-}: {
-  chat: ApiChat; userId: number; messageId: number;
-}) {
-  const users = await invokeRequest(
-    new GramJs.users.GetUsers({
-      id: [new GramJs.InputUserFromMessage({
-        peer: buildInputPeer(chat.id, chat.access_hash),
-        msgId: messageId,
-        userId,
-      })],
-    }),
-  );
-
-  if (!users || !(users[0] instanceof GramJs.User)) {
-    return;
-  }
-
-  const user = buildApiUser(users[0])!;
-
-  onUpdate({
-    '@type': 'updateUser',
-    id: user.id,
-    user,
-  });
 }
 
 export async function fetchFullUser({
