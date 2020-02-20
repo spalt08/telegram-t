@@ -84,7 +84,7 @@ export async function fetchFullChat(chat: ApiChat) {
   });
 }
 
-export async function fetchChatOnlines(chat: ApiChat) {
+export async function fetchSuperGroupOnlines(chat: ApiChat) {
   const { id, access_hash } = chat;
   const peer = buildInputPeer(id, access_hash);
 

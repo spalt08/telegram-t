@@ -31,14 +31,14 @@ addReducer('loadFullChat', (global, actions, payload) => {
   runDebouncedForFetchFullChat(() => callApi('fetchFullChat', chat));
 });
 
-addReducer('loadChatOnlines', (global, actions, payload) => {
+addReducer('loadSuperGroupOnlines', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  runDebouncedForFetchOnlines(() => callApi('fetchChatOnlines', chat));
+  runDebouncedForFetchOnlines(() => callApi('fetchSuperGroupOnlines', chat));
 });
 
 addReducer('loadTopChats', () => {

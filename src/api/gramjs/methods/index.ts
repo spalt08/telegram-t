@@ -2,7 +2,7 @@ import { destroy, downloadMedia } from './client';
 import {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
 } from './auth';
-import { fetchChats, fetchFullChat, fetchChatOnlines } from './chats';
+import { fetchChats, fetchFullChat, fetchSuperGroupOnlines } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
   searchMessages, fetchWebPagePreview,
@@ -33,7 +33,7 @@ export default {
   searchMessages,
   fetchWebPagePreview,
   fetchFullChat,
-  fetchChatOnlines,
+  fetchSuperGroupOnlines,
   fetchFullUser,
   fetchUserFromMessage,
   fetchNearestCountry,

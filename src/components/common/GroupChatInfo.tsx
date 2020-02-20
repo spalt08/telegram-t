@@ -3,35 +3,42 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
-import { getChatTypeString, getChatTitle } from '../../modules/helpers';
-import { selectChat } from '../../modules/selectors';
+import { getChatTypeString, getChatTitle, isChatSuperGroup } from '../../modules/helpers';
+import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 
-type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullChat' | 'loadChatOnlines'> & {
+type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines'> & {
   chatId: number;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   chat: ApiChat;
+  onlineCount?: number;
 };
 
 const GroupChatInfo: FC<IProps> = ({
+  avatarSize = 'medium',
   lastSyncTime,
   chat,
-  avatarSize = 'medium',
+  onlineCount,
   loadFullChat,
-  loadChatOnlines,
+  loadSuperGroupOnlines,
 }) => {
+  const isSuperGroup = isChatSuperGroup(chat);
+
   useEffect(() => {
     if (lastSyncTime) {
       loadFullChat({ chatId: chat.id });
-      loadChatOnlines({ chatId: chat.id });
+
+      if (isSuperGroup) {
+        loadSuperGroupOnlines({ chatId: chat.id });
+      }
     }
-  }, [chat.id, loadChatOnlines, loadFullChat, lastSyncTime]);
+  }, [chat.id, lastSyncTime, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
 
   const groupStatus = getGroupStatus(chat);
-  const onlineStatus = chat.online_count ? `, ${formatInteger(chat.online_count)} online` : '';
+  const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : '';
 
   return (
     <div className="ChatInfo">
@@ -67,11 +74,12 @@ export default withGlobal(
   (global, { chatId }: IProps) => {
     const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
+    const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
 
-    return { lastSyncTime, chat };
+    return { lastSyncTime, chat, onlineCount };
   },
   (setGlobal, actions) => {
-    const { loadFullChat, loadChatOnlines } = actions;
-    return { loadFullChat, loadChatOnlines };
+    const { loadFullChat, loadSuperGroupOnlines } = actions;
+    return { loadFullChat, loadSuperGroupOnlines };
   },
 )(GroupChatInfo);

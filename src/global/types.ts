@@ -95,7 +95,7 @@ export type ActionTypes = (
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
-  'loadFullChat' | 'loadChatOnlines' | 'loadTopChats' |
+  'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' |
   // messages
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' |
