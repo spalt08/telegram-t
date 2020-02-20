@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "npm run build:staging",
-    "build:staging": "parcel build src/index.html --public-url ./",
+    "build:staging": "NODE_ENV=staging parcel build src/index.html --public-url ./",
     "build:contest": "./deploy/contest.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",

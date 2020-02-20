@@ -29,7 +29,7 @@ let pako: typeof import('../lib/pako_inflate');
 export function fetch<T extends Type>(url: string, mediaType: T) {
   if (!FETCH_PROMISES[url]) {
     FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType).catch((err) => {
-      if (DEBUG && process.env.NODE_ENV !== 'perf') {
+      if (DEBUG) {
         // eslint-disable-next-line no-console
         console.warn(err);
       }

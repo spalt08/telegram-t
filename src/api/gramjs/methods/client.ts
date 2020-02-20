@@ -77,18 +77,21 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
   shouldHandleUpdates = false,
 ): Promise<T['__response'] | undefined> {
-  if (DEBUG && process.env.NODE_ENV !== 'perf') {
-    if (!isConnected) {
+  if (!isConnected) {
+    if (DEBUG) {
       // eslint-disable-next-line no-console
       console.warn(`[GramJs/client] INVOKE ${request.className} ERROR: Client is not connected`);
-      return undefined;
     }
 
-    // eslint-disable-next-line no-console
-    console.log(`[GramJs/client] INVOKE ${request.className}`);
+    return undefined;
   }
 
   try {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/client] INVOKE ${request.className}`);
+    }
+
     const result = await client.invoke(request);
 
     if (DEBUG) {
