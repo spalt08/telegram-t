@@ -54,23 +54,21 @@ const Chat: FC<IProps> = ({
   openChat,
 }) => {
   const { last_message } = chat;
-  const lastMessageAction = last_message && getMessageAction(last_message);
 
-  const actionTargetMessageId = last_message && lastMessageAction
-    && last_message.reply_to_message_id;
-  const actionTargetUserId = last_message && lastMessageAction
-    && lastMessageAction.targetUserId;
+  const lastMessageAction = last_message && getMessageAction(last_message);
+  const actionTargetMessageId = lastMessageAction && last_message!.reply_to_message_id;
+  const actionTargetUserId = lastMessageAction && lastMessageAction.targetUserId;
 
   useEnsureMessage(chat.id, actionTargetMessageId, actionTargetMessage);
   useEnsureUserFromMessage(
     chat.id,
-    last_message && last_message.id,
+    last_message,
     last_message && last_message.sender_user_id,
     lastMessageSender,
   );
   useEnsureUserFromMessage(
     chat.id,
-    last_message && last_message.id,
+    last_message,
     actionTargetUserId,
     actionTargetUser,
   );

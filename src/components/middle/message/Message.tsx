@@ -111,20 +111,20 @@ const Message: FC<IProps> = ({
 
   useEnsureUserFromMessage(
     chatId,
-    messageId,
+    message,
     showAvatar || showSenderName ? message.sender_user_id : undefined,
     sender,
   );
   useEnsureUserFromMessage(
     chatId,
-    messageId,
+    message,
     message.forward_info && message.forward_info.origin.sender_user_id,
     originSender,
   );
   useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
   useEnsureUserFromMessage(
     chatId,
-    messageId,
+    replyMessage,
     replyMessage && replyMessage.sender_user_id,
     replyMessageSender,
   );

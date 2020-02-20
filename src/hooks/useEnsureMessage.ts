@@ -22,5 +22,5 @@ export default (
     if (messageId && !message) {
       loadMessageThrottled();
     }
-  }, [message, messageId, loadMessageThrottled]);
+  });
 };

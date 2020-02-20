@@ -26,10 +26,11 @@ const FOCUSING_MAX_DISTANCE = 2000;
 const ServiceMessage: FC<IProps> = ({
   message, sender, actionTargetUser, actionTargetMessage, isReply, isFocused,
 }) => {
+  const elementRef = useRef<HTMLDivElement>();
+
   const { targetUserId: actionTargetUserId } = message.content.action || {};
   useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
-  useEnsureUserFromMessage(message.chat_id, message.id, actionTargetUserId, actionTargetUser);
-  const elementRef = useRef<HTMLDivElement>();
+  useEnsureUserFromMessage(message.chat_id, actionTargetMessage, actionTargetUserId, actionTargetUser);
 
   useEffect(() => {
     const messagesContainer = document.getElementById('MessageList');

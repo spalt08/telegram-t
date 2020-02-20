@@ -1,17 +1,20 @@
 import { useEffect, useMemo } from '../lib/teact/teact';
 import { getDispatch } from '../lib/teact/teactn';
 
-import { ApiUser } from '../api/types';
+import { ApiMessage, ApiUser } from '../api/types';
 
 import { throttle } from '../util/schedulers';
 
 export default (
   chatId: number,
-  messageId?: number,
+  message?: ApiMessage,
   userId?: number,
   user?: ApiUser,
 ) => {
   const { loadUserFromMessage } = getDispatch();
+
+  const messageId = message ? message.id : undefined;
+
   const loadUserThrottled = useMemo(() => {
     const throttled = throttle(loadUserFromMessage, 500, true);
     return () => {
@@ -20,8 +23,8 @@ export default (
   }, [loadUserFromMessage, chatId, messageId, userId]);
 
   useEffect(() => {
-    if (userId && !user && messageId) {
+    if (message && userId && !user) {
       loadUserThrottled();
     }
-  }, [messageId, userId, user, loadUserThrottled]);
+  });
 };
