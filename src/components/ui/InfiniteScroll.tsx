@@ -40,21 +40,21 @@ const InfiniteScroll: FC = ({
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;
-    const { scrollTop, scrollHeight, offsetHeight } = container;
-    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= sensitiveHeight;
-
-    if (isNearBottom) {
-      const anchor = container.lastElementChild as HTMLElement;
-      if (anchor) {
-        const newAnchorTop = anchor.getBoundingClientRect().top;
-        const isMovingDown = typeof anchorTopRef.current === 'number' && newAnchorTop < anchorTopRef.current;
-        anchorTopRef.current = newAnchorTop;
-
-        if (isMovingDown) {
-          onLoadMoreDebounced({ direction: BACKWARDS });
-        }
-      }
+    const anchor = container.firstChild as HTMLElement;
+    if (!anchor) {
+      return;
     }
+
+    const { scrollTop, scrollHeight, offsetHeight } = container;
+    const newAnchorTop = anchor.getBoundingClientRect().top;
+    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= sensitiveHeight;
+    const isMovingDown = typeof anchorTopRef.current === 'number' && newAnchorTop < anchorTopRef.current;
+
+    if (isNearBottom && isMovingDown) {
+      onLoadMoreDebounced({ direction: BACKWARDS });
+    }
+
+    anchorTopRef.current = newAnchorTop;
   }, [onLoadMoreDebounced, sensitiveHeight]);
 
   return (
