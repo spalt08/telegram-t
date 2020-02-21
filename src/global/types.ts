@@ -38,6 +38,7 @@ export type GlobalState = {
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
     replyingToById: Record<number, number>;
+    orderedPinnedIds?: number[];
   };
 
   messages: {

@@ -212,9 +212,18 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         is_pinned: update.pinned || false,
       },
     });
-  } else if (
-    update instanceof GramJs.UpdateChatParticipants
-  ) {
+  } else if (update instanceof GramJs.UpdatePinnedDialogs) {
+    const ids = update.order
+      ? update.order
+        .filter((dp): dp is GramJs.DialogPeer => dp instanceof GramJs.DialogPeer)
+        .map((dp) => getApiChatIdFromMtpPeer(dp.peer))
+      : [];
+
+    onUpdate({
+      '@type': 'updatePinnedChatIds',
+      ids,
+    });
+  } else if (update instanceof GramJs.UpdateChatParticipants) {
     const members = buildChatMembers(update.participants);
 
     onUpdate({

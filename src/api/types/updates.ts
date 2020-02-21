@@ -55,6 +55,11 @@ export type ApiUpdateChatFullInfo = {
   full_info: Partial<ApiChatFullInfo>;
 };
 
+export type ApiUpdatePinnedChatIds = {
+  '@type': 'updatePinnedChatIds';
+  ids: number[];
+};
+
 export type ApiUpdateNewMessage = {
   '@type': 'newMessage';
   chat_id: number;
@@ -130,7 +135,7 @@ export type ApiUpdateMessageImage = {
 
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
-  ApiUpdateChat | ApiUpdateChatFullInfo |
+  ApiUpdateChat | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateMessages | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateFileUploadProgress |

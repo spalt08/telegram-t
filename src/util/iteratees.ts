@@ -88,10 +88,6 @@ export function orderBy<T>(
   });
 }
 
-export function toArray<T>(object: Record<string, T>): T[] {
-  return Object.keys(object).map((key) => object[key]);
-}
-
 export function flatten(array: any[]) {
   return array.reduce((result, member) => {
     if (Array.isArray(member)) {

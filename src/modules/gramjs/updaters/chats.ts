@@ -45,6 +45,35 @@ export function onUpdate(update: ApiUpdate) {
           ...full_info,
         },
       }));
+
+      break;
+    }
+
+    case 'updatePinnedChatIds': {
+      const { ids } = update;
+      const allChats = Object.values(global.chats.byId);
+
+      let newGlobal = global;
+
+      allChats.forEach((chat) => {
+        if (!chat.is_pinned && ids.includes(chat.id)) {
+          newGlobal = updateChat(newGlobal, chat.id, { is_pinned: true });
+        } else if (chat.is_pinned && !ids.includes(chat.id)) {
+          newGlobal = updateChat(newGlobal, chat.id, { is_pinned: false });
+        }
+      });
+
+      newGlobal = {
+        ...newGlobal,
+        chats: {
+          ...newGlobal.chats,
+          orderedPinnedIds: ids,
+        },
+      };
+
+      setGlobal(newGlobal);
+
+      break;
     }
   }
 }
