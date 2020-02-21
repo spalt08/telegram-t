@@ -172,9 +172,11 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       }
     }
 
-    if (textRef.current || currentAttachment) {
+    const trimmedText = textRef.current.trim();
+
+    if (trimmedText || currentAttachment) {
       sendMessage({
-        text: textRef.current,
+        text: trimmedText,
         attachment: currentAttachment,
       });
 

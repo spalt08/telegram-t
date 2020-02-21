@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useEffect, useRef } from '../../../lib/teact/teact';
+import React, {
+  FC, useEffect, useLayoutEffect, useRef
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { debounce } from '../../../util/schedulers';
@@ -23,6 +25,21 @@ const MessageInput: FC<IProps> = ({
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>();
 
+  useLayoutEffect(() => {
+    const input = inputRef.current!;
+
+    if (text) {
+      if (input.scrollHeight !== input.offsetHeight) {
+        input.style.height = 'auto';
+        input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
+      }
+
+      input.style.overflowY = input.scrollHeight <= MAX_INPUT_HEIGHT ? 'hidden' : 'auto';
+    } else {
+      input.removeAttribute('style');
+    }
+  }, [text]);
+
   function focusInput() {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -35,24 +52,14 @@ const MessageInput: FC<IProps> = ({
       return;
     }
 
-    const { currentTarget } = e;
-    onUpdate(currentTarget.value);
-    if (currentTarget.scrollHeight !== currentTarget.offsetHeight) {
-      currentTarget.style.height = 'auto';
-      currentTarget.style.height = `${Math.min(currentTarget.scrollHeight, MAX_INPUT_HEIGHT)}px`;
-    }
-
-    currentTarget.style.overflowY = currentTarget.scrollHeight <= MAX_INPUT_HEIGHT ? 'hidden' : 'auto';
+    onUpdate(e.currentTarget.value);
   }
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    const { currentTarget } = e;
-
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
 
       onSend();
-      currentTarget.removeAttribute('style');
 
       // Disable `onChange` following immediately after `onKeyPress`.
       isJustSent = true;
