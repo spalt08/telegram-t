@@ -14,7 +14,7 @@ type IProps = {
   messageText: string;
 } & Pick<GlobalState, 'webPagePreview'> & Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview'>;
 
-const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#]{1}[=&#a-zA-Z0-9]{2,128})?/;
+const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#][=&#a-zA-Z0-9]{2,128})?/;
 
 const runThrottledForWebPagePreview = throttle((cb) => cb(), 1000, true);
 
@@ -48,7 +48,7 @@ const WebPagePreview: FC<IProps> = ({
 
   return (
     <div className="WebPagePreview">
-      <WebPage message={messageStub} />
+      <WebPage message={messageStub} inPreview />
     </div>
   );
 };

@@ -17,6 +17,7 @@ type IProps = {
   message: ApiMessage;
   load?: boolean;
   inSharedMedia?: boolean; // TODO Extract as a separate component.
+  inPreview?: boolean;
   onMediaClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -25,6 +26,7 @@ const WebPage: FC<IProps> = ({
   message,
   load,
   inSharedMedia,
+  inPreview,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
@@ -33,11 +35,15 @@ const WebPage: FC<IProps> = ({
 
   if (!webPage && inSharedMedia) {
     const link = matchLinkInMessageText(message);
-    if (link && link.length >= 2) {
+    if (link) {
+      const { url, domain } = link;
+      const messageText = getMessagePlainText(message);
+
       linkData = {
-        siteName: link[1].replace(/^www./, ''),
-        url: link[0],
-        description: getMessagePlainText(message),
+        siteName: domain.replace(/^www./, ''),
+        // eslint-disable-next-line no-nested-ternary
+        url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
+        description: messageText !== url ? messageText : undefined,
       } as ApiWebPage;
     }
   }
@@ -68,7 +74,7 @@ const WebPage: FC<IProps> = ({
     } else if (width < MAX_WIDTH) {
       style = `max-width:${width}px`;
     }
-  } else {
+  } else if (!inPreview) {
     classNames.push('without-photo');
   }
 
@@ -89,7 +95,7 @@ const WebPage: FC<IProps> = ({
       )}
       <div className="WebPage-text">
         <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
-          {inSharedMedia ? url : siteName || displayUrl}
+          {inSharedMedia ? url.replace('mailto:', '') : siteName || displayUrl}
         </a>
         <p className="site-title">{inSharedMedia ? title || siteName : title}</p>
         {truncatedDescription && <p className="site-description">{description}</p>}

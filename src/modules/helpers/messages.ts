@@ -1,7 +1,7 @@
 import { ApiMessage } from '../../api/types';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
-const RE_LINK = /([-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?/;
+const RE_LINK = /(^|\s)(([a-z]{3,}?:\/\/)?([a-z0-9]+([-.@][a-z0-9]+)*\.[a-z]{2,}\.?(:[0-9]{1,5})?)([/#?][^\s]*)?)\b/;
 
 export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
@@ -86,8 +86,16 @@ export function getMessageText(message: ApiMessage) {
 
 export function matchLinkInMessageText(message: ApiMessage) {
   const { text } = message.content;
+  const match = text && text.text.match(RE_LINK);
 
-  return text && text.text.match(RE_LINK);
+  if (!match) {
+    return undefined;
+  }
+
+  return {
+    url: match[2],
+    domain: match[4],
+  };
 }
 
 export function isOwnMessage(message: ApiMessage) {

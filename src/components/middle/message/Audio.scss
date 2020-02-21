@@ -92,10 +92,14 @@
 
     span {
       margin-left: 0.25rem;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       line-height: .875rem;
       vertical-align: middle;
     }
+  }
+
+  &:not(.own) .voice-duration span {
+    color: var(--color-primary);
   }
 
   .waveform {
