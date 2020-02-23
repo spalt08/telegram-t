@@ -9,8 +9,8 @@ import {
   updateChatMessageListedIds,
   replaceChatMessagesById,
   updateChatMessage,
-  updateUsers,
   replaceChatMessageViewportIds,
+  addUsers,
 } from '../../reducers';
 import {
   selectChat, selectChatMessageListedIds, selectChatMessageViewportIds, selectOpenChat,
@@ -179,7 +179,7 @@ async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?
   let newGlobal = getGlobal();
   newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
   newGlobal = updateChatMessageListedIds(newGlobal, chat.id, ids);
-  newGlobal = updateUsers(newGlobal, buildCollectionByKey(users, 'id'));
+  newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
   const { newViewportIds } = getUpdatedViewportIds(newGlobal, chat.id, direction, true);
   newGlobal = replaceChatMessageViewportIds(newGlobal, chat.id, newViewportIds!);
@@ -196,6 +196,6 @@ async function loadMessage(chat: ApiChat, messageId: number) {
 
   let newGlobal = getGlobal();
   newGlobal = updateChatMessage(newGlobal, chat.id, messageId, result.message);
-  newGlobal = updateUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
+  newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
   setGlobal(newGlobal);
 }

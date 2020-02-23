@@ -5,7 +5,7 @@ import { ApiChat, ApiMessageSearchMediaType, ApiUser } from '../../../api/types'
 import { callApi } from '../../../api/gramjs';
 import { selectOpenChat, selectOpenUser } from '../../selectors';
 import { areSortedArraysEqual, buildCollectionByKey, unique } from '../../../util/iteratees';
-import { addChatMessagesById, updateUsers } from '../../reducers';
+import { addChatMessagesById, addUsers } from '../../reducers';
 
 const SEARCH_LIMIT = 50;
 
@@ -42,7 +42,7 @@ async function searchMessages(
 
   let newGlobal = getGlobal();
   newGlobal = addChatMessagesById(newGlobal, chatOrUser.id, byId);
-  newGlobal = updateUsers(newGlobal, buildCollectionByKey(users, 'id'));
+  newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
   const currentFoundIds = newGlobal.messageSearch.foundIds || [];
   const newFoundIds = Object.keys(byId).map(Number);

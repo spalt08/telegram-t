@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teactn';
 
 import { callApi } from '../../../api/gramjs';
-import { updateChatIds, updateChats, updateUsers } from '../../reducers';
+import { addUsers, updateChatIds, updateChats } from '../../reducers';
 import { selectChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
@@ -63,7 +63,7 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
 
   let global = getGlobal();
 
-  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateChatIds(global, chat_ids);
 

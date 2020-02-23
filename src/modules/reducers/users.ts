@@ -32,8 +32,21 @@ export function updateUser(global: GlobalState, userId: number, userUpdate: Part
 export function updateUsers(global: GlobalState, updatedById: Record<number, ApiUser>): GlobalState {
   let newGlobal = global;
 
-  Object.keys(updatedById).forEach((id) => {
-    newGlobal = updateUser(newGlobal, Number(id), updatedById[Number(id)]);
+  Object.keys(updatedById).map(Number).forEach((id) => {
+    newGlobal = updateUser(newGlobal, id, updatedById[id]);
+  });
+
+  return newGlobal;
+}
+
+export function addUsers(global: GlobalState, addedById: Record<number, ApiUser>): GlobalState {
+  const { byId } = global.users;
+  let newGlobal = global;
+
+  Object.keys(addedById).map(Number).forEach((id) => {
+    if (!byId[id]) {
+      newGlobal = updateUser(newGlobal, id, addedById[id]);
+    }
   });
 
   return newGlobal;
