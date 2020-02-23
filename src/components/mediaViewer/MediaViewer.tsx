@@ -31,6 +31,7 @@ import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
+import Transition from '../ui/Transition';
 
 type IProps = Pick<GlobalActions, 'openMediaViewer'> & {
   chatId?: number;
@@ -185,36 +186,40 @@ const MediaViewer: FC<IProps> = ({
 
   return (
     <AnimationFade show={isOpen}>
-      <div id="MediaViewer" onClick={handleClose} className={`${messageText ? 'footer' : ''}`}>
+      <div id="MediaViewer" onClick={handleClose}>
         <div className="media-viewer-head" onClick={stopEvent}>
           <SenderInfo chatId={chatId} messageId={messageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
-        <div className="media-viewer-content">
-          {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
-          {isVideo && renderVideo(
-            blobUrlFull,
-            blobUrlPreview || thumbDataUri,
-            message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+        <Transition activeKey={selectedMediaMessageIndex} name='slide'>
+          {() => (
+            <div className={`media-viewer-content ${messageText ? 'footer' : ''}`}>
+              {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+              {isVideo && renderVideo(
+                blobUrlFull,
+                blobUrlPreview || thumbDataUri,
+                message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+              )}
+              {hasFooter && <MediaViewerFooter text={messageText!} />}
+            </div>
           )}
-          {!isFirst && (
-            <button
-              type="button"
-              className="navigation prev"
-              aria-label="Previous"
-              onClick={selectPreviousMedia}
-            />
-          )}
-          {!isLast && (
-            <button
-              type="button"
-              className="navigation next"
-              aria-label="Next"
-              onClick={selectNextMedia}
-            />
-          )}
-        </div>
-        {hasFooter && <MediaViewerFooter text={messageText!} />}
+        </Transition>
+        {!isFirst && (
+          <button
+            type="button"
+            className="navigation prev"
+            aria-label="Previous"
+            onClick={selectPreviousMedia}
+          />
+        )}
+        {!isLast && (
+          <button
+            type="button"
+            className="navigation next"
+            aria-label="Next"
+            onClick={selectNextMedia}
+          />
+        )}
       </div>
     </AnimationFade>
   );
