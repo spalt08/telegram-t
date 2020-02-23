@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState,
+  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../../lib/teact/teact';
 
 import { ApiAudio, ApiMessage, ApiVoice } from '../../../api/types';
@@ -209,4 +209,4 @@ function renderWaveform(voice: ApiVoice, progress = 0, isOwn = false) {
   );
 }
 
-export default Audio;
+export default memo(Audio);

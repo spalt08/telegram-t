@@ -1,5 +1,5 @@
 import { MouseEvent } from 'react';
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../../api/types';
 
@@ -104,4 +104,4 @@ const WebPage: FC<IProps> = ({
   );
 };
 
-export default WebPage;
+export default memo(WebPage);
