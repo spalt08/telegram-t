@@ -10,7 +10,6 @@ import Photo from './Photo';
 
 import './WebPage.scss';
 
-const MAX_WIDTH = 448; // 28 rem
 const MAX_TEXT_LENGTH = 170; // symbols
 
 type IProps = {
@@ -65,14 +64,11 @@ const WebPage: FC<IProps> = ({
     ? `${description.substr(0, MAX_TEXT_LENGTH)}...`
     : description;
 
-  let style = '';
   const classNames = ['WebPage'];
   if (photo) {
     const { width, height } = calculateMediaDimensions(message);
     if (width === height) {
       classNames.push('with-square-photo');
-    } else if (width < MAX_WIDTH) {
-      style = `max-width:${width}px`;
     }
   } else if (!inPreview) {
     classNames.push('without-photo');
@@ -82,8 +78,6 @@ const WebPage: FC<IProps> = ({
     <div
       className={classNames.join(' ')}
       data-initial={(siteName || displayUrl)[0]}
-      // @ts-ignore teact feature
-      style={style}
     >
       {photo && (
         <Photo

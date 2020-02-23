@@ -10,16 +10,17 @@
   .active-tab {
     position: absolute;
     bottom: -1px;
-    left: 0;
     width: 0;
     height: .25rem;
     border-radius: .125rem .125rem 0 0;
     background-color: var(--color-primary);
-    transition: width 300ms ease-in-out, left 300ms ease-in-out;
     pointer-events: none;
     padding-right: .5rem;
     box-sizing: content-box;
-    transform: translate3d(0, 0, 0);
     left: var(--pos, 0);
+
+    transition: width .25s ease-in-out, left .25s ease-in-out;
+    transform: translate3d(0, 0, 0);
+    will-change: width, left;
   }
 }

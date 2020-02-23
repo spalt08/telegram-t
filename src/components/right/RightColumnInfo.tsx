@@ -9,6 +9,7 @@ import { GlobalActions } from '../../global/types';
 import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
 import { selectChat, selectChatMessages } from '../../modules/selectors';
 
+import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -86,42 +87,46 @@ const RightColumnInfo: FC<IProps> = ({
         <GroupExtra chatId={chatId} />,
       ]}
       <div className="shared-media">
-        <div className={`content ${mediaType}-list`}>
-          {/* eslint-disable no-nested-ternary */}
-          {mediaType === 'media' ? (
-            messageIds.map((id: number) => (
-              <Media
-                key={id}
-                message={chatMessages[id]}
-                onClick={handleSelectMedia}
-              />
-            ))
-          ) : mediaType === 'document' ? (
-            messageIds.map((id: number) => (
-              <Document key={id} message={chatMessages[id]} />
-            ))
-          ) : mediaType === 'webPage' ? (
-            messageIds.map((id: number) => (
-              <WebPage
-                key={id}
-                inSharedMedia
-                message={chatMessages[id]}
-                load
-              />
-            ))
-          ) : mediaType === 'audio' ? (
-            messageIds.map((id: number) => (
-              <Audio
-                key={id}
-                inSharedMedia
-                message={chatMessages[id]}
-                date={chatMessages[id].date}
-              />
-            ))
-          ) : null}
-          {/* eslint-enable no-nested-ternary */}
-        </div>
         <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
+        <Transition activeKey={activeTab} name="slide">
+          {() => (
+            <div className={`content ${mediaType}-list`}>
+              {/* eslint-disable no-nested-ternary */}
+              {mediaType === 'media' ? (
+                messageIds.map((id: number) => (
+                  <Media
+                    key={id}
+                    message={chatMessages[id]}
+                    onClick={handleSelectMedia}
+                  />
+                ))
+              ) : mediaType === 'document' ? (
+                messageIds.map((id: number) => (
+                  <Document key={id} message={chatMessages[id]} />
+                ))
+              ) : mediaType === 'webPage' ? (
+                messageIds.map((id: number) => (
+                  <WebPage
+                    key={id}
+                    inSharedMedia
+                    message={chatMessages[id]}
+                    load
+                  />
+                ))
+              ) : mediaType === 'audio' ? (
+                messageIds.map((id: number) => (
+                  <Audio
+                    key={id}
+                    inSharedMedia
+                    message={chatMessages[id]}
+                    date={chatMessages[id].date}
+                  />
+                ))
+              ) : null}
+              {/* eslint-enable no-nested-ternary */}
+            </div>
+          )}
+        </Transition>
       </div>
     </InfiniteScroll>
   );

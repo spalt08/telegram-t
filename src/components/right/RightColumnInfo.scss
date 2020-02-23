@@ -2,6 +2,9 @@
   margin-bottom: 1.5rem;
   height: calc(100% - 60px);
   overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 
   .ChatInfo {
     padding: 0 1.5rem;
@@ -73,11 +76,13 @@
 }
 
 .shared-media {
+  flex-grow: 1;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
 
   .TabList {
     background: #fff;
+    z-index: 2;
   }
 
   .Tab {
@@ -101,6 +106,15 @@
     &:nth-child(4).active ~ .active-tab {
       width: 2.5625rem;
       --pos: calc(87.5% - 1.4375rem);
+    }
+  }
+
+  .Transition {
+    flex-grow: 1;
+
+    &.slide {
+      overflow: hidden;
+      height: auto !important;
     }
   }
 
