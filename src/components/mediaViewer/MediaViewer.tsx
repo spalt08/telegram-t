@@ -61,7 +61,6 @@ const MediaViewer: FC<IProps> = ({
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(messageId);
 
-  let { text: messageText } = message ? buildMessageContent(message) : { text: undefined };
   let isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
   let isVideo = message ? Boolean(getMessageVideo(message)) : null;
 
@@ -91,7 +90,6 @@ const MediaViewer: FC<IProps> = ({
     message,
     chatId,
     messageId,
-    messageText,
     isPhoto,
     isVideo,
     blobUrlFull,
@@ -102,14 +100,12 @@ const MediaViewer: FC<IProps> = ({
     message = previousProps.message;
     chatId = previousProps.chatId;
     messageId = previousProps.messageId;
-    messageText = previousProps.messageText;
     isPhoto = previousProps.isPhoto;
     isVideo = previousProps.isVideo;
     blobUrlFull = previousProps.blobUrlFull;
     blobUrlPreview = previousProps.blobUrlPreview;
   }
 
-  const hasFooter = Boolean(messageText);
   const videoDimensions = message && isVideo ? getVideoDimensions(getMessageVideo(message)!)! : undefined;
 
   const getMessageId = (fromId: number, direction: number): number => {
@@ -184,6 +180,27 @@ const MediaViewer: FC<IProps> = ({
     });
   }
 
+  function renderSlide() {
+    if (!message) {
+      return null;
+    }
+
+    const messageText = buildMessageContent(message).text;
+    const hasFooter = Boolean(messageText);
+
+    return (
+      <div key={messageId} className={`media-viewer-content ${hasFooter ? 'footer' : ''}`}>
+        {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+        {isVideo && renderVideo(
+          blobUrlFull,
+          blobUrlPreview || thumbDataUri,
+          message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+        )}
+        {messageText && <MediaViewerFooter text={messageText} />}
+      </div>
+    );
+  }
+
   return (
     <AnimationFade show={isOpen}>
       <div id="MediaViewer" onClick={handleClose}>
@@ -191,18 +208,8 @@ const MediaViewer: FC<IProps> = ({
           <SenderInfo chatId={chatId} messageId={messageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
-        <Transition activeKey={selectedMediaMessageIndex} name='slide'>
-          {() => (
-            <div className={`media-viewer-content ${messageText ? 'footer' : ''}`}>
-              {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
-              {isVideo && renderVideo(
-                blobUrlFull,
-                blobUrlPreview || thumbDataUri,
-                message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
-              )}
-              {hasFooter && <MediaViewerFooter text={messageText!} />}
-            </div>
-          )}
+        <Transition activeKey={messageId} direction={isReversed ? 'inverse' : 'auto'} name="slow-slide">
+          {renderSlide}
         </Transition>
         {!isFirst && (
           <button
