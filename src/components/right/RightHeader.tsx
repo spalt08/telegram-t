@@ -30,17 +30,19 @@ const RightHeader: FC<IProps> = ({
   }, [searchMessages, setMessageSearchQuery]);
 
   function renderRegularHeader() {
-    return [
-      <h3>Info</h3>,
-      <Button
-        round
-        color="translucent"
-        size="smaller"
-        className="more-button not-implemented"
-      >
-        <i className="icon-more" />
-      </Button>,
-    ];
+    return (
+      <>
+        <h3>Info</h3>
+        <Button
+          round
+          color="translucent"
+          size="smaller"
+          className="more-button not-implemented"
+        >
+          <i className="icon-more" />
+        </Button>
+      </>
+    );
   }
 
   function renderSearch() {

@@ -79,6 +79,8 @@ export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualE
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
 
+const Fragment = Symbol('Fragment');
+
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
@@ -102,19 +104,23 @@ export function isRealElement($element: VirtualElement): $element is VirtualReal
 }
 
 function createElement(
-  tagOrComponent: string | FC,
+  source: string | FC | typeof Fragment,
   props: Props,
   ...children: any[]
-): VirtualRealElement {
+): VirtualRealElement | VirtualElementChildren {
   if (!props) {
     props = {};
   }
 
   children = flatten(children);
 
-  return typeof tagOrComponent === 'function'
-    ? createComponentInstance(tagOrComponent, props, children)
-    : buildTagElement(tagOrComponent, props, children);
+  if (source === Fragment) {
+    return children;
+  } else if (typeof source === 'function') {
+    return createComponentInstance(source, props, children);
+  } else {
+    return buildTagElement(source, props, children);
+  }
 }
 
 function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
@@ -455,4 +461,5 @@ export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
 // We need to keep it here for JSX.
 export default {
   createElement,
+  Fragment,
 };

@@ -17,12 +17,14 @@ type IProps = {
 const MessageMeta: FC<IProps> = ({ message, outgoingStatus }) => {
   return (
     <span className="MessageMeta">
-      {message.views && [
-        <span className="message-views">
-          {formatIntegerCompact(message.views)}
-        </span>,
-        <i className="icon-channelviews" />,
-      ]}
+      {message.views && (
+        <>
+          <span className="message-views">
+            {formatIntegerCompact(message.views)}
+          </span>
+          <i className="icon-channelviews" />
+        </>
+      )}
       <span className="message-time">
         {message.isEdited ? 'edited ' : ''}
         {formatTime(message.date * 1000)}

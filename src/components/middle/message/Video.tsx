@@ -93,19 +93,21 @@ const Video: FC<IProps> = ({
           <source src={mediaData || localBlobUrl} />
         </video>
       )}
-      {isHqPreview && ([
-        <img
-          src={mediaData}
-          width={width}
-          height={height}
-          alt=""
-        />,
-        <div className="message-media-loading open shown">
-          <div className="message-media-play-button">
-            <i className="icon-large-play" />
+      {isHqPreview && (
+        <>
+          <img
+            src={mediaData}
+            width={width}
+            height={height}
+            alt=""
+          />
+          <div className="message-media-loading open shown">
+            <div className="message-media-play-button">
+              <i className="icon-large-play" />
+            </div>
           </div>
-        </div>,
-      ])}
+        </>
+      )}
       {shouldSpinnerRender && (
         <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />

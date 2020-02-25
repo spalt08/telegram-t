@@ -51,24 +51,26 @@ const HeaderPinnedMessage: FC<IProps> = ({
 
   return (
     <div className="HeaderPinnedMessage-wrapper">
-      {onUnpinMessage && ([
-        <ConfirmDialog
-          isOpen={isUnpinDialogOpen}
-          onClose={closeUnpinConfirmation}
-          text="Would you like to unpin this message?"
-          confirmLabel="Unpin"
-          confirmHandler={handleUnpinMessage}
-        />,
-        <Button
-          round
-          size="smaller"
-          color="translucent"
-          ariaLabel="Unpin message"
-          onClick={openUnpinConfirmation}
-        >
-          <i className="icon-close" />
-        </Button>,
-      ])}
+      {onUnpinMessage && (
+        <>
+          <ConfirmDialog
+            isOpen={isUnpinDialogOpen}
+            onClose={closeUnpinConfirmation}
+            text="Would you like to unpin this message?"
+            confirmLabel="Unpin"
+            confirmHandler={handleUnpinMessage}
+          />
+          <Button
+            round
+            size="smaller"
+            color="translucent"
+            ariaLabel="Unpin message"
+            onClick={openUnpinConfirmation}
+          >
+            <i className="icon-close" />
+          </Button>
+        </>
+      )}
 
       <div className={`HeaderPinnedMessage ${!isInViewPort ? 'not-implemented' : ''}`} onClick={stopPropagation}>
         {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
