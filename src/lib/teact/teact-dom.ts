@@ -12,7 +12,7 @@ import {
   VirtualElement,
   VirtualElementComponent,
   VirtualElementTag,
-  VirtualRealElement,
+  VirtualRealElement, isComponentTemplateElement, VirtualElementComponentTemplate, VirtualElementRenderable,
 } from './teact';
 
 type VirtualDomHead = {
@@ -48,14 +48,22 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
 function renderWithVirtual(
   parentEl: HTMLElement,
   $current: VirtualElement | undefined,
-  $new: VirtualElement | undefined,
+  $newOrTemplate: VirtualElementRenderable | VirtualElementComponentTemplate | undefined,
   $parent: VirtualRealElement | VirtualDomHead,
   index: number,
-  skipComponentUpdate = false,
+  isComponentUpdate = false,
   insertAfterOrPrepend?: Element | 'prepend',
 ) {
+  let $new = $newOrTemplate as VirtualElementRenderable | undefined;
+
+  if ($newOrTemplate && !isComponentUpdate) {
+    if (isComponentTemplateElement($newOrTemplate)) {
+      $new = initComponent($newOrTemplate, $parent, index, parentEl);
+    }
+  }
+
   if (
-    !skipComponentUpdate
+    !isComponentUpdate
     && $current && $new
     && isComponentElement($current) && isComponentElement($new)
     && !hasElementChanged($current, $new)
@@ -64,7 +72,7 @@ function renderWithVirtual(
   }
 
   // Parent element may have changed, so we need to update the listener closure.
-  if (!skipComponentUpdate && $new && isComponentElement($new) && $new.componentInstance.isMounted) {
+  if (!isComponentUpdate && $new && isComponentElement($new) && $new.componentInstance.isMounted) {
     setupComponentUpdateListener($new, $parent, index, parentEl);
   }
 
@@ -73,10 +81,6 @@ function renderWithVirtual(
   }
 
   if (!$current && $new) {
-    if (isComponentElement($new)) {
-      $new = initComponent($new, $parent, index, parentEl);
-    }
-
     const node = createNode($new);
     setTarget($new, node);
 
@@ -93,10 +97,6 @@ function renderWithVirtual(
   } else if ($current && $new) {
     if (hasElementChanged($current, $new)) {
       unmountTree($current);
-      if (isComponentElement($new)) {
-        $new = initComponent($new, $parent, index, parentEl);
-      }
-
       const node = createNode($new);
       setTarget($new, node);
       parentEl.replaceChild(node, getTarget($current)!);
@@ -125,24 +125,17 @@ function renderWithVirtual(
 }
 
 function initComponent(
-  $element: VirtualElementComponent, $parent: VirtualRealElement | VirtualDomHead, index: number, parentEl: HTMLElement,
+  $componentTemplate: VirtualElementComponentTemplate,
+  $parent: VirtualRealElement | VirtualDomHead,
+  index: number,
+  parentEl: HTMLElement,
 ) {
-  if (!isComponentElement($element)) {
-    return $element;
-  }
+  const $element = mountComponent($componentTemplate);
+  setupComponentUpdateListener($element, $parent, index, parentEl);
 
-  const { componentInstance } = $element;
-
-  if (!componentInstance.isMounted) {
-    $element = mountComponent(componentInstance);
-    setupComponentUpdateListener($element, $parent, index, parentEl);
-
-    const $firstChild = $element.children[0];
-    if (isComponentElement($firstChild)) {
-      $element.children = [initComponent($firstChild, $element, 0, parentEl)];
-    }
-
-    componentInstance.isMounted = true;
+  const $firstChild = $element.children[0];
+  if (isComponentTemplateElement($firstChild)) {
+    $element.children = [initComponent($firstChild, $element, 0, parentEl)];
   }
 
   return $element;
@@ -171,7 +164,7 @@ function setupComponentUpdateListener(
   };
 }
 
-function createNode($element: VirtualElement): Node {
+function createNode($element: VirtualElementRenderable): Node {
   if (isEmptyElement($element)) {
     return document.createTextNode('');
   }
@@ -181,7 +174,7 @@ function createNode($element: VirtualElement): Node {
   }
 
   if (isComponentElement($element)) {
-    return createNode($element.children[0] as VirtualElement);
+    return createNode($element.children[0] as VirtualElementRenderable);
   }
 
   const { tag, props, children = [] } = $element;

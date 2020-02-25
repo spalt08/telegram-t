@@ -191,7 +191,7 @@ const MediaViewer: FC<IProps> = ({
           <SenderInfo chatId={chatId} messageId={messageId} />
           <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
         </div>
-        <Transition activeKey={selectedMediaMessageIndex} name='slide'>
+        <Transition activeKey={selectedMediaMessageIndex} name="slide">
           {() => (
             <div className={`media-viewer-content ${messageText ? 'footer' : ''}`}>
               {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}

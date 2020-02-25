@@ -1,6 +1,7 @@
 import { onTickEnd, onTickEndThenRaf, throttleWithRaf } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { DEBUG } from '../../config';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
@@ -9,6 +10,7 @@ export enum VirtualElementTypesEnum {
   Empty,
   Text,
   Tag,
+  ComponentTemplate,
   Component,
 }
 
@@ -29,6 +31,12 @@ export interface VirtualElementTag {
   tag: string;
   props: Props;
   children: VirtualElementChildren;
+}
+
+export interface VirtualElementComponentTemplate {
+  type: VirtualElementTypesEnum.ComponentTemplate;
+  Component: FC;
+  props: Props;
 }
 
 export interface VirtualElementComponent {
@@ -75,9 +83,22 @@ interface ComponentInstance {
   onUpdate?: () => void;
 }
 
-export type VirtualElement = VirtualElementEmpty | VirtualElementText | VirtualElementTag | VirtualElementComponent;
+export type VirtualElementRenderable =
+  VirtualElementEmpty
+  | VirtualElementText
+  | VirtualElementTag
+  | VirtualElementComponent;
+export type VirtualElement = VirtualElementRenderable | VirtualElementComponentTemplate;
 export type VirtualRealElement = VirtualElementTag | VirtualElementComponent;
 export type VirtualElementChildren = VirtualElement[];
+
+
+const DEBUG_components: AnyLiteral = {};
+
+document.addEventListener('dblclick', () => {
+  // eslint-disable-next-line no-console
+  console.log('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
+});
 
 let renderingInstance: ComponentInstance;
 
@@ -93,6 +114,10 @@ export function isTagElement($element: VirtualElement): $element is VirtualEleme
   return $element.type === VirtualElementTypesEnum.Tag;
 }
 
+export function isComponentTemplateElement($element: VirtualElement): $element is VirtualElementComponentTemplate {
+  return $element.type === VirtualElementTypesEnum.ComponentTemplate;
+}
+
 export function isComponentElement($element: VirtualElement): $element is VirtualElementComponent {
   return $element.type === VirtualElementTypesEnum.Component;
 }
@@ -105,70 +130,16 @@ function createElement(
   tagOrComponent: string | FC,
   props: Props,
   ...children: any[]
-): VirtualRealElement {
+): VirtualElementTag | VirtualElementComponentTemplate {
   if (!props) {
     props = {};
   }
 
   children = flatten(children);
 
-  return typeof tagOrComponent === 'function'
-    ? createComponentInstance(tagOrComponent, props, children)
-    : buildTagElement(tagOrComponent, props, children);
-}
-
-function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
-  let parsedChildren: any | any[] | undefined;
-  if (children.length === 0) {
-    parsedChildren = undefined;
-  } else if (children.length === 1) {
-    [parsedChildren] = children;
-  } else {
-    parsedChildren = children;
-  }
-
-  const componentInstance: ComponentInstance = {
-    $element: {} as VirtualElementComponent,
-    Component,
-    name: Component.name,
-    props: {
-      ...props,
-      ...(parsedChildren && { children: parsedChildren }),
-    },
-    isMounted: false,
-    hooks: {
-      state: {
-        cursor: 0,
-        byCursor: [],
-      },
-      effects: {
-        cursor: 0,
-        byCursor: [],
-      },
-      memos: {
-        cursor: 0,
-        byCursor: [],
-      },
-    },
-  };
-
-  componentInstance.$element = buildComponentElement(componentInstance);
-
-  return componentInstance.$element;
-}
-
-function buildComponentElement(
-  componentInstance: ComponentInstance,
-  children: VirtualElementChildren = [],
-): VirtualElementComponent {
-  const { props } = componentInstance;
-
-  return {
-    componentInstance,
-    type: VirtualElementTypesEnum.Component,
-    props,
-    children,
-  };
+  return typeof tagOrComponent === 'string'
+    ? buildTagElement(tagOrComponent, props, children)
+    : buildComponentTemplateElement(tagOrComponent, props, children);
 }
 
 function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
@@ -200,7 +171,7 @@ function isEmptyPlaceholder(child: any) {
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
     return buildEmptyElement();
-  } else if (isRealElement(child)) {
+  } else if (typeof child === 'object') {
     return child;
   } else {
     return buildTextElement(child);
@@ -218,22 +189,68 @@ function buildEmptyElement(): VirtualElementEmpty {
   return { type: VirtualElementTypesEnum.Empty };
 }
 
-const DEBUG_components: AnyLiteral = {};
+function buildComponentTemplateElement(
+  Component: FC, props: Props, children: any[],
+): VirtualElementComponentTemplate {
+  let parsedChildren: any | any[] | undefined;
+  if (children.length === 0) {
+    parsedChildren = undefined;
+  } else if (children.length === 1) {
+    [parsedChildren] = children;
+  } else {
+    parsedChildren = children;
+  }
 
-document.addEventListener('dblclick', () => {
-  // eslint-disable-next-line no-console
-  console.log('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
-});
+  return {
+    Component,
+    type: VirtualElementTypesEnum.ComponentTemplate,
+    props: {
+      ...props,
+      ...(parsedChildren && { children: parsedChildren }),
+    },
+  };
+}
+
+export function mountComponent(template: VirtualElementComponentTemplate): VirtualElementComponent {
+  const { Component, Component: { name }, props } = template;
+
+  const componentInstance = {
+    $element: {} as VirtualElementComponent,
+    Component,
+    name,
+    props,
+    isMounted: true,
+    hooks: {
+      state: {
+        cursor: 0,
+        byCursor: [],
+      },
+      effects: {
+        cursor: 0,
+        byCursor: [],
+      },
+      memos: {
+        cursor: 0,
+        byCursor: [],
+      },
+    },
+  };
+
+  return renderComponent(componentInstance);
+}
 
 export function renderComponent(componentInstance: ComponentInstance) {
-  const componentName = componentInstance.name;
-  if (!DEBUG_components[componentName]) {
-    DEBUG_components[componentName] = {
-      componentName,
-      renderCount: 0,
-    };
+  if (DEBUG) {
+    const componentName = componentInstance.name;
+
+    if (!DEBUG_components[componentName]) {
+      DEBUG_components[componentName] = {
+        componentName,
+        renderCount: 0,
+      };
+    }
+    DEBUG_components[componentName].renderCount++;
   }
-  DEBUG_components[componentName].renderCount++;
 
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
@@ -243,6 +260,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
   const { Component, props } = componentInstance;
   const newRenderedValue = Component(props);
 
+  // TODO Component should not be rendered at all when not mounted.
   if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
   }
@@ -253,6 +271,20 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.$element = buildComponentElement(componentInstance, [newChild]);
 
   return componentInstance.$element;
+}
+
+function buildComponentElement(
+  componentInstance: ComponentInstance,
+  children: VirtualElementChildren = [],
+): VirtualElementComponent {
+  const { props } = componentInstance;
+
+  return {
+    componentInstance,
+    type: VirtualElementTypesEnum.Component,
+    props,
+    children,
+  };
 }
 
 export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
@@ -287,12 +319,6 @@ export function unmountTree($element: VirtualElement) {
   $element.children.forEach(unmountTree);
 }
 
-export function mountComponent(componentInstance: ComponentInstance) {
-  renderComponent(componentInstance);
-  componentInstance.isMounted = true;
-  return componentInstance.$element;
-}
-
 function unmountComponent(componentInstance: ComponentInstance) {
   componentInstance.hooks.effects.byCursor.forEach(({ cleanup }) => {
     if (typeof cleanup === 'function') {
@@ -319,15 +345,17 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 export function getTarget($element: VirtualElement): Node | undefined {
   if (isComponentElement($element)) {
     return getTarget($element.children[0]);
-  } else {
+  } else if (!isComponentTemplateElement($element)) {
     return $element.target;
   }
+
+  return undefined;
 }
 
 export function setTarget($element: VirtualElement, target: Node) {
   if (isComponentElement($element)) {
     setTarget($element.children[0], target);
-  } else {
+  } else if (!isComponentTemplateElement($element)) {
     $element.target = target;
   }
 }
@@ -445,7 +473,8 @@ export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
 
     if (!renderedRef.current || (propsRef.current && !areEqual(propsRef.current, props))) {
       propsRef.current = props;
-      renderedRef.current = createElement(Component, props) as VirtualElementComponent;
+      const template = createElement(Component, props) as VirtualElementComponentTemplate;
+      renderedRef.current = mountComponent(template);
     }
 
     return renderedRef.current;
