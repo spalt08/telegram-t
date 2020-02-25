@@ -18,11 +18,11 @@
 
     &.animating {
       > :nth-child(1) {
-        animation: slide-out .25s ease-in-out;
+        animation: slide-out .25s ease;
       }
 
       > :nth-child(2) {
-        animation: slide-in .25s ease-in-out;
+        animation: slide-in .25s ease;
       }
     }
   }
@@ -34,22 +34,22 @@
 
     &.animating {
       > :nth-child(1) {
-        animation: slide-in-backwards .25s ease-in-out;
+        animation: slide-in-backwards .25s ease;
       }
 
       > :nth-child(2) {
-        animation: slide-out-backwards .25s ease-in-out;
+        animation: slide-out-backwards .25s ease;
       }
     }
   }
 
   &.slide-up {
     > :nth-child(1) {
-      animation: slide-up-out .25s ease-in-out;
+      animation: slide-up-out .25s ease;
     }
 
     > :nth-child(2) {
-      animation: slide-up-in .25s ease-in-out;
+      animation: slide-up-in .25s ease;
     }
   }
 }
