@@ -20,18 +20,17 @@ import {
 } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import usePrevious from '../../hooks/usePrevious';
 import useMedia from '../../hooks/useMedia';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
+import Transition from '../ui/Transition';
 import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
-import Transition from '../ui/Transition';
 
 type IProps = Pick<GlobalActions, 'openMediaViewer'> & {
   chatId?: number;
@@ -61,12 +60,12 @@ const MediaViewer: FC<IProps> = ({
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(messageId);
 
-  let isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
-  let isVideo = message ? Boolean(getMessageVideo(message)) : null;
+  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
+  const isVideo = message ? Boolean(getMessageVideo(message)) : null;
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
-  let blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
-  let blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
+  const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
+  const blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
@@ -84,27 +83,6 @@ const MediaViewer: FC<IProps> = ({
       }
     };
   }, []);
-
-  // For correct unmount animation
-  const previousProps = usePrevious({
-    message,
-    chatId,
-    messageId,
-    isPhoto,
-    isVideo,
-    blobUrlFull,
-    blobUrlPreview,
-  });
-
-  if (!isOpen && previousProps) {
-    message = previousProps.message;
-    chatId = previousProps.chatId;
-    messageId = previousProps.messageId;
-    isPhoto = previousProps.isPhoto;
-    isVideo = previousProps.isVideo;
-    blobUrlFull = previousProps.blobUrlFull;
-    blobUrlPreview = previousProps.blobUrlPreview;
-  }
 
   const videoDimensions = message && isVideo ? getVideoDimensions(getMessageVideo(message)!)! : undefined;
 
@@ -202,32 +180,34 @@ const MediaViewer: FC<IProps> = ({
   }
 
   return (
-    <AnimationFade show={isOpen}>
-      <div id="MediaViewer" onClick={handleClose}>
-        <div className="media-viewer-head" onClick={stopEvent}>
-          <SenderInfo chatId={chatId} messageId={messageId} />
-          <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
-        </div>
-        <Transition activeKey={messageId} direction={isReversed ? 'inverse' : 'auto'} name="slow-slide">
-          {renderSlide}
-        </Transition>
-        {!isFirst && (
-          <button
-            type="button"
-            className="navigation prev"
-            aria-label="Previous"
-            onClick={selectPreviousMedia}
-          />
-        )}
-        {!isLast && (
-          <button
-            type="button"
-            className="navigation next"
-            aria-label="Next"
-            onClick={selectNextMedia}
-          />
-        )}
-      </div>
+    <AnimationFade className="MediaViewer" isOpen={isOpen} onClick={handleClose}>
+      {() => (
+        <>
+          <div className="media-viewer-head" onClick={stopEvent}>
+            <SenderInfo chatId={chatId} messageId={messageId} />
+            <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
+          </div>
+          <Transition activeKey={selectedMediaMessageIndex} name="slow-slide">
+            {renderSlide}
+          </Transition>
+          {!isFirst && (
+            <button
+              type="button"
+              className="navigation prev"
+              aria-label="Previous"
+              onClick={selectPreviousMedia}
+            />
+          )}
+          {!isLast && (
+            <button
+              type="button"
+              className="navigation next"
+              aria-label="Next"
+              onClick={selectNextMedia}
+            />
+          )}
+        </>
+      )}
     </AnimationFade>
   );
 };
