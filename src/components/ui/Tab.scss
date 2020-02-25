@@ -15,13 +15,46 @@
   &:focus {
     outline: none;
   }
+
   &.active {
     pointer-events: none;
     cursor: default;
     color: var(--color-primary);
   }
 
+  &.show-indicator {
+    i {
+      opacity: 1;
+    }
+  }
+
   &:not(.active):hover {
     color: var(--color-primary-shade);
+  }
+
+  span {
+    position: relative;
+    display: inline-block;
+  }
+
+  i {
+    position: absolute;
+    bottom: calc(-.625rem - 1px);
+    left: 0;
+    opacity: 0;
+    background-color: var(--color-primary);
+    height: .25rem;
+    width: 100%;
+    border-radius: .125rem .125rem 0 0;
+    pointer-events: none;
+    padding-right: .5rem;
+    margin-left: -.25rem;
+    box-sizing: content-box;
+    transform-origin: left;
+
+    &.animate {
+      // This equals to `Transition.slide` animation params.
+      transition: transform .25s ease;
+    }
   }
 }

@@ -1,6 +1,6 @@
-import React, {
-  FC, memo,
-} from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
+
+import usePrevious from '../../hooks/usePrevious';
 
 import Tab from './Tab';
 
@@ -9,31 +9,28 @@ import './TabList.scss';
 type IProps = {
   tabs: string[];
   activeTab: number;
-  onSwitchTab: (id: number) => void;
+  onSwitchTab: (index: number) => void;
 };
 
-const TabList: FC<IProps> = ({ activeTab, tabs, onSwitchTab }) => {
-  const handleTabClick = (index: number) => {
-    onSwitchTab(index);
-  };
+const TabList: FC<IProps> = ({ tabs, activeTab, onSwitchTab }) => {
+  const previousActiveTab = usePrevious(activeTab);
 
   return (
     <div className="TabList">
-      {tabs.map((title, index: number) => {
+      {tabs.map((title, i: number) => {
         const isNotImplemented = title.startsWith('-');
 
         return (
           <Tab
             key={title}
-            id={index}
             title={isNotImplemented ? title.replace(/^-/, '') : title}
-            active={index === activeTab}
+            active={i === activeTab}
+            previousActiveTab={previousActiveTab}
             className={isNotImplemented ? 'not-implemented' : undefined}
-            onClick={isNotImplemented ? undefined : handleTabClick}
+            onClick={isNotImplemented ? undefined : () => onSwitchTab(i)}
           />
         );
       })}
-      <span className="active-tab" />
     </div>
   );
 };
