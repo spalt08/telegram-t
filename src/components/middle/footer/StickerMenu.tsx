@@ -88,17 +88,19 @@ const StickerMenu: FC<IProps> = ({
     >
       <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />
       <div className="StickerMenu-main">
-        {isActivated.current && [
-          <EmojiPicker
-            className={`picker-tab ${selectedScreen === 'emoji' ? 'active' : ''}`}
-            onEmojiSelect={onEmojiSelect}
-          />,
-          <StickerPicker
-            className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`}
-            onStickerSelect={onStickerSelect}
-          />,
-          <div className={`picker-tab ${selectedScreen === 'gif' ? 'active' : ''}`} />,
-        ]}
+        {isActivated.current && (
+          <>
+            <EmojiPicker
+              className={`picker-tab ${selectedScreen === 'emoji' ? 'active' : ''}`}
+              onEmojiSelect={onEmojiSelect}
+            />
+            <StickerPicker
+              className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`}
+              onStickerSelect={onStickerSelect}
+            />
+            <div className={`picker-tab ${selectedScreen === 'gif' ? 'active' : ''}`} />
+          </>
+        )}
       </div>
     </Menu>
   );

@@ -67,10 +67,12 @@ const UiLoader: FC<IProps> = ({
     <div id="UiLoader">
       {shouldRender && (
         <div key={page} className={['mask', 'overlay', ...transitionClassNames].join(' ')}>
-          {page === 'main' ? [
-            <div className="left" />,
-            <div className="middle" />,
-          ] : (
+          {page === 'main' ? (
+            <>
+              <div className="left" />
+              <div className="middle" />
+            </>
+          ) : (
             <div className="blank" />
           )}
         </div>
