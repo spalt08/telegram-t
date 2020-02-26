@@ -1,11 +1,23 @@
 .WebPage {
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
-  padding-left: 0.5rem;
-  border-left: 0.125rem solid var(--accent-color);
+  padding-left: .625rem;
   font-size: 0.875rem;
   line-height: 1.125rem;
   max-width: 29rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: var(--accent-color);
+    border-radius: 2px;
+  }
 
   .media-inner {
     margin: 0 !important;

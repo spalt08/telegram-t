@@ -45,7 +45,7 @@ const Sticker: FC<IProps> = ({
   const { width, height } = getStickerDimensions(sticker);
 
   let thumbClassName = 'thumbnail';
-  if (thumbDataUri && isAnimationLoaded && fullMediaClassNames.includes('open')) {
+  if (thumbDataUri && (isAnimationLoaded || isMediaLoaded) && fullMediaClassNames.includes('open')) {
     thumbClassName += ' fade-out';
   } else if (!thumbDataUri) {
     thumbClassName += ' empty';
