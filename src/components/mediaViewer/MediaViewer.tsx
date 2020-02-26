@@ -181,9 +181,7 @@ const MediaViewer: FC<IProps> = ({
 
   function renderSenderInfo() {
     return (
-      <div key={messageId}>
-        <SenderInfo chatId={chatId} messageId={messageId} />
-      </div>
+      <SenderInfo key={messageId} chatId={chatId} messageId={messageId} />
     );
   }
 

@@ -89,11 +89,6 @@
    * slide-fade
    */
   &.slide-fade {
-    > :nth-child(2) {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-
     &.animating {
       > :nth-child(1) {
         animation: slide-fade-out .45s var(--easeOutSine);
@@ -106,11 +101,6 @@
   }
 
   &.slide-fade.backwards {
-    > :nth-child(2) {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-
     &.animating {
       > :nth-child(1) {
         animation: slide-fade-in-backwards .45s var(--easeOutSine);
@@ -196,7 +186,6 @@
   100% {
     transform: translateX(1.5rem);
     opacity: 0;
-
   }
 }
 
