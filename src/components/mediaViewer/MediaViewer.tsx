@@ -179,12 +179,22 @@ const MediaViewer: FC<IProps> = ({
     );
   }
 
+  function renderSenderInfo() {
+    return (
+      <div key={messageId}>
+        <SenderInfo chatId={chatId} messageId={messageId} />
+      </div>
+    );
+  }
+
   return (
     <AnimationFade className="MediaViewer" isOpen={isOpen} onClick={handleClose}>
       {() => (
         <>
           <div className="media-viewer-head" onClick={stopEvent}>
-            <SenderInfo chatId={chatId} messageId={messageId} />
+            <Transition activeKey={messageId} name="slide-fade">
+              {renderSenderInfo}
+            </Transition>
             <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
           </div>
           <Transition activeKey={selectedMediaMessageIndex} name="slow-slide">

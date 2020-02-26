@@ -22,9 +22,13 @@
     display: flex;
     grid-area: header;
     padding: 0 1.25rem;
+
+    & > .Transition {
+      width: 100%;
+    }
   }
 
-  .Transition {
+  & > .Transition {
     grid-area: media;
     position: relative;
     justify-self: center;
