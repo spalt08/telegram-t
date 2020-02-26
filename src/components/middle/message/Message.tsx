@@ -137,6 +137,7 @@ const Message: FC<IProps> = ({
     contextMenuPosition !== null,
     isOwn,
     isFocused,
+    replyMessage,
   );
   const {
     isEmojiOnly,
@@ -358,6 +359,7 @@ function buildClassNames(
   hasContextMenu = false,
   isOwn = false,
   isFocused = false,
+  replyMessage?: ApiMessage,
 ) {
   const classNames = ['Message'];
 
@@ -385,7 +387,11 @@ function buildClassNames(
     classNames.push('was-edited');
   }
 
-  if (getMessageMediaHash(message, 'inline') || hasMessageLocalBlobUrl(message)) {
+  if (
+    getMessageMediaHash(message, 'inline')
+    || hasMessageLocalBlobUrl(message)
+    || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
+  ) {
     classNames.push('has-media');
   }
 

@@ -1,5 +1,4 @@
-import { MouseEvent } from 'react';
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../../api/types';
 
@@ -17,7 +16,7 @@ type IProps = {
   load?: boolean;
   inSharedMedia?: boolean; // TODO Extract as a separate component.
   inPreview?: boolean;
-  onMediaClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
 };
 
@@ -30,6 +29,21 @@ const WebPage: FC<IProps> = ({
   onCancelMediaTransfer,
 }) => {
   const webPage = getMessageWebPage(message);
+
+  let isSquarePhoto = false;
+  if (webPage && webPage.photo) {
+    const { width, height } = calculateMediaDimensions(message);
+    isSquarePhoto = width === height;
+  }
+
+  const handleMediaClick = useCallback(() => {
+    if (webPage && (isSquarePhoto || webPage.hasDocument)) {
+      window.open(webPage.url);
+    } else if (onMediaClick) {
+      onMediaClick();
+    }
+  }, [webPage, isSquarePhoto, onMediaClick]);
+
   let linkData: ApiWebPage | undefined = webPage;
 
   if (!webPage && inSharedMedia) {
@@ -64,34 +78,32 @@ const WebPage: FC<IProps> = ({
     ? `${description.substr(0, MAX_TEXT_LENGTH)}...`
     : description;
 
-  const classNames = ['WebPage'];
-  if (photo) {
-    const { width, height } = calculateMediaDimensions(message);
-    if (width === height) {
-      classNames.push('with-square-photo');
-    }
-  } else if (!inPreview) {
-    classNames.push('without-photo');
-  }
+  const className = [
+    'WebPage',
+    photo
+      ? (isSquarePhoto && 'with-square-photo')
+      : (!inPreview && 'without-photo'),
+  ].filter(Boolean).join(' ');
 
   return (
     <div
-      className={classNames.join(' ')}
+      className={className}
       data-initial={(siteName || displayUrl)[0]}
     >
       {photo && (
         <Photo
           message={message}
           load={load}
-          onClick={onMediaClick}
+          onClick={handleMediaClick}
           onCancelTransfer={onCancelMediaTransfer}
+          size={isSquarePhoto ? 'pictogram' : 'inline'}
         />
       )}
       <div className="WebPage-text">
         <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
           {inSharedMedia ? url.replace('mailto:', '') : siteName || displayUrl}
         </a>
-        <p className="site-title">{inSharedMedia ? title || siteName : title}</p>
+        <p className="site-title">{inSharedMedia ? title || siteName || displayUrl : title}</p>
         {truncatedDescription && <p className="site-description">{description}</p>}
       </div>
     </div>

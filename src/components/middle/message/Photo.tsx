@@ -21,6 +21,7 @@ type IProps = {
   message: ApiMessage;
   load?: boolean;
   fileTransferProgress?: number;
+  size?: 'inline' | 'pictogram';
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelTransfer?: () => void;
 };
@@ -29,6 +30,7 @@ const Photo: FC<IProps> = ({
   message,
   load,
   fileTransferProgress,
+  size = 'inline',
   onClick,
   onCancelTransfer,
 }) => {
@@ -36,7 +38,7 @@ const Photo: FC<IProps> = ({
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const localBlobUrl = load ? photo.blobUrl : undefined;
-  const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !load);
+  const mediaData = useMedia(getMessageMediaHash(message, size), !load);
   const isMediaLoaded = Boolean(mediaData);
   const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
 
