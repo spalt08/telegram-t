@@ -372,6 +372,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     title,
     description,
     photo,
+    document,
   } = media.webpage;
 
   return {
@@ -381,14 +382,16 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     siteName,
     title,
     description,
-    // TODO support video and embed
     photo: photo && photo instanceof GramJs.Photo
       ? {
         thumbnail: buildApiThumbnailFromStripped(photo.sizes),
         sizes: photo.sizes
           .filter((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize)
           .map(buildApiPhotoSize),
-      } : undefined,
+      }
+      : undefined,
+    // TODO support video and embed
+    ...(document && { hasDocument: true }),
   };
 }
 

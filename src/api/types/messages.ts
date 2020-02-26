@@ -119,6 +119,7 @@ export interface ApiWebPage {
   title?: string;
   description?: string;
   photo?: ApiPhoto;
+  hasDocument?: true;
 }
 
 export interface ApiMessageForwardInfo {
