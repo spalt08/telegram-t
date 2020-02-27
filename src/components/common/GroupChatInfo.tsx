@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiChat } from '../../api/types';
+import { ApiChat, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 import { getChatTypeString, getChatTitle, isChatSuperGroup } from '../../modules/helpers';
 import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
@@ -9,9 +9,11 @@ import { formatInteger } from '../../util/textFormat';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
+import TypingStatus from './TypingStatus';
 
 type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines'> & {
   chatId: number;
+  typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   chat: ApiChat;
   onlineCount?: number;
@@ -21,6 +23,7 @@ const GroupChatInfo: FC<IProps> = ({
   avatarSize = 'medium',
   lastSyncTime,
   chat,
+  typingStatus,
   onlineCount,
   loadFullChat,
   loadSuperGroupOnlines,
@@ -37,8 +40,21 @@ const GroupChatInfo: FC<IProps> = ({
     }
   }, [chat.id, lastSyncTime, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
 
-  const groupStatus = getGroupStatus(chat);
-  const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : '';
+
+  function renderStatusOrTyping() {
+    if (typingStatus) {
+      return <TypingStatus typingStatus={typingStatus} />;
+    }
+    const groupStatus = getGroupStatus(chat);
+    const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : '';
+
+    return (
+      <div className="status">
+        {groupStatus}
+        {onlineStatus}
+      </div>
+    );
+  }
 
   return (
     <div className="ChatInfo">
@@ -48,10 +64,7 @@ const GroupChatInfo: FC<IProps> = ({
           {getChatTitle(chat)}
           {chat.is_verified && <VerifiedIcon />}
         </div>
-        <div className="status">
-          {groupStatus}
-          {onlineStatus}
-        </div>
+        {renderStatusOrTyping()}
       </div>
     </div>
   );

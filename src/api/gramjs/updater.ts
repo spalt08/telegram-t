@@ -7,7 +7,7 @@ import {
   buildApiMessageFromShortChat, buildMessageMediaContent, buildMessageTextContent,
   resolveMessageApiChatId,
 } from './apiBuilders/messages';
-import { getApiChatIdFromMtpPeer, buildChatMembers } from './apiBuilders/chats';
+import { getApiChatIdFromMtpPeer, buildChatMembers, buildChatTypingStatus } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import { buildMessageFromUpdateShortSent } from './gramjsBuilders';
 import localDb from './localDb';
@@ -257,6 +257,20 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
       },
     });
+  } else if (
+    update instanceof GramJs.UpdateUserTyping
+    || update instanceof GramJs.UpdateChatUserTyping
+  ) {
+    const id = update instanceof GramJs.UpdateUserTyping
+      ? update.userId
+      : getApiChatIdFromMtpPeer({ chatId: update.chatId } as GramJs.PeerChat);
+
+    onUpdate({
+      '@type': 'updateChatTypingStatus',
+      id,
+      typingStatus: buildChatTypingStatus(update),
+    });
+
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {

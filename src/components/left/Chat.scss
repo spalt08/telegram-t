@@ -36,7 +36,7 @@
       max-width: 80%;
     }
 
-    h3, .last-message {
+    h3, .last-message, .typing-status {
       font-size: 1rem;
       line-height: 1.6875rem;
       margin: 0;
@@ -63,13 +63,17 @@
       margin-left: auto;
     }
 
-    .last-message {
+    .last-message, .typing-status {
       flex-grow: 1;
       color: var(--color-text-secondary);
 
       .sender-name {
         color: var(--color-text);
+      }
+    }
 
+    .last-message {
+      .sender-name {
         &::after {
           content: ': ';
         }

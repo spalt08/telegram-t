@@ -5,12 +5,29 @@ import { ApiUpdate } from '../../../api/types';
 import { updateChat } from '../../reducers';
 import { selectChat } from '../../selectors';
 
+const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
+
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
 
   switch (update['@type']) {
     case 'updateChat': {
       setGlobal(updateChat(global, update.id, update.chat));
+
+      break;
+    }
+
+    case 'updateChatTypingStatus': {
+      const { id, typingStatus } = update;
+      setGlobal(updateChat(global, id, { typingStatus }));
+
+      setTimeout(() => {
+        const newGlobal = getGlobal();
+        const chat = selectChat(newGlobal, id);
+        if (typingStatus && chat.typingStatus && chat.typingStatus.timestamp === typingStatus.timestamp) {
+          setGlobal(updateChat(newGlobal, id, { typingStatus: undefined }));
+        }
+      }, TYPING_STATUS_CLEAR_DELAY);
 
       break;
     }

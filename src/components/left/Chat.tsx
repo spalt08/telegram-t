@@ -24,6 +24,7 @@ import useEnsureMessage from '../../hooks/useEnsureMessage';
 import Avatar from '../common/Avatar';
 import RippleEffect from '../ui/RippleEffect';
 import VerifiedIcon from '../common/VerifiedIcon';
+import TypingStatus from '../common/TypingStatus';
 import LastMessageMeta from './LastMessageMeta';
 import Badge from './Badge';
 
@@ -52,12 +53,16 @@ const Chat: FC<IProps> = ({
   isUiReady,
   openChat,
 }) => {
-  const { last_message } = chat;
+  const { last_message, typingStatus } = chat;
   const isAction = last_message && isActionMessage(last_message);
 
   useEnsureMessage(chat.id, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
 
-  function renderLastMessage() {
+  function renderLastMessageOrTyping() {
+    if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
+      return <TypingStatus typingStatus={typingStatus} />;
+    }
+
     if (!last_message) {
       return null;
     }
@@ -112,7 +117,7 @@ const Chat: FC<IProps> = ({
           )}
         </div>
         <div className="subtitle">
-          {renderLastMessage()}
+          {renderLastMessageOrTyping()}
           <Badge chat={chat} />
         </div>
       </div>
@@ -153,6 +158,7 @@ export default memo(withGlobal(
     }
 
     const { last_message } = chat;
+
     if (!last_message) {
       return {};
     }
@@ -164,7 +170,7 @@ export default memo(withGlobal(
     const lastMessageSender = sender_user_id && selectUser(global, sender_user_id);
     const lastMessageAction = getMessageAction(last_message);
     const actionTargetMessage = lastMessageAction && reply_to_message_id
-      ? selectChatMessage(global, chat_id, reply_to_message_id)
+      ? selectChatMessage(global, chat_id!, reply_to_message_id)
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);

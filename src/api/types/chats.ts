@@ -27,6 +27,14 @@ export interface ApiChat {
   full_info?: ApiChatFullInfo;
   // Obtained from GetOnlines
   online_count?: number;
+  // Obtained with UpdateUserTyping or UpdateChatUserTyping updates
+  typingStatus?: ApiTypingStatus;
+}
+
+export interface ApiTypingStatus {
+  userId?: number;
+  action: string;
+  timestamp: number;
 }
 
 export interface ApiChatFullInfo {
