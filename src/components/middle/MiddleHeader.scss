@@ -32,10 +32,14 @@
     }
   }
 
-  .status {
+  .status, .typing-status {
     font-size: 0.875rem;
     line-height: 1.25rem;
-    color: #868e96;
+    margin: 0;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 
     &.online {
       color: var(--color-primary);

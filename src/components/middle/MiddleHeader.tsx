@@ -2,7 +2,12 @@ import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
+import {
+  ApiMessage,
+  ApiChat,
+  ApiUser,
+  ApiTypingStatus,
+} from '../../api/types';
 import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
   selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions, selectChatMessageViewportIds,
@@ -23,6 +28,7 @@ type IProps = {
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
   isPinnedMessageInViewport?: boolean;
+  typingStatus?: ApiTypingStatus;
 } & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageSearch' | 'pinMessage' | 'focusMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
@@ -31,6 +37,7 @@ const MiddleHeader: FC<IProps> = ({
   pinnedMessage,
   canUnpin,
   isPinnedMessageInViewport,
+  typingStatus,
   openChatWithInfo,
   openMessageSearch,
   pinMessage,
@@ -66,9 +73,9 @@ const MiddleHeader: FC<IProps> = ({
     <div className="MiddleHeader">
       <div onClick={handleHeaderClick}>
         {isChatPrivate(chatId) ? (
-          <PrivateChatInfo userId={chatId} />
+          <PrivateChatInfo userId={chatId} typingStatus={typingStatus} />
         ) : (
-          <GroupChatInfo chatId={chatId} />
+          <GroupChatInfo chatId={chatId} typingStatus={typingStatus} />
         )}
       </div>
 
@@ -101,6 +108,7 @@ export default withGlobal(
     }
 
     if (target && target.full_info) {
+      const { typingStatus } = chat;
       const { pinned_message_id } = target.full_info;
       const pinnedMessage = pinned_message_id && selectChatMessage(global, chatId, pinned_message_id);
 
@@ -114,10 +122,12 @@ export default withGlobal(
           pinnedMessage,
           canUnpin: canPin,
           isPinnedMessageInViewport,
+          typingStatus,
         };
       } else {
         return {
           pinnedMessageId: pinned_message_id,
+          typingStatus,
         };
       }
     }

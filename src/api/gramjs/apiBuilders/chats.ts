@@ -99,3 +99,40 @@ export function buildChatInviteLink(exportedInvite: GramJs.TypeExportedChatInvit
     ? exportedInvite.link
     : undefined;
 }
+
+export function buildChatTypingStatus(update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping) {
+  let action: string = '';
+  if (update.action instanceof GramJs.SendMessageCancelAction) {
+    return undefined;
+  } else if (update.action instanceof GramJs.SendMessageTypingAction) {
+    action = 'typing';
+  } else if (update.action instanceof GramJs.SendMessageRecordVideoAction) {
+    action = 'recording a video';
+  } else if (update.action instanceof GramJs.SendMessageUploadVideoAction) {
+    action = 'uploading a video';
+  } else if (update.action instanceof GramJs.SendMessageRecordAudioAction) {
+    action = 'recording a voice message';
+  } else if (update.action instanceof GramJs.SendMessageUploadAudioAction) {
+    action = 'uploading a voice message';
+  } else if (update.action instanceof GramJs.SendMessageUploadPhotoAction) {
+    action = 'uploading a photo';
+  } else if (update.action instanceof GramJs.SendMessageUploadDocumentAction) {
+    action = 'uploading a file';
+  } else if (update.action instanceof GramJs.SendMessageGeoLocationAction) {
+    action = 'selecting a location to share';
+  } else if (update.action instanceof GramJs.SendMessageChooseContactAction) {
+    action = 'selecting a contact to share';
+  } else if (update.action instanceof GramJs.SendMessageGamePlayAction) {
+    action = 'playing a game';
+  } else if (update.action instanceof GramJs.SendMessageRecordRoundAction) {
+    action = 'recording a round video';
+  } else if (update.action instanceof GramJs.SendMessageUploadRoundAction) {
+    action = 'uploading a round video';
+  }
+
+  return {
+    action,
+    ...(update instanceof GramJs.UpdateChatUserTyping && { userId: update.userId }),
+    timestamp: Date.now(),
+  };
+}

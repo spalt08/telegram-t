@@ -1,0 +1,27 @@
+.typing-status {
+  &::after {
+    display: inline-block;
+    content: '';
+    width: 1rem;
+    animation: typing-animation 1s linear infinite
+  }
+
+  .sender-name {
+    &::after {
+      content: ' is ';
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+@keyframes typing-animation {
+  0% {
+    content: '.';
+  }
+  33% {
+    content: '..';
+  }
+  66% {
+    content: '...';
+  }
+}
