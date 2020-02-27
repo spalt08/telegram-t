@@ -54,7 +54,6 @@ const WebPage: FC<IProps> = ({
 
       linkData = {
         siteName: domain.replace(/^www./, ''),
-        // eslint-disable-next-line no-nested-ternary
         url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
         description: messageText !== url ? messageText : undefined,
       } as ApiWebPage;

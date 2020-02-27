@@ -84,7 +84,6 @@ const Attachment: FC<IProps> = ({
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachment" onClick={onClear}>
           <i className="icon-close" />
         </Button>
-        {/* eslint-disable-next-line no-nested-ternary */}
         <div className="caption">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
         <Button color="primary" size="smaller" className="send" onClick={sendAttachment}>Send</Button>
       </div>

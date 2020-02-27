@@ -91,7 +91,6 @@ const RightColumnInfo: FC<IProps> = ({
         <Transition activeKey={activeTab} name="slide">
           {() => (
             <div className={`content ${mediaType}-list`}>
-              {/* eslint-disable no-nested-ternary */}
               {mediaType === 'media' ? (
                 messageIds.map((id: number) => (
                   <Media
@@ -123,7 +122,6 @@ const RightColumnInfo: FC<IProps> = ({
                   />
                 ))
               ) : null}
-              {/* eslint-enable no-nested-ternary */}
             </div>
           )}
         </Transition>

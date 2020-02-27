@@ -28,7 +28,6 @@ const ChatList: FC<IProps> = ({
 
   return (
     <InfiniteScroll className="ChatList custom-scroll" items={loadedIds} onLoadMore={loadMoreChats}>
-      {/* eslint-disable-next-line no-nested-ternary */}
       {loadedIds && loadedIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map(({ id }) => (

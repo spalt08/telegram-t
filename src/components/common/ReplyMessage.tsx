@@ -39,7 +39,6 @@ const ReplyMessage: FC<IProps> = ({
       <div className="reply-text">
         <div className="sender-name">{(sender && getUserFullName(sender)) || NBSP}</div>
         <p>
-          {/* eslint-disable-next-line no-nested-ternary */}
           {!message ? (
             NBSP
           ) : isActionMessage(message) ? (

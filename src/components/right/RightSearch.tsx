@@ -94,7 +94,6 @@ const RightSearch: FC<IProps> = ({
   return (
     <InfiniteScroll className="RightSearch custom-scroll" items={foundResults} onLoadMore={searchMessages}>
       <p className="helper-text">
-        {/* eslint-disable-next-line no-nested-ternary */}
         {!query ? (
           'Search messages'
         ) : totalCount === 1 ? (

@@ -28,6 +28,7 @@
     "no-param-reassign": "off",
     "no-prototype-builtins": "off",
     "no-await-in-loop": "off",
+    "no-nested-ternary": "off",
     "import/no-extraneous-dependencies": "off",
     "import/prefer-default-export": "off",
     "import/named": "off",

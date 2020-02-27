@@ -10,7 +10,6 @@ function getAvailableWidth(
   isForwarded?: boolean,
   isWebPagePhoto?: boolean,
 ) {
-  // eslint-disable-next-line no-nested-ternary
   const extraPadding = isForwarded ? 1.75 : isWebPagePhoto ? 1.625 : 0;
   if (fromOwnMessage) {
     return (30 - extraPadding) * REM;
