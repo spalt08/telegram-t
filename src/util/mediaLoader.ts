@@ -11,6 +11,8 @@ export enum Type {
   Lottie,
 }
 
+const CACHEABLE_SIZE_BYTES = 512000;
+
 const asCacheApiType = {
   [Type.DataUri]: cacheApi.Type.Text,
   [Type.BlobUrl]: cacheApi.Type.Blob,
@@ -65,8 +67,9 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
 
   const { mimeType, data } = remote;
   const mediaData = await parseMedia(data, mediaType, mimeType);
+  const canCache = mediaType !== Type.BlobUrl || (mediaData as Blob).size <= CACHEABLE_SIZE_BYTES;
 
-  if (!MEDIA_CACHE_DISABLED) {
+  if (!MEDIA_CACHE_DISABLED && canCache) {
     cacheApi.save(MEDIA_CACHE_NAME, url, mediaData);
   }
 
