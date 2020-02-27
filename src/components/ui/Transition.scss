@@ -89,25 +89,45 @@
    * slide-fade
    */
   &.slide-fade {
+    > :nth-child(1) {
+      transform-origin: left;
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    > :nth-child(2) {
+      transform-origin: left;
+      transform: translateX(1.5rem);
+      opacity: 0;
+    }
     &.animating {
       > :nth-child(1) {
-        animation: slide-fade-out .45s var(--easeOutSine);
+        animation: slide-fade-out-opacity .35s ease-out, slide-fade-out-move .4s;
       }
 
       > :nth-child(2) {
-        animation: slide-fade-in .45s var(--easeInSine);
+        animation: slide-fade-in-opacity .35s var(--easeInSine),  slide-fade-in-move .4s;
       }
     }
   }
 
   &.slide-fade.backwards {
+    > :nth-child(1) {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    > :nth-child(2) {
+      transform: translateX(-1.5rem);
+      opacity: 0;
+    }
     &.animating {
       > :nth-child(1) {
-        animation: slide-fade-in-backwards .45s var(--easeOutSine);
+        animation: slide-fade-in-backwards-opacity .35s ease-out, slide-fade-in-backwards-move .4s;
       }
 
       > :nth-child(2) {
-        animation: slide-fade-out-backwards .45s var(--easeInSine);
+        animation: slide-fade-out-backwards-opacity .35s var(--easeOutSine),  slide-fade-out-backwards-move .4s;
       }
     }
   }
@@ -155,47 +175,70 @@
 /*
  * slide-fade
  */
-@keyframes slide-fade-in {
+@keyframes slide-fade-in-move {
   0% {
     transform: translateX(1.5rem);
-    opacity: 0;
   }
   100% {
     transform: translateX(0);
+  }
+}
+@keyframes slide-fade-in-opacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
     opacity: 1;
   }
 }
 
-@keyframes slide-fade-out {
+@keyframes slide-fade-out-move {
   0% {
     transform: translateX(0);
-    opacity: 1;
   }
   100% {
     transform: translateX(-1.5rem);
-    opacity: 0;
-
   }
 }
-
-@keyframes slide-fade-in-backwards {
+@keyframes slide-fade-out-opacity {
   0% {
-    transform: translateX(0);
     opacity: 1;
   }
   100% {
-    transform: translateX(1.5rem);
     opacity: 0;
   }
 }
 
-@keyframes slide-fade-out-backwards {
+@keyframes slide-fade-in-backwards-move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(1.5rem);
+  }
+}
+@keyframes slide-fade-in-backwards-opacity {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-fade-out-backwards-move {
   0% {
     transform: translateX(-1.5rem);
-    opacity: 0;
   }
   100% {
     transform: translateX(0);
+  }
+}
+@keyframes slide-fade-out-backwards-opacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
     opacity: 1;
   }
 }
