@@ -33,9 +33,9 @@ const GifButton: FC<IProps> = ({
   const handleClick = useCallback(() => {
     onGifSelect({
       ...gif,
-      localMediaHash,
+      blobUrl: mediaData,
     });
-  }, [onGifSelect, gif, localMediaHash]);
+  }, [onGifSelect, gif, mediaData]);
 
   const handleMouseEnter = useCallback(() => {
     if (mediaData) {
