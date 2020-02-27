@@ -25,10 +25,6 @@
     animation-timing-function: linear;
   }
 
-  > span {
-    font-size: x-small;
-  }
-
   &.with-background {
     &::before {
       content: '';
@@ -47,10 +43,6 @@
       background-image: url('../../assets/spinner-white.svg');
     }
 
-    > span {
-      color: #ffffff;
-    }
-
     &.with-background {
       > div {
         background-image: url('../../assets/spinner-white-thin.svg');
@@ -62,19 +54,11 @@
     > div {
       background-image: url('../../assets/spinner-blue.svg');
     }
-
-    > span {
-      color: #4ea4f6;
-    }
   }
 
   &.black {
     > div {
       background-image: url('../../assets/spinner-black.svg');
-    }
-
-    > span {
-      color: #000000;
     }
   }
 }
