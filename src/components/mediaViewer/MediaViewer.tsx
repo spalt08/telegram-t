@@ -190,7 +190,7 @@ const MediaViewer: FC<IProps> = ({
       {() => (
         <>
           <div className="media-viewer-head" onClick={stopEvent}>
-            <Transition activeKey={messageId} name="slide-fade">
+            <Transition activeKey={messageId} direction={isReversed ? 'inverse' : 'auto'} name="slide-fade">
               {renderSenderInfo}
             </Transition>
             <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
