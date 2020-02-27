@@ -20,11 +20,11 @@ import {
 } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import usePrevious from '../../hooks/usePrevious';
 import useMedia from '../../hooks/useMedia';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
+import Transition from '../ui/Transition';
 import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -60,13 +60,12 @@ const MediaViewer: FC<IProps> = ({
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(messageId);
 
-  let { text: messageText } = message ? buildMessageContent(message) : { text: undefined };
-  let isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
-  let isVideo = message ? Boolean(getMessageVideo(message)) : null;
+  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
+  const isVideo = message ? Boolean(getMessageVideo(message)) : null;
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
-  let blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
-  let blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
+  const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
+  const blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
@@ -85,30 +84,6 @@ const MediaViewer: FC<IProps> = ({
     };
   }, []);
 
-  // For correct unmount animation
-  const previousProps = usePrevious({
-    message,
-    chatId,
-    messageId,
-    messageText,
-    isPhoto,
-    isVideo,
-    blobUrlFull,
-    blobUrlPreview,
-  });
-
-  if (!isOpen && previousProps) {
-    message = previousProps.message;
-    chatId = previousProps.chatId;
-    messageId = previousProps.messageId;
-    messageText = previousProps.messageText;
-    isPhoto = previousProps.isPhoto;
-    isVideo = previousProps.isVideo;
-    blobUrlFull = previousProps.blobUrlFull;
-    blobUrlPreview = previousProps.blobUrlPreview;
-  }
-
-  const hasFooter = Boolean(messageText);
   const videoDimensions = message && isVideo ? getVideoDimensions(getMessageVideo(message)!)! : undefined;
 
   const getMessageId = (fromId: number, direction: number): number => {
@@ -183,20 +158,46 @@ const MediaViewer: FC<IProps> = ({
     });
   }
 
+  function renderSlide() {
+    if (!message) {
+      return null;
+    }
+
+    const messageText = buildMessageContent(message).text;
+    const hasFooter = Boolean(messageText);
+
+    return (
+      <div key={messageId} className={`media-viewer-content ${hasFooter ? 'footer' : ''}`}>
+        {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+        {isVideo && renderVideo(
+          blobUrlFull,
+          blobUrlPreview || thumbDataUri,
+          message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+        )}
+        {messageText && <MediaViewerFooter text={messageText} />}
+      </div>
+    );
+  }
+
+  function renderSenderInfo() {
+    return (
+      <SenderInfo key={messageId} chatId={chatId} messageId={messageId} />
+    );
+  }
+
   return (
-    <AnimationFade show={isOpen}>
-      <div id="MediaViewer" onClick={handleClose} className={`${messageText ? 'footer' : ''}`}>
-        <div className="media-viewer-head" onClick={stopEvent}>
-          <SenderInfo chatId={chatId} messageId={messageId} />
-          <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
-        </div>
-        <div className="media-viewer-content">
-          {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
-          {isVideo && renderVideo(
-            blobUrlFull,
-            blobUrlPreview || thumbDataUri,
-            message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
-          )}
+    <AnimationFade className="MediaViewer" isOpen={isOpen} onClick={handleClose}>
+      {() => (
+        <>
+          <div className="media-viewer-head" onClick={stopEvent}>
+            <Transition activeKey={messageId} direction={isReversed ? 'inverse' : 'auto'} name="slide-fade">
+              {renderSenderInfo}
+            </Transition>
+            <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
+          </div>
+          <Transition activeKey={selectedMediaMessageIndex} name="slow-slide">
+            {renderSlide}
+          </Transition>
           {!isFirst && (
             <button
               type="button"
@@ -213,9 +214,8 @@ const MediaViewer: FC<IProps> = ({
               onClick={selectNextMedia}
             />
           )}
-        </div>
-        {hasFooter && <MediaViewerFooter text={messageText!} />}
-      </div>
+        </>
+      )}
     </AnimationFade>
   );
 };
