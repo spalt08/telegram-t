@@ -40,13 +40,16 @@ export interface ApiStickerSet {
 }
 
 export interface ApiVideo {
+  id: string;
   duration: number;
   width?: number;
   height?: number;
   supportsStreaming?: boolean;
   isRound?: boolean;
+  isGif?: boolean;
   thumbnail?: ApiThumbnail;
   blobUrl?: string;
+  localMediaHash?: string;
 }
 
 export interface ApiAudio {

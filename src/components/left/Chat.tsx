@@ -75,7 +75,7 @@ const Chat: FC<IProps> = ({
             lastMessageSender,
             actionTargetUser,
             actionTargetMessage,
-            { maxTextLength: 16, plain: true },
+            { plain: true },
           )}
         </p>
       );

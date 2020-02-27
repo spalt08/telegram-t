@@ -146,7 +146,7 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.duration <= MAX_INLINE_VIDEO_DURATION;
+  return video.isGif || video.duration <= MAX_INLINE_VIDEO_DURATION;
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {

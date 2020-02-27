@@ -6,9 +6,9 @@ import {
   updateStickerSet,
 } from '../../reducers';
 
-addReducer('loadStickers', (global) => {
+addReducer('loadStickerSets', (global) => {
   const { hash } = global.stickers.all || {};
-  void loadStickers(hash);
+  void loadStickerSets(hash);
 });
 
 addReducer('loadRecentStickers', (global) => {
@@ -16,17 +16,22 @@ addReducer('loadRecentStickers', (global) => {
   void loadRecentStickers(hash);
 });
 
-addReducer('loadStickerSet', (global, actions, payload) => {
-  const { id } = payload!;
-  const set = global.stickers.all.byId[id];
+addReducer('loadStickers', (global, actions, payload) => {
+  const { stickerSetId } = payload!;
+  const set = global.stickers.all.byId[stickerSetId];
   if (!set) {
     return;
   }
-  void loadStickerSet(id, set.accessHash);
+  void loadStickers(stickerSetId, set.accessHash);
 });
 
-async function loadStickers(hash = 0) {
-  const allStickers = await callApi('fetchStickers', { hash });
+addReducer('loadSavedGifs', (global) => {
+  const { hash } = global.savedGifs || {};
+  void loadSavedGifs(hash);
+});
+
+async function loadStickerSets(hash = 0) {
+  const allStickers = await callApi('fetchStickerSets', { hash });
   if (!allStickers) {
     return;
   }
@@ -55,8 +60,8 @@ async function loadRecentStickers(hash = 0) {
   });
 }
 
-async function loadStickerSet(id: string, accessHash: string) {
-  const stickerSet = await callApi('fetchStickerSet', { id, accessHash });
+async function loadStickers(stickerSetId: string, accessHash: string) {
+  const stickerSet = await callApi('fetchStickers', { stickerSetId, accessHash });
   if (!stickerSet) {
     return;
   }
@@ -68,4 +73,16 @@ async function loadStickerSet(id: string, accessHash: string) {
     set,
     stickers,
   ));
+}
+
+async function loadSavedGifs(hash = 0) {
+  const savedGifs = await callApi('fetchSavedGifs', { hash });
+  if (!savedGifs) {
+    return;
+  }
+
+  setGlobal({
+    ...getGlobal(),
+    savedGifs,
+  });
 }

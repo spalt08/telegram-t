@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
-import { ApiSticker } from '../../types';
+import { ApiSticker, ApiVideo } from '../../types';
 import localDb from '../localDb';
 
 const WAVEFORM_LENGTH = 63;
@@ -79,8 +79,8 @@ export function buildInputStickerSet(id: string, accessHash: string) {
   });
 }
 
-export function buildInputMediaDocumentFromSticker(sticker: ApiSticker) {
-  const document = localDb.documents[sticker.id];
+export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+  const document = localDb.documents[media.id];
 
   if (!document) {
     return undefined;

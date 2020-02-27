@@ -116,7 +116,7 @@ const Video: FC<IProps> = ({
       {isTransferring ? (
         <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
       ) : (
-        <div className="message-media-duration">{formatMediaDuration(video.duration)}</div>
+        <div className="message-media-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</div>
       )}
     </div>
   );

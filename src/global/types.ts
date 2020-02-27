@@ -8,6 +8,7 @@ import {
   ApiSticker,
   ApiMessageSearchMediaType,
   ApiWebPage,
+  ApiVideo,
 } from '../api/types';
 
 export type GlobalState = {
@@ -70,6 +71,11 @@ export type GlobalState = {
     };
   };
 
+  savedGifs: {
+    hash?: number;
+    gifs: ApiVideo[];
+  };
+
   messageSearch: {
     isTextSearch: boolean;
     query?: string;
@@ -107,7 +113,7 @@ export type ActionTypes = (
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' |
   // misc
   'openMediaViewer' |
-  'loadStickers' | 'loadRecentStickers' | 'loadStickerSet' |
+  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |
   'loadWebPagePreview' | 'clearWebPagePreview'
 );
 

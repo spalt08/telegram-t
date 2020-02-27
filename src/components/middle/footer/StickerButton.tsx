@@ -17,16 +17,16 @@ interface IProps {
   top?: number;
   left?: number;
   title?: string;
-  setButton?: boolean;
-  onStickerSelect: (sticker: ApiSticker) => void;
+  className?: string;
+  onClick: (sticker: ApiSticker) => void;
 }
 
 const StickerButton: FC<IProps> = ({
-  sticker, top, left, title, setButton, onStickerSelect,
+  sticker, top, left, title, className, onClick,
 }) => {
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const [shouldPlay, setShouldPlay] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
-  const [playAnimation, setPlayAnimation] = useState(false);
 
   const isAnimated = sticker.is_animated;
 
@@ -40,23 +40,22 @@ const StickerButton: FC<IProps> = ({
   const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
 
   const handleMouseEnter = useCallback(() => {
-    if (isAnimated) {
-      setPlayAnimation(true);
+    if (shouldPlay) {
+      setShouldPlay(false);
+      requestAnimationFrame(() => {
+        setShouldPlay(true);
+      });
+    } else {
+      setShouldPlay(true);
     }
-  }, [isAnimated]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (isAnimated) {
-      setPlayAnimation(false);
-    }
-  }, [isAnimated]);
+  }, [shouldPlay]);
 
   const handleClick = useCallback(
-    () => onStickerSelect({
+    () => onClick({
       ...sticker,
       localMediaHash,
     }),
-    [onStickerSelect, sticker, localMediaHash],
+    [onClick, sticker, localMediaHash],
   );
 
   const {
@@ -70,8 +69,8 @@ const StickerButton: FC<IProps> = ({
   if (isAbsolutePositioned) {
     classNames.push('absolute-position');
   }
-  if (setButton) {
-    classNames.push('set-button');
+  if (className) {
+    classNames.push(className);
   }
 
   return (
@@ -82,8 +81,7 @@ const StickerButton: FC<IProps> = ({
       title={title || (sticker && sticker.emoji)}
       // @ts-ignore teact feature
       style={style}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={isAnimated ? handleMouseEnter : undefined}
     >
       {(!isAnimated && shouldFullMediaRender) && (
         <img
@@ -95,7 +93,8 @@ const StickerButton: FC<IProps> = ({
       {isAnimated && isMediaLoaded && (
         <AnimatedSticker
           animationData={mediaData as AnyLiteral}
-          play={playAnimation}
+          play={shouldPlay}
+          noLoop
           className={['full-media', ...fullMediaClassNames].join(' ')}
           onLoad={handleAnimationLoad}
         />

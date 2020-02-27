@@ -90,11 +90,11 @@ div[role="button"] {
 }
 
 .overlay {
-  opacity: 0;
+  opacity: 1;
   transition: opacity .15s ease;
 
-  &.open {
-    opacity: 1;
+  &:not(.open) {
+    opacity: 0;
   }
 
   &:not(.shown) {

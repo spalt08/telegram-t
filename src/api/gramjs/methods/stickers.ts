@@ -1,15 +1,16 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiSticker } from '../../types';
+import { ApiSticker, ApiVideo } from '../../types';
 
 import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet } from '../apiBuilders/stickers';
 import { buildInputStickerSet } from '../gramjsBuilders';
 import localDb from '../localDb';
+import { buildVideoFromDocument } from '../apiBuilders/messages';
 
 export function init() {
 }
 
-export async function fetchStickers({ hash }: { hash: number }) {
+export async function fetchStickerSets({ hash }: { hash: number }) {
   const allStickers = await invokeRequest(new GramJs.messages.GetAllStickers({ hash }));
 
   if (!allStickers || allStickers instanceof GramJs.messages.AllStickersNotModified) {
@@ -47,9 +48,9 @@ export async function fetchRecentStickers({ hash }: { hash: number }) {
   };
 }
 
-export async function fetchStickerSet({ id, accessHash }: { id: string; accessHash: string }) {
+export async function fetchStickers({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {
   const result = await invokeRequest(new GramJs.messages.GetStickerSet({
-    stickerset: buildInputStickerSet(id, accessHash),
+    stickerset: buildInputStickerSet(stickerSetId, accessHash),
   }));
 
   if (!result) {
@@ -71,5 +72,29 @@ export async function fetchStickerSet({ id, accessHash }: { id: string; accessHa
   return {
     set: buildStickerSet(result.set),
     stickers,
+  };
+}
+
+export async function fetchSavedGifs({ hash }: { hash: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetSavedGifs({ hash }));
+
+  if (!result || result instanceof GramJs.messages.SavedGifsNotModified) {
+    return undefined;
+  }
+
+  const gifs: ApiVideo[] = [];
+  result.gifs.forEach((document) => {
+    if (document instanceof GramJs.Document) {
+      const video = buildVideoFromDocument(document);
+      if (video) {
+        gifs.push(video);
+        localDb.documents[String(document.id)] = document;
+      }
+    }
+  });
+
+  return {
+    hash: result.hash,
+    gifs,
   };
 }

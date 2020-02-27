@@ -7,6 +7,7 @@ import {
   ApiMessageSearchMediaType,
   ApiUser,
   ApiSticker,
+  ApiVideo,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
@@ -22,7 +23,7 @@ import {
   buildInputPeer,
   generateRandomBigInt,
   getEntityTypeById,
-  buildInputMediaDocumentFromSticker,
+  buildInputMediaDocument,
   reduceWaveform,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
@@ -111,6 +112,7 @@ export async function sendMessage({
   replyingTo,
   attachment,
   sticker,
+  gif,
 }: {
   chat: ApiChat;
   currentUserId: number;
@@ -118,8 +120,9 @@ export async function sendMessage({
   replyingTo?: number;
   attachment?: ApiAttachment;
   sticker?: ApiSticker;
+  gif?: ApiVideo;
 }) {
-  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment, sticker);
+  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment, sticker, gif);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -134,7 +137,9 @@ export async function sendMessage({
   if (attachment) {
     media = await uploadMedia(localMessage, attachment);
   } else if (sticker) {
-    media = buildInputMediaDocumentFromSticker(sticker);
+    media = buildInputMediaDocument(sticker);
+  } else if (gif) {
+    media = buildInputMediaDocument(gif);
   }
 
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;

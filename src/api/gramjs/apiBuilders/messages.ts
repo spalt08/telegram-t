@@ -23,6 +23,8 @@ import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
 import { reduceWaveform } from '../gramjsBuilders';
 
+const LOCAL_VIDEO_TEMP_ID = 'temp';
+
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
   const chatId = resolveMessageApiChatId(mtpMessage);
   if (
@@ -208,21 +210,20 @@ function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   };
 }
 
-function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
-  if (
-    !(media instanceof GramJs.MessageMediaDocument)
-    || !(media.document instanceof GramJs.Document)
-    || !media.document.mimeType.startsWith('video')
-  ) {
+export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | undefined {
+  if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
 
-  const videoAttr = media.document.attributes
+  const videoAttr = document.attributes
     .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
 
   if (!videoAttr) {
     return undefined;
   }
+
+  const gifAttr = document.attributes
+    .find((a: any): a is GramJs.DocumentAttributeAnimated => a instanceof GramJs.DocumentAttributeAnimated);
 
   const {
     duration,
@@ -233,13 +234,27 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   } = videoAttr;
 
   return {
+    id: String(document.id),
     duration,
     width,
     height,
     supportsStreaming,
     isRound,
-    thumbnail: buildApiThumbnailFromStripped(media.document.thumbs),
+    isGif: Boolean(gifAttr),
+    thumbnail: buildApiThumbnailFromStripped(document.thumbs),
   };
+}
+
+function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
+  if (
+    !(media instanceof GramJs.MessageMediaDocument)
+    || !(media.document instanceof GramJs.Document)
+    || !media.document.mimeType.startsWith('video')
+  ) {
+    return undefined;
+  }
+
+  return buildVideoFromDocument(media.document);
 }
 
 
@@ -458,6 +473,7 @@ export function buildLocalMessage(
   replyingTo?: number,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
+  gif?: ApiVideo,
 ): ApiMessage {
   const localId = localMessageCounter--;
 
@@ -473,6 +489,7 @@ export function buildLocalMessage(
       }),
       ...(attachment && buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
+      ...(gif && { video: gif }),
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,
@@ -507,6 +524,7 @@ function buildUploadingMedia(
     } else {
       return {
         video: {
+          id: LOCAL_VIDEO_TEMP_ID,
           duration: 0,
           width,
           height,
