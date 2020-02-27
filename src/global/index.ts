@@ -42,6 +42,10 @@ const INITIAL_STATE: GlobalState = {
     },
   },
 
+  savedGifs: {
+    gifs: [],
+  },
+
   messageSearch: {
     isTextSearch: false,
   },
@@ -97,6 +101,9 @@ function updateCache(global: GlobalState) {
       recent: {
         stickers: [],
       },
+    },
+    savedGifs: {
+      gifs: [],
     },
     messageSearch: { isTextSearch: false },
     mediaViewer: {},

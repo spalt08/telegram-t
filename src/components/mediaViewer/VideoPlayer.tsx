@@ -4,13 +4,14 @@ import './VideoPlayer.scss';
 
 type IProps = {
   url: string;
+  isGif?: boolean;
 };
 
 function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
   e.stopPropagation();
 }
 
-const VideoPlayer: FC<IProps> = ({ url }) => {
+const VideoPlayer: FC<IProps> = ({ url, isGif }) => {
   const [hasSize, setHasSize] = useState(false);
 
   function handleLoadedMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {
@@ -28,7 +29,8 @@ const VideoPlayer: FC<IProps> = ({ url }) => {
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         autoPlay
-        controls
+        controls={!isGif}
+        loop={isGif}
         // @ts-ignore
         style={style}
         id="media-viewer-video"

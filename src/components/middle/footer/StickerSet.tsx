@@ -1,41 +1,35 @@
-import React, {
-  FC, memo, useEffect, useMemo,
-} from '../../../lib/teact/teact';
+import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
 
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
 import useShowTransition from '../../../hooks/useShowTransition';
+import buildClassName from '../../../util/buildClassName';
 
 import StickerButton from './StickerButton';
-import { throttle } from '../../../util/schedulers';
 
 type IProps = {
   set: ApiStickerSet;
-  shouldLoadStickers: boolean;
+  loadAndShow: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
-} & Pick<GlobalActions, 'loadStickerSet'>;
+} & Pick<GlobalActions, 'loadStickers'>;
 
 const STICKER_ROW_SIZE = 5;
 const STICKER_SIZE = 80; // px
 
 const StickerSet: FC<IProps> = ({
-  set, shouldLoadStickers, onStickerSelect, loadStickerSet,
+  set, loadAndShow, loadStickers, onStickerSelect,
 }) => {
-  const setHeight = Math.ceil(set.count / STICKER_ROW_SIZE) * STICKER_SIZE;
-
-  const { transitionClassNames } = useShowTransition(Boolean(set.stickers.length));
-
-  const loadStickersThrottled = useMemo(() => {
-    const throttled = throttle(loadStickerSet, 60000, true);
-    return () => { throttled({ id: set.id }); };
-  }, [set, loadStickerSet]);
+  const areLoaded = Boolean(set.stickers.length);
+  const stickerSetHeight = Math.ceil(set.count / STICKER_ROW_SIZE) * STICKER_SIZE;
 
   useEffect(() => {
-    if (shouldLoadStickers && set.id !== 'recent' && !set.stickers.length) {
-      loadStickersThrottled();
+    if (!areLoaded && loadAndShow) {
+      loadStickers({ stickerSetId: set.id });
     }
-  }, [shouldLoadStickers, set, loadStickersThrottled]);
+  }, [areLoaded, loadAndShow, loadStickers, set.id]);
+
+  const { transitionClassNames } = useShowTransition(areLoaded && loadAndShow);
 
   return (
     <div
@@ -45,9 +39,9 @@ const StickerSet: FC<IProps> = ({
     >
       <p className="symbol-set-name">{set.title}</p>
       <div
-        className={['symbol-set-container', ...transitionClassNames].join(' ')}
+        className={buildClassName('symbol-set-container overlay', transitionClassNames)}
         // @ts-ignore teact feature
-        style={`height: ${setHeight}px`}
+        style={`height: ${stickerSetHeight}px`}
       >
         {set.stickers.map((sticker, index) => (
           <StickerButton
@@ -55,7 +49,7 @@ const StickerSet: FC<IProps> = ({
             sticker={sticker}
             top={Math.floor(index / STICKER_ROW_SIZE) * STICKER_SIZE}
             left={(index % STICKER_ROW_SIZE) * STICKER_SIZE}
-            onStickerSelect={onStickerSelect}
+            onClick={onStickerSelect}
           />
         ))}
       </div>

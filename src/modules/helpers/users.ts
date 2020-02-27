@@ -25,7 +25,7 @@ export function getUserFirstName(user?: ApiUser) {
 
 export function getUserFullName(user?: ApiUser) {
   if (!user) {
-    return null;
+    return undefined;
   }
 
   if (isDeletedUser(user)) {
@@ -56,7 +56,7 @@ export function getUserFullName(user?: ApiUser) {
     }
   }
 
-  return null;
+  return undefined;
 }
 
 export function getUserStatus(user: ApiUser) {

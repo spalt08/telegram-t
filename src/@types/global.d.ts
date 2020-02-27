@@ -28,6 +28,8 @@ type Emoji = {
 
 type EmojiWithSkins = Record<number, Emoji>;
 
+type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
+
 declare module '*.png';
 
 declare module '../lib/pako_inflate' {

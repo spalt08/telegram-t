@@ -11,7 +11,7 @@ import {
   fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
 } from './users';
 import {
-  fetchStickers, fetchRecentStickers, fetchStickerSet,
+  fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
 } from './stickers';
 
 export default {
@@ -37,7 +37,8 @@ export default {
   fetchFullUser,
   fetchNearestCountry,
   uploadProfilePhoto,
-  fetchStickers,
+  fetchStickerSets,
   fetchRecentStickers,
-  fetchStickerSet,
+  fetchStickers,
+  fetchSavedGifs,
 };

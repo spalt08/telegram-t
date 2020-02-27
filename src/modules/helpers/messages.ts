@@ -32,10 +32,12 @@ export function getMessagePlainText(message: ApiMessage, hasPictogram = false) {
   }
 
   if (video) {
+    const typeString = video.isGif ? 'GIF' : 'Video';
+
     if (text && text.text.length) {
-      return `${!hasPictogram ? '(Video) ' : ''}${text.text}`;
+      return `${!hasPictogram ? `(${typeString}) ` : ''}${text.text}`;
     }
-    return 'Video';
+    return typeString;
   }
 
   if (text) {

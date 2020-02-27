@@ -50,7 +50,7 @@ function getMessageContent(message: ApiMessage, options: ServiceMessageTextOptio
   if (photo) {
     messageText = 'a photo';
   } else if (video) {
-    messageText = 'a video';
+    messageText = video.isGif ? 'a GIF' : 'a video';
   } else if (document) {
     messageText = 'a document';
   } else if (sticker) {
@@ -76,7 +76,7 @@ function getMessageContent(message: ApiMessage, options: ServiceMessageTextOptio
   );
 }
 
-function getUserContent(sender: ApiUser, plain?: boolean) {
+function getUserContent(sender: ApiUser, plain?: boolean): string | TextPart | undefined {
   if (plain) {
     return getUserFullName(sender);
   }
@@ -95,6 +95,7 @@ export function getServiceMessageContent(
   }
   const { text } = message.content.action;
   const content: TextPart[] = [];
+  const textOptions: ServiceMessageTextOptions = { ...options, maxTextLength: 16 };
 
   const processedOriginUserText = processPlaceholder(
     text,
@@ -122,14 +123,15 @@ export function getServiceMessageContent(
     thirdPart,
     '%message%',
     targetMessage
-      ? getMessageContent(targetMessage, options)
+      ? getMessageContent(targetMessage, textOptions)
       : 'a message',
   );
 
+  content.push(...processedMessageText);
+
   if (options.plain) {
-    return processedMessageText.join('').trim();
+    return content.join('').trim();
   }
 
-  content.push(...processedMessageText);
   return content;
 }

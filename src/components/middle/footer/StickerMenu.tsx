@@ -2,19 +2,20 @@ import React, {
   FC, memo, useState, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
-import { ApiSticker } from '../../../api/types';
+import { ApiSticker, ApiVideo } from '../../../api/types';
 
 import Menu from '../../ui/Menu';
 import TabList from '../../ui/TabList';
 import EmojiPicker from './EmojiPicker';
 import StickerPicker from './StickerPicker';
+import GifPicker from './GifPicker';
 
 import './StickerMenu.scss';
 
 const TABS = [
   'Emoji',
   'Stickers',
-  '-GIFs',
+  'GIFs',
 ];
 
 const CONTENT = [
@@ -31,10 +32,11 @@ type IProps = {
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
   onStickerSelect: (sticker: ApiSticker) => void;
+  onGifSelect: (gif: ApiVideo) => void;
 };
 
 const StickerMenu: FC<IProps> = ({
-  isOpen, onClose, onEmojiSelect, onStickerSelect,
+  isOpen, onClose, onEmojiSelect, onStickerSelect, onGifSelect,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
   const selectedScreen = CONTENT[activeTab];
@@ -91,14 +93,19 @@ const StickerMenu: FC<IProps> = ({
         {isActivated.current && (
           <>
             <EmojiPicker
-              className={`picker-tab ${selectedScreen === 'emoji' ? 'active' : ''}`}
+              className={`picker-tab ${isOpen && selectedScreen === 'emoji' ? 'active' : ''}`}
               onEmojiSelect={onEmojiSelect}
             />
             <StickerPicker
-              className={`picker-tab ${selectedScreen === 'sticker' ? 'active' : ''}`}
+              className={`picker-tab ${isOpen && selectedScreen === 'sticker' ? 'active' : ''}`}
+              load={isOpen && selectedScreen === 'sticker'}
               onStickerSelect={onStickerSelect}
             />
-            <div className={`picker-tab ${selectedScreen === 'gif' ? 'active' : ''}`} />
+            <GifPicker
+              className={`picker-tab ${isOpen && selectedScreen === 'gif' ? 'active' : ''}`}
+              load={isOpen && selectedScreen === 'gif'}
+              onGifSelect={onGifSelect}
+            />
           </>
         )}
       </div>

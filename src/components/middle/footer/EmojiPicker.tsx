@@ -1,12 +1,14 @@
 import React, {
-  FC, useState, useEffect, memo, useRef, useCallback, useMemo,
+  FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../../global/types';
+
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
-import { getPlatform } from '../../../util/environment';
-import determineVisibleSymbolSet from '../util/determineVisibleSymbolSet';
+import findInViewport from '../../../util/findInViewport';
+import fastSmoothScroll from '../../../util/fastSmoothScroll';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -23,7 +25,11 @@ type EmojiData = typeof import('../../../../public/emojiData.json');
 let emojiDataPromise: Promise<EmojiData>;
 let emojiData: EmojiData;
 
-type EmojiCategory = { id: string; name: string; emojis: string[] };
+type NimbleEmojiIndexLib = typeof import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index');
+let emojiIndexPromise: Promise<NimbleEmojiIndexLib>;
+let EmojiIndex: NimbleEmojiIndexLib['default'];
+
+type EmojiCategoryData = { id: string; name: string; emojis: string[] };
 
 const ICONS_BY_CATEGORY: Record<string, string> = {
   recent: 'icon-recent',
@@ -37,7 +43,9 @@ const ICONS_BY_CATEGORY: Record<string, string> = {
   flags: 'icon-flag',
 };
 
-let isScrollingProgrammatically = false;
+const OPEN_ANIMATION_DELAY = 200;
+// Only a few categories are above this height.
+const SMOOTH_SCROLL_DISTANCE = 800;
 
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
@@ -48,94 +56,105 @@ async function ensureEmojiData() {
   return emojiDataPromise;
 }
 
-const runThrottledForScroll = throttle((cb) => cb(), 100, false);
+async function ensureEmojiIndex() {
+  if (!emojiIndexPromise) {
+    // eslint-disable-next-line max-len
+    emojiIndexPromise = import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index') as unknown as Promise<NimbleEmojiIndexLib>;
+    EmojiIndex = (await emojiIndexPromise).default;
+  }
+
+  return emojiIndexPromise;
+}
+
+const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
 const EmojiPicker: FC<IProps> = ({
   className, onEmojiSelect, recentEmojis, addRecentEmoji,
 }) => {
-  const [emojiCategories, setEmojiCategories] = useState<EmojiCategory[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentCategory, setCurrentCategory] = useState(recentEmojis && recentEmojis.length ? 'recent' : 'people');
   const containerRef = useRef<HTMLDivElement>();
+  const [categories, setCategories] = useState<EmojiCategoryData[]>();
+  const [emojis, setEmojis] = useState<AllEmojis>();
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
-  useEffect(() => {
-    const exec = () => {
-      setEmojiCategories(emojiData.categories);
-      setIsLoading(false);
-    };
-
-    if (emojiData) {
-      exec();
-    } else {
-      ensureEmojiData().then(() => {
-        requestAnimationFrame(exec);
-      });
+  const allCategories = useMemo(() => {
+    if (!categories) {
+      return MEMO_EMPTY_ARRAY;
     }
-  }, []);
-
-  const selectCategory = useCallback((category: string) => {
-    if (currentCategory === category) {
-      return;
-    }
-
-    setCurrentCategory(category);
-    const categoryEl = document.getElementById(`emoji-category-${category}`);
-    if (categoryEl) {
-      isScrollingProgrammatically = true;
-      categoryEl.scrollIntoView();
-      requestAnimationFrame(() => { isScrollingProgrammatically = false; });
-    }
-  }, [currentCategory]);
-
-  const handleScroll = useCallback(
-    () => {
-      if (isScrollingProgrammatically) {
-        return;
-      }
-
-      runThrottledForScroll(() => {
-        if (!containerRef.current) {
-          return;
-        }
-        const visibleCategory = determineVisibleSymbolSet(containerRef.current);
-        if (visibleCategory && visibleCategory !== currentCategory) {
-          setCurrentCategory(visibleCategory);
-        }
-      });
-    },
-    [containerRef, currentCategory],
-  );
-
-  const handleEmojiSelect = useCallback((emoji: string, name: string) => {
-    onEmojiSelect(emoji);
-    addRecentEmoji({ emoji: name });
-  }, [addRecentEmoji, onEmojiSelect]);
-
-  const allEmojiCategories = useMemo(() => {
-    if (isLoading) {
-      return [];
-    }
-    const allCategories = [...emojiCategories];
+    const themeCategories = [...categories];
     if (recentEmojis && recentEmojis.length) {
-      allCategories.unshift({
+      themeCategories.unshift({
         id: 'recent',
         name: 'Recently Used',
         emojis: recentEmojis,
       });
     }
 
-    return allCategories;
-  }, [emojiCategories, recentEmojis, isLoading]);
+    return themeCategories;
+  }, [categories, recentEmojis]);
 
-  function renderEmojiCategoryButton(category: EmojiCategory) {
+  // Initialize data on first render.
+  useEffect(() => {
+    setTimeout(() => {
+      const exec = () => {
+        setCategories(emojiData.categories);
+
+        const index = new EmojiIndex(emojiData);
+        setEmojis(index.emojis as AllEmojis);
+      };
+
+      if (emojiData && EmojiIndex) {
+        exec();
+      } else {
+        Promise.all([
+          ensureEmojiData(),
+          ensureEmojiIndex(),
+        ]).then(exec);
+      }
+    }, OPEN_ANIMATION_DELAY);
+  }, []);
+
+  const shouldShowCategory = useCallback((index: number) => {
+    return Math.abs(activeCategoryIndex - index) <= 1;
+  }, [activeCategoryIndex]);
+
+  const selectCategory = useCallback((index: number) => {
+    if (activeCategoryIndex === index) {
+      return;
+    }
+
+    setActiveCategoryIndex(index);
+
+    const categoryEl = document.getElementById(`emoji-category-${allCategories[index].id}`)!;
+    const isShown = shouldShowCategory(index);
+
+    if (isShown) {
+      fastSmoothScroll(containerRef.current!, categoryEl, 'start', SMOOTH_SCROLL_DISTANCE);
+    } else {
+      categoryEl.scrollIntoView();
+    }
+  }, [activeCategoryIndex, allCategories, shouldShowCategory]);
+
+  const handleScroll = useCallback(() => {
+    runThrottledForScroll(() => {
+      const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
+      setActiveCategoryIndex(visibleIndexes[0]);
+    });
+  }, []);
+
+  const handleEmojiSelect = useCallback((emoji: string, name: string) => {
+    onEmojiSelect(emoji);
+    addRecentEmoji({ emoji: name });
+  }, [addRecentEmoji, onEmojiSelect]);
+
+  function renderCategoryButton(category: EmojiCategoryData, index: number) {
     const icon = ICONS_BY_CATEGORY[category.id];
 
     return icon && (
       <Button
-        className={`symbol-set-button ${category.id === currentCategory ? 'activated' : ''}`}
+        className={`symbol-set-button ${index === activeCategoryIndex ? 'activated' : ''}`}
         round
         color="translucent"
-        onClick={() => selectCategory(category.id)}
+        onClick={() => selectCategory(index)}
         ariaLabel={category.name}
       >
         <i className={icon} />
@@ -143,7 +162,7 @@ const EmojiPicker: FC<IProps> = ({
     );
   }
 
-  if (isLoading) {
+  if (!emojis) {
     return (
       <div className={`EmojiPicker ${className || ''}`}>
         <Loading />
@@ -155,19 +174,20 @@ const EmojiPicker: FC<IProps> = ({
     <div className={`EmojiPicker ${className || ''}`}>
       <div
         ref={containerRef}
-        className={`EmojiPicker-main custom-scroll ${getPlatform() === 'Mac OS' ? 'mac-os-fix' : ''}`}
+        className="EmojiPicker-main custom-scroll"
         onScroll={handleScroll}
       >
-        {allEmojiCategories.map((category) => (
+        {allCategories.map((category, i) => (
           <EmojiCategory
-            data={emojiData}
             category={category}
+            allEmojis={emojis}
             onEmojiSelect={handleEmojiSelect}
+            show={shouldShowCategory(i)}
           />
         ))}
       </div>
       <div className="StickerMenu-footer EmojiPicker-footer">
-        {allEmojiCategories.map(renderEmojiCategoryButton)}
+        {allCategories.map(renderCategoryButton)}
       </div>
     </div>
   );

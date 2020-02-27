@@ -62,6 +62,7 @@ const MediaViewer: FC<IProps> = ({
 
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
   const isVideo = message ? Boolean(getMessageVideo(message)) : null;
+  const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
@@ -173,6 +174,7 @@ const MediaViewer: FC<IProps> = ({
           blobUrlFull,
           blobUrlPreview || thumbDataUri,
           message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+          isGif,
         )}
         {messageText && <MediaViewerFooter text={messageText} />}
       </div>
@@ -224,9 +226,9 @@ function renderPhoto(blobUrl?: string) {
   return blobUrl ? <img src={blobUrl} alt="" /> : <Spinner color="white" />;
 }
 
-function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimensions) {
+function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimensions, isGif?: boolean) {
   if (blobUrl) {
-    return <VideoPlayer key={blobUrl} url={blobUrl} />;
+    return <VideoPlayer key={blobUrl} url={blobUrl} isGif={isGif} />;
   } else {
     if (posterData && posterSize) {
       return (

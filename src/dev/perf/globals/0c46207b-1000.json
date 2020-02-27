@@ -3,6 +3,24 @@
   "fileTransfers": {
     "byMessageKey": {}
   },
+  "recentEmojis": [
+    "grinning",
+    "kissing_heart",
+    "christmas_tree",
+    "brain",
+    "trophy"
+  ],
+  "stickers": {
+    "all": {
+      "byId": {}
+    },
+    "recent": {
+      "stickers": []
+    }
+  },
+  "savedGifs": {
+    "gifs": []
+  },
   "messageSearch": {
     "isTextSearch": false
   },
@@ -3395,7 +3413,8 @@
   },
   "groups": {
     "ids": [],
-    "byId": {}
+    "byId": {
+    }
   },
   "messages": {
     "byChatId": {

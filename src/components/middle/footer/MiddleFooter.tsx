@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiAttachment, ApiSticker } from '../../../api/types';
+import { ApiAttachment, ApiSticker, ApiVideo } from '../../../api/types';
 
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
@@ -112,6 +112,11 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     sendMessage({ sticker });
+    setIsStickerMenuOpen(false);
+  }, [sendMessage]);
+
+  const handleGifSelect = useCallback((gif: ApiVideo) => {
+    sendMessage({ gif });
     setIsStickerMenuOpen(false);
   }, [sendMessage]);
 
@@ -240,6 +245,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
             onClose={handleCloseStickerMenu}
             onEmojiSelect={handleEmojiSelect}
             onStickerSelect={handleStickerSelect}
+            onGifSelect={handleGifSelect}
           />
         </div>
       </div>

@@ -3,13 +3,13 @@ import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
 
-type EntityType = 'msg' | 'sticker' | 'channel' | 'chat' | 'user';
+type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
 export default async function downloadMedia(client: TelegramClient, url: string): Promise<{
   data: Buffer | null;
   mimeType?: string;
 } | null> {
-  const mediaMatch = url.match(/(avatar|msg|sticker)([-\d]+)(\?size=\w)?/);
+  const mediaMatch = url.match(/(avatar|msg|sticker|gif)([-\d]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return null;
   }
@@ -23,7 +23,7 @@ export default async function downloadMedia(client: TelegramClient, url: string)
     entityType = getEntityTypeById(Number(entityId));
     entityId = Math.abs(Number(entityId));
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker';
+    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'gif';
   }
 
   switch (entityType) {
@@ -38,6 +38,7 @@ export default async function downloadMedia(client: TelegramClient, url: string)
       entity = localDb.messages[entityId as string];
       break;
     case 'sticker':
+    case 'gif':
       entity = localDb.documents[entityId as string];
       break;
   }
@@ -46,7 +47,7 @@ export default async function downloadMedia(client: TelegramClient, url: string)
     return null;
   }
 
-  if (entityType === 'msg' || entityType === 'sticker') {
+  if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
     const data = await client.downloadMedia(entity, { sizeType });
     const mimeType = entity instanceof GramJs.Message
       ? getMessageMediaMimeType(entity, Boolean(sizeType))

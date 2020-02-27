@@ -30,7 +30,7 @@ const Media: FC<IProps> = ({ message, onClick }) => {
   return (
     <div onClick={handleClick} tabIndex={-1} className="Media">
       <img src={mediaBlobUrl || thumbDataUri} className={!mediaBlobUrl ? 'blur' : ''} alt="" />
-      {video && <span className="video-duration">{formatMediaDuration(video.duration)}</span>}
+      {video && <span className="video-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</span>}
     </div>
   );
 };

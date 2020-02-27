@@ -1,4 +1,3 @@
-import { WheelEvent } from 'react';
 import React, {
   FC, useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
@@ -6,9 +5,12 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
+
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { getFirstLetters } from '../../../util/textFormat';
-import determineVisibleSymbolSet from '../util/determineVisibleSymbolSet';
+import findInViewport from '../../../util/findInViewport';
+import fastSmoothScroll from '../../../util/fastSmoothScroll';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -19,127 +21,47 @@ import './StickerPicker.scss';
 
 type IProps = {
   className: string;
+  load: boolean;
   recentStickers: ApiSticker[];
   stickerSets: Record<string, ApiStickerSet>;
   onStickerSelect: (sticker: ApiSticker) => void;
-} & Pick<GlobalActions, 'loadStickers' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickerSet'>;
+} & Pick<GlobalActions, 'loadStickerSets' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickers'>;
 
 type PartialStickerSet = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
 
-let isScrollingProgrammatically = false;
+const SMOOTH_SCROLL_DISTANCE = 500;
+// For some reason, parallel `scrollIntoView` executions are conflicting.
+const FOOTER_SCROLL_DELAY = 500;
 
-const runThrottledForScroll = throttle((cb) => cb(), 100, false);
+const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
 const StickerPicker: FC<IProps> = ({
   className,
+  load,
   recentStickers,
   stickerSets,
   onStickerSelect,
-  loadStickers,
+  loadStickerSets,
   loadRecentStickers,
-  loadStickerSet,
+  loadStickers,
   addRecentSticker,
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentSet, setCurrentSet] = useState('recent');
   const containerRef = useRef<HTMLDivElement>();
   const footerRef = useRef<HTMLDivElement>();
+  const [activeSetIndex, setActiveSetIndex] = useState(0);
+  const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
-  const loadStickersThrottled = useMemo(() => {
-    const throttled = throttle(loadStickers, 2500, true);
-    return () => { throttled(); };
-  }, [loadStickers]);
+  const areLoaded = Boolean(Object.keys(stickerSets).length);
 
-  const loadRecentStickersThrottled = useMemo(() => {
-    const throttled = throttle(loadRecentStickers, 2500, true);
-    return () => { throttled(); };
-  }, [loadRecentStickers]);
-
-  useEffect(() => {
-    loadStickersThrottled();
-    loadRecentStickersThrottled();
-  }, [className, loadStickersThrottled, loadRecentStickersThrottled]);
-
-  useEffect(() => {
-    if (isLoading && Object.keys(stickerSets).length) {
-      setIsLoading(false);
-    }
-  }, [isLoading, stickerSets]);
-
-  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
-    onStickerSelect(sticker);
-    addRecentSticker({ sticker });
-  }, [addRecentSticker, onStickerSelect]);
-
-  const scrollToCurrentSetButton = useCallback(() => {
-    if (!footerRef.current) {
-      return;
+  const allSets = useMemo(() => {
+    if (!areLoaded) {
+      return MEMO_EMPTY_ARRAY;
     }
 
-    const visibleSetEl = footerRef.current.querySelector('.sticker-set-button.activated') as HTMLButtonElement;
-    if (visibleSetEl) {
-      footerRef.current.scrollTo({
-        left: visibleSetEl.offsetLeft - footerRef.current.offsetWidth / 2 + visibleSetEl.offsetWidth / 2,
-        behavior: 'smooth',
-      });
-    }
-  }, [footerRef]);
-
-  const selectSet = useCallback((setId: string) => {
-    if (currentSet === setId) {
-      return;
-    }
-
-    setCurrentSet(setId);
-    const setEl = document.getElementById(`sticker-set-${setId}`);
-    if (setEl) {
-      isScrollingProgrammatically = true;
-      setEl.scrollIntoView();
-      requestAnimationFrame(() => {
-        isScrollingProgrammatically = false;
-        scrollToCurrentSetButton();
-      });
-    }
-  }, [currentSet, scrollToCurrentSetButton]);
-
-  const handleScroll = useCallback(
-    () => {
-      if (isScrollingProgrammatically) {
-        return;
-      }
-
-      runThrottledForScroll(() => {
-        if (!containerRef.current) {
-          return;
-        }
-        const visibleSet = determineVisibleSymbolSet(containerRef.current);
-        if (visibleSet && visibleSet !== currentSet) {
-          setCurrentSet(visibleSet);
-          requestAnimationFrame(() => {
-            scrollToCurrentSetButton();
-          });
-        }
-      });
-    },
-    [containerRef, currentSet, scrollToCurrentSetButton],
-  );
-
-  const handleFooterScroll = useCallback(
-    (e: WheelEvent<HTMLDivElement>) => {
-      if (!footerRef.current) {
-        return;
-      }
-
-      footerRef.current.scrollLeft += e.deltaY / 4;
-    },
-    [footerRef],
-  );
-
-  const allStickerSets = useMemo(() => {
-    const allSets: PartialStickerSet[] = Object.values(stickerSets);
+    const themeSets: PartialStickerSet[] = Object.values(stickerSets);
 
     if (recentStickers.length) {
-      allSets.unshift({
+      themeSets.unshift({
         id: 'recent',
         title: 'Recently Used',
         stickers: recentStickers,
@@ -147,19 +69,91 @@ const StickerPicker: FC<IProps> = ({
       });
     }
 
-    return allSets;
-  }, [stickerSets, recentStickers]);
+    return themeSets;
+  }, [areLoaded, recentStickers, stickerSets]);
 
-  function renderStickerSetButton(set: PartialStickerSet) {
-    const setCover = set.stickers[0];
-    if (!setCover || set.id === 'recent') {
+  useEffect(() => {
+    if (load) {
+      loadStickerSets();
+      loadRecentStickers();
+    }
+  }, [load, loadStickerSets, loadRecentStickers]);
+
+  useEffect(() => {
+    if (!areLoaded) {
+      return undefined;
+    }
+
+    const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
+    setVisibleSetIndexes(visibleIndexes);
+
+    const footer = footerRef.current!;
+
+    function scrollFooter(e: WheelEvent) {
+      footer.scrollLeft += e.deltaY / 4;
+    }
+
+    footer.addEventListener('wheel', scrollFooter, { passive: true });
+
+    return () => {
+      footer.removeEventListener('wheel', scrollFooter);
+    };
+  }, [areLoaded]);
+
+  // Scroll footer when active set updates
+  useEffect(() => {
+    if (!areLoaded) {
+      return;
+    }
+
+    setTimeout(() => {
+      const footer = footerRef.current!;
+      const selector = `.sticker-set-button:nth-child(${activeSetIndex + 1})`;
+      const activeSetButton = footer.querySelector(selector) as HTMLButtonElement;
+
+      if (!activeSetButton) {
+        return;
+      }
+
+      footer.scrollTo({
+        left: activeSetButton.offsetLeft - footer.offsetWidth / 2 + activeSetButton.offsetWidth / 2,
+        behavior: 'smooth',
+      });
+    }, FOOTER_SCROLL_DELAY);
+  }, [areLoaded, activeSetIndex]);
+
+  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
+    onStickerSelect(sticker);
+    addRecentSticker({ sticker });
+  }, [addRecentSticker, onStickerSelect]);
+
+  const selectSet = useCallback((index: number) => {
+    setActiveSetIndex(index);
+
+    const stickerSetEl = document.getElementById(`sticker-set-${allSets[index].id}`)!;
+    fastSmoothScroll(containerRef.current!, stickerSetEl, 'start', SMOOTH_SCROLL_DISTANCE);
+  }, [allSets]);
+
+  const handleScroll = useCallback(() => {
+    runThrottledForScroll(() => {
+      const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
+      setActiveSetIndex(visibleIndexes[0]);
+      setVisibleSetIndexes(visibleIndexes);
+    });
+  }, []);
+
+  function renderSetButton(set: PartialStickerSet, index: number) {
+    const stickerSetCover = set.stickers[0];
+    const buttonClassName = `symbol-set-button sticker-set-button ${index === activeSetIndex ? 'activated' : ''}`;
+
+    if (!stickerSetCover || set.id === 'recent') {
       return (
         <Button
-          className={`symbol-set-button sticker-set-button ${set.id === currentSet ? 'activated' : ''}`}
+          className={buttonClassName}
+          onClick={() => selectSet(index)}
+          ariaLabel={set.title}
           round
           color="translucent"
-          onClick={() => selectSet(set.id)}
-          ariaLabel={set.title}
         >
           {set.id === 'recent' ? (
             <i className="icon-recent" />
@@ -172,24 +166,15 @@ const StickerPicker: FC<IProps> = ({
 
     return (
       <StickerButton
-        className={`symbol-set-button sticker-set-button ${set.id === currentSet ? 'activated' : ''}`}
-        setButton
-        sticker={setCover}
+        className={buttonClassName}
+        sticker={stickerSetCover}
         title={set.title}
-        onStickerSelect={() => selectSet(set.id)}
+        onClick={() => selectSet(index)}
       />
     );
   }
 
-  const shouldLoadStickers = useCallback((targetIndex: number) => {
-    const visibleIndex = allStickerSets.findIndex((s) => s.id === currentSet);
-    const previousIndex = visibleIndex > 0 ? visibleIndex - 1 : visibleIndex;
-    const nextIndex = visibleIndex < allStickerSets.length ? visibleIndex + 1 : visibleIndex;
-
-    return targetIndex >= previousIndex && targetIndex <= nextIndex;
-  }, [allStickerSets, currentSet]);
-
-  if (isLoading) {
+  if (!areLoaded) {
     return (
       <div className={`StickerPicker ${className || ''}`}>
         <Loading />
@@ -204,21 +189,20 @@ const StickerPicker: FC<IProps> = ({
         className="StickerPicker-main custom-scroll"
         onScroll={handleScroll}
       >
-        {allStickerSets.map((set, index) => (
+        {allSets.map((set, index) => (
           <StickerSet
             set={set}
+            loadAndShow={visibleSetIndexes.includes(index)}
+            loadStickers={loadStickers}
             onStickerSelect={handleStickerSelect}
-            loadStickerSet={loadStickerSet}
-            shouldLoadStickers={shouldLoadStickers(index)}
           />
         ))}
       </div>
       <div
         ref={footerRef}
         className="StickerMenu-footer StickerPicker-footer"
-        onWheel={handleFooterScroll}
       >
-        {allStickerSets.map(renderStickerSetButton)}
+        {allSets.map(renderSetButton)}
       </div>
     </div>
   );
@@ -235,15 +219,15 @@ export default memo(withGlobal(
   },
   (setGlobal, actions) => {
     const {
-      loadStickers,
+      loadStickerSets,
       loadRecentStickers,
-      loadStickerSet,
+      loadStickers,
       addRecentSticker,
     } = actions;
     return {
-      loadStickers,
+      loadStickerSets,
       loadRecentStickers,
-      loadStickerSet,
+      loadStickers,
       addRecentSticker,
     };
   },

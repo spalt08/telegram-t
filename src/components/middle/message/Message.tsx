@@ -27,6 +27,7 @@ import {
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
 import { buildMessageContent } from './util/buildMessageContent';
 import { getMinMediaWidth } from './util/mediaDimensions';
+import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 
 import Avatar from '../../common/Avatar';
@@ -113,17 +114,7 @@ const Message: FC<IProps> = ({
   useEffect(() => {
     const messagesContainer = document.getElementById('MessageList');
     if (isFocused && elementRef.current && messagesContainer) {
-      const offset = elementRef.current.offsetTop - messagesContainer.scrollTop;
-      if (offset < -FOCUSING_MAX_DISTANCE) {
-        messagesContainer.scrollTop += (offset + FOCUSING_MAX_DISTANCE);
-      } else if (offset > FOCUSING_MAX_DISTANCE) {
-        messagesContainer.scrollTop += (offset - FOCUSING_MAX_DISTANCE);
-      }
-
-      elementRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+      fastSmoothScroll(messagesContainer, elementRef.current, 'center', FOCUSING_MAX_DISTANCE);
     }
   }, [isFocused, chatId, focusMessage]);
 
