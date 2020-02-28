@@ -3,17 +3,23 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiMessageSearchType, ApiUser } from '../../../api/types';
 
 import { callApi } from '../../../api/gramjs';
-import { selectCurrentMessageSearch, selectOpenChat, selectOpenUser } from '../../selectors';
+import {
+  selectCurrentMessageSearch,
+  selectCurrentMessageSearchChatId,
+} from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { addChatMessagesById, addUsers, updateMessageSearchResults } from '../../reducers';
 
 const SEARCH_LIMIT = 50;
 
 addReducer('searchMessages', (global) => {
-  const chatOrUser = selectOpenUser(global) || selectOpenChat(global);
+  const currentSearchChatId = selectCurrentMessageSearchChatId(global);
+  const chatOrUser = currentSearchChatId
+    ? global.users.byId[currentSearchChatId] || global.chats.byId[currentSearchChatId]
+    : undefined;
   const currentSearch = selectCurrentMessageSearch(global);
 
-  if (!currentSearch) {
+  if (!chatOrUser || !currentSearch) {
     return;
   }
 
@@ -21,7 +27,7 @@ addReducer('searchMessages', (global) => {
   const currentResults = type && resultsByType && resultsByType[type];
   const offsetId = currentResults ? currentResults.nextOffsetId : undefined;
 
-  if (!chatOrUser || !type) {
+  if (!type) {
     return;
   }
 

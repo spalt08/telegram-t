@@ -7,7 +7,7 @@ import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_
 import { filterKeys } from '../util/iteratees';
 
 const INITIAL_STATE: GlobalState = {
-  showRightColumn: true,
+  showChatInfo: true,
   isUiReady: false,
 
   authRememberMe: true,

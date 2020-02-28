@@ -11,10 +11,11 @@ addReducer('setIsUiReady', (global, actions, payload) => {
   };
 });
 
-addReducer('toggleRightColumn', (global) => {
+// TODO Remove.
+addReducer('toggleChatInfo', (global) => {
   return {
     ...global,
-    showRightColumn: !global.showRightColumn,
+    showChatInfo: !global.showChatInfo,
   };
 });
 

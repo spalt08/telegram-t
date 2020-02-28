@@ -13,7 +13,7 @@ addReducer('openChatWithInfo', (global, actions, payload) => {
   global = updateSelectedChatId(global, id);
   global = {
     ...global,
-    showRightColumn: true,
+    showChatInfo: true,
   };
 
   return global;

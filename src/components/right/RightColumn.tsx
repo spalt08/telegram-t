@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import React, { FC, useCallback, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -13,45 +13,50 @@ import RightSearch from './RightSearch';
 import './RightColumn.scss';
 
 type IProps = {
-  showRightColumn: boolean;
-  isSearchActive: boolean;
-  areChatsLoaded: boolean;
+  isUserInfo: boolean;
+  isChatInfo: boolean;
+  isSearch: boolean;
   selectedChatId?: number;
   selectedUserId?: number;
-} & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch'>;
+} & Pick<GlobalActions, 'toggleChatInfo' | 'openUserInfo' | 'closeMessageTextSearch'>;
 
 const RightColumn: FC<IProps> = ({
-  showRightColumn,
-  isSearchActive,
-  areChatsLoaded,
+  isUserInfo,
+  isChatInfo,
+  isSearch,
   selectedChatId,
   selectedUserId,
-  toggleRightColumn,
-  closeMessageSearch,
+  toggleChatInfo,
+  openUserInfo,
+  closeMessageTextSearch,
 }) => {
-  const isInfo = showRightColumn && selectedChatId;
-  const isSearch = isSearchActive;
-
-  useEffect(() => {
+  const isOpen = isSearch || isUserInfo || isChatInfo;
+  const close = useCallback(() => {
     if (isSearch) {
-      return captureEscKeyListener(closeMessageSearch);
+      return closeMessageTextSearch();
+    } else if (isUserInfo) {
+      return openUserInfo({ id: undefined });
+    } else if (isChatInfo) {
+      return toggleChatInfo();
     }
-    return isInfo ? captureEscKeyListener(toggleRightColumn) : undefined;
-  }, [toggleRightColumn, closeMessageSearch, isInfo, isSearch]);
 
-  if (!isInfo && !isSearch) {
+    return undefined;
+  }, [closeMessageTextSearch, isChatInfo, isSearch, isUserInfo, openUserInfo, toggleChatInfo]);
+
+  useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+
+  if (!selectedUserId && !isChatInfo && !isSearch) {
     return null;
   }
 
   return (
     <div id="RightColumn">
-      <RightHeader />
-      {!isSearch && areChatsLoaded && (
-        <RightColumnInfo key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
-      )}
-      {isSearch && areChatsLoaded && (
+      <RightHeader onClose={close} />
+      {isSearch ? (
         <RightSearch chatId={selectedChatId} />
-      )}
+      ) : (isUserInfo || isChatInfo) ? (
+        <RightColumnInfo key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
+      ) : null}
     </div>
   );
 };
@@ -61,25 +66,25 @@ export default withGlobal(
     const {
       chats,
       users,
-      showRightColumn,
+      showChatInfo,
     } = global;
 
-    const areChatsLoaded = Boolean(chats.ids);
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
+    const areChatsLoaded = Boolean(chats.ids);
 
     const currentSearch = selectCurrentMessageSearch(global);
 
     return {
-      showRightColumn,
-      isSearchActive: currentSearch && currentSearch.currentType === 'text',
+      isUserInfo: selectedUserId && areChatsLoaded,
+      isChatInfo: selectedChatId && showChatInfo && areChatsLoaded,
+      isSearch: currentSearch && currentSearch.currentType === 'text',
       selectedChatId,
       selectedUserId,
-      areChatsLoaded,
     };
   },
   (setGlobal, actions) => {
-    const { toggleRightColumn, closeMessageSearch } = actions;
-    return { toggleRightColumn, closeMessageSearch };
+    const { openUserInfo, toggleChatInfo, closeMessageTextSearch } = actions;
+    return { openUserInfo, toggleChatInfo, closeMessageTextSearch };
   },
 )(RightColumn);

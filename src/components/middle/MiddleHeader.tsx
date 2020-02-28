@@ -29,7 +29,7 @@ type IProps = {
   canUnpin?: boolean;
   isPinnedMessageInViewport?: boolean;
   typingStatus?: ApiTypingStatus;
-} & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageSearch' | 'pinMessage' | 'focusMessage'>;
+} & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageTextSearch' | 'pinMessage' | 'focusMessage'>;
 
 const MiddleHeader: FC<IProps> = ({
   chatId,
@@ -39,7 +39,7 @@ const MiddleHeader: FC<IProps> = ({
   isPinnedMessageInViewport,
   typingStatus,
   openChatWithInfo,
-  openMessageSearch,
+  openMessageTextSearch,
   pinMessage,
   focusMessage,
 }) => {
@@ -50,14 +50,14 @@ const MiddleHeader: FC<IProps> = ({
   }, [openChatWithInfo, chatId]);
 
   const handleSearchClick = useCallback(() => {
-    openMessageSearch();
+    openMessageTextSearch();
     setTimeout(() => {
       const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
       if (searchInput) {
         searchInput.focus();
       }
     }, SEARCH_FOCUS_DELAY_MS);
-  }, [openMessageSearch]);
+  }, [openMessageTextSearch]);
 
   const handleUnpinMessage = useCallback(() => {
     pinMessage({ chatId, messageId: 0 });
@@ -137,13 +137,13 @@ export default withGlobal(
   (setGlobal, actions) => {
     const {
       openChatWithInfo,
-      openMessageSearch,
+      openMessageTextSearch,
       pinMessage,
       focusMessage,
     } = actions;
     return {
       openChatWithInfo,
-      openMessageSearch,
+      openMessageTextSearch,
       pinMessage,
       focusMessage,
     };
