@@ -7,13 +7,7 @@ import { updateSelectedUserId } from '../reducers';
 addReducer('openUserInfo', (global, actions, payload) => {
   const { id } = payload!;
 
-  global = updateSelectedUserId(global, id);
-  global = {
-    ...global,
-    showRightColumn: true,
-  };
-
-  return global;
+  return updateSelectedUserId(global, id);
 });
 
 const clearSelectedUserId = (global: GlobalState) => updateSelectedUserId(global, undefined);

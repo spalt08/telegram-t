@@ -1,10 +1,9 @@
 import { addReducer } from '../../lib/teact/teactn';
-import { selectCurrentMessageSearch, selectCurrentMessageSearchChatId } from '../selectors';
 import { replaceMessageSearchResults, updateMessageSearchType } from '../reducers';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-addReducer('openMessageSearch', (global) => {
-  const chatId = selectCurrentMessageSearchChatId(global);
+addReducer('openMessageTextSearch', (global) => {
+  const chatId = global.chats.selectedId;
 
   if (!chatId) {
     return undefined;
@@ -13,8 +12,8 @@ addReducer('openMessageSearch', (global) => {
   return updateMessageSearchType(global, chatId, 'text');
 });
 
-addReducer('closeMessageSearch', (global) => {
-  const chatId = selectCurrentMessageSearchChatId(global);
+addReducer('closeMessageTextSearch', (global) => {
+  const chatId = global.chats.selectedId;
 
   if (!chatId) {
     return undefined;
@@ -24,14 +23,14 @@ addReducer('closeMessageSearch', (global) => {
 });
 
 addReducer('setMessageSearchQuery', (global, actions, payload) => {
-  const chatId = selectCurrentMessageSearchChatId(global);
+  const chatId = global.chats.selectedId;
 
   if (!chatId) {
     return undefined;
   }
 
   const { query } = payload!;
-  const { query: currentQuery } = selectCurrentMessageSearch(global) || {};
+  const { query: currentQuery } = global.messageSearch.byChatId[chatId] || {};
 
   if (query !== currentQuery) {
     global = replaceMessageSearchResults(global, chatId, 'text', MEMO_EMPTY_ARRAY);
@@ -43,7 +42,7 @@ addReducer('setMessageSearchQuery', (global, actions, payload) => {
 });
 
 addReducer('setMessageSearchMediaType', (global, actions, payload) => {
-  const chatId = selectCurrentMessageSearchChatId(global);
+  const chatId = global.users.selectedId || global.chats.selectedId;
 
   if (!chatId) {
     return undefined;

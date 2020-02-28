@@ -12,7 +12,7 @@ import {
 } from '../api/types';
 
 export type GlobalState = {
-  showRightColumn: boolean;
+  showChatInfo: boolean;
   isUiReady: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
@@ -99,7 +99,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system and UI
-  'init' | 'toggleRightColumn' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
+  'init' | 'toggleChatInfo' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
@@ -110,7 +110,7 @@ export type ActionTypes = (
   'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   // message search
-  'openMessageSearch' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
+  'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' |

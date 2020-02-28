@@ -12,17 +12,17 @@ import Button from '../ui/Button';
 import './RightHeader.scss';
 
 type IProps = {
+  onClose: () => void;
   isSearch: boolean;
   searchQuery?: string;
-} & Pick<GlobalActions, 'toggleRightColumn' | 'closeMessageSearch' | 'setMessageSearchQuery' | 'searchMessages'>;
+} & Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 const RightHeader: FC<IProps> = ({
+  onClose,
   isSearch,
   searchQuery,
-  toggleRightColumn,
-  closeMessageSearch,
   setMessageSearchQuery,
   searchMessages,
 }) => {
@@ -57,7 +57,7 @@ const RightHeader: FC<IProps> = ({
         round
         color="translucent"
         size="smaller"
-        onClick={isSearch ? closeMessageSearch : toggleRightColumn}
+        onClick={onClose}
       >
         <i className="icon-close" />
       </Button>
@@ -81,10 +81,10 @@ export default withGlobal(
   },
   (setGlobal, actions) => {
     const {
-      toggleRightColumn, closeMessageSearch, setMessageSearchQuery, searchMessages,
+      setMessageSearchQuery, searchMessages,
     } = actions;
     return {
-      toggleRightColumn, closeMessageSearch, setMessageSearchQuery, searchMessages,
+      setMessageSearchQuery, searchMessages,
     };
   },
 )(RightHeader);
