@@ -87,7 +87,6 @@ const RightColumnInfo: FC<IProps> = ({
         <GroupExtra chatId={chatId} />,
       ]}
       <div className="shared-media">
-        <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
         <Transition activeKey={activeTab} name="slide">
           {() => (
             <div className={`content ${mediaType}-list`}>
@@ -125,6 +124,7 @@ const RightColumnInfo: FC<IProps> = ({
             </div>
           )}
         </Transition>
+        <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
       </div>
     </InfiniteScroll>
   );
