@@ -3,6 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
+import buildClassName from '../../util/buildClassName';
 
 import './Transition.scss';
 
@@ -11,6 +12,8 @@ type IProps = {
   activeKey: any;
   name: 'slide' | 'slow-slide' | 'slide-fade';
   direction?: 'auto' | 'inverse' | 1 | -1;
+  onStart?: () => void;
+  onStop?: () => void;
   children: ChildrenFn;
 };
 
@@ -21,6 +24,8 @@ const Transition: FC<IProps> = ({
   activeKey,
   name,
   direction = 'auto',
+  onStart,
+  onStop,
   children,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
@@ -46,6 +51,10 @@ const Transition: FC<IProps> = ({
     setTimeout(() => {
       isAppendStageRef.current = false;
       setIsAnimating(false);
+
+      if (onStop) {
+        onStop();
+      }
     }, ANIMATION_END_DELAY);
   };
 
@@ -56,6 +65,10 @@ const Transition: FC<IProps> = ({
     fromActiveKeyRef.current = prevActiveKey;
     isAppendStageRef.current = true;
     setIsAnimating(true);
+
+    if (onStart) {
+      onStart();
+    }
   }
 
   const contents = isAppendStageRef.current
@@ -68,12 +81,12 @@ const Transition: FC<IProps> = ({
     || (direction === 'inverse' && Number(fromActiveKeyRef.current) < Number(activeKey))
   );
 
-  const className = [
+  const className = buildClassName(
     'Transition',
-    isAppendStageRef.current ? name : '',
-    isAnimating ? 'animating' : '',
-    isBackwards ? 'backwards' : '',
-  ].filter(Boolean).join(' ');
+    name,
+    isAnimating && 'animating',
+    isBackwards && 'backwards',
+  );
 
   return (
     <div ref={containerRef} className={className} onAnimationEnd={handleAnimationEnd}>

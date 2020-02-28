@@ -1,4 +1,4 @@
-import { UIEvent } from 'react';
+import { RefObject, UIEvent } from 'react';
 import React, {
   FC, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -6,6 +6,7 @@ import React, {
 import { debounce } from '../../util/schedulers';
 
 interface IProps {
+  ref?: RefObject<HTMLDivElement>;
   className?: string;
   onLoadMore: AnyToVoidFunction;
   items: any[];
@@ -19,6 +20,7 @@ const DEFAULT_PRELOAD_BACKWARDS = 50;
 const BACKWARDS = -1;
 
 const InfiniteScroll: FC = ({
+  ref,
   className,
   onLoadMore,
   items,
@@ -26,7 +28,11 @@ const InfiniteScroll: FC = ({
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   children,
 }: IProps) => {
-  const containerRef = useRef<HTMLDivElement>();
+  let containerRef = useRef<HTMLDivElement>();
+  if (ref) {
+    containerRef = ref;
+  }
+
   const anchorTopRef = useRef<number>(undefined);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
