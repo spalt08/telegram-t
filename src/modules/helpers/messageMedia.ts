@@ -1,5 +1,5 @@
 import {
-  ApiMessage,
+  ApiMessage, ApiMessageSearchType,
   ApiPhoto,
   ApiVideo,
 } from '../../api/types';
@@ -205,25 +205,25 @@ export function getMessageTransferParams(message: ApiMessage, fileTransferProgre
 }
 
 export function getMessageContentIds(
-  messages: Record<number, ApiMessage>, contentType: 'media' | 'document' | 'webPage' | 'audio',
+  messages: Record<number, ApiMessage>, contentType: ApiMessageSearchType,
 ) {
   let validator: Function;
 
   switch (contentType) {
-    case 'audio':
-      validator = getMessageAudio;
-      break;
-
-    case 'document':
-      validator = getMessageDocument;
-      break;
-
     case 'media':
       validator = (message: ApiMessage) => getMessagePhoto(message) || getMessageVideo(message);
       break;
 
-    case 'webPage':
+    case 'documents':
+      validator = getMessageDocument;
+      break;
+
+    case 'links':
       validator = (message: ApiMessage) => getMessageWebPage(message) || matchLinkInMessageText(message);
+      break;
+
+    case 'audio':
+      validator = getMessageAudio;
       break;
   }
 

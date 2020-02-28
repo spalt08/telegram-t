@@ -121,7 +121,7 @@
       grid-gap: .25rem;
     }
 
-    &.document-list {
+    &.documents-list {
       padding: 1.25rem;
 
       & .File + .File {
@@ -129,15 +129,7 @@
       }
     }
 
-    &.audio-list {
-      padding: 1.25rem;
-
-      & .Audio + .Audio {
-        margin-top: 1.6875rem;
-      }
-    }
-
-    &.webPage-list {
+    &.links-list {
       padding: 1.25rem;
 
       .ProgressSpinner,
@@ -224,6 +216,14 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+      }
+    }
+
+    &.audio-list {
+      padding: 1.25rem;
+
+      & .Audio + .Audio {
+        margin-top: 1.6875rem;
       }
     }
   }

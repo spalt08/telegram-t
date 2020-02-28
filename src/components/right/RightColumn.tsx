@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { selectCurrentMessageSearch } from '../../modules/selectors';
 
 import RightHeader from './RightHeader';
 import RightColumnInfo from './RightColumnInfo';
@@ -28,17 +29,17 @@ const RightColumn: FC<IProps> = ({
   toggleRightColumn,
   closeMessageSearch,
 }) => {
-  const isOpen = showRightColumn && selectedChatId;
-  const isSearch = isOpen && isSearchActive;
+  const isInfo = showRightColumn && selectedChatId;
+  const isSearch = isSearchActive;
 
   useEffect(() => {
     if (isSearch) {
       return captureEscKeyListener(closeMessageSearch);
     }
-    return isOpen ? captureEscKeyListener(toggleRightColumn) : undefined;
-  }, [toggleRightColumn, closeMessageSearch, isOpen, isSearch]);
+    return isInfo ? captureEscKeyListener(toggleRightColumn) : undefined;
+  }, [toggleRightColumn, closeMessageSearch, isInfo, isSearch]);
 
-  if (!isOpen) {
+  if (!isInfo && !isSearch) {
     return null;
   }
 
@@ -61,16 +62,17 @@ export default withGlobal(
       chats,
       users,
       showRightColumn,
-      messageSearch,
     } = global;
 
     const areChatsLoaded = Boolean(chats.ids);
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
 
+    const currentSearch = selectCurrentMessageSearch(global);
+
     return {
       showRightColumn,
-      isSearchActive: messageSearch.isTextSearch,
+      isSearchActive: currentSearch && currentSearch.currentType === 'text',
       selectedChatId,
       selectedUserId,
       areChatsLoaded,

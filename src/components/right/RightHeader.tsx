@@ -3,11 +3,13 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { debounce } from '../../util/schedulers';
+import { selectCurrentMessageSearch } from '../../modules/selectors';
+
+import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 
 import './RightHeader.scss';
-import SearchInput from '../ui/SearchInput';
-import { debounce } from '../../util/schedulers';
 
 type IProps = {
   isSearch: boolean;
@@ -66,11 +68,15 @@ const RightHeader: FC<IProps> = ({
 
 export default withGlobal(
   (global) => {
-    const { messageSearch } = global;
+    const currentSearch = selectCurrentMessageSearch(global);
+
+    if (!currentSearch) {
+      return {};
+    }
 
     return {
-      isSearch: messageSearch.isTextSearch,
-      searchQuery: messageSearch.query,
+      isSearch: currentSearch.currentType === 'text',
+      searchQuery: currentSearch.query,
     };
   },
   (setGlobal, actions) => {

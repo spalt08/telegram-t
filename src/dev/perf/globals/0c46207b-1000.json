@@ -22,7 +22,7 @@
     "gifs": []
   },
   "messageSearch": {
-    "isTextSearch": false
+    "byChatId": {}
   },
   "mediaViewer": {},
   "users": {

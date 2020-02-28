@@ -63,8 +63,5 @@ export function updateSelectedUserId(global: GlobalState, selectedId?: number): 
       ...global.users,
       selectedId,
     },
-    messageSearch: {
-      isTextSearch: false,
-    },
   };
 }

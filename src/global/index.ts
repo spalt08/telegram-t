@@ -47,7 +47,7 @@ const INITIAL_STATE: GlobalState = {
   },
 
   messageSearch: {
-    isTextSearch: false,
+    byChatId: {},
   },
 
   mediaViewer: {},
@@ -105,7 +105,7 @@ function updateCache(global: GlobalState) {
     savedGifs: {
       gifs: [],
     },
-    messageSearch: { isTextSearch: false },
+    messageSearch: { byChatId: {} },
     mediaViewer: {},
     webPagePreview: undefined,
   };

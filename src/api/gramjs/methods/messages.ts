@@ -4,7 +4,7 @@ import {
   ApiAttachment,
   ApiMessage,
   OnApiUpdate,
-  ApiMessageSearchMediaType,
+  ApiMessageSearchType,
   ApiUser,
   ApiSticker,
   ApiVideo,
@@ -270,29 +270,32 @@ export async function readMessageContents({ messageId }: { messageId: number }) 
 }
 
 export async function searchMessages({
-  chatOrUser, query, mediaType, ...pagination
+  chatOrUser, type, query, ...pagination
 }: {
   chatOrUser: ApiChat | ApiUser;
+  type?: ApiMessageSearchType;
   query?: string;
-  mediaType?: ApiMessageSearchMediaType;
   offsetId?: number;
   addOffset?: number;
   limit: number;
 }) {
-  let filter = new GramJs.InputMessagesFilterEmpty();
-  switch (mediaType) {
+  let filter;
+  switch (type) {
     case 'media':
       filter = new GramJs.InputMessagesFilterPhotoVideo();
       break;
-    case 'document':
+    case 'documents':
       filter = new GramJs.InputMessagesFilterDocument();
       break;
-    case 'webPage':
+    case 'links':
       filter = new GramJs.InputMessagesFilterUrl();
       break;
     case 'audio':
       filter = new GramJs.InputMessagesFilterMusic();
       break;
+    case 'text':
+    default:
+      filter = new GramJs.InputMessagesFilterEmpty();
   }
 
   const result = await invokeRequest(new GramJs.messages.Search({
