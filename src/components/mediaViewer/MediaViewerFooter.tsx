@@ -1,12 +1,13 @@
 import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 import { throttle } from '../../util/schedulers';
+import { TextPart } from '../middle/message/util/enhanceText';
 
 import './MediaViewerFooter.scss';
 
 const RESIZE_THROTTLE_MS = 500;
 
 type IProps = {
-  text: string | Element | (string | Element)[];
+  text: TextPart | TextPart[];
 };
 
 const MediaViewerFooter: FC<IProps> = ({ text = '' }) => {

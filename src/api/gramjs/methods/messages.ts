@@ -8,6 +8,7 @@ import {
   ApiUser,
   ApiSticker,
   ApiVideo,
+  ApiMessageEntity,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
@@ -25,6 +26,7 @@ import {
   getEntityTypeById,
   buildInputMediaDocument,
   reduceWaveform,
+  buildMtpMessageEntity,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 
@@ -109,6 +111,7 @@ export async function sendMessage({
   chat,
   currentUserId,
   text,
+  entities,
   replyingTo,
   attachment,
   sticker,
@@ -117,12 +120,13 @@ export async function sendMessage({
   chat: ApiChat;
   currentUserId: number;
   text?: string;
+  entities?: ApiMessageEntity[];
   replyingTo?: number;
   attachment?: ApiAttachment;
   sticker?: ApiSticker;
   gif?: ApiVideo;
 }) {
-  const localMessage = buildLocalMessage(chat.id, currentUserId, text, replyingTo, attachment, sticker, gif);
+  const localMessage = buildLocalMessage(chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif);
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -143,9 +147,11 @@ export async function sendMessage({
   }
 
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
+  const mtpEntities = entities && entities.map(buildMtpMessageEntity);
 
   await invokeRequest(new RequestClass({
     message: text || '',
+    entities: mtpEntities,
     peer: buildInputPeer(chat.id, chat.access_hash),
     randomId,
     ...(replyingTo && { replyToMsgId: replyingTo }),

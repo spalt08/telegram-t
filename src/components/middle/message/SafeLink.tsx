@@ -37,7 +37,7 @@ function getHref(url?: string) {
     return undefined;
   }
 
-  return url.startsWith('http') ? url : `http://${url}`;
+  return url.includes('://') ? url : `http://${url}`;
 }
 
 function getDecodedUrl(url?: string) {
