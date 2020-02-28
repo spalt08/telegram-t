@@ -78,11 +78,10 @@
 .shared-media {
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
 
   .TabList {
     background: #fff;
-    z-index: 2;
   }
 
   .Tab {
