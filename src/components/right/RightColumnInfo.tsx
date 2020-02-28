@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage, ApiPrivateChat } from '../../api/types';
+import { ApiMessage, ApiMessageSearchType, ApiPrivateChat } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
 import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
@@ -39,8 +39,8 @@ const TAB_TITLES = [
 
 const MEDIA_TYPES = [
   'media',
-  'document',
-  'webPage',
+  'documents',
+  'links',
   'audio',
 ] as const;
 
@@ -55,7 +55,7 @@ const RightColumnInfo: FC<IProps> = ({
   const containerRef = useRef<HTMLDivElement>();
 
   const [activeTab, setActiveTab] = useState(0);
-  const [mediaType, setMediaType] = useState();
+  const [mediaType, setMediaType] = useState<ApiMessageSearchType>();
 
   const messageIds = useMemo(
     () => (mediaType && chatMessages ? getMessageContentIds(chatMessages, mediaType).reverse() : []),
@@ -135,11 +135,11 @@ const RightColumnInfo: FC<IProps> = ({
                     onClick={handleSelectMedia}
                   />
                 ))
-              ) : mediaType === 'document' ? (
+              ) : mediaType === 'documents' ? (
                 messageIds.map((id: number) => (
                   <Document key={id} message={chatMessages[id]} />
                 ))
-              ) : mediaType === 'webPage' ? (
+              ) : mediaType === 'links' ? (
                 messageIds.map((id: number) => (
                   <WebPage
                     key={id}

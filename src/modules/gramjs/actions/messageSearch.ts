@@ -1,33 +1,41 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiMessageSearchMediaType, ApiUser } from '../../../api/types';
+import { ApiChat, ApiMessageSearchType, ApiUser } from '../../../api/types';
 
 import { callApi } from '../../../api/gramjs';
-import { selectOpenChat, selectOpenUser } from '../../selectors';
-import { areSortedArraysEqual, buildCollectionByKey, unique } from '../../../util/iteratees';
-import { addChatMessagesById, addUsers } from '../../reducers';
+import { selectCurrentMessageSearch, selectOpenChat, selectOpenUser } from '../../selectors';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { addChatMessagesById, addUsers, updateMessageSearchResults } from '../../reducers';
 
 const SEARCH_LIMIT = 50;
 
 addReducer('searchMessages', (global) => {
   const chatOrUser = selectOpenUser(global) || selectOpenChat(global);
-  const { query, mediaType, nextOffsetId: offsetId } = global.messageSearch;
+  const currentSearch = selectCurrentMessageSearch(global);
 
-  if (!chatOrUser || !(query || mediaType)) {
+  if (!currentSearch) {
     return;
   }
 
-  void searchMessages(chatOrUser, query, mediaType, offsetId);
+  const { currentType: type, query, resultsByType } = currentSearch;
+  const currentResults = type && resultsByType && resultsByType[type];
+  const offsetId = currentResults ? currentResults.nextOffsetId : undefined;
+
+  if (!chatOrUser || !type) {
+    return;
+  }
+
+  void searchMessages(chatOrUser, type, query, offsetId);
 });
 
 async function searchMessages(
   chatOrUser: ApiChat | ApiUser,
+  type: ApiMessageSearchType,
   query?: string,
-  mediaType?: ApiMessageSearchMediaType,
   offsetId?: number,
 ) {
   const result = await callApi('searchMessages', {
-    chatOrUser, query, mediaType, limit: SEARCH_LIMIT, offsetId,
+    chatOrUser, type, query, limit: SEARCH_LIMIT, offsetId,
   });
 
   if (!result) {
@@ -39,23 +47,17 @@ async function searchMessages(
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
+  const newFoundIds = Object.keys(byId).map(Number);
 
   let newGlobal = getGlobal();
+
+  const currentSearch = selectCurrentMessageSearch(newGlobal);
+  if (!currentSearch || (query && query !== currentSearch.query)) {
+    return;
+  }
+
   newGlobal = addChatMessagesById(newGlobal, chatOrUser.id, byId);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
-
-  const currentFoundIds = newGlobal.messageSearch.foundIds || [];
-  const newFoundIds = Object.keys(byId).map(Number);
-  const foundIds = unique(Array.prototype.concat(currentFoundIds, newFoundIds));
-  newGlobal = {
-    ...newGlobal,
-    messageSearch: {
-      ...newGlobal.messageSearch,
-      totalCount,
-      ...(nextOffsetId && { nextOffsetId }),
-      ...(!areSortedArraysEqual(currentFoundIds, foundIds) && { foundIds }),
-    },
-  };
-
+  newGlobal = updateMessageSearchResults(newGlobal, chatOrUser.id, type, newFoundIds, totalCount, nextOffsetId);
   setGlobal(newGlobal);
 }

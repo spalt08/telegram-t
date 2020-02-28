@@ -7,7 +7,7 @@ import {
   selectUser,
   selectChatMessages,
   selectChatMessageViewportIds,
-  selectOpenChat,
+  selectOpenChat, selectCurrentMessageSearch,
 } from '../../modules/selectors';
 import {
   getMessageText,
@@ -92,7 +92,12 @@ const RightSearch: FC<IProps> = ({
   };
 
   return (
-    <InfiniteScroll className="RightSearch custom-scroll" items={foundResults} onLoadMore={searchMessages}>
+    <InfiniteScroll
+      className="RightSearch custom-scroll"
+      items={foundResults}
+      preloadBackwards={0}
+      onLoadMore={searchMessages}
+    >
       <p className="helper-text">
         {!query ? (
           'Search messages'
@@ -132,7 +137,9 @@ export default withGlobal(
     }
 
     const viewportIds = selectChatMessageViewportIds(global, chat.id);
-    const { query, totalCount, foundIds } = global.messageSearch;
+    const currentSearch = selectCurrentMessageSearch(global);
+    const { query, resultsByType } = currentSearch || {};
+    const { totalCount, foundIds } = (resultsByType && resultsByType.text) || {};
 
     return {
       chat,

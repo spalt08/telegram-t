@@ -6,7 +6,7 @@ import {
   ApiUpdateConnectionStateType,
   ApiStickerSet,
   ApiSticker,
-  ApiMessageSearchMediaType,
+  ApiMessageSearchType,
   ApiWebPage,
   ApiVideo,
 } from '../api/types';
@@ -77,12 +77,15 @@ export type GlobalState = {
   };
 
   messageSearch: {
-    isTextSearch: boolean;
-    query?: string;
-    mediaType?: ApiMessageSearchMediaType;
-    totalCount?: number;
-    nextOffsetId?: number;
-    foundIds?: number[];
+    byChatId: Record<number, {
+      currentType?: ApiMessageSearchType;
+      query?: string;
+      resultsByType?: Record<ApiMessageSearchType, {
+        totalCount?: number;
+        nextOffsetId: number;
+        foundIds: number[];
+      }>;
+    }>;
   };
 
   mediaViewer: {

@@ -1,64 +1,54 @@
 import { addReducer } from '../../lib/teact/teactn';
-import { updateSelectedChatId } from '../reducers';
+import { selectCurrentMessageSearch, selectCurrentMessageSearchChatId } from '../selectors';
+import { replaceMessageSearchResults, updateMessageSearchType } from '../reducers';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-addReducer('openMessageSearch', (global, actions, payload) => {
-  const { id } = payload!;
-  if (id === global.chats.selectedId && global.messageSearch.isTextSearch) {
-    return global;
+addReducer('openMessageSearch', (global) => {
+  const chatId = selectCurrentMessageSearchChatId(global);
+
+  if (!chatId) {
+    return undefined;
   }
 
-  global = updateSelectedChatId(global, id);
-  global = {
-    ...global,
-    showRightColumn: true,
-    messageSearch: {
-      isTextSearch: true,
-    },
-  };
+  return updateMessageSearchType(global, chatId, 'text');
+});
+
+addReducer('closeMessageSearch', (global) => {
+  const chatId = selectCurrentMessageSearchChatId(global);
+
+  if (!chatId) {
+    return undefined;
+  }
+
+  return updateMessageSearchType(global, chatId, undefined);
+});
+
+addReducer('setMessageSearchQuery', (global, actions, payload) => {
+  const chatId = selectCurrentMessageSearchChatId(global);
+
+  if (!chatId) {
+    return undefined;
+  }
+
+  const { query } = payload!;
+  const { query: currentQuery } = selectCurrentMessageSearch(global) || {};
+
+  if (query !== currentQuery) {
+    global = replaceMessageSearchResults(global, chatId, 'text', MEMO_EMPTY_ARRAY);
+  }
+
+  global = updateMessageSearchType(global, chatId, 'text', query);
 
   return global;
 });
 
-addReducer('closeMessageSearch', (global) => {
-  return {
-    ...global,
-    showRightColumn: false,
-    messageSearch: {
-      isTextSearch: false,
-    },
-  };
-});
-
-addReducer('setMessageSearchQuery', (global, actions, payload) => {
-  const { query } = payload!;
-  const currentQuery = global.messageSearch.query;
-
-  if (query === currentQuery) {
-    return undefined;
-  }
-
-  return {
-    ...global,
-    messageSearch: {
-      isTextSearch: true,
-      query,
-    },
-  };
-});
-
 addReducer('setMessageSearchMediaType', (global, actions, payload) => {
-  const { mediaType } = payload!;
-  const currentMediaType = global.messageSearch.mediaType;
+  const chatId = selectCurrentMessageSearchChatId(global);
 
-  if (mediaType === currentMediaType) {
+  if (!chatId) {
     return undefined;
   }
 
-  return {
-    ...global,
-    messageSearch: {
-      isTextSearch: false,
-      mediaType,
-    },
-  };
+  const { mediaType } = payload!;
+  return updateMessageSearchType(global, chatId, mediaType);
 });

@@ -203,4 +203,4 @@ export interface ApiMessage {
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
-export type ApiMessageSearchMediaType = 'media' | 'document' | 'webPage' | 'audio';
+export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio';

@@ -50,14 +50,14 @@ const MiddleHeader: FC<IProps> = ({
   }, [openChatWithInfo, chatId]);
 
   const handleSearchClick = useCallback(() => {
-    openMessageSearch({ id: chatId });
+    openMessageSearch();
     setTimeout(() => {
       const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
       if (searchInput) {
         searchInput.focus();
       }
     }, SEARCH_FOCUS_DELAY_MS);
-  }, [openMessageSearch, chatId]);
+  }, [openMessageSearch]);
 
   const handleUnpinMessage = useCallback(() => {
     pinMessage({ chatId, messageId: 0 });
