@@ -1,4 +1,6 @@
-import React, { FC, useRef, useState } from '../../lib/teact/teact';
+import React, {
+  FC, useLayoutEffect, useRef, useState,
+} from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
 
@@ -21,6 +23,8 @@ const Transition: FC<IProps> = ({
   direction = 'auto',
   children,
 }) => {
+  const containerRef = useRef<HTMLDivElement>();
+
   const prevChildren = usePrevious<ChildrenFn>(children);
   const prevActiveKey = usePrevious<any>(activeKey);
 
@@ -29,6 +33,14 @@ const Transition: FC<IProps> = ({
 
   const isAppendStageRef = useRef<any>();
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
+  // Restore container height after switching content to absolute positioning.
+  useLayoutEffect(() => {
+    if (!isAnimating) {
+      const container = containerRef.current!;
+      container.style.height = `${container.firstElementChild!.clientHeight}px`;
+    }
+  }, [isAnimating, children]);
 
   const handleAnimationEnd = () => {
     setTimeout(() => {
@@ -64,7 +76,7 @@ const Transition: FC<IProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={className} onAnimationEnd={handleAnimationEnd}>
+    <div ref={containerRef} className={className} onAnimationEnd={handleAnimationEnd}>
       {contents}
     </div>
   );
