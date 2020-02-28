@@ -21,7 +21,8 @@ function handleError(...args: any[]) {
   }
 
   // For startup errors, we just clean the cache and refresh the page.
-  if (Date.now() - startedAt <= STARTUP_TIMEOUT) {
+  const hasCache = Boolean(localStorage.getItem(GLOBAL_STATE_CACHE_KEY));
+  if (hasCache && Date.now() - startedAt <= STARTUP_TIMEOUT) {
     localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
 
     isReloading = true;
