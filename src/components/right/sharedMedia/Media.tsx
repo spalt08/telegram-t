@@ -9,6 +9,8 @@ import {
   getMessageVideo,
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
+import buildClassName from '../../../util/buildClassName';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
 
 import './Media.scss';
 
@@ -26,10 +28,16 @@ const Media: FC<IProps> = ({ message, onClick }) => {
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
+  const { shouldRenderThumb, shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(mediaBlobUrl);
 
   return (
     <div onClick={handleClick} tabIndex={-1} className="Media">
-      <img src={mediaBlobUrl || thumbDataUri} className={!mediaBlobUrl ? 'blur' : ''} alt="" />
+      {shouldRenderThumb && (
+        <img src={thumbDataUri} className="blur" alt="" />
+      )}
+      {shouldRenderFullMedia && (
+        <img src={mediaBlobUrl} className={buildClassName('overlay', transitionClassNames)} alt="" />
+      )}
       {video && <span className="video-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</span>}
     </div>
   );
