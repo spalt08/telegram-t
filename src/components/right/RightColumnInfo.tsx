@@ -71,6 +71,24 @@ const RightColumnInfo: FC<IProps> = ({
     setMessageSearchMediaType({ mediaType });
   }, [mediaType, setMessageSearchMediaType]);
 
+  // Set `min-height` for shared media container to prevent jumping when switching tabs
+  useEffect(() => {
+    function setMinHeight() {
+      const container = containerRef.current!;
+      const transitionEl = container.querySelector<HTMLDivElement>('.Transition')!;
+      const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
+      transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+    }
+
+    setMinHeight();
+
+    window.addEventListener('resize', setMinHeight, false);
+
+    return () => {
+      window.removeEventListener('resize', setMinHeight, false);
+    };
+  }, []);
+
   // Workaround for scrollable content flickering during animation.
   const handleTransitionStart = useCallback(() => {
     const container = containerRef.current!;
