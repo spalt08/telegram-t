@@ -16,7 +16,7 @@ type IProps = (
   & Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>
 );
 
-const MIN_PASSWORD_LENGTH = 4;
+const MIN_PASSWORD_LENGTH = 3;
 const PEEK_MONKEY_SHOW_DELAY = 700;
 const SEGMENT_COVER_EYES = [0, 50];
 const SEGMENT_UNCOVER_EYE = [0, 20];
