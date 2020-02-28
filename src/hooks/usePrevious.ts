@@ -1,11 +1,9 @@
-import { useEffect, useRef } from '../lib/teact/teact';
+import { useRef } from '../lib/teact/teact';
 
-export default <T extends any>(value: T) => {
+export default <T extends any>(next: T) => {
   const ref = useRef<T>();
+  const { current } = ref;
+  ref.current = next;
 
-  useEffect(() => {
-    ref.current = value;
-  });
-
-  return ref.current;
+  return current;
 };
