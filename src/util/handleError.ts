@@ -1,16 +1,14 @@
-import { GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
+import { GLOBAL_STATE_CACHE_KEY } from '../config';
 
 const ERROR_TEXT = `Shoot!
-Something went wrong and we need to refresh the app.
+Something went wrong, please see the error details in Dev Tools Console.`;
 
-Do you want to also re-login?
-Confirm if it happens constantly.`;
+window.onerror = handleError;
+window.addEventListener('unhandledrejection', handleError);
 
-if (process.env.NODE_ENV !== 'development') {
-  window.onerror = handleError;
-  window.addEventListener('unhandledrejection', handleError);
-}
+const STARTUP_TIMEOUT = 5000;
 
+const startedAt = Date.now();
 let isReloading = false;
 
 function handleError(...args: any[]) {
@@ -21,13 +19,18 @@ function handleError(...args: any[]) {
     return;
   }
 
-  // eslint-disable-next-line no-alert
-  if (window.confirm(ERROR_TEXT)) {
-    localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+  // For startup errors, we just clean the cache and refresh the page.
+  if (Date.now() - startedAt <= STARTUP_TIMEOUT) {
+    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+
+    isReloading = true;
+    window.location.reload();
+
+    return;
   }
 
-  localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
-
-  isReloading = true;
-  window.location.reload();
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging') {
+    // eslint-disable-next-line no-alert
+    window.alert(ERROR_TEXT);
+  }
 }
