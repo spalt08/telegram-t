@@ -110,11 +110,6 @@
 
   .Transition {
     flex-grow: 1;
-
-    &.slide {
-      overflow: hidden;
-      height: auto !important;
-    }
   }
 
   .content {

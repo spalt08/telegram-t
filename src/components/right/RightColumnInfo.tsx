@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useState,
+  FC, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -52,6 +52,8 @@ const RightColumnInfo: FC<IProps> = ({
   searchMessages,
   openMediaViewer,
 }) => {
+  const containerRef = useRef<HTMLDivElement>();
+
   const [activeTab, setActiveTab] = useState(0);
   const [mediaType, setMediaType] = useState();
 
@@ -69,12 +71,29 @@ const RightColumnInfo: FC<IProps> = ({
     setMessageSearchMediaType({ mediaType });
   }, [mediaType, setMessageSearchMediaType]);
 
+  // Workaround for scrollable content flickering during animation.
+  const handleTransitionStart = useCallback(() => {
+    const container = containerRef.current!;
+    if (container.style.overflowY !== 'hidden') {
+      const scrollBarWidth = container.offsetWidth - container.clientWidth;
+      container.style.overflowY = 'hidden';
+      container.style.marginRight = `${scrollBarWidth}px`;
+    }
+  }, []);
+
+  const handleTransitionStop = useCallback(() => {
+    const container = containerRef.current!;
+    container.style.overflowY = 'scroll';
+    container.style.marginRight = '0';
+  }, []);
+
   const handleSelectMedia = useCallback((messageId) => {
     openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isReversed: true });
   }, [chatId, resolvedUserId, openMediaViewer]);
 
   return (
     <InfiniteScroll
+      ref={containerRef}
       className="RightColumnInfo custom-scroll"
       items={messageIds}
       onLoadMore={searchMessages}
@@ -87,7 +106,7 @@ const RightColumnInfo: FC<IProps> = ({
         <GroupExtra chatId={chatId} />,
       ]}
       <div className="shared-media">
-        <Transition activeKey={activeTab} name="slide">
+        <Transition activeKey={activeTab} name="slide" onStart={handleTransitionStart} onStop={handleTransitionStop}>
           {() => (
             <div className={`content ${mediaType}-list`}>
               {mediaType === 'media' ? (
