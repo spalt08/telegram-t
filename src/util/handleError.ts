@@ -6,6 +6,7 @@ Something went wrong, please see the error details in Dev Tools Console.`;
 window.onerror = handleError;
 window.addEventListener('unhandledrejection', handleError);
 
+const { NODE_ENV } = process.env;
 const STARTUP_TIMEOUT = 5000;
 
 const startedAt = Date.now();
@@ -29,7 +30,13 @@ function handleError(...args: any[]) {
     return;
   }
 
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging') {
+  const error = typeof args[4] === 'object' ? args[4].error : undefined;
+  // Parcel bug.
+  if (NODE_ENV === 'development' && error && error.message.includes('css-loader.js')) {
+    return;
+  }
+
+  if (NODE_ENV === 'development' || NODE_ENV === 'staging') {
     // eslint-disable-next-line no-alert
     window.alert(ERROR_TEXT);
   }
