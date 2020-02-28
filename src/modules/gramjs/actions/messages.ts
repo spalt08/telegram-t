@@ -87,12 +87,12 @@ addReducer('sendMessage', (global, actions, payload) => {
   }
 
   const {
-    text, attachment, sticker, gif,
+    text, entities, attachment, sticker, gif,
   } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
   void callApi('sendMessage', {
-    chat, currentUserId, text, replyingTo, attachment, sticker, gif,
+    chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif,
   });
 
   actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });

@@ -137,11 +137,31 @@ export interface ApiMessageForwardInfo {
 }
 
 export interface ApiMessageEntity {
-  className: string;
+  type: string;
   offset: number;
   length: number;
-  user_id?: number;
+  userId?: number;
   url?: string;
+}
+
+export enum ApiMessageEntityTypes {
+  Bold = 'MessageEntityBold',
+  Blockquote = 'MessageEntityBlockquote',
+  BotCommand = 'MessageEntityBotCommand',
+  Cashtag = 'MessageEntityCashtag',
+  Code = 'MessageEntityCode',
+  Email = 'MessageEntityEmail',
+  Hashtag = 'MessageEntityHashtag',
+  Italic = 'MessageEntityItalic',
+  MentionName = 'MessageEntityMentionName',
+  Mention = 'MessageEntityMention',
+  Phone = 'MessageEntityPhone',
+  Pre = 'MessageEntityPre',
+  Strike = 'MessageEntityStrike',
+  TextUrl = 'MessageEntityTextUrl',
+  Url = 'MessageEntityUrl',
+  Underline = 'MessageEntityUnderline',
+  Unknown = 'MessageEntityUnknown',
 }
 
 export interface ApiFormattedText {

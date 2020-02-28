@@ -3,11 +3,11 @@ import React from '../../lib/teact/teact';
 import { ApiMessage, ApiUser } from '../../api/types';
 import { getUserFullName } from '../../modules/helpers';
 import { buildMessageContent } from '../middle/message/util/buildMessageContent';
+import { TextPart } from '../middle/message/util/enhanceText';
 
 import UserLink from './UserLink';
 import MessageLink from './MessageLink';
 
-type TextPart = string | Element;
 interface ServiceMessageTextOptions {
   maxTextLength?: number;
   plain?: boolean;

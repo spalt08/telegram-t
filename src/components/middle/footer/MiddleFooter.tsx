@@ -9,6 +9,8 @@ import { ApiAttachment, ApiSticker, ApiVideo } from '../../../api/types';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 import * as voiceRecording from '../../../util/voiceRecording';
+import parseTextEntities from '../util/parseTextEntities';
+import focusEditableElement from '../../../util/focusEditableElement';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
@@ -27,10 +29,25 @@ const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
 const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
+const EDITABLE_INPUT_ID = 'editable-message-text';
+const MAX_NESTING_PARENTS = 5;
+const MAX_MESSAGE_LENGTH = 4096;
+
+function isSelectionInsideInput(selectionRange: Range) {
+  const { commonAncestorContainer } = selectionRange;
+  let parentNode: HTMLElement | null = commonAncestorContainer as HTMLElement;
+  let iterations = 1;
+  while (parentNode && parentNode.id !== EDITABLE_INPUT_ID && iterations < MAX_NESTING_PARENTS) {
+    parentNode = parentNode.parentElement;
+    iterations++;
+  }
+
+  return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
+}
 
 const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
-  const [text, setText] = useState('');
-  const textRef = useRef(text);
+  const [html, setHtml] = useState<string>('');
+  const htmlRef = useRef<string>(html);
 
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
@@ -43,14 +60,35 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const startRecordTimeRef = useRef<number>();
   const [currentRecordTime, setCurrentRecordTime] = useState();
 
-  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (text && !attachment);
+  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment);
 
   useEffect(() => {
-    textRef.current = text;
-  }, [text]);
+    htmlRef.current = html;
+  }, [html]);
+
+  const insertTextAndUpdateCursor = useCallback((text: string) => {
+    const selection = window.getSelection()!;
+
+    if (selection.rangeCount) {
+      const selectionRange = selection.getRangeAt(0);
+      if (isSelectionInsideInput(selectionRange)) {
+        // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
+        document.execCommand('insertText', false, text);
+        return;
+      }
+
+      setHtml(`${htmlRef.current!}${text}`);
+
+      // If selection is outside of input, set cursor at the end of input
+      requestAnimationFrame(() => {
+        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+        focusEditableElement(messageInput);
+      });
+    }
+  }, []);
 
   useEffect(() => {
-    async function pasteImageFromClipboard(e: ClipboardEvent) {
+    async function handlePaste(e: ClipboardEvent) {
       if (!e.clipboardData) {
         return;
       }
@@ -60,19 +98,30 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
       const file = media && media.getAsFile();
 
-      if (file) {
-        e.preventDefault();
+      const pasteText = e.clipboardData.getData('text')
+        .substring(0, MAX_MESSAGE_LENGTH)
+        .replace(/<br[ ]?\/?>/g, '\n')
+        .replace(/</g, '&lt;');
+      if (!file && !pasteText) {
+        return;
+      }
 
+      e.preventDefault();
+
+      if (file) {
         setAttachment(await buildAttachment(file, true));
+      }
+      if (pasteText) {
+        insertTextAndUpdateCursor(pasteText);
       }
     }
 
-    document.addEventListener('paste', pasteImageFromClipboard, false);
+    document.addEventListener('paste', handlePaste, false);
 
     return () => {
-      document.removeEventListener('paste', pasteImageFromClipboard, false);
+      document.removeEventListener('paste', handlePaste, false);
     };
-  }, []);
+  }, [insertTextAndUpdateCursor]);
 
   const handleOpenAttachMenu = useCallback(() => {
     if (canOpenAttachMenu.current) {
@@ -98,16 +147,6 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   const handleCloseStickerMenu = useCallback(() => {
     setIsStickerMenuOpen(false);
-  }, []);
-
-  const handleEmojiSelect = useCallback((emoji: string) => {
-    const messageInput = document.getElementById('message-input-text') as HTMLInputElement;
-    const selectionStart = messageInput.selectionStart || 0;
-    const selectionEnd = messageInput.selectionEnd || 0;
-    setText(`${textRef.current.substring(0, selectionStart)}${emoji}${textRef.current.substring(selectionEnd)}`);
-    requestAnimationFrame(() => {
-      messageInput.setSelectionRange(selectionStart + emoji.length, selectionStart + emoji.length);
-    });
   }, []);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -177,32 +216,35 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
       }
     }
 
-    const trimmedText = textRef.current.trim();
+    const { rawText, entities } = parseTextEntities(htmlRef.current!);
 
-    if (trimmedText || currentAttachment) {
-      sendMessage({
-        text: trimmedText,
-        attachment: currentAttachment,
-      });
-
-      setText('');
-      setAttachment(undefined);
-      setIsStickerMenuOpen(false);
+    if (!currentAttachment && !rawText) {
+      return;
     }
+
+    sendMessage({
+      text: rawText,
+      entities,
+      attachment: currentAttachment,
+    });
+
+    setHtml('');
+    setAttachment(undefined);
+    setIsStickerMenuOpen(false);
   }, [activeVoiceRecording, attachment, sendMessage, stopRecordingVoice]);
 
   return (
     <div className="MiddleFooter">
       <Attachment
         attachment={attachment}
-        caption={attachment ? text : ''}
-        onCaptionUpdate={setText}
+        caption={attachment ? html : ''}
+        onCaptionUpdate={setHtml}
         onSend={handleSend}
         onClear={handleClearAttachment}
       />
       <div id="message-compose">
         <MessageInputReply />
-        <WebPagePreview messageText={!attachment ? text : ''} />
+        <WebPagePreview messageText={!attachment ? html : ''} />
         <div className="message-input-wrapper">
           <Button
             className={`${isStickerMenuOpen ? 'activated' : ''}`}
@@ -214,10 +256,12 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
             <i className="icon-smile" />
           </Button>
           <MessageInput
-            text={!attachment ? text : ''}
-            onUpdate={setText}
+            id="message-input-text"
+            html={!attachment ? html : ''}
+            placeholder="Message"
+            onUpdate={setHtml}
             onSend={handleSend}
-            isStickerMenuOpen={isStickerMenuOpen}
+            shouldSetFocus={isStickerMenuOpen}
           />
           {!activeVoiceRecording && (
             <Button
@@ -243,7 +287,7 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
           <StickerMenu
             isOpen={isStickerMenuOpen}
             onClose={handleCloseStickerMenu}
-            onEmojiSelect={handleEmojiSelect}
+            onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
           />

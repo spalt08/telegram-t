@@ -5,13 +5,16 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { debounce } from '../../../util/schedulers';
+import focusEditableElement from '../../../util/focusEditableElement';
 
 type IProps = {
+  id: string;
+  html: string;
+  placeholder: string;
   selectedChatId?: number;
   replyingTo?: number;
-  text: string;
-  isStickerMenuOpen: boolean;
-  onUpdate: Function;
+  shouldSetFocus: boolean;
+  onUpdate: (html: string) => void;
   onSend: Function;
 };
 
@@ -21,41 +24,49 @@ const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 let isJustSent = false;
 
 const MessageInput: FC<IProps> = ({
-  selectedChatId, replyingTo, text, onUpdate, onSend, isStickerMenuOpen,
+  id, html, placeholder, selectedChatId, replyingTo, onUpdate, onSend, shouldSetFocus,
 }) => {
-  const inputRef = useRef<HTMLTextAreaElement>();
+  const inputRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
-    const input = inputRef.current!;
-
-    if (text) {
-      if (input.scrollHeight !== input.offsetHeight) {
-        input.style.height = 'auto';
-        input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
-      }
-
-      input.style.overflowY = input.scrollHeight <= MAX_INPUT_HEIGHT ? 'hidden' : 'auto';
-    } else {
-      input.removeAttribute('style');
+    if (!inputRef.current) {
+      return;
     }
-  }, [text]);
+    if (html !== undefined && html !== inputRef.current.innerHTML) {
+      inputRef.current.innerHTML = html;
+    }
+    updateInputHeight();
+  }, [html]);
 
   function focusInput() {
     if (inputRef.current) {
-      inputRef.current.focus();
+      focusEditableElement(inputRef.current);
     }
   }
 
-  function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
+  function handleChange(e: ChangeEvent<HTMLDivElement>) {
     if (isJustSent) {
       isJustSent = false;
       return;
     }
 
-    onUpdate(e.currentTarget.value);
+    const { currentTarget } = e;
+    onUpdate(currentTarget.innerHTML);
   }
 
-  function handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function updateInputHeight() {
+    if (!inputRef.current) {
+      return;
+    }
+    if (inputRef.current.scrollHeight !== inputRef.current.offsetHeight) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, MAX_INPUT_HEIGHT)}px`;
+    }
+
+    inputRef.current.classList.toggle('overflown', inputRef.current.scrollHeight > MAX_INPUT_HEIGHT);
+  }
+
+  function handleKeyPress(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
 
@@ -69,7 +80,7 @@ const MessageInput: FC<IProps> = ({
     }
   }
 
-  useEffect(focusInput, [selectedChatId, replyingTo, isStickerMenuOpen, text]);
+  useEffect(focusInput, [selectedChatId, replyingTo, shouldSetFocus]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
@@ -86,18 +97,24 @@ const MessageInput: FC<IProps> = ({
     };
   }, []);
 
+  const inputClassNames = ['form-control', 'custom-scroll'];
+  if (html.length) {
+    inputClassNames.push('touched');
+  }
+
   return (
-    <textarea
-      ref={inputRef}
-      id="message-input-text"
-      className="form-control custom-scroll"
-      placeholder="Message"
-      rows={1}
-      autoComplete="off"
-      onChange={handleChange}
-      onKeyPress={handleKeyPress}
-      value={text}
-    />
+    <div id={id}>
+      <div
+        ref={inputRef}
+        id="editable-message-text"
+        className={inputClassNames.join(' ')}
+        contentEditable
+        onClick={focusInput}
+        onChange={handleChange}
+        onKeyPress={handleKeyPress}
+      />
+      <span className="placeholder-text">{placeholder}</span>
+    </div>
   );
 };
 

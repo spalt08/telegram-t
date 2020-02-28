@@ -14,11 +14,11 @@ import {
   ApiAttachment,
   ApiPoll,
   ApiWebPage,
+  ApiMessageEntity,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
-import { omitGramJsFields } from './helpers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
 import { reduceWaveform } from '../gramjsBuilders';
@@ -124,7 +124,7 @@ export function buildMessageTextContent(
     text: {
       '@type': 'formattedText' as const,
       text: message,
-      ...(entities && { entities: entities.map(omitGramJsFields) }),
+      ...(entities && { entities: entities.map(buildApiMessageEntity) }),
     },
   };
 }
@@ -470,6 +470,7 @@ export function buildLocalMessage(
   chatId: number,
   currentUserId: number,
   text?: string,
+  entities?: ApiMessageEntity[],
   replyingTo?: number,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
@@ -485,6 +486,7 @@ export function buildLocalMessage(
         text: {
           '@type': 'formattedText',
           text,
+          entities,
         },
       }),
       ...(attachment && buildUploadingMedia(attachment)),
@@ -558,4 +560,15 @@ function buildUploadingMedia(
       },
     };
   }
+}
+
+function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
+  const { className: type, offset, length } = entity;
+  return {
+    type,
+    offset,
+    length,
+    ...('userId' in entity && typeof entity.userId === 'number' && { userId: entity.userId }),
+    ...('url' in entity && { url: entity.url }),
+  };
 }

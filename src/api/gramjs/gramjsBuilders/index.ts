@@ -2,7 +2,12 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
-import { ApiSticker, ApiVideo } from '../../types';
+import {
+  ApiSticker,
+  ApiVideo,
+  ApiMessageEntity,
+  ApiMessageEntityTypes,
+} from '../../types';
 import localDb from '../localDb';
 
 const WAVEFORM_LENGTH = 63;
@@ -135,4 +140,34 @@ export function buildMessageFromUpdateShortSent(
     fromId: chatId,
     media: update.media,
   } as GramJs.Message);
+}
+
+export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMessageEntity {
+  const {
+    type, offset, length, url,
+  } = entity;
+  switch (type) {
+    case ApiMessageEntityTypes.Bold:
+      return new GramJs.MessageEntityBold({ offset, length });
+    case ApiMessageEntityTypes.Italic:
+      return new GramJs.MessageEntityItalic({ offset, length });
+    case ApiMessageEntityTypes.Underline:
+      return new GramJs.MessageEntityUnderline({ offset, length });
+    case ApiMessageEntityTypes.Strike:
+      return new GramJs.MessageEntityStrike({ offset, length });
+    case ApiMessageEntityTypes.Code:
+      return new GramJs.MessageEntityCode({ offset, length });
+    case ApiMessageEntityTypes.Pre:
+      return new GramJs.MessageEntityPre({ offset, length, language: '' });
+    case ApiMessageEntityTypes.Blockquote:
+      return new GramJs.MessageEntityBlockquote({ offset, length });
+    case ApiMessageEntityTypes.TextUrl:
+      return new GramJs.MessageEntityTextUrl({ offset, length, url: url! });
+    case ApiMessageEntityTypes.Url:
+      return new GramJs.MessageEntityUrl({ offset, length });
+    case ApiMessageEntityTypes.Hashtag:
+      return new GramJs.MessageEntityHashtag({ offset, length });
+    default:
+      return new GramJs.MessageEntityUnknown({ offset, length });
+  }
 }

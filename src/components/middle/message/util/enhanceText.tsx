@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from '../../../../lib/teact/teact';
-import { ApiFormattedText, ApiMessageEntity } from '../../../../api/types';
+import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../../api/types';
 import { DEBUG } from '../../../../config';
 import MentionLink from '../MentionLink';
 import SafeLink from '../SafeLink';
@@ -11,13 +11,13 @@ function stopPropagation(event: any) {
   event.stopPropagation();
 }
 
-function getBotCommand(entityText: string) {
-  return entityText.length > 0 && entityText[0] === '/' ? entityText.substring(1) : entityText;
+function getBotCommand(entityContent: string) {
+  return entityContent.length > 0 && entityContent[0] === '/' ? entityContent.substring(1) : entityContent;
 }
 
-function getLinkUrl(entityText: string, entity: ApiMessageEntity) {
-  const { className, url } = entity;
-  return className === 'MessageEntityTextUrl' && url ? url : entityText;
+function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
+  const { type, url } = entity;
+  return type === ApiMessageEntityTypes.TextUrl && url ? url : entityContent;
 }
 
 function searchCurrentChat(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, text: string) {
@@ -32,107 +32,108 @@ function searchCurrentChat(event: React.MouseEvent<HTMLAnchorElement, MouseEvent
 }
 
 function processEntity(
-  className: string,
   entity: ApiMessageEntity,
-  entityKey: number,
-  entityText: string,
+  entityContent: TextPart,
+  nestedEntityText?: string,
 ) {
-  switch (className) {
-    case 'MessageEntityBold':
-      return <strong key={entityKey}>{addLineBreaks(entityText)}</strong>;
-    case 'MessageEntityBlockquote':
-      return <blockquote key={entityKey}>{addLineBreaks(entityText)}</blockquote>;
+  const entityText = typeof entityContent === 'string'
+    ? entityContent
+    : nestedEntityText;
+
+  if (!entityText) {
+    return addLineBreaks(entityContent);
+  }
+
+  switch (entity.type) {
+    case ApiMessageEntityTypes.Bold:
+      return <strong>{addLineBreaks(entityContent)}</strong>;
+    case ApiMessageEntityTypes.Blockquote:
+      return <blockquote>{addLineBreaks(entityContent)}</blockquote>;
     // TODO @not-implemented
-    case 'MessageEntityBotCommand':
+    case ApiMessageEntityTypes.BotCommand:
       return (
         <a
-          key={entityKey}
           onClick={stopPropagation}
           href={`tg://bot_command?command=${getBotCommand(entityText)}&bot=`}
           className="text-entity-link not-implemented"
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </a>
       );
-    case 'MessageEntityCashtag':
+    case ApiMessageEntityTypes.Cashtag:
       return (
         <a
-          key={entityKey}
           onClick={(event) => searchCurrentChat(event, entityText)}
           className="text-entity-link"
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </a>
       );
-    case 'MessageEntityCode':
-      return <code className="text-entity-code" key={entityKey}>{addLineBreaks(entityText)}</code>;
-    case 'MessageEntityEmail':
+    case ApiMessageEntityTypes.Code:
+      return <code className="text-entity-code">{addLineBreaks(entityContent)}</code>;
+    case ApiMessageEntityTypes.Email:
       return (
         <a
-          key={entityKey}
           href={`mailto:${entityText}`}
           onClick={stopPropagation}
           target="_blank"
           rel="noopener noreferrer"
           className="text-entity-link"
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </a>
       );
-    case 'MessageEntityHashtag':
+    case ApiMessageEntityTypes.Hashtag:
       return (
         <a
-          key={entityKey}
           onClick={(event) => searchCurrentChat(event, entityText)}
           className="text-entity-link"
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </a>
       );
-    case 'MessageEntityItalic':
-      return <em key={entityKey}>{addLineBreaks(entityText)}</em>;
-    case 'MessageEntityMentionName':
+    case ApiMessageEntityTypes.Italic:
+      return <em>{addLineBreaks(entityContent)}</em>;
+    case ApiMessageEntityTypes.MentionName:
       return (
-        <MentionLink key={entityKey} userId={entity.user_id}>
-          {addLineBreaks(entityText)}
+        <MentionLink userId={entity.userId}>
+          {addLineBreaks(entityContent)}
         </MentionLink>
       );
-    case 'MessageEntityMention':
+    case ApiMessageEntityTypes.Mention:
       return (
-        <MentionLink key={entityKey} userName={entityText}>
-          {addLineBreaks(entityText)}
+        <MentionLink userName={entityText}>
+          {addLineBreaks(entityContent)}
         </MentionLink>
       );
-    case 'MessageEntityPhone':
+    case ApiMessageEntityTypes.Phone:
       return (
         <a
-          key={entityKey}
           href={`tel:${entityText}`}
           onClick={stopPropagation}
           className="text-entity-link"
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </a>
       );
-    case 'MessageEntityPre':
-      return <pre className="text-entity-pre" key={entityKey}>{addLineBreaks(entityText)}</pre>;
-    case 'MessageEntityStrike':
-      return <del key={entityKey}>{addLineBreaks(entityText)}</del>;
-    case 'MessageEntityTextUrl':
-    case 'MessageEntityUrl':
+    case ApiMessageEntityTypes.Pre:
+      return <pre className="text-entity-pre">{addLineBreaks(entityContent)}</pre>;
+    case ApiMessageEntityTypes.Strike:
+      return <del>{addLineBreaks(entityContent)}</del>;
+    case ApiMessageEntityTypes.TextUrl:
+    case ApiMessageEntityTypes.Url:
       return (
         <SafeLink
-          key={entityKey}
           url={getLinkUrl(entityText, entity)}
           text={entityText}
         >
-          {addLineBreaks(entityText)}
+          {addLineBreaks(entityContent)}
         </SafeLink>
       );
-    case 'MessageEntityUnderline':
-      return <ins key={entityKey}>{addLineBreaks(entityText)}</ins>;
+    case ApiMessageEntityTypes.Underline:
+      return <ins>{addLineBreaks(entityContent)}</ins>;
     default:
-      return addLineBreaks(entityText);
+      return addLineBreaks(entityContent);
   }
 }
 
@@ -154,9 +155,11 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
   let deleteLineBreakAfterPre = false;
   const result: TextPart[] = [];
   let index = 0;
+  let nestedEntity: TextPart | undefined;
+  let nestedEntityText: string | undefined;
 
   entities.forEach((entity, arrayIndex) => {
-    const { offset, length, className } = entity;
+    const { offset, length, type } = entity;
     let textBefore = text.substring(index, offset);
     const textBeforeLength = textBefore.length;
     if (textBefore) {
@@ -164,30 +167,41 @@ export function enhanceTextParts(formattedText?: ApiFormattedText) {
         textBefore = textBefore.substr(1);
         deleteLineBreakAfterPre = false;
       }
-      if (textBefore) {
+      if (!nestedEntity && textBefore) {
         result.push(...addLineBreaks(textBefore));
       }
     }
 
-    const entityKey = offset;
-    let entityText = text.substring(offset, offset + length);
-    if (deleteLineBreakAfterPre && entityText.length > 0 && entityText[0] === '\n') {
-      entityText = entityText.substr(1);
+    let entityContent: TextPart = text.substring(offset, offset + length);
+    if (nestedEntity) {
+      entityContent = nestedEntity;
+    } else if (deleteLineBreakAfterPre && entityContent.length > 0 && entityContent[0] === '\n') {
+      entityContent = entityContent.substr(1);
       deleteLineBreakAfterPre = false;
     }
 
-    if (className === 'MessageEntityPre') {
+    if (type === ApiMessageEntityTypes.Pre) {
       deleteLineBreakAfterPre = true;
     }
 
-    // TODO Support multiple text entities on same text fragments
-    // Currently, if text fragment has multiple text entities, only the last one gets applied
+    const newEntity = processEntity(entity, entityContent, nestedEntityText);
+
     const nextEntity = entities[arrayIndex + 1];
-    if (nextEntity && nextEntity.offset === offset) {
+    if (nextEntity && nextEntity.offset >= offset && nextEntity.offset < offset + length) {
+      // If there are multiple entities on the same offset, store current processed entity
+      // to insert it inside another processed entity on next iteration
+      nestedEntity = newEntity;
+      if (nextEntity.offset !== offset) {
+        nestedEntityText = text.substring(nextEntity.offset, nextEntity.offset + nextEntity.length);
+      } else if (typeof entityContent === 'string') {
+        nestedEntityText = entityContent;
+      }
       return;
+    } else {
+      nestedEntity = undefined;
+      nestedEntityText = undefined;
     }
 
-    const newEntity = processEntity(className, entity, entityKey, entityText);
     if (Array.isArray(newEntity)) {
       result.push(...newEntity);
     } else {

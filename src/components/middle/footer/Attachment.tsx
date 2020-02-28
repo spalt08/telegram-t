@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useRef,
+  FC, memo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
 import { ApiAttachment } from '../../../api/types';
@@ -10,20 +10,18 @@ import usePrevious from '../../../hooks/usePrevious';
 
 import Button from '../../ui/Button';
 import Dialog from '../../ui/Dialog';
-import InputText from '../../ui/InputText';
 import File from '../../common/File';
+import MessageInput from './MessageInput';
 
 import './Attachment.scss';
 
 type IProps = {
   attachment?: ApiAttachment;
   caption?: string;
-  onCaptionUpdate: (caption: string) => void;
+  onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onClear: () => void;
 };
-
-let isJustSent = false;
 
 const Attachment: FC<IProps> = ({
   attachment, caption, onCaptionUpdate, onSend, onClear,
@@ -31,48 +29,16 @@ const Attachment: FC<IProps> = ({
   const prevAttachment = usePrevious(attachment);
   const renderingAttachment = attachment || prevAttachment;
   const isOpen = Boolean(attachment);
-  const inputRef = useRef<HTMLInputElement>();
   const photo = renderingAttachment && renderingAttachment.file.type.startsWith('image/') && renderingAttachment.quick;
   const video = renderingAttachment && renderingAttachment.file.type.startsWith('video/') && renderingAttachment.quick;
 
-  function focusInput() {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }
-
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
-
-  useEffect(focusInput, [isOpen]);
 
   const sendAttachment = useCallback(() => {
     if (isOpen) {
       onSend();
     }
   }, [isOpen, onSend]);
-
-  function handleCaptionChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (isJustSent) {
-      isJustSent = false;
-      return;
-    }
-
-    const { value } = e.target;
-
-    onCaptionUpdate(value);
-  }
-
-  function handleCaptionKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      sendAttachment();
-
-      // Disable `onChange` following immediately after `onKeyPress`.
-      isJustSent = true;
-      setTimeout(() => {
-        isJustSent = false;
-      }, 0);
-    }
-  }
 
   function renderHeader() {
     if (!renderingAttachment) {
@@ -113,12 +79,13 @@ const Attachment: FC<IProps> = ({
         </div>
       )}
 
-      <InputText
-        ref={inputRef}
+      <MessageInput
+        id="caption-input-text"
+        html={caption}
         placeholder="Add a caption..."
-        value={caption}
-        onChange={handleCaptionChange}
-        onKeyPress={handleCaptionKeyPress}
+        onUpdate={onCaptionUpdate}
+        onSend={onSend}
+        shouldSetFocus={isOpen}
       />
     </Dialog>
   );
