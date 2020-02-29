@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 
-import { calculateMediaViewerVideoDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../../util/mediaDimensions';
+import { calculateMediaViewerVideoDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
 import {
   getChatMediaMessageIds,
@@ -20,7 +20,7 @@ import {
 } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useMedia from '../../hooks/useMedia';
-import { renderMessageText } from '../../helpers/renderMessageText';
+import { renderMessageText } from '../common/helpers/renderMessageText';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';

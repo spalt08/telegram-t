@@ -4,7 +4,7 @@ import React, {
 
 import { ApiAttachment } from '../../../api/types';
 
-import { getFileExtension } from '../../../util/documentInfo';
+import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
 

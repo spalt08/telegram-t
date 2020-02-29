@@ -1,4 +1,4 @@
-import { ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
+import { ApiMessageEntity, ApiMessageEntityTypes } from '../../../../api/types';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   B: ApiMessageEntityTypes.Bold,
@@ -17,31 +17,39 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
 const MAX_TAG_DEEPNESS = 3;
 const MAX_MESSAGE_LENGTH = 4096;
 
-function getEntityTypeFromNode(node: ChildNode) {
-  if (ENTITY_CLASS_BY_NODE_NAME[node.nodeName]) {
-    return ENTITY_CLASS_BY_NODE_NAME[node.nodeName];
+export default function parseMessageInput(html: string) {
+  const fragment = document.createElement('div');
+  fragment.innerHTML = parseMarkdown(html);
+  const rawText = fragment.innerText.trim().slice(0, MAX_MESSAGE_LENGTH);
+  let textIndex = 0;
+  let recursionDeepness = 0;
+  const entities: ApiMessageEntity[] = [];
+
+  function addEntity(node: ChildNode) {
+    const { index, entity } = getEntityDataFromNode(node, rawText, textIndex);
+
+    if (entity) {
+      textIndex = index;
+      entities.push(entity);
+    } else if (node.textContent) {
+      textIndex += node.textContent.length;
+    }
+
+    if (node.hasChildNodes() && recursionDeepness <= MAX_TAG_DEEPNESS) {
+      recursionDeepness += 1;
+      Array.from(node.childNodes).forEach(addEntity);
+    }
   }
 
-  if (node.nodeName === 'A') {
-    const anchor = node as HTMLAnchorElement;
-    if (anchor.href.startsWith('mailto:')) {
-      return ApiMessageEntityTypes.Email;
-    }
-    if (anchor.href.startsWith('tel:')) {
-      return ApiMessageEntityTypes.Phone;
-    }
-    if (anchor.href !== anchor.textContent) {
-      return ApiMessageEntityTypes.TextUrl;
-    }
+  Array.from(fragment.childNodes).forEach((node) => {
+    recursionDeepness = 1;
+    addEntity(node);
+  });
 
-    return ApiMessageEntityTypes.Url;
-  }
-
-  if (node.nodeName === 'SPAN') {
-    return (node as HTMLElement).dataset['data-entity-type'];
-  }
-
-  return undefined;
+  return {
+    rawText,
+    entities: entities.length ? entities : undefined,
+  };
 }
 
 function parseMarkdown(html: string) {
@@ -119,37 +127,29 @@ function getEntityDataFromNode(node: ChildNode, rawText: string, textIndex: numb
   };
 }
 
-export default function parseTextEntities(html: string) {
-  const fragment = document.createElement('div');
-  fragment.innerHTML = parseMarkdown(html);
-  const rawText = fragment.innerText.trim().slice(0, MAX_MESSAGE_LENGTH);
-  let textIndex = 0;
-  let recursionDeepness = 0;
-  const entities: ApiMessageEntity[] = [];
-
-  function addEntity(node: ChildNode) {
-    const { index, entity } = getEntityDataFromNode(node, rawText, textIndex);
-
-    if (entity) {
-      textIndex = index;
-      entities.push(entity);
-    } else if (node.textContent) {
-      textIndex += node.textContent.length;
-    }
-
-    if (node.hasChildNodes() && recursionDeepness <= MAX_TAG_DEEPNESS) {
-      recursionDeepness += 1;
-      Array.from(node.childNodes).forEach(addEntity);
-    }
+function getEntityTypeFromNode(node: ChildNode) {
+  if (ENTITY_CLASS_BY_NODE_NAME[node.nodeName]) {
+    return ENTITY_CLASS_BY_NODE_NAME[node.nodeName];
   }
 
-  Array.from(fragment.childNodes).forEach((node) => {
-    recursionDeepness = 1;
-    addEntity(node);
-  });
+  if (node.nodeName === 'A') {
+    const anchor = node as HTMLAnchorElement;
+    if (anchor.href.startsWith('mailto:')) {
+      return ApiMessageEntityTypes.Email;
+    }
+    if (anchor.href.startsWith('tel:')) {
+      return ApiMessageEntityTypes.Phone;
+    }
+    if (anchor.href !== anchor.textContent) {
+      return ApiMessageEntityTypes.TextUrl;
+    }
 
-  return {
-    rawText,
-    entities: entities.length ? entities : undefined,
-  };
+    return ApiMessageEntityTypes.Url;
+  }
+
+  if (node.nodeName === 'SPAN') {
+    return (node as HTMLElement).dataset['data-entity-type'];
+  }
+
+  return undefined;
 }

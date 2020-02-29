@@ -1,6 +1,6 @@
 import { ApiMessage } from '../../../../api/types';
 
-import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
+import parseEmojiOnlyString from '../../../common/helpers/parseEmojiOnlyString';
 import { getMessageContent } from '../../../../modules/helpers';
 
 const SOLID_BACKGROUND_CLASSES = [

@@ -4,7 +4,7 @@ import React, {
 
 import { ApiMessage } from '../../../api/types';
 
-import { getStickerDimensions } from '../../../util/mediaDimensions';
+import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
 import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';

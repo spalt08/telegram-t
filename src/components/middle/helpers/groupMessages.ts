@@ -1,7 +1,7 @@
 import { ApiMessage } from '../../../api/types';
 
 import { isSameDay } from '../../../util/dateFormat';
-import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
+import parseEmojiOnlyString from '../../common/helpers/parseEmojiOnlyString';
 import {
   getMessageRenderKey,
   isActionMessage,

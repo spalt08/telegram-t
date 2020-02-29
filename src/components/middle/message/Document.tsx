@@ -2,7 +2,7 @@ import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
-import { getDocumentInfo } from '../../../util/documentInfo';
+import { getDocumentInfo } from '../../common/helpers/documentInfo';
 import { getMessageTransferParams } from '../../../modules/helpers';
 
 import File from '../../common/File';

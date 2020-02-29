@@ -1,11 +1,11 @@
-import React from '../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 
-import { ApiMessage, ApiUser } from '../api/types';
-import { getMessageContent, getMessageSummaryText, getUserFullName } from '../modules/helpers';
+import { ApiMessage, ApiUser } from '../../../api/types';
+import { getMessageContent, getMessageSummaryText, getUserFullName } from '../../../modules/helpers';
 import { TextPart } from './renderMessageText';
 
-import UserLink from '../components/common/UserLink';
-import MessageLink from '../components/common/MessageLink';
+import UserLink from '../UserLink';
+import MessageLink from '../MessageLink';
 
 interface ServiceMessageTextOptions {
   maxTextLength?: number;

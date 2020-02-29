@@ -6,7 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
 
-import getMonkeyAnimationData from '../../util/monkeys';
+import getMonkeyAnimationData from '../common/helpers/monkeys';
 import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';

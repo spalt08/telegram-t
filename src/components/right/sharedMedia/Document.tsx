@@ -2,7 +2,7 @@ import React, { FC, memo } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
-import { getDocumentExtension } from '../../../util/documentInfo';
+import { getDocumentExtension } from '../../common/helpers/documentInfo';
 import { getMessageDocument } from '../../../modules/helpers';
 
 import File from '../../common/File';

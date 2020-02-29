@@ -15,7 +15,7 @@ import {
   isChatChannel,
   getUserFullName,
 } from '../../modules/helpers';
-import { TextPart } from '../../helpers/renderMessageText';
+import { TextPart } from '../common/helpers/renderMessageText';
 import LastMessageMeta from '../left/LastMessageMeta';
 import { GlobalActions } from '../../global/types';
 import { orderBy } from '../../util/iteratees';

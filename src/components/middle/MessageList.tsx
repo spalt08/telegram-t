@@ -24,8 +24,8 @@ import { flatten, orderBy } from '../../util/iteratees';
 import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import { groupMessages, MessageDateGroup } from './util/groupMessages';
 import buildClassName from '../../util/buildClassName';
+import { groupMessages, MessageDateGroup } from './helpers/groupMessages';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';

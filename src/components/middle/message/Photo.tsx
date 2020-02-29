@@ -2,7 +2,6 @@ import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
-import { calculateMediaDimensions } from './util/mediaDimensions';
 import {
   getMessagePhoto,
   getMessageWebPagePhoto,
@@ -14,6 +13,7 @@ import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
 import buildClassName from '../../../util/buildClassName';
+import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 

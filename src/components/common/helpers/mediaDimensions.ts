@@ -1,5 +1,5 @@
-import { ApiPhoto, ApiVideo, ApiSticker } from '../api/types';
-import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../modules/helpers';
+import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
+import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS = { width: 100, height: 100 };

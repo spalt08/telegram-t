@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from '../lib/teact/teact';
-import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../api/types';
-import { DEBUG } from '../config';
-import MentionLink from '../components/middle/message/MentionLink';
-import SafeLink from '../components/middle/message/SafeLink';
+import React from '../../../lib/teact/teact';
+import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
+import { DEBUG } from '../../../config';
+import MentionLink from '../../middle/message/MentionLink';
+import SafeLink from '../../middle/message/SafeLink';
 
 export type TextPart = string | Element;
 

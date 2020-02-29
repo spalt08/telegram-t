@@ -12,12 +12,11 @@ import {
 } from '../../../api/types';
 
 import { isChatPrivate } from '../../../modules/helpers';
-
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 import * as voiceRecording from '../../../util/voiceRecording';
-import parseTextEntities from '../util/parseTextEntities';
 import focusEditableElement from '../../../util/focusEditableElement';
+import parseMessageInput from './helpers/parseMessageInput';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
@@ -105,15 +104,14 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
       }
 
       const { items } = e.clipboardData;
-
       const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
       const file = media && media.getAsFile();
-
-      const pasteText = e.clipboardData.getData('text')
+      const pastedText = e.clipboardData.getData('text')
         .substring(0, MAX_MESSAGE_LENGTH)
         .replace(/<br[ ]?\/?>/g, '\n')
         .replace(/</g, '&lt;');
-      if (!file && !pasteText) {
+
+      if (!file && !pastedText) {
         return;
       }
 
@@ -122,8 +120,9 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
       if (file) {
         setAttachment(await buildAttachment(file, true));
       }
-      if (pasteText) {
-        insertTextAndUpdateCursor(pasteText);
+
+      if (pastedText) {
+        insertTextAndUpdateCursor(pastedText);
       }
     }
 
@@ -240,7 +239,7 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
       }
     }
 
-    const { rawText, entities } = parseTextEntities(htmlRef.current!);
+    const { rawText, entities } = parseMessageInput(htmlRef.current!);
 
     if (!currentAttachment && !rawText) {
       return;

@@ -18,7 +18,7 @@ import {
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
-import { renderServiceMessageText } from '../../helpers/renderServiceMessageText';
+import { renderServiceMessageText } from '../common/helpers/renderServiceMessageText';
 import buildClassName from '../../util/buildClassName';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
