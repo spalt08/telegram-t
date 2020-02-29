@@ -11,6 +11,7 @@ interface IProps {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const InputText: FC<IProps> = ({
@@ -23,6 +24,7 @@ const InputText: FC<IProps> = ({
   onChange,
   onInput,
   onKeyPress,
+  onBlur,
 }) => {
   let className = 'input-group';
   if (value) {
@@ -43,6 +45,7 @@ const InputText: FC<IProps> = ({
         onChange={onChange}
         onInput={onInput}
         onKeyPress={onKeyPress}
+        onBlur={onBlur}
         placeholder={placeholder || label}
       />
       {(error || label) && (

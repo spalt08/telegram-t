@@ -1,8 +1,9 @@
-.Attachment {
+.AttachmentModal {
   --border-radius-default: 0.625rem;
 
-  .content {
+  .modal-content {
     width: 26.25rem;
+    padding: .5rem 1.25rem 1.875rem;
   }
 
   .media-wrapper {
@@ -27,33 +28,5 @@
 
   .document-wrapper {
     margin: .75rem 0 1.75rem;
-  }
-
-  &.Dialog .content {
-    padding: .5rem 1.25rem;
-  }
-}
-
-.AttachmentHeader {
-  padding: .5rem 1.25rem 0 .9375rem;
-  display: flex;
-  align-items: center;
-
-  .caption {
-    font-weight: 500;
-    font-size: 1.25rem;
-    flex: 1 1 auto;
-    margin: 0 1.3125rem;
-  }
-
-  .Button.send {
-    font-size: 0.875rem;
-    height: 2.25rem;
-    width: auto;
-    line-height: 1.625rem;
-    margin-left: auto;
-    padding-left: .5rem;
-    padding-right: .5rem;
-    min-width: 5rem;
   }
 }

@@ -19,7 +19,7 @@ import {
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 
 import MessageContextMenu from './MessageContextMenu';
-import Dialog from '../../ui/Dialog';
+import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
 import useShowTransition from '../../../hooks/useShowTransition';
 
@@ -118,7 +118,7 @@ const ContextMenuContainer: FC<IProps> = ({
         onDelete={handleDelete}
         onClose={closeMenu}
       />
-      <Dialog
+      <Modal
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
         className="delete"
@@ -127,15 +127,15 @@ const ContextMenuContainer: FC<IProps> = ({
       >
         <p>Are you sure you want to delete message?</p>
         {canDeleteForAll && (
-          <Button color="danger" className="button" isText onClick={handleDeleteMessageForAll}>
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
             Delete for {contactFirstName ? `me and ${contactFirstName}` : 'Everyone'}
           </Button>
         )}
-        <Button color="danger" className="button" isText onClick={handleDeleteMessageForSelf}>
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
           Delete{canDeleteForAll ? ' just for me' : ''}
         </Button>
-        <Button className="button" isText onClick={closeDeleteDialog}>Cancel</Button>
-      </Dialog>
+        <Button className="confirm-dialog-button" isText onClick={closeDeleteDialog}>Cancel</Button>
+      </Modal>
     </div>
   );
 };

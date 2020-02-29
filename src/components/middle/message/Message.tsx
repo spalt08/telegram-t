@@ -73,9 +73,9 @@ type IProps = (
   }
   & MessagePositionProperties
   & Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
+    'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
   )>
-  );
+);
 
 const FOCUSING_MAX_DISTANCE = 2000;
 const NBSP = '\u00A0';

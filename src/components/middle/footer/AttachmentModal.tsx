@@ -9,11 +9,11 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import usePrevious from '../../../hooks/usePrevious';
 
 import Button from '../../ui/Button';
-import Dialog from '../../ui/Dialog';
+import Modal from '../../ui/Modal';
 import File from '../../common/File';
 import MessageInput from './MessageInput';
 
-import './Attachment.scss';
+import './AttachmentModal.scss';
 
 type IProps = {
   attachment?: ApiAttachment;
@@ -23,7 +23,7 @@ type IProps = {
   onClear: () => void;
 };
 
-const Attachment: FC<IProps> = ({
+const AttachmentModal: FC<IProps> = ({
   attachment, caption, onCaptionUpdate, onSend, onClear,
 }) => {
   const prevAttachment = usePrevious(attachment);
@@ -46,12 +46,12 @@ const Attachment: FC<IProps> = ({
     }
 
     return (
-      <div className="AttachmentHeader">
+      <div className="modal-header-condensed">
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachment" onClick={onClear}>
           <i className="icon-close" />
         </Button>
-        <div className="caption">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
-        <Button color="primary" size="smaller" className="send" onClick={sendAttachment}>Send</Button>
+        <div className="modal-title">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
+        <Button color="primary" size="smaller" className="modal-action-button" onClick={sendAttachment}>Send</Button>
       </div>
     );
   }
@@ -61,7 +61,7 @@ const Attachment: FC<IProps> = ({
   }
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClear} header={renderHeader()} className="Attachment">
+    <Modal isOpen={isOpen} onClose={onClear} header={renderHeader()} className="AttachmentModal">
       {(photo || video) && (
         <div className="media-wrapper">
           {photo && <img src={photo.blobUrl} alt="" />}
@@ -87,8 +87,8 @@ const Attachment: FC<IProps> = ({
         onSend={onSend}
         shouldSetFocus={isOpen}
       />
-    </Dialog>
+    </Modal>
   );
 };
 
-export default memo(Attachment);
+export default memo(AttachmentModal);

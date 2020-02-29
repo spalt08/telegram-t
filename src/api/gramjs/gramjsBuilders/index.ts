@@ -5,6 +5,7 @@ import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/H
 import {
   ApiSticker,
   ApiVideo,
+  ApiNewPoll,
   ApiMessageEntity,
   ApiMessageEntityTypes,
 } from '../../types';
@@ -100,6 +101,18 @@ export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
   });
 
   return new GramJs.InputMediaDocument({ id: inputDocument });
+}
+
+export function buildInputPoll(pollSummary: ApiNewPoll, randomId: BigInt.BigInteger) {
+  const { question, answers } = pollSummary;
+
+  const poll = new GramJs.Poll({
+    id: randomId,
+    question,
+    answers: answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
+  });
+
+  return new GramJs.InputMediaPoll({ poll });
 }
 
 export function generateRandomBigInt() {

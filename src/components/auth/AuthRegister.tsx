@@ -61,7 +61,7 @@ const AuthRegister: FC<IProps> = ({
     setCroppedBlobUrl(URL.createObjectURL(croppedImg));
   }
 
-  function handleModalDismiss() {
+  function handleModalClose() {
     setSelectedFile(undefined);
   }
 
@@ -115,7 +115,7 @@ const AuthRegister: FC<IProps> = ({
         {isButtonShown && (
           <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
         )}
-        <CropModal file={selectedFile} onDismiss={handleModalDismiss} onChange={handleAvatarCrop} />
+        <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
       </form>
     </div>
   );

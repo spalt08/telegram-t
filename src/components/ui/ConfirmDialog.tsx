@@ -1,6 +1,6 @@
 import React, { FC } from '../../lib/teact/teact';
 
-import Dialog from './Dialog';
+import Modal from './Modal';
 import Button from './Button';
 
 type IProps = {
@@ -23,18 +23,22 @@ const ConfirmDialog: FC<IProps> = ({
   confirmIsDestructive,
 }) => {
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} onCloseAnimationEnd={onCloseAnimationEnd}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onCloseAnimationEnd={onCloseAnimationEnd}
+    >
       <p>{text}</p>
       <Button
-        className="button"
+        className="confirm-dialog-button"
         isText
         onClick={confirmHandler}
         color={confirmIsDestructive ? 'danger' : 'primary'}
       >
         {confirmLabel}
       </Button>
-      <Button className="button" isText onClick={onClose}>Cancel</Button>
-    </Dialog>
+      <Button className="confirm-dialog-button" isText onClick={onClose}>Cancel</Button>
+    </Modal>
   );
 };
 

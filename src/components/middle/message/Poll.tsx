@@ -23,7 +23,7 @@ const Poll: FC<IProps> = ({ messageId, poll }) => {
       return null;
     }
 
-    const result = voteResults.find((r) => getOptionString(r.option) === getOptionString(answer.option));
+    const result = voteResults.find((r) => r.option === answer.option);
 
     return result && (
       <div className="poll-answer">
@@ -51,7 +51,7 @@ const Poll: FC<IProps> = ({ messageId, poll }) => {
         <div className="poll-answers not-implemented">
           <RadioGroup
             name={`poll-${messageId}`}
-            options={summary.answers.map((a) => ({ label: a.text, value: getOptionString(a.option) }))}
+            options={summary.answers.map((a) => ({ label: a.text, value: a.option }))}
             onChange={() => {}}
           />
         </div>
@@ -88,13 +88,6 @@ function getReadableVotersCount(count?: number) {
 
 function getPercentage(value: number, total: number) {
   return ((value / total) * 100).toFixed();
-}
-
-function getOptionString(option: string | Uint8Array) {
-  if (typeof option === 'string') {
-    return option;
-  }
-  return String.fromCharCode.apply(null, Array.from(option));
 }
 
 export default Poll;

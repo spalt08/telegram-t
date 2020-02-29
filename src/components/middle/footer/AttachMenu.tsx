@@ -11,14 +11,18 @@ import './AttachMenu.scss';
 
 type IProps = {
   isOpen: boolean;
+  isPrivateChat: boolean;
   onFileSelect: (file: File, isQuick: boolean) => void;
+  onPollCreate: () => void;
   onClose: () => void;
 };
 
 const MENU_CLOSE_TIMEOUT = 250;
 let closeTimeout: NodeJS.Timeout | null = null;
 
-const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
+const AttachMenu: FC<IProps> = ({
+  isOpen, isPrivateChat, onFileSelect, onPollCreate, onClose,
+}) => {
   const isMouseInside = useRef(false);
 
   useEffect(() => {
@@ -84,7 +88,9 @@ const AttachMenu: FC<IProps> = ({ isOpen, onFileSelect, onClose }) => {
     >
       <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
-      <MenuItem icon="poll" className="not-implemented">Poll</MenuItem>
+      {!isPrivateChat && (
+        <MenuItem icon="poll" onClick={onPollCreate}>Poll</MenuItem>
+      )}
     </Menu>
   );
 };
