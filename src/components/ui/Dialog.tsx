@@ -2,9 +2,9 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import buildClassName from '../../util/buildClassName';
 
 import './Dialog.scss';
-import buildClassName from '../../util/buildClassName';
 
 interface IProps {
   title?: string;

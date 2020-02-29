@@ -1,7 +1,6 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 
 import useShowTransition from '../../../hooks/useShowTransition';
-import buildClassName from '../../../util/buildClassName';
 
 import EmojiButton from './EmojiButton';
 
@@ -30,7 +29,7 @@ const EmojiCategory: FC<IProps> = ({
     >
       <p className="symbol-set-name">{category.name}</p>
       <div
-        className={buildClassName('symbol-set-container overlay', transitionClassNames)}
+        className={['symbol-set-container', transitionClassNames].join(' ')}
         // @ts-ignore teact feature
         style={`height: ${categoryHeight}px`}
       >

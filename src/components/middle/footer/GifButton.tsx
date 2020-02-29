@@ -45,10 +45,16 @@ const GifButton: FC<IProps> = ({
 
   const { width, height } = calculateVideoDimensions(gif, false);
 
+  const className = buildClassName(
+    'GifButton',
+    width < height ? 'vertical' : 'horizontal',
+    transitionClassNames,
+  );
+
   return (
     <button
       ref={buttonRef}
-      className={buildClassName('GifButton overlay', width < height ? 'vertical' : 'horizontal', transitionClassNames)}
+      className={className}
       type="button"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
@@ -69,6 +75,7 @@ const GifButton: FC<IProps> = ({
         <>
           {gif.thumbnail && (
             <img
+              className="thumbnail"
               src={gif.thumbnail.dataUri}
               width={width}
               height={height}

@@ -28,6 +28,7 @@ import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../
 import { buildMessageContent } from './util/buildMessageContent';
 import { getMinMediaWidth } from './util/mediaDimensions';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 
 import Avatar from '../../common/Avatar';
@@ -72,9 +73,9 @@ type IProps = (
   }
   & MessagePositionProperties
   & Pick<GlobalActions, (
-    'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
+  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
   )>
-);
+  );
 
 const FOCUSING_MAX_DISTANCE = 2000;
 const NBSP = '\u00A0';
@@ -121,15 +122,28 @@ const Message: FC<IProps> = ({
   const isOwn = isOwnMessage(message);
   const isReply = isReplyMessage(message);
   const isForwarded = isForwardedMessage(message);
-
-  const containerClassNames = buildClassNames(
-    message,
-    { isFirstInGroup, isLastInGroup, isLastInList },
-    contextMenuPosition !== null,
-    isOwn,
-    isFocused,
-    replyMessage,
+  const isContextMenuShown = contextMenuPosition !== null;
+  const hasMedia = (
+    getMessageMediaHash(message, 'inline')
+    || hasMessageLocalBlobUrl(message)
+    || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
   );
+
+  const containerClassName = buildClassName(
+    'Message',
+    isFirstInGroup && 'first-in-group',
+    isLastInGroup && 'last-in-group',
+    isLastInList && 'last-in-list',
+    isOwn ? 'own' : 'not-own',
+    Boolean(message.views) && 'has-views',
+    message.isEdited && 'was-edited',
+    hasMedia && 'has-media',
+    isReply && 'has-reply',
+    isContextMenuShown && 'has-menu-open',
+    isFocused && 'focused',
+    message.is_deleting && 'is-deleting',
+  );
+
   const {
     isEmojiOnly,
     text,
@@ -210,16 +224,14 @@ const Message: FC<IProps> = ({
   }
 
   function renderContent() {
-    const classNames = ['content-inner'];
-    if (isForwarded && !sticker) {
-      classNames.push('forwarded-message');
-    }
-    if (isReply) {
-      classNames.push('reply-message');
-    }
+    const className = buildClassName(
+      'content-inner',
+      isForwarded && !sticker && 'forwarded-message',
+      isReply && 'reply-message',
+    );
 
     return (
-      <div className={classNames.join(' ')}>
+      <div className={className}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {isReply && (
           <ReplyMessage
@@ -305,7 +317,7 @@ const Message: FC<IProps> = ({
     <div
       ref={elementRef}
       id={`message${messageId}`}
-      className={containerClassNames.join(' ')}
+      className={containerClassName}
       data-message-id={messageId}
     >
       {showAvatar && (
@@ -343,67 +355,6 @@ const Message: FC<IProps> = ({
     </div>
   );
 };
-
-function buildClassNames(
-  message: ApiMessage,
-  position: MessagePositionProperties,
-  hasContextMenu = false,
-  isOwn = false,
-  isFocused = false,
-  replyMessage?: ApiMessage,
-) {
-  const classNames = ['Message'];
-
-  if (position.isFirstInGroup) {
-    classNames.push('first-in-group');
-  }
-  if (position.isLastInGroup) {
-    classNames.push('last-in-group');
-  }
-  if (position.isLastInList) {
-    classNames.push('last-in-list');
-  }
-
-  if (isOwn) {
-    classNames.push('own');
-  } else {
-    classNames.push('not-own');
-  }
-
-  if (message.views) {
-    classNames.push('has-views');
-  }
-
-  if (message.isEdited) {
-    classNames.push('was-edited');
-  }
-
-  if (
-    getMessageMediaHash(message, 'inline')
-    || hasMessageLocalBlobUrl(message)
-    || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
-  ) {
-    classNames.push('has-media');
-  }
-
-  if (isReplyMessage(message)) {
-    classNames.push('has-reply');
-  }
-
-  if (hasContextMenu) {
-    classNames.push('has-menu-open');
-  }
-
-  if (isFocused) {
-    classNames.push('focused');
-  }
-
-  if (message.is_deleting) {
-    classNames.push('is-deleting');
-  }
-
-  return classNames;
-}
 
 export default memo(withGlobal(
   (global, ownProps: IProps) => {

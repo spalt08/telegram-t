@@ -25,6 +25,7 @@ import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import { groupMessages, MessageDateGroup } from './util/groupMessages';
+import buildClassName from '../../util/buildClassName';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';
@@ -224,22 +225,15 @@ const MessageList: FC<IProps> = ({
 
   const isPrivate = chatId !== undefined && isChatPrivate(chatId);
 
-  const classNames = ['MessageList', 'custom-scroll'];
-  if (isPrivate || isChannelChat) {
-    classNames.push('no-avatars');
-  }
-  if (isChannelChat) {
-    classNames.push('is-channel');
-  }
-  if (isChannelChat) {
-    classNames.push('bottom-padding');
-  }
-  if (isScrolling) {
-    classNames.push('is-scrolling');
-  }
+  const className = buildClassName(
+    'MessageList custom-scroll',
+    isPrivate && 'no-avatars',
+    isChannelChat && 'is-channel no-avatars bottom-padding',
+    isScrolling && 'is-scrolling',
+  );
 
   return (
-    <div ref={containerRef} id="MessageList" className={classNames.join(' ')} onScroll={handleScroll}>
+    <div ref={containerRef} id="MessageList" className={className} onScroll={handleScroll}>
       {messageIds ? (
         // @ts-ignore
         <div className="messages-container" teactChildrenKeyOrder="asc">

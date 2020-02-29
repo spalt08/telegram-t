@@ -19,6 +19,7 @@ import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
 import { getServiceMessageContent } from '../common/getServiceMessageContent';
+import buildClassName from '../../util/buildClassName';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
 import Avatar from '../common/Avatar';
@@ -97,8 +98,14 @@ const Chat: FC<IProps> = ({
     openChat({ id: chat.id });
   }, [openChat, chat.id]);
 
+  const className = buildClassName(
+    'Chat',
+    isChatPrivate(chat.id) ? 'private' : 'group',
+    selected && 'selected',
+  );
+
   return (
-    <div className={buildClassNames(chat, selected)} onClick={handleClick}>
+    <div className={className} onClick={handleClick}>
       {isUiReady && (
         <Avatar
           chat={chat}
@@ -125,18 +132,6 @@ const Chat: FC<IProps> = ({
     </div>
   );
 };
-
-function buildClassNames(chat: ApiChat, isSelected: boolean) {
-  const classNames = ['Chat'];
-
-  classNames.push(isChatPrivate(chat.id) ? 'private' : 'group');
-
-  if (isSelected) {
-    classNames.push('selected');
-  }
-
-  return classNames.join(' ');
-}
 
 function getSenderName(chatId: number, sender?: ApiUser) {
   if (!sender || isChatPrivate(chatId)) {

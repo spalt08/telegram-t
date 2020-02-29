@@ -29,6 +29,10 @@
     object-fit: cover;
   }
 
+  .thumbnail {
+    filter: blur(3px);
+  }
+
   &:not(.shown) {
     display: block !important;
     visibility: hidden;
