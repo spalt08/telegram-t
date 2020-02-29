@@ -81,13 +81,13 @@ export interface ApiContact {
 
 export interface PollAnswer {
   text: string;
-  option: Buffer;
+  option: string;
 }
 
 export interface PollAnswerVote {
   chosen?: true;
   correct?: true;
-  option: Buffer;
+  option: string;
   voters: number;
 }
 
@@ -108,6 +108,8 @@ export interface ApiPoll {
     recentVoters?: number[];
   };
 }
+
+export type ApiNewPoll = ApiPoll['summary'];
 
 export interface ApiAction {
   text: string;

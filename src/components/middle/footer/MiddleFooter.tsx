@@ -4,7 +4,14 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiAttachment, ApiSticker, ApiVideo } from '../../../api/types';
+import {
+  ApiAttachment,
+  ApiSticker,
+  ApiVideo,
+  ApiNewPoll,
+} from '../../../api/types';
+
+import { isChatPrivate } from '../../../modules/helpers';
 
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
@@ -17,12 +24,15 @@ import AttachMenu from './AttachMenu';
 import StickerMenu from './StickerMenu';
 import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
-import Attachment from './Attachment';
+import AttachmentModal from './AttachmentModal';
+import PollModal from './PollModal';
 import WebPagePreview from './WebPagePreview';
 
 import './MiddleFooter.scss';
 
-type IProps = Pick<GlobalActions, 'sendMessage'>;
+type IProps = {
+  isPrivateChat: boolean;
+} &Pick<GlobalActions, 'sendMessage'>;
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -45,12 +55,13 @@ function isSelectionInsideInput(selectionRange: Range) {
   return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
 }
 
-const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
+const MiddleFooter: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
   const [html, setHtml] = useState<string>('');
   const htmlRef = useRef<string>(html);
 
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const canOpenAttachMenu = useRef(true);
 
   const [isStickerMenuOpen, setIsStickerMenuOpen] = useState(false);
@@ -132,6 +143,19 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
   const handleCloseAttachMenu = useCallback(() => {
     setIsAttachMenuOpen(false);
   }, []);
+
+  const handleOpenPollCreation = useCallback(() => {
+    setIsPollModalOpen(true);
+  }, []);
+
+  const handleClosePollCreation = useCallback(() => {
+    setIsPollModalOpen(false);
+  }, []);
+
+  const handlePollSend = useCallback((pollSummary: ApiNewPoll) => {
+    sendMessage({ pollSummary });
+    setIsPollModalOpen(false);
+  }, [sendMessage]);
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
     setAttachment(await buildAttachment(file, isQuick));
@@ -235,12 +259,17 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
 
   return (
     <div className="MiddleFooter">
-      <Attachment
+      <AttachmentModal
         attachment={attachment}
         caption={attachment ? html : ''}
         onCaptionUpdate={setHtml}
         onSend={handleSend}
         onClear={handleClearAttachment}
+      />
+      <PollModal
+        isOpen={isPollModalOpen}
+        onClear={handleClosePollCreation}
+        onSend={handlePollSend}
       />
       <div id="message-compose">
         <MessageInputReply />
@@ -281,7 +310,9 @@ const MiddleFooter: FC<IProps> = ({ sendMessage }) => {
           )}
           <AttachMenu
             isOpen={isAttachMenuOpen}
+            isPrivateChat={isPrivateChat}
             onFileSelect={handleFileSelect}
+            onPollCreate={handleOpenPollCreation}
             onClose={handleCloseAttachMenu}
           />
           <StickerMenu
@@ -331,7 +362,10 @@ async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachm
 }
 
 export default memo(withGlobal(
-  undefined,
+  (global) => {
+    const selectedChatId = global.chats.selectedId;
+    return { isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId) };
+  },
   (setGlobal, actions) => {
     const { sendMessage } = actions;
     return { sendMessage };

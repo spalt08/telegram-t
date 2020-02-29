@@ -8,6 +8,7 @@ import {
   ApiUser,
   ApiSticker,
   ApiVideo,
+  ApiNewPoll,
   ApiMessageEntity,
 } from '../../types';
 
@@ -26,6 +27,7 @@ import {
   getEntityTypeById,
   buildInputMediaDocument,
   reduceWaveform,
+  buildInputPoll,
   buildMtpMessageEntity,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
@@ -116,6 +118,7 @@ export async function sendMessage({
   attachment,
   sticker,
   gif,
+  pollSummary,
 }: {
   chat: ApiChat;
   currentUserId: number;
@@ -125,8 +128,11 @@ export async function sendMessage({
   attachment?: ApiAttachment;
   sticker?: ApiSticker;
   gif?: ApiVideo;
+  pollSummary?: ApiNewPoll;
 }) {
-  const localMessage = buildLocalMessage(chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif);
+  const localMessage = buildLocalMessage(
+    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
+  );
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
@@ -144,6 +150,8 @@ export async function sendMessage({
     media = buildInputMediaDocument(sticker);
   } else if (gif) {
     media = buildInputMediaDocument(gif);
+  } else if (pollSummary) {
+    media = buildInputPoll(pollSummary, randomId);
   }
 
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;

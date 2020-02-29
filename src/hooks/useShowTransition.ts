@@ -38,12 +38,14 @@ export default (
   }
 
   const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
-  const shouldRender = isOpen || Boolean(closeTimeoutRef.current);
+  const isClosing = Boolean(closeTimeoutRef.current);
+  const shouldRender = isOpen || isClosing;
   const transitionClassNames = buildClassName(
     className && 'opacity-transition',
     className,
     hasOpenClassName && 'open',
     shouldRender && 'shown',
+    isClosing && 'closing',
   );
 
   return {

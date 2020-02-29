@@ -50,20 +50,18 @@ async function processFile(imgFile: File) {
 
     const { offsetWidth, offsetHeight } = cropContainer;
 
-    if (!cropper) {
-      cropper = new Croppie(cropContainer, {
-        enableZoom: false,
-        boundary: {
-          width: offsetWidth,
-          height: offsetHeight,
-        },
-        viewport: {
-          width: offsetWidth * 0.9,
-          height: offsetHeight * 0.9,
-          type: 'circle',
-        },
-      });
-    }
+    cropper = new Croppie(cropContainer, {
+      enableZoom: false,
+      boundary: {
+        width: offsetWidth,
+        height: offsetHeight,
+      },
+      viewport: {
+        width: offsetWidth * 0.9,
+        height: offsetHeight * 0.9,
+        type: 'circle',
+      },
+    });
 
     const dataUri = await blobToDataUri(imgFile);
     await cropper.bind({ url: dataUri });
@@ -76,10 +74,10 @@ async function processFile(imgFile: File) {
 type IProps = {
   file: File;
   onChange: Function;
-  onDismiss: () => void;
+  onClose: () => void;
 };
 
-const CropModal: FC<IProps> = ({ file, onChange, onDismiss }: IProps) => {
+const CropModal: FC<IProps> = ({ file, onChange, onClose }: IProps) => {
   const [isCroppieReady, setIsCroppieReady] = useState(false);
 
   useEffect(() => {
@@ -109,16 +107,17 @@ const CropModal: FC<IProps> = ({ file, onChange, onDismiss }: IProps) => {
   return (
     <Modal
       isOpen={Boolean(file)}
-      onDismiss={onDismiss}
+      onClose={onClose}
       title="Drag to reposition"
       className="CropModal"
+      showCloseButton
     >
       {isCroppieReady ? (
         <div id="avatar-crop" />
       ) : (
         <Loading />
       )}
-      <Button round color="primary" onClick={cropAvatar}>
+      <Button className="confirm-button" round color="primary" onClick={cropAvatar}>
         <i className="icon-check" />
       </Button>
     </Modal>

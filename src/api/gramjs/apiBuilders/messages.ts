@@ -13,6 +13,7 @@ import {
   ApiContact,
   ApiAttachment,
   ApiPoll,
+  ApiNewPoll,
   ApiWebPage,
   ApiMessageEntity,
 } from '../../types';
@@ -363,11 +364,25 @@ function buildPoll(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
   }
 
   const { id, ...summary } = media.poll;
+  const answers = summary.answers.map((answer) => ({
+    text: answer.text,
+    option: String.fromCharCode(...answer.option),
+  }));
+  const results = media.results.results && media.results.results.map((result) => ({
+    ...result,
+    option: String.fromCharCode(...result.option),
+  }));
 
   return {
     id: Number(id),
-    summary,
-    results: media.results,
+    summary: {
+      ...summary,
+      answers,
+    },
+    results: {
+      ...media.results,
+      results,
+    },
   };
 }
 
@@ -475,6 +490,7 @@ export function buildLocalMessage(
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
+  pollSummary?: ApiNewPoll,
 ): ApiMessage {
   const localId = localMessageCounter--;
 
@@ -492,6 +508,7 @@ export function buildLocalMessage(
       ...(attachment && buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
+      ...(pollSummary && buildNewPoll(pollSummary, localId)),
     },
     date: Math.round(Date.now() / 1000),
     is_outgoing: true,
@@ -560,6 +577,20 @@ function buildUploadingMedia(
       },
     };
   }
+}
+
+function buildNewPoll(pollSummary: ApiNewPoll, localId: number) {
+  const { question, answers } = pollSummary;
+  return {
+    poll: {
+      id: localId,
+      summary: {
+        question,
+        answers,
+      },
+      results: {},
+    },
+  };
 }
 
 function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
