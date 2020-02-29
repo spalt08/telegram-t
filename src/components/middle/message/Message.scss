@@ -284,8 +284,6 @@
   }
 
   .thumbnail {
-    filter: blur(0px);
-
     &.blur {
       filter: blur(7px);
     }

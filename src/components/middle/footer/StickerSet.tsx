@@ -4,7 +4,6 @@ import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
 import useShowTransition from '../../../hooks/useShowTransition';
-import buildClassName from '../../../util/buildClassName';
 
 import StickerButton from './StickerButton';
 
@@ -39,7 +38,7 @@ const StickerSet: FC<IProps> = ({
     >
       <p className="symbol-set-name">{set.title}</p>
       <div
-        className={buildClassName('symbol-set-container overlay', transitionClassNames)}
+        className={['symbol-set-container', transitionClassNames].join(' ')}
         // @ts-ignore teact feature
         style={`height: ${stickerSetHeight}px`}
       >
