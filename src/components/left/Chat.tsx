@@ -8,7 +8,7 @@ import {
 
 import {
   getChatTitle,
-  getMessagePlainText,
+  getMessageSummaryText,
   getUserFirstName,
   isChatPrivate,
   isActionMessage,
@@ -18,7 +18,7 @@ import {
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
-import { getServiceMessageContent } from '../common/getServiceMessageContent';
+import { renderServiceMessageText } from '../../helpers/renderServiceMessageText';
 import buildClassName from '../../util/buildClassName';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
@@ -71,7 +71,7 @@ const Chat: FC<IProps> = ({
     if (isAction) {
       return (
         <p className="last-message">
-          {getServiceMessageContent(
+          {renderServiceMessageText(
             last_message,
             lastMessageSender,
             actionTargetUser,
@@ -89,7 +89,7 @@ const Chat: FC<IProps> = ({
         {senderName && (
           <span className="sender-name">{senderName}</span>
         )}
-        {getMessagePlainText(last_message)}
+        {getMessageSummaryText(last_message)}
       </p>
     );
   }

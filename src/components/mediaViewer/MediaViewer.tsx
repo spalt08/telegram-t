@@ -18,9 +18,9 @@ import {
   IDimensions,
   getMessageWebPagePhoto,
 } from '../../modules/helpers';
-import { buildMessageContent } from '../middle/message/util/buildMessageContent';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useMedia from '../../hooks/useMedia';
+import { renderMessageText } from '../../helpers/renderMessageText';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -164,8 +164,8 @@ const MediaViewer: FC<IProps> = ({
       return null;
     }
 
-    const messageText = buildMessageContent(message).text;
-    const hasFooter = Boolean(messageText);
+    const textParts = renderMessageText(message.content.text);
+    const hasFooter = Boolean(textParts);
 
     return (
       <div key={messageId} className={`media-viewer-content ${hasFooter ? 'footer' : ''}`}>
@@ -176,7 +176,7 @@ const MediaViewer: FC<IProps> = ({
           message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
           isGif,
         )}
-        {messageText && <MediaViewerFooter text={messageText} />}
+        {textParts && <MediaViewerFooter text={textParts} />}
       </div>
     );
   }

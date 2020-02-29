@@ -8,7 +8,7 @@ import {
   ApiMessage,
 } from '../../api/types';
 import { selectUser, selectChatMessage, selectChatFocusedMessageId } from '../../modules/selectors';
-import { getServiceMessageContent } from '../common/getServiceMessageContent';
+import { renderServiceMessageText } from '../../helpers/renderServiceMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
 type IProps = {
@@ -46,7 +46,7 @@ const ServiceMessage: FC<IProps> = ({
     }
   }, [isFocused, message.chat_id]);
 
-  const content = getServiceMessageContent(
+  const content = renderServiceMessageText(
     message,
     sender,
     actionTargetUser,
