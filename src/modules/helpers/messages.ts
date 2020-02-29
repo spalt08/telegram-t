@@ -11,17 +11,9 @@ export function getMessageRenderKey(message: ApiMessage) {
   return message.prev_local_id || message.id;
 }
 
-export function getMessagePlainText(message: ApiMessage, hasPictogram = false) {
+export function getMessageSummaryText(message: ApiMessage, hasPictogram = false) {
   const {
-    text,
-    photo,
-    video,
-    audio,
-    voice,
-    document,
-    sticker,
-    contact,
-    poll,
+    text, photo, video, audio, voice, document, sticker, contact, poll,
   } = message.content;
 
   if (photo) {
@@ -75,6 +67,7 @@ export function getMessageText(message: ApiMessage) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
   } = message.content;
+
   if (text) {
     return text.text;
   }

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 import { throttle } from '../../util/schedulers';
-import { TextPart } from '../middle/message/util/enhanceText';
+import { TextPart } from '../../helpers/renderMessageText';
 
 import './MediaViewerFooter.scss';
 

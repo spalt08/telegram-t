@@ -2,7 +2,7 @@ import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage, ApiWebPage } from '../../../api/types';
 
-import { getMessagePlainText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
+import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './util/mediaDimensions';
 
 import Photo from './Photo';
@@ -50,7 +50,7 @@ const WebPage: FC<IProps> = ({
     const link = matchLinkInMessageText(message);
     if (link) {
       const { url, domain } = link;
-      const messageText = getMessagePlainText(message);
+      const messageText = getMessageSummaryText(message);
 
       linkData = {
         siteName: domain.replace(/^www./, ''),

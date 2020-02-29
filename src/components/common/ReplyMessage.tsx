@@ -7,7 +7,7 @@ import {
   getMessageMediaThumbDataUri,
   getMessageMediaHash,
   isActionMessage,
-  getMessagePlainText,
+  getMessageSummaryText,
 } from '../../modules/helpers';
 import { getPictogramDimensions } from '../../util/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
@@ -44,7 +44,7 @@ const ReplyMessage: FC<IProps> = ({
           ) : isActionMessage(message) ? (
             <ServiceMessage message={message} isReply />
           ) : (
-            getMessagePlainText(message, true)
+            getMessageSummaryText(message, true)
           )}
         </p>
       </div>

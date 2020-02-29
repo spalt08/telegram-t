@@ -17,6 +17,7 @@ import {
   selectUser,
 } from '../../../modules/selectors';
 import {
+  getMessageContent,
   getMessageMediaHash,
   getUserFullName,
   hasMessageLocalBlobUrl,
@@ -25,11 +26,12 @@ import {
   isForwardedMessage,
 } from '../../../modules/helpers';
 import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
-import { buildMessageContent } from './util/buildMessageContent';
+import { buildContentClassName } from './util/buildContentClassName';
 import { getMinMediaWidth } from './util/mediaDimensions';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
+import { renderMessageText } from '../../../helpers/renderMessageText';
 
 import Avatar from '../../common/Avatar';
 import MessageMeta from './MessageMeta';
@@ -113,7 +115,7 @@ const Message: FC<IProps> = ({
   useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
 
   useEffect(() => {
-    const messagesContainer = document.getElementById('MessageList');
+    const messagesContainer = window.document.getElementById('MessageList');
     if (isFocused && elementRef.current && messagesContainer) {
       fastSmoothScroll(messagesContainer, elementRef.current, 'center', FOCUSING_MAX_DISTANCE);
     }
@@ -122,13 +124,16 @@ const Message: FC<IProps> = ({
   const isOwn = isOwnMessage(message);
   const isReply = isReplyMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const isContextMenuShown = contextMenuPosition !== null;
+  const {
+    text, photo, video, audio, voice, document, sticker, contact, poll, webPage,
+  } = getMessageContent(message);
+  const textParts = renderMessageText(text);
   const hasMedia = (
     getMessageMediaHash(message, 'inline')
     || hasMessageLocalBlobUrl(message)
     || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
   );
-
+  const isContextMenuShown = contextMenuPosition !== null;
   const containerClassName = buildClassName(
     'Message',
     isFirstInGroup && 'first-in-group',
@@ -143,23 +148,7 @@ const Message: FC<IProps> = ({
     isFocused && 'focused',
     message.is_deleting && 'is-deleting',
   );
-
-  const {
-    isEmojiOnly,
-    text,
-    photo,
-    video,
-    audio,
-    voice,
-    document: messageDocument,
-    sticker,
-    contact,
-    poll,
-    webPage,
-    className: contentClassName,
-  } = buildMessageContent(message, { isLastInGroup, hasReply: isReply });
-
-  const isSticker = Boolean(contentClassName && contentClassName.includes('sticker'));
+  const { contentClassName, asSticker } = buildContentClassName(message, { isOwn, isLastInGroup, hasReply: isReply });
 
   const handleAvatarClick = useCallback(() => {
     if (!sender) {
@@ -213,7 +202,7 @@ const Message: FC<IProps> = ({
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
-      || !user || photo || video || sticker || isEmojiOnly
+      || !user || photo || video || asSticker
     ) {
       return null;
     }
@@ -226,7 +215,7 @@ const Message: FC<IProps> = ({
   function renderContent() {
     const className = buildClassName(
       'content-inner',
-      isForwarded && !sticker && 'forwarded-message',
+      isForwarded && !asSticker && 'forwarded-message',
       isReply && 'reply-message',
     );
 
@@ -275,7 +264,7 @@ const Message: FC<IProps> = ({
             onCancelTransfer={handleCancelTransfer}
           />
         )}
-        {messageDocument && (
+        {document && (
           <Document
             message={message}
             fileTransferProgress={fileTransferProgress}
@@ -288,7 +277,7 @@ const Message: FC<IProps> = ({
         {poll && (
           <Poll messageId={message.id} poll={poll} />
         )}
-        {text && <p className="text-content">{text}</p>}
+        {textParts && <p className="text-content">{textParts}</p>}
         {webPage && (
           <WebPage
             message={message}
@@ -337,7 +326,7 @@ const Message: FC<IProps> = ({
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
       >
-        {message.forward_info && !isSticker && (
+        {message.forward_info && !asSticker && (
           <div className="sender-name">Forwarded message</div>
         )}
         {renderContent()}

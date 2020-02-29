@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 
-import { getMessageCopyOptions } from './util/clipboard';
+import { getMessageCopyOptions } from './util/copyOptions';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
