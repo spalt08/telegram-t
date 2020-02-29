@@ -9,6 +9,7 @@ import { isOwnMessage, getMessageMediaHash, getMessageTransferParams } from '../
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { renderWaveformToDataUri } from '../../../util/waveform';
+import buildClassName from '../../../util/buildClassName';
 
 import Button from '../../ui/Button';
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -97,13 +98,11 @@ const Audio: FC<IProps> = ({
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(() => voice && renderWaveform(voice, progress, isOwn), [voice, progress, isOwn]);
 
-  const classNames = ['Audio', 'media-inner'];
-  if (isOwn && !inSharedMedia) {
-    classNames.push('own');
-  }
-  if (inSharedMedia) {
-    classNames.push('smaller');
-  }
+  const className = buildClassName(
+    'Audio media-inner',
+    isOwn && !inSharedMedia && 'own',
+    inSharedMedia && 'smaller',
+  );
 
   const buttonClassNames = ['toggle-play'];
   if (shouldSpinnerRender) {
@@ -115,7 +114,7 @@ const Audio: FC<IProps> = ({
   }
 
   return (
-    <div className={classNames.join(' ')}>
+    <div className={className}>
       <Button
         round
         size={inSharedMedia ? 'smaller' : 'default'}
@@ -126,7 +125,7 @@ const Audio: FC<IProps> = ({
         <i className="icon-pause" />
       </Button>
       {shouldSpinnerRender && (
-        <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
+        <div className={['message-media-loading', spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent smaller={inSharedMedia} />
         </div>
       )}

@@ -1,7 +1,5 @@
-import { flatten } from './iteratees';
-
-type Parts = (string | string[] | false | undefined)[];
+type Parts = (string | false | undefined)[];
 
 export default (...parts: Parts) => {
-  return flatten(parts.filter(Boolean)).join(' ');
+  return parts.filter(Boolean).join(' ');
 };

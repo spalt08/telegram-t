@@ -4,6 +4,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import './Dialog.scss';
+import buildClassName from '../../util/buildClassName';
 
 interface IProps {
   title?: string;
@@ -35,21 +36,20 @@ const Dialog: FC<IProps> = (props) => {
     return null;
   }
 
-  const classNames = ['Dialog', className, 'overlay', ...transitionClassNames];
-  if (className) {
-    classNames.push(className);
-  }
-  if (transparentBackdrop) {
-    classNames.push('transparent-backdrop');
-  }
+  const fullClassName = buildClassName(
+    'Dialog',
+    className,
+    transitionClassNames,
+    transparentBackdrop && 'transparent-backdrop',
+  );
 
   return (
-    <div className={classNames.join(' ')}>
+    <div className={fullClassName}>
       <div className="container">
         {isOpen && (
           <div className="backdrop" onClick={onClose} />
         )}
-        <div className={['dialog', 'overlay', ...transitionClassNames].join(' ')}>
+        <div className={['dialog', transitionClassNames].join(' ')}>
           {header}
           {!header && title && (
             <div className="title">

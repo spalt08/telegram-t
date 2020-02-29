@@ -14,6 +14,8 @@ import {
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -39,6 +41,7 @@ const Video: FC<IProps> = ({
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const localBlobUrl = loadAndPlay ? video.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+  const { shouldRenderThumb, transitionClassNames } = useProgressiveMedia(mediaData, 'slow');
 
   const {
     isTransferring, transferProgress,
@@ -56,22 +59,22 @@ const Video: FC<IProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
 
-  let className = 'media-inner';
-  if (!isTransferring) {
-    className += ' has-viewer';
-  }
+  const className = buildClassName(
+    'media-inner',
+    !isTransferring && 'has-viewer',
+  );
 
-  let thumbClassName = 'thumbnail blur';
-  if (!thumbDataUri) {
-    thumbClassName += ' empty';
-  }
+  const thumbClassName = buildClassName(
+    'thumbnail blur',
+    !localBlobUrl && 'blur',
+  );
 
   return (
     <div
       className={className}
       onClick={!isTransferring ? onClick : undefined}
     >
-      {!isInline && !isHqPreview && (
+      {(shouldRenderThumb || !isInline) && (
         <img
           src={thumbDataUri}
           className={thumbClassName}
@@ -82,6 +85,7 @@ const Video: FC<IProps> = ({
       )}
       {isInline && (
         <video
+          className={['full-media', transitionClassNames].join(' ')}
           width={width}
           height={height}
           autoPlay
@@ -97,6 +101,7 @@ const Video: FC<IProps> = ({
         <>
           <img
             src={mediaData}
+            className={['full-media', transitionClassNames].join(' ')}
             width={width}
             height={height}
             alt=""
@@ -109,7 +114,7 @@ const Video: FC<IProps> = ({
         </>
       )}
       {shouldSpinnerRender && (
-        <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
+        <div className={['message-media-loading', spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}

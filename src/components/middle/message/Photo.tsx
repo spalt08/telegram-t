@@ -1,5 +1,5 @@
 import { MouseEvent } from 'react';
-import React, { FC, useRef } from '../../../lib/teact/teact';
+import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { calculateMediaDimensions } from './util/mediaDimensions';
@@ -12,6 +12,8 @@ import {
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -40,66 +42,57 @@ const Photo: FC<IProps> = ({
   const localBlobUrl = load ? photo.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, size), !load);
   const isMediaLoaded = Boolean(mediaData);
-  const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
+  const { shouldRenderThumb, shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(mediaData, 'slow');
 
   const {
     isTransferring, transferProgress,
   } = getMessageTransferParams(message, fileTransferProgress, !isMediaLoaded && !localBlobUrl);
 
   const {
-    shouldRender: shouldSpinnerRender,
+    shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring && load);
-
-  const {
-    shouldRender: shouldFullMediaRender,
-    transitionClassNames: fullMediaClassNames,
-  } = useShowTransition(isMediaLoaded, undefined, isMediaPreloadedRef.current!);
+  } = useShowTransition(isTransferring && load, undefined, undefined, 'slow');
 
   const { width, height, isSmall } = calculateMediaDimensions(message);
 
-  let className = 'media-inner';
-  if (!isTransferring) {
-    className += ' has-viewer';
-  }
-  if (isSmall) {
-    className += ' small-image';
-  }
-  if (width === height) {
-    className += ' square-image';
-  }
+  const className = buildClassName(
+    'media-inner',
+    !isTransferring && 'has-viewer',
+    isSmall && 'small-image',
+    width === height && 'square-image',
+  );
 
-  let thumbClassName = 'thumbnail';
-  if (!isMediaLoaded && !localBlobUrl) {
-    thumbClassName += ' blur';
-  }
-  if (!thumbDataUri) {
-    thumbClassName += ' empty';
-  }
+  const thumbClassName = buildClassName(
+    'thumbnail',
+    !localBlobUrl && 'blur',
+    !thumbDataUri && 'empty',
+  );
 
   return (
     <div
       className={className}
       onClick={!isTransferring ? onClick : undefined}
     >
-      <img
-        src={localBlobUrl || thumbDataUri}
-        className={thumbClassName}
-        width={width}
-        height={height}
-        alt=""
-      />
-      {shouldFullMediaRender && (
+      {shouldRenderThumb && (
         <img
-          src={mediaData}
-          className={['full-media', ...fullMediaClassNames].join(' ')}
+          src={localBlobUrl || thumbDataUri}
+          className={thumbClassName}
           width={width}
           height={height}
           alt=""
         />
       )}
-      {shouldSpinnerRender && (
-        <div className={['message-media-loading', ...spinnerClassNames].join(' ')}>
+      {shouldRenderFullMedia && (
+        <img
+          src={mediaData}
+          className={['full-media', transitionClassNames].join(' ')}
+          width={width}
+          height={height}
+          alt=""
+        />
+      )}
+      {shouldRenderSpinner && (
+        <div className={['message-media-loading', spinnerClassNames].join(' ')}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}

@@ -1,12 +1,13 @@
 import React, {
-  FC, memo, useCallback, useState, useRef,
+  FC, memo, useCallback, useState,
 } from '../../../lib/teact/teact';
 
 import { ApiSticker } from '../../../api/types';
 
 import * as mediaLoader from '../../../util/mediaLoader';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useMedia from '../../../hooks/useMedia';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 
@@ -37,7 +38,9 @@ const StickerButton: FC<IProps> = ({
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );
   const isMediaLoaded = Boolean(mediaData);
-  const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
+  const {
+    shouldRenderFullMedia, transitionClassNames,
+  } = useProgressiveMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast');
 
   const handleMouseEnter = useCallback(() => {
     if (shouldPlay) {
@@ -58,24 +61,18 @@ const StickerButton: FC<IProps> = ({
     [onClick, sticker, localMediaHash],
   );
 
-  const {
-    shouldRender: shouldFullMediaRender,
-    transitionClassNames: fullMediaClassNames,
-  } = useShowTransition(isAnimated ? isAnimationLoaded : isMediaLoaded, undefined, isMediaPreloadedRef.current!);
-
   const isAbsolutePositioned = top !== undefined && left !== undefined;
   const style = isAbsolutePositioned ? `top: ${top}px; left: ${left}px` : '';
-  const classNames = ['StickerButton'];
-  if (isAbsolutePositioned) {
-    classNames.push('absolute-position');
-  }
-  if (className) {
-    classNames.push(className);
-  }
+
+  const fullClassName = buildClassName(
+    'StickerButton',
+    className,
+    isAbsolutePositioned && 'absolute-position',
+  );
 
   return (
     <button
-      className={classNames.join(' ')}
+      className={fullClassName}
       onClick={handleClick}
       type="button"
       title={title || (sticker && sticker.emoji)}
@@ -83,11 +80,11 @@ const StickerButton: FC<IProps> = ({
       style={style}
       onMouseEnter={isAnimated ? handleMouseEnter : undefined}
     >
-      {(!isAnimated && shouldFullMediaRender) && (
+      {!isAnimated && shouldRenderFullMedia && (
         <img
           src={mediaData as string}
           alt=""
-          className={['full-media', ...fullMediaClassNames].join(' ')}
+          className={transitionClassNames}
         />
       )}
       {isAnimated && isMediaLoaded && (
@@ -95,7 +92,7 @@ const StickerButton: FC<IProps> = ({
           animationData={mediaData as AnyLiteral}
           play={shouldPlay}
           noLoop
-          className={['full-media', ...fullMediaClassNames].join(' ')}
+          className={transitionClassNames}
           onLoad={handleAnimationLoad}
         />
       )}

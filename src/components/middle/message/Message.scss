@@ -17,7 +17,7 @@
     opacity: 1;
     transform: scale(1) translateX(0);
     transform-origin: bottom;
-    transition: opacity 150ms, transform 150ms ease-in;
+    transition: opacity .15ms, transform .15ms ease-in;
   }
 
   &.last-in-group {
@@ -279,27 +279,12 @@
     display: block;
   }
 
-  .full-media, .message-media-loading {
+  .thumbnail ~ .full-media, .message-media-loading {
     position: absolute;
   }
 
-  .full-media {
-    opacity: 0;
-    transition: opacity .3s ease;
-
-    &.open {
-      opacity: 1;
-    }
-
-    &:not(.shown) {
-      display: none;
-    }
-  }
-
   .thumbnail {
-    opacity: 1;
     filter: blur(0px);
-    transition: opacity .3s ease, filter .3s ease;
 
     &.blur {
       filter: blur(7px);
@@ -307,10 +292,6 @@
 
     &.empty {
       visibility: hidden;
-    }
-
-    &.fade-out {
-      opacity: 0;
     }
   }
 }

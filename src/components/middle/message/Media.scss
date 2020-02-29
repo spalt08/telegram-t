@@ -35,14 +35,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
-    opacity: 1;
-    transition: opacity 250ms;
-    will-change: opacity;
-
-    &:not(.open) {
-      opacity: 0;
-    }
   }
 
   .message-media-duration,

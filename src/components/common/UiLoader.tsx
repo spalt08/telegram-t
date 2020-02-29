@@ -66,7 +66,7 @@ const UiLoader: FC<IProps> = ({
   return (
     <div id="UiLoader">
       {shouldRender && (
-        <div key={page} className={['mask', 'overlay', ...transitionClassNames].join(' ')}>
+        <div key={page} className={['mask', transitionClassNames].join(' ')}>
           {page === 'main' ? (
             <>
               <div className="left" />

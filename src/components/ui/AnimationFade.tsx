@@ -26,7 +26,7 @@ const AnimationFade: FC<IProps> = ({
 
   return (
     shouldRender && (
-      <div className={[className, 'overlay', ...transitionClassNames].join(' ')} onClick={onClick}>
+      <div className={[className, transitionClassNames].join(' ')} onClick={onClick}>
         {isOpen ? children() : fromChildrenRef.current!()}
       </div>
     )

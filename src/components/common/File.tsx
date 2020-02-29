@@ -47,7 +47,7 @@ const File: FC<IProps> = ({
           )}
         </div>
         {shouldSpinnerRender && (
-          <div className={['file-progress', color, ...spinnerClassNames].join(' ')}>
+          <div className={['file-progress', color, spinnerClassNames].join(' ')}>
             <ProgressSpinner progress={transferProgress} radius={22} smaller={smaller} onClick={onCancelTransfer} />
           </div>
         )}
