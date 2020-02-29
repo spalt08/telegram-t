@@ -15,13 +15,14 @@ import TabList from '../ui/TabList';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import UserExtra from './UserExtra';
-import GroupExtra from './GroupExtra';
+import GroupExtra from './ChatExtra';
 import Media from './sharedMedia/Media';
 import Document from './sharedMedia/Document';
+// TODO @refactoring Move to `components/common`.
 import WebPage from '../middle/message/WebPage';
 import Audio from '../middle/message/Audio';
 
-import './RightColumnInfo.scss';
+import './Profile.scss';
 
 type IProps = {
   chatId: number;
@@ -44,7 +45,7 @@ const MEDIA_TYPES = [
   'audio',
 ] as const;
 
-const RightColumnInfo: FC<IProps> = ({
+const Profile: FC<IProps> = ({
   chatId,
   resolvedUserId,
   chatMessages,
@@ -112,7 +113,7 @@ const RightColumnInfo: FC<IProps> = ({
   return (
     <InfiniteScroll
       ref={containerRef}
-      className="RightColumnInfo custom-scroll"
+      className="Profile custom-scroll"
       items={messageIds}
       onLoadMore={searchMessages}
     >
@@ -188,4 +189,4 @@ export default withGlobal(
     const { setMessageSearchMediaType, searchMessages, openMediaViewer } = actions;
     return { setMessageSearchMediaType, searchMessages, openMediaViewer };
   },
-)(RightColumnInfo);
+)(Profile);

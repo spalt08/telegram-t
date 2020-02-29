@@ -10,7 +10,7 @@ import EmojiPicker from './EmojiPicker';
 import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
 
-import './StickerMenu.scss';
+import './SymbolMenu.scss';
 
 const TABS = [
   'Emoji',
@@ -35,7 +35,7 @@ type IProps = {
   onGifSelect: (gif: ApiVideo) => void;
 };
 
-const StickerMenu: FC<IProps> = ({
+const SymbolMenu: FC<IProps> = ({
   isOpen, onClose, onEmojiSelect, onStickerSelect, onGifSelect,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -82,14 +82,14 @@ const StickerMenu: FC<IProps> = ({
       positionX="left"
       positionY="bottom"
       onClose={onClose}
-      className="StickerMenu"
+      className="SymbolMenu"
       onCloseAnimationEnd={onClose}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       noCloseOnBackdrop
     >
       <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />
-      <div className="StickerMenu-main">
+      <div className="SymbolMenu-main">
         {isActivated.current && (
           <>
             <EmojiPicker
@@ -113,4 +113,4 @@ const StickerMenu: FC<IProps> = ({
   );
 };
 
-export default memo(StickerMenu);
+export default memo(SymbolMenu);
