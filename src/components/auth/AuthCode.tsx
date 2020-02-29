@@ -5,7 +5,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
-import getMonkeyAnimationData from '../../util/monkeys';
+import getMonkeyAnimationData from '../common/helpers/monkeys';
 
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';

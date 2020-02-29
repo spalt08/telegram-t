@@ -9,7 +9,7 @@ import {
   isActionMessage,
   getMessageSummaryText,
 } from '../../modules/helpers';
-import { getPictogramDimensions } from '../../util/mediaDimensions';
+import { getPictogramDimensions } from './helpers/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
 
 import RippleEffect from '../ui/RippleEffect';

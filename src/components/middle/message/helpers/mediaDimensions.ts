@@ -1,5 +1,5 @@
 import { ApiMessage } from '../../../../api/types';
-import { calculateInlineImageDimensions } from '../../../../util/mediaDimensions';
+import { calculateInlineImageDimensions } from '../../../common/helpers/mediaDimensions';
 import {
   getMessageText,
   getMessagePhoto,

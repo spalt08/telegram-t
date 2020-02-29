@@ -3,7 +3,7 @@ import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 import { ApiMessage, ApiWebPage } from '../../../api/types';
 
 import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
-import { calculateMediaDimensions } from './util/mediaDimensions';
+import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import Photo from './Photo';
 

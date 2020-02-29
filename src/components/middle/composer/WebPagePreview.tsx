@@ -5,7 +5,7 @@ import { GlobalActions, GlobalState } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 
 import { throttle } from '../../../util/schedulers';
-import parseTextEntities from '../util/parseTextEntities';
+import parseMessageInput from './helpers/parseMessageInput';
 
 import WebPage from '../message/WebPage';
 
@@ -28,7 +28,7 @@ const WebPagePreview: FC<IProps> = ({
   const hasPreview = Boolean(webPagePreview);
 
   useEffect(() => {
-    const { rawText } = parseTextEntities(messageText);
+    const { rawText } = parseMessageInput(messageText);
     if (rawText.length && rawText.match(RE_LINK)) {
       runThrottledForWebPagePreview(() => loadWebPagePreview({ text: rawText }));
     } else {

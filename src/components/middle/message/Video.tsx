@@ -3,7 +3,7 @@ import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import { calculateVideoDimensions } from '../../../util/mediaDimensions';
+import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,

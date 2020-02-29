@@ -1,6 +1,6 @@
 import React, { FC } from '../../lib/teact/teact';
 
-import { getColorFromExtension, getFileSizeString } from '../../util/documentInfo';
+import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import ProgressSpinner from '../ui/ProgressSpinner';

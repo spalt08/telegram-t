@@ -8,7 +8,7 @@ import {
   ApiMessage,
 } from '../../api/types';
 import { selectUser, selectChatMessage, selectChatFocusedMessageId } from '../../modules/selectors';
-import { renderServiceMessageText } from '../../helpers/renderServiceMessageText';
+import { renderServiceMessageText } from '../common/helpers/renderServiceMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
 type IProps = {

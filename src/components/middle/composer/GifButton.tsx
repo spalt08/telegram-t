@@ -5,7 +5,7 @@ import React, {
 import { ApiVideo } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { calculateVideoDimensions } from '../../../util/mediaDimensions';
+import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 

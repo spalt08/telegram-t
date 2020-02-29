@@ -2,7 +2,7 @@ import React, { FC, useState, useCallback } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
 
-import { getPictogramDimensions } from '../../util/mediaDimensions';
+import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri, getMessageSummaryText } from '../../modules/helpers';
 import useMedia from '../../hooks/useMedia';
 

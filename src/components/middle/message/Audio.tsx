@@ -8,7 +8,7 @@ import { formatMediaDateTime, formatMediaDuration } from '../../../util/dateForm
 import { isOwnMessage, getMessageMediaHash, getMessageTransferParams } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
-import { renderWaveformToDataUri } from '../../../util/waveform';
+import { renderWaveformToDataUri } from '../../common/helpers/waveform';
 import buildClassName from '../../../util/buildClassName';
 
 import Button from '../../ui/Button';

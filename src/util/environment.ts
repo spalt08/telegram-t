@@ -13,14 +13,9 @@ export function getPlatform() {
     os = 'Windows';
   } else if (/Android/.test(userAgent)) {
     os = 'Android';
-  } else if (!os && /Linux/.test(platform)) {
+  } else if (/Linux/.test(platform)) {
     os = 'Linux';
   }
 
   return os;
-}
-
-export function isSafari() {
-  const ua = navigator.userAgent;
-  return ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1;
 }

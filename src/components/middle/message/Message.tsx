@@ -25,13 +25,13 @@ import {
   isReplyMessage,
   isForwardedMessage,
 } from '../../../modules/helpers';
-import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../util/mediaDimensions';
-import { buildContentClassName } from './util/buildContentClassName';
-import { getMinMediaWidth } from './util/mediaDimensions';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
-import { renderMessageText } from '../../../helpers/renderMessageText';
+import { renderMessageText } from '../../common/helpers/renderMessageText';
+import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
+import { buildContentClassName } from './helpers/buildContentClassName';
+import { getMinMediaWidth } from './helpers/mediaDimensions';
 
 import Avatar from '../../common/Avatar';
 import MessageMeta from './MessageMeta';
