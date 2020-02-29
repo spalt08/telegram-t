@@ -1,4 +1,4 @@
-import React, { FC, useRef } from '../../lib/teact/teact';
+import React, { FC } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat } from '../../api/types';
 import {
@@ -8,7 +8,8 @@ import {
 import * as mediaLoader from '../../util/mediaLoader';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
-import useShowTransition from '../../hooks/useShowTransition';
+import useProgressiveMedia from '../../hooks/useProgressiveMedia';
+import buildClassName from '../../util/buildClassName';
 
 import './Avatar.scss';
 
@@ -45,12 +46,7 @@ const Avatar: FC<IProps> = ({
   }
 
   const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
-  const isImageLoaded = Boolean(dataUri);
-  const isImagePreloadedRef = useRef(isImageLoaded);
-  const {
-    shouldRender: shouldImageRender,
-    transitionClassNames: imageClassNames,
-  } = useShowTransition(isImageLoaded, undefined, noAnimate || isImagePreloadedRef.current!);
+  const { shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(dataUri, 'slow', noAnimate);
 
   let content: string | null = '';
 
@@ -58,8 +54,8 @@ const Avatar: FC<IProps> = ({
     content = <i className="icon-avatar-saved-messages" />;
   } else if (isDeleted) {
     content = <i className="icon-avatar-deleted-account" />;
-  } else if (shouldImageRender) {
-    content = <img src={dataUri} className={imageClassNames.join(' ')} alt="" />;
+  } else if (shouldRenderFullMedia) {
+    content = <img src={dataUri} className={transitionClassNames} alt="" />;
   } else if (user) {
     const userName = getUserFullName(user);
     content = userName ? getFirstLetters(userName).slice(0, 2) : null;
@@ -69,23 +65,15 @@ const Avatar: FC<IProps> = ({
   }
 
   const isOnline = !isSavedMessages && user && isUserOnline(user);
-  const classNames = ['Avatar', `size-${size}`];
-
-  if (showOnlineStatus && isOnline) {
-    classNames.push('online');
-  }
-  if (className) {
-    classNames.push(className);
-  }
-  if (onClick) {
-    classNames.push('action');
-  }
+  const fullClassName = buildClassName(
+    `Avatar size-${size}`,
+    className,
+    showOnlineStatus && isOnline && 'online',
+    onClick && 'action',
+  );
 
   return (
-    <div
-      className={classNames.join(' ')}
-      onClick={onClick}
-    >
+    <div className={fullClassName} onClick={onClick}>
       {content}
     </div>
   );

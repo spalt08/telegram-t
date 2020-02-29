@@ -11,17 +11,6 @@
 
   img {
     border-radius: 50%;
-
-    opacity: 0;
-    transition: opacity .15s ease;
-
-    &.open {
-      opacity: 1;
-    }
-
-    &:not(.shown) {
-      display: none;
-    }
   }
 
   i {

@@ -89,7 +89,7 @@ div[role="button"] {
   cursor: pointer;
 }
 
-.overlay {
+.opacity-transition {
   opacity: 1;
   transition: opacity .15s ease;
 
@@ -99,6 +99,10 @@ div[role="button"] {
 
   &:not(.shown) {
     display: none;
+  }
+
+  &.slow {
+    transition-duration: .3s;
   }
 }
 

@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from '../lib/teact/teact';
+import buildClassName from '../util/buildClassName';
 
 const CLOSE_DURATION = 350;
 
-export default (isOpen = false, onCloseTransitionEnd?: () => void, noOpenTransition = false) => {
+export default (
+  isOpen = false,
+  onCloseTransitionEnd?: () => void,
+  noOpenTransition = false,
+  className: string | false = 'fast',
+) => {
   const [isClosed, setIsClosed] = useState(!isOpen);
   const closeTimeoutRef = useRef<number>();
   // СSS class should be added in a separate tick to turn on CSS transition.
@@ -31,15 +37,14 @@ export default (isOpen = false, onCloseTransitionEnd?: () => void, noOpenTransit
     }, CLOSE_DURATION);
   }
 
-  const shouldRender = isOpen || closeTimeoutRef.current;
-  const transitionClassNames = [];
   const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);
-  if (hasOpenClassName) {
-    transitionClassNames.push('open');
-  }
-  if (shouldRender) {
-    transitionClassNames.push('shown');
-  }
+  const shouldRender = isOpen || Boolean(closeTimeoutRef.current);
+  const transitionClassNames = buildClassName(
+    className && 'opacity-transition',
+    className,
+    hasOpenClassName && 'open',
+    shouldRender && 'shown',
+  );
 
   return {
     shouldRender,

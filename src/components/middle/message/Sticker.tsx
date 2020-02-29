@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useRef, useState,
+  FC, useCallback, useState,
 } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
@@ -8,11 +8,12 @@ import { getStickerDimensions } from '../../../util/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
 import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';
-import useShowTransition from '../../../hooks/useShowTransition';
 
 type IProps = {
   message: ApiMessage;
@@ -35,38 +36,31 @@ const Sticker: FC<IProps> = ({
     isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
   );
   const isMediaLoaded = Boolean(mediaData);
-  const isMediaPreloadedRef = useRef<boolean>(isMediaLoaded);
-
   const {
-    shouldRender: shouldFullMediaRender,
-    transitionClassNames: fullMediaClassNames,
-  } = useShowTransition(isAnimated ? isAnimationLoaded : isMediaLoaded, undefined, isMediaPreloadedRef.current!);
+    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
+  } = useProgressiveMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast');
 
   const { width, height } = getStickerDimensions(sticker);
-
-  let thumbClassName = 'thumbnail';
-  if (thumbDataUri && (isAnimationLoaded || isMediaLoaded) && fullMediaClassNames.includes('open')) {
-    thumbClassName += ' fade-out';
-  } else if (!thumbDataUri) {
-    thumbClassName += ' empty';
-  }
+  const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
 
   return (
     <div className="media-inner">
-      <img
-        src={thumbDataUri}
-        width={width}
-        height={height}
-        alt=""
-        className={thumbClassName}
-      />
-      {(!isAnimated && shouldFullMediaRender) && (
+      {shouldRenderThumb && (
+        <img
+          src={thumbDataUri}
+          width={width}
+          height={height}
+          alt=""
+          className={thumbClassName}
+        />
+      )}
+      {!isAnimated && shouldRenderFullMedia && (
         <img
           src={mediaData as string}
           width={width}
           height={height}
           alt=""
-          className={['full-media', ...fullMediaClassNames].join(' ')}
+          className={['full-media', transitionClassNames].join(' ')}
         />
       )}
       {isAnimated && isMediaLoaded && (
@@ -75,7 +69,7 @@ const Sticker: FC<IProps> = ({
           width={width}
           height={height}
           play={loadAndPlay}
-          className={['full-media', ...fullMediaClassNames].join(' ')}
+          className={['full-media', transitionClassNames].join(' ')}
           onLoad={handleAnimationLoad}
         />
       )}

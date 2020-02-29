@@ -39,8 +39,7 @@ const Menu: FC<IProps> = (props) => {
   } = props;
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
   const bubbleClassNames = [
-    'bubble', 'menu-container', 'custom-scroll', positionY, positionX,
-    'overlay', ...transitionClassNames,
+    'bubble', 'menu-container', 'custom-scroll', positionY, positionX, transitionClassNames,
   ].join(' ');
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
