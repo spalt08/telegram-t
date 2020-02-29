@@ -21,14 +21,14 @@ import focusEditableElement from '../../../util/focusEditableElement';
 
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
-import StickerMenu from './StickerMenu';
+import SymbolMenu from './SymbolMenu';
 import MessageInput from './MessageInput';
 import MessageInputReply from './MessageInputReply';
 import AttachmentModal from './AttachmentModal';
 import PollModal from './PollModal';
 import WebPagePreview from './WebPagePreview';
 
-import './MiddleFooter.scss';
+import './Composer.scss';
 
 type IProps = {
   isPrivateChat: boolean;
@@ -55,7 +55,7 @@ function isSelectionInsideInput(selectionRange: Range) {
   return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
 }
 
-const MiddleFooter: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
+const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
   const [html, setHtml] = useState<string>('');
   const htmlRef = useRef<string>(html);
 
@@ -315,7 +315,7 @@ const MiddleFooter: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
             onPollCreate={handleOpenPollCreation}
             onClose={handleCloseAttachMenu}
           />
-          <StickerMenu
+          <SymbolMenu
             isOpen={isStickerMenuOpen}
             onClose={handleCloseStickerMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
@@ -370,4 +370,4 @@ export default memo(withGlobal(
     const { sendMessage } = actions;
     return { sendMessage };
   },
-)(MiddleFooter));
+)(Composer));

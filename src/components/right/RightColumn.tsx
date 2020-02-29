@@ -7,7 +7,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { selectCurrentMessageSearch } from '../../modules/selectors';
 
 import RightHeader from './RightHeader';
-import RightColumnInfo from './RightColumnInfo';
+import Profile from './Profile';
 import RightSearch from './RightSearch';
 
 import './RightColumn.scss';
@@ -55,7 +55,7 @@ const RightColumn: FC<IProps> = ({
       {isSearch ? (
         <RightSearch chatId={selectedChatId} />
       ) : (isUserInfo || isChatInfo) ? (
-        <RightColumnInfo key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
+        <Profile key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
       ) : null}
     </div>
   );
