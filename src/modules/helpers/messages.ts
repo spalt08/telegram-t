@@ -1,5 +1,7 @@
 import { ApiMessage } from '../../api/types';
 
+import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
+
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = /(^|\s)(([a-z]{3,}?:\/\/)?([a-z0-9]+([-.@][a-z0-9]+)*\.[a-z]{2,}\.?(:[0-9]{1,5})?)([/#?][^\s]*)?)\b/;
 
@@ -77,6 +79,23 @@ export function getMessageText(message: ApiMessage) {
   }
 
   return CONTENT_NOT_SUPPORTED;
+}
+
+export function getMessageCustomShape(message: ApiMessage): boolean | number {
+  const {
+    text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
+  } = message.content;
+
+  if (sticker || (video && video.isRound)) {
+    return true;
+  }
+
+  if (!text || photo || video || audio || voice || document || poll || webPage || contact) {
+    return false;
+  }
+
+  // This is a "dual-intent" method used to limit calls of `parseEmojiOnlyString`.
+  return parseEmojiOnlyString(text.text) || false;
 }
 
 export function matchLinkInMessageText(message: ApiMessage) {

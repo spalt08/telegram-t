@@ -1,11 +1,6 @@
 import { ApiMessage } from '../../../../api/types';
 
-import parseEmojiOnlyString from '../../../common/helpers/parseEmojiOnlyString';
 import { getMessageContent } from '../../../../modules/helpers';
-
-const SOLID_BACKGROUND_CLASSES = [
-  'text', 'media', 'audio', 'voice', 'document', 'contact', 'poll', 'webPage', 'is-forwarded', 'is-reply',
-];
 
 export function buildContentClassName(
   message: ApiMessage,
@@ -13,40 +8,30 @@ export function buildContentClassName(
     isOwn,
     hasReply,
     isLastInGroup,
+    customShape,
   }: {
     isOwn?: boolean;
     hasReply?: boolean;
     isLastInGroup?: boolean;
+    customShape?: boolean | number;
   } = {},
 ) {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
+    text, photo, video, audio, voice, document, poll, webPage, contact,
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
-  let asSticker = false;
 
-  if (text) {
-    const emojiOnlyCount = parseEmojiOnlyString(text.text);
-
-    if (!photo && emojiOnlyCount) {
-      asSticker = true;
-      classNames.push(`sticker emoji-only emoji-only-${emojiOnlyCount}`);
-    } else {
-      classNames.push('text');
-    }
+  if (typeof customShape === 'number') {
+    classNames.push(`emoji-only emoji-only-${customShape}`);
+  } else if (text) {
+    classNames.push('text');
   }
 
-  if (sticker) {
-    asSticker = true;
+  if (customShape) {
     classNames.push('sticker');
   } else if (photo || video) {
-    if (video && video.isRound) {
-      asSticker = true;
-      classNames.push('round', 'sticker');
-    } else {
-      classNames.push('media');
-    }
+    classNames.push('media');
   } else if (audio) {
     classNames.push('audio');
   } else if (voice) {
@@ -65,7 +50,7 @@ export function buildContentClassName(
     }
   }
 
-  if (message.forward_info && !classNames.includes('sticker')) {
+  if (message.forward_info && !customShape) {
     classNames.push('is-forwarded');
   }
 
@@ -73,10 +58,7 @@ export function buildContentClassName(
     classNames.push('is-reply');
   }
 
-  if (
-    classNames.some((className) => SOLID_BACKGROUND_CLASSES.includes(className))
-    && !asSticker
-  ) {
+  if (!customShape) {
     classNames.push('has-solid-background');
 
     if (!(classNames.includes('media') && !text && !classNames.includes('is-forwarded'))) {
@@ -90,8 +72,5 @@ export function buildContentClassName(
 
   classNames.push('status-read');
 
-  return {
-    contentClassName: classNames.join(' '),
-    asSticker,
-  };
+  return classNames.join(' ');
 }
