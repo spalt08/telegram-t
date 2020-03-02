@@ -1,8 +1,9 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate } from '../../types';
+import { OnApiUpdate, ApiUser } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
 import { buildInputEntity } from '../gramjsBuilders';
+import { buildApiUser } from '../apiBuilders/users';
 
 let onUpdate: OnApiUpdate;
 
@@ -52,4 +53,15 @@ export async function uploadProfilePhoto(file: File) {
   const inputFile = await uploadFile(file);
   const request = new GramJs.photos.UploadProfilePhoto({ file: inputFile });
   await invokeRequest(request);
+}
+
+export async function fetchTopUsers() {
+  const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
+    correspondents: true,
+  }));
+  if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
+    return undefined;
+  }
+
+  return topPeers.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
 }

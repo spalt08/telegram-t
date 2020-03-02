@@ -26,10 +26,31 @@ addReducer('loadNearestCountry', (global) => {
   }
 });
 
+addReducer('loadTopUsers', () => {
+  void loadTopUsers();
+});
+
 async function loadNearestCountry() {
   const authNearestCountry = await callApi('fetchNearestCountry');
   setGlobal({
     ...getGlobal(),
     authNearestCountry,
+  });
+}
+
+async function loadTopUsers() {
+  const users = await callApi('fetchTopUsers');
+  if (!users) {
+    return;
+  }
+
+  const global = getGlobal();
+
+  setGlobal({
+    ...global,
+    topPeers: {
+      ...global.topPeers,
+      users,
+    },
   });
 }

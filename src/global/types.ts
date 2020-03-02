@@ -94,6 +94,10 @@ export type GlobalState = {
     isReversed?: boolean;
   };
 
+  topPeers: {
+    users?: ApiUser[];
+  };
+
   webPagePreview?: ApiWebPage;
 };
 
@@ -113,7 +117,7 @@ export type ActionTypes = (
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' |
   // misc
   'openMediaViewer' |
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |

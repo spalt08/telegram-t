@@ -1,4 +1,6 @@
-import React, { FC, useState, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useCallback, useMemo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -9,16 +11,30 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import SearchInput from '../ui/SearchInput';
 import './LeftHeader.scss';
 
-type IProps = Pick<GlobalActions, 'signOut'>;
+type IProps = {
+  isSearchOpen: boolean;
+  onSearchOpen: () => void;
+  onSearchClose: () => void;
+} & Pick<GlobalActions, 'signOut'>;
 
-const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => (
-  <Button round size="smaller" color="translucent" className={isOpen ? 'active' : ''} onMouseDown={onTrigger}>
-    <i className="icon-menu" />
-  </Button>
-);
+const LeftHeader: FC<IProps> = ({
+  isSearchOpen, onSearchOpen, onSearchClose, signOut,
+}) => {
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);
 
-const LeftHeader: FC<IProps> = ({ signOut }) => {
-  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
+  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        round
+        size="smaller"
+        color="translucent"
+        className={isOpen ? 'active' : ''}
+        onMouseDown={isSearchOpen ? onSearchClose : onTrigger}
+      >
+        <div className={`animated-menu-icon ${isSearchOpen ? 'state-back' : ''}`} />
+      </Button>
+    );
+  }, [isSearchOpen, onSearchClose]);
 
   function openSignOutConfirmation() {
     setIsSignOutDialogOpen(true);
@@ -46,7 +62,7 @@ const LeftHeader: FC<IProps> = ({ signOut }) => {
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <SearchInput className="not-implemented" onChange={() => {}} />
+      <SearchInput focused={isSearchOpen} onChange={() => {}} onFocus={onSearchOpen} />
 
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}

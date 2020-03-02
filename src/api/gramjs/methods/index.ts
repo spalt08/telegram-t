@@ -8,7 +8,7 @@ import {
   searchMessages, fetchWebPagePreview,
 } from './messages';
 import {
-  fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
+  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers,
 } from './users';
 import {
   fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
@@ -37,6 +37,7 @@ export default {
   fetchFullUser,
   fetchNearestCountry,
   uploadProfilePhoto,
+  fetchTopUsers,
   fetchStickerSets,
   fetchRecentStickers,
   fetchStickers,

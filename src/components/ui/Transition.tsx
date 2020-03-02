@@ -1,5 +1,5 @@
 import React, {
-  FC, useLayoutEffect, useRef, useState,
+  FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
@@ -10,7 +10,7 @@ import './Transition.scss';
 type ChildrenFn = () => any;
 type IProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade';
+  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade';
   direction?: 'auto' | 'inverse' | 1 | -1;
   onStart?: () => void;
   onStop?: () => void;
@@ -40,7 +40,7 @@ const Transition: FC<IProps> = ({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   // Restore container height after switching content to absolute positioning.
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!isAnimating) {
       const container = containerRef.current!;
       container.style.height = `${container.firstElementChild!.clientHeight}px`;
