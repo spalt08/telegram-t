@@ -10,7 +10,7 @@ import './Transition.scss';
 type ChildrenFn = () => any;
 type IProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade';
+  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade';
   direction?: 'auto' | 'inverse' | 1 | -1;
   onStart?: () => void;
   onStop?: () => void;

@@ -50,6 +50,8 @@ const INITIAL_STATE: GlobalState = {
     byChatId: {},
   },
 
+  topPeers: {},
+
   mediaViewer: {},
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
