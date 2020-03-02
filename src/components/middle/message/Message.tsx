@@ -24,6 +24,7 @@ import {
   isOwnMessage,
   isReplyMessage,
   isForwardedMessage,
+  getMessageCustomShape,
 } from '../../../modules/helpers';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -148,7 +149,10 @@ const Message: FC<IProps> = ({
     isFocused && 'focused',
     message.is_deleting && 'is-deleting',
   );
-  const { contentClassName, asSticker } = buildContentClassName(message, { isOwn, isLastInGroup, hasReply: isReply });
+  const customShape = getMessageCustomShape(message);
+  const contentClassName = buildContentClassName(message, {
+    isOwn, isLastInGroup, hasReply: isReply, customShape,
+  });
 
   const handleAvatarClick = useCallback(() => {
     if (!sender) {
@@ -202,7 +206,7 @@ const Message: FC<IProps> = ({
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
-      || !user || photo || video || asSticker
+      || !user || photo || video || customShape
     ) {
       return null;
     }
@@ -215,7 +219,7 @@ const Message: FC<IProps> = ({
   function renderContent() {
     const className = buildClassName(
       'content-inner',
-      isForwarded && !asSticker && 'forwarded-message',
+      isForwarded && !customShape && 'forwarded-message',
       isReply && 'reply-message',
     );
 
@@ -326,7 +330,7 @@ const Message: FC<IProps> = ({
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
       >
-        {message.forward_info && !asSticker && (
+        {message.forward_info && !customShape && (
           <div className="sender-name">Forwarded message</div>
         )}
         {renderContent()}
