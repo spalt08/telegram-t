@@ -1,75 +1,72 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat } from '../../../api/types';
-import { GlobalState } from '../../../global/types';
+import { LoadMoreDirection } from '../../../types';
 
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  updateListedIds,
-  replaceChatMessagesById,
-  updateChatMessage,
-  replaceViewportIds,
   addUsers,
+  replaceChatMessagesById,
+  safeReplaceViewportIds,
+  updateChatMessage,
+  updateListedIds,
 } from '../../reducers';
 import {
   selectChat, selectListedIds, selectViewportIds, selectOpenChat,
 } from '../../selectors';
-
-const MESSAGE_SLICE_LIMIT = 50;
+import { MESSAGE_SLICE_LIMIT } from '../../../config';
 
 addReducer('loadMessagesForList', (global, actions, payload) => {
   const { direction } = payload || {};
   const chat = selectOpenChat(global);
+
   if (!chat) {
     return undefined;
   }
 
-  if (direction) {
-    const { newViewportIds, anchorId } = getUpdatedViewportIds(global, chat.id, direction);
-    if (newViewportIds) {
-      return replaceViewportIds(global, chat.id, newViewportIds);
-    } else if (anchorId) {
-      void loadMessagesForList(chat, anchorId, direction);
-    }
-  } else {
-    void loadMessagesForList(chat);
-  }
+  let newGlobal = global;
 
-  return undefined;
-});
-
-function getUpdatedViewportIds(global: GlobalState, chatId: number, direction?: 1 | -1, force = false) {
-  const listedIds = selectListedIds(global, chatId);
-  const viewportIds = selectViewportIds(global, chatId);
-
-  if (!listedIds) {
-    return {};
-  }
+  const listedIds = selectListedIds(global, chat.id);
+  const viewportIds = selectViewportIds(global, chat.id);
 
   if (!viewportIds) {
-    return { newViewportIds: listedIds };
+    void loadMessagesForList(chat, chat.last_read_inbox_message_id, LoadMoreDirection.Around, MESSAGE_SLICE_LIMIT * 2);
+    return undefined;
   }
 
-  const anchorId = direction === -1 ? viewportIds[0] : viewportIds[viewportIds.length - 1];
-  const indexInListed = listedIds.indexOf(anchorId);
-  const newViewportIds = listedIds.slice(
-    Math.max((direction === 1 ? indexInListed + 1 : indexInListed) - MESSAGE_SLICE_LIMIT, 0),
-    (direction === 1 ? indexInListed + 1 : indexInListed) + MESSAGE_SLICE_LIMIT,
-  );
+  if (direction === LoadMoreDirection.Backwards || direction === LoadMoreDirection.Both) {
+    const offsetId = viewportIds[0];
+    const {
+      newViewportIds, areSomeLocal, areAllLocal,
+    } = getViewportSlice(listedIds!, offsetId, LoadMoreDirection.Backwards);
 
-  if (force || newViewportIds.length === MESSAGE_SLICE_LIMIT * 2) {
-    if (
-      viewportIds[0] === newViewportIds[0]
-      && viewportIds[viewportIds.length - 1] === newViewportIds[newViewportIds.length - 1]
-    ) {
-      return { newViewportIds: viewportIds };
+    if (areSomeLocal) {
+      newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds);
     }
-    return { newViewportIds };
-  } else {
-    return { anchorId };
+
+    if (!areAllLocal) {
+      void loadMessagesForList(chat, offsetId, LoadMoreDirection.Backwards);
+    }
   }
-}
+
+  if (direction === LoadMoreDirection.Forwards || direction === LoadMoreDirection.Both) {
+    const offsetId = viewportIds[viewportIds.length - 1];
+    const {
+      newViewportIds, areSomeLocal, areAllLocal,
+    } = getViewportSlice(listedIds!, offsetId, LoadMoreDirection.Forwards);
+
+    if (areSomeLocal) {
+      newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds);
+    }
+
+    if (!areAllLocal) {
+      void loadMessagesForList(chat, offsetId, LoadMoreDirection.Forwards);
+    }
+  }
+
+  return newGlobal;
+});
 
 addReducer('loadMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
@@ -161,12 +158,27 @@ async function loadWebPagePreview(message: string) {
   });
 }
 
-async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?: 1 | -1) {
+async function loadMessagesForList(
+  chat: ApiChat,
+  offsetId: number,
+  direction: LoadMoreDirection,
+  limit = MESSAGE_SLICE_LIMIT,
+) {
+  let addOffset: number | undefined;
+  switch (direction) {
+    case LoadMoreDirection.Backwards:
+      addOffset = undefined;
+      break;
+    case LoadMoreDirection.Around:
+      addOffset = -(Math.round(limit / 2) + 1);
+      break;
+    case LoadMoreDirection.Forwards:
+      addOffset = -(limit + 1);
+      break;
+  }
+
   const result = await callApi('fetchMessages', {
-    chat,
-    offsetId,
-    limit: MESSAGE_SLICE_LIMIT,
-    ...(direction === 1 && { addOffset: -MESSAGE_SLICE_LIMIT }),
+    chat, offsetId, addOffset, limit,
   });
 
   if (!result) {
@@ -179,12 +191,14 @@ async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?
   const ids = Object.keys(byId).map(Number);
 
   let newGlobal = getGlobal();
+
   newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
   newGlobal = updateListedIds(newGlobal, chat.id, ids);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
-  const { newViewportIds } = getUpdatedViewportIds(newGlobal, chat.id, direction, true);
-  newGlobal = replaceViewportIds(newGlobal, chat.id, newViewportIds!);
+  const listedIds = selectListedIds(newGlobal, chat.id)!;
+  const { newViewportIds } = getViewportSlice(listedIds, offsetId, direction, true);
+  newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds!);
 
   setGlobal(newGlobal);
 }
@@ -200,4 +214,26 @@ async function loadMessage(chat: ApiChat, messageId: number) {
   newGlobal = updateChatMessage(newGlobal, chat.id, messageId, result.message);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(result.users, 'id'));
   setGlobal(newGlobal);
+}
+
+function getViewportSlice(sourceIds: number[], offsetId: number, direction: LoadMoreDirection, forceMax = false) {
+  const { length } = sourceIds;
+  const index = sourceIds.indexOf(offsetId);
+  const isForwards = direction === LoadMoreDirection.Forwards;
+  const indexForDirection = isForwards ? index + 1 : index;
+  const from = indexForDirection - MESSAGE_SLICE_LIMIT;
+  const to = indexForDirection + MESSAGE_SLICE_LIMIT;
+  const newViewportIds = sourceIds.slice(Math.max(0, from), to);
+  const areSomeLocal = (isForwards && indexForDirection < length) || (!isForwards && indexForDirection > 0);
+  const areAllLocal = (isForwards && to <= length) || (!isForwards && from >= 0);
+
+  if (!areAllLocal && forceMax) {
+    return {
+      newViewportIds: index <= (length / 2 - 1)
+        ? sourceIds.slice(0, MESSAGE_SLICE_LIMIT * 2)
+        : sourceIds.slice(Math.max(0, length - MESSAGE_SLICE_LIMIT * 2), length),
+    };
+  }
+
+  return { newViewportIds, areSomeLocal, areAllLocal };
 }

@@ -1,12 +1,11 @@
-import { useLayoutEffect, useRef } from '../lib/teact/teact';
+import { useLayoutEffect } from '../lib/teact/teact';
+import usePrevious from './usePrevious';
 
 export default <T extends any[]>(cb: (args: T) => void, dependencies: T) => {
-  // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
-  const prevDeps = useRef<T>([]);
+  const prevDeps = usePrevious<T>(dependencies);
   return useLayoutEffect(() => {
-    cb(prevDeps.current);
-
-    prevDeps.current = dependencies;
+    // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
+    cb(prevDeps || []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 };

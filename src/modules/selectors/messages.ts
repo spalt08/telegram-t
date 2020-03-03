@@ -24,10 +24,11 @@ export function selectViewportIds(global: GlobalState, chatId: number) {
   return messages ? messages.viewportIds : undefined;
 }
 
-export function selectIsChatMessageViewportLatest(global: GlobalState, chatId: number) {
-  const { listedIds, viewportIds } = global.messages.byChatId[chatId] || {};
+export function selectIsViewportNewest(global: GlobalState, chatId: number) {
+  const { last_message } = selectChat(global, chatId) || {};
+  const viewportIds = selectViewportIds(global, chatId);
 
-  return listedIds && viewportIds && listedIds[listedIds.length - 1] === viewportIds[viewportIds.length - 1];
+  return last_message && viewportIds && viewportIds[viewportIds.length - 1] === last_message.id;
 }
 
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {

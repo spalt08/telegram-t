@@ -6,11 +6,14 @@ import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../global/types';
+import { LoadMoreDirection } from '../../types';
 
+import { MESSAGE_SLICE_LIMIT } from '../../config';
 import {
   selectChatMessages,
   selectViewportIds,
-  selectIsChatMessageViewportLatest,
+  selectIsViewportNewest,
+  selectLastReadIdByChatId,
   selectOpenChat,
 } from '../../modules/selectors';
 import {
@@ -26,28 +29,28 @@ import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages, MessageDateGroup } from './helpers/groupMessages';
+import useOnChange from '../../hooks/useOnChange';
+import findInViewport from '../../util/findInViewport';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';
 import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
-import findInViewport from '../../util/findInViewport';
 
 type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | 'setChatScrollOffset'> & {
   chatId?: number;
   isChannelChat?: boolean;
-  isUnread?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
-  isLatest: boolean;
+  lastReadId?: number;
+  isViewportNewest: boolean;
 };
 
 const LOAD_MORE_THRESHOLD_PX = 1500;
-const LOAD_MORE_WHEN_LESS_THAN = 50;
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
-const VIEWPORT_MARGIN = 500;
-const STICKY_OFFSET_TOP = 10;
+const VIEWPORT_MEDIA_MARGIN = 500;
+const INDICATOR_TOP_MARGIN = 10;
 const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
@@ -55,19 +58,19 @@ const scrollToLastMessage = throttle((container: Element) => {
   container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 }, 300, true);
 
-let currentScrollOffset = 0;
+let currentScrollOffset: number;
 let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
-
+let unreadDividerMessageId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
   chatId,
   isChannelChat,
-  isUnread,
   messageIds,
   messagesById,
-  isLatest,
+  lastReadId,
+  isViewportNewest,
   loadMessagesForList,
   markMessagesRead,
   setChatScrollOffset,
@@ -75,31 +78,57 @@ const MessageList: FC<IProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
+
+  useOnChange(() => {
+    currentAnchorId = undefined;
+
+    // We update local cached `currentScrollOffset` when switching chat.
+    // Then we update global version every second on scrolling.
+    currentScrollOffset = chatId ? getGlobal().chats.scrollOffsetById[chatId] : 0;
+
+    // We only update `unreadDividerMessageId` when switching chat.
+    unreadDividerMessageId = lastReadId;
+  }, [chatId]);
+
   const messageGroups = useMemo(() => {
     if (!chatId || !messageIds || !messagesById || !messageIds.length) {
       return undefined;
     }
 
     const listedMessages = messageIds.map((id) => messagesById[id]);
-    return groupMessages(orderBy(listedMessages, 'date'));
+    return groupMessages(orderBy(listedMessages, 'date'), unreadDividerMessageId!);
   }, [chatId, messageIds, messagesById]);
-
-  const playMediaInViewport = useCallback(() => {
-    requestAnimationFrame(() => {
-      const container = containerRef.current!;
-      const { allElements, visibleIndexes } = findInViewport(container, '.Message.has-media', VIEWPORT_MARGIN);
-      const newViewportMessageIds = visibleIndexes.map((i) => Number(allElements[i].dataset.messageId));
-      if (!areSortedArraysEqual(newViewportMessageIds, viewportMessageIds)) {
-        setViewportMessageIds(newViewportMessageIds);
-      }
-    });
-  }, [viewportMessageIds]);
 
   const loadMessagesDebounced = useMemo(
     () => debounce(loadMessagesForList, 1000, true, false),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadMessagesForList, messageIds],
   );
+
+  const updateViewportMessages = useCallback(() => {
+    requestAnimationFrame(() => {
+      const container = containerRef.current!;
+
+      const {
+        allElements: mediaMessageEls, visibleIndexes: visibleMediaIndexes,
+      } = findInViewport(container, '.Message.has-media', VIEWPORT_MEDIA_MARGIN);
+      const newViewportMessageIds = visibleMediaIndexes.map((i) => Number(mediaMessageEls[i].dataset.messageId));
+      if (!areSortedArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+        setViewportMessageIds(newViewportMessageIds);
+      }
+
+      if (lastReadId) {
+        const { allElements, visibleIndexes } = findInViewport(container, '.Message', undefined, undefined, true);
+        const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
+        if (lowerElement) {
+          const maxId = Number(lowerElement.dataset.messageId);
+          if (maxId > lastReadId) {
+            markMessagesRead({ maxId });
+          }
+        }
+      }
+    });
+  }, [lastReadId, markMessagesRead, viewportMessageIds]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;
@@ -112,8 +141,8 @@ const MessageList: FC<IProps> = ({
     const currentAnchor = currentAnchorId && document.getElementById(currentAnchorId);
 
     if (isNearTop) {
-      const itemEls = container.querySelectorAll('.Message');
-      const newAnchor = itemEls[0];
+      const messageElements = container.querySelectorAll('.Message');
+      const newAnchor = messageElements[0];
       if (newAnchor) {
         const newMovingOffset = newAnchor.getBoundingClientRect().top;
         const isMovingUp = (
@@ -124,12 +153,12 @@ const MessageList: FC<IProps> = ({
         currentAnchorTop = newMovingOffset;
 
         if (isMovingUp) {
-          loadMessagesDebounced({ direction: -1 });
+          loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
         }
       }
-    } else if (!isLatest && isNearBottom) {
-      const itemEls = container.querySelectorAll('.Message');
-      const newAnchor = itemEls[itemEls.length - 1];
+    } else if (!isViewportNewest && isNearBottom) {
+      const messageElements = container.querySelectorAll('.Message');
+      const newAnchor = messageElements[messageElements.length - 1];
       if (newAnchor) {
         const newMovingOffset = newAnchor.getBoundingClientRect().top;
         const isMovingDown = (
@@ -140,7 +169,7 @@ const MessageList: FC<IProps> = ({
         currentAnchorTop = newMovingOffset;
 
         if (isMovingDown) {
-          loadMessagesDebounced({ direction: 1 });
+          loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
         }
       }
     } else if (currentAnchor) {
@@ -156,36 +185,30 @@ const MessageList: FC<IProps> = ({
     runThrottledForScroll(() => {
       setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
-      playMediaInViewport();
+      updateViewportMessages();
     });
 
     determineStickyElement(container, '.message-date-header');
-  }, [chatId, isLatest, loadMessagesDebounced, playMediaInViewport, setChatScrollOffset]);
+  }, [chatId, isViewportNewest, loadMessagesDebounced, updateViewportMessages, setChatScrollOffset]);
 
+  // Initial message loading
   useEffect(() => {
-    if (!messageIds || (messageIds.length < LOAD_MORE_WHEN_LESS_THAN)) {
-      loadMessagesDebounced();
+    const container = containerRef.current!;
+
+    if (!messageIds || (
+      container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_SLICE_LIMIT * 2
+    )) {
+      loadMessagesDebounced({ direction: LoadMoreDirection.Both });
     }
   }, [messageIds, loadMessagesDebounced]);
 
-  useEffect(() => {
-    if (isUnread) {
-      markMessagesRead();
-    }
-  }, [isUnread, markMessagesRead]);
-
-  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds, prevIsLatest]) => {
+  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds, prevIsViewportNewest]) => {
     if (chatId === prevChatId && messageIds === prevMessageIds) {
       return;
     }
 
-    if (chatId && chatId !== prevChatId) {
-      // We only read global state offset value when the chat has changed. Then we update it every second on scrolling.
-      currentScrollOffset = getGlobal().chats.scrollOffsetById[chatId];
-      currentAnchorId = undefined;
-    }
-
-    if (!containerRef.current) {
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
 
@@ -194,23 +217,29 @@ const MessageList: FC<IProps> = ({
       console.time('scrollTop');
     }
 
-    const { scrollTop, scrollHeight, offsetHeight } = containerRef.current;
+    const { scrollTop, scrollHeight, offsetHeight } = container;
     const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
-
-    const itemEls = containerRef.current.querySelectorAll('.Message');
-    const lastMessage = itemEls[itemEls.length - 1];
+    const messageElements = container.querySelectorAll('.Message');
+    const lastMessage = messageElements[messageElements.length - 1];
     const isNewMessage = lastMessage && (lastMessage.id !== currentAnchorId);
     const isScrolledDown = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
+    const unreadDivider = (
+      !anchor && unreadDividerMessageId && container.querySelector<HTMLDivElement>('.unread-divider')
+    );
 
-    if (prevIsLatest && isScrolledDown && isNewMessage) {
-      scrollToLastMessage(containerRef.current);
-    } else if (!anchor) {
-      containerRef.current.scrollTop = scrollHeight - Number(currentScrollOffset || 0);
-    } else {
+    if (isNewMessage && isScrolledDown && prevIsViewportNewest) {
+      scrollToLastMessage(container);
+    } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
       const newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
       currentScrollOffset = scrollHeight - newScrollTop;
-      containerRef.current.scrollTop = newScrollTop;
+      container.scrollTop = newScrollTop;
+    } else if (currentScrollOffset) {
+      container.scrollTop = scrollHeight - currentScrollOffset;
+    } else if (unreadDivider) {
+      container.scrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
+    } else {
+      container.scrollTop = scrollHeight;
     }
 
     if (lastMessage) {
@@ -218,15 +247,15 @@ const MessageList: FC<IProps> = ({
       currentAnchorTop = lastMessage.getBoundingClientRect().top;
     }
 
-    playMediaInViewport();
+    updateViewportMessages();
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, isLatest, playMediaInViewport]);
+  }, [chatId, messageIds, isViewportNewest, updateViewportMessages]);
 
-  const isPrivate = chatId !== undefined && isChatPrivate(chatId);
+  const isPrivate = Boolean(chatId && isChatPrivate(chatId));
 
   const className = buildClassName(
     'MessageList custom-scroll',
@@ -254,6 +283,8 @@ function renderMessages(
   viewportMessageIds: number[],
   isPrivate: boolean,
 ) {
+  let isPrevLastRead = false;
+
   const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
     dateGroupIndex: number,
@@ -269,10 +300,14 @@ function renderMessages(
         return <ServiceMessage key={message.id} message={message} />;
       }
 
-      return senderGroup.map((
+      return flatten(senderGroup.map((
         message,
         messageIndex,
       ) => {
+        if (message.prev_local_id && currentAnchorId === `message${message.prev_local_id}`) {
+          currentAnchorId = `message${message.id}`;
+        }
+
         const isOwn = isOwnMessage(message);
         const position = {
           isFirstInGroup: messageIndex === 0,
@@ -288,7 +323,7 @@ function renderMessages(
           || (message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
         );
 
-        return (
+        const renderedMessage = (
           <Message
             key={getMessageRenderKey(message)}
             message={message}
@@ -300,12 +335,27 @@ function renderMessages(
             isLastInList={position.isLastInList}
           />
         );
-      });
+
+        if (isPrevLastRead && !message.is_outgoing) {
+          isPrevLastRead = false;
+
+          return (
+            <>
+              <div className="unread-divider">Unread messages</div>
+              {renderedMessage}
+            </>
+          );
+        } else if (message.id === unreadDividerMessageId) {
+          isPrevLastRead = true;
+        }
+
+        return renderedMessage;
+      }));
     });
 
     return (
       // @ts-ignore
-      <div className="message-date-group" key={dateGroup.key}>
+      <div className="message-date-group" key={dateGroup.key} teactChildrenKeyOrder="asc">
         <div className="message-date-header" key={-Infinity}>
           <span>{formatHumanDate(dateGroup.datetime)}</span>
         </div>
@@ -323,7 +373,7 @@ function determineStickyElement(container: HTMLElement, selector: string) {
 
   Array.from(allElements).forEach((el) => {
     const currentTop = (el as HTMLElement).offsetTop;
-    el.classList.toggle('is-sticky', currentTop - containerTop === STICKY_OFFSET_TOP);
+    el.classList.toggle('is-sticky', currentTop - containerTop === INDICATOR_TOP_MARGIN);
   });
 }
 
@@ -338,10 +388,10 @@ export default memo(withGlobal(
     return {
       chatId: chat.id,
       isChannelChat: isChatChannel(chat),
-      isUnread: Boolean(chat.unread_count),
       messageIds: selectViewportIds(global, chat.id),
       messagesById: selectChatMessages(global, chat.id),
-      isLatest: selectIsChatMessageViewportLatest(global, chat.id),
+      lastReadId: selectLastReadIdByChatId(global, chat.id),
+      isViewportNewest: selectIsViewportNewest(global, chat.id),
     };
   },
   (setGlobal, actions) => {

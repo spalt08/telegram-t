@@ -1,4 +1,6 @@
 import { RefObject, UIEvent } from 'react';
+import { LoadMoreDirection } from '../../types';
+
 import React, {
   FC, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -17,7 +19,6 @@ interface IProps {
 
 const DEFAULT_SENSITIVE_HEIGHT = 1200;
 const DEFAULT_PRELOAD_BACKWARDS = 50;
-const BACKWARDS = -1;
 
 const InfiniteScroll: FC = ({
   ref,
@@ -40,7 +41,7 @@ const InfiniteScroll: FC = ({
 
   useEffect(() => {
     if (items && items.length < preloadBackwards) {
-      onLoadMoreDebounced({ direction: BACKWARDS });
+      onLoadMoreDebounced({ direction: LoadMoreDirection.Backwards });
     }
   }, [items, onLoadMoreDebounced, preloadBackwards]);
 
@@ -57,7 +58,7 @@ const InfiniteScroll: FC = ({
     const isMovingDown = typeof anchorTopRef.current === 'number' && newAnchorTop < anchorTopRef.current;
 
     if (isNearBottom && isMovingDown) {
-      onLoadMoreDebounced({ direction: BACKWARDS });
+      onLoadMoreDebounced({ direction: LoadMoreDirection.Backwards });
     }
 
     anchorTopRef.current = newAnchorTop;

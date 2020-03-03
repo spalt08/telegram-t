@@ -56,7 +56,7 @@ const Profile: FC<IProps> = ({
   const containerRef = useRef<HTMLDivElement>();
 
   const [activeTab, setActiveTab] = useState(0);
-  const [mediaType, setMediaType] = useState<ApiMessageSearchType>();
+  const [mediaType, setMediaType] = useState<ApiMessageSearchType | undefined>();
 
   const messageIds = useMemo(
     () => (mediaType && chatMessages ? getMessageContentIds(chatMessages, mediaType).reverse() : []),
@@ -69,7 +69,9 @@ const Profile: FC<IProps> = ({
   }, [activeTab]);
 
   useEffect(() => {
-    setMessageSearchMediaType({ mediaType });
+    if (mediaType) {
+      setMessageSearchMediaType({ mediaType });
+    }
   }, [mediaType, setMessageSearchMediaType]);
 
   // Set `min-height` for shared media container to prevent jumping when switching tabs
