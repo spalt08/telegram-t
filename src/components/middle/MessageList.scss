@@ -128,4 +128,18 @@
   .message-date-header + .message-action-header {
     margin-top: -0.5rem;
   }
+
+  // TODO @pixel-perfect when designs are ready
+  .unread-divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.5rem;
+    width: 100%;
+    border-radius: var(--border-radius-messages);
+    background: rgba(0, 0, 0, 0.15);
+    margin-bottom: 0.625rem;
+    color: white;
+    font-size: 0.9rem;
+  }
 }

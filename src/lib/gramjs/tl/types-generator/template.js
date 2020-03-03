@@ -143,7 +143,6 @@ namespace Api {
   type I<T extends AnyClass> = InstanceType<T>;
   type ValuesOf<T> = T[keyof T];
   type AnyLiteral = Record<string, any>;
-  type Buffer = Uint8Array;
 
   type Reader = any; // To be defined.
   type Client = any; // To be defined.

@@ -1,6 +1,7 @@
 import { GlobalState } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 import { selectListedIds, selectChatMessages, selectViewportIds } from '../selectors';
+import { areSortedArraysEqual } from '../../util/iteratees';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -50,6 +51,10 @@ export function replaceViewportIds(
 export function replaceChatMessagesById(
   global: GlobalState, chatId: number, updatedById: Record<number, ApiMessage>,
 ): GlobalState {
+  if (!Object.keys(updatedById).length) {
+    return global;
+  }
+
   const byId = selectChatMessages(global, chatId);
 
   return replaceChatMessages(global, chatId, {
@@ -170,6 +175,20 @@ export function updateViewportIds(
     ...viewportIds,
     ...newIds,
   ]);
+}
+
+export function safeReplaceViewportIds(
+  global: GlobalState,
+  chatId: number,
+  newViewportIds: number[],
+): GlobalState {
+  const viewportIds = selectViewportIds(global, chatId) || [];
+
+  return replaceViewportIds(
+    global,
+    chatId,
+    areSortedArraysEqual(viewportIds, newViewportIds) ? viewportIds : newViewportIds,
+  );
 }
 
 export function updateFocusedMessageId(global: GlobalState, chatId: number, focusedMessageId?: number) {

@@ -10,7 +10,7 @@ import {
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
 import {
-  selectChat, selectChatMessage, selectChatMessages, selectIsChatMessageViewportLatest,
+  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest,
 } from '../../selectors';
 import { getMessageKey, getMessageContent } from '../../helpers';
 
@@ -39,7 +39,7 @@ export function onUpdate(update: ApiUpdate) {
 
       let newGlobal = global;
       newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
-      if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
+      if (selectIsViewportNewest(newGlobal, chat_id)) {
         newGlobal = updateViewportIds(newGlobal, chat_id, [id]);
       }
       newGlobal = updateListedIds(newGlobal, chat_id, [id]);
@@ -84,16 +84,18 @@ export function onUpdate(update: ApiUpdate) {
       const { chat_id, local_id, message } = update;
 
       let newGlobal = global;
+
+      if (selectIsViewportNewest(newGlobal, chat_id)) {
+        newGlobal = updateViewportIds(newGlobal, chat_id, [message.id]);
+      }
+      newGlobal = updateListedIds(newGlobal, chat_id, [message.id]);
+
       newGlobal = updateChatMessage(newGlobal, chat_id, message.id, {
         ...selectChatMessage(newGlobal, chat_id, local_id),
         ...message,
         prev_local_id: local_id,
       });
       newGlobal = deleteChatMessages(newGlobal, chat_id, [local_id]);
-      if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
-        newGlobal = updateViewportIds(newGlobal, chat_id, [message.id]);
-      }
-      newGlobal = updateListedIds(newGlobal, chat_id, [message.id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
@@ -198,11 +200,24 @@ function updateChatLastMessage(
   const { chats } = global;
   const currentLastMessage = chats.byId[chatId] && chats.byId[chatId].last_message;
 
-  if (!currentLastMessage || message.id >= currentLastMessage.id || force) {
-    return updateChat(global, chatId, { last_message: message });
+  if (currentLastMessage && !force) {
+    // TODO @refactoring Use 1e9+ for local IDs instead of 0-
+    const isNewer = (
+      currentLastMessage.id === message.id || currentLastMessage.id === message.prev_local_id
+    ) || (
+      currentLastMessage.id < 0 && message.id < currentLastMessage.id
+    ) || (
+      currentLastMessage.id >= 0 && (
+        message.id < 0 || message.id > currentLastMessage.id
+      )
+    );
+
+    if (!isNewer) {
+      return global;
+    }
   }
 
-  return global;
+  return updateChat(global, chatId, { last_message: message });
 }
 
 function findChatId(global: GlobalState, messageId: number) {

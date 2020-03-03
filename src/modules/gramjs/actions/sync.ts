@@ -12,7 +12,7 @@ import {
 } from '../../reducers';
 
 const INITIAL_CHATS_LIMIT = 50;
-const INITIAL_MESSAGES_LIMIT = 50;
+const TOP_MESSAGES_LIMIT = 100;
 
 addReducer('sync', () => {
   void sync();
@@ -63,7 +63,7 @@ async function loadAndReplaceMessages(global: GlobalState) {
   let messages: GlobalState['messages'] = { byChatId: {} };
 
   if (selectedChatId) {
-    const result = await loadNewestMessages(global.chats.byId[selectedChatId]);
+    const result = await loadTopMessages(global.chats.byId[selectedChatId]);
     const newSelectedChatId = getGlobal().chats.selectedId;
 
     if (newSelectedChatId !== selectedChatId) {
@@ -94,15 +94,11 @@ async function loadAndReplaceMessages(global: GlobalState) {
   return global;
 }
 
-async function loadNewestMessages(chat: ApiChat) {
-  const result = await callApi('fetchMessages', {
+function loadTopMessages(chat: ApiChat) {
+  return callApi('fetchMessages', {
     chat,
-    limit: INITIAL_MESSAGES_LIMIT,
+    offsetId: chat.last_read_inbox_message_id,
+    addOffset: -(Math.round(TOP_MESSAGES_LIMIT / 2) + 1),
+    limit: TOP_MESSAGES_LIMIT,
   });
-
-  if (!result) {
-    return null;
-  }
-
-  return result;
 }
