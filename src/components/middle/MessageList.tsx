@@ -46,7 +46,7 @@ const LOAD_MORE_THRESHOLD_PX = 1500;
 const LOAD_MORE_WHEN_LESS_THAN = 50;
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MARGIN = 500;
-const STICKY_OFFSET_TOP = 71; // MiddleHeader Height + 10px
+const STICKY_OFFSET_TOP = 10;
 const HIDE_STICKY_TIMEOUT = 450;
 
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
