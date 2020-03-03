@@ -10,7 +10,7 @@ import {
   selectChat,
   selectChatFocusedMessageId,
   selectChatMessage,
-  selectChatMessageViewportIds,
+  selectViewportIds,
   selectFileTransferProgress,
   selectIsChatWithSelf,
   selectOutgoingStatus,
@@ -359,7 +359,7 @@ export default memo(withGlobal(
     const replyMessageSender = replyMessage && replyMessage.sender_user_id
       ? selectUser(global, replyMessage.sender_user_id)
       : undefined;
-    const viewportIds = selectChatMessageViewportIds(global, message.chat_id);
+    const viewportIds = selectViewportIds(global, message.chat_id);
     const isReplyInViewport = message.reply_to_message_id && viewportIds
       && viewportIds.includes(message.reply_to_message_id);
 

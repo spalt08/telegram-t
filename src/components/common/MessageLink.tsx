@@ -2,7 +2,7 @@ import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
-import { selectChatMessageViewportIds } from '../../modules/selectors';
+import { selectViewportIds } from '../../modules/selectors';
 
 type IProps = {
   className?: string;
@@ -42,7 +42,7 @@ export default withGlobal(
       return {};
     }
 
-    const viewportIds = selectChatMessageViewportIds(global, message.chat_id);
+    const viewportIds = selectViewportIds(global, message.chat_id);
     const isMessageInViewport = viewportIds && viewportIds.includes(message.id);
 
     return { isMessageInViewport };

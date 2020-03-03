@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiUser } from '../../../api/types';
 
-import { selectChatMessage, selectChatMessageViewportIds, selectUser } from '../../../modules/selectors';
+import { selectChatMessage, selectViewportIds, selectUser } from '../../../modules/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Button from '../../ui/Button';
@@ -68,7 +68,7 @@ export default memo(withGlobal(
     const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
     const message = replyingTo ? selectChatMessage(global, selectedChatId!, replyingTo) : undefined;
     const sender = message && message.sender_user_id && selectUser(global, message.sender_user_id);
-    const viewportIds = selectedChatId && selectChatMessageViewportIds(global, selectedChatId);
+    const viewportIds = selectedChatId && selectViewportIds(global, selectedChatId);
     const isReplyInViewport = message && message.id && viewportIds && viewportIds.includes(message.id);
 
     return {
