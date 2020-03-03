@@ -6,7 +6,7 @@ import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 import {
   selectUser,
   selectChatMessages,
-  selectChatMessageViewportIds,
+  selectViewportIds,
   selectOpenChat, selectCurrentMessageSearch,
 } from '../../modules/selectors';
 import {
@@ -136,7 +136,7 @@ export default withGlobal(
       return {};
     }
 
-    const viewportIds = selectChatMessageViewportIds(global, chat.id);
+    const viewportIds = selectViewportIds(global, chat.id);
     const currentSearch = selectCurrentMessageSearch(global);
     const { query, resultsByType } = currentSearch || {};
     const { totalCount, foundIds } = (resultsByType && resultsByType.text) || {};

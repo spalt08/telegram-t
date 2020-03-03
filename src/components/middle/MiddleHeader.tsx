@@ -10,7 +10,7 @@ import {
 } from '../../api/types';
 import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
-  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions, selectChatMessageViewportIds,
+  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions, selectViewportIds,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -114,7 +114,7 @@ export default withGlobal(
 
       if (pinnedMessage) {
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
-        const viewportIds = selectChatMessageViewportIds(global, pinnedMessage.chat_id);
+        const viewportIds = selectViewportIds(global, pinnedMessage.chat_id);
         const isPinnedMessageInViewport = viewportIds && viewportIds.includes(pinnedMessage.id);
 
         return {

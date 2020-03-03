@@ -12,13 +12,13 @@ export function selectChatMessages(global: GlobalState, chatId: number) {
   return messages ? messages.byId : null;
 }
 
-export function selectChatMessageListedIds(global: GlobalState, chatId: number) {
+export function selectListedIds(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
   return messages ? messages.listedIds : undefined;
 }
 
-export function selectChatMessageViewportIds(global: GlobalState, chatId: number) {
+export function selectViewportIds(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
   return messages ? messages.viewportIds : undefined;
@@ -42,14 +42,14 @@ export function selectChatFocusedMessageId(global: GlobalState, chatId: number) 
   return messages ? messages.focusedMessageId : undefined;
 }
 
-export function selectIsUnread(global: GlobalState, message: ApiMessage) {
+export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 
   return isMessageLocal(message) || (chat && chat.last_read_outbox_message_id < message.id);
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
-  if (!selectIsUnread(global, message)) {
+  if (!selectIsMessageUnread(global, message)) {
     return 'read';
   }
 

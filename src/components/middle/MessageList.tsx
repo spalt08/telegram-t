@@ -9,7 +9,7 @@ import { GlobalActions } from '../../global/types';
 
 import {
   selectChatMessages,
-  selectChatMessageViewportIds,
+  selectViewportIds,
   selectIsChatMessageViewportLatest,
   selectOpenChat,
 } from '../../modules/selectors';
@@ -367,7 +367,7 @@ export default memo(withGlobal(
       chatId: chat.id,
       isChannelChat: isChatChannel(chat),
       isUnread: Boolean(chat.unread_count),
-      messageIds: selectChatMessageViewportIds(global, chat.id),
+      messageIds: selectViewportIds(global, chat.id),
       messagesById: selectChatMessages(global, chat.id),
       isLatest: selectIsChatMessageViewportLatest(global, chat.id),
     };

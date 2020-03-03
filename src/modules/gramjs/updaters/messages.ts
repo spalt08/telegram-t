@@ -5,8 +5,8 @@ import {
   updateChat,
   deleteChatMessages,
   updateChatMessage,
-  updateChatMessageListedIds,
-  updateChatMessageViewportIds,
+  updateListedIds,
+  updateViewportIds,
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
 import {
@@ -40,9 +40,9 @@ export function onUpdate(update: ApiUpdate) {
       let newGlobal = global;
       newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
       if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
-        newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [id]);
+        newGlobal = updateViewportIds(newGlobal, chat_id, [id]);
       }
-      newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [id]);
+      newGlobal = updateListedIds(newGlobal, chat_id, [id]);
 
       const chat = selectChat(newGlobal, chat_id);
 
@@ -91,9 +91,9 @@ export function onUpdate(update: ApiUpdate) {
       });
       newGlobal = deleteChatMessages(newGlobal, chat_id, [local_id]);
       if (selectIsChatMessageViewportLatest(newGlobal, chat_id)) {
-        newGlobal = updateChatMessageViewportIds(newGlobal, chat_id, [message.id]);
+        newGlobal = updateViewportIds(newGlobal, chat_id, [message.id]);
       }
-      newGlobal = updateChatMessageListedIds(newGlobal, chat_id, [message.id]);
+      newGlobal = updateListedIds(newGlobal, chat_id, [message.id]);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);

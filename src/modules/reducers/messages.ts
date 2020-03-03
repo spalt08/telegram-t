@@ -1,6 +1,6 @@
 import { GlobalState } from '../../global/types';
 import { ApiMessage } from '../../api/types';
-import { selectChatMessageListedIds, selectChatMessages, selectChatMessageViewportIds } from '../selectors';
+import { selectListedIds, selectChatMessages, selectViewportIds } from '../selectors';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -31,7 +31,7 @@ function replaceChatMessages(global: GlobalState, chatId: number, newById: Recor
   });
 }
 
-function replaceChatMessageListedIds(
+function replaceListedIds(
   global: GlobalState, chatId: number, newListedIds: number[] | undefined,
 ): GlobalState {
   return replaceStoreSection(global, chatId, {
@@ -39,7 +39,7 @@ function replaceChatMessageListedIds(
   });
 }
 
-export function replaceChatMessageViewportIds(
+export function replaceViewportIds(
   global: GlobalState, chatId: number, newViewportIds: number[] | undefined,
 ): GlobalState {
   return replaceStoreSection(global, chatId, {
@@ -101,8 +101,8 @@ export function deleteChatMessages(
   const byId = selectChatMessages(global, chatId) || {};
   const newById = { ...byId };
 
-  let listedIds = selectChatMessageListedIds(global, chatId);
-  let viewportIds = selectChatMessageViewportIds(global, chatId);
+  let listedIds = selectListedIds(global, chatId);
+  let viewportIds = selectViewportIds(global, chatId);
 
   messageIds.forEach((messageId) => {
     delete newById[messageId];
@@ -125,25 +125,25 @@ export function deleteChatMessages(
   let newGlobal = global;
 
   newGlobal = replaceChatMessages(newGlobal, chatId, newById);
-  newGlobal = replaceChatMessageListedIds(newGlobal, chatId, listedIds);
-  newGlobal = replaceChatMessageViewportIds(newGlobal, chatId, viewportIds);
+  newGlobal = replaceListedIds(newGlobal, chatId, listedIds);
+  newGlobal = replaceViewportIds(newGlobal, chatId, viewportIds);
 
   return newGlobal;
 }
 
-export function updateChatMessageListedIds(
+export function updateListedIds(
   global: GlobalState,
   chatId: number,
   idsUpdate: number[],
 ): GlobalState {
-  const listedIds = selectChatMessageListedIds(global, chatId) || [];
+  const listedIds = selectListedIds(global, chatId) || [];
   const newIds = listedIds.length ? idsUpdate.filter((id) => !listedIds.includes(id)) : idsUpdate;
 
   if (!newIds.length) {
     return global;
   }
 
-  return replaceChatMessageListedIds(global, chatId, orderListedIds([
+  return replaceListedIds(global, chatId, orderListedIds([
     ...listedIds,
     ...newIds,
   ]));
@@ -154,19 +154,19 @@ function orderListedIds(listedIds: number[]) {
   return listedIds.sort((a, b) => (a > 0 && b > 0 ? a - b : b - a));
 }
 
-export function updateChatMessageViewportIds(
+export function updateViewportIds(
   global: GlobalState,
   chatId: number,
   idsUpdate: number[],
 ): GlobalState {
-  const viewportIds = selectChatMessageViewportIds(global, chatId) || [];
+  const viewportIds = selectViewportIds(global, chatId) || [];
   const newIds = viewportIds.length ? idsUpdate.filter((id) => !viewportIds.includes(id)) : idsUpdate;
 
   if (!newIds.length) {
     return global;
   }
 
-  return replaceChatMessageViewportIds(global, chatId, [
+  return replaceViewportIds(global, chatId, [
     ...viewportIds,
     ...newIds,
   ]);

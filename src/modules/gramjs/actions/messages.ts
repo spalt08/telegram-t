@@ -6,14 +6,14 @@ import { GlobalState } from '../../../global/types';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  updateChatMessageListedIds,
+  updateListedIds,
   replaceChatMessagesById,
   updateChatMessage,
-  replaceChatMessageViewportIds,
+  replaceViewportIds,
   addUsers,
 } from '../../reducers';
 import {
-  selectChat, selectChatMessageListedIds, selectChatMessageViewportIds, selectOpenChat,
+  selectChat, selectListedIds, selectViewportIds, selectOpenChat,
 } from '../../selectors';
 
 const MESSAGE_SLICE_LIMIT = 50;
@@ -28,7 +28,7 @@ addReducer('loadMessagesForList', (global, actions, payload) => {
   if (direction) {
     const { newViewportIds, anchorId } = getUpdatedViewportIds(global, chat.id, direction);
     if (newViewportIds) {
-      return replaceChatMessageViewportIds(global, chat.id, newViewportIds);
+      return replaceViewportIds(global, chat.id, newViewportIds);
     } else if (anchorId) {
       void loadMessagesForList(chat, anchorId, direction);
     }
@@ -40,8 +40,8 @@ addReducer('loadMessagesForList', (global, actions, payload) => {
 });
 
 function getUpdatedViewportIds(global: GlobalState, chatId: number, direction?: 1 | -1, force = false) {
-  const listedIds = selectChatMessageListedIds(global, chatId);
-  const viewportIds = selectChatMessageViewportIds(global, chatId);
+  const listedIds = selectListedIds(global, chatId);
+  const viewportIds = selectViewportIds(global, chatId);
 
   if (!listedIds) {
     return {};
@@ -180,11 +180,11 @@ async function loadMessagesForList(chat: ApiChat, offsetId?: number, direction ?
 
   let newGlobal = getGlobal();
   newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
-  newGlobal = updateChatMessageListedIds(newGlobal, chat.id, ids);
+  newGlobal = updateListedIds(newGlobal, chat.id, ids);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
   const { newViewportIds } = getUpdatedViewportIds(newGlobal, chat.id, direction, true);
-  newGlobal = replaceChatMessageViewportIds(newGlobal, chat.id, newViewportIds!);
+  newGlobal = replaceViewportIds(newGlobal, chat.id, newViewportIds!);
 
   setGlobal(newGlobal);
 }
