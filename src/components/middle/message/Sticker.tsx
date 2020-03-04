@@ -38,7 +38,7 @@ const Sticker: FC<IProps> = ({
   const isMediaLoaded = Boolean(mediaData);
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useProgressiveMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast');
+  } = useProgressiveMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast', isAnimated);
 
   const { width, height } = getStickerDimensions(sticker);
   const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
