@@ -117,6 +117,7 @@ const Profile: FC<IProps> = ({
       ref={containerRef}
       className="Profile custom-scroll"
       items={messageIds}
+      preloadBackwards={!mediaType ? 0 : undefined}
       onLoadMore={searchMessages}
     >
       {resolvedUserId ? [
