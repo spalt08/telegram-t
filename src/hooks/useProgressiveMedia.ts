@@ -10,7 +10,7 @@ const SPEED = {
 export default (mediaData?: any, speed: keyof typeof SPEED = 'fast', noAnimate = false) => {
   const isMediaLoaded = Boolean(mediaData);
   const willAnimate = !useRef(isMediaLoaded).current && !noAnimate;
-  const [shouldRenderThumb, setShouldRenderThumb] = useState(willAnimate);
+  const [shouldRenderThumb, setShouldRenderThumb] = useState(!isMediaLoaded);
 
   const {
     shouldRender: shouldRenderFullMedia,
@@ -18,10 +18,14 @@ export default (mediaData?: any, speed: keyof typeof SPEED = 'fast', noAnimate =
   } = useShowTransition(isMediaLoaded, undefined, !willAnimate, speed);
 
   useEffect(() => {
-    if (willAnimate && shouldRenderFullMedia) {
-      setTimeout(() => {
+    if (shouldRenderFullMedia) {
+      if (willAnimate) {
+        setTimeout(() => {
+          setShouldRenderThumb(false);
+        }, SPEED[speed]);
+      } else {
         setShouldRenderThumb(false);
-      }, SPEED[speed]);
+      }
     }
   }, [willAnimate, shouldRenderFullMedia, speed]);
 
