@@ -142,15 +142,18 @@ const MessageList: FC<IProps> = ({
 
     if (isNearTop) {
       const messageElements = container.querySelectorAll('.Message');
-      const newAnchor = messageElements[0];
-      if (newAnchor) {
-        const newMovingOffset = newAnchor.getBoundingClientRect().top;
+      const nextAnchor = messageElements[0];
+      if (nextAnchor) {
+        const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
+        const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
+          ? currentAnchor.getBoundingClientRect().top
+          : nextAnchorTop;
         const isMovingUp = (
-          currentAnchor && currentAnchorTop !== undefined && newMovingOffset > currentAnchorTop
+          currentAnchor && currentAnchorTop !== undefined && newAnchorTop > currentAnchorTop
         );
 
-        currentAnchorId = newAnchor.id;
-        currentAnchorTop = newMovingOffset;
+        currentAnchorId = nextAnchor.id;
+        currentAnchorTop = nextAnchorTop;
 
         if (isMovingUp) {
           loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
@@ -158,15 +161,18 @@ const MessageList: FC<IProps> = ({
       }
     } else if (!isViewportNewest && isNearBottom) {
       const messageElements = container.querySelectorAll('.Message');
-      const newAnchor = messageElements[messageElements.length - 1];
-      if (newAnchor) {
-        const newMovingOffset = newAnchor.getBoundingClientRect().top;
+      const nextAnchor = messageElements[messageElements.length - 1];
+      if (nextAnchor) {
+        const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
+        const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
+          ? currentAnchor.getBoundingClientRect().top
+          : nextAnchorTop;
         const isMovingDown = (
-          currentAnchor && currentAnchorTop !== undefined && newMovingOffset < currentAnchorTop
+          currentAnchor && currentAnchorTop !== undefined && newAnchorTop < currentAnchorTop
         );
 
-        currentAnchorId = newAnchor.id;
-        currentAnchorTop = newMovingOffset;
+        currentAnchorId = nextAnchor.id;
+        currentAnchorTop = nextAnchorTop;
 
         if (isMovingDown) {
           loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
@@ -242,7 +248,7 @@ const MessageList: FC<IProps> = ({
       container.scrollTop = scrollHeight;
     }
 
-    if (lastMessage) {
+    if (isNewMessage) {
       currentAnchorId = lastMessage.id;
       currentAnchorTop = lastMessage.getBoundingClientRect().top;
     }
