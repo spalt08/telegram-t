@@ -10,7 +10,7 @@ import {
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
 import {
-  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest,
+  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds,
 } from '../../selectors';
 import { getMessageKey, getMessageContent } from '../../helpers';
 
@@ -117,7 +117,7 @@ export function onUpdate(update: ApiUpdate) {
             is_deleting: true,
           });
 
-          const newLastMessage = findLastMessage(newGlobal, chat_id, id);
+          const newLastMessage = findLastMessage(newGlobal, chat_id);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chat_id, newLastMessage, true);
           }
@@ -139,7 +139,7 @@ export function onUpdate(update: ApiUpdate) {
             is_deleting: true,
           });
 
-          const newLastMessage = findLastMessage(newGlobal, chatId, id);
+          const newLastMessage = findLastMessage(newGlobal, chatId);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
           }
@@ -228,15 +228,21 @@ function findChatId(global: GlobalState, messageId: number) {
   }));
 }
 
-function findLastMessage(global: GlobalState, chatId: number, exceptForId: number) {
+function findLastMessage(global: GlobalState, chatId: number) {
   const byId = selectChatMessages(global, chatId);
+  const listedIds = selectListedIds(global, chatId);
 
-  if (!byId) {
-    return null;
+  if (!byId || !listedIds) {
+    return undefined;
   }
 
-  const ids = Object.keys(byId).map(Number);
-  const lastId = ids[ids.length - 1];
+  let i = listedIds.length;
+  while (i--) {
+    const message = byId[listedIds[i]];
+    if (!message.is_deleting) {
+      return message;
+    }
+  }
 
-  return byId[lastId !== exceptForId ? lastId : ids[ids.length - 2]];
+  return undefined;
 }
