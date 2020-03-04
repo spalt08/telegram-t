@@ -20,7 +20,7 @@ import {
   isChatPrivate,
   isOwnMessage,
 } from '../../modules/helpers';
-import { flatten, orderBy } from '../../util/iteratees';
+import { areSortedArraysEqual, flatten, orderBy } from '../../util/iteratees';
 import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -32,6 +32,7 @@ import Message from './message/Message';
 import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
+import findInViewport from '../../util/findInViewport';
 
 type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | 'setChatScrollOffset'> & {
   chatId?: number;
@@ -85,8 +86,10 @@ const MessageList: FC<IProps> = ({
 
   const playMediaInViewport = useCallback(() => {
     requestAnimationFrame(() => {
-      const newViewportMessageIds = findMediaMessagesInViewport(containerRef.current!);
-      if (!areArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+      const container = containerRef.current!;
+      const { allElements, visibleIndexes } = findInViewport(container, '.Message.has-media', VIEWPORT_MARGIN);
+      const newViewportMessageIds = visibleIndexes.map((i) => Number(allElements[i].dataset.messageId));
+      if (!areSortedArraysEqual(newViewportMessageIds, viewportMessageIds)) {
         setViewportMessageIds(newViewportMessageIds);
       }
     });
@@ -312,37 +315,6 @@ function renderMessages(
   });
 
   return flatten(dateGroups);
-}
-
-function findMediaMessagesInViewport(container: HTMLElement) {
-  const viewportY1 = container.scrollTop;
-  const viewportY2 = viewportY1 + container.clientHeight;
-  const messageEls = container.querySelectorAll('.Message.has-media');
-  const visibleIds: number[] = [];
-  let isFound = false;
-
-  for (let i = messageEls.length - 1; i >= 0; i--) {
-    const messageEl = messageEls[i] as HTMLElement;
-    const y1 = messageEl.offsetTop;
-    const y2 = y1 + messageEl.offsetHeight;
-
-    if (y1 <= viewportY2 + VIEWPORT_MARGIN && y2 >= viewportY1 - VIEWPORT_MARGIN) {
-      visibleIds.push(Number(messageEl.dataset.messageId));
-      isFound = true;
-    } else if (isFound) {
-      break;
-    }
-  }
-
-  return visibleIds;
-}
-
-function areArraysEqual(arr1: any[], arr2: any[]) {
-  if (arr1.length !== arr2.length) {
-    return false;
-  }
-
-  return arr1.every((el, i) => el === arr2[i]);
 }
 
 function determineStickyElement(container: HTMLElement, selector: string) {
