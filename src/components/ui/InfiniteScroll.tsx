@@ -20,7 +20,7 @@ interface IProps {
 const DEFAULT_SENSITIVE_HEIGHT = 1200;
 const DEFAULT_PRELOAD_BACKWARDS = 50;
 
-const InfiniteScroll: FC = ({
+const InfiniteScroll: FC<IProps> = ({
   ref,
   className,
   onLoadMore,
