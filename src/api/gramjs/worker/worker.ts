@@ -1,6 +1,7 @@
 import { ApiUpdate } from '../../types';
 import { OriginMessageEvent, WorkerMessageData } from './types';
 import { initApi, callApi } from '../provider';
+import { DEBUG } from '../../../config';
 
 handleErrors();
 
@@ -25,8 +26,10 @@ onmessage = async (message: OriginMessageEvent) => {
           });
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
 
         if (messageId) {
           sendToOrigin({
