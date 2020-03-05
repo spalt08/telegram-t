@@ -69,8 +69,8 @@ function parseMarkdown(html: string) {
   parsedHtml = parsedHtml.replace(/<\/?div>/g, '');
 
   // Pre
-  parsedHtml = parsedHtml.replace(/^`{3}(.*[\n\r][^]*?^)`{3}/gm, '<pre>$1</pre>\n\n');
-  parsedHtml = parsedHtml.replace(/[`]{3}([^`]+)[`]{3}/g, '<pre>$1</pre>\n\n');
+  parsedHtml = parsedHtml.replace(/^`{3}(.*[\n\r][^]*?^)`{3}/gm, '<pre>$1</pre>');
+  parsedHtml = parsedHtml.replace(/[`]{3}([^`]+)[`]{3}/g, '<pre>$1</pre>');
 
   // Code
   parsedHtml = parsedHtml.replace(/[`]{1}([^`\n]+)[`]{1}/g, '<code>$1</code>');
@@ -107,7 +107,10 @@ function getEntityDataFromNode(node: ChildNode, rawText: string, textIndex: numb
     };
   }
 
-  const index = rawText.indexOf(node.textContent, textIndex);
+  const rawIndex = rawText.indexOf(node.textContent, textIndex);
+  // In some cases, last text entity ends with a newline (which gets trimmed from `rawText`).
+  // In this case, `rawIndex` would return `-1`, so we use `textIndex` instead.
+  const index = rawIndex >= 0 ? rawIndex : textIndex;
   const offset = rawText.substring(0, index).length;
   const { length } = rawText.substring(index, index + node.textContent.length);
 
