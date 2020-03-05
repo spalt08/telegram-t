@@ -29,7 +29,7 @@ export function buildContentClassName(
   }
 
   if (customShape) {
-    classNames.push('sticker');
+    classNames.push('custom-shape');
   } else if (photo || video) {
     classNames.push('media');
   } else if (audio) {
@@ -69,8 +69,6 @@ export function buildContentClassName(
       }
     }
   }
-
-  classNames.push('status-read');
 
   return classNames.join(' ');
 }

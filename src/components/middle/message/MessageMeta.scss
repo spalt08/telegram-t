@@ -39,7 +39,7 @@
   }
 
   .media:not(.text) &,
-  .Message .sticker & {
+  .Message .custom-shape & {
     background: rgba(0,0,0, 0.2);
     color: white !important;
     opacity: 1;
@@ -59,8 +59,8 @@
     right: 0;
   }
 
-  .Message.not-own.has-views .emoji-only &,
-  .Message.not-own.was-edited .emoji-only & {
+  .Message:not(.own).has-views .emoji-only &,
+  .Message:not(.own).was-edited .emoji-only & {
     left: 60%;
     right: auto;
   }
@@ -77,8 +77,8 @@
   }
 }
 
-.Message.not-own {
-  .sticker .reply-message + .MessageMeta {
+.Message:not(.own) {
+  .custom-shape .reply-message + .MessageMeta {
     right: auto;
     left: 13.2rem;
     bottom: 0.25rem;
