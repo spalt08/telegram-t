@@ -1,5 +1,5 @@
 import React, {
-  FC, useLayoutEffect, useRef, useState,
+  FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
@@ -40,7 +40,7 @@ const Transition: FC<IProps> = ({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   // Restore container height after switching content to absolute positioning.
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!isAnimating) {
       const container = containerRef.current!;
       container.style.height = `${container.firstElementChild!.clientHeight}px`;
