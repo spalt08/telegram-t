@@ -140,7 +140,7 @@ const Message: FC<IProps> = ({
     isFirstInGroup && 'first-in-group',
     isLastInGroup && 'last-in-group',
     isLastInList && 'last-in-list',
-    isOwn ? 'own' : 'not-own',
+    isOwn && 'own',
     Boolean(message.views) && 'has-views',
     message.isEdited && 'was-edited',
     hasMedia && 'has-media',
