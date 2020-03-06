@@ -249,7 +249,7 @@ function renderOrderedChildren(
         currentEl, undefined, nextChild, $new, i, false, insertAfterOrPrepend,
       ) as VirtualElementTag;
       newChildren.push(newChild);
-      insertAfterOrPrepend = newChild.target as Element;
+      insertAfterOrPrepend = getTarget(newChild) as Element;
 
       nextI++;
       nextChild = $new.children[nextI] as VirtualRealElement;
@@ -261,7 +261,7 @@ function renderOrderedChildren(
     } else {
       const newChild = renderWithVirtual(currentEl, prevChild, nextChild, $new, i) as VirtualElementTag;
       newChildren.push(newChild);
-      insertAfterOrPrepend = newChild.target as Element;
+      insertAfterOrPrepend = getTarget(newChild) as Element;
 
       prevI++;
       prevChild = $current.children[prevI] as VirtualRealElement;
