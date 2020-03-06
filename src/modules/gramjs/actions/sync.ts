@@ -5,6 +5,7 @@ import {
 import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
+import { MESSAGE_SLICE_LIMIT } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
@@ -12,7 +13,7 @@ import {
 } from '../../reducers';
 
 const INITIAL_CHATS_LIMIT = 50;
-const TOP_MESSAGES_LIMIT = 100;
+const TOP_MESSAGES_LIMIT = MESSAGE_SLICE_LIMIT * 2;
 
 addReducer('sync', () => {
   void sync();
@@ -78,6 +79,7 @@ async function loadAndReplaceMessages(global: GlobalState) {
             byId,
             listedIds,
             viewportIds: listedIds,
+            outlyingIds: undefined,
           },
         },
       };

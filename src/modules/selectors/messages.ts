@@ -18,6 +18,12 @@ export function selectListedIds(global: GlobalState, chatId: number) {
   return messages ? messages.listedIds : undefined;
 }
 
+export function selectOutlyingIds(global: GlobalState, chatId: number) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messages.outlyingIds : undefined;
+}
+
 export function selectViewportIds(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
@@ -37,10 +43,16 @@ export function selectChatMessage(global: GlobalState, chatId: number, messageId
   return chatMessages ? chatMessages[messageId] : null;
 }
 
-export function selectChatFocusedMessageId(global: GlobalState, chatId: number) {
+export function selectFocusedMessageId(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
   return messages ? messages.focusedMessageId : undefined;
+}
+
+export function selectFocusDirection(global: GlobalState, chatId: number) {
+  const messages = global.messages.byChatId[chatId];
+
+  return messages ? messages.focusDirection : undefined;
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {

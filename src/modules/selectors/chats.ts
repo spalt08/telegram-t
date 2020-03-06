@@ -44,8 +44,19 @@ export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
   }, 0);
 }
 
-export function selectLastReadIdByChatId(global: GlobalState, chatId: number) {
+export function selectLastReadId(global: GlobalState, chatId: number) {
   const chat = selectChat(global, chatId);
 
   return chat.unread_count ? chat.last_read_inbox_message_id : undefined;
+}
+
+export function selectLastReadOrVeryLastId(global: GlobalState, chatId: number) {
+  const chat = selectChat(global, chatId);
+  const { last_message, last_read_inbox_message_id } = chat;
+
+  if (last_message && last_message.id < last_read_inbox_message_id) {
+    return last_message.id;
+  }
+
+  return last_read_inbox_message_id;
 }

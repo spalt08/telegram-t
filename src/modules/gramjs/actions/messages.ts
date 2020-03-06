@@ -3,6 +3,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { MESSAGE_SLICE_LIMIT } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
@@ -11,57 +12,94 @@ import {
   safeReplaceViewportIds,
   updateChatMessage,
   updateListedIds,
+  updateOutlyingIds,
+  replaceOutlyingIds,
 } from '../../reducers';
 import {
-  selectChat, selectListedIds, selectViewportIds, selectOpenChat,
+  selectChat,
+  selectOpenChat,
+  selectListedIds,
+  selectOutlyingIds,
+  selectViewportIds,
+  selectFocusedMessageId,
+  selectLastReadOrVeryLastId,
 } from '../../selectors';
-import { MESSAGE_SLICE_LIMIT } from '../../../config';
 
-addReducer('loadMessagesForList', (global, actions, payload) => {
-  const { direction } = payload || {};
+addReducer('loadViewportMessages', (global, actions, payload) => {
+  const {
+    direction,
+    shouldRelocate = false,
+  } = payload || {};
   const chat = selectOpenChat(global);
 
   if (!chat) {
     return undefined;
   }
 
+  const chatId = chat.id;
+  const viewportIds = selectViewportIds(global, chatId);
+  const listedIds = selectListedIds(global, chatId);
+  const outlyingIds = selectOutlyingIds(global, chatId);
+
   let newGlobal = global;
 
-  const listedIds = selectListedIds(global, chat.id);
-  const viewportIds = selectViewportIds(global, chat.id);
+  if (!viewportIds || !viewportIds.length || shouldRelocate) {
+    const offsetId = selectFocusedMessageId(newGlobal, chatId) || selectLastReadOrVeryLastId(newGlobal, chatId);
+    if (!offsetId) {
+      return undefined;
+    }
 
-  if (!viewportIds) {
-    void loadMessagesForList(chat, chat.last_read_inbox_message_id, LoadMoreDirection.Around, MESSAGE_SLICE_LIMIT * 2);
-    return undefined;
-  }
+    const isOutlying = listedIds && !listedIds.includes(offsetId);
+    const historyIds = (isOutlying ? outlyingIds : listedIds) || [];
 
-  if (direction === LoadMoreDirection.Backwards || direction === LoadMoreDirection.Both) {
-    const offsetId = viewportIds[0];
+    if (!isOutlying && outlyingIds) {
+      newGlobal = replaceOutlyingIds(global, chatId, undefined);
+    }
+
     const {
       newViewportIds, areSomeLocal, areAllLocal,
-    } = getViewportSlice(listedIds!, offsetId, LoadMoreDirection.Backwards);
+    } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
 
     if (areSomeLocal) {
-      newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds);
+      newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);
     }
 
     if (!areAllLocal) {
-      void loadMessagesForList(chat, offsetId, LoadMoreDirection.Backwards);
+      const loadLimit = isOutlying ? MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT * 2;
+      void loadViewportMessages(chat, offsetId, LoadMoreDirection.Around, loadLimit, isOutlying);
     }
-  }
+  } else {
+    const isOutlying = Boolean(outlyingIds);
+    const historyIds = (isOutlying ? outlyingIds : listedIds)!;
 
-  if (direction === LoadMoreDirection.Forwards || direction === LoadMoreDirection.Both) {
-    const offsetId = viewportIds[viewportIds.length - 1];
-    const {
-      newViewportIds, areSomeLocal, areAllLocal,
-    } = getViewportSlice(listedIds!, offsetId, LoadMoreDirection.Forwards);
+    if (direction === LoadMoreDirection.Backwards || direction === LoadMoreDirection.Both) {
+      const offsetId = viewportIds[0];
+      const {
+        newViewportIds, areSomeLocal, areAllLocal,
+      } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Backwards);
 
-    if (areSomeLocal) {
-      newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds);
+      if (areSomeLocal) {
+        newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);
+      }
+
+      if (!areAllLocal) {
+        void loadViewportMessages(chat, offsetId, LoadMoreDirection.Backwards, undefined, isOutlying);
+      }
     }
 
-    if (!areAllLocal) {
-      void loadMessagesForList(chat, offsetId, LoadMoreDirection.Forwards);
+    if (direction === LoadMoreDirection.Forwards || direction === LoadMoreDirection.Both) {
+      const offsetId = viewportIds[viewportIds.length - 1];
+      const {
+        newViewportIds, areSomeLocal, areAllLocal,
+      } = getViewportSlice(historyIds!, offsetId, LoadMoreDirection.Forwards);
+
+      if (areSomeLocal) {
+        newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);
+      }
+
+      if (!areAllLocal) {
+        void loadViewportMessages(chat, offsetId, LoadMoreDirection.Forwards, undefined, isOutlying);
+      }
     }
   }
 
@@ -158,12 +196,15 @@ async function loadWebPagePreview(message: string) {
   });
 }
 
-async function loadMessagesForList(
+async function loadViewportMessages(
   chat: ApiChat,
   offsetId: number,
   direction: LoadMoreDirection,
   limit = MESSAGE_SLICE_LIMIT,
+  isOutlying = false,
 ) {
+  const chatId = chat.id;
+
   let addOffset: number | undefined;
   switch (direction) {
     case LoadMoreDirection.Backwards:
@@ -192,13 +233,13 @@ async function loadMessagesForList(
 
   let newGlobal = getGlobal();
 
-  newGlobal = replaceChatMessagesById(newGlobal, chat.id, byId);
-  newGlobal = updateListedIds(newGlobal, chat.id, ids);
+  newGlobal = replaceChatMessagesById(newGlobal, chatId, byId);
+  newGlobal = isOutlying ? updateOutlyingIds(newGlobal, chatId, ids) : updateListedIds(newGlobal, chatId, ids);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
-  const listedIds = selectListedIds(newGlobal, chat.id)!;
-  const { newViewportIds } = getViewportSlice(listedIds, offsetId, direction, true);
-  newGlobal = safeReplaceViewportIds(newGlobal, chat.id, newViewportIds!);
+  const historyIds = isOutlying ? selectOutlyingIds(newGlobal, chatId)! : selectListedIds(newGlobal, chatId)!;
+  const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction, true);
+  newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds!);
 
   setGlobal(newGlobal);
 }
@@ -216,7 +257,12 @@ async function loadMessage(chat: ApiChat, messageId: number) {
   setGlobal(newGlobal);
 }
 
-function getViewportSlice(sourceIds: number[], offsetId: number, direction: LoadMoreDirection, forceMax = false) {
+function getViewportSlice(
+  sourceIds: number[],
+  offsetId: number,
+  direction: LoadMoreDirection,
+  forceMax = false,
+) {
   const { length } = sourceIds;
   const index = sourceIds.indexOf(offsetId);
   const isForwards = direction === LoadMoreDirection.Forwards;
@@ -229,7 +275,7 @@ function getViewportSlice(sourceIds: number[], offsetId: number, direction: Load
 
   if (!areAllLocal && forceMax) {
     return {
-      newViewportIds: index <= (length / 2 - 1)
+      newViewportIds: indexForDirection <= (length / 2 - 1)
         ? sourceIds.slice(0, MESSAGE_SLICE_LIMIT * 2)
         : sourceIds.slice(Math.max(0, length - MESSAGE_SLICE_LIMIT * 2), length),
     };

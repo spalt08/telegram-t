@@ -10,7 +10,7 @@ import {
 } from '../../api/types';
 import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
-  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions, selectViewportIds,
+  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -27,7 +27,6 @@ type IProps = {
   pinnedMessageId?: number;
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
-  isPinnedMessageInViewport?: boolean;
   typingStatus?: ApiTypingStatus;
 } & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageTextSearch' | 'pinMessage' | 'focusMessage'>;
 
@@ -36,7 +35,6 @@ const MiddleHeader: FC<IProps> = ({
   pinnedMessageId,
   pinnedMessage,
   canUnpin,
-  isPinnedMessageInViewport,
   typingStatus,
   openChatWithInfo,
   openMessageTextSearch,
@@ -84,7 +82,6 @@ const MiddleHeader: FC<IProps> = ({
           message={pinnedMessage}
           onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
-          isInViewPort={isPinnedMessageInViewport}
         />
       )}
       <HeaderActions
@@ -114,14 +111,11 @@ export default withGlobal(
 
       if (pinnedMessage) {
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
-        const viewportIds = selectViewportIds(global, pinnedMessage.chat_id);
-        const isPinnedMessageInViewport = viewportIds && viewportIds.includes(pinnedMessage.id);
 
         return {
           pinnedMessageId: pinned_message_id,
           pinnedMessage,
           canUnpin: canPin,
-          isPinnedMessageInViewport,
           typingStatus,
         };
       } else {

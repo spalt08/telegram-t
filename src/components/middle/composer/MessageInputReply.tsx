@@ -6,7 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiUser } from '../../../api/types';
 
-import { selectChatMessage, selectViewportIds, selectUser } from '../../../modules/selectors';
+import { selectChatMessage, selectUser } from '../../../modules/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import Button from '../../ui/Button';
@@ -19,7 +19,6 @@ type IProps = {
   replyingTo?: number;
   message?: ApiMessage;
   sender?: ApiUser;
-  isReplyInViewport?: boolean;
 } & Pick<GlobalActions, 'setChatReplyingTo' | 'focusMessage'>;
 
 const MessageInputReply: FC<IProps> = ({
@@ -27,7 +26,6 @@ const MessageInputReply: FC<IProps> = ({
   replyingTo,
   message,
   sender,
-  isReplyInViewport,
   setChatReplyingTo,
   focusMessage,
 }) => {
@@ -52,11 +50,11 @@ const MessageInputReply: FC<IProps> = ({
         <i className="icon-close" />
       </Button>
       <ReplyMessage
+        className="inside-input"
         message={message!}
         sender={sender}
-        className={`inside-input ${isReplyInViewport ? '' : 'not-implemented '}`}
         loadPictogram
-        onClick={isReplyInViewport ? handleReplyClick : undefined}
+        onClick={handleReplyClick}
       />
     </div>
   );
@@ -68,15 +66,12 @@ export default memo(withGlobal(
     const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
     const message = replyingTo ? selectChatMessage(global, selectedChatId!, replyingTo) : undefined;
     const sender = message && message.sender_user_id && selectUser(global, message.sender_user_id);
-    const viewportIds = selectedChatId && selectViewportIds(global, selectedChatId);
-    const isReplyInViewport = message && message.id && viewportIds && viewportIds.includes(message.id);
 
     return {
       selectedChatId,
       replyingTo,
       message,
       sender,
-      isReplyInViewport,
     };
   },
   (setGlobal, actions) => {
