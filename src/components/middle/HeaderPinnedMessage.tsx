@@ -12,13 +12,12 @@ import RippleEffect from '../ui/RippleEffect';
 
 type IProps = {
   message: ApiMessage;
-  isInViewPort?: boolean;
   onUnpinMessage?: () => void;
   onClick?: () => void;
 };
 
 const HeaderPinnedMessage: FC<IProps> = ({
-  message, isInViewPort, onUnpinMessage, onClick,
+  message, onUnpinMessage, onClick,
 }) => {
   const text = getMessageSummaryText(message, true);
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
@@ -41,13 +40,6 @@ const HeaderPinnedMessage: FC<IProps> = ({
       onUnpinMessage();
     }
   }, [onUnpinMessage]);
-
-  function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
-    e.stopPropagation();
-    if (isInViewPort && onClick) {
-      onClick();
-    }
-  }
 
   return (
     <div className="HeaderPinnedMessage-wrapper">
@@ -72,7 +64,7 @@ const HeaderPinnedMessage: FC<IProps> = ({
         </>
       )}
 
-      <div className={`HeaderPinnedMessage ${!isInViewPort ? 'not-implemented' : ''}`} onClick={stopPropagation}>
+      <div className="HeaderPinnedMessage" onClick={onClick}>
         {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
         <div className="message-text">
           <div className="title">Pinned message</div>

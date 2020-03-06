@@ -7,7 +7,7 @@ import {
   ApiUser,
   ApiMessage,
 } from '../../api/types';
-import { selectUser, selectChatMessage, selectChatFocusedMessageId } from '../../modules/selectors';
+import { selectUser, selectChatMessage, selectFocusedMessageId } from '../../modules/selectors';
 import { renderServiceMessageText } from '../common/helpers/renderServiceMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
@@ -75,7 +75,7 @@ export default memo(withGlobal(
     const userId = message.sender_user_id;
     const { targetUserId: actionTargetUserId } = message.content.action || {};
     const actionTargetMessageId = message.reply_to_message_id;
-    const isFocused = message.id === selectChatFocusedMessageId(global, message.chat_id);
+    const isFocused = message.id === selectFocusedMessageId(global, message.chat_id);
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),

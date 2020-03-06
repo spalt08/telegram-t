@@ -10,6 +10,7 @@ import {
   ApiWebPage,
   ApiVideo,
 } from '../api/types';
+import { FocusDirection } from '../types';
 
 export type GlobalState = {
   showChatInfo: boolean;
@@ -47,8 +48,10 @@ export type GlobalState = {
     byChatId: Record<number, {
       byId: Record<number, ApiMessage>;
       listedIds?: number[];
+      outlyingIds?: number[];
       viewportIds?: number[];
       focusedMessageId?: number;
+      focusDirection?: FocusDirection;
     }>;
     isReversed?: boolean;
   };
@@ -112,8 +115,8 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' |
   // messages
-  'loadMessagesForList' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessagesRead' | 'loadMessage' | 'focusMessage' |
+  'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
+  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' |
   // message search
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |

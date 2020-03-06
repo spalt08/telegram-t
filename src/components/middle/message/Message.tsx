@@ -1,20 +1,21 @@
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  FC, memo, useCallback, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
+import { FocusDirection } from '../../../types';
 
 import {
   selectChat,
-  selectChatFocusedMessageId,
+  selectFocusedMessageId,
   selectChatMessage,
-  selectViewportIds,
   selectFileTransferProgress,
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
+  selectFocusDirection,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -65,13 +66,13 @@ type IProps = (
     sender?: ApiUser;
     replyMessage?: ApiMessage;
     replyMessageSender?: ApiUser;
-    isReplyInViewport?: boolean;
     originSender?: ApiUser;
     canDelete?: boolean;
     contactFirstName: string | null;
     outgoingStatus?: ApiMessageOutgoingStatus;
     fileTransferProgress?: number;
     isFocused?: boolean;
+    focusDirection?: FocusDirection;
     isChatWithSelf?: boolean;
   }
   & MessagePositionProperties
@@ -80,8 +81,12 @@ type IProps = (
   )>
 );
 
-const FOCUSING_MAX_DISTANCE = 2000;
 const NBSP = '\u00A0';
+
+// This is the max scroll offset within existing viewport.
+const FOCUS_MAX_OFFSET = 2000;
+// This is used when the viewport was replaced.
+const RELOCATED_FOCUS_OFFSET = 1000;
 
 const Message: FC<IProps> = ({
   message,
@@ -91,11 +96,11 @@ const Message: FC<IProps> = ({
   sender,
   replyMessage,
   replyMessageSender,
-  isReplyInViewport,
   originSender,
   outgoingStatus,
   fileTransferProgress,
   isFocused,
+  focusDirection,
   isChatWithSelf,
   isFirstInGroup,
   isLastInGroup,
@@ -106,21 +111,26 @@ const Message: FC<IProps> = ({
   cancelSendingMessage,
   readMessageContents,
 }) => {
-  const { chat_id: chatId, id: messageId } = message;
-
   const elementRef = useRef<HTMLDivElement>();
-
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
 
+  const { chat_id: chatId, id: messageId } = message;
+
   useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const messagesContainer = window.document.getElementById('MessageList');
     if (isFocused && elementRef.current && messagesContainer) {
-      fastSmoothScroll(messagesContainer, elementRef.current, 'center', FOCUSING_MAX_DISTANCE);
+      fastSmoothScroll(
+        messagesContainer,
+        elementRef.current,
+        'center',
+        focusDirection === undefined ? FOCUS_MAX_OFFSET : RELOCATED_FOCUS_OFFSET,
+        focusDirection,
+      );
     }
-  }, [isFocused, chatId, focusMessage]);
+  }, [isFocused, chatId, focusMessage, focusDirection]);
 
   const isOwn = isOwnMessage(message);
   const isReply = isReplyMessage(message);
@@ -228,11 +238,10 @@ const Message: FC<IProps> = ({
         {renderSenderName(isForwarded ? originSender : sender)}
         {isReply && (
           <ReplyMessage
-            className={isReplyInViewport ? '' : 'not-implemented '}
             message={replyMessage}
             sender={replyMessageSender}
             loadPictogram={loadAndPlayMedia}
-            onClick={isReplyInViewport ? handleReplyClick : undefined}
+            onClick={handleReplyClick}
           />
         )}
         {sticker && (
@@ -325,7 +334,6 @@ const Message: FC<IProps> = ({
       <div
         className={contentClassName}
         // @ts-ignore
-        // eslint-disable-next-line
         style={style}
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
@@ -352,16 +360,14 @@ const Message: FC<IProps> = ({
 export default memo(withGlobal(
   (global, ownProps: IProps) => {
     const { message, showSenderName, showAvatar } = ownProps;
+    const chatId = message.chat_id;
 
     const replyMessage = message.reply_to_message_id
-      ? selectChatMessage(global, message.chat_id, message.reply_to_message_id)
+      ? selectChatMessage(global, chatId, message.reply_to_message_id)
       : undefined;
     const replyMessageSender = replyMessage && replyMessage.sender_user_id
       ? selectUser(global, replyMessage.sender_user_id)
       : undefined;
-    const viewportIds = selectViewportIds(global, message.chat_id);
-    const isReplyInViewport = message.reply_to_message_id && viewportIds
-      && viewportIds.includes(message.reply_to_message_id);
 
     let userId;
     let originUserId;
@@ -373,9 +379,10 @@ export default memo(withGlobal(
     }
 
     const fileTransferProgress = selectFileTransferProgress(global, message);
-    const isFocused = message.id === selectChatFocusedMessageId(global, message.chat_id);
+    const isFocused = message.id === selectFocusedMessageId(global, chatId);
+    const focusDirection = isFocused ? selectFocusDirection(global, chatId) : undefined;
 
-    const chat = selectChat(global, message.chat_id);
+    const chat = selectChat(global, chatId);
     const isChatWithSelf = chat && selectIsChatWithSelf(global, chat);
 
     return {
@@ -385,11 +392,11 @@ export default memo(withGlobal(
       ...(replyMessage && {
         replyMessage,
         replyMessageSender,
-        isReplyInViewport,
       }),
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
       isFocused,
+      focusDirection,
       isChatWithSelf,
     };
   },

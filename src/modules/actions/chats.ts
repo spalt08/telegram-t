@@ -1,10 +1,18 @@
 import { addReducer } from '../../lib/teact/teactn';
-import { updateChatReplyingTo, updateChatScrollOffset, updateSelectedChatId } from '../reducers';
+import {
+  updateChatReplyingTo, updateChatScrollOffset, updateSelectedChatId,
+} from '../reducers';
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
+  const { selectedId } = global.chats;
 
-  return updateSelectedChatId(global, id);
+  if (selectedId !== id) {
+    return updateSelectedChatId(global, id);
+  } else {
+    actions.focusLastReadMessage();
+    return undefined;
+  }
 });
 
 addReducer('openChatWithInfo', (global, actions, payload) => {

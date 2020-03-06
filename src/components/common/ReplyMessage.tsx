@@ -11,6 +11,7 @@ import {
 } from '../../modules/helpers';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
+import buildClassName from '../../util/buildClassName';
 
 import RippleEffect from '../ui/RippleEffect';
 import ServiceMessage from '../middle/ServiceMessage';
@@ -18,23 +19,24 @@ import ServiceMessage from '../middle/ServiceMessage';
 import './ReplyMessage.scss';
 
 type IProps = {
+  className?: string;
   message?: ApiMessage;
   sender?: ApiUser;
-  className?: string;
   loadPictogram?: boolean;
-  onClick?: NoneToVoidFunction;
+  onClick: NoneToVoidFunction;
 };
 
 const NBSP = '\u00A0';
 
 const ReplyMessage: FC<IProps> = ({
-  message, sender, className, loadPictogram, onClick,
+  className, message, sender, loadPictogram, onClick,
 }) => {
   const mediaThumbnail = message && getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
+  const fullClassName = buildClassName('ReplyMessage', className, !message && 'not-implemented');
 
   return (
-    <div className={`ReplyMessage ${className || ''}`} onClick={onClick}>
+    <div className={fullClassName} onClick={message ? onClick : undefined}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="reply-text">
         <div className="sender-name">{(sender && getUserFullName(sender)) || NBSP}</div>

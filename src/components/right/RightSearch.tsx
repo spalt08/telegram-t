@@ -6,7 +6,6 @@ import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 import {
   selectUser,
   selectChatMessages,
-  selectViewportIds,
   selectOpenChat, selectCurrentMessageSearch,
 } from '../../modules/selectors';
 import {
@@ -30,7 +29,6 @@ import './RightSearch.scss';
 type IProps = {
   chat: ApiChat;
   messagesById: Record<number, ApiMessage>;
-  viewportIds?: number[];
   query?: string;
   totalCount?: number;
   foundIds?: number[];
@@ -39,7 +37,6 @@ type IProps = {
 const RightSearch: FC<IProps> = ({
   chat,
   messagesById,
-  viewportIds,
   query,
   totalCount,
   foundIds,
@@ -57,19 +54,17 @@ const RightSearch: FC<IProps> = ({
       return {
         message,
         user: message.sender_user_id ? selectUser(getGlobal(), message.sender_user_id) : undefined,
-        onClick: viewportIds && viewportIds.includes(id)
-          ? () => focusMessage({ chatId: chat.id, messageId: id })
-          : undefined,
+        onClick: () => focusMessage({ chatId: chat.id, messageId: id }),
       };
     });
 
     return orderBy(results, ({ message }) => message.date, 'desc');
-  }, [chat.id, focusMessage, foundIds, messagesById, query, viewportIds]);
+  }, [chat.id, focusMessage, foundIds, messagesById, query]);
 
   const renderSearchResult = ({
     message, user, onClick,
   }: {
-    message: ApiMessage; user?: ApiUser; onClick?: NoneToVoidFunction;
+    message: ApiMessage; user?: ApiUser; onClick: NoneToVoidFunction;
   }) => {
     const text = getMessageText(message);
     if (!text) {
@@ -136,7 +131,6 @@ export default withGlobal(
       return {};
     }
 
-    const viewportIds = selectViewportIds(global, chat.id);
     const currentSearch = selectCurrentMessageSearch(global);
     const { query, resultsByType } = currentSearch || {};
     const { totalCount, foundIds } = (resultsByType && resultsByType.text) || {};
@@ -144,7 +138,6 @@ export default withGlobal(
     return {
       chat,
       messagesById,
-      viewportIds,
       query,
       totalCount,
       foundIds,

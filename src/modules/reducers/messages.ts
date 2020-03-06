@@ -1,13 +1,19 @@
 import { GlobalState } from '../../global/types';
 import { ApiMessage } from '../../api/types';
-import { selectListedIds, selectChatMessages, selectViewportIds } from '../selectors';
+import { FocusDirection } from '../../types';
+
+import {
+  selectListedIds, selectChatMessages, selectViewportIds, selectOutlyingIds,
+} from '../selectors';
 import { areSortedArraysEqual } from '../../util/iteratees';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
   listedIds?: number[];
+  outlyingIds?: number[];
   viewportIds?: number[];
   focusedMessageId?: number;
+  focusDirection?: FocusDirection;
 };
 
 function replaceStoreSection(global: GlobalState, chatId: number, update: Partial<MessageStoreSections>): GlobalState {
@@ -37,6 +43,14 @@ function replaceListedIds(
 ): GlobalState {
   return replaceStoreSection(global, chatId, {
     listedIds: newListedIds,
+  });
+}
+
+export function replaceOutlyingIds(
+  global: GlobalState, chatId: number, newOutlyingIds: number[] | undefined,
+): GlobalState {
+  return replaceStoreSection(global, chatId, {
+    outlyingIds: newOutlyingIds,
   });
 }
 
@@ -148,14 +162,32 @@ export function updateListedIds(
     return global;
   }
 
-  return replaceListedIds(global, chatId, orderListedIds([
+  return replaceListedIds(global, chatId, orderHistoryIds([
     ...listedIds,
     ...newIds,
   ]));
 }
 
+export function updateOutlyingIds(
+  global: GlobalState,
+  chatId: number,
+  idsUpdate: number[],
+): GlobalState {
+  const outlyingIds = selectOutlyingIds(global, chatId) || [];
+  const newIds = outlyingIds.length ? idsUpdate.filter((id) => !outlyingIds.includes(id)) : idsUpdate;
+
+  if (!newIds.length) {
+    return global;
+  }
+
+  return replaceOutlyingIds(global, chatId, orderHistoryIds([
+    ...outlyingIds,
+    ...newIds,
+  ]));
+}
+
 // Expected result: `[1, 2, ..., n, -1, -2, ..., -n]`
-function orderListedIds(listedIds: number[]) {
+function orderHistoryIds(listedIds: number[]) {
   return listedIds.sort((a, b) => (a > 0 && b > 0 ? a - b : b - a));
 }
 
@@ -194,5 +226,13 @@ export function safeReplaceViewportIds(
 export function updateFocusedMessageId(global: GlobalState, chatId: number, focusedMessageId?: number) {
   return replaceStoreSection(global, chatId, {
     focusedMessageId,
+  });
+}
+
+export function updateFocusDirection(
+  global: GlobalState, chatId: number, focusDirection?: FocusDirection,
+) {
+  return replaceStoreSection(global, chatId, {
+    focusDirection,
   });
 }

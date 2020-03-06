@@ -41,7 +41,7 @@ type IProps = {
   actionTargetMessage?: ApiMessage;
   selected: boolean;
   isUiReady: boolean;
-} & Pick<GlobalActions, 'openChat'>;
+} & Pick<GlobalActions, 'openChat' | 'focusLastReadMessage'>;
 
 const Chat: FC<IProps> = ({
   chat,
@@ -53,11 +53,13 @@ const Chat: FC<IProps> = ({
   selected,
   isUiReady,
   openChat,
+  focusLastReadMessage,
 }) => {
   const { last_message, typingStatus } = chat;
+  const chatId = chat.id;
   const isAction = last_message && isActionMessage(last_message);
 
-  useEnsureMessage(chat.id, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
+  useEnsureMessage(chatId, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
 
   function renderLastMessageOrTyping() {
     if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
@@ -82,7 +84,7 @@ const Chat: FC<IProps> = ({
       );
     }
 
-    const senderName = getSenderName(chat.id, lastMessageSender);
+    const senderName = getSenderName(chatId, lastMessageSender);
 
     return (
       <p className="last-message">
@@ -95,12 +97,16 @@ const Chat: FC<IProps> = ({
   }
 
   const handleClick = useCallback(() => {
-    openChat({ id: chat.id });
-  }, [openChat, chat.id]);
+    if (selected) {
+      focusLastReadMessage();
+    } else {
+      openChat({ id: chatId });
+    }
+  }, [selected, focusLastReadMessage, openChat, chatId]);
 
   const className = buildClassName(
     'Chat',
-    isChatPrivate(chat.id) ? 'private' : 'group',
+    isChatPrivate(chatId) ? 'private' : 'group',
     selected && 'selected',
   );
 
@@ -148,24 +154,15 @@ function getSenderName(chatId: number, sender?: ApiUser) {
 export default memo(withGlobal(
   (global, { chatId }: IProps) => {
     const chat = selectChat(global, chatId);
-    if (!chat) {
+    if (!chat || !chat.last_message) {
       return {};
     }
 
-    const { last_message } = chat;
-
-    if (!last_message) {
-      return {};
-    }
-
-    const {
-      sender_user_id, chat_id, reply_to_message_id, is_outgoing,
-    } = last_message;
-
+    const { sender_user_id, reply_to_message_id, is_outgoing } = chat.last_message;
     const lastMessageSender = sender_user_id && selectUser(global, sender_user_id);
-    const lastMessageAction = getMessageAction(last_message);
+    const lastMessageAction = getMessageAction(chat.last_message);
     const actionTargetMessage = lastMessageAction && reply_to_message_id
-      ? selectChatMessage(global, chat_id!, reply_to_message_id)
+      ? selectChatMessage(global, chat.id, reply_to_message_id)
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
@@ -174,7 +171,7 @@ export default memo(withGlobal(
     return {
       chat,
       ...(lastMessageSender && { lastMessageSender }),
-      ...(is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, last_message) }),
+      ...(is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.last_message) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
@@ -182,7 +179,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { openChat } = actions;
-    return { openChat };
+    const { openChat, focusLastReadMessage } = actions;
+    return { openChat, focusLastReadMessage };
   },
 )(Chat));

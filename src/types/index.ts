@@ -1,6 +1,11 @@
 export enum LoadMoreDirection {
-  Backwards = 'backwards',
-  Forwards = 'forwards',
-  Both = 'both',
-  Around = 'around',
+  Backwards,
+  Forwards,
+  Both,
+  Around,
+}
+
+export enum FocusDirection {
+  Up,
+  Down,
 }

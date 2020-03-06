@@ -143,13 +143,13 @@ function reduceMessagesForCache(global: GlobalState) {
   if (global.chats.ids) {
     global.chats.ids.forEach((chatId) => {
       const current = global.messages.byChatId[chatId];
-      if (!current || !current.listedIds) {
+      if (!current || !current.viewportIds) {
         return;
       }
 
       byChatId[chatId] = {
         ...global.messages.byChatId[chatId],
-        byId: filterKeys(current.byId, current.listedIds),
+        byId: filterKeys(current.byId, current.viewportIds),
       };
     });
   }

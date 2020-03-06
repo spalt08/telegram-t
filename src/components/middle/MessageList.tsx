@@ -13,8 +13,9 @@ import {
   selectChatMessages,
   selectViewportIds,
   selectIsViewportNewest,
-  selectLastReadIdByChatId,
+  selectLastReadId,
   selectOpenChat,
+  selectFocusedMessageId,
 } from '../../modules/selectors';
 import {
   getMessageRenderKey,
@@ -38,20 +39,22 @@ import ServiceMessage from './ServiceMessage';
 
 import './MessageList.scss';
 
-type IProps = Pick<GlobalActions, 'loadMessagesForList' | 'markMessagesRead' | 'setChatScrollOffset'> & {
+type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
   chatId?: number;
   isChannelChat?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   lastReadId?: number;
   isViewportNewest: boolean;
+  isFocusing: boolean;
 };
 
-const LOAD_MORE_THRESHOLD_PX = 1500;
+const LOAD_MORE_THRESHOLD_PX = 500;
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
 const INDICATOR_TOP_MARGIN = 10;
 const HIDE_STICKY_TIMEOUT = 450;
+const FOCUSING_DURATION = 1000;
 
 const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
 const scrollToLastMessage = throttle((container: Element) => {
@@ -71,7 +74,8 @@ const MessageList: FC<IProps> = ({
   messagesById,
   lastReadId,
   isViewportNewest,
-  loadMessagesForList,
+  isFocusing,
+  loadViewportMessages,
   markMessagesRead,
   setChatScrollOffset,
 }) => {
@@ -100,9 +104,9 @@ const MessageList: FC<IProps> = ({
   }, [chatId, messageIds, messagesById]);
 
   const loadMessagesDebounced = useMemo(
-    () => debounce(loadMessagesForList, 1000, true, false),
+    () => debounce(loadViewportMessages, 1000, true, false),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loadMessagesForList, messageIds],
+    [loadViewportMessages, messageIds],
   );
 
   const updateViewportMessages = useCallback(() => {
@@ -156,7 +160,13 @@ const MessageList: FC<IProps> = ({
         currentAnchorTop = nextAnchorTop;
 
         if (isMovingUp) {
-          loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
+          if (isFocusing) {
+            setTimeout(() => {
+              loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
+            }, FOCUSING_DURATION);
+          } else {
+            loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
+          }
         }
       }
     } else if (!isViewportNewest && isNearBottom) {
@@ -175,7 +185,13 @@ const MessageList: FC<IProps> = ({
         currentAnchorTop = nextAnchorTop;
 
         if (isMovingDown) {
-          loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
+          if (isFocusing) {
+            setTimeout(() => {
+              loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
+            }, FOCUSING_DURATION);
+          } else {
+            loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
+          }
         }
       }
     } else if (currentAnchor) {
@@ -195,7 +211,7 @@ const MessageList: FC<IProps> = ({
     });
 
     determineStickyElement(container, '.message-date-header');
-  }, [chatId, isViewportNewest, loadMessagesDebounced, updateViewportMessages, setChatScrollOffset]);
+  }, [chatId, isViewportNewest, isFocusing, loadMessagesDebounced, updateViewportMessages, setChatScrollOffset]);
 
   // Initial message loading
   useEffect(() => {
@@ -228,12 +244,12 @@ const MessageList: FC<IProps> = ({
     const messageElements = container.querySelectorAll('.Message');
     const lastMessage = messageElements[messageElements.length - 1];
     const isNewMessage = lastMessage && (lastMessage.id !== currentAnchorId);
-    const isScrolledDown = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
+    const isAtBottom = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
     const unreadDivider = (
       !anchor && unreadDividerMessageId && container.querySelector<HTMLDivElement>('.unread-divider')
     );
 
-    if (isNewMessage && isScrolledDown && prevIsViewportNewest) {
+    if (isNewMessage && isAtBottom && prevIsViewportNewest) {
       scrollToLastMessage(container);
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
@@ -391,22 +407,25 @@ export default memo(withGlobal(
       return {};
     }
 
+    const chatId = chat.id;
+
     return {
-      chatId: chat.id,
+      chatId,
       isChannelChat: isChatChannel(chat),
-      messageIds: selectViewportIds(global, chat.id),
-      messagesById: selectChatMessages(global, chat.id),
-      lastReadId: selectLastReadIdByChatId(global, chat.id),
-      isViewportNewest: selectIsViewportNewest(global, chat.id),
+      messageIds: selectViewportIds(global, chatId),
+      messagesById: selectChatMessages(global, chatId),
+      lastReadId: selectLastReadId(global, chatId),
+      isViewportNewest: selectIsViewportNewest(global, chatId),
+      isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
     };
   },
   (setGlobal, actions) => {
     const {
-      loadMessagesForList, markMessagesRead, setChatScrollOffset,
+      loadViewportMessages, markMessagesRead, setChatScrollOffset,
     } = actions;
 
     return {
-      loadMessagesForList, markMessagesRead, setChatScrollOffset,
+      loadViewportMessages, markMessagesRead, setChatScrollOffset,
     };
   },
 )(MessageList));
