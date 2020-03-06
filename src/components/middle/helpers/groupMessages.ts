@@ -1,21 +1,19 @@
 import { ApiMessage } from '../../../api/types';
 
-import { isSameDay } from '../../../util/dateFormat';
-import { getMessageRenderKey, isActionMessage } from '../../../modules/helpers';
+import { getDayStart } from '../../../util/dateFormat';
+import { isActionMessage } from '../../../modules/helpers';
 
 type SenderGroup = ApiMessage[];
 
 export type MessageDateGroup = {
   datetime: number;
-  key: number;
   senderGroups: SenderGroup[];
 };
 
 export function groupMessages(messages: ApiMessage[], lastReadId: number) {
   let currentSenderGroup: SenderGroup = [];
   let currentDateGroup = {
-    datetime: messages[0].date * 1000,
-    key: getMessageRenderKey(messages[0]),
+    datetime: Number(getDayStart(messages[0].date * 1000)),
     senderGroups: [currentSenderGroup],
   };
 
@@ -26,10 +24,10 @@ export function groupMessages(messages: ApiMessage[], lastReadId: number) {
 
     const nextMessage = messages[index + 1];
     if (nextMessage) {
-      if (!isSameDay(currentDateGroup.datetime, nextMessage.date * 1000)) {
+      const nextMessageDatetime = Number(getDayStart(nextMessage.date * 1000));
+      if (currentDateGroup.datetime !== nextMessageDatetime) {
         currentDateGroup = {
-          datetime: nextMessage.date * 1000,
-          key: getMessageRenderKey(nextMessage),
+          datetime: nextMessageDatetime,
           senderGroups: [],
         };
         dateGroups.push(currentDateGroup);

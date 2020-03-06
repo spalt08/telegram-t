@@ -8,19 +8,23 @@ const MONTHS_FULL = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
+
+export function getDayStart(datetime: number | Date) {
+  const date = new Date(datetime);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
 export function formatPastTimeShort(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getDayStart(new Date());
   if (date > today) {
     return formatTime(date);
   }
 
-  const now = new Date();
-  const weekAgo = new Date();
-  weekAgo.setDate(now.getDate() - 7);
-  today.setHours(0, 0, 0, 0);
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
   if (date > weekAgo) {
     return WEEKDAYS_SHORT[date.getDay()];
   }
@@ -48,23 +52,19 @@ export function formatFullDate(datetime: number | Date, isShort = false) {
 export function formatHumanDate(datetime: number | Date, isShort = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getDayStart(new Date());
   if (date > today) {
     return 'Today';
   }
 
-  const yesterday = new Date();
+  const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
-  yesterday.setHours(today.getHours());
   if (date > yesterday) {
     return 'Yesterday';
   }
 
-  const now = new Date();
-  const weekAgo = new Date();
-  weekAgo.setDate(now.getDate() - 7);
-  today.setHours(0, 0, 0, 0);
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
   if (date > weekAgo) {
     return WEEKDAYS_FULL[date.getDay()];
   }
@@ -72,7 +72,7 @@ export function formatHumanDate(datetime: number | Date, isShort = false) {
   const day = date.getDate();
   const monthsArray = isShort ? MONTHS_SHORT : MONTHS_FULL;
   const month = monthsArray[date.getMonth()];
-  const currentYear = new Date().getFullYear();
+  const currentYear = today.getFullYear();
   const year = date.getFullYear();
 
   return `${month} ${day}${year < currentYear ? ` ${year}` : ''}`;
@@ -84,16 +84,6 @@ function padStart(str: string, targetLength: number, padString: string) {
   }
 
   return str;
-}
-
-export function isSameDay(datetime1: number | Date, datetime2: number | Date) {
-  const date1 = typeof datetime1 === 'number' ? new Date(datetime1) : datetime1;
-  const date2 = typeof datetime2 === 'number' ? new Date(datetime2) : datetime2;
-
-  date1.setHours(0, 0, 0, 0);
-  date2.setHours(0, 0, 0, 0);
-
-  return date1.valueOf() === date2.valueOf();
 }
 
 export function formatMediaDateTime(datetime: number | Date) {

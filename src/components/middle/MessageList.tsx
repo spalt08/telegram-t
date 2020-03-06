@@ -361,7 +361,7 @@ function renderMessages(
 
     return (
       // @ts-ignore
-      <div className="message-date-group" key={dateGroup.key} teactChildrenKeyOrder="asc">
+      <div className="message-date-group" key={dateGroup.datetime} teactChildrenKeyOrder="asc">
         <div className="message-date-header" key={-Infinity}>
           <span>{formatHumanDate(dateGroup.datetime)}</span>
         </div>
