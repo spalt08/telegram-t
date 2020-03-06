@@ -17,7 +17,6 @@ const INITIAL_STATE: GlobalState = {
   },
 
   chats: {
-    ids: null,
     byId: {},
     scrollOffsetById: {},
     replyingToById: {},
@@ -121,8 +120,8 @@ function reduceChatsForCache(global: GlobalState) {
   const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
   const replyingToById: GlobalState['chats']['replyingToById'] = {};
 
-  if (global.chats.ids) {
-    global.chats.ids.forEach((id) => {
+  if (global.chats.listIds) {
+    global.chats.listIds.forEach((id) => {
       byId[id] = global.chats.byId[id];
       scrollOffsetById[id] = global.chats.scrollOffsetById[id];
       replyingToById[id] = global.chats.replyingToById[id];
@@ -140,8 +139,8 @@ function reduceChatsForCache(global: GlobalState) {
 function reduceMessagesForCache(global: GlobalState) {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
-  if (global.chats.ids) {
-    global.chats.ids.forEach((chatId) => {
+  if (global.chats.listIds) {
+    global.chats.listIds.forEach((chatId) => {
       const current = global.messages.byChatId[chatId];
       if (!current || !current.viewportIds) {
         return;

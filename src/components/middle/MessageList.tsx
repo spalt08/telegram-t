@@ -8,7 +8,7 @@ import { ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
-import { MESSAGE_SLICE_LIMIT } from '../../config';
+import { MESSAGE_LIST_SENSITIVE_AREA, MESSAGE_LIST_SLICE } from '../../config';
 import {
   selectChatMessages,
   selectViewportIds,
@@ -49,7 +49,6 @@ type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 
   isFocusing: boolean;
 };
 
-const LOAD_MORE_THRESHOLD_PX = 500;
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
 const INDICATOR_TOP_MARGIN = 10;
@@ -140,9 +139,10 @@ const MessageList: FC<IProps> = ({
     const { scrollTop, scrollHeight, offsetHeight } = container;
     currentScrollOffset = scrollHeight - scrollTop;
 
-    const isNearTop = scrollTop <= LOAD_MORE_THRESHOLD_PX;
-    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= LOAD_MORE_THRESHOLD_PX;
+    const isNearTop = scrollTop <= MESSAGE_LIST_SENSITIVE_AREA;
+    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= MESSAGE_LIST_SENSITIVE_AREA;
     const currentAnchor = currentAnchorId && document.getElementById(currentAnchorId);
+    let isUpdated = false;
 
     if (isNearTop) {
       const messageElements = container.querySelectorAll('.Message');
@@ -156,10 +156,11 @@ const MessageList: FC<IProps> = ({
           currentAnchor && currentAnchorTop !== undefined && newAnchorTop > currentAnchorTop
         );
 
-        currentAnchorId = nextAnchor.id;
-        currentAnchorTop = nextAnchorTop;
-
         if (isMovingUp) {
+          currentAnchorId = nextAnchor.id;
+          currentAnchorTop = nextAnchorTop;
+          isUpdated = true;
+
           if (isFocusing) {
             setTimeout(() => {
               loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
@@ -169,7 +170,9 @@ const MessageList: FC<IProps> = ({
           }
         }
       }
-    } else if (!isViewportNewest && isNearBottom) {
+    }
+
+    if (!isViewportNewest && isNearBottom) {
       const messageElements = container.querySelectorAll('.Message');
       const nextAnchor = messageElements[messageElements.length - 1];
       if (nextAnchor) {
@@ -181,10 +184,11 @@ const MessageList: FC<IProps> = ({
           currentAnchor && currentAnchorTop !== undefined && newAnchorTop < currentAnchorTop
         );
 
-        currentAnchorId = nextAnchor.id;
-        currentAnchorTop = nextAnchorTop;
-
         if (isMovingDown) {
+          currentAnchorId = nextAnchor.id;
+          currentAnchorTop = nextAnchorTop;
+          isUpdated = true;
+
           if (isFocusing) {
             setTimeout(() => {
               loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
@@ -194,8 +198,17 @@ const MessageList: FC<IProps> = ({
           }
         }
       }
-    } else if (currentAnchor) {
-      currentAnchorTop = currentAnchor.getBoundingClientRect().top;
+    }
+
+    if (!isUpdated) {
+      if (currentAnchor) {
+        currentAnchorTop = currentAnchor.getBoundingClientRect().top;
+      } else {
+        const messageElements = container.querySelectorAll('.Message');
+        const nextAnchor = messageElements[0];
+        currentAnchorId = nextAnchor.id;
+        currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+      }
     }
 
     setIsScrolling(true);
@@ -218,7 +231,7 @@ const MessageList: FC<IProps> = ({
     const container = containerRef.current!;
 
     if (!messageIds || (
-      container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_SLICE_LIMIT * 2
+      container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_LIST_SLICE * 2
     )) {
       loadMessagesDebounced({ direction: LoadMoreDirection.Both });
     }
