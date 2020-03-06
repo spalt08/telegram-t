@@ -2,13 +2,12 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
+import { CHAT_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
-import { addUsers, updateChatIds, updateChats } from '../../reducers';
+import { addUsers, updateChatListIds, updateChats } from '../../reducers';
 import { selectChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
-
-const LOAD_CHATS_LIMIT = 50;
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -47,7 +46,7 @@ addReducer('loadTopChats', () => {
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
-    limit: LOAD_CHATS_LIMIT,
+    limit: CHAT_LIST_SLICE,
     offsetDate,
   });
 
@@ -65,7 +64,7 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChatIds(global, chat_ids);
+  global = updateChatListIds(global, chat_ids);
 
   setGlobal(global);
 }

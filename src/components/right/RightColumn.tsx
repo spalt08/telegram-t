@@ -71,7 +71,7 @@ export default withGlobal(
 
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
-    const areChatsLoaded = Boolean(chats.ids);
+    const areChatsLoaded = Boolean(chats.listIds);
 
     const currentSearch = selectCurrentMessageSearch(global);
 

@@ -14,21 +14,21 @@ import './ChatList.scss';
 
 type IProps = {
   chats: Record<number, ApiChat>;
-  loadedIds: number[];
+  listIds: number[];
   selectedChatId: number;
   orderedPinnedIds?: number[];
 } & Pick<GlobalActions, 'loadMoreChats'>;
 
 const ChatList: FC<IProps> = ({
-  chats, loadedIds, selectedChatId, orderedPinnedIds, loadMoreChats,
+  chats, listIds, selectedChatId, orderedPinnedIds, loadMoreChats,
 }) => {
   const chatArrays = useMemo(() => (
-    loadedIds ? prepareChats(chats, loadedIds, orderedPinnedIds) : undefined
-  ), [chats, loadedIds, orderedPinnedIds]);
+    listIds ? prepareChats(chats, listIds, orderedPinnedIds) : undefined
+  ), [chats, listIds, orderedPinnedIds]);
 
   return (
-    <InfiniteScroll className="ChatList custom-scroll" items={loadedIds} onLoadMore={loadMoreChats}>
-      {loadedIds && loadedIds.length && chatArrays ? (
+    <InfiniteScroll className="ChatList custom-scroll" items={listIds} onLoadMore={loadMoreChats}>
+      {listIds && listIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map(({ id }) => (
             <Chat key={id} chatId={id} selected={id === selectedChatId} />
@@ -40,7 +40,7 @@ const ChatList: FC<IProps> = ({
             <Chat key={id} chatId={id} selected={id === selectedChatId} />
           ))}
         </div>
-      ) : loadedIds && loadedIds.length === 0 ? (
+      ) : listIds && listIds.length === 0 ? (
         <div className="no-chats">Chat list is empty.</div>
       ) : (
         <Loading />
@@ -49,8 +49,8 @@ const ChatList: FC<IProps> = ({
   );
 };
 
-function prepareChats(chats: Record<number, ApiChat>, loadedIds: number[], orderedPinnedIds?: number[]) {
-  const filtered = Object.values(chats).filter((chat) => Boolean(chat.last_message) && loadedIds.includes(chat.id));
+function prepareChats(chats: Record<number, ApiChat>, listIds: number[], orderedPinnedIds?: number[]) {
+  const filtered = Object.values(chats).filter((chat) => Boolean(chat.last_message) && listIds.includes(chat.id));
   const pinnedChats = orderedPinnedIds
     ? orderedPinnedIds.map((id) => chats[id])
     : filtered.filter((chat) => chat.is_pinned);
@@ -66,7 +66,7 @@ export default memo(withGlobal(
   global => {
     const {
       chats: {
-        ids: loadedIds,
+        listIds,
         byId: chats,
         selectedId: selectedChatId,
         orderedPinnedIds,
@@ -75,7 +75,7 @@ export default memo(withGlobal(
 
     return {
       chats,
-      loadedIds,
+      listIds,
       selectedChatId,
       orderedPinnedIds,
     };

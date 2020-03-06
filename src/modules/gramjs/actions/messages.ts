@@ -3,9 +3,9 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { MESSAGE_SLICE_LIMIT } from '../../../config';
+import { MESSAGE_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { areSortedArraysIntersecting, buildCollectionByKey } from '../../../util/iteratees';
 import {
   addUsers,
   replaceChatMessagesById,
@@ -45,11 +45,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
 
   if (!viewportIds || !viewportIds.length || shouldRelocate) {
     const offsetId = selectFocusedMessageId(newGlobal, chatId) || selectLastReadOrVeryLastId(newGlobal, chatId);
-    if (!offsetId) {
-      return undefined;
-    }
-
-    const isOutlying = listedIds && !listedIds.includes(offsetId);
+    const isOutlying = Boolean(offsetId && listedIds && !listedIds.includes(offsetId));
     const historyIds = (isOutlying ? outlyingIds : listedIds) || [];
 
     if (!isOutlying && outlyingIds) {
@@ -65,7 +61,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
     }
 
     if (!areAllLocal) {
-      const loadLimit = isOutlying ? MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT * 2;
+      const loadLimit = isOutlying ? MESSAGE_LIST_SLICE : MESSAGE_LIST_SLICE * 2;
       void loadViewportMessages(chat, offsetId, LoadMoreDirection.Around, loadLimit, isOutlying);
     }
   } else {
@@ -198,9 +194,9 @@ async function loadWebPagePreview(message: string) {
 
 async function loadViewportMessages(
   chat: ApiChat,
-  offsetId: number,
+  offsetId: number | undefined,
   direction: LoadMoreDirection,
-  limit = MESSAGE_SLICE_LIMIT,
+  limit = MESSAGE_LIST_SLICE,
   isOutlying = false,
 ) {
   const chatId = chat.id;
@@ -237,7 +233,19 @@ async function loadViewportMessages(
   newGlobal = isOutlying ? updateOutlyingIds(newGlobal, chatId, ids) : updateListedIds(newGlobal, chatId, ids);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
-  const historyIds = isOutlying ? selectOutlyingIds(newGlobal, chatId)! : selectListedIds(newGlobal, chatId)!;
+  let listedIds = selectListedIds(newGlobal, chatId);
+  const outlyingIds = selectOutlyingIds(newGlobal, chatId);
+
+  if (isOutlying && listedIds && outlyingIds) {
+    if (areSortedArraysIntersecting(listedIds, outlyingIds)) {
+      newGlobal = updateListedIds(newGlobal, chatId, outlyingIds);
+      listedIds = selectListedIds(newGlobal, chatId);
+      newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
+      isOutlying = false;
+    }
+  }
+
+  const historyIds = isOutlying ? outlyingIds! : listedIds!;
   const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction, true);
   newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds!);
 
@@ -259,25 +267,25 @@ async function loadMessage(chat: ApiChat, messageId: number) {
 
 function getViewportSlice(
   sourceIds: number[],
-  offsetId: number,
+  offsetId: number | undefined,
   direction: LoadMoreDirection,
   forceMax = false,
 ) {
   const { length } = sourceIds;
-  const index = sourceIds.indexOf(offsetId);
+  const index = offsetId ? sourceIds.indexOf(offsetId) : -1;
   const isForwards = direction === LoadMoreDirection.Forwards;
-  const indexForDirection = isForwards ? index + 1 : index;
-  const from = indexForDirection - MESSAGE_SLICE_LIMIT;
-  const to = indexForDirection + MESSAGE_SLICE_LIMIT;
+  const indexForDirection = isForwards ? (index + 1) || length : index;
+  const from = indexForDirection - MESSAGE_LIST_SLICE;
+  const to = indexForDirection + MESSAGE_LIST_SLICE;
   const newViewportIds = sourceIds.slice(Math.max(0, from), to);
   const areSomeLocal = (isForwards && indexForDirection < length) || (!isForwards && indexForDirection > 0);
   const areAllLocal = (isForwards && to <= length) || (!isForwards && from >= 0);
 
   if (!areAllLocal && forceMax) {
     return {
-      newViewportIds: indexForDirection <= (length / 2 - 1)
-        ? sourceIds.slice(0, MESSAGE_SLICE_LIMIT * 2)
-        : sourceIds.slice(Math.max(0, length - MESSAGE_SLICE_LIMIT * 2), length),
+      newViewportIds: isForwards
+        ? sourceIds.slice(Math.max(0, length - MESSAGE_LIST_SLICE * 2), length)
+        : sourceIds.slice(0, MESSAGE_LIST_SLICE * 2),
     };
   }
 

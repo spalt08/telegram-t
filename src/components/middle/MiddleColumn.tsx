@@ -2,6 +2,7 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+
 import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -12,64 +13,46 @@ import Composer from './composer/Composer';
 
 import './MiddleColumn.scss';
 
-type IProps = Pick<GlobalActions, 'openChat'> & {
-  selectedChatId: number;
-  isChannelChat: boolean;
-  areChatsLoaded: boolean;
-};
+type IProps = {
+  openChatId?: number;
+  isChannel?: boolean;
+} & Pick<GlobalActions, 'openChat'>;
 
-const MiddleColumn: FC<IProps> = (props) => {
-  const { selectedChatId, openChat } = props;
-  const isChatOpen = Boolean(selectedChatId);
-
+const MiddleColumn: FC<IProps> = ({ openChatId, isChannel, openChat }) => {
   useEffect(() => {
-    return isChatOpen
+    return openChatId
       ? captureEscKeyListener(() => {
         openChat({ id: undefined });
       })
       : undefined;
-  }, [isChatOpen, openChat]);
+  }, [openChatId, openChat]);
 
   return (
     <div id="MiddleColumn">
-      {renderSelectedChat(props)}
+      {openChatId && (
+        <div className="messages-layout">
+          <MiddleHeader chatId={openChatId} />
+          <MessageList key={openChatId} />
+          {!isChannel && <Composer />}
+        </div>
+      )}
     </div>
   );
 };
 
-function renderSelectedChat(props: IProps) {
-  const { selectedChatId, isChannelChat } = props;
-
-  if (!selectedChatId) {
-    return null;
-  }
-
-  return (
-    <div className="messages-layout">
-      <MiddleHeader chatId={selectedChatId} />
-      <MessageList key={selectedChatId} />
-      {!isChannelChat && (
-        <Composer />
-      )}
-    </div>
-  );
-}
-
 export default withGlobal(
   (global) => {
-    const { chats } = global;
-    const selectedChatId = chats.selectedId;
-    const areChatsLoaded = Boolean(chats.ids);
+    const { chats: { selectedId: openChatId, listIds } } = global;
+    if (!listIds || !openChatId) {
+      return {};
+    }
 
-    const selectedChat = selectedChatId && areChatsLoaded
-      ? selectChat(global, selectedChatId)
-      : undefined;
-    const isChannelChat = selectedChat && isChatChannel(selectedChat);
+    const chat = selectChat(global, openChatId);
+    const isChannel = chat && isChatChannel(chat);
 
     return {
-      selectedChatId,
-      isChannelChat,
-      areChatsLoaded,
+      openChatId,
+      isChannel,
     };
   },
   (setGlobal, actions) => {

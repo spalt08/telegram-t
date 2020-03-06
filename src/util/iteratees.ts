@@ -113,3 +113,7 @@ export function areSortedArraysEqual(array1: any[], array2: any[]) {
 
   return array1.every((item, i) => item === array2[i]);
 }
+
+export function areSortedArraysIntersecting(array1: any[], array2: any[]) {
+  return array1[0] <= array2[array2.length - 1] && array1[array1.length - 1] >= array2[0];
+}

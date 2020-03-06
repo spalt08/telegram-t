@@ -2,6 +2,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiMessageSearchType, ApiUser } from '../../../api/types';
 
+import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   selectCurrentMessageSearch,
@@ -9,8 +10,6 @@ import {
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { addChatMessagesById, addUsers, updateMessageSearchResults } from '../../reducers';
-
-const SEARCH_LIMIT = 50;
 
 addReducer('searchMessages', (global) => {
   const currentSearchChatId = selectCurrentMessageSearchChatId(global);
@@ -41,7 +40,11 @@ async function searchMessages(
   offsetId?: number,
 ) {
   const result = await callApi('searchMessages', {
-    chatOrUser, type, query, limit: SEARCH_LIMIT, offsetId,
+    chatOrUser,
+    type,
+    query,
+    limit: type === 'text' ? MESSAGE_SEARCH_SLICE : SHARED_MEDIA_SLICE,
+    offsetId,
   });
 
   if (!result) {

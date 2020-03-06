@@ -1,26 +1,28 @@
 import { GlobalState } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
-export function replaceChatIds(global: GlobalState, newIds: number[]): GlobalState {
+export function replaceChatListIds(global: GlobalState, newIds: number[]): GlobalState {
   return {
     ...global,
     chats: {
       ...global.chats,
-      ids: newIds,
+      listIds: newIds,
     },
   };
 }
 
-export function updateChatIds(global: GlobalState, idsUpdate: number[]): GlobalState {
-  const ids = global.chats.ids || [];
-  const newIds = ids.length ? idsUpdate.filter((id) => !ids.includes(id)) : idsUpdate;
+export function updateChatListIds(global: GlobalState, idsUpdate: number[]): GlobalState {
+  const { listIds } = global.chats;
+  const newIds = listIds && listIds.length
+    ? idsUpdate.filter((id) => !listIds.includes(id))
+    : idsUpdate;
 
-  if (!newIds.length) {
+  if (listIds && !newIds.length) {
     return global;
   }
 
-  return replaceChatIds(global, [
-    ...ids,
+  return replaceChatListIds(global, [
+    ...(listIds || []),
     ...newIds,
   ]);
 }
