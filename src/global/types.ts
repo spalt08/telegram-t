@@ -36,7 +36,7 @@ export type GlobalState = {
 
   chats: {
     selectedId?: number;
-    ids: number[] | null;
+    listIds?: number[];
     // TODO Replace with Partial<Record> to handle missing keys
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;

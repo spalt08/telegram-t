@@ -121,6 +121,7 @@ export function deleteChatMessages(
   const newById = { ...byId };
 
   let listedIds = selectListedIds(global, chatId);
+  let outlyingIds = selectOutlyingIds(global, chatId);
   let viewportIds = selectViewportIds(global, chatId);
 
   messageIds.forEach((messageId) => {
@@ -130,6 +131,13 @@ export function deleteChatMessages(
       const index = listedIds.indexOf(messageId);
       if (index !== -1) {
         listedIds = Array.prototype.concat(listedIds.slice(0, index), listedIds.slice(index + 1));
+      }
+    }
+
+    if (outlyingIds) {
+      const index = outlyingIds.indexOf(messageId);
+      if (index !== -1) {
+        outlyingIds = Array.prototype.concat(outlyingIds.slice(0, index), outlyingIds.slice(index + 1));
       }
     }
 
@@ -145,6 +153,7 @@ export function deleteChatMessages(
 
   newGlobal = replaceChatMessages(newGlobal, chatId, newById);
   newGlobal = replaceListedIds(newGlobal, chatId, listedIds);
+  newGlobal = replaceOutlyingIds(newGlobal, chatId, listedIds);
   newGlobal = replaceViewportIds(newGlobal, chatId, viewportIds);
 
   return newGlobal;
@@ -155,15 +164,17 @@ export function updateListedIds(
   chatId: number,
   idsUpdate: number[],
 ): GlobalState {
-  const listedIds = selectListedIds(global, chatId) || [];
-  const newIds = listedIds.length ? idsUpdate.filter((id) => !listedIds.includes(id)) : idsUpdate;
+  const listedIds = selectListedIds(global, chatId);
+  const newIds = listedIds && listedIds.length
+    ? idsUpdate.filter((id) => !listedIds.includes(id))
+    : idsUpdate;
 
-  if (!newIds.length) {
+  if (listedIds && !newIds.length) {
     return global;
   }
 
   return replaceListedIds(global, chatId, orderHistoryIds([
-    ...listedIds,
+    ...(listedIds || []),
     ...newIds,
   ]));
 }
@@ -173,15 +184,17 @@ export function updateOutlyingIds(
   chatId: number,
   idsUpdate: number[],
 ): GlobalState {
-  const outlyingIds = selectOutlyingIds(global, chatId) || [];
-  const newIds = outlyingIds.length ? idsUpdate.filter((id) => !outlyingIds.includes(id)) : idsUpdate;
+  const outlyingIds = selectOutlyingIds(global, chatId);
+  const newIds = outlyingIds && outlyingIds.length
+    ? idsUpdate.filter((id) => !outlyingIds.includes(id))
+    : idsUpdate;
 
-  if (!newIds.length) {
+  if (outlyingIds && !newIds.length) {
     return global;
   }
 
   return replaceOutlyingIds(global, chatId, orderHistoryIds([
-    ...outlyingIds,
+    ...(outlyingIds || []),
     ...newIds,
   ]));
 }

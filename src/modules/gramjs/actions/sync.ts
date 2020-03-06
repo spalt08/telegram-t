@@ -5,15 +5,14 @@ import {
 import { ApiChat } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
 
-import { MESSAGE_SLICE_LIMIT } from '../../../config';
+import { CHAT_LIST_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  replaceChatIds, replaceChats, updateSelectedChatId, replaceUsers, updateUsers,
+  replaceChatListIds, replaceChats, updateSelectedChatId, replaceUsers, updateUsers,
 } from '../../reducers';
 
-const INITIAL_CHATS_LIMIT = 50;
-const TOP_MESSAGES_LIMIT = MESSAGE_SLICE_LIMIT * 2;
+const TOP_MESSAGES_LIMIT = MESSAGE_LIST_SLICE * 2;
 
 addReducer('sync', () => {
   void sync();
@@ -31,7 +30,7 @@ async function sync() {
 
 async function loadAndReplaceChats() {
   const result = await callApi('fetchChats', {
-    limit: INITIAL_CHATS_LIMIT,
+    limit: CHAT_LIST_SLICE,
   });
 
   let global = getGlobal();
@@ -42,7 +41,7 @@ async function loadAndReplaceChats() {
 
   global = replaceUsers(global, buildCollectionByKey(result.users, 'id'));
   global = replaceChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = replaceChatIds(global, result.chat_ids);
+  global = replaceChatListIds(global, result.chat_ids);
   global = {
     ...global,
     chats: {

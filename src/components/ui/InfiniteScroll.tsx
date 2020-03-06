@@ -12,12 +12,12 @@ interface IProps {
   className?: string;
   onLoadMore: AnyToVoidFunction;
   items: any[];
-  sensitiveHeight?: number;
+  sensitiveArea?: number;
   preloadBackwards?: number;
   children: any;
 }
 
-const DEFAULT_SENSITIVE_HEIGHT = 1200;
+const DEFAULT_SENSITIVE_AREA = 1200;
 const DEFAULT_PRELOAD_BACKWARDS = 50;
 
 const InfiniteScroll: FC<IProps> = ({
@@ -25,7 +25,7 @@ const InfiniteScroll: FC<IProps> = ({
   className,
   onLoadMore,
   items,
-  sensitiveHeight = DEFAULT_SENSITIVE_HEIGHT,
+  sensitiveArea = DEFAULT_SENSITIVE_AREA,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   children,
 }: IProps) => {
@@ -54,7 +54,7 @@ const InfiniteScroll: FC<IProps> = ({
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
     const newAnchorTop = anchor.getBoundingClientRect().top;
-    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= sensitiveHeight;
+    const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= sensitiveArea;
     const isMovingDown = typeof anchorTopRef.current === 'number' && newAnchorTop < anchorTopRef.current;
 
     if (isNearBottom && isMovingDown) {
@@ -62,7 +62,7 @@ const InfiniteScroll: FC<IProps> = ({
     }
 
     anchorTopRef.current = newAnchorTop;
-  }, [onLoadMoreDebounced, sensitiveHeight]);
+  }, [onLoadMoreDebounced, sensitiveArea]);
 
   return (
     <div ref={containerRef} className={className} onScroll={handleScroll}>

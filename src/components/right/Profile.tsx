@@ -6,6 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiMessage, ApiMessageSearchType, ApiPrivateChat } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
+import { SHARED_MEDIA_SLICE } from '../../config';
 import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
 import { selectChat, selectChatMessages } from '../../modules/selectors';
 
@@ -117,7 +118,7 @@ const Profile: FC<IProps> = ({
       ref={containerRef}
       className="Profile custom-scroll"
       items={messageIds}
-      preloadBackwards={!mediaType ? 0 : undefined}
+      preloadBackwards={!mediaType ? 0 : SHARED_MEDIA_SLICE}
       onLoadMore={searchMessages}
     >
       {resolvedUserId ? [
