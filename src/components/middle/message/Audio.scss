@@ -2,8 +2,14 @@
   display: flex;
   align-items: flex-start;
 
+  &.media-inner {
+    overflow: visible;
+  }
+
   &.own {
     --color-text-secondary: var(--accent-color);
+    --color-interactive-active: var(--color-text-green);
+    --color-interactive-inactive: rgba(var(--color-text-green-rgb), 0.40);
 
     .Button {
       --color-primary: var(--color-text-green);
@@ -78,6 +84,7 @@
     align-self: center;
     margin-top: .4375rem;
     min-width: 0;
+    flex-grow: 1;
   }
 
   .title {
@@ -110,7 +117,7 @@
   .performer,
   .date {
     font-size: .875rem;
-    line-height: 1.25;
+    line-height: 1;
     color: var(--color-text-secondary);
     margin: 0;
   }
@@ -137,6 +144,71 @@
     color: var(--color-text-secondary);
   }
 
+  .seekline {
+    width: calc(100% - 2px);
+    padding-left: 6px;
+    margin-bottom: .3125rem;
+    height: 12px;
+    position: relative;
+    margin-left: -6px;
+    top: 1px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      left: 6px;
+      top: 6px;
+      height: 2px;
+      background-color: var(--color-interactive-inactive);
+      border-radius: 2px;
+    }
+  }
+
+  .seekline-progress {
+    position: absolute;
+    height: 2px;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+    top: 6px;
+    left: 6px;
+
+    i {
+      position: absolute;
+      width: 100%;
+      background-color: var(--color-interactive-active);
+      height: 2px;
+      border-radius: 2px;
+      right: 100%;
+    }
+  }
+
+  .seekline-thumb {
+    position: absolute;
+    width: 100%;
+    top: 7px;
+    left: 0;
+
+    i {
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      right: 100%;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: -12px;
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background: var(--color-interactive-active);
+      }
+    }
+  }
+
   &.smaller {
     .content {
       margin-top: .1875rem;
@@ -149,9 +221,19 @@
       font-weight: 400;
       line-height: 1.5rem;
     }
+    .meta,
+    .performer,
+    .date {
+      line-height: 1.0625rem;
+    }
+
+    .seekline {
+      top: 2px;
+      margin-bottom: .5rem;
+    }
 
     .duration {
-      line-height: 1.125rem;
+      line-height: 1rem;
     }
   }
 }
