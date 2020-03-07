@@ -129,25 +129,38 @@ const Audio: FC<IProps> = ({
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent smaller={inSharedMedia} />
         </div>
       )}
-      {audio ? renderAudio(audio, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}
+      {audio ? renderAudio(audio, isActive, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}
     </div>
   );
 };
 
-function renderAudio(audio: ApiAudio, progress: number, date?: number) {
+function renderAudio(audio: ApiAudio, isActive: boolean, progress: number, date?: number) {
   const {
     title, performer, duration, fileName,
   } = audio;
+  const showSeekline = isActive || (progress > 0 && progress < 1);
 
   return (
     <div className="content">
       <p className="title">{title || fileName}</p>
-      <div className="meta">
-        {performer && (
-          <span className="performer">{performer}</span>
-        )}
-        {date && <span className="date">{formatMediaDateTime(date * 1000)}</span>}
-      </div>
+      {showSeekline && (
+        <div className="seekline">
+          <span className="seekline-progress">
+            <i style={`transform: translateX(${progress * 100}%)`} />
+          </span>
+          <span className="seekline-thumb">
+            <i style={`transform: translateX(${progress * 100}%)`} />
+          </span>
+        </div>
+      )}
+      {!showSeekline && (
+        <div className="meta">
+          {performer && (
+            <span className="performer">{performer}</span>
+          )}
+          {date && <span className="date">{formatMediaDateTime(date * 1000)}</span>}
+        </div>
+      )}
       <p className="duration">
         {progress > 0 ? `${formatMediaDuration(duration * progress)} / ` : null}
         {formatMediaDuration(duration)}
