@@ -19,13 +19,13 @@ export function formatPastTimeShort(datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = getDayStart(new Date());
-  if (date > today) {
+  if (date >= today) {
     return formatTime(date);
   }
 
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 7);
-  if (date > weekAgo) {
+  if (date >= weekAgo) {
     return WEEKDAYS_SHORT[date.getDay()];
   }
 
@@ -53,19 +53,19 @@ export function formatHumanDate(datetime: number | Date, isShort = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const today = getDayStart(new Date());
-  if (date > today) {
+  if (date >= today) {
     return 'Today';
   }
 
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
-  if (date > yesterday) {
+  if (date >= yesterday) {
     return 'Yesterday';
   }
 
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 7);
-  if (date > weekAgo) {
+  if (date >= weekAgo) {
     return WEEKDAYS_FULL[date.getDay()];
   }
 
