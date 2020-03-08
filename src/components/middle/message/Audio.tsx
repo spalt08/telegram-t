@@ -146,10 +146,16 @@ function renderAudio(audio: ApiAudio, isActive: boolean, progress: number, date?
       {showSeekline && (
         <div className="seekline">
           <span className="seekline-progress">
-            <i style={`transform: translateX(${progress * 100}%)`} />
+            <i
+              // @ts-ignore
+              style={`transform: translateX(${progress * 100}%)`}
+            />
           </span>
           <span className="seekline-thumb">
-            <i style={`transform: translateX(${progress * 100}%)`} />
+            <i
+              // @ts-ignore
+              style={`transform: translateX(${progress * 100}%)`}
+            />
           </span>
         </div>
       )}
