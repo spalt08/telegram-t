@@ -1,8 +1,8 @@
 import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
-import { ApiMessage, ApiWebPage } from '../../../api/types';
+import { ApiMessage } from '../../../api/types';
 
-import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
+import { getMessageWebPage } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import Photo from './Photo';
@@ -14,7 +14,6 @@ const MAX_TEXT_LENGTH = 170; // symbols
 type IProps = {
   message: ApiMessage;
   load?: boolean;
-  inSharedMedia?: boolean; // TODO Extract as a separate component.
   inPreview?: boolean;
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
@@ -23,7 +22,6 @@ type IProps = {
 const WebPage: FC<IProps> = ({
   message,
   load,
-  inSharedMedia,
   inPreview,
   onMediaClick,
   onCancelMediaTransfer,
@@ -44,23 +42,7 @@ const WebPage: FC<IProps> = ({
     }
   }, [webPage, isSquarePhoto, onMediaClick]);
 
-  let linkData: ApiWebPage | undefined = webPage;
-
-  if (!webPage && inSharedMedia) {
-    const link = matchLinkInMessageText(message);
-    if (link) {
-      const { url, domain } = link;
-      const messageText = getMessageSummaryText(message);
-
-      linkData = {
-        siteName: domain.replace(/^www./, ''),
-        url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
-        description: messageText !== url ? messageText : undefined,
-      } as ApiWebPage;
-    }
-  }
-
-  if (!linkData) {
+  if (!webPage) {
     return null;
   }
 
@@ -71,7 +53,7 @@ const WebPage: FC<IProps> = ({
     title,
     description,
     photo,
-  } = linkData;
+  } = webPage;
 
   const truncatedDescription = description && description.length > MAX_TEXT_LENGTH
     ? `${description.substr(0, MAX_TEXT_LENGTH)}...`
@@ -100,9 +82,9 @@ const WebPage: FC<IProps> = ({
       )}
       <div className="WebPage-text">
         <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
-          {inSharedMedia ? url.replace('mailto:', '') : siteName || displayUrl}
+          {siteName || displayUrl}
         </a>
-        <p className="site-title">{inSharedMedia ? title || siteName || displayUrl : title}</p>
+        <p className="site-title">{title}</p>
         {truncatedDescription && <p className="site-description">{description}</p>}
       </div>
     </div>
