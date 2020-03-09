@@ -3,7 +3,7 @@ import {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
 } from './auth';
 import {
-  fetchChats, fetchFullChat, fetchSuperGroupOnlines, fetchChatLastMessage,
+  fetchChats, fetchFullChat, fetchSuperGroupOnlines, requestChatUpdate,
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
@@ -36,7 +36,7 @@ export default {
   fetchWebPagePreview,
   fetchFullChat,
   fetchSuperGroupOnlines,
-  fetchChatLastMessage,
+  requestChatUpdate,
   fetchFullUser,
   fetchNearestCountry,
   uploadProfilePhoto,

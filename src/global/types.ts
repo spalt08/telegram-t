@@ -113,7 +113,7 @@ export type ActionTypes = (
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
-  'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'loadChatLastMessage' |
+  'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' |
