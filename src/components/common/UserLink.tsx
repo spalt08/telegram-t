@@ -3,7 +3,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-type IProps = Pick<GlobalActions, 'openUserInfo' | 'openChatWithInfo'> & {
+type IProps = Pick<GlobalActions, 'openUserInfo'> & {
   className?: string;
   sender?: ApiUser | ApiChat;
   children: any;

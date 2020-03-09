@@ -166,7 +166,7 @@ const Message: FC<IProps> = ({
     isOwn, isLastInGroup, hasReply: isReply, customShape,
   });
 
-  const handleAvatarClick = useCallback(() => {
+  const handleSenderClick = useCallback(() => {
     if (!sender) {
       return;
     }
@@ -228,7 +228,9 @@ const Message: FC<IProps> = ({
     }
 
     return (
-      <div className="sender-name">{user ? getUserFullName(user) : NBSP}</div>
+      <div className="sender-name" onClick={handleSenderClick}>
+        {user ? getUserFullName(user) : NBSP}
+      </div>
     );
   }
 
@@ -332,7 +334,7 @@ const Message: FC<IProps> = ({
         <Avatar
           size="small"
           user={sender}
-          onClick={handleAvatarClick}
+          onClick={handleSenderClick}
           className={!isLastInGroup ? 'hidden' : ''}
           noAnimate
         />
