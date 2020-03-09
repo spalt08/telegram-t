@@ -19,8 +19,8 @@ import UserExtra from './UserExtra';
 import GroupExtra from './ChatExtra';
 import Media from './sharedMedia/Media';
 import Document from './sharedMedia/Document';
+import WebLink from './sharedMedia/WebLink';
 // TODO @refactoring Move to `components/common`.
-import WebPage from '../middle/message/WebPage';
 import Audio from '../middle/message/Audio';
 
 import './Profile.scss';
@@ -146,11 +146,9 @@ const Profile: FC<IProps> = ({
                 ))
               ) : mediaType === 'links' ? (
                 messageIds.map((id: number) => (
-                  <WebPage
+                  <WebLink
                     key={id}
-                    inSharedMedia
                     message={chatMessages[id]}
-                    load
                   />
                 ))
               ) : mediaType === 'audio' ? (
