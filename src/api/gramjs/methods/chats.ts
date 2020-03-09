@@ -103,6 +103,33 @@ export async function fetchSuperGroupOnlines(chat: ApiChat) {
   });
 }
 
+export async function fetchChatLastMessage(chat: ApiChat) {
+  const { id, access_hash } = chat;
+
+  const result = await invokeRequest(new GramJs.messages.GetPeerDialogs({
+    peers: [new GramJs.InputDialogPeer({
+      peer: buildInputPeer(id, access_hash),
+    })],
+  }));
+
+  if (!result || !result.messages[0]) {
+    return;
+  }
+
+  const lastMessage = buildApiMessage(result.messages[0]);
+  if (!lastMessage) {
+    return;
+  }
+
+  if (lastMessage) {
+    onUpdate({
+      '@type': 'updateChat',
+      id,
+      chat: { last_message: lastMessage },
+    });
+  }
+}
+
 async function getFullChatInfo(chatId: number) {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 

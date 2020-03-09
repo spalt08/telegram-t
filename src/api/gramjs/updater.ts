@@ -159,7 +159,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   } else if (update instanceof GramJs.UpdateReadMessagesContents) {
     onUpdate({
-      '@type': 'updateMessages',
+      '@type': 'updateCommonBoxMessages',
       ids: update.messages,
       messageUpdate: {
         isMediaUnread: false,

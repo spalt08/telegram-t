@@ -96,8 +96,8 @@ export type ApiUpdateMessageSendFailed = {
   };
 };
 
-export type ApiUpdateMessages = {
-  '@type': 'updateMessages';
+export type ApiUpdateCommonBoxMessages = {
+  '@type': 'updateCommonBoxMessages';
   ids: number[];
   messageUpdate: Partial<ApiMessage>;
 };
@@ -142,7 +142,7 @@ export type ApiUpdateMessageImage = {
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateMessages | ApiUpdateDeleteMessages |
+  ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateCommonBoxMessages | ApiUpdateDeleteMessages |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateFileUploadProgress |
   ApiUpdateUser | ApiUpdateUserFullInfo |

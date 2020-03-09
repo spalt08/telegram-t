@@ -16,6 +16,10 @@ export function isChatChannel(chat: ApiChat) {
   return chat.type['@type'] === 'chatTypeChannel';
 }
 
+export function isCommonBoxChat(chat: ApiChat) {
+  return chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeBasicGroup';
+}
+
 export function getChatTypeString(chat: ApiChat) {
   switch (chat.type['@type']) {
     case 'chatTypePrivate':
