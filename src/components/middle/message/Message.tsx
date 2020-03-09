@@ -77,7 +77,8 @@ type IProps = (
   }
   & MessagePositionProperties
   & Pick<GlobalActions, (
-    'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents'
+    'focusMessage' | 'openMediaViewer' | 'openUserInfo' |
+    'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
   )>
 );
 
@@ -110,6 +111,7 @@ const Message: FC<IProps> = ({
   openUserInfo,
   cancelSendingMessage,
   readMessageContents,
+  sendPollVote,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -213,6 +215,10 @@ const Message: FC<IProps> = ({
     setContextMenuPosition(null);
   }, []);
 
+  const handleVoteSend = useCallback((options: string[]) => {
+    sendPollVote({ chatId, messageId, options });
+  }, [chatId, messageId, sendPollVote]);
+
   function renderSenderName(user?: ApiUser) {
     if (
       (!showSenderName && !message.forward_info)
@@ -288,7 +294,7 @@ const Message: FC<IProps> = ({
           <Contact contact={contact} />
         )}
         {poll && (
-          <Poll messageId={message.id} poll={poll} />
+          <Poll messageId={message.id} poll={poll} onSendVote={handleVoteSend} />
         )}
         {textParts && <p className="text-content">{textParts}</p>}
         {webPage && (
@@ -407,6 +413,7 @@ export default memo(withGlobal(
       cancelSendingMessage,
       openUserInfo,
       readMessageContents,
+      sendPollVote,
     } = actions;
     return {
       focusMessage,
@@ -414,6 +421,7 @@ export default memo(withGlobal(
       cancelSendingMessage,
       openUserInfo,
       readMessageContents,
+      sendPollVote,
     };
   },
 )(Message));

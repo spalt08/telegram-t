@@ -184,6 +184,14 @@ addReducer('clearWebPagePreview', (global) => {
   });
 });
 
+addReducer('sendPollVote', (global, actions, payload) => {
+  const { chatId, messageId, options } = payload!;
+  const chat = selectChat(global, chatId);
+  if (chat) {
+    void callApi('sendPollVote', { chat, messageId, options });
+  }
+});
+
 async function loadWebPagePreview(message: string) {
   const webPagePreview = await callApi('fetchWebPagePreview', { message });
   setGlobal({

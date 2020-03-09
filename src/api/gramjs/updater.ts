@@ -6,6 +6,8 @@ import {
   buildApiMessageFromShort,
   buildApiMessageFromShortChat, buildMessageMediaContent, buildMessageTextContent,
   resolveMessageApiChatId,
+  buildPoll,
+  buildPollResults,
 } from './apiBuilders/messages';
 import { getApiChatIdFromMtpPeer, buildChatMembers, buildChatTypingStatus } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
@@ -164,6 +166,31 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       messageUpdate: {
         isMediaUnread: false,
       },
+    });
+  } else if (update instanceof GramJs.UpdateMessagePoll) {
+    const { pollId, poll, results } = update;
+    if (poll) {
+      const apiPoll = buildPoll(poll, results);
+
+      onUpdate({
+        '@type': 'updateMessagePoll',
+        pollId: pollId.toString(),
+        pollUpdate: apiPoll,
+      });
+    } else {
+      const pollResults = buildPollResults(results);
+      onUpdate({
+        '@type': 'updateMessagePoll',
+        pollId: pollId.toString(),
+        pollUpdate: { results: pollResults },
+      });
+    }
+  } else if (update instanceof GramJs.UpdateMessagePollVote) {
+    onUpdate({
+      '@type': 'updateMessagePollVote',
+      pollId: update.pollId.toString(),
+      userId: update.userId,
+      options: update.options.map((option) => String.fromCharCode(...option)),
     });
 
     // Chats

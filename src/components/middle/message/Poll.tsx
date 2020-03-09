@@ -1,4 +1,6 @@
-import React, { FC } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useState, useEffect,
+} from '../../../lib/teact/teact';
 
 import { ApiPoll, PollAnswer } from '../../../api/types';
 
@@ -9,14 +11,43 @@ import './Poll.scss';
 type IProps = {
   messageId: number;
   poll: ApiPoll;
+  onSendVote: (options: string[]) => void;
 };
 
-const Poll: FC<IProps> = ({ messageId, poll }) => {
+let isJustSent = false;
+
+const Poll: FC<IProps> = ({ messageId, poll, onSendVote }) => {
+  const [loadingOption, setLoadingOption] = useState<string | undefined>(undefined);
   const { summary, results } = poll;
   const { results: voteResults, totalVoters } = results;
   const hasVoted = voteResults && voteResults.some((r) => r.chosen);
   const canVote = !summary.closed && !hasVoted;
   const maxVotersCount = voteResults ? Math.max(...voteResults.map((r) => r.voters)) : totalVoters;
+
+  useEffect(() => {
+    if (
+      loadingOption
+      && poll.results.results
+      && poll.results.results.some((result) => result.chosen)
+    ) {
+      setLoadingOption(undefined);
+    }
+  }, [loadingOption, poll.results.results]);
+
+  const handleRadioChange = useCallback(
+    (option: string) => {
+      if (isJustSent) {
+        isJustSent = false;
+        return;
+      }
+      setLoadingOption(option);
+      isJustSent = true;
+      onSendVote([option]);
+      setTimeout(() => {
+        isJustSent = false;
+      }, 0);
+    }, [onSendVote],
+  );
 
   function renderResultOption(answer: PollAnswer) {
     if (!voteResults || !totalVoters) {
@@ -48,11 +79,13 @@ const Poll: FC<IProps> = ({ messageId, poll }) => {
       <div className="poll-question">{summary.question}</div>
       <div className="poll-type">{getPollTypeString(summary)}</div>
       {canVote && (
-        <div className="poll-answers not-implemented">
+        <div className="poll-answers">
           <RadioGroup
             name={`poll-${messageId}`}
             options={summary.answers.map((a) => ({ label: a.text, value: a.option }))}
-            onChange={() => {}}
+            onChange={handleRadioChange}
+            disabled={!!loadingOption}
+            loadingOption={loadingOption}
           />
         </div>
       )}

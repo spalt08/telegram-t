@@ -43,6 +43,23 @@ export function selectChatMessage(global: GlobalState, chatId: number, messageId
   return chatMessages ? chatMessages[messageId] : null;
 }
 
+export function selectChatMessageByPollId(global: GlobalState, pollId: string) {
+  let messageWithPoll: ApiMessage | undefined;
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const chatMessages of Object.values(global.messages.byChatId)) {
+    const { byId } = chatMessages;
+    messageWithPoll = Object.values(byId).find((message) => {
+      return message.content.poll && message.content.poll.id === pollId;
+    });
+    if (messageWithPoll) {
+      break;
+    }
+  }
+
+  return messageWithPoll;
+}
+
 export function selectFocusedMessageId(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
