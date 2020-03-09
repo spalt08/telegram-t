@@ -12,7 +12,7 @@ import { GlobalState } from '../../../global/types';
 import {
   selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds,
 } from '../../selectors';
-import { getMessageKey, getMessageContent } from '../../helpers';
+import { getMessageKey, getMessageContent, isCommonBoxChat } from '../../helpers';
 
 const ANIMATION_DELAY = 300;
 
@@ -112,6 +112,8 @@ export function onUpdate(update: ApiUpdate) {
 
       // Channel update.
       if (chat_id) {
+        let isMissingLastMessage = false;
+
         ids.forEach((id) => {
           newGlobal = updateChatMessage(newGlobal, chat_id, id, {
             is_deleting: true,
@@ -120,10 +122,16 @@ export function onUpdate(update: ApiUpdate) {
           const newLastMessage = findLastMessage(newGlobal, chat_id);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chat_id, newLastMessage, true);
+          } else {
+            isMissingLastMessage = true;
           }
         });
 
         setGlobal(newGlobal);
+
+        if (isMissingLastMessage) {
+          getDispatch().loadChatLastMessage({ chatId: chat_id });
+        }
 
         setTimeout(() => {
           setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
@@ -132,8 +140,10 @@ export function onUpdate(update: ApiUpdate) {
         return;
       }
 
+      const missingLastMessageChatIds: number[] = [];
+
       ids.forEach((id) => {
-        const chatId = findChatId(newGlobal, id);
+        const chatId = findCommonBoxChatId(newGlobal, id);
         if (chatId) {
           newGlobal = updateChatMessage(newGlobal, chatId, id, {
             is_deleting: true,
@@ -142,6 +152,8 @@ export function onUpdate(update: ApiUpdate) {
           const newLastMessage = findLastMessage(newGlobal, chatId);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
+          } else {
+            missingLastMessageChatIds.push(chatId);
           }
 
           setTimeout(() => {
@@ -152,16 +164,20 @@ export function onUpdate(update: ApiUpdate) {
 
       setGlobal(newGlobal);
 
+      missingLastMessageChatIds.forEach((chatId) => {
+        getDispatch().loadChatLastMessage({ chatId });
+      });
+
       break;
     }
 
-    case 'updateMessages': {
+    case 'updateCommonBoxMessages': {
       const { ids, messageUpdate } = update;
 
       let newGlobal = global;
 
       ids.forEach((id) => {
-        const chatId = findChatId(newGlobal, id);
+        const chatId = findCommonBoxChatId(newGlobal, id);
         if (chatId) {
           newGlobal = updateChatMessage(newGlobal, chatId, id, messageUpdate);
         }
@@ -220,11 +236,18 @@ function updateChatLastMessage(
   return updateChat(global, chatId, { last_message: message });
 }
 
-function findChatId(global: GlobalState, messageId: number) {
-  const { byChatId } = global.messages;
+function findCommonBoxChatId(global: GlobalState, messageId: number) {
+  const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
+    isCommonBoxChat(chat) && chat.last_message && chat.last_message.id === messageId
+  ));
+  if (fromLastMessage) {
+    return fromLastMessage.id;
+  }
 
+  const { byChatId } = global.messages;
   return Number(Object.keys(byChatId).find((chatId) => {
-    return messageId in byChatId[Number(chatId)].byId;
+    const chat = selectChat(global, Number(chatId));
+    return isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
   }));
 }
 
