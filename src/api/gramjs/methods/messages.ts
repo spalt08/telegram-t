@@ -280,7 +280,7 @@ export async function readMessageContents({ messageId }: { messageId: number }) 
   }), true);
 
   onUpdate({
-    '@type': 'updateMessages',
+    '@type': 'updateCommonBoxMessages',
     ids: [messageId],
     messageUpdate: {
       isMediaUnread: false,

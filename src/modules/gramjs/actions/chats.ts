@@ -44,6 +44,13 @@ addReducer('loadTopChats', () => {
   runThrottledForLoadTopChats(() => loadChats());
 });
 
+addReducer('loadChatLastMessage', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+
+  void callApi('fetchChatLastMessage', chat);
+});
+
 async function loadChats(offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,
