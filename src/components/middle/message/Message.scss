@@ -8,6 +8,7 @@
   --hover-color: rgba(var(--color-text-secondary-rgb), 0.08);
   --max-width: 29rem;
   --accent-color: var(--color-primary);
+  --accent-shade-color: var(--color-primary-shade);
   --secondary-color: var(--color-text-secondary);
   --meta-safe-area-base: 2.25rem;
   --meta-safe-area-size: var(--meta-safe-area-base);
@@ -34,6 +35,7 @@
     --hover-color: rgba(var(--color-text-green-rgb), 0.12);
     --max-width: 30rem;
     --accent-color: var(--color-text-green);
+    --accent-shade-color: var(--color-green);
     --secondary-color: var(--color-text-green);
     --color-code: var(--color-code-own);
     --meta-safe-area-base: 3.5rem;
@@ -246,6 +248,11 @@
     font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--accent-shade-color);
+    }
 
     & + .File {
       margin-top: .25rem;
