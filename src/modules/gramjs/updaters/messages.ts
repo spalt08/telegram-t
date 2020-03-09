@@ -130,7 +130,7 @@ export function onUpdate(update: ApiUpdate) {
         setGlobal(newGlobal);
 
         if (isMissingLastMessage) {
-          getDispatch().loadChatLastMessage({ chatId: chat_id });
+          getDispatch().requestChatUpdate({ chatId: chat_id });
         }
 
         setTimeout(() => {
@@ -165,7 +165,7 @@ export function onUpdate(update: ApiUpdate) {
       setGlobal(newGlobal);
 
       missingLastMessageChatIds.forEach((chatId) => {
-        getDispatch().loadChatLastMessage({ chatId });
+        getDispatch().requestChatUpdate({ chatId });
       });
 
       break;

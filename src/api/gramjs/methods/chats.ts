@@ -103,7 +103,7 @@ export async function fetchSuperGroupOnlines(chat: ApiChat) {
   });
 }
 
-export async function fetchChatLastMessage(chat: ApiChat) {
+export async function requestChatUpdate(chat: ApiChat) {
   const { id, access_hash } = chat;
 
   const result = await invokeRequest(new GramJs.messages.GetPeerDialogs({
@@ -112,22 +112,27 @@ export async function fetchChatLastMessage(chat: ApiChat) {
     })],
   }));
 
-  if (!result || !result.messages[0]) {
+  if (!result) {
     return;
   }
 
+  const dialog = result.dialogs[0];
   const lastMessage = buildApiMessage(result.messages[0]);
-  if (!lastMessage) {
+  if (!dialog || !(dialog instanceof GramJs.Dialog) || !lastMessage) {
     return;
   }
 
-  if (lastMessage) {
-    onUpdate({
-      '@type': 'updateChat',
-      id,
-      chat: { last_message: lastMessage },
-    });
-  }
+  onUpdate({
+    '@type': 'updateChat',
+    id,
+    chat: {
+      last_read_outbox_message_id: dialog.readOutboxMaxId,
+      last_read_inbox_message_id: dialog.readInboxMaxId,
+      unread_count: dialog.unreadCount,
+      unread_mention_count: dialog.unreadMentionsCount,
+      last_message: lastMessage,
+    },
+  });
 }
 
 async function getFullChatInfo(chatId: number) {

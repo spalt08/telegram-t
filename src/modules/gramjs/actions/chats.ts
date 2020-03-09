@@ -44,11 +44,11 @@ addReducer('loadTopChats', () => {
   runThrottledForLoadTopChats(() => loadChats());
 });
 
-addReducer('loadChatLastMessage', (global, actions, payload) => {
+addReducer('requestChatUpdate', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
 
-  void callApi('fetchChatLastMessage', chat);
+  void callApi('requestChatUpdate', chat);
 });
 
 async function loadChats(offsetId?: number, offsetDate?: number) {
