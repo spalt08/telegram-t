@@ -7,7 +7,7 @@ import {
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
-  searchMessages, fetchWebPagePreview,
+  searchMessages, fetchWebPagePreview, sendPollVote,
 } from './messages';
 import {
   fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers,
@@ -34,6 +34,7 @@ export default {
   readMessageContents,
   searchMessages,
   fetchWebPagePreview,
+  sendPollVote,
   fetchFullChat,
   fetchSuperGroupOnlines,
   requestChatUpdate,

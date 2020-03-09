@@ -92,7 +92,7 @@ export interface PollAnswerVote {
 }
 
 export interface ApiPoll {
-  id: number;
+  id: string;
   summary: {
     closed?: true;
     publicVoters?: true;

@@ -12,6 +12,8 @@ interface IProps {
   name: string;
   options: IRadioOption[];
   selected?: string;
+  disabled?: boolean;
+  loadingOption?: string;
   onChange: (value: string) => void;
 }
 
@@ -20,6 +22,8 @@ const RadioGroup: FC<IProps> = ({
   name,
   options,
   selected,
+  disabled,
+  loadingOption,
   onChange,
 }) => {
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +39,8 @@ const RadioGroup: FC<IProps> = ({
           label={option.label}
           value={option.value}
           checked={option.value === selected}
+          disabled={disabled}
+          isLoading={loadingOption ? loadingOption === option.value : undefined}
           onChange={handleChange}
         />
       ))}

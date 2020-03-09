@@ -152,7 +152,7 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
   const contact = buildContact(media);
   if (contact) return { contact };
 
-  const poll = buildPoll(media);
+  const poll = buildPollFromMedia(media);
   if (poll) return { poll };
 
   const webPage = buildWebPage(media);
@@ -358,31 +358,55 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | undefined {
   };
 }
 
-function buildPoll(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
+function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
   if (!(media instanceof GramJs.MessageMediaPoll)) {
     return undefined;
   }
 
-  const { id, ...summary } = media.poll;
-  const answers = summary.answers.map((answer) => ({
+  return buildPoll(media.poll, media.results);
+}
+
+export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
+  const {
+    id, closed, publicVoters, multipleChoice, quiz, question, answers: rawAnswers,
+  } = poll;
+  const answers = rawAnswers.map((answer) => ({
     text: answer.text,
     option: String.fromCharCode(...answer.option),
   }));
-  const results = media.results.results && media.results.results.map((result) => ({
-    ...result,
-    option: String.fromCharCode(...result.option),
+
+  return {
+    id: id.toString(),
+    summary: {
+      closed,
+      publicVoters,
+      multipleChoice,
+      quiz,
+      question,
+      answers,
+    },
+    results: buildPollResults(pollResults),
+  };
+}
+
+export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['results'] {
+  const {
+    results: rawResults, min, totalVoters, recentVoters,
+  } = pollResults;
+  const results = rawResults && rawResults.map(({
+    option, chosen, correct, voters,
+  }) => ({
+    chosen,
+    correct,
+    voters,
+    option: String.fromCharCode(...option),
   }));
 
   return {
-    id: Number(id),
-    summary: {
-      ...summary,
-      answers,
-    },
-    results: {
-      ...media.results,
-      results,
-    },
+    min,
+    totalVoters,
+    recentVoters,
+    results,
   };
 }
 
@@ -583,7 +607,7 @@ function buildNewPoll(pollSummary: ApiNewPoll, localId: number) {
   const { question, answers } = pollSummary;
   return {
     poll: {
-      id: localId,
+      id: localId.toString(),
       summary: {
         question,
         answers,
