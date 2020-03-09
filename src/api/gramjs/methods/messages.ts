@@ -363,6 +363,22 @@ export async function fetchWebPagePreview({ message }: { message: string }) {
   return preview && buildWebPage(preview);
 }
 
+export async function sendPollVote({
+  chat, messageId, options,
+} : {
+  chat: ApiChat;
+  messageId: number;
+  options: string[];
+}) {
+  const { id, access_hash } = chat;
+
+  await invokeRequest(new GramJs.messages.SendVote({
+    peer: buildInputPeer(id, access_hash),
+    msgId: messageId,
+    options: options.map((option) => Buffer.from(option)),
+  }), true);
+}
+
 function updateLocalDb(
   result: GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages,
 ) {

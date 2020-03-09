@@ -31,6 +31,11 @@
       margin-bottom: 0;
     }
 
+    &.disabled {
+      opacity: 1 !important;
+      cursor: not-allowed;
+    }
+
     span {
       &::before {
         background-color: var(--background-color);
@@ -45,6 +50,12 @@
     input:checked ~ span {
       &::before {
         border-color: var(--accent-color);
+      }
+    }
+
+    .Spinner > div {
+      .Message.own & {
+        background-image: url('../../../assets/spinner-green.svg');
       }
     }
   }
@@ -75,6 +86,7 @@
   }
 
   .poll-answer-line {
+    width: 0;
     height: 0.25rem;
     min-width: 0.5rem;
     border-radius: 0.125rem;

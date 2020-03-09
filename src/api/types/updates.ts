@@ -1,5 +1,5 @@
 import { ApiChat, ApiChatFullInfo, ApiTypingStatus } from './chats';
-import { ApiMessage } from './messages';
+import { ApiMessage, ApiPoll } from './messages';
 import { ApiUser, ApiUserFullInfo } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
@@ -102,6 +102,19 @@ export type ApiUpdateCommonBoxMessages = {
   messageUpdate: Partial<ApiMessage>;
 };
 
+export type ApiUpdateMessagePoll = {
+  '@type': 'updateMessagePoll';
+  pollId: string;
+  pollUpdate: Partial<ApiPoll>;
+};
+
+export type ApiUpdateMessagePollVote = {
+  '@type': 'updateMessagePollVote';
+  pollId: string;
+  userId: number;
+  options: string[];
+};
+
 export type ApiUpdateDeleteMessages = {
   '@type': 'deleteMessages';
   ids: number[];
@@ -143,6 +156,7 @@ export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateCommonBoxMessages | ApiUpdateDeleteMessages |
+  ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateFileUploadProgress |
   ApiUpdateUser | ApiUpdateUserFullInfo |

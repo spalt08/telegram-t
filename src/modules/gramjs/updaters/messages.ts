@@ -1,6 +1,6 @@
 import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiUpdate, ApiMessage } from '../../../api/types';
+import { ApiUpdate, ApiMessage, PollAnswerVote } from '../../../api/types';
 import {
   updateChat,
   deleteChatMessages,
@@ -10,7 +10,7 @@ import {
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
 import {
-  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds,
+  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds, selectChatMessageByPollId,
 } from '../../selectors';
 import { getMessageKey, getMessageContent, isCommonBoxChat } from '../../helpers';
 
@@ -184,6 +184,98 @@ export function onUpdate(update: ApiUpdate) {
       });
 
       setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateMessagePoll': {
+      const { pollId, pollUpdate } = update;
+
+      const message = selectChatMessageByPollId(global, pollId);
+
+      if (message && message.content.poll) {
+        const updatedPoll = { ...message.content.poll, ...pollUpdate };
+
+        // Workaround for poll update bug: `chosen` option gets reset when someone votes after current user
+        const { results: updatedResults } = updatedPoll.results || {};
+        if (updatedResults && !updatedResults.some(((result) => result.chosen))) {
+          const { results } = message.content.poll.results;
+          const chosenAnswer = results && results.find((result) => result.chosen);
+          const chosenAnswerIndex = chosenAnswer
+            ? updatedResults.findIndex((result) => result.option === chosenAnswer.option)
+            : -1;
+          if (chosenAnswerIndex >= 0) {
+            updatedPoll.results.results![chosenAnswerIndex].chosen = true;
+          }
+        }
+
+        setGlobal(updateChatMessage(
+          global,
+          message.chat_id,
+          message.id,
+          {
+            content: {
+              ...message.content,
+              poll: updatedPoll,
+            },
+          },
+        ));
+      }
+      break;
+    }
+
+    case 'updateMessagePollVote': {
+      const { pollId, userId, options } = update;
+      const message = selectChatMessageByPollId(global, pollId);
+      if (!message || !message.content.poll || !message.content.poll.results) {
+        break;
+      }
+
+      const { poll } = message.content;
+
+      const { recentVoters, totalVoters, results } = poll.results;
+      const newRecentVoters = recentVoters ? [...recentVoters] : [];
+      const newTotalVoters = totalVoters ? totalVoters + 1 : 1;
+      const newResults = results ? [...results] : [];
+
+      newRecentVoters.push(userId);
+
+      options.forEach((option) => {
+        const targetOption = newResults.find((result) => result.option === option);
+        const targetOptionIndex = newResults.findIndex((result) => result.option === option);
+        const updatedOption: PollAnswerVote = targetOption ? { ...targetOption } : { option, voters: 0 };
+
+        updatedOption.voters += 1;
+        if (userId === global.currentUserId) {
+          updatedOption.chosen = true;
+        }
+
+        if (targetOptionIndex) {
+          newResults[targetOptionIndex] = updatedOption;
+        } else {
+          newResults.push(updatedOption);
+        }
+      });
+
+      setGlobal(updateChatMessage(
+        global,
+        message.chat_id,
+        message.id,
+        {
+          content: {
+            ...message.content,
+            poll: {
+              ...poll,
+              results: {
+                ...poll.results,
+                recentVoters: newRecentVoters,
+                totalVoters: newTotalVoters,
+                results: newResults,
+              },
+            },
+          },
+        },
+      ));
 
       break;
     }
