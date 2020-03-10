@@ -22,7 +22,7 @@ import {
   selectOutlyingIds,
   selectViewportIds,
   selectFocusedMessageId,
-  selectLastReadOrVeryLastId,
+  selectRealLastReadId,
 } from '../../selectors';
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
@@ -44,12 +44,12 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
   let newGlobal = global;
 
   if (!viewportIds || !viewportIds.length || shouldRelocate) {
-    const offsetId = selectFocusedMessageId(newGlobal, chatId) || selectLastReadOrVeryLastId(newGlobal, chatId);
+    const offsetId = selectFocusedMessageId(newGlobal, chatId) || selectRealLastReadId(newGlobal, chatId);
     const isOutlying = Boolean(offsetId && listedIds && !listedIds.includes(offsetId));
     const historyIds = (isOutlying ? outlyingIds : listedIds) || [];
 
     if (!isOutlying && outlyingIds) {
-      newGlobal = replaceOutlyingIds(global, chatId, undefined);
+      newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
     }
 
     const {
@@ -254,7 +254,7 @@ async function loadViewportMessages(
   }
 
   const historyIds = isOutlying ? outlyingIds! : listedIds!;
-  const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction, true);
+  const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction);
   newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds!);
 
   setGlobal(newGlobal);
@@ -273,28 +273,42 @@ async function loadMessage(chat: ApiChat, messageId: number) {
   setGlobal(newGlobal);
 }
 
+function findClosestIndex(sourceIds: number[], offsetId: number) {
+  return sourceIds.findIndex((id, i) => (
+    id === offsetId
+    || (id < offsetId && sourceIds[i + 1] > offsetId)
+  ));
+}
+
 function getViewportSlice(
   sourceIds: number[],
   offsetId: number | undefined,
   direction: LoadMoreDirection,
-  forceMax = false,
 ) {
   const { length } = sourceIds;
-  const index = offsetId ? sourceIds.indexOf(offsetId) : -1;
-  const isForwards = direction === LoadMoreDirection.Forwards;
-  const indexForDirection = isForwards ? (index + 1) || length : index;
+  const index = offsetId ? findClosestIndex(sourceIds, offsetId) : -1;
+  const isBackwards = direction === LoadMoreDirection.Backwards;
+  const indexForDirection = isBackwards ? index : (index + 1) || length;
   const from = indexForDirection - MESSAGE_LIST_SLICE;
-  const to = indexForDirection + MESSAGE_LIST_SLICE;
-  const newViewportIds = sourceIds.slice(Math.max(0, from), to);
-  const areSomeLocal = (isForwards && indexForDirection < length) || (!isForwards && indexForDirection > 0);
-  const areAllLocal = (isForwards && to <= length) || (!isForwards && from >= 0);
+  const to = indexForDirection + MESSAGE_LIST_SLICE - 1;
+  const newViewportIds = sourceIds.slice(Math.max(0, from), to + 1);
 
-  if (!areAllLocal && forceMax) {
-    return {
-      newViewportIds: isForwards
-        ? sourceIds.slice(Math.max(0, length - MESSAGE_LIST_SLICE * 2), length)
-        : sourceIds.slice(0, MESSAGE_LIST_SLICE * 2),
-    };
+  let areSomeLocal;
+  let areAllLocal;
+  switch (direction) {
+    case LoadMoreDirection.Backwards:
+      areSomeLocal = indexForDirection > 0;
+      areAllLocal = from >= 0;
+      break;
+    case LoadMoreDirection.Forwards:
+      areSomeLocal = indexForDirection < length;
+      areAllLocal = to <= length - 1;
+      break;
+    case LoadMoreDirection.Around:
+    default:
+      areSomeLocal = newViewportIds.length > 0;
+      areAllLocal = newViewportIds.length === MESSAGE_LIST_SLICE * 2;
+      break;
   }
 
   return { newViewportIds, areSomeLocal, areAllLocal };
