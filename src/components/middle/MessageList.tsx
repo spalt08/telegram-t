@@ -1,4 +1,3 @@
-import { UIEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
@@ -13,7 +12,7 @@ import {
   selectChatMessages,
   selectViewportIds,
   selectIsViewportNewest,
-  selectLastReadId,
+  selectFirstUnreadId,
   selectOpenChat,
   selectFocusedMessageId,
 } from '../../modules/selectors';
@@ -44,7 +43,7 @@ type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 
   isChannelChat?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
-  lastReadId?: number;
+  firstUnreadId?: number;
   isViewportNewest: boolean;
   isFocusing: boolean;
 };
@@ -63,7 +62,7 @@ const scrollToLastMessage = throttle((container: Element) => {
 let currentScrollOffset: number;
 let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
-let unreadDividerMessageId: number | undefined;
+let memoFirstUnreadId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
@@ -71,7 +70,7 @@ const MessageList: FC<IProps> = ({
   isChannelChat,
   messageIds,
   messagesById,
-  lastReadId,
+  firstUnreadId,
   isViewportNewest,
   isFocusing,
   loadViewportMessages,
@@ -89,9 +88,9 @@ const MessageList: FC<IProps> = ({
     // Then we update global version every second on scrolling.
     currentScrollOffset = chatId ? getGlobal().chats.scrollOffsetById[chatId] : 0;
 
-    // We only update `unreadDividerMessageId` when switching chat.
-    unreadDividerMessageId = lastReadId;
-  }, [chatId]);
+    // We only update `memoFirstUnreadId` when switching chat.
+    memoFirstUnreadId = firstUnreadId;
+  }, [chatId, Boolean(messageIds)]);
 
   const messageGroups = useMemo(() => {
     if (!chatId || !messageIds || !messagesById || !messageIds.length) {
@@ -99,11 +98,15 @@ const MessageList: FC<IProps> = ({
     }
 
     const listedMessages = messageIds.map((id) => messagesById[id]);
-    return groupMessages(orderBy(listedMessages, 'date'), unreadDividerMessageId!);
+    return groupMessages(orderBy(listedMessages, 'date'), memoFirstUnreadId!);
   }, [chatId, messageIds, messagesById]);
 
-  const loadMessagesDebounced = useMemo(
-    () => debounce(loadViewportMessages, 1000, true, false),
+  const [loadMoreBackwards, loadMoreForwards, loadMoreBoth] = useMemo(
+    () => [
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Both }), 1000, true, false),
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadViewportMessages, messageIds],
   );
@@ -120,22 +123,21 @@ const MessageList: FC<IProps> = ({
         setViewportMessageIds(newViewportMessageIds);
       }
 
-      if (lastReadId) {
+      if (firstUnreadId) {
         const { allElements, visibleIndexes } = findInViewport(container, '.Message', undefined, undefined, true);
         const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
         if (lowerElement) {
           const maxId = Number(lowerElement.dataset.messageId);
-          if (maxId > lastReadId) {
+          if (maxId >= firstUnreadId) {
             markMessagesRead({ maxId });
           }
         }
       }
     });
-  }, [lastReadId, markMessagesRead, viewportMessageIds]);
+  }, [firstUnreadId, markMessagesRead, viewportMessageIds]);
 
-  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
-    const container = e.target as HTMLElement;
-
+  const processInfiniteScroll = useCallback(() => {
+    const container = containerRef.current!;
     const { scrollTop, scrollHeight, offsetHeight } = container;
     currentScrollOffset = scrollHeight - scrollTop;
 
@@ -160,14 +162,7 @@ const MessageList: FC<IProps> = ({
           currentAnchorId = nextAnchor.id;
           currentAnchorTop = nextAnchorTop;
           isUpdated = true;
-
-          if (isFocusing) {
-            setTimeout(() => {
-              loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
-            }, FOCUSING_DURATION);
-          } else {
-            loadMessagesDebounced({ direction: LoadMoreDirection.Backwards });
-          }
+          loadMoreBackwards();
         }
       }
     }
@@ -188,14 +183,7 @@ const MessageList: FC<IProps> = ({
           currentAnchorId = nextAnchor.id;
           currentAnchorTop = nextAnchorTop;
           isUpdated = true;
-
-          if (isFocusing) {
-            setTimeout(() => {
-              loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
-            }, FOCUSING_DURATION);
-          } else {
-            loadMessagesDebounced({ direction: LoadMoreDirection.Forwards });
-          }
+          loadMoreForwards();
         }
       }
     }
@@ -210,6 +198,14 @@ const MessageList: FC<IProps> = ({
         currentAnchorTop = nextAnchor.getBoundingClientRect().top;
       }
     }
+  }, [isViewportNewest, loadMoreBackwards, loadMoreForwards]);
+
+  const handleScroll = useCallback(() => {
+    if (!isFocusing) {
+      processInfiniteScroll();
+    } else {
+      setTimeout(processInfiniteScroll, FOCUSING_DURATION);
+    }
 
     setIsScrolling(true);
     if (scrollTimeout) {
@@ -223,8 +219,8 @@ const MessageList: FC<IProps> = ({
       updateViewportMessages();
     });
 
-    determineStickyElement(container, '.message-date-header');
-  }, [chatId, isViewportNewest, isFocusing, loadMessagesDebounced, updateViewportMessages, setChatScrollOffset]);
+    determineStickyElement(containerRef.current!, '.message-date-header');
+  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages]);
 
   // Initial message loading
   useEffect(() => {
@@ -233,9 +229,9 @@ const MessageList: FC<IProps> = ({
     if (!messageIds || (
       container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_LIST_SLICE * 2
     )) {
-      loadMessagesDebounced({ direction: LoadMoreDirection.Both });
+      loadMoreBoth();
     }
-  }, [messageIds, loadMessagesDebounced]);
+  }, [messageIds, loadMoreBoth]);
 
   useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds, prevIsViewportNewest]) => {
     if (chatId === prevChatId && messageIds === prevMessageIds) {
@@ -253,33 +249,29 @@ const MessageList: FC<IProps> = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
-    const messageElements = container.querySelectorAll('.Message');
-    const lastMessage = messageElements[messageElements.length - 1];
-    const isNewMessage = lastMessage && (lastMessage.id !== currentAnchorId);
     const isAtBottom = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
+    // For some reason generic types are not properly resolved here.
+    const typedPrevMessageIds = prevMessageIds as typeof messageIds;
+    const isNewMessage = (
+      isViewportNewest && prevIsViewportNewest && messageIds && typedPrevMessageIds
+      && messageIds[messageIds.length - 1] !== typedPrevMessageIds[typedPrevMessageIds.length - 1]
+    );
+    const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
     const unreadDivider = (
-      !anchor && unreadDividerMessageId && container.querySelector<HTMLDivElement>('.unread-divider')
+      !anchor && memoFirstUnreadId && container.querySelector<HTMLDivElement>('.unread-divider')
     );
 
-    if (isNewMessage && isAtBottom && prevIsViewportNewest) {
+    if (isAtBottom && isNewMessage && isViewportNewest && prevIsViewportNewest) {
       scrollToLastMessage(container);
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
       const newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
       currentScrollOffset = scrollHeight - newScrollTop;
       container.scrollTop = newScrollTop;
-    } else if (currentScrollOffset) {
-      container.scrollTop = scrollHeight - currentScrollOffset;
     } else if (unreadDivider) {
       container.scrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
     } else {
-      container.scrollTop = scrollHeight;
-    }
-
-    if (isNewMessage) {
-      currentAnchorId = lastMessage.id;
-      currentAnchorTop = lastMessage.getBoundingClientRect().top;
+      container.scrollTop = scrollHeight - (currentScrollOffset || 0);
     }
 
     updateViewportMessages();
@@ -318,8 +310,6 @@ function renderMessages(
   viewportMessageIds: number[],
   isPrivate: boolean,
 ) {
-  let isPrevLastRead = false;
-
   const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
     dateGroupIndex: number,
@@ -371,17 +361,13 @@ function renderMessages(
           />
         );
 
-        if (isPrevLastRead && !message.is_outgoing) {
-          isPrevLastRead = false;
-
+        if (message.id === memoFirstUnreadId) {
           return (
             <>
               <div className="unread-divider">Unread messages</div>
               {renderedMessage}
             </>
           );
-        } else if (message.id === unreadDividerMessageId) {
-          isPrevLastRead = true;
         }
 
         return renderedMessage;
@@ -427,7 +413,7 @@ export default memo(withGlobal(
       isChannelChat: isChatChannel(chat),
       messageIds: selectViewportIds(global, chatId),
       messagesById: selectChatMessages(global, chatId),
-      lastReadId: selectLastReadId(global, chatId),
+      firstUnreadId: selectFirstUnreadId(global, chatId),
       isViewportNewest: selectIsViewportNewest(global, chatId),
       isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
     };

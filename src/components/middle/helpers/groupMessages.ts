@@ -10,7 +10,7 @@ export type MessageDateGroup = {
   senderGroups: SenderGroup[];
 };
 
-export function groupMessages(messages: ApiMessage[], lastReadId: number) {
+export function groupMessages(messages: ApiMessage[], firstUnreadId: number) {
   let currentSenderGroup: SenderGroup = [];
   let currentDateGroup = {
     datetime: Number(getDayStart(messages[0].date * 1000)),
@@ -35,7 +35,7 @@ export function groupMessages(messages: ApiMessage[], lastReadId: number) {
         currentSenderGroup = [];
         currentDateGroup.senderGroups.push(currentSenderGroup);
       } else if (
-        message.id === lastReadId
+        nextMessage.id === firstUnreadId
         || message.sender_user_id !== nextMessage.sender_user_id
         || message.is_outgoing !== nextMessage.is_outgoing
         || isActionMessage(message)

@@ -9,7 +9,7 @@ import { selectUser } from './users';
 export function selectChatMessages(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
 
-  return messages ? messages.byId : null;
+  return messages ? messages.byId : undefined;
 }
 
 export function selectListedIds(global: GlobalState, chatId: number) {
@@ -137,4 +137,46 @@ export function selectFileTransferProgress(global: GlobalState, message: ApiMess
   const fileTransfer = global.fileTransfers.byMessageKey[messageKey];
 
   return fileTransfer ? fileTransfer.progress : undefined;
+}
+
+export function selectRealLastReadId(global: GlobalState, chatId: number) {
+  const chat = selectChat(global, chatId);
+  const { last_message, last_read_inbox_message_id } = chat;
+
+  // Edge case #1
+  if (last_message && last_message.id < last_read_inbox_message_id) {
+    return last_message.id;
+  }
+
+  // Edge case #2
+  const listedIds = selectListedIds(global, chatId);
+  if (listedIds && listedIds.length) {
+    const closestId = listedIds.find((id, i) => (
+      id === last_read_inbox_message_id
+      || (id < last_read_inbox_message_id && listedIds[i + 1] > last_read_inbox_message_id)
+    ));
+
+    if (closestId) {
+      return closestId;
+    }
+  }
+
+  return last_read_inbox_message_id;
+}
+
+export function selectFirstUnreadId(global: GlobalState, chatId: number) {
+  const chat = selectChat(global, chatId);
+  if (!chat.unread_count) {
+    return undefined;
+  }
+
+  const lastReadId = selectRealLastReadId(global, chatId);
+  const listedIds = selectListedIds(global, chatId);
+  const byId = selectChatMessages(global, chatId);
+
+  if (!chat.unread_count || !lastReadId || !listedIds || !byId) {
+    return undefined;
+  }
+
+  return listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
 }

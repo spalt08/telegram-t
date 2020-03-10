@@ -7,7 +7,7 @@ import {
   updateFocusDirection,
   updateSelectedChatId,
 } from '../reducers';
-import { selectLastReadOrVeryLastId, selectViewportIds } from '../selectors';
+import { selectRealLastReadId, selectViewportIds } from '../selectors';
 
 const FOCUS_DURATION = 2000;
 
@@ -35,7 +35,7 @@ addReducer('focusLastReadMessage', (global, actions) => {
 
   actions.focusMessage({
     chatId: selectedId,
-    messageId: selectLastReadOrVeryLastId(global, selectedId),
+    messageId: selectRealLastReadId(global, selectedId),
   });
 });
 
