@@ -1,17 +1,20 @@
 import React, { FC, useRef, useEffect } from '../../lib/teact/teact';
 
+import Loading from './Loading';
+
 import './SearchInput.scss';
 
 type IProps = {
   value?: string;
   className?: string;
   focused?: boolean;
+  isLoading?: boolean;
   onChange: (value: string) => void;
   onFocus?: () => void;
 };
 
 const SearchInput: FC<IProps> = ({
-  value, className, focused, onChange, onFocus,
+  value, className, focused, isLoading, onChange, onFocus,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
 
@@ -44,6 +47,9 @@ const SearchInput: FC<IProps> = ({
         onFocus={onFocus}
       />
       <i className="icon-search" />
+      {isLoading && (
+        <Loading />
+      )}
     </div>
   );
 };

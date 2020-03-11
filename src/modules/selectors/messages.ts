@@ -61,21 +61,16 @@ export function selectChatMessageByPollId(global: GlobalState, pollId: string) {
 }
 
 export function selectFocusedMessageId(global: GlobalState, chatId: number) {
-  const messages = global.messages.byChatId[chatId];
+  const { messageId, chatId: focusedChatId } = global.focusedMessage || {};
 
-  return messages ? messages.focusedMessageId : undefined;
-}
-
-export function selectFocusDirection(global: GlobalState, chatId: number) {
-  const messages = global.messages.byChatId[chatId];
-
-  return messages ? messages.focusDirection : undefined;
+  return focusedChatId === chatId ? messageId : undefined;
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
 
-  return isMessageLocal(message) || (chat && chat.last_read_outbox_message_id < message.id);
+  const { last_read_outbox_message_id } = chat || {};
+  return isMessageLocal(message) || (last_read_outbox_message_id && last_read_outbox_message_id < message.id);
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
@@ -144,8 +139,12 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
   const { last_message, last_read_inbox_message_id } = chat;
 
   // Edge case #1
-  if (last_message && last_message.id < last_read_inbox_message_id) {
+  if (last_message && (!last_read_inbox_message_id || last_message.id < last_read_inbox_message_id)) {
     return last_message.id;
+  }
+
+  if (!last_read_inbox_message_id) {
+    return undefined;
   }
 
   // Edge case #2

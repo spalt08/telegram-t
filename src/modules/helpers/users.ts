@@ -1,5 +1,6 @@
 import { ApiUser } from '../../api/types';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
+import { isChatPrivate } from './chats';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
@@ -177,4 +178,16 @@ export function isDeletedUser(user: ApiUser) {
   return user.type['@type'] === 'userTypeDeleted'
     || user.type['@type'] === 'userTypeUnknown'
     || user.status['@type'] === 'userStatusEmpty';
+}
+
+export function getSenderName(chatId: number, sender?: ApiUser) {
+  if (!sender || isChatPrivate(chatId)) {
+    return undefined;
+  }
+
+  if (sender.is_self) {
+    return 'You';
+  }
+
+  return getUserFirstName(sender);
 }

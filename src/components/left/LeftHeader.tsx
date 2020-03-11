@@ -13,12 +13,15 @@ import './LeftHeader.scss';
 
 type IProps = {
   isSearchOpen: boolean;
+  searchQuery?: string;
+  isLoading: boolean;
+  onSearchChange: (value: string) => void;
   onSearchOpen: () => void;
   onSearchClose: () => void;
 } & Pick<GlobalActions, 'signOut'>;
 
 const LeftHeader: FC<IProps> = ({
-  isSearchOpen, onSearchOpen, onSearchClose, signOut,
+  isSearchOpen, searchQuery, isLoading, onSearchChange, onSearchOpen, onSearchClose, signOut,
 }) => {
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);
 
@@ -62,7 +65,13 @@ const LeftHeader: FC<IProps> = ({
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <SearchInput focused={isSearchOpen} onChange={() => {}} onFocus={onSearchOpen} />
+      <SearchInput
+        value={searchQuery}
+        focused={isSearchOpen}
+        isLoading={isLoading}
+        onChange={onSearchChange}
+        onFocus={onSearchOpen}
+      />
 
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
@@ -77,7 +86,13 @@ const LeftHeader: FC<IProps> = ({
 };
 
 export default withGlobal(
-  undefined,
+  (global) => {
+    const { fetchingStatus } = global.globalSearch;
+
+    return {
+      isLoading: fetchingStatus && (fetchingStatus.chats || fetchingStatus.messages),
+    };
+  },
   (setGlobal, actions) => {
     const { signOut } = actions;
     return { signOut };

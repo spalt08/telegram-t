@@ -2,8 +2,9 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiUser } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
-import { buildInputEntity } from '../gramjsBuilders';
+import { buildInputEntity, calculateResultHash } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
+import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -55,13 +56,40 @@ export async function uploadProfilePhoto(file: File) {
   await invokeRequest(request);
 }
 
-export async function fetchTopUsers() {
+export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
+    hash,
     correspondents: true,
   }));
   if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
     return undefined;
   }
 
-  return topPeers.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+
+  return {
+    hash: calculateResultHash(users.map(({ id }) => id)),
+    users,
+  };
+}
+
+export async function fetchContactList({ hash = 0 }: { hash?: number }) {
+  const result = await invokeRequest(new GramJs.contacts.GetContacts({ hash }));
+  if (!result || result instanceof GramJs.contacts.ContactsNotModified) {
+    return undefined;
+  }
+
+  result.users.forEach((user) => {
+    if (user instanceof GramJs.User) {
+      localDb.users[user.id] = user;
+    }
+  });
+
+  return {
+    hash: calculateResultHash([
+      result.savedCount,
+      ...result.contacts.map(({ userId }) => userId),
+    ]),
+    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+  };
 }

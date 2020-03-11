@@ -2,10 +2,7 @@ import { FocusDirection } from '../../types';
 
 import { addReducer, getGlobal, setGlobal } from '../../lib/teact/teactn';
 import {
-  replaceViewportIds,
-  updateFocusedMessageId,
-  updateFocusDirection,
-  updateSelectedChatId,
+  replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
 } from '../reducers';
 import { selectRealLastReadId, selectViewportIds } from '../selectors';
 
@@ -48,33 +45,34 @@ addReducer('focusMessage', (global, actions, payload) => {
   }
   blurTimeout = window.setTimeout(() => {
     let newGlobal = getGlobal();
-    newGlobal = updateFocusedMessageId(newGlobal, chatId, undefined);
-    newGlobal = updateFocusDirection(newGlobal, chatId, undefined);
+    newGlobal = updateFocusedMessage(newGlobal);
+    newGlobal = updateFocusDirection(newGlobal);
     setGlobal(newGlobal);
   }, FOCUS_DURATION);
 
   let newGlobal = global;
-  newGlobal = updateFocusedMessageId(newGlobal, chatId, messageId);
+
+  newGlobal = updateFocusedMessage(newGlobal, chatId, messageId);
+  newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (shouldSwitchChat) {
     newGlobal = updateSelectedChatId(newGlobal, chatId);
+    newGlobal = replaceViewportIds(newGlobal, chatId, undefined);
+    newGlobal = updateFocusDirection(newGlobal, FocusDirection.Static);
   }
 
   const viewportIds = selectViewportIds(newGlobal, chatId);
   if (viewportIds && viewportIds.includes(messageId)) {
     return newGlobal;
-  } else {
-    if (shouldSwitchChat) {
-      // We only clean viewport when switching chat.
-      newGlobal = replaceViewportIds(newGlobal, chatId, []);
-    } else if (viewportIds) {
-      const direction = messageId < viewportIds[0] ? FocusDirection.Up : FocusDirection.Down;
-      newGlobal = updateFocusDirection(newGlobal, chatId, direction);
-    }
-
-    setGlobal(newGlobal);
-
-    actions.loadViewportMessages({ shouldRelocate: true });
-    return undefined;
   }
+
+  if (viewportIds && !shouldSwitchChat) {
+    const direction = messageId < viewportIds[0] ? FocusDirection.Up : FocusDirection.Down;
+    newGlobal = updateFocusDirection(newGlobal, direction);
+  }
+
+  setGlobal(newGlobal);
+
+  actions.loadViewportMessages({ shouldRelocate: true });
+  return undefined;
 });

@@ -45,6 +45,8 @@ const INITIAL_STATE: GlobalState = {
     gifs: [],
   },
 
+  globalSearch: {},
+
   messageSearch: {
     byChatId: {},
   },
@@ -92,7 +94,6 @@ function updateCache(global: GlobalState) {
     connectionState: undefined,
     isUiReady: false,
     lastSyncTime: undefined,
-    chats: reduceChatsForCache(global),
     messages: reduceMessagesForCache(global),
     fileTransfers: { byMessageKey: {} },
     stickers: {
@@ -106,6 +107,9 @@ function updateCache(global: GlobalState) {
     savedGifs: {
       gifs: [],
     },
+    globalSearch: {
+      recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
+    },
     messageSearch: { byChatId: {} },
     mediaViewer: {},
     webPagePreview: undefined,
@@ -113,27 +117,6 @@ function updateCache(global: GlobalState) {
 
   const json = JSON.stringify(reducedState);
   localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
-}
-
-function reduceChatsForCache(global: GlobalState) {
-  const byId: GlobalState['chats']['byId'] = {};
-  const scrollOffsetById: GlobalState['chats']['scrollOffsetById'] = {};
-  const replyingToById: GlobalState['chats']['replyingToById'] = {};
-
-  if (global.chats.listIds) {
-    global.chats.listIds.forEach((id) => {
-      byId[id] = global.chats.byId[id];
-      scrollOffsetById[id] = global.chats.scrollOffsetById[id];
-      replyingToById[id] = global.chats.replyingToById[id];
-    });
-  }
-
-  return {
-    ...global.chats,
-    byId,
-    scrollOffsetById,
-    replyingToById,
-  };
 }
 
 function reduceMessagesForCache(global: GlobalState) {

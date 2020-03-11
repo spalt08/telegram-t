@@ -103,6 +103,11 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
         return;
       }
 
+      const input = document.getElementById('editable-message-text');
+      if (input !== document.activeElement) {
+        return;
+      }
+
       const { items } = e.clipboardData;
       const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
       const file = media && media.getAsFile();

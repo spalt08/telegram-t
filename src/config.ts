@@ -16,3 +16,4 @@ export const MESSAGE_LIST_SLICE = isBigScreen ? 50 : 30;
 export const CHAT_LIST_SLICE = 50;
 export const SHARED_MEDIA_SLICE = 30;
 export const MESSAGE_SEARCH_SLICE = 30;
+export const GLOBAL_SEARCH_SLICE = 20;

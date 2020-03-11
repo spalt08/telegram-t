@@ -47,11 +47,6 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
     const offsetId = selectFocusedMessageId(newGlobal, chatId) || selectRealLastReadId(newGlobal, chatId);
     const isOutlying = Boolean(offsetId && listedIds && !listedIds.includes(offsetId));
     const historyIds = (isOutlying ? outlyingIds : listedIds) || [];
-
-    if (!isOutlying && outlyingIds) {
-      newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
-    }
-
     const {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
@@ -306,7 +301,7 @@ function getViewportSlice(
       break;
     case LoadMoreDirection.Around:
     default:
-      areSomeLocal = newViewportIds.length > 0;
+      areSomeLocal = indexForDirection > 0 && indexForDirection < length;
       areAllLocal = newViewportIds.length === MESSAGE_LIST_SLICE * 2;
       break;
   }
