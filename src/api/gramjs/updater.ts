@@ -254,12 +254,15 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     const members = buildChatMembers(update.participants);
 
     onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer({ chatId: update.participants.chatId } as GramJs.TypePeer),
+      chat: { members_count: members && members.length },
+    });
+
+    onUpdate({
       '@type': 'updateChatFullInfo',
       id: getApiChatIdFromMtpPeer({ chatId: update.participants.chatId } as GramJs.TypePeer),
-      full_info: {
-        members,
-        member_count: members && members.length,
-      },
+      full_info: { members },
     });
   } else if (
     update instanceof GramJs.UpdateChatPinnedMessage

@@ -3,14 +3,14 @@ import {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
 } from './auth';
 import {
-  fetchChats, fetchFullChat, fetchSuperGroupOnlines, requestChatUpdate,
+  fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
-  searchMessages, fetchWebPagePreview, sendPollVote,
+  searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote,
 } from './messages';
 import {
-  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers,
+  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers, fetchContactList,
 } from './users';
 import {
   fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
@@ -33,15 +33,18 @@ export default {
   markMessagesRead,
   readMessageContents,
   searchMessages,
+  searchMessagesGlobal,
   fetchWebPagePreview,
   sendPollVote,
   fetchFullChat,
   fetchSuperGroupOnlines,
+  searchChats,
   requestChatUpdate,
   fetchFullUser,
   fetchNearestCountry,
   uploadProfilePhoto,
   fetchTopUsers,
+  fetchContactList,
   fetchStickerSets,
   fetchRecentStickers,
   fetchStickers,

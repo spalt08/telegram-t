@@ -71,9 +71,9 @@ const MiddleHeader: FC<IProps> = ({
     <div className="MiddleHeader">
       <div onClick={handleHeaderClick}>
         {isChatPrivate(chatId) ? (
-          <PrivateChatInfo userId={chatId} typingStatus={typingStatus} />
+          <PrivateChatInfo userId={chatId} typingStatus={typingStatus} showFullInfo />
         ) : (
-          <GroupChatInfo chatId={chatId} typingStatus={typingStatus} />
+          <GroupChatInfo chatId={chatId} typingStatus={typingStatus} showFullInfo />
         )}
       </div>
 

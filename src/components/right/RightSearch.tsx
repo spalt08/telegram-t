@@ -14,11 +14,11 @@ import {
   isChatChannel,
   getUserFullName,
 } from '../../modules/helpers';
-import { TextPart } from '../common/helpers/renderMessageText';
 import LastMessageMeta from '../left/LastMessageMeta';
 import { GlobalActions } from '../../global/types';
 import { orderBy } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
 
 import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -79,7 +79,7 @@ const RightSearch: FC<IProps> = ({
             <h3>{isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{highlightMatches(text, query!)}</p>
+          <p className="subtitle">{renderTextWithHighlight(text, query!)}</p>
         </div>
         <RippleEffect />
       </div>
@@ -106,21 +106,6 @@ const RightSearch: FC<IProps> = ({
     </InfiniteScroll>
   );
 };
-
-function highlightMatches(text: string, query: string): TextPart[] {
-  const lowerCaseText = text.toLowerCase();
-  const queryPosition = lowerCaseText.indexOf(query.toLowerCase());
-  if (queryPosition < 0) {
-    return [text];
-  }
-
-  const content: TextPart[] = [];
-  content.push(text.substring(0, queryPosition));
-  content.push(<span>{text.substring(queryPosition, queryPosition + query.length)}</span>);
-  content.push(text.substring(queryPosition + query.length));
-
-  return content;
-}
 
 export default withGlobal(
   (global) => {

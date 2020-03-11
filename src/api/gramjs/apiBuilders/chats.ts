@@ -20,11 +20,39 @@ export function buildApiChatFromDialog(
     unread_count: dialog.unreadCount,
     unread_mention_count: dialog.unreadMentionsCount,
     ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
-    is_pinned: dialog.pinned || false,
-    is_verified: (('verified' in peerEntity) && peerEntity.verified) || false,
+    is_pinned: dialog.pinned,
+    ...(('verified' in peerEntity) && { is_verified: peerEntity.verified }),
     is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
+    ...(!(peerEntity instanceof GramJs.User) && { members_count: peerEntity.participantsCount }),
+  };
+}
+
+export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUser): ApiChat | undefined {
+  if (
+    !(preview instanceof GramJs.Chat)
+    && !(preview instanceof GramJs.Channel)
+    && !(preview instanceof GramJs.User)
+  ) {
+    return undefined;
+  }
+
+  const avatar = preview.photo && buildAvatar(preview.photo);
+
+  return {
+    id: preview instanceof GramJs.User ? preview.id : -preview.id,
+    type: {
+      '@type': getApiChatTypeFromPeerEntity(preview),
+    },
+    title: preview instanceof GramJs.User ? getUserName(preview) : preview.title,
+    ...(!(preview instanceof GramJs.Chat) && { username: preview.username }),
+    ...(('accessHash' in preview) && preview.accessHash && { access_hash: preview.accessHash.toString() }),
+    ...(avatar && { avatar }),
+    ...(('verified' in preview) && { is_verified: preview.verified }),
+    ...(!(preview instanceof GramJs.User) && {
+      members_count: preview.participantsCount,
+    }),
   };
 }
 

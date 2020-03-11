@@ -3,12 +3,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage, ApiMessageSearchType, ApiPrivateChat } from '../../api/types';
+import { ApiMessage, ApiMessageSearchType } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
-import { getMessageContentIds, getPrivateChatUserId } from '../../modules/helpers';
-import { selectChat, selectChatMessages } from '../../modules/selectors';
+import { getMessageContentIds, isChatPrivate } from '../../modules/helpers';
+import { selectChatMessages } from '../../modules/selectors';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -122,10 +122,10 @@ const Profile: FC<IProps> = ({
       onLoadMore={searchMessages}
     >
       {resolvedUserId ? [
-        <PrivateChatInfo userId={resolvedUserId} avatarSize="jumbo" />,
+        <PrivateChatInfo userId={resolvedUserId} avatarSize="jumbo" showFullInfo />,
         <UserExtra userId={resolvedUserId} />,
       ] : [
-        <GroupChatInfo chatId={chatId} avatarSize="jumbo" />,
+        <GroupChatInfo chatId={chatId} avatarSize="jumbo" showFullInfo />,
         <GroupExtra chatId={chatId} />,
       ]}
       <div className="shared-media">
@@ -177,9 +177,8 @@ export default withGlobal(
     let resolvedUserId;
     if (userId) {
       resolvedUserId = userId;
-    } else {
-      const chat = selectChat(global, chatId) as ApiPrivateChat | undefined;
-      resolvedUserId = chat && getPrivateChatUserId(chat);
+    } else if (isChatPrivate(chatId)) {
+      resolvedUserId = chatId;
     }
 
     return {

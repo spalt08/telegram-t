@@ -11,18 +11,19 @@ export interface ApiChat {
   };
   title?: string;
   last_message?: ApiMessage;
-  last_read_outbox_message_id: number;
-  last_read_inbox_message_id: number;
-  unread_count: number;
-  unread_mention_count: number;
-  is_pinned: boolean;
-  is_verified: boolean;
-  is_muted: boolean;
+  last_read_outbox_message_id?: number;
+  last_read_inbox_message_id?: number;
+  unread_count?: number;
+  unread_mention_count?: number;
+  is_pinned?: boolean;
+  is_verified?: boolean;
+  is_muted?: boolean;
   access_hash?: string;
   avatar?: {
     hash: string;
   };
   username?: string;
+  members_count?: number;
   // Obtained from GetFullChat / GetFullChannel
   full_info?: ApiChatFullInfo;
   // Obtained from GetOnlines
@@ -40,7 +41,6 @@ export interface ApiTypingStatus {
 export interface ApiChatFullInfo {
   about?: string;
   members?: ApiChatMember[];
-  member_count?: number;
   pinned_message_id?: number;
   invite_link?: string;
 }

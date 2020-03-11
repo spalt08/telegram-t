@@ -1,103 +1,110 @@
 import React, {
-  FC, useState, useEffect, useRef, useCallback,
+  FC, useEffect, useCallback,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiUser } from '../../api/types';
 
-import { getUserFirstName } from '../../modules/helpers';
+import { getUserFirstName, isChatPrivate } from '../../modules/helpers';
 import { throttle } from '../../util/schedulers';
 
-import Loading from '../ui/Loading';
 import Avatar from '../common/Avatar';
+import PrivateChatInfo from '../common/PrivateChatInfo';
+import GroupChatInfo from '../common/GroupChatInfo';
+import RippleEffect from '../ui/RippleEffect';
 
 type IProps = {
   topUsers?: ApiUser[];
+  recentlyFoundChatIds?: number[];
+  currentUserId?: number;
   onSearchClose: () => void;
-} & Pick<GlobalActions, 'loadTopUsers' | 'openChat'>;
+} & Pick<GlobalActions, 'loadTopUsers' | 'loadContactList' | 'openChat' | 'addRecentlyFoundChatId'>;
 
-const runThrottledForTopPeople = throttle((cb) => cb(), 60000, true);
+const SEARCH_CLOSE_TIMEOUT_MS = 250;
+const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const LeftRecent: FC<IProps> = ({
-  topUsers, onSearchClose, loadTopUsers, openChat,
+  topUsers, recentlyFoundChatIds, currentUserId,
+  onSearchClose, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
 }) => {
-  const topPeopleListRef = useRef<HTMLDivElement>();
-  const [isLoading, setIsLoading] = useState(!topUsers);
-
   useEffect(() => {
-    runThrottledForTopPeople(loadTopUsers);
-  }, [loadTopUsers]);
-
-  useEffect(() => {
-    if (topUsers) {
-      setIsLoading(false);
-    }
-  }, [topUsers]);
-
-  useEffect(() => {
-    if (isLoading) {
-      return undefined;
-    }
-
-    const list = topPeopleListRef.current!;
-
-    function scrollList(e: WheelEvent) {
-      list.scrollLeft += e.deltaY / 3;
-    }
-
-    list.addEventListener('wheel', scrollList, { passive: true });
-
-    return () => {
-      list.removeEventListener('wheel', scrollList);
-    };
-  }, [isLoading]);
+    runThrottled(() => {
+      loadTopUsers();
+      // Loading full contact list for quick local search before user enters the query
+      loadContactList();
+    });
+  }, [loadTopUsers, loadContactList]);
 
   const handleClick = useCallback(
     (id: number) => {
       openChat({ id });
       onSearchClose();
+      setTimeout(() => {
+        addRecentlyFoundChatId({ id });
+      }, SEARCH_CLOSE_TIMEOUT_MS);
     },
-    [openChat, onSearchClose],
+    [openChat, addRecentlyFoundChatId, onSearchClose],
   );
 
-  if (isLoading) {
-    return (
-      <div className="LeftRecent">
-        <Loading />
-      </div>
-    );
-  }
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.currentTarget.scrollLeft += e.deltaY / 3;
+  }, []);
 
   return (
-    <div className="LeftRecent">
+    <div className="LeftRecent custom-scroll">
       {topUsers && (
         <div className="search-section">
           <h3 className="section-heading">People</h3>
-          <div ref={topPeopleListRef} className="top-peers">
+          <div className="top-peers" onWheel={handleWheel}>
             {topUsers.map((user) => (
               <div className="top-peer-item" onClick={() => handleClick(user.id)}>
                 <Avatar user={user} />
                 <div className="top-peer-name">{getUserFirstName(user)}</div>
+                <RippleEffect />
               </div>
             ))}
           </div>
         </div>
       )}
-      <div className="search-section">
-        <h3 className="section-heading">Recent</h3>
-      </div>
+      {recentlyFoundChatIds && (
+        <div className="search-section">
+          <h3 className="section-heading">Recent</h3>
+          {recentlyFoundChatIds.map((id) => (
+            <div className="search-result" onClick={() => handleClick(id)}>
+              {isChatPrivate(id) ? (
+                <PrivateChatInfo userId={id} isSavedMessages={id === currentUserId} />
+              ) : (
+                <GroupChatInfo chatId={id} />
+              )}
+              <RippleEffect />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
 export default withGlobal(
   (global) => {
+    const { currentUserId } = global;
     const { users: topUsers } = global.topPeers;
-    return { topUsers };
+    const { recentlyFoundChatIds } = global.globalSearch;
+
+    return {
+      currentUserId,
+      topUsers,
+      recentlyFoundChatIds,
+    };
   },
   (setGlobal, actions) => {
-    const { loadTopUsers, openChat } = actions;
-    return { loadTopUsers, openChat };
+    const {
+      loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
+    } = actions;
+    return {
+      loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
+    };
   },
 )(LeftRecent);

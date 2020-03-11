@@ -15,7 +15,6 @@ import {
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
-  selectFocusDirection,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -388,7 +387,7 @@ export default memo(withGlobal(
 
     const fileTransferProgress = selectFileTransferProgress(global, message);
     const isFocused = message.id === selectFocusedMessageId(global, chatId);
-    const focusDirection = isFocused ? selectFocusDirection(global, chatId) : undefined;
+    const { direction: focusDirection } = (isFocused && global.focusedMessage) || {};
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = chat && selectIsChatWithSelf(global, chat);

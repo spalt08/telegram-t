@@ -21,6 +21,7 @@
   "savedGifs": {
     "gifs": []
   },
+  "globalSearch": {},
   "messageSearch": {
     "byChatId": {}
   },
@@ -2638,10 +2639,10 @@
           "sender_user_id": 310552513,
           "reply_to_message_id": null
         },
+        "members_count": 43,
         "online_count": 22,
         "full_info": {
           "about": "",
-          "member_count": 43,
           "pinned_message_id": null
         }
       },

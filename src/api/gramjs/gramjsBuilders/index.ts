@@ -42,18 +42,14 @@ export function buildPeer(chatOrUserId: number): GramJs.TypePeer {
 
 export function buildInputPeer(chatOrUserId: number, accessHash?: string): GramJs.TypeInputPeer {
   if (chatOrUserId > 0 || chatOrUserId <= -1000000000) {
-    if (!accessHash) {
-      throw new Error('Missing `accessHash`');
-    }
-
     return chatOrUserId > 0
       ? new GramJs.InputPeerUser({
         userId: chatOrUserId,
-        accessHash: BigInt(accessHash),
+        accessHash: BigInt(accessHash!),
       })
       : new GramJs.InputPeerChannel({
         channelId: -chatOrUserId,
-        accessHash: BigInt(accessHash),
+        accessHash: BigInt(accessHash!),
       });
   } else {
     return new GramJs.InputPeerChat({
@@ -183,4 +179,15 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
     default:
       return new GramJs.MessageEntityUnknown({ offset, length });
   }
+}
+
+// TODO: This formula is taken from API docs, but doesn't seem to calculate hash correctly
+export function calculateResultHash(ids: number[]) {
+  let hash = 0;
+  ids.forEach((id) => {
+    // eslint-disable-next-line no-bitwise
+    hash = (((hash * 0x4F25) & 0x7FFFFFFF) + id) & 0x7FFFFFFF;
+  });
+
+  return hash;
 }

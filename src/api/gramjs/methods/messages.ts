@@ -31,6 +31,7 @@ import {
   buildMtpMessageEntity,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
 
 let onUpdate: OnApiUpdate;
 
@@ -355,6 +356,61 @@ export async function searchMessages({
   };
 }
 
+export async function searchMessagesGlobal({
+  query, offsetRate = 0, limit,
+}: {
+  query: string;
+  offsetRate?: number;
+  limit: number;
+}) {
+  try {
+    const result = await invokeRequest(new GramJs.messages.SearchGlobal({
+      q: query,
+      offsetRate,
+      offsetPeer: new GramJs.InputPeerEmpty(),
+      limit,
+    }));
+
+    if (
+      !result
+      || result instanceof GramJs.messages.MessagesNotModified
+      || !result.messages
+    ) {
+      return undefined;
+    }
+
+    updateLocalDb({
+      chats: result.chats,
+      users: result.users,
+      messages: [] as GramJs.Message[],
+    } as GramJs.messages.Messages);
+
+    const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
+    const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+    const chats = result.chats.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
+
+    let totalCount = messages.length;
+    let nextRate: number | undefined;
+    if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
+      totalCount = result.count;
+
+      if (messages.length) {
+        nextRate = messages[messages.length - 1].id;
+      }
+    }
+
+    return {
+      messages,
+      users,
+      chats,
+      totalCount,
+      nextRate: 'nextRate' in result && result.nextRate ? result.nextRate : nextRate,
+    };
+  } catch (err) {
+    return undefined;
+  }
+}
+
 export async function fetchWebPagePreview({ message }: { message: string }) {
   const preview = await invokeRequest(new GramJs.messages.GetWebPagePreview({
     message,
@@ -383,7 +439,15 @@ function updateLocalDb(
   result: GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages,
 ) {
   result.users.forEach((user) => {
-    localDb.users[user.id] = user;
+    if (user instanceof GramJs.User) {
+      localDb.users[user.id] = user;
+    }
+  });
+
+  result.chats.forEach((chat) => {
+    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
+      localDb.chats[chat.id] = chat;
+    }
   });
 
   result.messages.forEach((message) => {
