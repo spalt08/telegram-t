@@ -15,43 +15,57 @@ type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullC
   chatId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
-  chat: ApiChat;
+  showHandle?: boolean;
+  showFullInfo?: boolean;
+  chat?: ApiChat;
   onlineCount?: number;
 };
 
 const GroupChatInfo: FC<IProps> = ({
+  typingStatus,
   avatarSize = 'medium',
+  showHandle,
+  showFullInfo,
   lastSyncTime,
   chat,
-  typingStatus,
   onlineCount,
   loadFullChat,
   loadSuperGroupOnlines,
 }) => {
-  const isSuperGroup = isChatSuperGroup(chat);
+  const isSuperGroup = chat && isChatSuperGroup(chat);
+  const { id: chatId } = chat || {};
 
   useEffect(() => {
-    if (lastSyncTime) {
-      loadFullChat({ chatId: chat.id });
+    if (showFullInfo && lastSyncTime) {
+      loadFullChat({ chatId });
 
       if (isSuperGroup) {
-        loadSuperGroupOnlines({ chatId: chat.id });
+        loadSuperGroupOnlines({ chatId });
       }
     }
-  }, [chat.id, lastSyncTime, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
+  }, [chatId, lastSyncTime, showFullInfo, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
 
+  if (!chat) {
+    return null;
+  }
 
   function renderStatusOrTyping() {
+    if (!chat) {
+      return null;
+    }
+
     if (typingStatus) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
+    const handle = showHandle ? chat.username : undefined;
     const groupStatus = getGroupStatus(chat);
-    const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : '';
+    const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : undefined;
 
     return (
       <div className="status">
-        {groupStatus}
-        {onlineStatus}
+        {handle && <span className="handle">{handle}</span>}
+        <span className="group-status">{groupStatus}</span>
+        {onlineStatus && <span className="online-status">{onlineStatus}</span>}
       </div>
     );
   }
@@ -72,14 +86,10 @@ const GroupChatInfo: FC<IProps> = ({
 
 function getGroupStatus(chat: ApiChat) {
   const chatTypeString = getChatTypeString(chat);
-  if (!chat.full_info) {
-    return chatTypeString;
-  }
+  const { members_count } = chat;
 
-  const { member_count } = chat.full_info;
-
-  return member_count
-    ? `${formatInteger(member_count)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+  return members_count
+    ? `${formatInteger(members_count)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
     : chatTypeString;
 }
 

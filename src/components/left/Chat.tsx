@@ -9,11 +9,11 @@ import {
 import {
   getChatTitle,
   getMessageSummaryText,
-  getUserFirstName,
   isChatPrivate,
   isActionMessage,
   getPrivateChatUserId,
   getMessageAction,
+  getSenderName,
 } from '../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
@@ -138,18 +138,6 @@ const Chat: FC<IProps> = ({
     </div>
   );
 };
-
-function getSenderName(chatId: number, sender?: ApiUser) {
-  if (!sender || isChatPrivate(chatId)) {
-    return undefined;
-  }
-
-  if (sender.is_self) {
-    return 'You';
-  }
-
-  return getUserFirstName(sender);
-}
 
 export default memo(withGlobal(
   (global, { chatId }: IProps) => {

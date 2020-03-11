@@ -42,7 +42,7 @@ export function getPrivateChatUserId(chat: ApiChat) {
 }
 
 export function getChatTitle(chat: ApiChat, user?: ApiUser) {
-  if (user && user.is_self) {
+  if (user && chat.id === user.id && user.is_self) {
     return 'Saved Messages';
   }
   return chat.title || 'Deleted account';

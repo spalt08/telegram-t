@@ -14,27 +14,49 @@ type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullU
   userId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
-  isSavedMessages: boolean;
-  user: ApiUser;
+  isSavedMessages?: boolean;
+  showHandle?: boolean;
+  showFullInfo?: boolean;
+  user?: ApiUser;
 };
 
 const PrivateChatInfo: FC<IProps> = ({
-  lastSyncTime, user, typingStatus, avatarSize = 'medium', isSavedMessages, loadFullUser,
+  lastSyncTime,
+  user,
+  typingStatus,
+  avatarSize = 'medium',
+  isSavedMessages,
+  showHandle,
+  showFullInfo,
+  loadFullUser,
 }) => {
+  const { id: userId, is_self } = user || {};
+
   useEffect(() => {
-    if (lastSyncTime && user.is_self) {
-      loadFullUser({ userId: user.id });
+    // `Saved Messages` is the only private chat that supports pinned messages.
+    // We need to call for `loadFullUser` to get pinned message ID.
+    if (showFullInfo && lastSyncTime && userId && is_self) {
+      loadFullUser({ userId });
     }
-  }, [user.is_self, loadFullUser, user.id, lastSyncTime]);
+  }, [is_self, userId, loadFullUser, lastSyncTime, showFullInfo]);
+
+  if (!user) {
+    return null;
+  }
 
   function renderStatusOrTyping() {
+    if (!user) {
+      return null;
+    }
+
     if (typingStatus) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
     return (
       <div className={`status ${isUserOnline(user) ? 'online' : ''}`}>
-        {getUserStatus(user)}
+        {showHandle && <span className="handle">{user.username}</span>}
+        <span className="user-status">{getUserStatus(user)}</span>
       </div>
     );
   }
@@ -48,7 +70,7 @@ const PrivateChatInfo: FC<IProps> = ({
         ) : (
           <div className="title">
             {getUserFullName(user)}
-            {user.is_verified && <VerifiedIcon />}
+            {user && user.is_verified && <VerifiedIcon />}
           </div>
         )}
         {!isSavedMessages && renderStatusOrTyping()}

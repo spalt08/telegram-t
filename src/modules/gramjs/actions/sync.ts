@@ -39,8 +39,20 @@ async function loadAndReplaceChats() {
     return global;
   }
 
-  global = replaceUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = replaceChats(global, buildCollectionByKey(result.chats, 'id'));
+  const { recentlyFoundChatIds } = global.globalSearch;
+
+  const savedUsers = recentlyFoundChatIds ? [
+    ...Object.values(global.users.byId).filter((user) => recentlyFoundChatIds.includes(user.id)),
+    ...result.users,
+  ] : result.users;
+
+  const savedChats = recentlyFoundChatIds ? [
+    ...Object.values(global.chats.byId).filter((chat) => recentlyFoundChatIds.includes(chat.id)),
+    ...result.chats,
+  ] : result.chats;
+
+  global = replaceUsers(global, buildCollectionByKey(savedUsers, 'id'));
+  global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
   global = replaceChatListIds(global, result.chat_ids);
   global = {
     ...global,

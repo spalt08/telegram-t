@@ -6,19 +6,16 @@
   .Transition {
     flex-grow: 1;
   }
-
-  .column-content {
-    height: 100%;
-  }
 }
 
-.LeftRecent {
+.ChatList, .LeftRecent, .LeftSearch {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.LeftRecent, .LeftSearch {
   flex-grow: 1;
   overflow: auto;
-
-  .Loading {
-    min-height: 75vh;
-  }
 
   .search-section {
     padding: 0 1rem;
@@ -34,6 +31,153 @@
       font-weight: 500;
       margin: 1rem 0.5rem;
     }
+
+    .Loading {
+      height: 4.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .search-no-results {
+    padding: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+
+  .search-result {
+    cursor: pointer;
+    border-radius: var(--border-radius-default);
+    padding: 0.75rem;
+    margin: 0 -0.5rem 0.5rem;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      background: var(--color-chat-hover);
+    }
+
+    .ChatInfo {
+      display: flex;
+      align-items: center;
+
+      .Avatar {
+        width: 3rem;
+        height: 3rem;
+        margin-right: 0.75rem;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.3125;
+
+        .VerifiedIcon {
+          width: 1.25rem;
+          height: 1.25rem;
+          margin-left: 0.25rem;
+          margin-top: 0.05rem;
+        }
+      }
+
+      .status, .typing-status {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        margin: 0;
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        &.online {
+          color: var(--color-primary);
+        }
+      }
+
+      .handle {
+        color: var(--color-primary);
+
+        &::before {
+          content: '@';
+        }
+
+        &::after {
+          content: ', ';
+          color: var(--color-text-secondary);
+        }
+      }
+    }
+  }
+
+  .search-result-message {
+    position: relative;
+    overflow: hidden;
+    margin: 0 -0.5rem 0.35rem;
+    padding: 0.5rem;
+    display: flex;
+    cursor: pointer;
+    border-radius: var(--border-radius-default);
+
+    &:hover {
+      background: var(--color-chat-hover);
+    }
+
+    .Avatar {
+      margin-right: 0.5rem;
+    }
+
+    .info {
+      flex: 1;
+      overflow: hidden;
+
+      .title {
+        overflow: hidden;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding-right: .15rem;
+      }
+
+      h3 {
+        max-width: 80%;
+      }
+
+      h3, .subtitle {
+        font-size: 1rem;
+        line-height: 1.6875rem;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .LastMessageMeta {
+        margin-left: auto;
+      }
+
+      .subtitle {
+        color: var(--color-text-secondary);
+        margin-right: 2rem;
+
+        .matching-text-highlight {
+          color: var(--color-primary);
+        }
+      }
+
+      .sender-name {
+        color: var(--color-text);
+
+        &::after {
+          content: ': ';
+        }
+      }
+    }
+  }
+}
+
+.LeftRecent {
+  .Loading {
+    min-height: 75vh;
   }
 
   .top-peers {
@@ -53,6 +197,15 @@
     &::-webkit-scrollbar-thumb {
       background-color: rgba(0,0,0,0);
     }
+
+    // Spacer to counter last button margin not being accounted in scroll width
+    &::after {
+      content: "";
+      display: block;
+      flex-shrink: 0;
+      width: 0.1px;
+      height: 1rem;
+    }
   }
 
   .top-peer-item {
@@ -63,9 +216,15 @@
     margin-left: 0.3125rem;
     border-radius: var(--border-radius-default);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 
     &:first-child {
       margin-left: 0.25rem;
+    }
+
+    &:last-child {
+      margin-right: 0.25rem;
     }
 
     .Avatar {

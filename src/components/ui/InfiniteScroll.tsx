@@ -47,7 +47,7 @@ const InfiniteScroll: FC<IProps> = ({
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const container = e.target as HTMLElement;
-    const anchor = container.firstChild as HTMLElement;
+    const anchor = container.firstElementChild;
     if (!anchor) {
       return;
     }

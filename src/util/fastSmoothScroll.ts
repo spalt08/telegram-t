@@ -7,6 +7,12 @@ export default (
   maxDistance = 2000,
   forceDirection?: FocusDirection,
 ) => {
+  if (forceDirection === FocusDirection.Static) {
+    element.scrollIntoView({ block: position });
+
+    return;
+  }
+
   const { offsetTop } = element;
 
   if (forceDirection === undefined) {

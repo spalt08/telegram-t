@@ -8,4 +8,5 @@ export enum LoadMoreDirection {
 export enum FocusDirection {
   Up,
   Down,
+  Static,
 }

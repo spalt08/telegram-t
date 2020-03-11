@@ -29,6 +29,11 @@ export type GlobalState = {
   authIsSessionRemembered?: boolean;
   authNearestCountry?: string;
 
+  contactList?: {
+    hash: number;
+    userIds: number[];
+  };
+
   users: {
     byId: Record<number, ApiUser>;
     selectedId?: number;
@@ -50,10 +55,14 @@ export type GlobalState = {
       listedIds?: number[];
       outlyingIds?: number[];
       viewportIds?: number[];
-      focusedMessageId?: number;
-      focusDirection?: FocusDirection;
     }>;
     isReversed?: boolean;
+  };
+
+  focusedMessage?: {
+    chatId?: number;
+    messageId?: number;
+    direction?: FocusDirection;
   };
 
   fileTransfers: {
@@ -80,6 +89,28 @@ export type GlobalState = {
     gifs: ApiVideo[];
   };
 
+  globalSearch: {
+    query?: string;
+    recentlyFoundChatIds?: number[];
+    fetchingStatus?: {
+      chats?: boolean;
+      messages?: boolean;
+    };
+    localResults?: {
+      chats?: ApiChat[];
+      users?: ApiUser[];
+    };
+    globalResults?: {
+      chats?: ApiChat[];
+      users?: ApiUser[];
+      messages?: {
+        totalCount: number;
+        nextRate?: number;
+        byId: Record<number, ApiMessage>;
+      };
+    };
+  };
+
   messageSearch: {
     byChatId: Record<number, {
       currentType?: ApiMessageSearchType;
@@ -99,6 +130,8 @@ export type GlobalState = {
   };
 
   topPeers: {
+    hashes?: Record<string, number>;
+    lastRequestedAt?: Record<string, number>;
     users?: ApiUser[];
   };
 
@@ -117,11 +150,13 @@ export type ActionTypes = (
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' | 'sendPollVote' |
+  // global search
+  'setGlobalSearchQuery' | 'searchMoreMessages' | 'addRecentlyFoundChatId' |
   // message search
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
   // misc
   'openMediaViewer' |
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |

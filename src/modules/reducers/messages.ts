@@ -12,8 +12,6 @@ type MessageStoreSections = {
   listedIds?: number[];
   outlyingIds?: number[];
   viewportIds?: number[];
-  focusedMessageId?: number;
-  focusDirection?: FocusDirection;
 };
 
 function replaceStoreSection(global: GlobalState, chatId: number, update: Partial<MessageStoreSections>): GlobalState {
@@ -236,16 +234,25 @@ export function safeReplaceViewportIds(
   );
 }
 
-export function updateFocusedMessageId(global: GlobalState, chatId: number, focusedMessageId?: number) {
-  return replaceStoreSection(global, chatId, {
-    focusedMessageId,
-  });
+export function updateFocusedMessage(global: GlobalState, chatId?: number, messageId?: number) {
+  return {
+    ...global,
+    focusedMessage: {
+      ...global.focusedMessage,
+      chatId,
+      messageId,
+    },
+  };
 }
 
 export function updateFocusDirection(
-  global: GlobalState, chatId: number, focusDirection?: FocusDirection,
+  global: GlobalState, direction?: FocusDirection,
 ) {
-  return replaceStoreSection(global, chatId, {
-    focusDirection,
-  });
+  return {
+    ...global,
+    focusedMessage: {
+      ...global.focusedMessage,
+      direction,
+    },
+  };
 }
