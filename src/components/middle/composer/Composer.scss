@@ -51,6 +51,8 @@
     &.send {
       color: var(--color-primary);
 
+      &:active,
+      &:focus,
       &:hover {
         color: white;
       }
