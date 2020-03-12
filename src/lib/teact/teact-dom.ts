@@ -295,16 +295,16 @@ function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement
 }
 
 function addAttribute(element: HTMLElement, key: string, value: any) {
-  if (value === false || value === null || value === undefined) {
-    return;
-  }
-
   // An optimization attempt.
   if (key === 'className') {
     element.className = value;
   } else if (key === 'style') {
     element.style.cssText = value;
   } else if (key.startsWith('on')) {
+    if (typeof value !== 'function') {
+      return;
+    }
+
     element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
 
     if (key === 'onChange') {
