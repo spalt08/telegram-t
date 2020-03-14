@@ -6,6 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
+import buildClassName from '../../../util/buildClassName';
 
 type IProps = {
   id: string;
@@ -21,49 +22,35 @@ type IProps = {
 const MAX_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 
-let isJustSent = false;
-
 const MessageInput: FC<IProps> = ({
   id, html, placeholder, selectedChatId, replyingTo, onUpdate, onSend, shouldSetFocus,
 }) => {
   const inputRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
-    if (!inputRef.current) {
-      return;
-    }
-    if (html !== undefined && html !== inputRef.current.innerHTML) {
-      inputRef.current.innerHTML = html;
+    if (html !== undefined && html !== inputRef.current!.innerHTML) {
+      inputRef.current!.innerHTML = html;
     }
     updateInputHeight();
   }, [html]);
 
   function focusInput() {
-    if (inputRef.current) {
-      focusEditableElement(inputRef.current);
-    }
+    focusEditableElement(inputRef.current!);
   }
 
   function handleChange(e: ChangeEvent<HTMLDivElement>) {
-    if (isJustSent) {
-      isJustSent = false;
-      return;
-    }
-
-    const { currentTarget } = e;
-    onUpdate(currentTarget.innerHTML);
+    onUpdate(e.currentTarget.innerHTML);
   }
 
   function updateInputHeight() {
-    if (!inputRef.current) {
-      return;
-    }
-    if (inputRef.current.scrollHeight !== inputRef.current.offsetHeight) {
-      inputRef.current.style.height = 'auto';
-      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, MAX_INPUT_HEIGHT)}px`;
+    const input = inputRef.current!;
+
+    if (input.scrollHeight !== input.offsetHeight) {
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
     }
 
-    inputRef.current.classList.toggle('overflown', inputRef.current.scrollHeight > MAX_INPUT_HEIGHT);
+    input.classList.toggle('overflown', input.scrollHeight > MAX_INPUT_HEIGHT);
   }
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -71,12 +58,6 @@ const MessageInput: FC<IProps> = ({
       e.preventDefault();
 
       onSend();
-
-      // Disable `onChange` following immediately after `onKeyPress`.
-      isJustSent = true;
-      setTimeout(() => {
-        isJustSent = false;
-      }, 0);
     }
   }
 
@@ -97,17 +78,12 @@ const MessageInput: FC<IProps> = ({
     };
   }, []);
 
-  const inputClassNames = ['form-control', 'custom-scroll'];
-  if (html.length) {
-    inputClassNames.push('touched');
-  }
-
   return (
     <div id={id}>
       <div
         ref={inputRef}
         id="editable-message-text"
-        className={inputClassNames.join(' ')}
+        className={buildClassName('form-control custom-scroll', html.length > 0 && 'touched')}
         contentEditable
         onClick={focusInput}
         onChange={handleChange}
