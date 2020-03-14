@@ -305,11 +305,13 @@ function addAttribute(element: HTMLElement, key: string, value: any) {
   } else if (key === 'style') {
     element.style.cssText = value;
   } else if (key.startsWith('on')) {
-    element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
-
-    if (key === 'onChange') {
-      setupAdditionalOnChangeHandlers(element, value);
+    if (key === 'onChange' && element.tagName !== 'SELECT') {
+      // React behavior repeated here.
+      // https://stackoverflow.com/questions/38256332/in-react-whats-the-difference-between-onchange-and-oninput
+      key = 'oninput';
     }
+
+    element.addEventListener(key.replace(/^on/, '').toLowerCase(), value);
   } else if (key.startsWith('data-')) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
@@ -323,11 +325,11 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   } else if (key === 'style') {
     element.style.cssText = value;
   } else if (key.startsWith('on')) {
-    element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
-
-    if (key === 'onChange') {
-      removeAdditionalOnChangeHandlers(element, value);
+    if (key === 'onChange' && element.tagName !== 'SELECT') {
+      key = 'oninput';
     }
+
+    element.removeEventListener(key.replace(/^on/, '').toLowerCase(), value);
   } else if (key.startsWith('data-')) {
     element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
@@ -343,16 +345,6 @@ function updateAttribute(element: HTMLElement, key: string, oldValue: any, newVa
     removeAttribute(element, key, oldValue);
     addAttribute(element, key, newValue);
   }
-}
-
-function setupAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
-  element.addEventListener('input', handler);
-  element.addEventListener('paste', handler);
-}
-
-function removeAdditionalOnChangeHandlers(element: HTMLElement, handler: EventHandlerNonNull) {
-  element.removeEventListener('paste', handler);
-  element.removeEventListener('input', handler);
 }
 
 function DEBUG_addToVirtualTreeSize($current: VirtualRealElement | VirtualDomHead) {
