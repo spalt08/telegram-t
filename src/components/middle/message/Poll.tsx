@@ -14,8 +14,6 @@ type IProps = {
   onSendVote: (options: string[]) => void;
 };
 
-let isJustSent = false;
-
 const Poll: FC<IProps> = ({ messageId, poll, onSendVote }) => {
   const [loadingOption, setLoadingOption] = useState<string | undefined>(undefined);
   const { summary, results } = poll;
@@ -36,16 +34,8 @@ const Poll: FC<IProps> = ({ messageId, poll, onSendVote }) => {
 
   const handleRadioChange = useCallback(
     (option: string) => {
-      if (isJustSent) {
-        isJustSent = false;
-        return;
-      }
       setLoadingOption(option);
-      isJustSent = true;
       onSendVote([option]);
-      setTimeout(() => {
-        isJustSent = false;
-      }, 0);
     }, [onSendVote],
   );
 

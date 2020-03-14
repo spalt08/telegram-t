@@ -41,19 +41,12 @@ const LeftColumn: FC<IProps> = ({ searchQuery, setGlobalSearchQuery }) => {
   }, [setGlobalSearchQuery]);
 
   const handleSearchQueryChange = useCallback((query: string) => {
-    if (!isSearchOpen) {
-      // Prevent change events being handled while input is not focused
-      return;
-    } else if (query.length) {
-      setColumnContent(ColumnContent.GlobalSearch);
-    } else {
-      setColumnContent(ColumnContent.RecentChats);
-    }
+    setColumnContent(query.length ? ColumnContent.GlobalSearch : ColumnContent.RecentChats);
 
     if (query !== searchQuery) {
       setGlobalSearchQuery({ query });
     }
-  }, [setGlobalSearchQuery, searchQuery, isSearchOpen]);
+  }, [setGlobalSearchQuery, searchQuery]);
 
   useEffect(
     () => (isSearchOpen ? captureEscKeyListener(handleCloseSearch) : undefined),
