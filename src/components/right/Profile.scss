@@ -3,10 +3,11 @@
   height: calc(100% - 60px);
   overflow-y: scroll;
   overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-areas: "chat_info" "chat_extra" "shared_media";
 
   .ChatInfo {
+    grid-area: chat_info;
     padding: 0 1.5rem;
     margin-bottom: 1rem;
     text-align: center;
@@ -40,6 +41,7 @@
   }
 
   .ChatExtra {
+    grid-area: chat_extra;
     padding: 0 1.5rem;
 
     .item {
@@ -76,7 +78,7 @@
 }
 
 .shared-media {
-  flex-grow: 1;
+  grid-area: shared_media;
   display: flex;
   flex-direction: column-reverse;
 
