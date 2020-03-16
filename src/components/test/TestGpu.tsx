@@ -8,15 +8,15 @@ const READY_TIMEOUT = 3000;
 const CANVAS_SIZE = 500;
 const CANVAS_STYLE = 'position: absolute; top:0; left: 0; pointer-events: none; opacity: 0.1;';
 
-const ITERATIONS_COUNT = 50;
-const TICK_DRAWS_COUNT = 30;
+const ITERATIONS_COUNT = 100;
+const TICK_DRAWS_COUNT = 100;
 // const ITERATION_DELAY = 30;
 
 const TRIANGLES = [
-  [-0.5, 0.5, 0.0, -0.5, -0.5, 0.0, 0.5, -0.5, 0.0],
-  [-0.5, 0.5, 0.0, -0.5, -0.5, 0.0, 0.5, 0.5, 0.0],
-  [-0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5, -0.5, 0.0],
-  [-0.5, -0.5, 0.0, 0.5, 0.5, 0.0, 0.5, -0.5, 0.0],
+  [-1, 1, 0.0, -1, -1, 0.0, 1, -1, 0.0],
+  [-1, 1, 0.0, -1, -1, 0.0, 1, 1, 0.0],
+  [-1, 1, 0.0, 1, 1, 0.0, 1, -1, 0.0],
+  [-1, -1, 0.0, 1, 1, 0.0, 1, -1, 0.0],
 ];
 
 const TestGpu: FC = () => {
@@ -84,17 +84,14 @@ async function measureGpuRate(canvas: HTMLCanvasElement, callback: (rate: number
   let i = 0;
   while (i++ < ITERATIONS_COUNT) {
     await new Promise(requestAnimationFrame);
-    let j = 0;
-    while (j++ < TICK_DRAWS_COUNT) {
-      drawTriangle(canvas, gl, i + j);
-    }
+    drawTriangle(canvas, gl, TICK_DRAWS_COUNT);
   }
 
   const rate = Math.round(performance.now() - startTime);
   callback(rate);
 }
 
-function drawTriangle(canvas: HTMLCanvasElement, gl: WebGLRenderingContext, i: number) {
+function drawTriangle(canvas: HTMLCanvasElement, gl: WebGLRenderingContext, n: number) {
   gl.viewport(0, 0, canvas.width, canvas.height);
   const vertShader = gl.createShader(gl.VERTEX_SHADER)!;
   gl.shaderSource(vertShader, 'attribute vec3 c;void main(void){gl_Position=vec4(c, 1.0);}');
@@ -111,11 +108,14 @@ function drawTriangle(canvas: HTMLCanvasElement, gl: WebGLRenderingContext, i: n
   gl.clear(gl.COLOR_BUFFER_BIT);
   const vertexBuf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(TRIANGLES[i % 4]), gl.STATIC_DRAW);
-  const coord = gl.getAttribLocation(prog, 'c');
-  gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(coord);
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  while (n-- > 0) {
+    const data = new Float32Array(TRIANGLES[n % 4].map((x: number) => x * Math.random()));
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    const coord = gl.getAttribLocation(prog, 'c');
+    gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(coord);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
 }
 
 export default TestGpu;
