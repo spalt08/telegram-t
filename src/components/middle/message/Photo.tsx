@@ -38,16 +38,16 @@ const Photo: FC<IProps> = ({
   onCancelTransfer,
 }) => {
   const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
+  const localBlobUrl = photo.blobUrl;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const localBlobUrl = load ? photo.blobUrl : undefined;
   const mediaData = useMedia(getMessageMediaHash(message, size), !load);
-  const isMediaLoaded = Boolean(mediaData);
-  const { shouldRenderThumb, shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(mediaData, 'slow');
-
+  const {
+    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
+  } = useProgressiveMedia(mediaData || localBlobUrl, 'slow');
   const {
     isTransferring, transferProgress,
-  } = getMessageTransferParams(message, fileTransferProgress, !isMediaLoaded && !localBlobUrl);
+  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
 
   const {
     shouldRender: shouldRenderSpinner,
@@ -64,8 +64,7 @@ const Photo: FC<IProps> = ({
   );
 
   const thumbClassName = buildClassName(
-    'thumbnail',
-    !localBlobUrl && 'blur',
+    'thumbnail blur',
     !thumbDataUri && 'empty',
   );
 
@@ -76,7 +75,7 @@ const Photo: FC<IProps> = ({
     >
       {shouldRenderThumb && (
         <img
-          src={localBlobUrl || thumbDataUri}
+          src={thumbDataUri}
           className={thumbClassName}
           width={width}
           height={height}
@@ -85,15 +84,15 @@ const Photo: FC<IProps> = ({
       )}
       {shouldRenderFullMedia && (
         <img
-          src={mediaData}
-          className={['full-media', transitionClassNames].join(' ')}
+          src={localBlobUrl || mediaData}
+          className={`full-media ${transitionClassNames}`}
           width={width}
           height={height}
           alt=""
         />
       )}
       {shouldRenderSpinner && (
-        <div className={['message-media-loading', spinnerClassNames].join(' ')}>
+        <div className={`message-media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
         </div>
       )}
