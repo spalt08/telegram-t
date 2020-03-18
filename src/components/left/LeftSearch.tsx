@@ -16,6 +16,7 @@ import {
   getMessageSummaryText,
 } from '../../modules/helpers';
 import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -37,7 +38,7 @@ type IProps = {
   usersById: Record<number, ApiUser>;
   fetchingStatus: { chats?: boolean; messages?: boolean };
   onSearchClose: () => void;
-} & Pick<GlobalActions, 'openChat' | 'addRecentlyFoundChatId' | 'focusMessage' | 'searchMoreMessages'>;
+} & Pick<GlobalActions, 'openChat' | 'addRecentlyFoundChatId' | 'focusMessage' | 'searchMessagesGlobal'>;
 
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 5;
 
@@ -45,7 +46,7 @@ const LeftSearch: FC<IProps> = ({
   searchQuery, currentUserId,
   localContactIds, localChats, localUsers, globalChats, globalUsers,
   globalMessagesById, chatsById, usersById, fetchingStatus,
-  onSearchClose, openChat, addRecentlyFoundChatId, focusMessage, searchMoreMessages,
+  onSearchClose, openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
 }) => {
   const handleChatClick = useCallback(
     (id: number) => {
@@ -60,7 +61,7 @@ const LeftSearch: FC<IProps> = ({
 
   const localResults = useMemo(() => {
     if (!searchQuery || (searchQuery.startsWith('@') && searchQuery.length < 2)) {
-      return [];
+      return MEMO_EMPTY_ARRAY;
     }
 
     const foundLocalContacts = localContactIds
@@ -91,7 +92,7 @@ const LeftSearch: FC<IProps> = ({
       !searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH
       || !globalChats || !globalUsers
     ) {
-      return [];
+      return MEMO_EMPTY_ARRAY;
     }
 
     return unique([
@@ -101,8 +102,12 @@ const LeftSearch: FC<IProps> = ({
   }, [globalChats, globalUsers, searchQuery]);
 
   const foundMessages = useMemo(() => {
-    return globalMessagesById ? Object.values(globalMessagesById).sort((a, b) => b.date - a.date) : [];
-  }, [globalMessagesById]);
+    if (!searchQuery || !globalMessagesById) {
+      return [];
+    }
+
+    return Object.values(globalMessagesById).sort((a, b) => b.date - a.date);
+  }, [globalMessagesById, searchQuery]);
 
   function renderFoundMessage(message: ApiMessage) {
     const text = getMessageSummaryText(message);
@@ -145,7 +150,7 @@ const LeftSearch: FC<IProps> = ({
     <InfiniteScroll
       className="LeftSearch custom-scroll"
       items={foundMessages}
-      onLoadMore={searchMoreMessages}
+      onLoadMore={searchMessagesGlobal}
     >
       {nothingFound && (
         <div className="search-section">
@@ -227,10 +232,10 @@ export default withGlobal(
   },
   (setGlobal, actions) => {
     const {
-      openChat, addRecentlyFoundChatId, focusMessage, searchMoreMessages,
+      openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
     } = actions;
     return {
-      openChat, addRecentlyFoundChatId, focusMessage, searchMoreMessages,
+      openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
     };
   },
 )(LeftSearch);

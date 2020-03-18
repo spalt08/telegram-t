@@ -151,7 +151,7 @@ export type ActionTypes = (
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' | 'sendPollVote' |
   // global search
-  'setGlobalSearchQuery' | 'searchMoreMessages' | 'addRecentlyFoundChatId' |
+  'setGlobalSearchQuery' | 'searchMessagesGlobal' | 'addRecentlyFoundChatId' |
   // message search
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'readMessageContents' |
