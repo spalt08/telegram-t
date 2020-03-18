@@ -13,27 +13,24 @@ import { selectCurrentGlobalSearchQuery } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { GLOBAL_SEARCH_SLICE } from '../../../config';
 
-const searchThrottled = throttle((cb) => cb(), 1000, false);
+const searchThrottled = throttle((cb) => cb(), 500, false);
 
 addReducer('setGlobalSearchQuery', (global, actions, payload) => {
   const { query } = payload!;
-  const { globalResults } = global.globalSearch;
-  const { nextRate } = (globalResults && globalResults.messages) || {};
 
   if (query) {
     void searchThrottled(() => {
       searchChats(query);
-      searchMessages(query, nextRate);
     });
   }
 });
 
-addReducer('searchMoreMessages', (global) => {
+addReducer('searchMessagesGlobal', (global) => {
   const { query, globalResults } = global.globalSearch;
   const { nextRate } = (globalResults && globalResults.messages) || {};
 
-  if (query && nextRate) {
-    void searchMessages(query, nextRate);
+  if (query) {
+    searchMessages(query, nextRate);
   }
 });
 

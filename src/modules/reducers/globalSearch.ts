@@ -21,6 +21,16 @@ export function updateGlobalSearchResults(
   nextRate?: number,
 ): GlobalState {
   const { messages } = global.globalSearch.globalResults || {};
+  const byId = messages && messages.byId;
+
+  if (byId && Object.keys(newFoundMessagesById).every((newId) => Boolean(byId[Number(newId)]))) {
+    return updateGlobalSearch(global, {
+      fetchingStatus: {
+        ...global.globalSearch.fetchingStatus,
+        messages: false,
+      },
+    });
+  }
 
   return updateGlobalSearch(global, {
     fetchingStatus: {
@@ -33,7 +43,7 @@ export function updateGlobalSearchResults(
         totalCount,
         nextRate,
         byId: {
-          ...(messages ? messages.byId : {}),
+          ...byId,
           ...newFoundMessagesById,
         },
       },
