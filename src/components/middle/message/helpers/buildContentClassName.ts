@@ -30,7 +30,11 @@ export function buildContentClassName(
 
   if (customShape) {
     classNames.push('custom-shape');
-  } else if (photo || video) {
+    if (video && video.isRound) {
+      classNames.push('round');
+    }
+  }
+  if (photo || video) {
     classNames.push('media');
   } else if (audio) {
     classNames.push('audio');

@@ -201,6 +201,7 @@ export interface ApiMessage {
   views?: number;
   isEdited?: boolean;
   isMediaUnread?: boolean;
+  groupedId?: string;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';

@@ -5,7 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
-import { FocusDirection } from '../../../types';
+import { FocusDirection, IAlbum } from '../../../types';
 
 import {
   selectChat,
@@ -47,6 +47,7 @@ import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
 import Audio from './Audio';
+import Album from './Album';
 
 import './Message.scss';
 
@@ -59,6 +60,7 @@ type MessagePositionProperties = {
 type IProps = (
   {
     message: ApiMessage;
+    album?: IAlbum;
     showAvatar?: boolean;
     showSenderName?: boolean;
     loadAndPlayMedia?: boolean;
@@ -90,6 +92,7 @@ const RELOCATED_FOCUS_OFFSET = 1000;
 
 const Message: FC<IProps> = ({
   message,
+  album,
   showAvatar,
   showSenderName,
   loadAndPlayMedia,
@@ -159,6 +162,7 @@ const Message: FC<IProps> = ({
     isContextMenuShown && 'has-menu-open',
     isFocused && 'focused',
     message.is_deleting && 'is-deleting',
+    !!album && 'is-album',
   );
   const customShape = getMessageCustomShape(message);
   const contentClassName = buildContentClassName(message, {
@@ -179,6 +183,10 @@ const Message: FC<IProps> = ({
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({ chatId, messageId });
   }, [chatId, messageId, openMediaViewer]);
+
+  const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
+    openMediaViewer({ chatId, messageId: albumMessageId });
+  }, [chatId, openMediaViewer]);
 
   const handleReadMedia = useCallback((): void => {
     readMessageContents({ messageId });
@@ -257,7 +265,14 @@ const Message: FC<IProps> = ({
             loadAndPlay={loadAndPlayMedia}
           />
         )}
-        {photo && (
+        {album && (
+          <Album
+            album={album}
+            loadAndPlay={loadAndPlayMedia}
+            onMediaClick={handleAlbumMediaClick}
+          />
+        )}
+        {!album && photo && (
           <Photo
             message={message}
             load={loadAndPlayMedia}
@@ -266,7 +281,7 @@ const Message: FC<IProps> = ({
             onCancelTransfer={handleCancelTransfer}
           />
         )}
-        {video && (
+        {!album && video && (
           <Video
             message={message}
             loadAndPlay={loadAndPlayMedia}
@@ -311,7 +326,7 @@ const Message: FC<IProps> = ({
   }
 
   let style = '';
-  if (photo || video) {
+  if (!album && (photo || video)) {
     const { width } = photo
       ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
       : (video && calculateVideoDimensions(video, isOwn, isForwarded)) || {};
@@ -366,7 +381,9 @@ const Message: FC<IProps> = ({
 
 export default memo(withGlobal(
   (global, ownProps: IProps) => {
-    const { message, showSenderName, showAvatar } = ownProps;
+    const {
+      message, album, showSenderName, showAvatar,
+    } = ownProps;
     const chatId = message.chat_id;
 
     const replyMessage = message.reply_to_message_id
@@ -386,7 +403,10 @@ export default memo(withGlobal(
     }
 
     const fileTransferProgress = selectFileTransferProgress(global, message);
-    const isFocused = message.id === selectFocusedMessageId(global, chatId);
+    const focusedId = selectFocusedMessageId(global, chatId);
+    const isFocused = focusedId && album
+      ? album.messages.map(({ id }) => id).includes(focusedId)
+      : message.id === focusedId;
     const { direction: focusDirection } = (isFocused && global.focusedMessage) || {};
 
     const chat = selectChat(global, chatId);

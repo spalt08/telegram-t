@@ -3,7 +3,7 @@ import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
+import { calculateVideoDimensions, AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
@@ -19,12 +19,11 @@ import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
-import './Media.scss';
-
 type IProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
   fileTransferProgress?: number;
+  albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelTransfer?: () => void;
 };
@@ -33,6 +32,7 @@ const Video: FC<IProps> = ({
   message,
   loadAndPlay,
   fileTransferProgress,
+  albumMediaParams,
   onClick,
   onCancelTransfer,
 }) => {
@@ -57,7 +57,7 @@ const Video: FC<IProps> = ({
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded);
+  const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded, albumMediaParams);
 
   const className = buildClassName(
     'media-inner',

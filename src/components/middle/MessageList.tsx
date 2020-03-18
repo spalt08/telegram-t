@@ -28,7 +28,7 @@ import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
-import { groupMessages, MessageDateGroup } from './helpers/groupMessages';
+import { groupMessages, MessageDateGroup, isAlbum } from './helpers/groupMessages';
 import useOnChange from '../../hooks/useOnChange';
 import findInViewport from '../../util/findInViewport';
 
@@ -320,15 +320,18 @@ function renderMessages(
       senderGroupIndex,
       senderGroupsArray,
     ) => {
-      if (senderGroup.length === 1 && isActionMessage(senderGroup[0])) {
+      if (senderGroup.length === 1 && !isAlbum(senderGroup[0]) && isActionMessage(senderGroup[0])) {
         const message = senderGroup[0];
         return <ServiceMessage key={message.id} message={message} />;
       }
 
       return flatten(senderGroup.map((
-        message,
+        messageOrAlbum,
         messageIndex,
       ) => {
+        const message = isAlbum(messageOrAlbum) ? messageOrAlbum.messages[0] : messageOrAlbum;
+        const album = isAlbum(messageOrAlbum) ? messageOrAlbum : undefined;
+
         if (message.prev_local_id && currentAnchorId === `message${message.prev_local_id}`) {
           currentAnchorId = `message${message.id}`;
         }
@@ -352,6 +355,7 @@ function renderMessages(
           <Message
             key={getMessageRenderKey(message)}
             message={message}
+            album={album}
             showAvatar={!isPrivate && !isOwn}
             showSenderName={messageIndex === 0 && !isPrivate && !isOwn}
             loadAndPlayMedia={loadAndPlayMedia}
