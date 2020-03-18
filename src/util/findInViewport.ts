@@ -3,7 +3,7 @@ export default function findInViewport(
   selector: string,
   margin = 0,
   isDense = false,
-  shouldContainFully = false,
+  shouldContainBottom = false,
 ) {
   const viewportY1 = container.scrollTop;
   const viewportY2 = viewportY1 + container.offsetHeight;
@@ -16,8 +16,8 @@ export default function findInViewport(
     const element = allElements[i];
     const y1 = element.offsetTop;
     const y2 = y1 + element.offsetHeight;
-    const isVisible = shouldContainFully
-      ? y1 >= viewportY1 - margin && y2 <= viewportY2 + margin
+    const isVisible = shouldContainBottom
+      ? y2 >= viewportY1 - margin && y2 <= viewportY2 + margin
       : y1 <= viewportY2 + margin && y2 >= viewportY1 - margin;
 
     if (isVisible) {
