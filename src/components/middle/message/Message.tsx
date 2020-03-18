@@ -235,7 +235,7 @@ const Message: FC<IProps> = ({
     }
 
     return (
-      <div className="sender-name" onClick={handleSenderClick}>
+      <div className="sender-name interactive" onClick={handleSenderClick}>
         {user ? getUserFullName(user) : NBSP}
       </div>
     );
