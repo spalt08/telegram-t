@@ -16,10 +16,13 @@
     font-weight: 500;
     line-height: 1.25rem;
     color: var(--accent-color);
-    cursor: pointer;
 
-    &:hover {
-      color: var(--accent-shade-color);
+    &.interactive {
+      cursor: pointer;
+
+      &:hover {
+        color: var(--accent-shade-color);
+      }
     }
 
     & + .File {
