@@ -1,3 +1,5 @@
+import { ApiMessage } from '../api/types';
+
 export enum LoadMoreDirection {
   Backwards,
   Forwards,
@@ -9,4 +11,9 @@ export enum FocusDirection {
   Up,
   Down,
   Static,
+}
+
+export interface IAlbum {
+  albumId: string;
+  messages: ApiMessage[];
 }

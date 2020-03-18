@@ -71,7 +71,7 @@ type UniversalMessage = (
   Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
     'out' | 'message' | 'entities' | 'fromId' | 'toId' | 'fwdFrom' | 'replyToMsgId' |
-    'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread'
+    'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId'
   )>
 );
 
@@ -114,6 +114,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     views: mtpMessage.views,
     ...(isEdited && { isEdited }),
     ...(isMediaUnread && { isMediaUnread }),
+    ...(mtpMessage.groupedId && { groupedId: mtpMessage.groupedId.toString() }),
   };
 }
 

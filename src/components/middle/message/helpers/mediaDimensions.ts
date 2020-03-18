@@ -1,11 +1,16 @@
 import { ApiMessage } from '../../../../api/types';
-import { calculateInlineImageDimensions } from '../../../common/helpers/mediaDimensions';
+import {
+  calculateInlineImageDimensions,
+  calculateVideoDimensions,
+  AlbumMediaParameters,
+} from '../../../common/helpers/mediaDimensions';
 import {
   getMessageText,
   getMessagePhoto,
   getMessageWebPagePhoto,
   isForwardedMessage,
   isOwnMessage,
+  getMessageVideo,
 } from '../../../../modules/helpers';
 
 const MIN_MEDIA_WIDTH = 100;
@@ -16,12 +21,16 @@ export function getMinMediaWidth(hasText?: boolean) {
   return hasText ? MIN_MEDIA_WIDTH_WITH_TEXT : MIN_MEDIA_WIDTH;
 }
 
-export function calculateMediaDimensions(message: ApiMessage) {
+export function calculateMediaDimensions(message: ApiMessage, albumMediaParams?: AlbumMediaParameters) {
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
-  const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
+  const photo = getMessagePhoto(message) || getMessageWebPagePhoto(message);
+  const video = getMessageVideo(message);
+
   const isWebPagePhoto = Boolean(getMessageWebPagePhoto(message));
-  const { width, height } = calculateInlineImageDimensions(photo, isOwn, isForwarded, isWebPagePhoto);
+  const { width, height } = photo
+    ? calculateInlineImageDimensions(photo, isOwn, isForwarded, isWebPagePhoto, albumMediaParams)
+    : calculateVideoDimensions(video!, isOwn, isForwarded, albumMediaParams);
 
   const hasText = Boolean(getMessageText(message));
   const minMediaWidth = getMinMediaWidth(hasText);

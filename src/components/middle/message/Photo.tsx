@@ -14,16 +14,16 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
 import buildClassName from '../../../util/buildClassName';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
+import { AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
-
-import './Media.scss';
 
 type IProps = {
   message: ApiMessage;
   load?: boolean;
   fileTransferProgress?: number;
   size?: 'inline' | 'pictogram';
+  albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelTransfer?: () => void;
 };
@@ -33,6 +33,7 @@ const Photo: FC<IProps> = ({
   load,
   fileTransferProgress,
   size = 'inline',
+  albumMediaParams,
   onClick,
   onCancelTransfer,
 }) => {
@@ -53,7 +54,7 @@ const Photo: FC<IProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring && load, undefined, undefined, 'slow');
 
-  const { width, height, isSmall } = calculateMediaDimensions(message);
+  const { width, height, isSmall } = calculateMediaDimensions(message, albumMediaParams);
 
   const className = buildClassName(
     'media-inner',
