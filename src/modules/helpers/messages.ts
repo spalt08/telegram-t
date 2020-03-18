@@ -18,6 +18,13 @@ export function getMessageSummaryText(message: ApiMessage, hasPictogram = false)
     text, photo, video, audio, voice, document, sticker, contact, poll,
   } = message.content;
 
+  if (message.groupedId) {
+    if (text && text.text.length) {
+      return `${!hasPictogram ? '(Album) ' : ''}${text.text}`;
+    }
+    return 'Album';
+  }
+
   if (photo) {
     if (text && text.text.length) {
       return `${!hasPictogram ? '(Photo) ' : ''}${text.text}`;

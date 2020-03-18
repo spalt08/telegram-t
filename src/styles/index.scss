@@ -106,6 +106,30 @@ div[role="button"] {
   }
 }
 
+// Common styles for all media-type components across the app.
+.media-inner {
+  position: relative;
+
+  video,
+  img {
+    display: block;
+  }
+
+  .thumbnail ~ .full-media, .message-media-loading {
+    position: absolute;
+  }
+
+  .thumbnail {
+    &.blur {
+      filter: blur(7px);
+    }
+
+    &.empty {
+      visibility: hidden;
+    }
+  }
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);
