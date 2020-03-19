@@ -1,95 +1,177 @@
 import React, {
-  FC, useEffect, useRef, useState,
+  FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
-import buildClassName from '../../util/buildClassName';
 
 import './Transition.scss';
 
 type ChildrenFn = () => any;
 type IProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade';
+  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide';
   direction?: 'auto' | 'inverse' | 1 | -1;
+  renderCount?: number;
+  shouldRestoreHeight?: boolean;
   onStart?: () => void;
   onStop?: () => void;
   children: ChildrenFn;
 };
 
-// For some reason the event is fired sooner than it should.
-const ANIMATION_END_DELAY = 50;
+const ANIMATION_DURATION = {
+  slide: 350,
+  'slow-slide': 450,
+  'slide-fade': 400,
+  'zoom-fade': 150,
+  'scroll-slide': 500,
+};
+const END_DELAY = 50;
 
 const Transition: FC<IProps> = ({
   activeKey,
   name,
   direction = 'auto',
+  renderCount,
+  shouldRestoreHeight,
   onStart,
   onStop,
   children,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
-
-  const prevChildren = usePrevious<ChildrenFn>(children);
+  const rendersRef = useRef<Record<number, ChildrenFn>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
-
-  const fromChildrenRef = useRef<ChildrenFn>();
-  const fromActiveKeyRef = useRef<any>();
-
-  const isAppendStageRef = useRef<any>();
-  const [isAnimating, setIsAnimating] = useState<boolean>(false);
-
-  // Restore container height after switching content to absolute positioning.
-  useEffect(() => {
-    if (!isAnimating) {
-      const container = containerRef.current!;
-      container.style.height = `${container.firstElementChild!.clientHeight}px`;
-    }
-  }, [isAnimating, children]);
-
-  const handleAnimationEnd = () => {
-    setTimeout(() => {
-      isAppendStageRef.current = false;
-      setIsAnimating(false);
-
-      if (onStop) {
-        onStop();
-      }
-    }, ANIMATION_END_DELAY);
-  };
+  const activateTimeoutRef = useRef<number>();
 
   const activeKeyChanged = prevActiveKey !== null && activeKey !== prevActiveKey;
 
-  if (activeKeyChanged) {
-    fromChildrenRef.current = prevChildren;
-    fromActiveKeyRef.current = prevActiveKey;
-    isAppendStageRef.current = true;
-    setIsAnimating(true);
-
-    if (onStart) {
-      onStart();
-    }
+  if (!renderCount && activeKeyChanged) {
+    rendersRef.current = {
+      [prevActiveKey]: rendersRef.current[prevActiveKey],
+    };
   }
 
-  const contents = isAppendStageRef.current
-    ? Array.prototype.concat(fromChildrenRef.current!(), children())
-    : children();
+  rendersRef.current[activeKey] = children;
 
-  const isBackwards = isAppendStageRef.current && (
-    direction === -1
-    || (direction === 'auto' && Number(fromActiveKeyRef.current) > Number(activeKey))
-    || (direction === 'inverse' && Number(fromActiveKeyRef.current) < Number(activeKey))
-  );
+  useLayoutEffect(() => {
+    const container = containerRef.current!;
+    const childNodes = Array.from(container.childNodes);
 
-  const className = buildClassName(
-    'Transition',
-    name,
-    isAnimating && 'animating',
-    isBackwards && 'backwards',
-  );
+    if (childNodes.length === 1) {
+      const firstChild = childNodes[0];
+
+      if (firstChild instanceof Element) {
+        firstChild.classList.add('active');
+      }
+
+      return;
+    }
+
+    if (!activeKeyChanged || !childNodes.length) {
+      return;
+    }
+
+    if (activateTimeoutRef.current) {
+      clearTimeout(activateTimeoutRef.current);
+      activateTimeoutRef.current = null;
+    }
+
+    const isBackwards = (
+      direction === -1
+      || (direction === 'auto' && prevActiveKey > activeKey)
+      || (direction === 'inverse' && prevActiveKey < activeKey)
+    );
+
+    container.classList.remove('animating');
+    container.classList.toggle('backwards', isBackwards);
+
+    const keys = Object.keys(rendersRef.current).map(Number);
+    const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
+    const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
+
+    childNodes.forEach((node, i) => {
+      if (node instanceof HTMLElement) {
+        node.classList.remove('active');
+        node.classList.toggle('from', i === prevActiveIndex);
+        node.classList.toggle('through', (
+          (i > prevActiveIndex && i < activeIndex) || (i < prevActiveIndex && i > activeIndex)
+        ));
+        node.classList.toggle('to', i === activeIndex);
+      }
+    });
+
+    if (name === 'scroll-slide') {
+      const width = container.offsetWidth;
+      container.scrollBy({
+        left: activeIndex > prevActiveIndex ? width : -width,
+        behavior: 'smooth',
+      });
+    }
+
+    requestAnimationFrame(() => {
+      container.classList.add('animating');
+
+      activateTimeoutRef.current = window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          container.classList.remove('animating', 'backwards');
+
+          childNodes.forEach((node, i) => {
+            if (node instanceof HTMLElement) {
+              node.classList.remove('from', 'through', 'to');
+              node.classList.toggle('active', i === activeIndex);
+            }
+          });
+
+          if (name === 'scroll-slide') {
+            container.scrollLeft = activeKey * container.offsetWidth;
+          }
+
+          if (shouldRestoreHeight) {
+            const activeElement = container.querySelector<HTMLDivElement>('.active');
+
+            if (activeElement) {
+              activeElement.style.height = 'auto';
+              container.style.height = `${activeElement.clientHeight}px`;
+            }
+          }
+
+          if (onStop) {
+            onStop();
+          }
+        });
+      }, ANIMATION_DURATION[name] + END_DELAY);
+
+      if (onStart) {
+        onStart();
+      }
+    });
+  }, [activeKey, activeKeyChanged, direction, name, onStart, onStop, prevActiveKey, renderCount, shouldRestoreHeight]);
+
+  useLayoutEffect(() => {
+    if (shouldRestoreHeight) {
+      const container = containerRef.current!;
+      const activeElement = container.querySelector<HTMLDivElement>('.active')
+        || container.querySelector<HTMLDivElement>('.from');
+
+      if (activeElement) {
+        activeElement.style.height = 'auto';
+        container.style.height = `${activeElement.clientHeight}px`;
+      }
+    }
+  }, [shouldRestoreHeight, children]);
+
+  const renders = rendersRef.current;
+  let contents;
+  if (renderCount) {
+    contents = [];
+    for (let key = 0; key < renderCount; key++) {
+      contents.push(renders[key] ? <div key={key}>{renders[key]()}</div> : undefined);
+    }
+  } else {
+    contents = Object.keys(renders).map((key) => <div key={key}>{renders[Number(key)]()}</div>);
+  }
 
   return (
-    <div ref={containerRef} className={className} onAnimationEnd={handleAnimationEnd}>
+    <div ref={containerRef} className={['Transition', name].join(' ')}>
       {contents}
     </div>
   );

@@ -34,7 +34,7 @@ const InfiniteScroll: FC<IProps> = ({
     containerRef = ref;
   }
 
-  const anchorTopRef = useRef<number>(undefined);
+  const anchorTopRef = useRef<number>();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onLoadMoreDebounced = useMemo(() => debounce(onLoadMore, 1000, true, false), [onLoadMore, items]);

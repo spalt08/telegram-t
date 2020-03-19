@@ -499,12 +499,9 @@ class TelegramClient {
 
     }
 
-    _pickFileSize(sizes, sizeType, downgradeAllowed = false) {
+    _pickFileSize(sizes, sizeType) {
         if (!sizeType || !sizes || !sizes.length) {
             return null
-        }
-        if (!downgradeAllowed) {
-            return sizes.find((s) => s.type === sizeType)
         }
         const indexOfSize = sizeTypes.indexOf(sizeType)
         let size
@@ -536,7 +533,7 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return
         }
-        const size = this._pickFileSize(photo.sizes, args.sizeType, true)
+        const size = this._pickFileSize(photo.sizes, args.sizeType)
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return
         }

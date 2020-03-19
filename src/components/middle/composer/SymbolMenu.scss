@@ -4,11 +4,29 @@
   &-main {
     width: var(--menu-width);
     height: 23.25rem;
+
+    > .Transition {
+      --slide-width: var(--menu-width);
+    }
   }
 
-  .picker-tab {
-    &:not(.active) {
-      display: none;
+  .menu-container:not(.open) {
+    .picker-tab {
+      visibility: hidden;
+    }
+  }
+
+  .Transition > div:not(.active) {
+    .picker-tab {
+      .Loading {
+        display: none;
+      }
+    }
+  }
+
+  .Transition.slide {
+    .Loading {
+      height: 22rem;
     }
   }
 
@@ -43,11 +61,6 @@
 
   &-container {
     position: relative;
-
-    &:not(.shown) {
-      display: block !important;
-      visibility: hidden;
-    }
   }
 
   &-button {

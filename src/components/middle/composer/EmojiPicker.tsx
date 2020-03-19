@@ -9,6 +9,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import buildClassName from '../../../util/buildClassName';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -113,10 +114,6 @@ const EmojiPicker: FC<IProps> = ({
     }, OPEN_ANIMATION_DELAY);
   }, []);
 
-  const shouldShowCategory = useCallback((index: number) => {
-    return Math.abs(activeCategoryIndex - index) <= 1;
-  }, [activeCategoryIndex]);
-
   const selectCategory = useCallback((index: number) => {
     if (activeCategoryIndex === index) {
       return;
@@ -125,14 +122,8 @@ const EmojiPicker: FC<IProps> = ({
     setActiveCategoryIndex(index);
 
     const categoryEl = document.getElementById(`emoji-category-${allCategories[index].id}`)!;
-    const isShown = shouldShowCategory(index);
-
-    if (isShown) {
-      fastSmoothScroll(containerRef.current!, categoryEl, 'start', SMOOTH_SCROLL_DISTANCE);
-    } else {
-      categoryEl.scrollIntoView();
-    }
-  }, [activeCategoryIndex, allCategories, shouldShowCategory]);
+    fastSmoothScroll(containerRef.current!, categoryEl, 'start', SMOOTH_SCROLL_DISTANCE);
+  }, [activeCategoryIndex, allCategories]);
 
   const handleScroll = useCallback(() => {
     runThrottledForScroll(() => {
@@ -162,31 +153,35 @@ const EmojiPicker: FC<IProps> = ({
     );
   }
 
+  const containerClassName = buildClassName(
+    'EmojiPicker',
+    className,
+  );
+
   if (!emojis) {
     return (
-      <div className={`EmojiPicker ${className || ''}`}>
+      <div className={containerClassName}>
         <Loading />
       </div>
     );
   }
 
   return (
-    <div className={`EmojiPicker ${className || ''}`}>
+    <div className={containerClassName}>
       <div
         ref={containerRef}
-        className="EmojiPicker-main custom-scroll"
+        className="EmojiPicker-main no-scroll"
         onScroll={handleScroll}
       >
-        {allCategories.map((category, i) => (
+        {allCategories.map((category) => (
           <EmojiCategory
             category={category}
             allEmojis={emojis}
             onEmojiSelect={handleEmojiSelect}
-            show={shouldShowCategory(i)}
           />
         ))}
       </div>
-      <div className="StickerMenu-footer EmojiPicker-footer">
+      <div className="EmojiPicker-footer">
         {allCategories.map(renderCategoryButton)}
       </div>
     </div>

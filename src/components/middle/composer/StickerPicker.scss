@@ -18,14 +18,14 @@
     user-select: none;
 
     scrollbar-width: none;
-    scrollbar-color: rgba(0,0,0,0);
+    scrollbar-color: rgba(0, 0, 0, 0);
 
     &::-webkit-scrollbar {
       height: 0;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: rgba(0,0,0,0);
+      background-color: rgba(0, 0, 0, 0);
     }
 
     // Spacer to counter last button margin not being accounted in scroll width
@@ -35,6 +35,16 @@
       flex-shrink: 0;
       width: 0.1px;
       height: 1rem;
+    }
+  }
+
+  .symbol-set-container {
+    width: 25rem;
+    line-height: 0;
+
+    &:not(.shown) {
+      display: block !important;
+      visibility: hidden;
     }
   }
 

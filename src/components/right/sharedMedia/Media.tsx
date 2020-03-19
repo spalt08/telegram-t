@@ -23,14 +23,14 @@ const Media: FC<IProps> = ({ message, onClick }) => {
     onClick(message.id);
   };
 
-  const video = getMessageVideo(message);
-
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
   const { shouldRenderThumb, shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(mediaBlobUrl, 'slow');
 
+  const video = getMessageVideo(message);
+
   return (
-    <div onClick={handleClick} tabIndex={-1} className="Media">
+    <div onClick={handleClick} className="Media">
       {shouldRenderThumb && (
         <img src={thumbDataUri} className="blur" alt="" />
       )}

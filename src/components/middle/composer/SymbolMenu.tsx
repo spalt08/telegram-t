@@ -6,25 +6,25 @@ import { ApiSticker, ApiVideo } from '../../../api/types';
 
 import Menu from '../../ui/Menu';
 import TabList from '../../ui/TabList';
+import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
 import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
 
 import './SymbolMenu.scss';
 
-const TABS = [
+enum Tabs {
   'Emoji',
   'Stickers',
   'GIFs',
-];
+}
 
-const CONTENT = [
-  'emoji',
-  'sticker',
-  'gif',
-];
-
+// Getting enum string values for display in Tabs.
+// See: https://www.typescriptlang.org/docs/handbook/enums.html#reverse-mappings
+const TAB_TITLES = Object.values(Tabs).filter((value) => typeof value === 'string');
 const MENU_CLOSE_TIMEOUT = 250;
+const TRANSITION_NAME = navigator.userAgent.includes('Safari') ? 'slide' : 'scroll-slide';
+
 let closeTimeout: NodeJS.Timeout | null = null;
 
 type IProps = {
@@ -38,8 +38,7 @@ type IProps = {
 const SymbolMenu: FC<IProps> = ({
   isOpen, onClose, onEmojiSelect, onStickerSelect, onGifSelect,
 }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const selectedScreen = CONTENT[activeTab];
+  const [activeTab, setActiveTab] = useState<number>(0);
   const isActivated = useRef(false);
   const isMouseInside = useRef(false);
 
@@ -76,6 +75,36 @@ const SymbolMenu: FC<IProps> = ({
     }, MENU_CLOSE_TIMEOUT);
   }, [onClose]);
 
+  function renderContent() {
+    switch (activeTab) {
+      case Tabs.Emoji:
+        return (
+          <EmojiPicker
+            className="picker-tab"
+            onEmojiSelect={onEmojiSelect}
+          />
+        );
+      case Tabs.Stickers:
+        return (
+          <StickerPicker
+            className="picker-tab"
+            load={isOpen}
+            onStickerSelect={onStickerSelect}
+          />
+        );
+      case Tabs.GIFs:
+        return (
+          <GifPicker
+            className="picker-tab"
+            load={isOpen}
+            onGifSelect={onGifSelect}
+          />
+        );
+    }
+
+    return null;
+  }
+
   return (
     <Menu
       isOpen={isOpen}
@@ -86,27 +115,13 @@ const SymbolMenu: FC<IProps> = ({
       onCloseAnimationEnd={onClose}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      noCloseOnBackdrop
     >
-      <TabList activeTab={activeTab} tabs={TABS} onSwitchTab={setActiveTab} />
+      <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
       <div className="SymbolMenu-main">
         {isActivated.current && (
-          <>
-            <EmojiPicker
-              className={`picker-tab ${isOpen && selectedScreen === 'emoji' ? 'active' : ''}`}
-              onEmojiSelect={onEmojiSelect}
-            />
-            <StickerPicker
-              className={`picker-tab ${isOpen && selectedScreen === 'sticker' ? 'active' : ''}`}
-              load={isOpen && selectedScreen === 'sticker'}
-              onStickerSelect={onStickerSelect}
-            />
-            <GifPicker
-              className={`picker-tab ${isOpen && selectedScreen === 'gif' ? 'active' : ''}`}
-              load={isOpen && selectedScreen === 'gif'}
-              onGifSelect={onGifSelect}
-            />
-          </>
+          <Transition name={TRANSITION_NAME} activeKey={activeTab} renderCount={TAB_TITLES.length}>
+            {renderContent}
+          </Transition>
         )}
       </div>
     </Menu>

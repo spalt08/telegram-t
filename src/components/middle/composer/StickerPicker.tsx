@@ -11,6 +11,7 @@ import { throttle } from '../../../util/schedulers';
 import { getFirstLetters } from '../../../util/textFormat';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import buildClassName from '../../../util/buildClassName';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -32,6 +33,7 @@ type PartialStickerSet = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'sticker
 const SMOOTH_SCROLL_DISTANCE = 500;
 // For some reason, parallel `scrollIntoView` executions are conflicting.
 const FOOTER_SCROLL_DELAY = 500;
+const FOOTER_BUTTON_WIDTH = 60; // px. Includes margins
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
@@ -84,9 +86,6 @@ const StickerPicker: FC<IProps> = ({
       return undefined;
     }
 
-    const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
-    setVisibleSetIndexes(visibleIndexes);
-
     const footer = footerRef.current!;
 
     function scrollFooter(e: WheelEvent) {
@@ -108,15 +107,14 @@ const StickerPicker: FC<IProps> = ({
 
     setTimeout(() => {
       const footer = footerRef.current!;
-      const selector = `.sticker-set-button:nth-child(${activeSetIndex + 1})`;
-      const activeSetButton = footer.querySelector(selector) as HTMLButtonElement;
+      const newLeft = activeSetIndex * FOOTER_BUTTON_WIDTH - footer.offsetWidth / 2 + FOOTER_BUTTON_WIDTH / 2;
 
-      if (!activeSetButton) {
+      if (newLeft > footer.offsetWidth) {
         return;
       }
 
       footer.scrollTo({
-        left: activeSetButton.offsetLeft - footer.offsetWidth / 2 + activeSetButton.offsetWidth / 2,
+        left: newLeft,
         behavior: 'smooth',
       });
     }, FOOTER_SCROLL_DELAY);
@@ -144,7 +142,10 @@ const StickerPicker: FC<IProps> = ({
 
   function renderSetButton(set: PartialStickerSet, index: number) {
     const stickerSetCover = set.stickers[0];
-    const buttonClassName = `symbol-set-button sticker-set-button ${index === activeSetIndex ? 'activated' : ''}`;
+    const buttonClassName = buildClassName(
+      'symbol-set-button sticker-set-button',
+      index === activeSetIndex && 'activated',
+    );
 
     if (!stickerSetCover || set.id === 'recent') {
       return (
@@ -174,25 +175,27 @@ const StickerPicker: FC<IProps> = ({
     );
   }
 
+  const fullClassName = buildClassName('StickerPicker', className);
+
   if (!areLoaded) {
     return (
-      <div className={`StickerPicker ${className || ''}`}>
+      <div className={fullClassName}>
         <Loading />
       </div>
     );
   }
 
   return (
-    <div className={`StickerPicker ${className || ''}`}>
+    <div className={fullClassName}>
       <div
         ref={containerRef}
-        className="StickerPicker-main custom-scroll"
+        className="StickerPicker-main no-scroll"
         onScroll={handleScroll}
       >
         {allSets.map((set, index) => (
           <StickerSet
             set={set}
-            loadAndShow={visibleSetIndexes.includes(index)}
+            load={visibleSetIndexes.includes(index)}
             loadStickers={loadStickers}
             onStickerSelect={handleStickerSelect}
           />
@@ -200,7 +203,7 @@ const StickerPicker: FC<IProps> = ({
       </div>
       <div
         ref={footerRef}
-        className="StickerMenu-footer StickerPicker-footer"
+        className="StickerPicker-footer"
       >
         {allSets.map(renderSetButton)}
       </div>
