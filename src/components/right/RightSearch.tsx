@@ -6,7 +6,8 @@ import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
 import {
   selectUser,
   selectChatMessages,
-  selectOpenChat, selectCurrentMessageSearch,
+  selectOpenChat,
+  selectCurrentMessageSearch,
 } from '../../modules/selectors';
 import {
   getMessageText,
@@ -27,6 +28,7 @@ import Avatar from '../common/Avatar';
 import './RightSearch.scss';
 
 type IProps = {
+  chatId: number;
   chat: ApiChat;
   messagesById: Record<number, ApiMessage>;
   query?: string;
@@ -35,6 +37,7 @@ type IProps = {
 } & Pick<GlobalActions, 'searchMessages' | 'focusMessage'>;
 
 const RightSearch: FC<IProps> = ({
+  chatId,
   chat,
   messagesById,
   query,
@@ -54,12 +57,12 @@ const RightSearch: FC<IProps> = ({
       return {
         message,
         user: message.sender_user_id ? selectUser(getGlobal(), message.sender_user_id) : undefined,
-        onClick: () => focusMessage({ chatId: chat.id, messageId: id }),
+        onClick: () => focusMessage({ chatId, messageId: id }),
       };
     });
 
     return orderBy(results, ({ message }) => message.date, 'desc');
-  }, [chat.id, focusMessage, foundIds, messagesById, query]);
+  }, [chatId, focusMessage, foundIds, messagesById, query]);
 
   const renderSearchResult = ({
     message, user, onClick,

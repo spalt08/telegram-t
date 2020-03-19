@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useEffect,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -9,8 +11,15 @@ import { selectCurrentMessageSearch } from '../../modules/selectors';
 import RightHeader from './RightHeader';
 import Profile from './Profile';
 import RightSearch from './RightSearch';
+import Transition from '../ui/Transition';
 
 import './RightColumn.scss';
+
+enum ColumnContent {
+  // eslint-disable-next-line no-shadow
+  Profile,
+  Search,
+}
 
 type IProps = {
   isUserInfo: boolean;
@@ -31,32 +40,39 @@ const RightColumn: FC<IProps> = ({
   closeMessageTextSearch,
 }) => {
   const isOpen = isSearch || isUserInfo || isChatInfo;
+  const columnContent = isSearch ? ColumnContent.Search : ColumnContent.Profile;
   const close = useCallback(() => {
     if (isSearch) {
-      return closeMessageTextSearch();
+      closeMessageTextSearch();
     } else if (isUserInfo) {
-      return openUserInfo({ id: undefined });
+      openUserInfo({ id: undefined });
     } else if (isChatInfo) {
-      return toggleChatInfo();
+      toggleChatInfo();
     }
-
-    return undefined;
-  }, [closeMessageTextSearch, isChatInfo, isSearch, isUserInfo, openUserInfo, toggleChatInfo]);
+  }, [isChatInfo, isSearch, isUserInfo, closeMessageTextSearch, openUserInfo, toggleChatInfo]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 
-  if (!selectedUserId && !isChatInfo && !isSearch) {
+  if (!isOpen) {
     return null;
+  }
+
+  function renderContent() {
+    return (
+      isSearch ? (
+        <RightSearch chatId={selectedChatId} />
+      ) : (isUserInfo || isChatInfo) ? (
+        <Profile key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
+      ) : null
+    );
   }
 
   return (
     <div id="RightColumn">
-      <RightHeader onClose={close} />
-      {isSearch ? (
-        <RightSearch chatId={selectedChatId} />
-      ) : (isUserInfo || isChatInfo) ? (
-        <Profile key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />
-      ) : null}
+      <RightHeader onClose={close} isSearchOpen={isSearch} />
+      <Transition activeKey={columnContent} name="zoom-fade">
+        {renderContent}
+      </Transition>
     </div>
   );
 };

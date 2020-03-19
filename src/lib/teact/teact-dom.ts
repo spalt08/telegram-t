@@ -339,8 +339,8 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
 
 function updateAttribute(element: HTMLElement, key: string, oldValue: any, newValue: any) {
   if (key === 'value') {
-    // Setting value to '' (as we do with `className`) causes a cursor jump.
-    (element as HTMLInputElement).value = newValue;
+    // `delete` do not update the value, and setting the value to '' (as we do with `className`) causes a cursor jump.
+    (element as HTMLInputElement).value = newValue || '';
   } else {
     removeAttribute(element, key, oldValue);
     addAttribute(element, key, newValue);

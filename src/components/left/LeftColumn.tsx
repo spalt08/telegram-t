@@ -1,24 +1,25 @@
 import React, {
   FC, useState, useCallback, useEffect,
 } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 
+import { GlobalActions } from '../../global/types';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import LeftHeader from './LeftHeader';
 import ConnectionState from './ConnectionState';
 import ChatList from './ChatList';
 import LeftRecent from './LeftRecent';
+import LeftSearch from './LeftSearch';
+import Transition from '../ui/Transition';
 
 import './LeftColumn.scss';
-import Transition from '../ui/Transition';
-import LeftSearch from './LeftSearch';
-import { withGlobal } from '../../lib/teact/teactn';
-import { GlobalActions } from '../../global/types';
 
 enum ColumnContent {
-  'ChatList',
-  'RecentChats',
-  'GlobalSearch',
+  // eslint-disable-next-line no-shadow
+  ChatList,
+  RecentChats,
+  GlobalSearch,
 }
 
 type IProps = {
