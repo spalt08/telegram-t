@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage, ApiMessageSearchType } from '../../api/types';
+import { ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
@@ -55,19 +55,14 @@ const Profile: FC<IProps> = ({
   openMediaViewer,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
-
   const [activeTab, setActiveTab] = useState(0);
-  const [mediaType, setMediaType] = useState<ApiMessageSearchType | undefined>();
+
+  const mediaType = MEDIA_TYPES[activeTab];
 
   const messageIds = useMemo(
     () => (mediaType && chatMessages ? getMessageContentIds(chatMessages, mediaType).reverse() : []),
     [chatMessages, mediaType],
   );
-
-  // Async rendering.
-  useEffect(() => {
-    setMediaType(MEDIA_TYPES[activeTab]);
-  }, [activeTab]);
 
   useEffect(() => {
     if (mediaType) {
@@ -113,6 +108,42 @@ const Profile: FC<IProps> = ({
     openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isReversed: true });
   }, [chatId, resolvedUserId, openMediaViewer]);
 
+  function renderSharedMedia() {
+    return (
+      <div className={`content ${mediaType}-list`}>
+        {mediaType === 'media' ? (
+          messageIds.map((id) => (
+            <Media
+              key={id}
+              message={chatMessages[id]}
+              onClick={handleSelectMedia}
+            />
+          ))
+        ) : mediaType === 'documents' ? (
+          messageIds.map((id) => (
+            <Document key={id} message={chatMessages[id]} />
+          ))
+        ) : mediaType === 'links' ? (
+          messageIds.map((id) => (
+            <WebLink
+              key={id}
+              message={chatMessages[id]}
+            />
+          ))
+        ) : mediaType === 'audio' ? (
+          messageIds.map((id) => (
+            <Audio
+              key={id}
+              inSharedMedia
+              message={chatMessages[id]}
+              date={chatMessages[id].date}
+            />
+          ))
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <InfiniteScroll
       ref={containerRef}
@@ -129,40 +160,15 @@ const Profile: FC<IProps> = ({
         <GroupExtra chatId={chatId} />,
       ]}
       <div className="shared-media">
-        <Transition activeKey={activeTab} name="slide" onStart={handleTransitionStart} onStop={handleTransitionStop}>
-          {() => (
-            <div className={`content ${mediaType}-list`}>
-              {mediaType === 'media' ? (
-                messageIds.map((id: number) => (
-                  <Media
-                    key={id}
-                    message={chatMessages[id]}
-                    onClick={handleSelectMedia}
-                  />
-                ))
-              ) : mediaType === 'documents' ? (
-                messageIds.map((id: number) => (
-                  <Document key={id} message={chatMessages[id]} />
-                ))
-              ) : mediaType === 'links' ? (
-                messageIds.map((id: number) => (
-                  <WebLink
-                    key={id}
-                    message={chatMessages[id]}
-                  />
-                ))
-              ) : mediaType === 'audio' ? (
-                messageIds.map((id: number) => (
-                  <Audio
-                    key={id}
-                    inSharedMedia
-                    message={chatMessages[id]}
-                    date={chatMessages[id].date}
-                  />
-                ))
-              ) : null}
-            </div>
-          )}
+        <Transition
+          name="slide"
+          activeKey={activeTab}
+          renderCount={TAB_TITLES.length}
+          shouldRestoreHeight
+          onStart={handleTransitionStart}
+          onStop={handleTransitionStop}
+        >
+          {renderSharedMedia}
         </Transition>
         <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
       </div>

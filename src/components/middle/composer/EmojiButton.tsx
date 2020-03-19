@@ -6,30 +6,22 @@ import './EmojiButton.scss';
 
 interface IProps {
   emoji: Emoji;
-  top: number;
-  left: number;
-  onEmojiSelect: (emoji: string, name: string) => void;
+  onClick: (emoji: string, name: string) => void;
 }
 
-// TODO: Support selecting Emoji skin, store preferred skin in GlobalState
-const EmojiButton: FC<IProps> = ({
-  emoji, top, left, onEmojiSelect,
-}) => {
-  const handleSelectEmoji = useCallback(() => {
-    onEmojiSelect(emoji.native, emoji.id);
-  }, [emoji, onEmojiSelect]);
+const EmojiButton: FC<IProps> = ({ emoji, onClick }) => {
+  const handleClick = useCallback(() => {
+    onClick(emoji.native, emoji.id);
+  }, [emoji, onClick]);
 
   return (
-    <button
+    <div
       className="EmojiButton"
-      onClick={handleSelectEmoji}
-      type="button"
+      onClick={handleClick}
       title={emoji.colons}
-      // @ts-ignore teact feature
-      style={`top: ${top}px; left: ${left}px`}
     >
       {emoji.native}
-    </button>
+    </div>
   );
 };
 

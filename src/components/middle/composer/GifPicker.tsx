@@ -64,7 +64,7 @@ const GifPicker: FC<IProps> = ({
   return (
     <div
       ref={containerRef}
-      className={buildClassName('GifPicker custom-scroll', className)}
+      className={buildClassName('GifPicker no-scroll', className)}
       onScroll={handleScroll}
     >
       {!areLoaded ? (
@@ -74,8 +74,8 @@ const GifPicker: FC<IProps> = ({
           <GifButton
             key={gif.id}
             gif={gif}
-            onGifSelect={onGifSelect}
-            loadAndShow={visibleIndexes.includes(index)}
+            onClick={onGifSelect}
+            load={visibleIndexes.includes(index)}
           />
         ))
       )}

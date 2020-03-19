@@ -25,6 +25,8 @@ type IProps = {
   searchQuery?: string;
 } & Pick<GlobalActions, 'setGlobalSearchQuery'>;
 
+const TRANSITION_RENDER_COUNT = 3;
+
 const LeftColumn: FC<IProps> = ({ searchQuery, setGlobalSearchQuery }) => {
   const [columnContent, setColumnContent] = useState<ColumnContent>(ColumnContent.ChatList);
   const isSearchOpen = columnContent !== ColumnContent.ChatList;
@@ -74,7 +76,7 @@ const LeftColumn: FC<IProps> = ({ searchQuery, setGlobalSearchQuery }) => {
         onSearchClose={handleCloseSearch}
       />
       <ConnectionState />
-      <Transition activeKey={columnContent} name="zoom-fade">
+      <Transition activeKey={columnContent} renderCount={TRANSITION_RENDER_COUNT} name="zoom-fade">
         {renderContent}
       </Transition>
     </div>

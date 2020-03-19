@@ -1,23 +1,18 @@
 .StickerButton {
-  outline: none !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   width: 4.75rem;
   height: 4.75rem;
   margin: 0.125rem;
-  padding: 0;
-  border: 0;
   border-radius: var(--border-radius-messages-small);
-  background-color: transparent;
+  background-size: contain !important;
+  background: transparent no-repeat center;
   cursor: pointer;
-  flex-shrink: 0;
   overflow: hidden;
-  font-size: 1.75rem;
   transition: background-color .15s ease;
 
-  &.absolute-position {
-    position: absolute;
+  &:not(.shown) {
+    display: inline-block !important;
+    visibility: hidden;
   }
 
   &.set-button {
@@ -26,10 +21,8 @@
     margin: 0 0.5rem;
   }
 
-  img {
-    width: 100%;
+  .AnimatedSticker {
     height: 100%;
-    object-fit: contain;
   }
 
   &:hover {

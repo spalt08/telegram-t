@@ -1,5 +1,7 @@
 import React, { FC, useLayoutEffect, useRef } from '../../lib/teact/teact';
 
+import buildClassName from '../../util/buildClassName';
+
 import './Tab.scss';
 
 type IProps = {
@@ -20,39 +22,33 @@ const Tab: FC<IProps> = ({
   const tabRef = useRef<HTMLButtonElement>();
 
   useLayoutEffect(() => {
-    if (!active) {
+    if (!active || previousActiveTab === null) {
       return;
     }
 
     const tab = tabRef.current!;
-    tab.classList.add('show-indicator');
+    const indicator = tab.querySelector('i')!;
+    const currentIndicator = tab.parentElement!.children[previousActiveTab].querySelector('i')!;
 
-    if (active && previousActiveTab !== null) {
-      const indicator = tab.querySelector('i')!;
-      const currentIndicator = tab.parentElement!.children[previousActiveTab].querySelector('i')!;
+    currentIndicator.classList.remove('animate');
+    indicator.classList.remove('animate');
 
-      currentIndicator.classList.remove('animate');
-      indicator.classList.remove('animate');
+    // We move and resize our indicator so it repeats the position and size of the previous one.
+    const shiftLeft = currentIndicator.parentElement!.offsetLeft - indicator.parentElement!.offsetLeft;
+    const scaleFactor = currentIndicator.clientWidth / indicator.clientWidth;
+    indicator.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
 
-      // We move and resize our indicator so it repeats the position and size of the previous one.
-      const shiftLeft = currentIndicator.parentElement!.offsetLeft - indicator.parentElement!.offsetLeft;
-      const scaleFactor = currentIndicator.clientWidth / indicator.clientWidth;
-      indicator.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
-
-      requestAnimationFrame(() => {
-        // Now we remove the transform to let it animate to its own position and size.
-        indicator.classList.add('animate');
-        indicator.style.transform = 'none';
-      });
-    }
+    requestAnimationFrame(() => {
+      // Now we remove the transform to let it animate to its own position and size.
+      indicator.classList.add('animate');
+      indicator.style.transform = 'none';
+    });
   }, [active, previousActiveTab]);
-
-  const fullClassName = ['Tab', className, active && 'active'].filter(Boolean).join(' ');
 
   return (
     <button
       type="button"
-      className={fullClassName}
+      className={buildClassName('Tab', className, active && 'active')}
       onClick={onClick}
       ref={tabRef}
     >

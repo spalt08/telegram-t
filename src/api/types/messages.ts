@@ -49,7 +49,6 @@ export interface ApiVideo {
   isGif?: boolean;
   thumbnail?: ApiThumbnail;
   blobUrl?: string;
-  localMediaHash?: string;
 }
 
 export interface ApiAudio {

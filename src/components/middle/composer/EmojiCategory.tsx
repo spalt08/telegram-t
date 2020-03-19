@@ -1,26 +1,15 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
-
-import useShowTransition from '../../../hooks/useShowTransition';
-
 import EmojiButton from './EmojiButton';
 
 interface IProps {
   category: EmojiCategory;
   allEmojis: AllEmojis;
-  show: boolean;
   onEmojiSelect: (emoji: string, name: string) => void;
 }
 
-const EMOJI_ROW_SIZE = 9;
-const EMOJI_SIZE = 44; // px
-
 const EmojiCategory: FC<IProps> = ({
-  category, allEmojis, show, onEmojiSelect,
+  category, allEmojis, onEmojiSelect,
 }) => {
-  const { length } = category.emojis;
-  const { transitionClassNames } = useShowTransition(show);
-  const categoryHeight = Math.ceil(length / EMOJI_ROW_SIZE) * EMOJI_SIZE;
-
   return (
     <div
       key={category.id}
@@ -28,12 +17,8 @@ const EmojiCategory: FC<IProps> = ({
       className="symbol-set"
     >
       <p className="symbol-set-name">{category.name}</p>
-      <div
-        className={['symbol-set-container', transitionClassNames].join(' ')}
-        // @ts-ignore teact feature
-        style={`height: ${categoryHeight}px`}
-      >
-        {category.emojis.map((name, index) => {
+      <div className="symbol-set-container">
+        {category.emojis.map((name) => {
           const emoji = allEmojis[name];
           // Some emojis have multiple skins and are represented as an Object with emojis for all skins.
           // For now, we select only the first emoji with 'neutral' skin.
@@ -43,9 +28,7 @@ const EmojiCategory: FC<IProps> = ({
             <EmojiButton
               key={displayedEmoji.id}
               emoji={displayedEmoji}
-              top={Math.floor(index / EMOJI_ROW_SIZE) * EMOJI_SIZE}
-              left={(index % EMOJI_ROW_SIZE) * EMOJI_SIZE}
-              onEmojiSelect={onEmojiSelect}
+              onClick={onEmojiSelect}
             />
           );
         })}

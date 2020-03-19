@@ -9,7 +9,7 @@ import StickerButton from './StickerButton';
 
 type IProps = {
   set: ApiStickerSet;
-  loadAndShow: boolean;
+  load: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
 } & Pick<GlobalActions, 'loadStickers'>;
 
@@ -17,18 +17,18 @@ const STICKER_ROW_SIZE = 5;
 const STICKER_SIZE = 80; // px
 
 const StickerSet: FC<IProps> = ({
-  set, loadAndShow, loadStickers, onStickerSelect,
+  set, load, loadStickers, onStickerSelect,
 }) => {
   const areLoaded = Boolean(set.stickers.length);
   const stickerSetHeight = Math.ceil(set.count / STICKER_ROW_SIZE) * STICKER_SIZE;
 
   useEffect(() => {
-    if (!areLoaded && loadAndShow) {
+    if (!areLoaded && load) {
       loadStickers({ stickerSetId: set.id });
     }
-  }, [areLoaded, loadAndShow, loadStickers, set.id]);
+  }, [areLoaded, load, loadStickers, set.id]);
 
-  const { transitionClassNames } = useShowTransition(areLoaded && loadAndShow);
+  const { transitionClassNames } = useShowTransition(areLoaded);
 
   return (
     <div
@@ -42,12 +42,10 @@ const StickerSet: FC<IProps> = ({
         // @ts-ignore teact feature
         style={`height: ${stickerSetHeight}px`}
       >
-        {set.stickers.map((sticker, index) => (
+        {set.stickers.map((sticker) => (
           <StickerButton
             key={sticker.id}
             sticker={sticker}
-            top={Math.floor(index / STICKER_ROW_SIZE) * STICKER_SIZE}
-            left={(index % STICKER_ROW_SIZE) * STICKER_SIZE}
             onClick={onStickerSelect}
           />
         ))}

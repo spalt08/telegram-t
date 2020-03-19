@@ -9,8 +9,34 @@
     top: 0;
     left: 0;
     width: 100%;
+    height: 100%;
 
     animation-fill-mode: forwards !important;
+
+    &:not(.active):not(.from):not(.to) {
+      transform: scale(0);
+    }
+  }
+
+  /*
+   * scroll-slide
+   */
+
+  &.scroll-slide {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+
+    > * {
+      position: static;
+      flex-shrink: 0;
+
+      &.through {
+        display: none;
+      }
+    }
   }
 
   /*
@@ -18,33 +44,33 @@
    */
 
   &.slide {
-    > :nth-child(2) {
-      transform: translateX(100%) !important;
+    > .to {
+      transform: translateX(100%);
     }
 
     &.animating {
-      > :nth-child(1) {
-        animation: slide-out .25s ease;
+      > .from {
+        animation: slide-out .3s ease-out;
       }
 
-      > :nth-child(2) {
-        animation: slide-in .25s ease;
+      > .to {
+        animation: slide-in .3s ease-out;
       }
     }
   }
 
   &.slide.backwards {
-    > :nth-child(2) {
-      transform: translateX(-100%) !important;
+    > .to {
+      transform: translateX(-100%);
     }
 
     &.animating {
-      > :nth-child(1) {
-        animation: slide-in-backwards .25s ease;
+      > .from {
+        animation: slide-in-backwards .3s ease-out;
       }
 
-      > :nth-child(2) {
-        animation: slide-out-backwards .25s ease;
+      > .to {
+        animation: slide-out-backwards .3s ease-out;
       }
     }
   }
@@ -54,32 +80,32 @@
    */
 
   &.slow-slide {
-    > :nth-child(2) {
-      transform: translateX(100%) !important;
+    > .to {
+      transform: translateX(100%);
     }
 
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: slide-out .45s var(--easeOutSine);
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: slide-in .45s var(--easeOutSine);
       }
     }
   }
 
   &.slow-slide.backwards {
-    > :nth-child(2) {
-      transform: translateX(-100%) !important;
+    > .to {
+      transform: translateX(-100%);
     }
 
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: slide-in-backwards .45s var(--easeOutSine);
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: slide-out-backwards .45s var(--easeOutSine);
       }
     }
@@ -89,44 +115,44 @@
    * slide-fade
    */
   &.slide-fade {
-    > :nth-child(1) {
+    > .from {
       transform-origin: left;
       transform: translateX(0);
       opacity: 1;
     }
 
-    > :nth-child(2) {
+    > .to {
       transform-origin: left;
       transform: translateX(1.5rem);
       opacity: 0;
     }
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: fade-out-opacity .35s ease-out, slide-fade-out-move .4s;
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: fade-in-opacity .35s var(--easeInSine),  slide-fade-in-move .4s;
       }
     }
   }
 
   &.slide-fade.backwards {
-    > :nth-child(1) {
+    > .from {
       transform: translateX(0);
       opacity: 1;
     }
 
-    > :nth-child(2) {
+    > .to {
       transform: translateX(-1.5rem);
       opacity: 0;
     }
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: fade-in-backwards-opacity .35s ease-out, slide-fade-in-backwards-move .4s;
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: fade-out-backwards-opacity .35s var(--easeOutSine), slide-fade-out-backwards-move .4s;
       }
     }
@@ -138,44 +164,44 @@
   &.zoom-fade {
     overflow: hidden;
 
-    > :nth-child(1) {
+    > .from {
       transform-origin: center;
       transform: scale(1);
       opacity: 1;
     }
 
-    > :nth-child(2) {
+    > .to {
       transform-origin: center;
       transform: scale(1.1);
       opacity: 0;
     }
 
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: fade-out-opacity .15s ease;
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: fade-in-opacity .15s ease, zoom-fade-in-move .15s ease;
       }
     }
   }
 
   &.zoom-fade.backwards {
-    > :nth-child(1) {
+    > .from {
       transform: scale(1);
     }
 
-    > :nth-child(2) {
+    > .to {
       transform: scale(0.95);
     }
 
     &.animating {
-      > :nth-child(1) {
+      > .from {
         animation: fade-in-backwards-opacity .1s ease, zoom-fade-in-backwards-move .15s ease;
       }
 
-      > :nth-child(2) {
+      > .to {
         animation: fade-out-backwards-opacity .15s ease, zoom-fade-out-backwards-move .15s ease;
       }
     }

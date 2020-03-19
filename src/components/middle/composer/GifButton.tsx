@@ -1,13 +1,13 @@
 import React, {
-  FC, memo, useCallback, useRef,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
 import { ApiVideo } from '../../../api/types';
 
+import * as mediaLoader from '../../../util/mediaLoader';
 import buildClassName from '../../../util/buildClassName';
-import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import useMedia from '../../../hooks/useMedia';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
 
 import Spinner from '../../ui/Spinner';
 
@@ -15,77 +15,97 @@ import './GifButton.scss';
 
 interface IProps {
   gif: ApiVideo;
-  loadAndShow: boolean;
-  onGifSelect: (gif: ApiVideo) => void;
+  load: boolean;
+  onClick: (gif: ApiVideo) => void;
 }
 
 const GifButton: FC<IProps> = ({
-  gif, loadAndShow, onGifSelect,
+  gif, load, onClick,
 }) => {
-  const videoRef = useRef<HTMLVideoElement>();
-  const buttonRef = useRef<HTMLButtonElement>();
+  const ref = useRef<HTMLDivElement>();
 
   const localMediaHash = `gif${gif.id}`;
-  const mediaData = useMedia(localMediaHash, !loadAndShow);
 
-  const { transitionClassNames } = useShowTransition(loadAndShow);
+  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
+  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'fast');
 
-  const handleClick = useCallback(() => {
-    onGifSelect({
-      ...gif,
-      blobUrl: mediaData,
-    });
-  }, [onGifSelect, gif, mediaData]);
+  const [shouldPlay, setShouldPlay] = useState(false);
+  const videoBlobUrl = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.BlobUrl);
 
-  const handleMouseEnter = useCallback(() => {
-    if (mediaData) {
-      void videoRef.current!.play();
+  const play = useCallback(() => {
+    setShouldPlay(true);
+  }, []);
+
+  const stop = useCallback(() => {
+    setShouldPlay(false);
+  }, []);
+
+  useEffect(() => {
+    if (!shouldPlay) {
+      return undefined;
     }
-  }, [mediaData]);
 
-  const { width, height } = calculateVideoDimensions(gif, false);
+    function handleMouseMove(e: MouseEvent) {
+      const buttonElement = e.target && (e.target as HTMLElement).closest('.GifButton');
+      if (buttonElement !== ref.current) {
+        stop();
+      }
+    }
 
+    document.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [shouldPlay, stop]);
+
+  const handleClick = useCallback(
+    () => onClick({
+      ...gif,
+      blobUrl: videoBlobUrl,
+    }),
+    [onClick, gif, videoBlobUrl],
+  );
+
+  const previewData = previewBlobUrl || (gif.thumbnail && gif.thumbnail.dataUri);
   const className = buildClassName(
     'GifButton',
-    width < height ? 'vertical' : 'horizontal',
+    gif.width && gif.height && gif.width < gif.height ? 'vertical' : 'horizontal',
     transitionClassNames,
   );
 
   return (
-    <button
-      ref={buttonRef}
+    <div
+      ref={ref}
       className={className}
-      type="button"
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
+      onMouseMove={play}
+      onMouseLeave={stop}
     >
-      {mediaData ? (
-        <video
-          ref={videoRef}
-          width={width}
-          height={height}
-          muted
-          playsinline
-          preload="none"
-          poster={gif.thumbnail && gif.thumbnail.dataUri}
-        >
-          <source src={mediaData} />
-        </video>
-      ) : (
-        <>
-          {gif.thumbnail && (
-            <img
-              className="thumbnail"
-              src={gif.thumbnail.dataUri}
-              width={width}
-              height={height}
-              alt=""
-            />
-          )}
-          <Spinner color={gif.thumbnail ? 'white' : 'black'} />
-        </>
+      {!(videoBlobUrl && shouldPlay) && (
+        <div
+          className="preview"
+          // @ts-ignore
+          style={`background-image: url(${previewData});`}
+        />
       )}
-    </button>
+      {shouldPlay && (
+        videoBlobUrl ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsinline
+            preload="none"
+            poster={previewData}
+          >
+            <source src={videoBlobUrl} />
+          </video>
+        ) : (
+          <Spinner color={previewData ? 'white' : 'black'} />
+        )
+      )}
+    </div>
   );
 };
 

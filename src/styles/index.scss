@@ -84,6 +84,14 @@ html, body {
   }
 }
 
+.no-scroll {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 div[role="button"] {
   outline: none !important;
   cursor: pointer;

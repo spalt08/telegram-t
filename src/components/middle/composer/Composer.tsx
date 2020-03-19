@@ -63,7 +63,7 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const canOpenAttachMenu = useRef(true);
 
-  const [isStickerMenuOpen, setIsStickerMenuOpen] = useState(false);
+  const [isSymbolMenuOpen, setIsSymbolMenuOpen] = useState(false);
 
   const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
@@ -169,22 +169,22 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
     setAttachment(undefined);
   }, []);
 
-  const handleOpenStickerMenu = useCallback(() => {
-    setIsStickerMenuOpen(true);
+  const handleOpenSymbolMenu = useCallback(() => {
+    setIsSymbolMenuOpen(true);
   }, []);
 
-  const handleCloseStickerMenu = useCallback(() => {
-    setIsStickerMenuOpen(false);
+  const handleCloseSymbolMenu = useCallback(() => {
+    setIsSymbolMenuOpen(false);
   }, []);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     sendMessage({ sticker });
-    setIsStickerMenuOpen(false);
+    setIsSymbolMenuOpen(false);
   }, [sendMessage]);
 
   const handleGifSelect = useCallback((gif: ApiVideo) => {
     sendMessage({ gif });
-    setIsStickerMenuOpen(false);
+    setIsSymbolMenuOpen(false);
   }, [sendMessage]);
 
   const handleRecordVoice = useCallback(async () => {
@@ -258,11 +258,11 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
 
     setHtml('');
     setAttachment(undefined);
-    setIsStickerMenuOpen(false);
+    setIsSymbolMenuOpen(false);
   }, [activeVoiceRecording, attachment, sendMessage, stopRecordingVoice]);
 
   return (
-    <div className="MiddleFooter">
+    <div className="Composer">
       <AttachmentModal
         attachment={attachment}
         caption={attachment ? html : ''}
@@ -280,11 +280,11 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
         <WebPagePreview messageText={!attachment ? html : ''} />
         <div className="message-input-wrapper">
           <Button
-            className={`${isStickerMenuOpen ? 'activated' : ''}`}
+            className={`${isSymbolMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onMouseEnter={handleOpenStickerMenu}
-            onFocus={handleOpenStickerMenu}
+            onMouseEnter={handleOpenSymbolMenu}
+            onFocus={handleOpenSymbolMenu}
           >
             <i className="icon-smile" />
           </Button>
@@ -294,7 +294,7 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
             placeholder="Message"
             onUpdate={setHtml}
             onSend={handleSend}
-            shouldSetFocus={isStickerMenuOpen}
+            shouldSetFocus={isSymbolMenuOpen}
           />
           {!activeVoiceRecording && (
             <Button
@@ -320,8 +320,8 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
             onClose={handleCloseAttachMenu}
           />
           <SymbolMenu
-            isOpen={isStickerMenuOpen}
-            onClose={handleCloseStickerMenu}
+            isOpen={isSymbolMenuOpen}
+            onClose={handleCloseSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
