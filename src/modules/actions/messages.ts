@@ -20,6 +20,7 @@ addReducer('openMediaViewer', (global, actions, payload) => {
       messageId,
       isReversed,
     },
+    forwardMessages: {},
   };
 });
 
@@ -75,4 +76,35 @@ addReducer('focusMessage', (global, actions, payload) => {
 
   actions.loadViewportMessages({ shouldRelocate: true });
   return undefined;
+});
+
+addReducer('openForwardMenu', (global, actions, payload) => {
+  const { fromChatId, messageIds } = payload!;
+
+  setGlobal({
+    ...global,
+    forwardMessages: {
+      fromChatId,
+      messageIds,
+    },
+  });
+});
+
+addReducer('closeForwardMenu', (global) => {
+  setGlobal({
+    ...global,
+    forwardMessages: {},
+  });
+});
+
+addReducer('setForwardChatIds', (global, actions, payload) => {
+  const { ids } = payload!;
+
+  setGlobal({
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      toChatIds: ids,
+    },
+  });
 });

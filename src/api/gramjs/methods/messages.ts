@@ -18,6 +18,7 @@ import {
   buildLocalMessage,
   resolveMessageApiChatId,
   buildWebPage,
+  buildForwardedMessage,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -433,6 +434,42 @@ export async function sendPollVote({
     msgId: messageId,
     options: options.map((option) => Buffer.from(option)),
   }), true);
+}
+
+export async function forwardMessages({
+  fromChat,
+  toChats,
+  messages,
+  currentUserId,
+}: {
+  fromChat: ApiChat;
+  toChats: ApiChat[];
+  messages: ApiMessage[];
+  currentUserId: number;
+}) {
+  const messageIds = messages.map(({ id }) => id);
+
+  await Promise.all(toChats.map((toChat) => {
+    const randomIds = messages.map(generateRandomBigInt);
+    messages.forEach((message, index) => {
+      const localMessage = buildForwardedMessage(toChat.id, currentUserId, message);
+      localDb.localMessages[randomIds[index].toString()] = localMessage;
+
+      onUpdate({
+        '@type': 'newMessage',
+        id: localMessage.id,
+        chat_id: toChat.id,
+        message: localMessage,
+      });
+    });
+
+    return invokeRequest(new GramJs.messages.ForwardMessages({
+      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
+      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
+      randomId: randomIds,
+      id: messageIds,
+    }), true);
+  }));
 }
 
 function updateLocalDb(

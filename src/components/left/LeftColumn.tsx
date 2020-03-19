@@ -77,7 +77,7 @@ const LeftColumn: FC<IProps> = ({ searchQuery, setGlobalSearchQuery }) => {
         onSearchClose={handleCloseSearch}
       />
       <ConnectionState />
-      <Transition activeKey={columnContent} renderCount={TRANSITION_RENDER_COUNT} name="zoom-fade">
+      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={columnContent}>
         {renderContent}
       </Transition>
     </div>

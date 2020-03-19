@@ -1,0 +1,33 @@
+#RightOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-modal);
+
+  .overlay-main {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 26.5rem;
+    height: 100%;
+    transform: translate3d(26.5rem, 0, 0);
+    transition: transform .2s ease;
+    background: var(--color-background);
+    will-change: transform;
+
+    &.open {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+  }
+}

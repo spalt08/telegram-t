@@ -7,7 +7,7 @@ interface IProps {
   id?: string;
   label: string;
   checked: boolean;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const Checkbox: FC<IProps> = ({

@@ -25,7 +25,7 @@
     }
 
     &::before {
-      border: 1px solid var(--color-borders);
+      border: 2px solid var(--color-borders);
       border-radius: .25rem;
       background-color: white;
       transition: border-color .1s ease;

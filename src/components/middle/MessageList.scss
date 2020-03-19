@@ -74,6 +74,10 @@
     &.focused::before {
       opacity: 0.2;
     }
+
+    &.is-forwarding::before {
+      opacity: 0.4;
+    }
   }
 
   .message-date-header,

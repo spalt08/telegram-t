@@ -179,3 +179,8 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
 
   return listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
 }
+
+export function selectIsForwardMenuOpen(global: GlobalState) {
+  const { forwardMessages } = global;
+  return Boolean(forwardMessages.fromChatId);
+}

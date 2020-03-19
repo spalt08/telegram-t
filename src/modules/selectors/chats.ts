@@ -13,6 +13,11 @@ export function selectOpenChat(global: GlobalState) {
   return selectedId ? byId[selectedId] : undefined;
 }
 
+export function selectIsMediaViewerOpen(global: GlobalState) {
+  const { mediaViewer } = global;
+  return Boolean(mediaViewer.chatId);
+}
+
 export function selectIsChatWithSelf(global: GlobalState, chat: ApiChat) {
   const userId = getPrivateChatUserId(chat);
 
