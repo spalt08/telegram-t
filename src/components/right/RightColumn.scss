@@ -1,3 +1,7 @@
 #RightColumn {
   overflow: hidden;
+
+  > .Transition {
+    height: calc(100% - 3.75rem);
+  }
 }

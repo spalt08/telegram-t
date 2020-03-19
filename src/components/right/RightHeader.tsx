@@ -13,7 +13,7 @@ import './RightHeader.scss';
 
 type IProps = {
   onClose: () => void;
-  isSearch: boolean;
+  isSearchOpen: boolean;
   searchQuery?: string;
 } & Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
 
@@ -21,7 +21,7 @@ const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 const RightHeader: FC<IProps> = ({
   onClose,
-  isSearch,
+  isSearchOpen,
   searchQuery,
   setMessageSearchQuery,
   searchMessages,
@@ -48,7 +48,7 @@ const RightHeader: FC<IProps> = ({
   }
 
   function renderSearch() {
-    return <SearchInput value={searchQuery} onChange={handleSearchQueryChange} />;
+    return <SearchInput focused={isSearchOpen} value={searchQuery} onChange={handleSearchQueryChange} />;
   }
 
   return (
@@ -61,7 +61,7 @@ const RightHeader: FC<IProps> = ({
       >
         <i className="icon-close" />
       </Button>
-      {isSearch ? renderSearch() : renderRegularHeader()}
+      {isSearchOpen ? renderSearch() : renderRegularHeader()}
     </div>
   );
 };
@@ -75,7 +75,6 @@ export default withGlobal(
     }
 
     return {
-      isSearch: currentSearch.currentType === 'text',
       searchQuery: currentSearch.query,
     };
   },
