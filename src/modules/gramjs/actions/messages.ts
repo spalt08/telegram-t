@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat } from '../../../api/types';
+import { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { MESSAGE_LIST_SLICE } from '../../../config';
@@ -23,6 +23,7 @@ import {
   selectViewportIds,
   selectFocusedMessageId,
   selectRealLastReadId,
+  selectChatMessage,
 } from '../../selectors';
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
@@ -187,6 +188,20 @@ addReducer('sendPollVote', (global, actions, payload) => {
   }
 });
 
+addReducer('forwardMessages', (global) => {
+  const { currentUserId } = global;
+  const { fromChatId, messageIds, toChatIds } = global.forwardMessages;
+  const fromChat = fromChatId && selectChat(global, fromChatId);
+  const toChats = toChatIds && toChatIds.map((id) => selectChat(global, id)).filter(Boolean);
+  const messages = fromChatId && messageIds
+    ? messageIds.map((id) => selectChatMessage(global, fromChatId, id)).filter<ApiMessage>(Boolean as any)
+    : undefined;
+
+  if (currentUserId && fromChat && toChats && toChats.length && messages && messages.length) {
+    void forwardMessages(fromChat, toChats, messages, currentUserId);
+  }
+});
+
 async function loadWebPagePreview(message: string) {
   const webPagePreview = await callApi('fetchWebPagePreview', { message });
   setGlobal({
@@ -307,4 +322,31 @@ function getViewportSlice(
   }
 
   return { newViewportIds, areSomeLocal, areAllLocal };
+}
+
+async function forwardMessages(
+  fromChat: ApiChat,
+  toChats: ApiChat[],
+  messages: ApiMessage[],
+  currentUserId: number,
+) {
+  const global = getGlobal();
+  setGlobal({
+    ...global,
+    forwardMessages: {
+      ...global.forwardMessages,
+      inProgress: true,
+    },
+  });
+  await callApi('forwardMessages', {
+    fromChat,
+    toChats,
+    messages,
+    currentUserId,
+  });
+
+  setGlobal({
+    ...getGlobal(),
+    forwardMessages: {},
+  });
 }

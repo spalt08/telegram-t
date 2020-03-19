@@ -13,7 +13,8 @@ import './RightHeader.scss';
 
 type IProps = {
   onClose: () => void;
-  isSearchOpen: boolean;
+  isForwarding: boolean;
+  isSearch: boolean;
   searchQuery?: string;
 } & Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
 
@@ -21,7 +22,8 @@ const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 const RightHeader: FC<IProps> = ({
   onClose,
-  isSearchOpen,
+  isForwarding,
+  isSearch,
   searchQuery,
   setMessageSearchQuery,
   searchMessages,
@@ -31,7 +33,15 @@ const RightHeader: FC<IProps> = ({
     runDebouncedForSearch(searchMessages);
   }, [searchMessages, setMessageSearchQuery]);
 
-  function renderRegularHeader() {
+  function renderHeaderContent() {
+    if (isForwarding) {
+      return <h3>Forward</h3>;
+    }
+
+    if (isSearch) {
+      return <SearchInput focused value={searchQuery} onChange={handleSearchQueryChange} />;
+    }
+
     return (
       <>
         <h3>Info</h3>
@@ -47,10 +57,6 @@ const RightHeader: FC<IProps> = ({
     );
   }
 
-  function renderSearch() {
-    return <SearchInput focused={isSearchOpen} value={searchQuery} onChange={handleSearchQueryChange} />;
-  }
-
   return (
     <div className="RightHeader">
       <Button
@@ -61,22 +67,16 @@ const RightHeader: FC<IProps> = ({
       >
         <i className="icon-close" />
       </Button>
-      {isSearchOpen ? renderSearch() : renderRegularHeader()}
+      {renderHeaderContent()}
     </div>
   );
 };
 
 export default withGlobal(
   (global) => {
-    const currentSearch = selectCurrentMessageSearch(global);
+    const { query: searchQuery } = selectCurrentMessageSearch(global) || {};
 
-    if (!currentSearch) {
-      return {};
-    }
-
-    return {
-      searchQuery: currentSearch.query,
-    };
+    return { searchQuery };
   },
   (setGlobal, actions) => {
     const {

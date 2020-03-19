@@ -54,6 +54,8 @@ const INITIAL_STATE: GlobalState = {
   topPeers: {},
 
   mediaViewer: {},
+
+  forwardMessages: {},
 };
 const CACHE_THROTTLE_TIMEOUT = 1000;
 
@@ -113,6 +115,7 @@ function updateCache(global: GlobalState) {
     messageSearch: { byChatId: {} },
     mediaViewer: {},
     webPagePreview: undefined,
+    forwardMessages: {},
   };
 
   const json = JSON.stringify(reducedState);

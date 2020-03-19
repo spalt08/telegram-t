@@ -136,6 +136,13 @@ export type GlobalState = {
   };
 
   webPagePreview?: ApiWebPage;
+
+  forwardMessages: {
+    fromChatId?: number;
+    messageIds?: number[];
+    toChatIds?: number[];
+    inProgress?: boolean;
+  };
 };
 
 export type ActionTypes = (
@@ -150,6 +157,8 @@ export type ActionTypes = (
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' | 'sendPollVote' |
+  // forwarding messages
+  'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search
   'setGlobalSearchQuery' | 'searchMessagesGlobal' | 'addRecentlyFoundChatId' |
   // message search

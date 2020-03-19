@@ -545,6 +545,44 @@ export function buildLocalMessage(
   };
 }
 
+export function buildForwardedMessage(
+  toChatId: number,
+  currentUserId: number,
+  message: ApiMessage,
+): ApiMessage {
+  const localId = localMessageCounter--;
+  const {
+    content,
+    chat_id: from_chat_id,
+    id: from_message_id,
+    sender_user_id,
+  } = message;
+
+  return {
+    id: localId,
+    chat_id: toChatId,
+    content,
+    date: Math.round(Date.now() / 1000),
+    is_outgoing: true,
+    sender_user_id: currentUserId,
+    sending_state: {
+      '@type': 'messageSendingStatePending',
+    },
+    // Forward info doesn't get added when users forwards his own messages
+    ...(sender_user_id !== currentUserId && {
+      forward_info: {
+        '@type': 'messageForwardInfo',
+        from_chat_id,
+        from_message_id,
+        origin: {
+          '@type': 'messageForwardOriginUser',
+          sender_user_id,
+        },
+      },
+    }),
+  };
+}
+
 function buildUploadingMedia(
   attachment: ApiAttachment,
 ): ApiMessage['content'] {

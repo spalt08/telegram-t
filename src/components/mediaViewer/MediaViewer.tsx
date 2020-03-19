@@ -32,7 +32,7 @@ import VideoPlayer from './VideoPlayer';
 
 import './MediaViewer.scss';
 
-type IProps = Pick<GlobalActions, 'openMediaViewer'> & {
+type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'> & {
   chatId?: number;
   messageId?: number;
   isReversed?: boolean;
@@ -47,6 +47,7 @@ const MediaViewer: FC<IProps> = ({
   message,
   chatMessages,
   openMediaViewer,
+  openForwardMenu,
 }) => {
   const [, onMediaQueryChanged] = useState(null);
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
@@ -99,6 +100,10 @@ const MediaViewer: FC<IProps> = ({
   const closeMediaViewer = useCallback(() => {
     openMediaViewer({ chatId: undefined, messageId: undefined });
   }, [openMediaViewer]);
+
+  const handleForward = useCallback(() => {
+    openForwardMenu({ fromChatId: chatId, messageIds: [messageId] });
+  }, [openForwardMenu, chatId, messageId]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(closeMediaViewer) : undefined), [closeMediaViewer, isOpen]);
 
@@ -195,7 +200,10 @@ const MediaViewer: FC<IProps> = ({
             <Transition activeKey={messageId} direction={isReversed ? 'inverse' : 'auto'} name="slide-fade">
               {renderSenderInfo}
             </Transition>
-            <MediaViewerActions onCloseMediaViewer={closeMediaViewer} />
+            <MediaViewerActions
+              onCloseMediaViewer={closeMediaViewer}
+              onForward={handleForward}
+            />
           </div>
           <Transition activeKey={selectedMediaMessageIndex} name="slow-slide">
             {renderSlide}
@@ -271,7 +279,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { openMediaViewer } = actions;
-    return { openMediaViewer };
+    const { openMediaViewer, openForwardMenu } = actions;
+    return { openMediaViewer, openForwardMenu };
   },
 )(MediaViewer));

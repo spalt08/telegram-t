@@ -74,6 +74,7 @@ const Button: FC<IProps> = ({
       onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
       onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
       aria-label={ariaLabel}
+      title={ariaLabel}
     >
       {isLoading ? (
         <div>

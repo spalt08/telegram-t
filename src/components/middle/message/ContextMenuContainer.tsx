@@ -42,7 +42,7 @@ type IProps = {
   canDeleteForAll?: boolean;
   contactFirstName: string;
   closeContextMenu: () => void;
-} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages'>;
+} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages' | 'openForwardMenu'>;
 
 const ContextMenuContainer: FC<IProps> = ({
   isOpen,
@@ -58,6 +58,7 @@ const ContextMenuContainer: FC<IProps> = ({
   setChatReplyingTo,
   pinMessage,
   deleteMessages,
+  openForwardMenu,
 }) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -88,6 +89,11 @@ const ContextMenuContainer: FC<IProps> = ({
     closeMenu();
   }, [pinMessage, message, closeMenu]);
 
+  const handleForward = useCallback(() => {
+    openForwardMenu({ fromChatId: message.chat_id, messageIds: [message.id] });
+    closeMenu();
+  }, [openForwardMenu, message, closeMenu]);
+
   const handleDeleteMessageForAll = useCallback(() => {
     deleteMessages({ messageIds: [message.id], shouldDeleteForAll: true });
     closeDeleteDialog();
@@ -115,6 +121,7 @@ const ContextMenuContainer: FC<IProps> = ({
         canDelete={canDelete}
         onReply={handleReply}
         onPin={handlePin}
+        onForward={handleForward}
         onDelete={handleDelete}
         onClose={closeMenu}
       />
@@ -159,7 +166,11 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { setChatReplyingTo, pinMessage, deleteMessages } = actions;
-    return { setChatReplyingTo, pinMessage, deleteMessages };
+    const {
+      setChatReplyingTo, pinMessage, deleteMessages, openForwardMenu,
+    } = actions;
+    return {
+      setChatReplyingTo, pinMessage, deleteMessages, openForwardMenu,
+    };
   },
 )(ContextMenuContainer));

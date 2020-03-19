@@ -4,8 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
-import { orderBy } from '../../util/iteratees';
-
+import prepareChats from '../common/helpers/prepareChats';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Loading from '../ui/Loading';
 import Chat from './Chat';
@@ -48,19 +47,6 @@ const ChatList: FC<IProps> = ({
     </InfiniteScroll>
   );
 };
-
-function prepareChats(chats: Record<number, ApiChat>, listIds: number[], orderedPinnedIds?: number[]) {
-  const filtered = Object.values(chats).filter((chat) => Boolean(chat.last_message) && listIds.includes(chat.id));
-  const pinnedChats = orderedPinnedIds
-    ? orderedPinnedIds.map((id) => chats[id])
-    : filtered.filter((chat) => chat.is_pinned);
-  const otherChats = orderBy(filtered.filter((chat) => !chat.is_pinned), [(chat) => chat.last_message!.date], 'desc');
-
-  return {
-    pinnedChats,
-    otherChats,
-  };
-}
 
 export default memo(withGlobal(
   global => {

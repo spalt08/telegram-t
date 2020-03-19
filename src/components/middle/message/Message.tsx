@@ -73,6 +73,7 @@ type IProps = (
     outgoingStatus?: ApiMessageOutgoingStatus;
     fileTransferProgress?: number;
     isFocused?: boolean;
+    isSelectedToForward?: boolean;
     focusDirection?: FocusDirection;
     isChatWithSelf?: boolean;
   }
@@ -103,6 +104,7 @@ const Message: FC<IProps> = ({
   outgoingStatus,
   fileTransferProgress,
   isFocused,
+  isSelectedToForward,
   focusDirection,
   isChatWithSelf,
   isFirstInGroup,
@@ -161,6 +163,7 @@ const Message: FC<IProps> = ({
     isReply && 'has-reply',
     isContextMenuShown && 'has-menu-open',
     isFocused && 'focused',
+    isSelectedToForward && 'is-forwarding',
     message.is_deleting && 'is-deleting',
     !!album && 'is-album',
   );
@@ -412,6 +415,9 @@ export default memo(withGlobal(
     const chat = selectChat(global, chatId);
     const isChatWithSelf = chat && selectIsChatWithSelf(global, chat);
 
+    const { messageIds } = global.forwardMessages;
+    const isSelectedToForward = messageIds && messageIds.includes(message.id);
+
     return {
       message,
       ...(userId && { sender: selectUser(global, userId) }),
@@ -423,6 +429,7 @@ export default memo(withGlobal(
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
       isFocused,
+      isSelectedToForward,
       focusDirection,
       isChatWithSelf,
     };

@@ -23,6 +23,7 @@ type IProps = {
   canDelete?: boolean;
   onReply: () => void;
   onPin: () => void;
+  onForward: () => void;
   onDelete: () => void;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
@@ -39,6 +40,7 @@ const MessageContextMenu: FC<IProps> = ({
   canDelete,
   onReply,
   onPin,
+  onForward,
   onDelete,
   onClose,
   onCloseAnimationEnd,
@@ -100,7 +102,7 @@ const MessageContextMenu: FC<IProps> = ({
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
       {canPin && <MenuItem icon="pin" onClick={onPin}>Pin</MenuItem>}
-      <MenuItem className="not-implemented" disabled icon="forward">Forward</MenuItem>
+      <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>
       {canDelete && <MenuItem className="danger" icon="delete" onClick={onDelete}>Delete</MenuItem>}
     </Menu>
   );

@@ -54,17 +54,14 @@ const Transition: FC<IProps> = ({
 
   useLayoutEffect(() => {
     const container = containerRef.current!;
-    const childNodes = Array.from(container.childNodes);
 
-    if (childNodes.length === 1) {
-      const firstChild = childNodes[0];
-
-      if (firstChild instanceof Element) {
-        firstChild.classList.add('active');
-      }
-
+    const childElements = container.children;
+    if (childElements.length === 1) {
+      childElements[0].classList.add('active');
       return;
     }
+
+    const childNodes = Array.from(container.childNodes);
 
     if (!activeKeyChanged || !childNodes.length) {
       return;
