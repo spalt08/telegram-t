@@ -34,7 +34,7 @@ import findInViewport from '../../util/findInViewport';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';
-import ServiceMessage from './ServiceMessage';
+import ActionMessage from './ActionMessage';
 
 import './MessageList.scss';
 
@@ -124,7 +124,9 @@ const MessageList: FC<IProps> = ({
       }
 
       if (firstUnreadId) {
-        const { allElements, visibleIndexes } = findInViewport(container, '.Message', undefined, undefined, true);
+        const {
+          allElements, visibleIndexes,
+        } = findInViewport(container, '.message-list-item', undefined, undefined, true);
         const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
         if (lowerElement) {
           const maxId = Number(lowerElement.dataset.messageId);
@@ -147,7 +149,7 @@ const MessageList: FC<IProps> = ({
     let isUpdated = false;
 
     if (isNearTop) {
-      const messageElements = container.querySelectorAll('.Message');
+      const messageElements = container.querySelectorAll('.message-list-item');
       const nextAnchor = messageElements[0];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
@@ -168,7 +170,7 @@ const MessageList: FC<IProps> = ({
     }
 
     if (!isViewportNewest && isNearBottom) {
-      const messageElements = container.querySelectorAll('.Message');
+      const messageElements = container.querySelectorAll('.message-list-item');
       const nextAnchor = messageElements[messageElements.length - 1];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
@@ -192,7 +194,7 @@ const MessageList: FC<IProps> = ({
       if (currentAnchor) {
         currentAnchorTop = currentAnchor.getBoundingClientRect().top;
       } else {
-        const messageElements = container.querySelectorAll('.Message');
+        const messageElements = container.querySelectorAll('.message-list-item');
         const nextAnchor = messageElements[0];
         currentAnchorId = nextAnchor.id;
         currentAnchorTop = nextAnchor.getBoundingClientRect().top;
@@ -322,7 +324,7 @@ function renderMessages(
     ) => {
       if (senderGroup.length === 1 && !isAlbum(senderGroup[0]) && isActionMessage(senderGroup[0])) {
         const message = senderGroup[0];
-        return <ServiceMessage key={message.id} message={message} />;
+        return <ActionMessage key={message.id} message={message} />;
       }
 
       return flatten(senderGroup.map((
@@ -368,7 +370,7 @@ function renderMessages(
         if (message.id === memoFirstUnreadId) {
           return (
             <>
-              <div className="unread-divider">Unread messages</div>
+              <div className="unread-divider"><span>Unread messages</span></div>
               {renderedMessage}
             </>
           );

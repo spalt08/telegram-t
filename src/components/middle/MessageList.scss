@@ -31,7 +31,7 @@
   }
 
   .Message,
-  .message-action-header {
+  .ActionMessage {
     position: relative;
 
     &::before {
@@ -81,7 +81,8 @@
   }
 
   .message-date-header,
-  .message-action-header {
+  .unread-divider,
+  .ActionMessage {
     text-align: center;
 
     > span {
@@ -116,10 +117,13 @@
     }
   }
 
-  .message-action-header {
+  .unread-divider,
+  .ActionMessage {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+  }
 
+  .ActionMessage {
     .action-link {
       cursor: pointer;
 
@@ -129,21 +133,7 @@
     }
   }
 
-  .message-date-header + .message-action-header {
+  .message-date-header + .ActionMessage {
     margin-top: -0.5rem;
-  }
-
-  // TODO @pixel-perfect when designs are ready
-  .unread-divider {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 1.5rem;
-    width: 100%;
-    border-radius: var(--border-radius-messages);
-    background: rgba(0, 0, 0, 0.15);
-    margin-bottom: 0.625rem;
-    color: white;
-    font-size: 0.9rem;
   }
 }

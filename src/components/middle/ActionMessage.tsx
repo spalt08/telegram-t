@@ -8,8 +8,9 @@ import {
   ApiMessage,
 } from '../../api/types';
 import { selectUser, selectChatMessage, selectFocusedMessageId } from '../../modules/selectors';
-import { renderServiceMessageText } from '../common/helpers/renderServiceMessageText';
+import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
+import buildClassName from '../../util/buildClassName';
 
 type IProps = {
   message: ApiMessage;
@@ -22,7 +23,7 @@ type IProps = {
 
 const FOCUSING_MAX_DISTANCE = 2000;
 
-const ServiceMessage: FC<IProps> = ({
+const ActionMessage: FC<IProps> = ({
   message, sender, actionTargetUser, actionTargetMessage, isEmbedded, isFocused,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
@@ -46,7 +47,7 @@ const ServiceMessage: FC<IProps> = ({
     }
   }, [isFocused, message.chat_id]);
 
-  const content = renderServiceMessageText(
+  const content = renderActionMessageText(
     message,
     sender,
     actionTargetUser,
@@ -58,13 +59,13 @@ const ServiceMessage: FC<IProps> = ({
     return <span className="embedded-action-message">{content}</span>;
   }
 
-  const classNames = ['message-action-header'];
-  if (isFocused) {
-    classNames.push('focused');
-  }
-
   return (
-    <div ref={elementRef} className={classNames.join(' ')}>
+    <div
+      ref={elementRef}
+      id={`message${message.id}`}
+      className={buildClassName('ActionMessage message-list-item', isFocused && 'focused')}
+      data-message-id={message.id}
+    >
       <span>{content}</span>
     </div>
   );
@@ -86,4 +87,4 @@ export default memo(withGlobal(
       isFocused,
     };
   },
-)(ServiceMessage));
+)(ActionMessage));

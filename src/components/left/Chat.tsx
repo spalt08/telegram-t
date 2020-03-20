@@ -18,7 +18,7 @@ import {
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
-import { renderServiceMessageText } from '../common/helpers/renderServiceMessageText';
+import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import buildClassName from '../../util/buildClassName';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
@@ -73,7 +73,7 @@ const Chat: FC<IProps> = ({
     if (isAction) {
       return (
         <p className="last-message">
-          {renderServiceMessageText(
+          {renderActionMessageText(
             last_message,
             lastMessageSender,
             actionTargetUser,
