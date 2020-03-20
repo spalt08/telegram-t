@@ -42,9 +42,7 @@ const INITIAL_STATE: GlobalState = {
     },
   },
 
-  savedGifs: {
-    gifs: [],
-  },
+  savedGifs: {},
 
   globalSearch: {},
 
@@ -112,9 +110,7 @@ function updateCache(global: GlobalState) {
         stickers: [],
       },
     },
-    savedGifs: {
-      gifs: [],
-    },
+    savedGifs: {},
     globalSearch: {
       recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
     },

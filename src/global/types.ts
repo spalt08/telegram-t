@@ -87,7 +87,7 @@ export type GlobalState = {
 
   savedGifs: {
     hash?: number;
-    gifs: ApiVideo[];
+    gifs?: ApiVideo[];
   };
 
   globalSearch: {

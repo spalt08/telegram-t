@@ -18,7 +18,7 @@ import './GifPicker.scss';
 type IProps = {
   className: string;
   load: boolean;
-  savedGifs: ApiVideo[];
+  savedGifs?: ApiVideo[];
   onGifSelect: (gif: ApiVideo) => void;
 } & Pick<GlobalActions, 'loadSavedGifs'>;
 
@@ -36,7 +36,7 @@ const GifPicker: FC<IProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const [visibleIndexes, setVisibleIndexes] = useState<number[]>([]);
 
-  const areLoaded = Boolean(savedGifs.length);
+  const areLoaded = Boolean(savedGifs);
 
   const updateVisibleIndexes = useCallback(() => {
     const {
@@ -69,7 +69,7 @@ const GifPicker: FC<IProps> = ({
     >
       {!areLoaded ? (
         <Loading />
-      ) : (
+      ) : savedGifs ? (
         savedGifs.map((gif, index) => (
           <GifButton
             key={gif.id}
@@ -78,7 +78,7 @@ const GifPicker: FC<IProps> = ({
             load={visibleIndexes.includes(index)}
           />
         ))
-      )}
+      ) : null}
     </div>
   );
 };
