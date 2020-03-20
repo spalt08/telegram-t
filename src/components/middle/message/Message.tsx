@@ -152,7 +152,7 @@ const Message: FC<IProps> = ({
   );
   const isContextMenuShown = contextMenuPosition !== null;
   const containerClassName = buildClassName(
-    'Message',
+    'Message message-list-item',
     isFirstInGroup && 'first-in-group',
     isLastInGroup && 'last-in-group',
     isLastInList && 'last-in-list',

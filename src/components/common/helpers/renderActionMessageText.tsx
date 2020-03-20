@@ -7,7 +7,7 @@ import { TextPart } from './renderMessageText';
 import UserLink from '../UserLink';
 import MessageLink from '../MessageLink';
 
-interface ServiceMessageTextOptions {
+interface ActionMessageTextOptions {
   maxTextLength?: number;
   plain?: boolean;
   isEmbedded?: boolean;
@@ -16,19 +16,19 @@ interface ServiceMessageTextOptions {
 const DEFAULT_MAX_TEXT_LENGTH = 30;
 const NBSP = '\u00A0';
 
-export function renderServiceMessageText(
+export function renderActionMessageText(
   message: ApiMessage,
   originUser?: ApiUser,
   targetUser?: ApiUser,
   targetMessage?: ApiMessage,
-  options: ServiceMessageTextOptions = {},
+  options: ActionMessageTextOptions = {},
 ) {
   if (!message.content.action) {
     return [];
   }
   const { text } = message.content.action;
   const content: TextPart[] = [];
-  const textOptions: ServiceMessageTextOptions = { ...options, maxTextLength: 16 };
+  const textOptions: ActionMessageTextOptions = { ...options, maxTextLength: 16 };
 
   const processedOriginUserText = processPlaceholder(
     text,
@@ -69,7 +69,7 @@ export function renderServiceMessageText(
   return content;
 }
 
-function renderMessageContent(message: ApiMessage, options: ServiceMessageTextOptions = {}) {
+function renderMessageContent(message: ApiMessage, options: ActionMessageTextOptions = {}) {
   const text = getMessageSummaryText(message);
   const {
     photo, video, document, sticker,

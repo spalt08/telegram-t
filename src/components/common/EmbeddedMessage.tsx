@@ -14,7 +14,7 @@ import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';
 
 import RippleEffect from '../ui/RippleEffect';
-import ServiceMessage from '../middle/ServiceMessage';
+import ActionMessage from '../middle/ActionMessage';
 
 import './EmbeddedMessage.scss';
 
@@ -45,7 +45,7 @@ const EmbeddedMessage: FC<IProps> = ({
           {!message ? (
             NBSP
           ) : isActionMessage(message) ? (
-            <ServiceMessage message={message} isEmbedded />
+            <ActionMessage message={message} isEmbedded />
           ) : (
             getMessageSummaryText(message, true)
           )}
