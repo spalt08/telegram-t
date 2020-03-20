@@ -50,7 +50,7 @@ const StickerPicker: FC<IProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const footerRef = useRef<HTMLDivElement>();
-  const [activeSetIndex, setActiveSetIndex] = useState(0);
+  const [activeSetIndex, setActiveSetIndex] = useState();
   const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
   const areLoaded = Boolean(Object.keys(stickerSets).length);
@@ -74,6 +74,12 @@ const StickerPicker: FC<IProps> = ({
     return themeSets;
   }, [areLoaded, recentStickers, stickerSets]);
 
+  const updateVisibleSetIndexes = useCallback(() => {
+    const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
+    setActiveSetIndex(visibleIndexes[0]);
+    setVisibleSetIndexes(visibleIndexes);
+  }, []);
+
   useEffect(() => {
     if (load) {
       loadStickerSets();
@@ -86,6 +92,8 @@ const StickerPicker: FC<IProps> = ({
       return undefined;
     }
 
+    updateVisibleSetIndexes();
+
     const footer = footerRef.current!;
 
     function scrollFooter(e: WheelEvent) {
@@ -97,7 +105,7 @@ const StickerPicker: FC<IProps> = ({
     return () => {
       footer.removeEventListener('wheel', scrollFooter);
     };
-  }, [areLoaded]);
+  }, [areLoaded, updateVisibleSetIndexes]);
 
   // Scroll footer when active set updates
   useEffect(() => {
@@ -133,12 +141,8 @@ const StickerPicker: FC<IProps> = ({
   }, [allSets]);
 
   const handleScroll = useCallback(() => {
-    runThrottledForScroll(() => {
-      const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
-      setActiveSetIndex(visibleIndexes[0]);
-      setVisibleSetIndexes(visibleIndexes);
-    });
-  }, []);
+    runThrottledForScroll(updateVisibleSetIndexes);
+  }, [updateVisibleSetIndexes]);
 
   function renderSetButton(set: PartialStickerSet, index: number) {
     const stickerSetCover = set.stickers[0];
