@@ -41,7 +41,7 @@ type IProps = {
   actionTargetMessage?: ApiMessage;
   selected: boolean;
   isUiReady: boolean;
-} & Pick<GlobalActions, 'openChat' | 'focusLastReadMessage'>;
+} & Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
 
 const Chat: FC<IProps> = ({
   chat,
@@ -53,7 +53,7 @@ const Chat: FC<IProps> = ({
   selected,
   isUiReady,
   openChat,
-  focusLastReadMessage,
+  focusTopMessage,
 }) => {
   const { last_message, typingStatus } = chat;
   const chatId = chat.id;
@@ -98,11 +98,11 @@ const Chat: FC<IProps> = ({
 
   const handleClick = useCallback(() => {
     if (selected) {
-      focusLastReadMessage();
+      focusTopMessage();
     } else {
       openChat({ id: chatId });
     }
-  }, [selected, focusLastReadMessage, openChat, chatId]);
+  }, [selected, focusTopMessage, openChat, chatId]);
 
   const className = buildClassName(
     'Chat',
@@ -167,7 +167,7 @@ export default memo(withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { openChat, focusLastReadMessage } = actions;
-    return { openChat, focusLastReadMessage };
+    const { openChat, focusTopMessage } = actions;
+    return { openChat, focusTopMessage };
   },
 )(Chat));
