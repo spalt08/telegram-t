@@ -125,6 +125,23 @@ addReducer('sendMessage', (global, actions, payload) => {
   actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
 });
 
+addReducer('editMessage', (global, actions, payload) => {
+  const { messageId, text, entities } = payload!;
+
+  const chat = selectOpenChat(global);
+  const message = chat && selectChatMessage(global, chat.id, messageId);
+
+  if (!chat || !message) {
+    return;
+  }
+
+  void callApi('editMessage', {
+    chat, message, text, entities,
+  });
+
+  actions.setChatEditing({ chatId: chat.id, messageId: undefined });
+});
+
 addReducer('cancelSendingMessage', () => {
   // const { chatId, messageId } = payload!;
 });
@@ -149,6 +166,9 @@ addReducer('deleteMessages', (global, actions, payload) => {
   const { messageIds, shouldDeleteForAll } = payload!;
 
   void callApi('deleteMessages', { chat, messageIds, shouldDeleteForAll });
+  if (messageIds.includes(global.chats.editingById[chat.id])) {
+    actions.setChatEditing({ chatId: chat.id, messageId: undefined });
+  }
 });
 
 addReducer('markMessagesRead', (global, actions, payload) => {

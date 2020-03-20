@@ -1,4 +1,4 @@
-.ReplyMessage {
+.EmbeddedMessage {
   display: flex;
   align-items: center;
   font-size: 0.875rem;
@@ -44,11 +44,11 @@
     background-color: var(--hover-color);
   }
 
-  .reply-text {
+  .message-text {
     overflow: hidden;
     margin-left: 0.5rem;
 
-    .sender-name {
+    .message-title {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -69,7 +69,7 @@
     }
   }
 
-  .reply-action-message {
+  .embedded-action-message {
     color: var(--accent-color);
     opacity: 0.75;
   }
@@ -101,11 +101,11 @@
       margin-left: .125rem;
     }
 
-    .reply-text {
+    .message-text {
       margin-left: .375rem;
     }
 
-    .sender-name {
+    .message-title {
       font-weight: 500;
       color: var(--accent-color);
     }

@@ -4,6 +4,8 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
+import { GlobalActions } from '../../../global/types';
+
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
@@ -17,13 +19,21 @@ type IProps = {
   shouldSetFocus: boolean;
   onUpdate: (html: string) => void;
   onSend: Function;
-};
+} & Pick<GlobalActions, 'editLastChatMessage'>;
 
 const MAX_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 
 const MessageInput: FC<IProps> = ({
-  id, html, placeholder, selectedChatId, replyingTo, onUpdate, onSend, shouldSetFocus,
+  id,
+  html,
+  placeholder,
+  selectedChatId,
+  replyingTo,
+  onUpdate,
+  onSend,
+  shouldSetFocus,
+  editLastChatMessage,
 }) => {
   const inputRef = useRef<HTMLDivElement>();
 
@@ -53,11 +63,15 @@ const MessageInput: FC<IProps> = ({
     input.classList.toggle('overflown', input.scrollHeight > MAX_INPUT_HEIGHT);
   }
 
-  function handleKeyPress(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.keyCode === 13 && !e.shiftKey) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
 
       onSend();
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      editLastChatMessage();
     }
   }
 
@@ -87,7 +101,7 @@ const MessageInput: FC<IProps> = ({
         contentEditable
         onClick={focusInput}
         onChange={handleChange}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyDown}
       />
       <span className="placeholder-text">{placeholder}</span>
     </div>
@@ -106,5 +120,9 @@ export default withGlobal(
       selectedChatId,
       replyingTo: replyingToById[selectedChatId],
     };
+  },
+  (setGlobal, actions) => {
+    const { editLastChatMessage } = actions;
+    return { editLastChatMessage };
   },
 )(MessageInput);

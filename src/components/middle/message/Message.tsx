@@ -36,7 +36,7 @@ import { getMinMediaWidth } from './helpers/mediaDimensions';
 
 import Avatar from '../../common/Avatar';
 import MessageMeta from './MessageMeta';
-import ReplyMessage from '../../common/ReplyMessage';
+import EmbeddedMessage from '../../common/EmbeddedMessage';
 import ContextMenuContainer from './ContextMenuContainer';
 
 import Sticker from './Sticker';
@@ -238,7 +238,7 @@ const Message: FC<IProps> = ({
     }
 
     return (
-      <div className="sender-name interactive" onClick={handleSenderClick}>
+      <div className="message-title interactive" onClick={handleSenderClick}>
         {user ? getUserFullName(user) : NBSP}
       </div>
     );
@@ -255,7 +255,7 @@ const Message: FC<IProps> = ({
       <div className={className}>
         {renderSenderName(isForwarded ? originSender : sender)}
         {isReply && (
-          <ReplyMessage
+          <EmbeddedMessage
             message={replyMessage}
             sender={replyMessageSender}
             loadPictogram={loadAndPlayMedia}
@@ -364,7 +364,7 @@ const Message: FC<IProps> = ({
         onContextMenu={handleContextMenu}
       >
         {message.forward_info && !customShape && (
-          <div className="sender-name">Forwarded message</div>
+          <div className="message-title">Forwarded message</div>
         )}
         {renderContent()}
         <MessageMeta message={message} outgoingStatus={outgoingStatus} />

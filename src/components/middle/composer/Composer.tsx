@@ -9,20 +9,24 @@ import {
   ApiSticker,
   ApiVideo,
   ApiNewPoll,
+  ApiMessage,
 } from '../../../api/types';
 
+import { selectChatMessage } from '../../../modules/selectors';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 import * as voiceRecording from '../../../util/voiceRecording';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
+import getMessageTextAsHtml from './helpers/getMessageTextAsHtml';
 
+import DeleteMessageModal from '../../common/DeleteMessageModal';
 import Button from '../../ui/Button';
 import AttachMenu from './AttachMenu';
 import SymbolMenu from './SymbolMenu';
 import MessageInput from './MessageInput';
-import MessageInputReply from './MessageInputReply';
+import ComposerEmbeddedMessage from './ComposerEmbeddedMessage';
 import AttachmentModal from './AttachmentModal';
 import PollModal from './PollModal';
 import WebPagePreview from './WebPagePreview';
@@ -31,8 +35,16 @@ import './Composer.scss';
 
 type IProps = {
   isPrivateChat: boolean;
-} &Pick<GlobalActions, 'sendMessage'>;
+  editedMessage?: ApiMessage;
+} & Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
+
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
+
+enum MainButtonState {
+  Send = 'send',
+  Record = 'record',
+  Edit = 'edit',
+}
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
@@ -54,7 +66,9 @@ function isSelectionInsideInput(selectionRange: Range) {
   return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
 }
 
-const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
+const Composer: FC<IProps> = ({
+  isPrivateChat, editedMessage, sendMessage, editMessage,
+}) => {
   const [html, setHtml] = useState<string>('');
   const htmlRef = useRef<string>(html);
 
@@ -70,11 +84,26 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
   const startRecordTimeRef = useRef<number>();
   const [currentRecordTime, setCurrentRecordTime] = useState();
 
-  const isMainButtonSend = !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const mainButtonState = editedMessage
+    ? MainButtonState.Edit
+    : !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
+      ? MainButtonState.Send
+      : MainButtonState.Record;
 
   useEffect(() => {
     htmlRef.current = html;
   }, [html]);
+
+  useEffect(() => {
+    if (!editedMessage) {
+      setHtml('');
+      return;
+    }
+
+    setHtml(getMessageTextAsHtml(editedMessage));
+  }, [editedMessage]);
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
     const selection = window.getSelection()!;
@@ -122,7 +151,7 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
 
       e.preventDefault();
 
-      if (file) {
+      if (file && !editedMessage) {
         setAttachment(await buildAttachment(file, true));
       }
 
@@ -136,7 +165,7 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
     return () => {
       document.removeEventListener('paste', handlePaste, false);
     };
-  }, [insertTextAndUpdateCursor]);
+  }, [insertTextAndUpdateCursor, editedMessage]);
 
   const handleOpenAttachMenu = useCallback(() => {
     if (canOpenAttachMenu.current) {
@@ -186,6 +215,10 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
     sendMessage({ gif });
     setIsSymbolMenuOpen(false);
   }, [sendMessage]);
+
+  const handleDeleteModalClose = useCallback(() => {
+    setIsDeleteModalOpen(false);
+  }, []);
 
   const handleRecordVoice = useCallback(async () => {
     try {
@@ -261,6 +294,45 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
     setIsSymbolMenuOpen(false);
   }, [activeVoiceRecording, attachment, sendMessage, stopRecordingVoice]);
 
+  const handleEditComplete = useCallback(() => {
+    const { rawText, entities } = parseMessageInput(htmlRef.current!);
+
+    if (!editedMessage) {
+      return;
+    }
+
+    if (!rawText) {
+      setIsDeleteModalOpen(true);
+      return;
+    }
+
+    editMessage({
+      messageId: editedMessage.id,
+      text: rawText,
+      entities,
+    });
+
+    setHtml('');
+    setAttachment(undefined);
+    setIsSymbolMenuOpen(false);
+  }, [editedMessage, editMessage]);
+
+  const mainButtonHandler = useCallback(() => {
+    switch (mainButtonState) {
+      case MainButtonState.Send:
+        handleSend();
+        break;
+      case MainButtonState.Record:
+        handleRecordVoice();
+        break;
+      case MainButtonState.Edit:
+        handleEditComplete();
+        break;
+      default:
+        break;
+    }
+  }, [mainButtonState, handleSend, handleRecordVoice, handleEditComplete]);
+
   return (
     <div className="Composer">
       <AttachmentModal
@@ -275,8 +347,15 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
         onClear={handleClosePollCreation}
         onSend={handlePollSend}
       />
+      {editedMessage && (
+        <DeleteMessageModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleDeleteModalClose}
+          message={editedMessage}
+        />
+      )}
       <div id="message-compose">
-        <MessageInputReply />
+        <ComposerEmbeddedMessage />
         <WebPagePreview messageText={!attachment ? html : ''} />
         <div className="message-input-wrapper">
           <Button
@@ -293,10 +372,10 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
             html={!attachment ? html : ''}
             placeholder="Message"
             onUpdate={setHtml}
-            onSend={handleSend}
+            onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
           />
-          {!activeVoiceRecording && (
+          {!activeVoiceRecording && !editedMessage && (
             <Button
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
@@ -342,11 +421,12 @@ const Composer: FC<IProps> = ({ isPrivateChat, sendMessage }) => {
         ref={recordButtonRef}
         round
         color="secondary"
-        className={`${isMainButtonSend ? 'send' : 'microphone'} ${activeVoiceRecording ? 'recording' : ''}`}
-        onClick={isMainButtonSend ? handleSend : handleRecordVoice}
+        className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
+        onClick={mainButtonHandler}
       >
         <i className="icon-send" />
         <i className="icon-microphone-alt" />
+        <i className="icon-check" />
       </Button>
     </div>
   );
@@ -368,10 +448,16 @@ async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachm
 export default memo(withGlobal(
   (global) => {
     const selectedChatId = global.chats.selectedId;
-    return { isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId) };
+    const editingMessageId = selectedChatId ? global.chats.editingById[selectedChatId] : undefined;
+    const editedMessage = editingMessageId ? selectChatMessage(global, selectedChatId!, editingMessageId) : undefined;
+
+    return {
+      isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId),
+      editedMessage,
+    };
   },
   (setGlobal, actions) => {
-    const { sendMessage } = actions;
-    return { sendMessage };
+    const { sendMessage, editMessage } = actions;
+    return { sendMessage, editMessage };
   },
 )(Composer));

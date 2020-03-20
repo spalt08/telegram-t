@@ -158,7 +158,7 @@
     }
 
     &:not(.custom-shape).is-reply .media-inner,
-    .sender-name ~ .media-inner {
+    .message-title ~ .media-inner {
       --border-top-left-radius: 0;
       --border-top-right-radius: 0;
     }

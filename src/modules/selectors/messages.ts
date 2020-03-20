@@ -1,10 +1,21 @@
 import { GlobalState } from '../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
+
 import { selectChat, selectIsChatWithSelf } from './chats';
-import {
-  getMessageKey, getSendingState, isChatBasicGroup, isChatChannel, isMessageLocal, isChatPrivate, isChatSuperGroup,
-} from '../helpers';
 import { selectUser } from './users';
+import {
+  getMessageKey,
+  getMessageText,
+  getSendingState,
+  isChatBasicGroup,
+  isChatChannel,
+  isMessageLocal,
+  isChatPrivate,
+  isChatSuperGroup,
+  isForwardedMessage,
+} from '../helpers';
+
+const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
 
 export function selectChatMessages(global: GlobalState, chatId: number) {
   const messages = global.messages.byChatId[chatId];
@@ -122,8 +133,13 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   const canDelete = isPrivate || isBasicGroup || isSuperGroupOrChannelAdmin || isOwnMessage;
   const canDeleteForAll = canDelete && ((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin);
 
+  const canEdit = isOwnMessage
+    && Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
+    && Boolean(getMessageText(message))
+    && !isForwardedMessage(message);
+
   return {
-    canReply, canPin, canDelete, canDeleteForAll,
+    canReply, canEdit, canPin, canDelete, canDeleteForAll,
   };
 }
 

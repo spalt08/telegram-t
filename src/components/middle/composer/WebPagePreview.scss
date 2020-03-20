@@ -10,7 +10,7 @@
 
   --accent-color: var(--color-primary);
 
-  .MessageInputReply + & {
+  .ComposerEmbeddedMessage + & {
     margin-top: 0.75rem;
   }
 

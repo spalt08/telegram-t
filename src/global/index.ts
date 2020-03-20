@@ -20,6 +20,7 @@ const INITIAL_STATE: GlobalState = {
     byId: {},
     scrollOffsetById: {},
     replyingToById: {},
+    editingById: {},
   },
 
   messages: {
@@ -93,6 +94,11 @@ function updateCache(global: GlobalState) {
 
   const reducedState: GlobalState = {
     ...global,
+    chats: {
+      ...global.chats,
+      replyingToById: {},
+      editingById: {},
+    },
     connectionState: undefined,
     isUiReady: false,
     lastSyncTime: undefined,
