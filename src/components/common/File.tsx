@@ -2,6 +2,7 @@ import React, { FC } from '../../lib/teact/teact';
 
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import useShowTransition from '../../hooks/useShowTransition';
+import buildClassName from '../../util/buildClassName';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -39,7 +40,7 @@ const File: FC<IProps> = ({
   const sizeString = getFileSizeString(size);
 
   return (
-    <div className={`File ${smaller ? 'smaller' : ''} ${className || ''}`}>
+    <div className={buildClassName('File', className, smaller && 'smaller')}>
       <div className="file-icon-container">
         <div className={`file-icon ${color}`}>
           {extension.length <= 4 && (
@@ -47,8 +48,8 @@ const File: FC<IProps> = ({
           )}
         </div>
         {shouldSpinnerRender && (
-          <div className={['file-progress', color, spinnerClassNames].join(' ')}>
-            <ProgressSpinner progress={transferProgress} radius={22} smaller={smaller} onClick={onCancelTransfer} />
+          <div className={buildClassName('file-progress', color, spinnerClassNames)}>
+            <ProgressSpinner progress={transferProgress} smaller onClick={onCancelTransfer} />
           </div>
         )}
       </div>

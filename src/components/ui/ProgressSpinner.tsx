@@ -1,9 +1,15 @@
 import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
 
 import './ProgressSpinner.scss';
+import buildClassName from '../../util/buildClassName';
+
+const RADIUS = 28;
+const RADIUS_SMALL = 22;
+const STROKE_WIDTH = 2;
+const MIN_PROGRESS = 0.05;
+const MAX_PROGRESS = 0.99;
 
 const ProgressSpinner: FC<{
-  radius?: number;
   progress?: number;
   smaller?: boolean;
   transparent?: boolean;
@@ -14,9 +20,8 @@ const ProgressSpinner: FC<{
   transparent,
   onClick,
 }) => {
-  const radius = smaller ? 25 : 28;
-  const strokeWidth = 2;
-  const circleRadius = radius - strokeWidth * 2;
+  const radius = smaller ? RADIUS_SMALL : RADIUS;
+  const circleRadius = radius - STROKE_WIDTH * 2;
   const borderRadius = radius - 1;
   const circumference = circleRadius * 2 * Math.PI;
   const container = useRef<HTMLDivElement>();
@@ -34,7 +39,7 @@ const ProgressSpinner: FC<{
     }
 
     const svg = container.current.firstElementChild;
-    const strokeDashOffset = circumference - Math.min(Math.max(0.05, progress), 0.95) * circumference;
+    const strokeDashOffset = circumference - Math.min(Math.max(MIN_PROGRESS, progress), MAX_PROGRESS) * circumference;
 
     if (svg === null) {
       container.current.innerHTML = `<svg
@@ -45,7 +50,7 @@ const ProgressSpinner: FC<{
         <circle
           stroke="white"
           fill="transparent"
-          stroke-width=${strokeWidth}
+          stroke-width=${STROKE_WIDTH}
           stroke-dasharray="${circumference} ${circumference}"}
           stroke-dashoffset="${strokeDashOffset}"
           r=${circleRadius}
@@ -58,12 +63,16 @@ const ProgressSpinner: FC<{
     }
   }, [container, circumference, borderRadius, circleRadius, progress]);
 
+  const className = buildClassName(
+    'ProgressSpinner not-implemented',
+    smaller && 'smaller',
+    transparent && 'transparent',
+  );
+
   return (
     <div
       ref={container}
-      className={`ProgressSpinner not-implemented ${smaller ? 'smaller' : ''} ${transparent ? 'transparent' : ''}`}
-      // @ts-ignore teact feature
-      style={`width: ${borderRadius * 2}px; height: ${borderRadius * 2}px`}
+      className={className}
       onClick={handleClick}
     />
   );
