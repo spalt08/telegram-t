@@ -9,14 +9,8 @@ import { selectChatMessages, selectIsOwnMessage, selectAllowedMessagedActions } 
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
-  const { selectedId } = global.chats;
 
-  if (selectedId !== id) {
-    return updateSelectedChatId(global, id);
-  } else {
-    actions.focusLastReadMessage();
-    return undefined;
-  }
+  return updateSelectedChatId(global, id);
 });
 
 addReducer('openChatWithInfo', (global, actions, payload) => {

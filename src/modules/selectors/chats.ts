@@ -48,9 +48,3 @@ export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
     return onlineCount;
   }, 0);
 }
-
-export function selectLastReadId(global: GlobalState, chatId: number) {
-  const chat = selectChat(global, chatId);
-
-  return chat.unread_count ? chat.last_read_inbox_message_id : undefined;
-}
