@@ -29,7 +29,8 @@
     margin-left: .5rem;
 
     .icon-send,
-    .icon-microphone-alt {
+    .icon-microphone-alt,
+    .icon-check {
       position: absolute;
     }
 
@@ -61,20 +62,41 @@
         animation: grow-icon .4s ease-out;
       }
 
-      .icon-microphone-alt {
+      .icon-microphone-alt,
+      .icon-check {
         animation: hide-icon .4s forwards ease-out;
       }
 
       transition: box-shadow 200ms ease-out;
     }
 
-    &.microphone {
+    &.record {
       .icon-microphone-alt {
         animation: grow-icon .4s ease-out;
       }
 
-      .icon-send {
+      .icon-send,
+      .icon-check {
         animation: hide-icon .4s forwards ease-out;
+      }
+    }
+
+    &.edit {
+      color: var(--color-primary);
+
+      &:active,
+      &:focus,
+      &:hover {
+        color: white;
+      }
+
+      .icon-send,
+      .icon-microphone-alt {
+        animation: hide-icon .4s forwards ease-out;
+      }
+
+      .icon-check {
+        animation: grow-icon .4s ease-out;
       }
     }
   }
@@ -197,7 +219,7 @@
     }
   }
 
-  .MessageInputReply + .message-input-wrapper &,
+  .ComposerEmbeddedMessage + .message-input-wrapper &,
   .WebPagePreview + .message-input-wrapper & {
     .form-control.overflown {
       margin-top: 0.75rem;

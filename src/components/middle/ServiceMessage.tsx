@@ -16,14 +16,14 @@ type IProps = {
   sender?: ApiUser;
   actionTargetUser?: ApiUser;
   actionTargetMessage?: ApiMessage;
-  isReply?: boolean;
+  isEmbedded?: boolean;
   isFocused: boolean;
 };
 
 const FOCUSING_MAX_DISTANCE = 2000;
 
 const ServiceMessage: FC<IProps> = ({
-  message, sender, actionTargetUser, actionTargetMessage, isReply, isFocused,
+  message, sender, actionTargetUser, actionTargetMessage, isEmbedded, isFocused,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
 
@@ -51,11 +51,11 @@ const ServiceMessage: FC<IProps> = ({
     sender,
     actionTargetUser,
     actionTargetMessage,
-    isReply ? { isReply, plain: true } : undefined,
+    isEmbedded ? { isEmbedded, plain: true } : undefined,
   );
 
-  if (isReply) {
-    return <span className="reply-action-message">{content}</span>;
+  if (isEmbedded) {
+    return <span className="embedded-action-message">{content}</span>;
   }
 
   const classNames = ['message-action-header'];

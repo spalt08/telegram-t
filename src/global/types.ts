@@ -45,7 +45,8 @@ export type GlobalState = {
     // TODO Replace with Partial<Record> to handle missing keys
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
-    replyingToById: Record<number, number>;
+    replyingToById: Record<number, number | undefined>;
+    editingById: Record<number, number | undefined>;
     orderedPinnedIds?: number[];
   };
 
@@ -153,10 +154,11 @@ export type ActionTypes = (
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
+  'setChatEditing' | 'editLastChatMessage' |
   'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' | 'sendPollVote' |
+  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastReadMessage' | 'sendPollVote' | 'editMessage' |
   // forwarding messages
   'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search

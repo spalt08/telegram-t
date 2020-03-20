@@ -100,7 +100,7 @@ export function updateChatScrollOffset(
 export function updateChatReplyingTo(
   global: GlobalState,
   chatId: number,
-  messageId: number,
+  messageId: number | undefined,
 ): GlobalState {
   return {
     ...global,
@@ -109,6 +109,31 @@ export function updateChatReplyingTo(
       replyingToById: {
         ...global.chats.replyingToById,
         [chatId]: messageId,
+      },
+      editingById: {
+        ...global.chats.editingById,
+        [chatId]: undefined,
+      },
+    },
+  };
+}
+
+export function updateChatEditing(
+  global: GlobalState,
+  chatId: number,
+  messageId: number | undefined,
+): GlobalState {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      editingById: {
+        ...global.chats.editingById,
+        [chatId]: messageId,
+      },
+      replyingToById: {
+        ...global.chats.replyingToById,
+        [chatId]: undefined,
       },
     },
   };

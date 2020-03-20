@@ -16,35 +16,36 @@ import buildClassName from '../../util/buildClassName';
 import RippleEffect from '../ui/RippleEffect';
 import ServiceMessage from '../middle/ServiceMessage';
 
-import './ReplyMessage.scss';
+import './EmbeddedMessage.scss';
 
 type IProps = {
   className?: string;
   message?: ApiMessage;
   sender?: ApiUser;
+  title?: string;
   loadPictogram?: boolean;
   onClick: NoneToVoidFunction;
 };
 
 const NBSP = '\u00A0';
 
-const ReplyMessage: FC<IProps> = ({
-  className, message, sender, loadPictogram, onClick,
+const EmbeddedMessage: FC<IProps> = ({
+  className, message, sender, title, loadPictogram, onClick,
 }) => {
   const mediaThumbnail = message && getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
-  const fullClassName = buildClassName('ReplyMessage', className, !message && 'not-implemented');
+  const fullClassName = buildClassName('EmbeddedMessage', className, !message && 'not-implemented');
 
   return (
     <div className={fullClassName} onClick={message ? onClick : undefined}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
-      <div className="reply-text">
-        <div className="sender-name">{(sender && getUserFullName(sender)) || NBSP}</div>
+      <div className="message-text">
+        <div className="message-title">{(sender && getUserFullName(sender)) || title || NBSP}</div>
         <p>
           {!message ? (
             NBSP
           ) : isActionMessage(message) ? (
-            <ServiceMessage message={message} isReply />
+            <ServiceMessage message={message} isEmbedded />
           ) : (
             getMessageSummaryText(message, true)
           )}
@@ -63,4 +64,4 @@ function renderPictogram(thumbDataUri: string, blobUrl?: string) {
   );
 }
 
-export default ReplyMessage;
+export default EmbeddedMessage;

@@ -169,6 +169,47 @@ export async function sendMessage({
   }), true);
 }
 
+export async function editMessage({
+  chat,
+  message,
+  text,
+  entities,
+}: {
+  chat: ApiChat;
+  message: ApiMessage;
+  text: string;
+  entities?: ApiMessageEntity[];
+}) {
+  const messageUpdate: Partial<ApiMessage> = {
+    content: {
+      ...message.content,
+      text: {
+        '@type': 'formattedText',
+        text,
+        entities,
+      },
+    },
+  };
+
+  onUpdate({
+    '@type': 'editMessage',
+    id: message.id,
+    chat_id: chat.id,
+    message: messageUpdate,
+  });
+
+  localDb.localMessages[message.id] = { ...message, ...messageUpdate };
+
+  const mtpEntities = entities && entities.map(buildMtpMessageEntity);
+
+  await invokeRequest(new GramJs.messages.EditMessage({
+    message: text || '',
+    entities: mtpEntities,
+    peer: buildInputPeer(chat.id, chat.access_hash),
+    id: message.id,
+  }), true);
+}
+
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) {
   const inputFile = await uploadFile(attachment.file, (progress) => {
     onUpdate({

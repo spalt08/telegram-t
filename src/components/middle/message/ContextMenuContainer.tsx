@@ -6,22 +6,12 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 
-import {
-  selectAllowedMessagedActions,
-  selectChat,
-  selectUser,
-} from '../../../modules/selectors';
-import {
-  getPrivateChatUserId,
-  getUserFirstName,
-  isChatPrivate,
-} from '../../../modules/helpers';
+import { selectAllowedMessagedActions } from '../../../modules/selectors';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
-
-import MessageContextMenu from './MessageContextMenu';
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
 import useShowTransition from '../../../hooks/useShowTransition';
+
+import DeleteMessageModal from '../../common/DeleteMessageModal';
+import MessageContextMenu from './MessageContextMenu';
 
 import './ContextMenuContainer.scss';
 
@@ -39,10 +29,9 @@ type IProps = {
   canReply?: boolean;
   canPin?: boolean;
   canDelete?: boolean;
-  canDeleteForAll?: boolean;
-  contactFirstName: string;
+  canEdit?: boolean;
   closeContextMenu: () => void;
-} & Pick<GlobalActions, 'setChatReplyingTo' | 'pinMessage' | 'deleteMessages' | 'openForwardMenu'>;
+} & Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
 
 const ContextMenuContainer: FC<IProps> = ({
   isOpen,
@@ -53,20 +42,19 @@ const ContextMenuContainer: FC<IProps> = ({
   canReply,
   canPin,
   canDelete,
-  canDeleteForAll,
-  contactFirstName,
+  canEdit,
   setChatReplyingTo,
+  setChatEditing,
   pinMessage,
-  deleteMessages,
   openForwardMenu,
 }) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleDelete = useCallback(() => {
     setIsMenuOpen(false);
-    setIsDeleteDialogOpen(true);
+    setIsDeleteModalOpen(true);
   }, []);
 
   const closeMenu = useCallback(() => {
@@ -74,8 +62,8 @@ const ContextMenuContainer: FC<IProps> = ({
     onClose();
   }, [onClose]);
 
-  const closeDeleteDialog = useCallback(() => {
-    setIsDeleteDialogOpen(false);
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
     onClose();
   }, [onClose]);
 
@@ -83,6 +71,11 @@ const ContextMenuContainer: FC<IProps> = ({
     setChatReplyingTo({ chatId: message.chat_id, messageId: message.id });
     closeMenu();
   }, [setChatReplyingTo, message, closeMenu]);
+
+  const handleEdit = useCallback(() => {
+    setChatEditing({ chatId: message.chat_id, messageId: message.id });
+    closeMenu();
+  }, [setChatEditing, message, closeMenu]);
 
   const handlePin = useCallback(() => {
     pinMessage({ messageId: message.id });
@@ -93,16 +86,6 @@ const ContextMenuContainer: FC<IProps> = ({
     openForwardMenu({ fromChatId: message.chat_id, messageIds: [message.id] });
     closeMenu();
   }, [openForwardMenu, message, closeMenu]);
-
-  const handleDeleteMessageForAll = useCallback(() => {
-    deleteMessages({ messageIds: [message.id], shouldDeleteForAll: true });
-    closeDeleteDialog();
-  }, [deleteMessages, message.id, closeDeleteDialog]);
-
-  const handleDeleteMessageForSelf = useCallback(() => {
-    deleteMessages({ messageIds: [message.id], shouldDeleteForAll: false });
-    closeDeleteDialog();
-  }, [deleteMessages, message.id, closeDeleteDialog]);
 
   useEffect(() => {
     disableScrolling();
@@ -117,32 +100,21 @@ const ContextMenuContainer: FC<IProps> = ({
         isOpen={isMenuOpen}
         anchor={anchor}
         canReply={canReply}
-        canPin={canPin}
         canDelete={canDelete}
+        canPin={canPin}
+        canEdit={canEdit}
         onReply={handleReply}
+        onEdit={handleEdit}
         onPin={handlePin}
         onForward={handleForward}
         onDelete={handleDelete}
         onClose={closeMenu}
       />
-      <Modal
-        isOpen={isDeleteDialogOpen}
-        onClose={closeDeleteDialog}
-        className="delete"
-        title="Delete Message?"
-        transparentBackdrop
-      >
-        <p>Are you sure you want to delete message?</p>
-        {canDeleteForAll && (
-          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-            Delete for {contactFirstName ? `me and ${contactFirstName}` : 'Everyone'}
-          </Button>
-        )}
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
-          Delete{canDeleteForAll ? ' just for me' : ''}
-        </Button>
-        <Button className="confirm-dialog-button" isText onClick={closeDeleteDialog}>Cancel</Button>
-      </Modal>
+      <DeleteMessageModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        message={message}
+      />
     </div>
   );
 };
@@ -150,27 +122,28 @@ const ContextMenuContainer: FC<IProps> = ({
 export default memo(withGlobal(
   (global, { message }: IProps) => {
     const {
-      canReply, canPin, canDelete, canDeleteForAll,
+      canReply, canPin, canDelete, canEdit,
     } = selectAllowedMessagedActions(global, message);
-    const chat = selectChat(global, message.chat_id);
-    const contactFirstName = isChatPrivate(chat.id)
-      ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
-      : null;
 
     return {
       canReply,
       canPin,
       canDelete,
-      canDeleteForAll,
-      contactFirstName,
+      canEdit,
     };
   },
   (setGlobal, actions) => {
     const {
-      setChatReplyingTo, pinMessage, deleteMessages, openForwardMenu,
+      setChatReplyingTo,
+      setChatEditing,
+      pinMessage,
+      openForwardMenu,
     } = actions;
     return {
-      setChatReplyingTo, pinMessage, deleteMessages, openForwardMenu,
+      setChatReplyingTo,
+      setChatEditing,
+      pinMessage,
+      openForwardMenu,
     };
   },
 )(ContextMenuContainer));

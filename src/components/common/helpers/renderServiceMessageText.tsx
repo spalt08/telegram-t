@@ -10,7 +10,7 @@ import MessageLink from '../MessageLink';
 interface ServiceMessageTextOptions {
   maxTextLength?: number;
   plain?: boolean;
-  isReply?: boolean;
+  isEmbedded?: boolean;
 }
 
 const DEFAULT_MAX_TEXT_LENGTH = 30;
@@ -34,7 +34,7 @@ export function renderServiceMessageText(
     text,
     '%origin_user%',
     originUser
-      ? (!options.isReply && renderUserContent(originUser, options.plain)) || NBSP
+      ? (!options.isEmbedded && renderUserContent(originUser, options.plain)) || NBSP
       : 'User',
   );
 
