@@ -45,7 +45,6 @@ export function onUpdate(update: ApiUpdate) {
       newGlobal = updateListedIds(newGlobal, chat_id, [id]);
 
       const chat = selectChat(newGlobal, chat_id);
-
       if (chat) {
         const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
         newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
@@ -54,7 +53,8 @@ export function onUpdate(update: ApiUpdate) {
       setGlobal(newGlobal);
 
       // Edge case: New message in an old (not loaded) chat.
-      if (!chat) {
+      const { listIds } = newGlobal.chats;
+      if (!listIds || !listIds.includes(chat_id)) {
         getDispatch().loadTopChats();
       }
 
