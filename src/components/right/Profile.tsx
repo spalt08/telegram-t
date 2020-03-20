@@ -30,6 +30,7 @@ type IProps = {
   userId?: number;
   resolvedUserId?: number;
   chatMessages: Record<number, ApiMessage>;
+  isSearchTypeEmpty?: boolean;
 } & Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
 
 const TAB_TITLES = [
@@ -50,6 +51,7 @@ const Profile: FC<IProps> = ({
   chatId,
   resolvedUserId,
   chatMessages,
+  isSearchTypeEmpty,
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
@@ -68,7 +70,7 @@ const Profile: FC<IProps> = ({
     if (mediaType) {
       setMessageSearchMediaType({ mediaType });
     }
-  }, [mediaType, setMessageSearchMediaType]);
+  }, [mediaType, setMessageSearchMediaType, isSearchTypeEmpty]);
 
   // Set `min-height` for shared media container to prevent jumping when switching tabs
   useEffect(() => {
@@ -149,7 +151,7 @@ const Profile: FC<IProps> = ({
       ref={containerRef}
       className="Profile custom-scroll"
       items={messageIds}
-      preloadBackwards={!mediaType ? 0 : SHARED_MEDIA_SLICE}
+      preloadBackwards={SHARED_MEDIA_SLICE}
       onLoadMore={searchMessages}
     >
       {resolvedUserId ? [
@@ -179,6 +181,7 @@ const Profile: FC<IProps> = ({
 export default withGlobal(
   (global, { chatId, userId }: IProps) => {
     const chatMessages = selectChatMessages(global, userId || chatId);
+    const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
 
     let resolvedUserId;
     if (userId) {
@@ -190,6 +193,7 @@ export default withGlobal(
     return {
       resolvedUserId,
       chatMessages,
+      isSearchTypeEmpty: !searchType,
     };
   },
   (setGlobal, actions) => {

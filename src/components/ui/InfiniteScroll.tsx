@@ -18,7 +18,7 @@ interface IProps {
 }
 
 const DEFAULT_SENSITIVE_AREA = 1200;
-const DEFAULT_PRELOAD_BACKWARDS = 50;
+const DEFAULT_PRELOAD_BACKWARDS = 20;
 
 const InfiniteScroll: FC<IProps> = ({
   ref,
@@ -40,7 +40,7 @@ const InfiniteScroll: FC<IProps> = ({
   const onLoadMoreDebounced = useMemo(() => debounce(onLoadMore, 1000, true, false), [onLoadMore, items]);
 
   useEffect(() => {
-    if (items && items.length < preloadBackwards) {
+    if (items.length < preloadBackwards) {
       onLoadMoreDebounced({ direction: LoadMoreDirection.Backwards });
     }
   }, [items, onLoadMoreDebounced, preloadBackwards]);
