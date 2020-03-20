@@ -151,7 +151,7 @@ export function deleteChatMessages(
 
   newGlobal = replaceChatMessages(newGlobal, chatId, newById);
   newGlobal = replaceListedIds(newGlobal, chatId, listedIds);
-  newGlobal = replaceOutlyingIds(newGlobal, chatId, listedIds);
+  newGlobal = replaceOutlyingIds(newGlobal, chatId, outlyingIds);
   newGlobal = replaceViewportIds(newGlobal, chatId, viewportIds);
 
   return newGlobal;
