@@ -41,11 +41,6 @@
   .symbol-set-container {
     width: 25rem;
     line-height: 0;
-
-    &:not(.shown) {
-      display: block !important;
-      visibility: hidden;
-    }
   }
 
   .sticker-set-button {

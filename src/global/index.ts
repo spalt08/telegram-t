@@ -102,15 +102,6 @@ function updateCache(global: GlobalState) {
     lastSyncTime: undefined,
     messages: reduceMessagesForCache(global),
     fileTransfers: { byMessageKey: {} },
-    stickers: {
-      all: {
-        byId: {},
-      },
-      recent: {
-        stickers: [],
-      },
-    },
-    savedGifs: {},
     globalSearch: {
       recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
     },

@@ -27,7 +27,7 @@ const GifButton: FC<IProps> = ({
   const localMediaHash = `gif${gif.id}`;
 
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
-  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'fast');
+  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'slow');
 
   const [shouldPlay, setShouldPlay] = useState(false);
   const videoBlobUrl = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.BlobUrl);

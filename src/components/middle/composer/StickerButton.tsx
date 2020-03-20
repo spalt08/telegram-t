@@ -15,21 +15,22 @@ import './StickerButton.scss';
 
 interface IProps {
   sticker: ApiSticker;
+  load: boolean;
   title?: string;
   className?: string;
   onClick: (sticker: ApiSticker) => void;
 }
 
 const StickerButton: FC<IProps> = ({
-  sticker, title, className, onClick,
+  sticker, load, title, className, onClick,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
   const isAnimated = sticker.is_animated;
   const localMediaHash = `sticker${sticker.id}`;
 
-  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, undefined, mediaLoader.Type.BlobUrl);
-  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'fast');
+  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
+  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'slow');
 
   const [shouldPlay, setShouldPlay] = useState(false);
   const lottieData = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.Lottie);

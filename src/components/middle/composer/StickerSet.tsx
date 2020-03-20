@@ -3,8 +3,6 @@ import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
 
-import useShowTransition from '../../../hooks/useShowTransition';
-
 import StickerButton from './StickerButton';
 
 type IProps = {
@@ -28,8 +26,6 @@ const StickerSet: FC<IProps> = ({
     }
   }, [areLoaded, load, loadStickers, set.id]);
 
-  const { transitionClassNames } = useShowTransition(areLoaded);
-
   return (
     <div
       key={set.id}
@@ -38,7 +34,7 @@ const StickerSet: FC<IProps> = ({
     >
       <p className="symbol-set-name">{set.title}</p>
       <div
-        className={['symbol-set-container', transitionClassNames].join(' ')}
+        className="symbol-set-container"
         // @ts-ignore teact feature
         style={`height: ${stickerSetHeight}px`}
       >
@@ -46,6 +42,7 @@ const StickerSet: FC<IProps> = ({
           <StickerButton
             key={sticker.id}
             sticker={sticker}
+            load={load}
             onClick={onStickerSelect}
           />
         ))}
