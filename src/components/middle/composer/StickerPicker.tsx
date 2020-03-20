@@ -117,10 +117,6 @@ const StickerPicker: FC<IProps> = ({
       const footer = footerRef.current!;
       const newLeft = activeSetIndex * FOOTER_BUTTON_WIDTH - footer.offsetWidth / 2 + FOOTER_BUTTON_WIDTH / 2;
 
-      if (newLeft > footer.offsetWidth) {
-        return;
-      }
-
       footer.scrollTo({
         left: newLeft,
         behavior: 'smooth',
@@ -171,9 +167,10 @@ const StickerPicker: FC<IProps> = ({
 
     return (
       <StickerButton
-        className={buttonClassName}
         sticker={stickerSetCover}
+        load
         title={set.title}
+        className={buttonClassName}
         onClick={() => selectSet(index)}
       />
     );

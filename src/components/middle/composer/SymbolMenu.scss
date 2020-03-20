@@ -1,13 +1,10 @@
 .SymbolMenu {
   --menu-width: 26.25rem;
+  --menu-height: 23.25rem;
 
   &-main {
     width: var(--menu-width);
-    height: 23.25rem;
-
-    > .Transition {
-      --slide-width: var(--menu-width);
-    }
+    height: var(--menu-height);
   }
 
   .Transition > div:not(.active) {
@@ -20,7 +17,7 @@
 
   .Transition.slide {
     .Loading {
-      height: 22rem;
+      height: var(--menu-height);
     }
   }
 
