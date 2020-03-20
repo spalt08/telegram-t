@@ -2,6 +2,7 @@ import React, { FC, useEffect } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import buildClassName from '../../util/buildClassName';
 
 import './Menu.scss';
 
@@ -21,33 +22,30 @@ interface IProps {
   children: any;
 }
 
-const Menu: FC<IProps> = (props) => {
-  const {
-    isOpen,
-    className,
-    style,
-    children,
-    positionX = 'left',
-    positionY = 'top',
-    autoClose = false,
-    noCloseOnBackdrop = false,
-    onKeyDown,
-    onCloseAnimationEnd,
-    onClose,
-    onMouseEnter,
-    onMouseLeave,
-  } = props;
+const Menu: FC<IProps> = ({
+  isOpen,
+  className,
+  style,
+  children,
+  positionX = 'left',
+  positionY = 'top',
+  autoClose = false,
+  noCloseOnBackdrop = false,
+  onKeyDown,
+  onCloseAnimationEnd,
+  onClose,
+  onMouseEnter,
+  onMouseLeave,
+}) => {
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
-  const bubbleClassNames = [
-    'bubble', 'menu-container', 'custom-scroll', positionY, positionX, transitionClassNames,
-  ].join(' ');
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
+
   const backDropHandler = noCloseOnBackdrop ? undefined : onClose;
 
   return (
     <div
-      className={`Menu ${className || ''}`}
+      className={buildClassName('Menu', className)}
       onKeyDown={isOpen ? onKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
@@ -57,9 +55,8 @@ const Menu: FC<IProps> = (props) => {
       {isOpen && (
         <div className="backdrop" onMouseDown={backDropHandler} />
       )}
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
-        className={bubbleClassNames}
+        className={buildClassName('bubble menu-container custom-scroll', positionY, positionX, transitionClassNames)}
         // @ts-ignore teact feature
         style={`transform-origin: ${positionY} ${positionX}`}
         onClick={autoClose ? onClose : undefined}

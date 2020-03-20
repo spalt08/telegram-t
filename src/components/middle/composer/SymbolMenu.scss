@@ -10,12 +10,6 @@
     }
   }
 
-  .menu-container:not(.open) {
-    .picker-tab {
-      visibility: hidden;
-    }
-  }
-
   .Transition > div:not(.active) {
     .picker-tab {
       .Loading {

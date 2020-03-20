@@ -32,6 +32,10 @@
       transform: scale(1);
     }
 
+    &.closing {
+      transition: opacity 0.15s ease-in, transform 0.2s ease-in !important;
+    }
+
     body.has-open-dialog & {
       transition: none !important;
     }
