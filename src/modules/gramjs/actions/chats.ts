@@ -17,7 +17,11 @@ addReducer('loadMoreChats', (global) => {
   const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
   const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
 
-  void loadChats(lastChat.id, lastChat.last_message!.date);
+  if (lastChat) {
+    void loadChats(lastChat.id, lastChat.last_message!.date);
+  } else {
+    void loadChats();
+  }
 });
 
 addReducer('loadFullChat', (global, actions, payload) => {
