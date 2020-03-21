@@ -40,7 +40,7 @@ const InfiniteScroll: FC<IProps> = ({
   const onLoadMoreDebounced = useMemo(() => debounce(onLoadMore, 1000, true, false), [onLoadMore, items]);
 
   useEffect(() => {
-    if (items.length < preloadBackwards) {
+    if (!items || items.length < preloadBackwards) {
       onLoadMoreDebounced({ direction: LoadMoreDirection.Backwards });
     }
   }, [items, onLoadMoreDebounced, preloadBackwards]);
