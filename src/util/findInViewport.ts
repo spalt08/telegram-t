@@ -1,13 +1,15 @@
 export default function findInViewport(
   container: HTMLElement,
-  selector: string,
+  selectorOrElements: string | NodeListOf<HTMLElement>,
   margin = 0,
   isDense = false,
   shouldContainBottom = false,
 ) {
   const viewportY1 = container.scrollTop;
   const viewportY2 = viewportY1 + container.offsetHeight;
-  const allElements = container.querySelectorAll<HTMLElement>(selector);
+  const allElements = typeof selectorOrElements === 'string'
+    ? container.querySelectorAll<HTMLElement>(selectorOrElements)
+    : selectorOrElements;
   const { length } = allElements;
   const visibleIndexes: number[] = [];
   let isFound = false;

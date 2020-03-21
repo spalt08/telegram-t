@@ -62,6 +62,7 @@ const scrollToLastMessage = throttle((container: Element) => {
 let currentScrollOffset: number;
 let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
+let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
@@ -126,7 +127,7 @@ const MessageList: FC<IProps> = ({
       if (firstUnreadId) {
         const {
           allElements, visibleIndexes,
-        } = findInViewport(container, '.message-list-item', undefined, undefined, true);
+        } = findInViewport(container, listItemElements, undefined, undefined, true);
         const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
         if (lowerElement) {
           const maxId = Number(lowerElement.dataset.messageId);
@@ -149,8 +150,7 @@ const MessageList: FC<IProps> = ({
     let isUpdated = false;
 
     if (isNearTop) {
-      const messageElements = container.querySelectorAll('.message-list-item');
-      const nextAnchor = messageElements[0];
+      const nextAnchor = listItemElements[0];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
@@ -170,8 +170,7 @@ const MessageList: FC<IProps> = ({
     }
 
     if (!isViewportNewest && isNearBottom) {
-      const messageElements = container.querySelectorAll('.message-list-item');
-      const nextAnchor = messageElements[messageElements.length - 1];
+      const nextAnchor = listItemElements[listItemElements.length - 1];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
@@ -194,8 +193,7 @@ const MessageList: FC<IProps> = ({
       if (currentAnchor) {
         currentAnchorTop = currentAnchor.getBoundingClientRect().top;
       } else {
-        const messageElements = container.querySelectorAll('.message-list-item');
-        const nextAnchor = messageElements[0];
+        const nextAnchor = listItemElements[0];
         currentAnchorId = nextAnchor.id;
         currentAnchorTop = nextAnchor.getBoundingClientRect().top;
       }
@@ -219,9 +217,9 @@ const MessageList: FC<IProps> = ({
       setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
 
       updateViewportMessages();
-    });
 
-    determineStickyElement(containerRef.current!, '.message-date-header');
+      determineStickyDate(containerRef.current!);
+    });
   }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages]);
 
   // Initial message loading
@@ -275,6 +273,8 @@ const MessageList: FC<IProps> = ({
     } else {
       container.scrollTop = scrollHeight - (currentScrollOffset || 0);
     }
+
+    listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
 
     updateViewportMessages();
 
@@ -394,13 +394,12 @@ function renderMessages(
   return flatten(dateGroups);
 }
 
-function determineStickyElement(container: HTMLElement, selector: string) {
-  const allElements = container.querySelectorAll(selector);
+function determineStickyDate(container: HTMLElement) {
+  const allElements = container.querySelectorAll<HTMLDivElement>('.message-date-header');
   const containerTop = container.scrollTop;
 
   Array.from(allElements).forEach((el) => {
-    const currentTop = (el as HTMLElement).offsetTop;
-    el.classList.toggle('is-sticky', currentTop - containerTop === INDICATOR_TOP_MARGIN);
+    el.classList.toggle('is-sticky', el.offsetTop - containerTop === INDICATOR_TOP_MARGIN);
   });
 }
 
