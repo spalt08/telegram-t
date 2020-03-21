@@ -21,7 +21,6 @@ interface IProps {
   isSavedMessages?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   className?: string;
-  noAnimate?: boolean;
 }
 
 const Avatar: FC<IProps> = ({
@@ -32,7 +31,6 @@ const Avatar: FC<IProps> = ({
   onClick,
   isSavedMessages,
   className,
-  noAnimate,
 }) => {
   const isDeleted = user && isDeletedUser(user);
   let imageHash: string | undefined;
@@ -46,7 +44,7 @@ const Avatar: FC<IProps> = ({
   }
 
   const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
-  const { shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(dataUri, 'slow', noAnimate);
+  const { shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(dataUri, 'slow');
 
   let content: string | null = '';
 
