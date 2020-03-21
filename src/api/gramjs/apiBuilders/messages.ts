@@ -238,6 +238,7 @@ export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | un
   return {
     id: String(document.id),
     duration,
+    fileName: getFilenameFromDocument(document, 'video'),
     width,
     height,
     supportsStreaming,
@@ -259,7 +260,6 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   return buildVideoFromDocument(media.document);
 }
 
-
 function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
   if (
     !(media instanceof GramJs.MessageMediaDocument)
@@ -280,13 +280,11 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
 
   const { size, mimeType } = media.document;
   const { duration, performer, title } = audioAttribute;
-  const filenameAttribute = media.document.attributes
-    .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
 
   return {
     size,
     mimeType,
-    fileName: (filenameAttribute && filenameAttribute.fileName) || 'Audio',
+    fileName: getFilenameFromDocument(media.document, 'audio'),
     duration,
     performer,
     title,
@@ -329,13 +327,11 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | undefined 
   }
 
   const { size, mimeType } = media.document;
-  const filenameAttribute = media.document.attributes
-    .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
 
   return {
     size,
     mimeType,
-    fileName: (filenameAttribute && filenameAttribute.fileName) || 'File',
+    fileName: getFilenameFromDocument(media.document),
   };
 }
 
@@ -504,6 +500,20 @@ function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAc
   };
 }
 
+function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file') {
+  const { mimeType, attributes } = document;
+  const filenameAttribute = attributes
+    .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
+
+  if (filenameAttribute) {
+    return filenameAttribute.fileName;
+  }
+
+  const extension = mimeType.split('/')[1];
+
+  return `${defaultBase}${String(document.id)}.${extension}`;
+}
+
 let localMessageCounter = -1;
 
 export function buildLocalMessage(
@@ -608,6 +618,7 @@ function buildUploadingMedia(
         video: {
           id: LOCAL_VIDEO_TEMP_ID,
           duration: 0,
+          fileName,
           width,
           height,
           blobUrl,

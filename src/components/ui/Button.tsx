@@ -2,6 +2,8 @@ import { MouseEvent as ReactMouseEvent, FocusEvent, RefObject } from 'react';
 
 import React, { FC, useRef } from '../../lib/teact/teact';
 
+import buildClassName from '../../util/buildClassName';
+
 import Spinner from './Spinner';
 import RippleEffect from './RippleEffect';
 
@@ -11,7 +13,7 @@ type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
 interface IProps {
-  ref?: RefObject<HTMLButtonElement>;
+  ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
   onMouseDown?: Function;
@@ -25,6 +27,9 @@ interface IProps {
   isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
+  href?: string;
+  download?: string;
+  disabled?: boolean;
 }
 
 const Button: FC<IProps> = ({
@@ -42,33 +47,47 @@ const Button: FC<IProps> = ({
   isText,
   isLoading,
   ariaLabel,
+  href,
+  download,
+  disabled,
 }) => {
-  let containerRef = useRef<HTMLButtonElement>();
+  let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
-    containerRef = ref;
+    elementRef = ref;
   }
-  let combinedClass = 'Button';
-  combinedClass += ` ${size} ${color}`;
 
-  if (round) {
-    combinedClass += ' round';
-  }
-  if (className) {
-    combinedClass += ` ${className}`;
-  }
-  if (isText) {
-    combinedClass += ' text';
-  }
-  if (isLoading) {
-    combinedClass += ' loading';
+  const fullClassName = buildClassName(
+    'Button',
+    className,
+    size,
+    color,
+    round && 'round',
+    disabled && 'disabled',
+    isText && 'text',
+    isLoading && 'loading',
+  );
+
+  if (href) {
+    return (
+      <a
+        ref={elementRef as RefObject<HTMLAnchorElement>}
+        className={fullClassName}
+        href={href}
+        title={ariaLabel}
+        download={download}
+      >
+        {children}
+        <RippleEffect />
+      </a>
+    );
   }
 
   return (
     // eslint-disable-next-line react/button-has-type
     <button
-      ref={containerRef}
+      ref={elementRef as RefObject<HTMLButtonElement>}
       type={type}
-      className={combinedClass}
+      className={fullClassName}
       onClick={onClick ? onClick as MouseEventHandler : undefined}
       onMouseDown={onMouseDown ? onMouseDown as MouseEventHandler : undefined}
       onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
