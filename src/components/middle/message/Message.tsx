@@ -353,7 +353,6 @@ const Message: FC<IProps> = ({
           user={sender}
           onClick={handleSenderClick}
           className={!isLastInGroup ? 'hidden' : ''}
-          noAnimate
         />
       )}
       <div
