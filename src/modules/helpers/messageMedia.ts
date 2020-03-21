@@ -139,6 +139,20 @@ export function getMessageMediaHash(
   return undefined;
 }
 
+export function getMessageMediaFilename(message: ApiMessage) {
+  const { photo, video, webPage } = message.content;
+
+  if (photo || (webPage && webPage.photo)) {
+    return `photo${message.date}.jpeg`;
+  }
+
+  if (video) {
+    return video.fileName;
+  }
+
+  return undefined;
+}
+
 export function hasMessageLocalBlobUrl(message: ApiMessage) {
   const { photo, video } = message.content;
 

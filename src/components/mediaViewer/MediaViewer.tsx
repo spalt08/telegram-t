@@ -17,6 +17,7 @@ import {
   getVideoDimensions,
   IDimensions,
   getMessageWebPagePhoto,
+  getMessageMediaFilename,
 } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useMedia from '../../hooks/useMedia';
@@ -50,24 +51,27 @@ const MediaViewer: FC<IProps> = ({
   openForwardMenu,
 }) => {
   const [, onMediaQueryChanged] = useState(null);
+
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
+  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
+  const isVideo = message ? Boolean(getMessageVideo(message)) : null;
+  const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
+
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
       ? [messageId]
       : getChatMediaMessageIds(chatMessages || {}, isReversed);
   }, [isWebPagePhoto, messageId, chatMessages, isReversed]);
+
   const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(messageId);
 
-  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
-  const isVideo = message ? Boolean(getMessageVideo(message)) : null;
-  const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
-
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
   const blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
+  const fileName = message && getMessageMediaFilename(message);
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
@@ -201,6 +205,8 @@ const MediaViewer: FC<IProps> = ({
               {renderSenderInfo}
             </Transition>
             <MediaViewerActions
+              blobUrl={blobUrlFull || blobUrlPreview}
+              fileName={fileName}
               onCloseMediaViewer={closeMediaViewer}
               onForward={handleForward}
             />

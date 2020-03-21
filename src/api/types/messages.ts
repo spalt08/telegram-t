@@ -42,6 +42,7 @@ export interface ApiStickerSet {
 export interface ApiVideo {
   id: string;
   duration: number;
+  fileName: string;
   width?: number;
   height?: number;
   supportsStreaming?: boolean;

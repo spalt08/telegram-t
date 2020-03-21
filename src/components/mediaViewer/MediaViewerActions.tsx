@@ -1,14 +1,19 @@
 import React, { FC } from '../../lib/teact/teact';
 
 import Button from '../ui/Button';
+
 import './MediaViewerActions.scss';
 
 type IProps = {
+  blobUrl?: string;
+  fileName?: string;
   onCloseMediaViewer: Function;
   onForward: Function;
 };
 
-const MediaViewerActions: FC<IProps> = ({ onCloseMediaViewer, onForward }) => {
+const MediaViewerActions: FC<IProps> = ({
+  blobUrl, fileName, onCloseMediaViewer, onForward,
+}) => {
   return (
     <div className="MediaViewerActions">
       <Button round size="smaller" color="translucent-white" ariaLabel="Delete" className="not-implemented">
@@ -23,7 +28,14 @@ const MediaViewerActions: FC<IProps> = ({ onCloseMediaViewer, onForward }) => {
       >
         <i className="icon-forward" />
       </Button>
-      <Button round size="smaller" color="translucent-white" ariaLabel="Download" className="not-implemented">
+      <Button
+        href={blobUrl}
+        download={fileName}
+        round
+        size="smaller"
+        color="translucent-white"
+        ariaLabel="Download"
+      >
         <i className="icon-download" />
       </Button>
       <Button
