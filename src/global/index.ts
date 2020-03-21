@@ -102,6 +102,8 @@ function updateCache(global: GlobalState) {
     lastSyncTime: undefined,
     messages: reduceMessagesForCache(global),
     fileTransfers: { byMessageKey: {} },
+    stickers: reduceStickersForCache(global),
+    savedGifs: reduceSavedGifsForCache(global),
     globalSearch: {
       recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
     },
@@ -135,6 +137,25 @@ function reduceMessagesForCache(global: GlobalState) {
   return {
     ...global.messages,
     byChatId,
+  };
+}
+
+// Remove `hash` so we can request all MTP entities on next load.
+function reduceStickersForCache(global: GlobalState) {
+  return {
+    all: {
+      byId: global.stickers.all.byId,
+    },
+    recent: {
+      stickers: global.stickers.recent.stickers,
+    },
+  };
+}
+
+// Remove `hash` so we can request all MTP entities on next load.
+function reduceSavedGifsForCache(global: GlobalState) {
+  return {
+    gifs: global.savedGifs.gifs,
   };
 }
 
