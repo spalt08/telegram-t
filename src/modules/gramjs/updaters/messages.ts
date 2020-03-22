@@ -286,9 +286,9 @@ export function onUpdate(update: ApiUpdate) {
 
       setGlobal({
         ...global,
-        fileTransfers: {
+        fileUploads: {
           byMessageKey: {
-            ...global.fileTransfers.byMessageKey,
+            ...global.fileUploads.byMessageKey,
             [messageKey]: { progress },
           },
         },

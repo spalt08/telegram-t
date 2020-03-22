@@ -12,7 +12,7 @@ type IProps = {
   name: string;
   extension?: string;
   size: number;
-  fileTransferProgress?: number;
+  uploadProgress?: number;
   className?: string;
   smaller?: boolean;
   isUploading?: boolean;

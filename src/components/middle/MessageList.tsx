@@ -17,7 +17,7 @@ import {
   selectFocusedMessageId,
 } from '../../modules/selectors';
 import {
-  getMessageRenderKey,
+  getMessageOriginalId,
   isActionMessage,
   isChatChannel,
   isChatPrivate,
@@ -355,7 +355,7 @@ function renderMessages(
 
         const renderedMessage = (
           <Message
-            key={getMessageRenderKey(message)}
+            key={getMessageOriginalId(message)}
             message={message}
             album={album}
             showAvatar={!isPrivate && !isOwn}

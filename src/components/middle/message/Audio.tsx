@@ -5,8 +5,8 @@ import React, {
 import { ApiAudio, ApiMessage, ApiVoice } from '../../../api/types';
 
 import { formatMediaDateTime, formatMediaDuration } from '../../../util/dateFormat';
-import { isOwnMessage, getMessageMediaHash, getMessageTransferParams } from '../../../modules/helpers';
-import useMedia from '../../../hooks/useMedia';
+import { isOwnMessage, getMessageMediaHash, getMediaTransferState } from '../../../modules/helpers';
+import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { renderWaveformToDataUri } from '../../common/helpers/waveform';
 import buildClassName from '../../../util/buildClassName';
@@ -19,7 +19,7 @@ import './Audio.scss';
 type IProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
-  fileTransferProgress?: number;
+  uploadProgress?: number;
   inSharedMedia?: boolean;
   date?: number;
   onReadMedia?: () => void;
@@ -28,7 +28,7 @@ type IProps = {
 
 const Audio: FC<IProps> = ({
   message,
-  fileTransferProgress,
+  uploadProgress,
   inSharedMedia,
   date,
   onReadMedia,
@@ -39,11 +39,13 @@ const Audio: FC<IProps> = ({
   const audioRef = useRef<HTMLAudioElement>();
   const [isActive, setIsActive] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
-  const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !isActive);
+  const {
+    mediaData, downloadProgress,
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !isActive);
 
   const {
     isTransferring, transferProgress,
-  } = getMessageTransferParams(message, fileTransferProgress, isActive && !mediaData);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !mediaData);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
@@ -125,7 +127,7 @@ const Audio: FC<IProps> = ({
         <i className="icon-pause" />
       </Button>
       {shouldSpinnerRender && (
-        <div className={['message-media-loading', spinnerClassNames].join(' ')}>
+        <div className={buildClassName('message-media-loading', spinnerClassNames)}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent smaller={inSharedMedia} />
         </div>
       )}

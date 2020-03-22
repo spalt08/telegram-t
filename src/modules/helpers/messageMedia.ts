@@ -201,17 +201,11 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
   return undefined;
 }
 
-export function getMessageTransferParams(message: ApiMessage, fileTransferProgress?: number, isDownloadNeeded = false) {
+export function getMediaTransferState(message: ApiMessage, progress?: number, isDownloadNeeded = false) {
   const isUploading = isMessageLocal(message);
   const isDownloading = !isUploading && isDownloadNeeded;
   const isTransferring = isUploading || isDownloading;
-
-  let transferProgress = 1;
-  if (isUploading) {
-    transferProgress = fileTransferProgress || 0;
-  } else if (isDownloading) {
-    transferProgress = fileTransferProgress || 0.15;
-  }
+  const transferProgress = Number(progress);
 
   return {
     isUploading, isDownloading, isTransferring, transferProgress,

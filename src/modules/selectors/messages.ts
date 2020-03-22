@@ -143,9 +143,9 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   };
 }
 
-export function selectFileTransferProgress(global: GlobalState, message: ApiMessage) {
-  const messageKey = getMessageKey(message.chat_id, message.id);
-  const fileTransfer = global.fileTransfers.byMessageKey[messageKey];
+export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
+  const messageKey = getMessageKey(message.chat_id, message.prev_local_id || message.id);
+  const fileTransfer = global.fileUploads.byMessageKey[messageKey];
 
   return fileTransfer ? fileTransfer.progress : undefined;
 }

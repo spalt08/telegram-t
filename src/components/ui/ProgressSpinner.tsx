@@ -4,10 +4,10 @@ import './ProgressSpinner.scss';
 import buildClassName from '../../util/buildClassName';
 
 const RADIUS = 28;
-const RADIUS_SMALL = 22;
+const RADIUS_SMALL = 25;
 const STROKE_WIDTH = 2;
 const MIN_PROGRESS = 0.05;
-const MAX_PROGRESS = 0.99;
+const MAX_PROGRESS = 1;
 
 const ProgressSpinner: FC<{
   progress?: number;

@@ -11,7 +11,7 @@ import {
   selectChat,
   selectFocusedMessageId,
   selectChatMessage,
-  selectFileTransferProgress,
+  selectUploadProgress,
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
@@ -71,7 +71,7 @@ type IProps = (
     canDelete?: boolean;
     contactFirstName: string | null;
     outgoingStatus?: ApiMessageOutgoingStatus;
-    fileTransferProgress?: number;
+    uploadProgress?: number;
     isFocused?: boolean;
     isSelectedToForward?: boolean;
     focusDirection?: FocusDirection;
@@ -102,7 +102,7 @@ const Message: FC<IProps> = ({
   replyMessageSender,
   originSender,
   outgoingStatus,
-  fileTransferProgress,
+  uploadProgress,
   isFocused,
   isSelectedToForward,
   focusDirection,
@@ -279,7 +279,7 @@ const Message: FC<IProps> = ({
           <Photo
             message={message}
             load={loadAndPlayMedia}
-            fileTransferProgress={fileTransferProgress}
+            uploadProgress={uploadProgress}
             onClick={handleMediaClick}
             onCancelTransfer={handleCancelTransfer}
           />
@@ -288,7 +288,7 @@ const Message: FC<IProps> = ({
           <Video
             message={message}
             loadAndPlay={loadAndPlayMedia}
-            fileTransferProgress={fileTransferProgress}
+            uploadProgress={uploadProgress}
             onClick={handleMediaClick}
             onCancelTransfer={handleCancelTransfer}
           />
@@ -297,7 +297,7 @@ const Message: FC<IProps> = ({
           <Audio
             message={message}
             loadAndPlay={loadAndPlayMedia}
-            fileTransferProgress={fileTransferProgress}
+            uploadProgress={uploadProgress}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelTransfer={handleCancelTransfer}
           />
@@ -305,7 +305,7 @@ const Message: FC<IProps> = ({
         {document && (
           <Document
             message={message}
-            fileTransferProgress={fileTransferProgress}
+            uploadProgress={uploadProgress}
             onCancelTransfer={handleCancelTransfer}
           />
         )}
@@ -404,7 +404,7 @@ export default memo(withGlobal(
       originUserId = message.forward_info.origin.sender_user_id;
     }
 
-    const fileTransferProgress = selectFileTransferProgress(global, message);
+    const uploadProgress = selectUploadProgress(global, message);
     const focusedId = selectFocusedMessageId(global, chatId);
     const isFocused = focusedId && album
       ? album.messages.map(({ id }) => id).includes(focusedId)
@@ -426,7 +426,7 @@ export default memo(withGlobal(
         replyMessageSender,
       }),
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
-      ...(typeof fileTransferProgress === 'number' && { fileTransferProgress }),
+      ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
       isSelectedToForward,
       focusDirection,

@@ -4,23 +4,22 @@ import { WorkerMessageEvent, OriginMessageData, ThenArg } from './types';
 
 import generateIdFor from '../../../util/generateIdFor';
 
-type WorkerPromiseStore = {
+type RequestStates = {
   promise: Promise<ThenArg<MethodResponse<keyof Methods>>>;
   resolve: Function;
   reject: Function;
+  callback: AnyToVoidFunction;
 };
 
 const worker = new Worker('./worker.ts');
-const workerPromises: Record<string, WorkerPromiseStore> = {};
+const requestStates: Record<string, RequestStates> = {};
 
 export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   subscribeToWorker(onUpdate);
 
   return sendToWorker({
     type: 'initApi',
-    args: {
-      sessionId,
-    },
+    args: [sessionId],
   }, true);
 }
 
@@ -37,12 +36,16 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
     if (data.type === 'update') {
       onUpdate(data.update);
     } else if (data.type === 'methodResponse') {
-      if (workerPromises[data.messageId]) {
+      if (requestStates[data.messageId]) {
         if (data.error) {
-          workerPromises[data.messageId].reject(data.error);
+          requestStates[data.messageId].reject(data.error);
         } else {
-          workerPromises[data.messageId].resolve(data.response);
+          requestStates[data.messageId].resolve(data.response);
         }
+      }
+    } else if (data.type === 'methodCallback') {
+      if (requestStates[data.messageId]) {
+        requestStates[data.messageId].callback(...data.callbackArgs);
       }
     } else if (data.type === 'unhandledError') {
       throw data;
@@ -56,26 +59,31 @@ function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false)
     return null;
   }
 
-  const messageId = generateIdFor(workerPromises);
+  const messageId = generateIdFor(requestStates);
+  const payload = {
+    messageId,
+    ...message,
+  };
 
-  workerPromises[messageId] = {} as WorkerPromiseStore;
-  workerPromises[messageId].promise = new Promise((resolve, reject) => {
-    Object.assign(workerPromises[messageId], { resolve, reject });
+  requestStates[messageId] = {} as RequestStates;
+  requestStates[messageId].promise = new Promise((resolve, reject) => {
+    Object.assign(requestStates[messageId], { resolve, reject });
   });
 
-  workerPromises[messageId].promise.then(
+  requestStates[messageId].promise.then(
     () => {
-      delete workerPromises[messageId];
+      delete requestStates[messageId];
     },
     () => {
-      delete workerPromises[messageId];
+      delete requestStates[messageId];
     },
   );
 
-  worker.postMessage({
-    messageId,
-    ...message,
-  });
+  if (typeof payload.args[1] === 'function') {
+    requestStates[messageId].callback = payload.args.pop() as AnyToVoidFunction;
+  }
 
-  return workerPromises[messageId].promise;
+  worker.postMessage(payload);
+
+  return requestStates[messageId].promise;
 }

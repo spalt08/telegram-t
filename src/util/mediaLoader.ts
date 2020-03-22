@@ -2,6 +2,7 @@ import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { blobToDataUri, preloadImage } from './files';
+import { ApiOnProgress } from '../api/types';
 
 // We cache avatars as Data URI for faster initial load
 // and messages media as Blob for smaller size.
@@ -28,9 +29,9 @@ const FETCH_PROMISES: Record<string, Promise<MemoryMedia | null>> = {};
 
 let pako: typeof import('../lib/pako_inflate');
 
-export function fetch<T extends Type>(url: string, mediaType: T) {
+export function fetch<T extends Type>(url: string, mediaType: T, onProgress?: ApiOnProgress) {
   if (!FETCH_PROMISES[url]) {
-    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType).catch((err) => {
+    FETCH_PROMISES[url] = fetchFromCacheOrRemote(url, mediaType, onProgress).catch((err) => {
       if (DEBUG) {
         // eslint-disable-next-line no-console
         console.warn(err);
@@ -49,7 +50,7 @@ export function getFromMemory<T extends Type>(url: string) {
   return MEMORY_CACHE[url] as TypeToMemory<T>;
 }
 
-async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
+async function fetchFromCacheOrRemote(url: string, mediaType: Type, onProgress?: ApiOnProgress) {
   if (!MEDIA_CACHE_DISABLED) {
     const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, asCacheApiType[mediaType]);
     if (cached) {
@@ -59,7 +60,7 @@ async function fetchFromCacheOrRemote(url: string, mediaType: Type) {
     }
   }
 
-  const remote = await callApi('downloadMedia', url);
+  const remote = await callApi('downloadMedia', url, onProgress);
 
   if (!remote || !remote.data) {
     throw new Error('Failed to fetch media');

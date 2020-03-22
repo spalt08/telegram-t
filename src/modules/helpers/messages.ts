@@ -9,7 +9,7 @@ export function getMessageKey(chatId: number, messageId: number) {
   return `msg${chatId}-${messageId}`;
 }
 
-export function getMessageRenderKey(message: ApiMessage) {
+export function getMessageOriginalId(message: ApiMessage) {
   return message.prev_local_id || message.id;
 }
 

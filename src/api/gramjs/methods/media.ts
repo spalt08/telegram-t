@@ -2,13 +2,13 @@ import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
+import { ApiOnProgress } from '../../types';
 
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
-export default async function downloadMedia(client: TelegramClient, url: string): Promise<{
-  data: Buffer | null;
-  mimeType?: string;
-} | null> {
+export default async function downloadMedia(
+  client: TelegramClient, url: string, onProgress?: ApiOnProgress,
+): Promise<{ data: Buffer | null; mimeType?: string } | null> {
   const mediaMatch = url.match(/(avatar|msg|sticker|gif)([-\d]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return null;
@@ -48,7 +48,10 @@ export default async function downloadMedia(client: TelegramClient, url: string)
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
-    const data = await client.downloadMedia(entity, { sizeType });
+    const progressCallback = onProgress ? (progress: number) => {
+      onProgress(progress);
+    } : undefined;
+    const data = await client.downloadMedia(entity, { sizeType, progressCallback });
     const mimeType = entity instanceof GramJs.Message
       ? getMessageMediaMimeType(entity, Boolean(sizeType))
       : (entity as GramJs.Document).mimeType;

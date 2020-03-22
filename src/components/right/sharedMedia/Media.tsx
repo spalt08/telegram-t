@@ -9,7 +9,7 @@ import {
   getMessageVideo,
 } from '../../../modules/helpers';
 import useMedia from '../../../hooks/useMedia';
-import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 
 import './Media.scss';
 
@@ -25,7 +25,9 @@ const Media: FC<IProps> = ({ message, onClick }) => {
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
-  const { shouldRenderThumb, shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(mediaBlobUrl, 'slow');
+  const {
+    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
+  } = useTransitionForMedia(mediaBlobUrl, 'slow');
 
   const video = getMessageVideo(message);
 
