@@ -18,7 +18,7 @@
     opacity: 1;
     transform: scale(1) translateX(0);
     transform-origin: bottom;
-    transition: opacity .15s, transform .15s ease-in;
+    transition: opacity .2s, transform .2s ease-in;
   }
 
   &.last-in-group {

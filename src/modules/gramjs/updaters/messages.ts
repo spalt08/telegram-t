@@ -14,7 +14,7 @@ import {
 } from '../../selectors';
 import { getMessageContent, isCommonBoxChat } from '../../helpers';
 
-const ANIMATION_DELAY = 300;
+const ANIMATION_DELAY = 350;
 
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
