@@ -11,7 +11,7 @@ import {
   onAuthError, onAuthReady, onCurrentUserId,
 } from './auth';
 import { updater } from '../updater';
-import downloadMediaFromClient from './media';
+import downloadMediaWithClient from './media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -120,11 +120,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 }
 
 export function downloadMedia(args: { url: string; mediaFormat: ApiMediaFormat }, onProgress?: ApiOnProgress) {
-  if (!isConnected) {
-    return Promise.reject(new Error('ERROR: Client is not connected'));
-  }
-
-  return downloadMediaFromClient(client, args, onProgress);
+  return downloadMediaWithClient(args, client, isConnected, onProgress);
 }
 
 export function uploadFile(file: File, onProgress?: (progress: number) => void) {

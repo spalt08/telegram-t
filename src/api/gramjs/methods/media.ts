@@ -16,11 +16,12 @@ type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 const CACHEABLE_SIZE_BYTES = 512000;
 
 export default async function (
-  client: TelegramClient,
   { url, mediaFormat }: { url: string; mediaFormat: ApiMediaFormat },
+  client: TelegramClient,
+  isConnected: boolean,
   onProgress?: ApiOnProgress,
 ) {
-  const { data, mimeType } = await download(client, url, onProgress) || {};
+  const { data, mimeType } = await download(url, client, isConnected, onProgress) || {};
   if (!data) {
     return undefined;
   }
@@ -40,10 +41,20 @@ export default async function (
   return { prepared, mimeType };
 }
 
-async function download(client: TelegramClient, url: string, onProgress?: ApiOnProgress) {
-  const mediaMatch = url.match(/(avatar|msg|sticker|gif)([-\d]+)(\?size=\w)?/);
+async function download(url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress) {
+  const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return undefined;
+  }
+
+  if (mediaMatch[1] === 'file') {
+    const response = await fetch(mediaMatch[2]);
+    const data = await response.arrayBuffer();
+    return { data };
+  }
+
+  if (!isConnected) {
+    return Promise.reject(new Error('ERROR: Client is not connected'));
   }
 
   let entityType: EntityType;
