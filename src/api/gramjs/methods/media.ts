@@ -1,22 +1,54 @@
-import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
+import { inflate } from 'pako/dist/pako_inflate';
 
+import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
+import {
+  ApiOnProgress, ApiMediaFormat, ApiParsedMedia, ApiPreparedMedia,
+} from '../../types';
+
+import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../../../config';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
-import { ApiOnProgress } from '../../types';
+import { blobToDataUri } from '../../../util/files';
+import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
-export default async function downloadMedia(
-  client: TelegramClient, url: string, onProgress?: ApiOnProgress,
-): Promise<{ data: Buffer | null; mimeType?: string } | null> {
+const CACHEABLE_SIZE_BYTES = 512000;
+
+export default async function (
+  client: TelegramClient,
+  { url, mediaFormat }: { url: string; mediaFormat: ApiMediaFormat },
+  onProgress?: ApiOnProgress,
+) {
+  const { data, mimeType } = await download(client, url, onProgress) || {};
+  if (!data) {
+    return undefined;
+  }
+
+  const parsed = await parseMedia(data, mediaFormat, mimeType);
+  if (!parsed) {
+    return undefined;
+  }
+
+  const canCache = mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= CACHEABLE_SIZE_BYTES;
+  if (!MEDIA_CACHE_DISABLED && canCache) {
+    void cacheApi.save(MEDIA_CACHE_NAME, url, parsed);
+  }
+
+  const prepared = prepareMedia(parsed);
+
+  return { prepared, mimeType };
+}
+
+async function download(client: TelegramClient, url: string, onProgress?: ApiOnProgress) {
   const mediaMatch = url.match(/(avatar|msg|sticker|gif)([-\d]+)(\?size=\w)?/);
   if (!mediaMatch) {
-    return null;
+    return undefined;
   }
 
   let entityType: EntityType;
   let entityId: string | number = mediaMatch[2];
-  const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : null;
+  const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : undefined;
   let entity: GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Message | GramJs.Document | undefined;
 
   if (mediaMatch[1] === 'avatar') {
@@ -44,7 +76,7 @@ export default async function downloadMedia(
   }
 
   if (!entity) {
-    return null;
+    return undefined;
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
@@ -60,6 +92,7 @@ export default async function downloadMedia(
   } else {
     const data = await client.downloadProfilePhoto(entity, false);
     const mimeType = 'image/jpeg';
+
     return { mimeType, data };
   }
 }
@@ -78,4 +111,30 @@ function getMessageMediaMimeType(message: GramJs.Message, isThumb = false) {
   }
 
   return undefined;
+}
+
+// eslint-disable-next-line no-async-without-await/no-async-without-await
+async function parseMedia(
+  data: Buffer, mediaFormat: ApiMediaFormat, mimeType?: string,
+): Promise<ApiParsedMedia | undefined> {
+  switch (mediaFormat) {
+    case ApiMediaFormat.DataUri:
+      return blobToDataUri(new Blob([data], { type: mimeType }));
+    case ApiMediaFormat.BlobUrl:
+      return new Blob([data], { type: mimeType });
+    case ApiMediaFormat.Lottie: {
+      const json = inflate(data, { to: 'string' });
+      return JSON.parse(json);
+    }
+  }
+
+  return undefined;
+}
+
+function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
+  if (mediaData instanceof Blob) {
+    return URL.createObjectURL(mediaData);
+  }
+
+  return mediaData;
 }

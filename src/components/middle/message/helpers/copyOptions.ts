@@ -1,7 +1,8 @@
+import { ApiMediaFormat, ApiMessage } from '../../../../api/types';
+
 import * as mediaLoader from '../../../../util/mediaLoader';
 import { getMessageMediaHash, getMessagePhoto, getMessageText } from '../../../../modules/helpers';
 import { CLIPBOARD_ITEM_SUPPORTED, copyImageToClipboard, copyTextToClipboard } from '../../../../util/clipboard';
-import { ApiMessage } from '../../../../api/types';
 
 type ICopyOptions = {
   label: string;
@@ -20,7 +21,7 @@ export function getMessageCopyOptions(message: ApiMessage, afterEffect?: () => v
     options.push({
       label: 'Copy Media',
       handler: () => {
-        mediaLoader.fetch(mediaHash, mediaLoader.Type.BlobUrl).then(copyImageToClipboard);
+        mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl).then(copyImageToClipboard);
 
         if (afterEffect) {
           afterEffect();

@@ -2,9 +2,8 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { ApiVideo } from '../../../api/types';
+import { ApiMediaFormat, ApiVideo } from '../../../api/types';
 
-import * as mediaLoader from '../../../util/mediaLoader';
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
@@ -26,11 +25,11 @@ const GifButton: FC<IProps> = ({
 
   const localMediaHash = `gif${gif.id}`;
 
-  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
+  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, ApiMediaFormat.BlobUrl);
   const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
 
   const [shouldPlay, setShouldPlay] = useState(false);
-  const videoBlobUrl = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.BlobUrl);
+  const videoBlobUrl = useMedia(localMediaHash, !shouldPlay, ApiMediaFormat.BlobUrl);
 
   const play = useCallback(() => {
     setShouldPlay(true);

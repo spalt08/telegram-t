@@ -32,7 +32,7 @@ type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
 
 declare module '*.png';
 
-declare module '../lib/pako_inflate' {
+declare module 'pako/dist/pako_inflate' {
   function inflate(...args: any[]): string;
 }
 

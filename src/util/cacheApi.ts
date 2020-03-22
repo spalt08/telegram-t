@@ -1,4 +1,5 @@
-const cacheApi = window.caches;
+// eslint-disable-next-line no-restricted-globals
+const cacheApi = self.caches;
 
 export enum Type {
   Text,
