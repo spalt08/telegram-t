@@ -45,7 +45,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
       }
     } else if (data.type === 'methodCallback') {
       if (requestStates[data.messageId]) {
-        requestStates[data.messageId].callback(...data.callbackArgs);
+        requestStates[data.messageId].callback(data.payload, data.arrayBuffer);
       }
     } else if (data.type === 'unhandledError') {
       throw data;

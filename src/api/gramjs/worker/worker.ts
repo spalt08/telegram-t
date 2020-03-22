@@ -17,11 +17,12 @@ onmessage = async (message: OriginMessageEvent) => {
       const { messageId, name, args } = data;
       try {
         if (messageId) {
-          args.push(((...callbackArgs: any[]) => {
+          args.push(((payload: any, arrayBuffer?: ArrayBuffer) => {
             sendToOrigin({
               type: 'methodCallback',
               messageId,
-              callbackArgs,
+              payload,
+              arrayBuffer,
             });
           }) as never);
         }
@@ -76,6 +77,10 @@ function onUpdate(update: ApiUpdate) {
   });
 }
 
-function sendToOrigin(data: WorkerMessageData) {
-  postMessage(data);
+function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
+  if (arrayBuffer) {
+    postMessage(data, [arrayBuffer]);
+  } else {
+    postMessage(data);
+  }
 }

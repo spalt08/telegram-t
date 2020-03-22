@@ -6,6 +6,7 @@ export * from './media';
 
 export type ApiOnProgress = (
   progress: number, // Float between 0 and 1.
+  arrayBuffer?: ArrayBuffer,
 ) => void;
 
 export interface ApiAttachment {

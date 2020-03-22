@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, useEffect, useRef } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { calculateVideoDimensions, AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 import {
@@ -36,13 +36,17 @@ const Video: FC<IProps> = ({
   onClick,
   onCancelUpload,
 }) => {
+  const videoRef = useRef<HTMLVideoElement>();
+
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
+  const canPlayInline = localBlobUrl || canMessagePlayVideoInline(video);
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const mediaFormat = canPlayInline ? ApiMediaFormat.StreamUrl : ApiMediaFormat.BlobUrl;
   const {
     mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !loadAndPlay, mediaFormat);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(localBlobUrl || mediaData, 'slow');
   const {
     isTransferring, transferProgress,
@@ -52,7 +56,6 @@ const Video: FC<IProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring && loadAndPlay);
 
-  const canPlayInline = localBlobUrl || canMessagePlayVideoInline(video);
   const isInline = canPlayInline && loadAndPlay && (mediaData || localBlobUrl);
   const isHqPreview = mediaData && !canPlayInline;
 
@@ -64,6 +67,16 @@ const Video: FC<IProps> = ({
     'media-inner',
     !isTransferring && 'has-viewer',
   );
+
+  useEffect(() => {
+    if (mediaData) {
+      videoRef.current!.src = mediaData;
+
+      setTimeout(() => {
+        videoRef.current!.play();
+      }, 3000);
+    }
+  }, [mediaData]);
 
   return (
     <div
@@ -81,6 +94,7 @@ const Video: FC<IProps> = ({
       )}
       {isInline && (
         <video
+          ref={videoRef}
           className={`full-media ${transitionClassNames}`}
           width={width}
           height={height}
@@ -90,7 +104,7 @@ const Video: FC<IProps> = ({
           playsinline
           poster={thumbDataUri}
         >
-          <source src={localBlobUrl || mediaData} />
+          {/* <source src={localBlobUrl || mediaData} /> */}
         </video>
       )}
       {isHqPreview && (

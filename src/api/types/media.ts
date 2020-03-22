@@ -3,6 +3,7 @@
 export enum ApiMediaFormat {
   DataUri,
   BlobUrl,
+  StreamUrl,
   Lottie,
 }
 

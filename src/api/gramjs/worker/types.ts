@@ -14,7 +14,8 @@ export type WorkerMessageData = {
 } | {
   messageId: number;
   type: 'methodCallback';
-  callbackArgs: any[];
+  payload: any;
+  arrayBuffer?: ArrayBuffer;
 } | {
   type: 'unhandledError';
   error?: { message: string };

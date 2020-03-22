@@ -14,6 +14,7 @@ import { preloadImage } from './files';
 const asCacheApiType = {
   [ApiMediaFormat.DataUri]: cacheApi.Type.Text,
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
+  [ApiMediaFormat.StreamUrl]: cacheApi.Type.Blob,
   [ApiMediaFormat.Lottie]: cacheApi.Type.Json,
 };
 
@@ -52,9 +53,42 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
       }
 
       MEMORY_CACHE[url] = prepared;
-
       return prepared;
     }
+  }
+
+  if (mediaFormat === ApiMediaFormat.StreamUrl) {
+    const mediaSource = new MediaSource();
+    const streamUrl = URL.createObjectURL(mediaSource);
+    let isOpen = false;
+
+    mediaSource.addEventListener('sourceopen', () => {
+      if (isOpen) {
+        return;
+      }
+      isOpen = true;
+
+      const sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.64000d"; profiles="mp41,mp42,isom"');
+
+      void callApi('downloadMedia', { url, mediaFormat }, (progress: number, arrayBuffer?: ArrayBuffer) => {
+        if (onProgress) {
+          onProgress(progress);
+        }
+
+        sourceBuffer.appendBuffer(arrayBuffer!);
+
+        if (progress === 1) {
+          sourceBuffer.addEventListener('updateend', () => {
+            if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
+              mediaSource.endOfStream();
+            }
+          });
+        }
+      });
+    });
+
+    MEMORY_CACHE[url] = streamUrl;
+    return streamUrl;
   }
 
   const remote = await callApi('downloadMedia', { url, mediaFormat }, onProgress);
@@ -69,7 +103,6 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
   }
 
   MEMORY_CACHE[url] = prepared;
-
   return prepared;
 }
 

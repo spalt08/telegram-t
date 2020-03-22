@@ -2,7 +2,7 @@ import { inflate } from 'pako/dist/pako_inflate';
 
 import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 import {
-  ApiOnProgress, ApiMediaFormat, ApiParsedMedia, ApiPreparedMedia,
+  ApiMediaFormat, ApiOnProgress, ApiParsedMedia, ApiPreparedMedia,
 } from '../../types';
 
 import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_MAX_BYTES, MEDIA_CACHE_NAME } from '../../../config';
@@ -10,6 +10,8 @@ import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
 import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
+
+type ProgressCallback = (progress: number, chunk: Buffer) => void;
 
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
@@ -19,7 +21,16 @@ export default async function (
   isConnected: boolean,
   onProgress?: ApiOnProgress,
 ) {
-  const { data, mimeType } = await download(url, client, isConnected, onProgress) || {};
+  const progressCallback = onProgress ? (progress: number, chunk: Buffer) => {
+    if (mediaFormat === ApiMediaFormat.StreamUrl) {
+      const arrayBuffer = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength);
+      onProgress(progress, arrayBuffer);
+    } else {
+      onProgress(progress);
+    }
+  } : undefined;
+
+  const { data, mimeType } = await download(url, client, isConnected, progressCallback) || {};
   if (!data) {
     return undefined;
   }
@@ -39,7 +50,9 @@ export default async function (
   return { prepared, mimeType };
 }
 
-async function download(url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress) {
+async function download(
+  url: string, client: TelegramClient, isConnected: boolean, progressCallback?: ProgressCallback,
+) {
   const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w)?/);
   if (!mediaMatch) {
     return undefined;
@@ -89,9 +102,6 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
-    const progressCallback = onProgress ? (progress: number) => {
-      onProgress(progress);
-    } : undefined;
     const data = await client.downloadMedia(entity, { sizeType, progressCallback });
     const mimeType = entity instanceof GramJs.Message
       ? getMessageMediaMimeType(entity, Boolean(sizeType))
