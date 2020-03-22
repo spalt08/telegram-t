@@ -3,7 +3,7 @@ import {
 } from '../../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
-import { ApiOnProgress } from '../../types';
+import { ApiMediaFormat, ApiOnProgress } from '../../types';
 
 import { DEBUG, DEBUG_GRAMJS } from '../../../config';
 import {
@@ -11,7 +11,7 @@ import {
   onAuthError, onAuthReady, onCurrentUserId,
 } from './auth';
 import { updater } from '../updater';
-import queuedDownloadMedia from './media';
+import downloadMediaFromClient from './media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -119,12 +119,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   }
 }
 
-export function downloadMedia(url: string, onProgress?: ApiOnProgress) {
+export function downloadMedia(args: { url: string; mediaFormat: ApiMediaFormat }, onProgress?: ApiOnProgress) {
   if (!isConnected) {
     return Promise.reject(new Error('ERROR: Client is not connected'));
   }
 
-  return queuedDownloadMedia(client, url, onProgress);
+  return downloadMediaFromClient(client, args, onProgress);
 }
 
 export function uploadFile(file: File, onProgress?: (progress: number) => void) {

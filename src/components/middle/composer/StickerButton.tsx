@@ -2,9 +2,8 @@ import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
-import { ApiSticker } from '../../../api/types';
+import { ApiMediaFormat, ApiSticker } from '../../../api/types';
 
-import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
@@ -29,11 +28,11 @@ const StickerButton: FC<IProps> = ({
   const isAnimated = sticker.is_animated;
   const localMediaHash = `sticker${sticker.id}`;
 
-  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
+  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, ApiMediaFormat.BlobUrl);
   const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
 
   const [shouldPlay, setShouldPlay] = useState(false);
-  const lottieData = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.Lottie);
+  const lottieData = useMedia(localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 

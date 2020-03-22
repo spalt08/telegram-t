@@ -2,6 +2,7 @@ export * from './users';
 export * from './chats';
 export * from './messages';
 export * from './updates';
+export * from './media';
 
 export type ApiOnProgress = (
   progress: number, // Float between 0 and 1.

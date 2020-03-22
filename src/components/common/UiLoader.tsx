@@ -1,6 +1,7 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
+import { ApiMediaFormat } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 
 import useShowTransition from '../../hooks/useShowTransition';
@@ -27,7 +28,7 @@ const MAX_PRELOAD_DELAY = 1000;
 function preloadAvatars() {
   return Promise.all(Object.values(getGlobal().chats.byId).map((chat) => {
     const avatarHash = getChatAvatarHash(chat);
-    return avatarHash ? mediaLoader.fetch(avatarHash, mediaLoader.Type.DataUri) : null;
+    return avatarHash ? mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri) : null;
   }));
 }
 

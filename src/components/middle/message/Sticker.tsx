@@ -2,11 +2,10 @@ import React, {
   FC, useCallback, useState,
 } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
-import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
@@ -33,7 +32,7 @@ const Sticker: FC<IProps> = ({
   const mediaData = useMedia(
     sticker.localMediaHash || getMessageMediaHash(message, 'inline'),
     !loadAndPlay,
-    isAnimated ? mediaLoader.Type.Lottie : mediaLoader.Type.BlobUrl,
+    isAnimated ? ApiMediaFormat.Lottie : ApiMediaFormat.BlobUrl,
   );
   const isMediaLoaded = Boolean(mediaData);
   const {

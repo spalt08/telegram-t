@@ -1,11 +1,10 @@
 import React, { FC } from '../../lib/teact/teact';
 
-import { ApiUser, ApiChat } from '../../api/types';
+import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
 import {
   getChatAvatarHash, getChatTitle, isChatPrivate,
   getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
 } from '../../modules/helpers';
-import * as mediaLoader from '../../util/mediaLoader';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
 import useTransitionForMedia from '../../hooks/useTransitionForMedia';
@@ -43,7 +42,7 @@ const Avatar: FC<IProps> = ({
     }
   }
 
-  const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
+  const dataUri = useMedia(imageHash, false, ApiMediaFormat.DataUri);
   const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
 
   let content: string | null = '';
