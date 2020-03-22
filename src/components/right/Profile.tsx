@@ -16,12 +16,11 @@ import TabList from '../ui/TabList';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Document from '../common/Document';
+import Audio from '../common/Audio';
 import UserExtra from './UserExtra';
 import GroupExtra from './ChatExtra';
 import Media from './sharedMedia/Media';
 import WebLink from './sharedMedia/WebLink';
-// TODO @refactoring Move to `components/common`.
-import Audio from '../middle/message/Audio';
 
 import './Profile.scss';
 

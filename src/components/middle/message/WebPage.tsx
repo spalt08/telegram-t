@@ -76,7 +76,7 @@ const WebPage: FC<IProps> = ({
           message={message}
           load={load}
           onClick={handleMediaClick}
-          onCancelTransfer={onCancelMediaTransfer}
+          onCancelUpload={onCancelMediaTransfer}
           size={isSquarePhoto ? 'pictogram' : 'inline'}
         />
       )}

@@ -35,18 +35,17 @@ import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth } from './helpers/mediaDimensions';
 
 import Avatar from '../../common/Avatar';
-import MessageMeta from './MessageMeta';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
-import ContextMenuContainer from './ContextMenuContainer';
-
-import Sticker from './Sticker';
 import Document from '../../common/Document';
-import Video from './Video';
+import Audio from '../../common/Audio';
+import MessageMeta from './MessageMeta';
+import ContextMenuContainer from './ContextMenuContainer';
+import Sticker from './Sticker';
 import Photo from './Photo';
+import Video from './Video';
 import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
-import Audio from './Audio';
 import Album from './Album';
 
 import './Message.scss';
@@ -195,7 +194,7 @@ const Message: FC<IProps> = ({
     readMessageContents({ messageId });
   }, [messageId, readMessageContents]);
 
-  const handleCancelTransfer = useCallback(() => {
+  const handleCancelUpload = useCallback(() => {
     cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
   }, [cancelSendingMessage, message.chat_id, message.id]);
 
@@ -281,7 +280,7 @@ const Message: FC<IProps> = ({
             load={loadAndPlayMedia}
             uploadProgress={uploadProgress}
             onClick={handleMediaClick}
-            onCancelTransfer={handleCancelTransfer}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {!album && video && (
@@ -290,7 +289,7 @@ const Message: FC<IProps> = ({
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
             onClick={handleMediaClick}
-            onCancelTransfer={handleCancelTransfer}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {(audio || voice) && (
@@ -299,14 +298,14 @@ const Message: FC<IProps> = ({
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
-            onCancelTransfer={handleCancelTransfer}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {document && (
           <Document
             message={message}
             uploadProgress={uploadProgress}
-            onCancelTransfer={handleCancelTransfer}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {contact && (
@@ -321,7 +320,7 @@ const Message: FC<IProps> = ({
             message={message}
             load={loadAndPlayMedia}
             onMediaClick={handleMediaClick}
-            onCancelMediaTransfer={handleCancelTransfer}
+            onCancelMediaTransfer={handleCancelUpload}
           />
         )}
       </div>

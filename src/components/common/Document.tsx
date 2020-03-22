@@ -15,11 +15,11 @@ type IProps = {
   message: ApiMessage;
   smaller?: boolean;
   uploadProgress?: number;
-  onCancelTransfer?: () => void;
+  onCancelUpload?: () => void;
 };
 
 const Document: FC<IProps> = ({
-  message, smaller, uploadProgress, onCancelTransfer,
+  message, smaller, uploadProgress, onCancelUpload,
 }) => {
   const document = message.content.document!;
   const { extension } = getDocumentInfo(document);
@@ -52,7 +52,7 @@ const Document: FC<IProps> = ({
       isUploading={isUploading}
       isDownloading={isDownloading}
       transferProgress={transferProgress}
-      onClick={isUploading ? onCancelTransfer : handleDownload}
+      onClick={isUploading ? onCancelUpload : handleDownload}
     />
   );
 };
