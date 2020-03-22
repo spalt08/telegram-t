@@ -121,13 +121,6 @@ export type ApiUpdateDeleteMessages = {
   chat_id?: number;
 };
 
-export type ApiUpdateFileUploadProgress = {
-  '@type': 'updateFileUploadProgress';
-  chat_id: number;
-  message_id: number;
-  progress: number;
-};
-
 export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: number;
@@ -158,7 +151,6 @@ export type ApiUpdate = (
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateCommonBoxMessages | ApiUpdateDeleteMessages |
   ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateFileUploadProgress |
   ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage
 );
