@@ -1,33 +1,27 @@
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
-import monkeyPaths from '../assets/TwoFactorSetup*.tgs';
+import monkeyPaths from '../../../assets/TwoFactorSetup*.tgs';
 
-const cache: Record<string, AnyLiteral> = {};
+import { ApiMediaFormat } from '../../../api/types';
 
-let pako: typeof import('../../../lib/pako_inflate');
-let lottie: typeof import('lottie-web/build/player/lottie_light').default;
+import * as mediaLoader from '../../../util/mediaLoader';
 
-export default async function getMonkeyAnimationData(name: string) {
-  if (!cache[name]) {
-    if (!pako || !lottie) {
-      await preloadLibs();
-    }
+type Lottie = typeof import('lottie-web/build/player/lottie_light').default;
+let lottiePromise: Promise<Lottie>;
 
-    const file = await fetch(monkeyPaths[name]);
-    const buffer = await file.arrayBuffer();
-    const json = pako.inflate(buffer, { to: 'string' });
-    cache[name] = JSON.parse(json);
+function ensureLottie() {
+  if (!lottiePromise) {
+    lottiePromise = import('lottie-web/build/player/lottie_light') as unknown as Promise<Lottie>;
   }
 
-  return cache[name];
+  return lottiePromise;
 }
 
-async function preloadLibs() {
-  const [loadedPako, loadedLottie] = await Promise.all([
-    (pako || import('../../../lib/pako_inflate')),
-    (lottie || import('lottie-web/build/player/lottie_light')),
+export default async function getMonkeyAnimationData(name: string) {
+  const [animationData] = await Promise.all([
+    mediaLoader.fetch(`file${monkeyPaths[name]}`, ApiMediaFormat.Lottie),
+    ensureLottie(),
   ]);
 
-  pako = loadedPako;
-  lottie = loadedLottie;
+  return animationData;
 }
