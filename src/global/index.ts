@@ -1,10 +1,8 @@
-import { addCallback, addReducer, removeCallback } from '../lib/teact/teactn';
+import { addReducer } from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 
-import { throttle } from '../util/schedulers';
-import { GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
-import { filterKeys } from '../util/iteratees';
+import { initCache, loadCache } from './cache';
 
 const INITIAL_STATE: GlobalState = {
   showChatInfo: true,
@@ -56,110 +54,9 @@ const INITIAL_STATE: GlobalState = {
 
   forwardMessages: {},
 };
-const CACHE_THROTTLE_TIMEOUT = 1000;
 
-const updateCacheThrottled = throttle(updateCache, CACHE_THROTTLE_TIMEOUT, false);
+initCache();
 
 addReducer('init', () => {
-  const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
-  if (!GLOBAL_STATE_CACHE_DISABLED && hasActiveSession) {
-    addCallback(updateCacheThrottled);
-
-    const cached = getCache();
-    if (cached) {
-      return cached;
-    }
-  }
-
-  return INITIAL_STATE;
+  return loadCache() || INITIAL_STATE;
 });
-
-if (!GLOBAL_STATE_CACHE_DISABLED) {
-  addReducer('saveSession', () => {
-    addCallback(updateCacheThrottled);
-  });
-
-  addReducer('signOut', () => {
-    removeCallback(updateCacheThrottled);
-    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
-  });
-}
-
-function updateCache(global: GlobalState) {
-  if (global.isLoggingOut) {
-    return;
-  }
-
-  const reducedState: GlobalState = {
-    ...global,
-    chats: {
-      ...global.chats,
-      replyingToById: {},
-      editingById: {},
-    },
-    connectionState: undefined,
-    isUiReady: false,
-    lastSyncTime: undefined,
-    messages: reduceMessagesForCache(global),
-    fileUploads: { byMessageKey: {} },
-    stickers: reduceStickersForCache(global),
-    savedGifs: reduceSavedGifsForCache(global),
-    globalSearch: {
-      recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
-    },
-    messageSearch: { byChatId: {} },
-    mediaViewer: {},
-    webPagePreview: undefined,
-    forwardMessages: {},
-  };
-
-  const json = JSON.stringify(reducedState);
-  localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
-}
-
-function reduceMessagesForCache(global: GlobalState) {
-  const byChatId: GlobalState['messages']['byChatId'] = {};
-
-  if (global.chats.listIds) {
-    global.chats.listIds.forEach((chatId) => {
-      const current = global.messages.byChatId[chatId];
-      if (!current || !current.viewportIds) {
-        return;
-      }
-
-      byChatId[chatId] = {
-        ...global.messages.byChatId[chatId],
-        byId: filterKeys(current.byId, current.viewportIds),
-      };
-    });
-  }
-
-  return {
-    ...global.messages,
-    byChatId,
-  };
-}
-
-// Remove `hash` so we can request all MTP entities on next load.
-function reduceStickersForCache(global: GlobalState) {
-  return {
-    all: {
-      byId: global.stickers.all.byId,
-    },
-    recent: {
-      stickers: global.stickers.recent.stickers,
-    },
-  };
-}
-
-// Remove `hash` so we can request all MTP entities on next load.
-function reduceSavedGifsForCache(global: GlobalState) {
-  return {
-    gifs: global.savedGifs.gifs,
-  };
-}
-
-function getCache(): GlobalState | null {
-  const json = localStorage.getItem(GLOBAL_STATE_CACHE_KEY);
-  return json ? JSON.parse(json) : null;
-}
