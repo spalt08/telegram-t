@@ -10,12 +10,13 @@ export default <T extends mediaLoader.Type = mediaLoader.Type.BlobUrl>(
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
 
   const [, onMediaLoad] = useState(null);
+  const [downloadProgress, setDownloadProgress] = useState(mediaData ? 1 : 0);
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, type).then(onMediaLoad);
+      mediaLoader.fetch(mediaHash, type, setDownloadProgress).then(onMediaLoad);
     }
   }, [noLoad, mediaHash, mediaData, type]);
 
-  return mediaData;
+  return { mediaData, downloadProgress };
 };

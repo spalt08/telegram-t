@@ -385,7 +385,8 @@ class TelegramClient {
                     fileWriter.write(result.bytes)
 
                     if (args.progressCallback) {
-                        await args.progressCallback(fileWriter.getValue().length, fileSize)
+                        const progress = fileWriter.getValue().length / fileSize
+                        args.progressCallback(progress, result.bytes)
                     }
                 }
 

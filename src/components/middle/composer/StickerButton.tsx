@@ -6,7 +6,7 @@ import { ApiSticker } from '../../../api/types';
 
 import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';
-import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -30,7 +30,7 @@ const StickerButton: FC<IProps> = ({
   const localMediaHash = `sticker${sticker.id}`;
 
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, mediaLoader.Type.BlobUrl);
-  const { transitionClassNames } = useProgressiveMedia(previewBlobUrl, 'slow');
+  const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
 
   const [shouldPlay, setShouldPlay] = useState(false);
   const lottieData = useMedia(localMediaHash, !shouldPlay, mediaLoader.Type.Lottie);

@@ -8,7 +8,7 @@ import {
 import * as mediaLoader from '../../util/mediaLoader';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
-import useProgressiveMedia from '../../hooks/useProgressiveMedia';
+import useTransitionForMedia from '../../hooks/useTransitionForMedia';
 import buildClassName from '../../util/buildClassName';
 
 import './Avatar.scss';
@@ -44,7 +44,7 @@ const Avatar: FC<IProps> = ({
   }
 
   const dataUri = useMedia(imageHash, false, mediaLoader.Type.DataUri);
-  const { shouldRenderFullMedia, transitionClassNames } = useProgressiveMedia(dataUri, 'slow');
+  const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
 
   let content: string | null = '';
 

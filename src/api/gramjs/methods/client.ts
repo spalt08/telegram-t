@@ -3,6 +3,8 @@ import {
 } from '../../../lib/gramjs';
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
+import { ApiOnProgress } from '../../types';
+
 import { DEBUG, DEBUG_GRAMJS } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
@@ -117,12 +119,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   }
 }
 
-export function downloadMedia(url: string) {
+export function downloadMedia(url: string, onProgress?: ApiOnProgress) {
   if (!isConnected) {
     return Promise.reject(new Error('ERROR: Client is not connected'));
   }
 
-  return queuedDownloadMedia(client, url);
+  return queuedDownloadMedia(client, url, onProgress);
 }
 
 export function uploadFile(file: File, onProgress?: (progress: number) => void) {

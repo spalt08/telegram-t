@@ -12,6 +12,10 @@ export type WorkerMessageData = {
   response?: ThenArg<MethodResponse<keyof Methods>>;
   error?: { message: string };
 } | {
+  messageId: number;
+  type: 'methodCallback';
+  callbackArgs: any[];
+} | {
   type: 'unhandledError';
   error?: { message: string };
 };
@@ -22,9 +26,7 @@ export interface WorkerMessageEvent {
 
 export type OriginMessageData = {
   type: 'initApi';
-  args: {
-    sessionId: string;
-  };
+  args: [string];
 } | {
   messageId?: number;
   type: 'callMethod';

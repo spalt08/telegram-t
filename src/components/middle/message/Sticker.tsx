@@ -8,7 +8,7 @@ import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
 import * as mediaLoader from '../../../util/mediaLoader';
 import useMedia from '../../../hooks/useMedia';
-import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -38,7 +38,7 @@ const Sticker: FC<IProps> = ({
   const isMediaLoaded = Boolean(mediaData);
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useProgressiveMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast', isAnimated);
+  } = useTransitionForMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast', isAnimated);
 
   const { width, height } = getStickerDimensions(sticker);
   const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');

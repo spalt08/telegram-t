@@ -66,7 +66,7 @@ export type GlobalState = {
     direction?: FocusDirection;
   };
 
-  fileTransfers: {
+  fileUploads: {
     byMessageKey: Record<string, {
       progress: number;
     }>;

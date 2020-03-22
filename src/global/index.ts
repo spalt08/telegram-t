@@ -27,7 +27,7 @@ const INITIAL_STATE: GlobalState = {
     byChatId: {},
   },
 
-  fileTransfers: {
+  fileUploads: {
     byMessageKey: {},
   },
 
@@ -101,7 +101,7 @@ function updateCache(global: GlobalState) {
     isUiReady: false,
     lastSyncTime: undefined,
     messages: reduceMessagesForCache(global),
-    fileTransfers: { byMessageKey: {} },
+    fileUploads: { byMessageKey: {} },
     stickers: reduceStickersForCache(global),
     savedGifs: reduceSavedGifsForCache(global),
     globalSearch: {

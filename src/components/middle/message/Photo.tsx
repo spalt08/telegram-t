@@ -2,26 +2,27 @@ import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
+import { AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
+
 import {
   getMessagePhoto,
   getMessageWebPagePhoto,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
-  getMessageTransferParams,
+  getMediaTransferState,
 } from '../../../modules/helpers';
-import useMedia from '../../../hooks/useMedia';
+import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
+import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
 import buildClassName from '../../../util/buildClassName';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
-import { AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
 type IProps = {
   message: ApiMessage;
   load?: boolean;
-  fileTransferProgress?: number;
+  uploadProgress?: number;
   size?: 'inline' | 'pictogram';
   albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
@@ -31,7 +32,7 @@ type IProps = {
 const Photo: FC<IProps> = ({
   message,
   load,
-  fileTransferProgress,
+  uploadProgress,
   size = 'inline',
   albumMediaParams,
   onClick,
@@ -41,13 +42,13 @@ const Photo: FC<IProps> = ({
   const localBlobUrl = photo.blobUrl;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const mediaData = useMedia(getMessageMediaHash(message, size), !load);
+  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !load);
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useProgressiveMedia(mediaData || localBlobUrl, 'slow');
+  } = useTransitionForMedia(mediaData || localBlobUrl, 'slow');
   const {
     isTransferring, transferProgress,
-  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, !mediaData && !localBlobUrl);
 
   const {
     shouldRender: shouldRenderSpinner,

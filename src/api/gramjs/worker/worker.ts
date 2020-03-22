@@ -10,12 +10,22 @@ onmessage = async (message: OriginMessageEvent) => {
 
   switch (data.type) {
     case 'initApi': {
-      await initApi(onUpdate, data.args.sessionId);
+      await initApi(onUpdate, data.args[0]);
       break;
     }
     case 'callMethod': {
       const { messageId, name, args } = data;
       try {
+        if (messageId) {
+          args.push(((...callbackArgs: any[]) => {
+            sendToOrigin({
+              type: 'methodCallback',
+              messageId,
+              callbackArgs,
+            });
+          }) as never);
+        }
+
         const response = await callApi(name, ...args);
 
         if (messageId) {

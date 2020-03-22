@@ -10,11 +10,11 @@ import {
   isForwardedMessage,
   isOwnMessage,
   canMessagePlayVideoInline,
-  getMessageTransferParams,
+  getMediaTransferState,
 } from '../../../modules/helpers';
-import useMedia from '../../../hooks/useMedia';
+import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useProgressiveMedia from '../../../hooks/useProgressiveMedia';
+import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -22,7 +22,7 @@ import ProgressSpinner from '../../ui/ProgressSpinner';
 type IProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
-  fileTransferProgress?: number;
+  uploadProgress?: number;
   albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelTransfer?: () => void;
@@ -31,7 +31,7 @@ type IProps = {
 const Video: FC<IProps> = ({
   message,
   loadAndPlay,
-  fileTransferProgress,
+  uploadProgress,
   albumMediaParams,
   onClick,
   onCancelTransfer,
@@ -40,11 +40,13 @@ const Video: FC<IProps> = ({
   const localBlobUrl = video.blobUrl;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const mediaData = useMedia(getMessageMediaHash(message, 'inline'), !loadAndPlay);
-  const { shouldRenderThumb, transitionClassNames } = useProgressiveMedia(localBlobUrl || mediaData, 'slow');
+  const {
+    mediaData, downloadProgress,
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+  const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(localBlobUrl || mediaData, 'slow');
   const {
     isTransferring, transferProgress,
-  } = getMessageTransferParams(message, fileTransferProgress, !mediaData && !localBlobUrl);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, !mediaData && !localBlobUrl);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
