@@ -12,7 +12,7 @@ import { GlobalState } from '../../../global/types';
 import {
   selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds, selectChatMessageByPollId,
 } from '../../selectors';
-import { getMessageKey, getMessageContent, isCommonBoxChat } from '../../helpers';
+import { getMessageContent, isCommonBoxChat } from '../../helpers';
 
 const ANIMATION_DELAY = 300;
 
@@ -276,23 +276,6 @@ export function onUpdate(update: ApiUpdate) {
           },
         },
       ));
-
-      break;
-    }
-
-    case 'updateFileUploadProgress': {
-      const { chat_id, message_id, progress } = update;
-      const messageKey = getMessageKey(chat_id, message_id);
-
-      setGlobal({
-        ...global,
-        fileUploads: {
-          byMessageKey: {
-            ...global.fileUploads.byMessageKey,
-            [messageKey]: { progress },
-          },
-        },
-      });
 
       break;
     }

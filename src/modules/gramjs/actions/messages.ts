@@ -25,6 +25,7 @@ import {
   selectRealLastReadId,
   selectChatMessage,
 } from '../../selectors';
+import { getMessageKey } from '../../helpers';
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
@@ -120,6 +121,19 @@ addReducer('sendMessage', (global, actions, payload) => {
 
   void callApi('sendMessage', {
     chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
+  }, (messageLocalId: number, progress: number) => {
+    const messageKey = getMessageKey(chat.id, messageLocalId);
+    const newGlobal = getGlobal();
+
+    setGlobal({
+      ...newGlobal,
+      fileUploads: {
+        byMessageKey: {
+          ...newGlobal.fileUploads.byMessageKey,
+          [messageKey]: { progress },
+        },
+      },
+    });
   });
 
   actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });

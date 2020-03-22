@@ -34,6 +34,11 @@ import {
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 
+type OnUploadProgress = (
+  messageLocalId: number,
+  progress: number, // Float between 0 and 1.
+) => void;
+
 let onUpdate: OnApiUpdate;
 
 export function init(_onUpdate: OnApiUpdate) {
@@ -111,27 +116,30 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   return { message, users };
 }
 
-export async function sendMessage({
-  chat,
-  currentUserId,
-  text,
-  entities,
-  replyingTo,
-  attachment,
-  sticker,
-  gif,
-  pollSummary,
-}: {
-  chat: ApiChat;
-  currentUserId: number;
-  text?: string;
-  entities?: ApiMessageEntity[];
-  replyingTo?: number;
-  attachment?: ApiAttachment;
-  sticker?: ApiSticker;
-  gif?: ApiVideo;
-  pollSummary?: ApiNewPoll;
-}) {
+export async function sendMessage(
+  {
+    chat,
+    currentUserId,
+    text,
+    entities,
+    replyingTo,
+    attachment,
+    sticker,
+    gif,
+    pollSummary,
+  }: {
+    chat: ApiChat;
+    currentUserId: number;
+    text?: string;
+    entities?: ApiMessageEntity[];
+    replyingTo?: number;
+    attachment?: ApiAttachment;
+    sticker?: ApiSticker;
+    gif?: ApiVideo;
+    pollSummary?: ApiNewPoll;
+  },
+  onProgress: OnUploadProgress,
+) {
   const localMessage = buildLocalMessage(
     chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
   );
@@ -147,7 +155,7 @@ export async function sendMessage({
 
   let media: GramJs.TypeInputMedia | undefined;
   if (attachment) {
-    media = await uploadMedia(localMessage, attachment);
+    media = await uploadMedia(localMessage, attachment, onProgress);
   } else if (sticker) {
     media = buildInputMediaDocument(sticker);
   } else if (gif) {
@@ -210,14 +218,9 @@ export async function editMessage({
   }), true);
 }
 
-async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment) {
+async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: OnUploadProgress) {
   const inputFile = await uploadFile(attachment.file, (progress) => {
-    onUpdate({
-      '@type': 'updateFileUploadProgress',
-      chat_id: localMessage.chat_id,
-      message_id: localMessage.id,
-      progress,
-    });
+    onProgress(localMessage.id, progress);
   });
 
   const { file: { type: mimeType, name: fileName }, quick, voice } = attachment;
@@ -463,7 +466,7 @@ export async function fetchWebPagePreview({ message }: { message: string }) {
 
 export async function sendPollVote({
   chat, messageId, options,
-} : {
+}: {
   chat: ApiChat;
   messageId: number;
   options: string[];
