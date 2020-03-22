@@ -53,7 +53,7 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
       MEMORY_CACHE[url] = prepared;
 
-      return MEMORY_CACHE[url];
+      return prepared;
     }
   }
 
@@ -70,7 +70,7 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
   MEMORY_CACHE[url] = prepared;
 
-  return MEMORY_CACHE[url];
+  return prepared;
 }
 
 function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {

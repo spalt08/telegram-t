@@ -15,10 +15,10 @@ import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
+import Document from '../common/Document';
 import UserExtra from './UserExtra';
 import GroupExtra from './ChatExtra';
 import Media from './sharedMedia/Media';
-import Document from './sharedMedia/Document';
 import WebLink from './sharedMedia/WebLink';
 // TODO @refactoring Move to `components/common`.
 import Audio from '../middle/message/Audio';
@@ -123,7 +123,7 @@ const Profile: FC<IProps> = ({
           ))
         ) : mediaType === 'documents' ? (
           messageIds.map((id) => (
-            <Document key={id} message={chatMessages[id]} />
+            <Document key={id} message={chatMessages[id]} smaller />
           ))
         ) : mediaType === 'links' ? (
           messageIds.map((id) => (

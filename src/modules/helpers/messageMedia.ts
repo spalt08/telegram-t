@@ -82,14 +82,14 @@ export function getMessageMediaThumbDataUri(message: ApiMessage) {
 
 export function getMessageMediaHash(
   message: ApiMessage,
-  target: 'inline' | 'pictogram' | 'viewerPreview' | 'viewerFull',
+  target?: 'inline' | 'pictogram' | 'viewerPreview' | 'viewerFull',
 ) {
   const {
-    photo, video, sticker, audio, voice,
+    photo, video, sticker, audio, voice, document,
   } = message.content;
   const webPagePhoto = getMessageWebPagePhoto(message);
 
-  if (!(photo || video || sticker || webPagePhoto || audio || voice)) {
+  if (!(photo || video || sticker || webPagePhoto || audio || voice || document)) {
     return undefined;
   }
 
@@ -129,11 +129,8 @@ export function getMessageMediaHash(
     }
   }
 
-  if (sticker || audio || voice) {
-    switch (target) {
-      case 'inline':
-        return base;
-    }
+  if (sticker || audio || voice || document) {
+    return base;
   }
 
   return undefined;

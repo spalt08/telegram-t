@@ -128,7 +128,7 @@ const Audio: FC<IProps> = ({
       </Button>
       {shouldSpinnerRender && (
         <div className={buildClassName('message-media-loading', spinnerClassNames)}>
-          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent smaller={inSharedMedia} />
+          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent size="m" />
         </div>
       )}
       {audio ? renderAudio(audio, isActive, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}

@@ -43,25 +43,28 @@
     flex-shrink: 0;
     position: relative;
     color: white;
+    cursor: pointer;
 
     .file-ext {
       font-size: 1rem;
       font-weight: 500;
     }
 
-    &::after {
-      content: "";
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 1.125rem;
-      height: 1.125rem;
-      border-bottom-left-radius: 0.25rem;
-      border-left: .5625rem solid rgba(black, 0.25);
-      border-bottom: .5625rem solid rgba(black, 0.25);
-      border-top: .5625rem solid var(--background-color);
-      border-right: .5625rem solid var(--background-color);
+    &:not(:hover) {
+      &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1.125rem;
+        height: 1.125rem;
+        border-bottom-left-radius: 0.25rem;
+        border-left: .5625rem solid rgba(black, 0.25);
+        border-bottom: .5625rem solid rgba(black, 0.25);
+        border-top: .5625rem solid var(--background-color);
+        border-right: .5625rem solid var(--background-color);
+      }
     }
   }
 
@@ -91,9 +94,13 @@
     --background-color: #fff;
     --border-radius-messages-small: .3125rem;
 
+    .file-progress,
     .file-icon {
       width: 3rem;
       height: 3rem;
+    }
+
+    .file-icon {
       padding-bottom: .375rem;
 
       &::after {

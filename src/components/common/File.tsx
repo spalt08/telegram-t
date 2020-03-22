@@ -18,7 +18,7 @@ type IProps = {
   isUploading?: boolean;
   isDownloading?: boolean;
   transferProgress?: number;
-  onCancelTransfer?: () => void;
+  onClick?: () => void;
 };
 
 const File: FC<IProps> = ({
@@ -30,7 +30,7 @@ const File: FC<IProps> = ({
   isUploading,
   isDownloading,
   transferProgress,
-  onCancelTransfer,
+  onClick,
 }) => {
   const {
     shouldRender: shouldSpinnerRender,
@@ -41,7 +41,7 @@ const File: FC<IProps> = ({
 
   return (
     <div className={buildClassName('File', className, smaller && 'smaller')}>
-      <div className="file-icon-container">
+      <div className="file-icon-container" onClick={onClick}>
         <div className={`file-icon ${color}`}>
           {extension.length <= 4 && (
             <span className="file-ext">{extension}</span>
@@ -49,14 +49,14 @@ const File: FC<IProps> = ({
         </div>
         {shouldSpinnerRender && (
           <div className={buildClassName('file-progress', color, spinnerClassNames)}>
-            <ProgressSpinner progress={transferProgress} smaller onClick={onCancelTransfer} />
+            <ProgressSpinner progress={transferProgress} size={smaller ? 's' : 'm'} />
           </div>
         )}
       </div>
       <div className="file-info">
         <div className="file-name">{name}</div>
         <div className="file-size">
-          {isUploading && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
+          {(isUploading || isDownloading) && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
         </div>
       </div>
     </div>
