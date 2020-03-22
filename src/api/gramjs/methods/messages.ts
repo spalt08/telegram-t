@@ -546,26 +546,13 @@ function isMessageWithMedia(message: GramJs.Message) {
     return false;
   }
 
-  if (media instanceof GramJs.MessageMediaPhoto) {
-    return true;
-  }
-
-  if (media instanceof GramJs.MessageMediaDocument && media.document) {
-    return ('attributes' in media.document) && media.document.attributes
-      .some((attr: any) => (
-        attr instanceof GramJs.DocumentAttributeSticker
-        || attr instanceof GramJs.DocumentAttributeVideo
-        || attr instanceof GramJs.DocumentAttributeAudio
-      ));
-  }
-
-  if (
-    media instanceof GramJs.MessageMediaWebPage
-    && media.webpage instanceof GramJs.WebPage
-    && media.webpage.photo instanceof GramJs.Photo
-  ) {
-    return true;
-  }
-
-  return false;
+  return (
+    media instanceof GramJs.MessageMediaPhoto
+    || media instanceof GramJs.MessageMediaDocument
+    || (
+      media instanceof GramJs.MessageMediaWebPage
+      && media.webpage instanceof GramJs.WebPage
+      && media.webpage.photo instanceof GramJs.Photo
+    )
+  );
 }

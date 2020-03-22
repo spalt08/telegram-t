@@ -40,7 +40,7 @@ import EmbeddedMessage from '../../common/EmbeddedMessage';
 import ContextMenuContainer from './ContextMenuContainer';
 
 import Sticker from './Sticker';
-import Document from './Document';
+import Document from '../../common/Document';
 import Video from './Video';
 import Photo from './Photo';
 import Contact from './Contact';

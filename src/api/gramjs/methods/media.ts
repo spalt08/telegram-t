@@ -5,15 +5,13 @@ import {
   ApiOnProgress, ApiMediaFormat, ApiParsedMedia, ApiPreparedMedia,
 } from '../../types';
 
-import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../../../config';
+import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_MAX_BYTES, MEDIA_CACHE_NAME } from '../../../config';
 import localDb from '../localDb';
 import { getEntityTypeById } from '../gramjsBuilders';
 import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
-
-const CACHEABLE_SIZE_BYTES = 512000;
 
 export default async function (
   { url, mediaFormat }: { url: string; mediaFormat: ApiMediaFormat },
@@ -31,7 +29,7 @@ export default async function (
     return undefined;
   }
 
-  const canCache = mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= CACHEABLE_SIZE_BYTES;
+  const canCache = mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= MEDIA_CACHE_MAX_BYTES;
   if (!MEDIA_CACHE_DISABLED && canCache) {
     void cacheApi.save(MEDIA_CACHE_NAME, url, parsed);
   }

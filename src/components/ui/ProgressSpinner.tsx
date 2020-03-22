@@ -1,26 +1,26 @@
 import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
 
-import './ProgressSpinner.scss';
 import buildClassName from '../../util/buildClassName';
 
-const RADIUS = 28;
-const RADIUS_SMALL = 25;
+import './ProgressSpinner.scss';
+
+const RADIUSES = { s: 22, m: 25, l: 28 };
 const STROKE_WIDTH = 2;
 const MIN_PROGRESS = 0.05;
 const MAX_PROGRESS = 1;
 
 const ProgressSpinner: FC<{
   progress?: number;
-  smaller?: boolean;
+  size?: 's' | 'm' | 'l';
   transparent?: boolean;
   onClick?: () => void;
 }> = ({
   progress = 0,
-  smaller,
+  size = 'l',
   transparent,
   onClick,
 }) => {
-  const radius = smaller ? RADIUS_SMALL : RADIUS;
+  const radius = RADIUSES[size];
   const circleRadius = radius - STROKE_WIDTH * 2;
   const borderRadius = radius - 1;
   const circumference = circleRadius * 2 * Math.PI;
@@ -64,8 +64,7 @@ const ProgressSpinner: FC<{
   }, [container, circumference, borderRadius, circleRadius, progress]);
 
   const className = buildClassName(
-    'ProgressSpinner not-implemented',
-    smaller && 'smaller',
+    `ProgressSpinner not-implemented size-${size}`,
     transparent && 'transparent',
   );
 
