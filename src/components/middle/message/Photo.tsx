@@ -26,7 +26,7 @@ type IProps = {
   size?: 'inline' | 'pictogram';
   albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
-  onCancelTransfer?: () => void;
+  onCancelUpload?: () => void;
 };
 
 const Photo: FC<IProps> = ({
@@ -36,7 +36,7 @@ const Photo: FC<IProps> = ({
   size = 'inline',
   albumMediaParams,
   onClick,
-  onCancelTransfer,
+  onCancelUpload,
 }) => {
   const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
   const localBlobUrl = photo.blobUrl;
@@ -94,7 +94,7 @@ const Photo: FC<IProps> = ({
       )}
       {shouldRenderSpinner && (
         <div className={`message-media-loading ${spinnerClassNames}`}>
-          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
+          <ProgressSpinner progress={transferProgress} onClick={onCancelUpload} />
         </div>
       )}
       {isTransferring && (

@@ -1,18 +1,18 @@
 import React, {
   FC, useCallback, useEffect, useMemo, useRef, useState, memo,
-} from '../../../lib/teact/teact';
+} from '../../lib/teact/teact';
 
-import { ApiAudio, ApiMessage, ApiVoice } from '../../../api/types';
+import { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
 
-import { formatMediaDateTime, formatMediaDuration } from '../../../util/dateFormat';
-import { isOwnMessage, getMessageMediaHash, getMediaTransferState } from '../../../modules/helpers';
-import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
-import useShowTransition from '../../../hooks/useShowTransition';
-import { renderWaveformToDataUri } from '../../common/helpers/waveform';
-import buildClassName from '../../../util/buildClassName';
+import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
+import { isOwnMessage, getMessageMediaHash, getMediaTransferState } from '../../modules/helpers';
+import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useShowTransition from '../../hooks/useShowTransition';
+import { renderWaveformToDataUri } from './helpers/waveform';
+import buildClassName from '../../util/buildClassName';
 
-import Button from '../../ui/Button';
-import ProgressSpinner from '../../ui/ProgressSpinner';
+import Button from '../ui/Button';
+import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './Audio.scss';
 
@@ -23,7 +23,7 @@ type IProps = {
   inSharedMedia?: boolean;
   date?: number;
   onReadMedia?: () => void;
-  onCancelTransfer?: () => void;
+  onCancelUpload?: () => void;
 };
 
 const Audio: FC<IProps> = ({
@@ -32,7 +32,7 @@ const Audio: FC<IProps> = ({
   inSharedMedia,
   date,
   onReadMedia,
-  onCancelTransfer,
+  onCancelUpload,
 }) => {
   const { content: { audio, voice }, isMediaUnread } = message;
 
@@ -128,7 +128,12 @@ const Audio: FC<IProps> = ({
       </Button>
       {shouldSpinnerRender && (
         <div className={buildClassName('message-media-loading', spinnerClassNames)}>
-          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} transparent size="m" />
+          <ProgressSpinner
+            progress={transferProgress}
+            transparent
+            size={inSharedMedia ? 'm' : 'l'}
+            onClick={onCancelUpload}
+          />
         </div>
       )}
       {audio ? renderAudio(audio, isActive, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}

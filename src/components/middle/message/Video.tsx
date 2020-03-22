@@ -25,7 +25,7 @@ type IProps = {
   uploadProgress?: number;
   albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
-  onCancelTransfer?: () => void;
+  onCancelUpload?: () => void;
 };
 
 const Video: FC<IProps> = ({
@@ -34,7 +34,7 @@ const Video: FC<IProps> = ({
   uploadProgress,
   albumMediaParams,
   onClick,
-  onCancelTransfer,
+  onCancelUpload,
 }) => {
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
@@ -111,7 +111,7 @@ const Video: FC<IProps> = ({
       )}
       {shouldSpinnerRender && (
         <div className={`message-media-loading ${spinnerClassNames}`}>
-          <ProgressSpinner progress={transferProgress} onClick={onCancelTransfer} />
+          <ProgressSpinner progress={transferProgress} onClick={onCancelUpload} />
         </div>
       )}
       {isTransferring ? (
