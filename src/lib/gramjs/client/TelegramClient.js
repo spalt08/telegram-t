@@ -353,6 +353,10 @@ class TelegramClient {
 
         this._log.info(`Downloading file in chunks of ${partSize} bytes`)
 
+        if (args.progressCallback) {
+            args.progressCallback(0)
+        }
+
         try {
             let offset = 0
             // eslint-disable-next-line no-constant-condition
@@ -386,7 +390,7 @@ class TelegramClient {
 
                     if (args.progressCallback) {
                         const progress = fileWriter.getValue().length / fileSize
-                        args.progressCallback(progress, result.bytes)
+                        args.progressCallback(progress)
                     }
                 }
 
