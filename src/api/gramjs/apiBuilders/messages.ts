@@ -48,20 +48,16 @@ export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
     : getApiChatIdFromMtpPeer(mtpMessage.toId);
 }
 
-export function buildApiMessageFromShort(
-  mtpMessage: GramJs.UpdateShortMessage,
-): ApiMessage {
+export function buildApiMessageFromShort(mtpMessage: GramJs.UpdateShortMessage, currentUserId: number): ApiMessage {
   const chatId = getApiChatIdFromMtpPeer({ userId: mtpMessage.userId } as GramJs.TypePeer);
 
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
-    fromId: mtpMessage.userId,
+    fromId: mtpMessage.out ? currentUserId : mtpMessage.userId,
   });
 }
 
-export function buildApiMessageFromShortChat(
-  mtpMessage: GramJs.UpdateShortChatMessage,
-): ApiMessage {
+export function buildApiMessageFromShortChat(mtpMessage: GramJs.UpdateShortChatMessage): ApiMessage {
   const chatId = getApiChatIdFromMtpPeer({ chatId: mtpMessage.chatId } as GramJs.TypePeer);
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
