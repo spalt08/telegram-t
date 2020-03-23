@@ -127,7 +127,7 @@ function processEntity(
       return (
         <a
           onClick={(event) => searchCurrentChat(event, entityText)}
-          className="text-entity-link"
+          className="text-entity-link not-implemented"
         >
           {addLineBreaks(entityContent)}
         </a>
@@ -150,7 +150,7 @@ function processEntity(
       return (
         <a
           onClick={(event) => searchCurrentChat(event, entityText)}
-          className="text-entity-link"
+          className="text-entity-link not-implemented"
         >
           {addLineBreaks(entityContent)}
         </a>
