@@ -103,6 +103,10 @@ const Composer: FC<IProps> = ({
     }
 
     setHtml(getMessageTextAsHtml(editedMessage));
+    requestAnimationFrame(() => {
+      const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+      focusEditableElement(messageInput, true);
+    });
   }, [editedMessage]);
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
