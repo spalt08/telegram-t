@@ -158,6 +158,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         }),
         id: update.id,
         sending_state: undefined,
+        ...('date' in update && { date: update.date }),
       },
     });
   } else if (update instanceof GramJs.UpdateReadMessagesContents) {
