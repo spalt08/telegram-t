@@ -103,7 +103,7 @@
     overflow: hidden;
   }
 
-  .file-name {
+  .file-title {
     font-size: 1rem;
     line-height: 1rem;
     padding-bottom: .25rem;
@@ -112,10 +112,16 @@
     text-overflow: ellipsis;
   }
 
-  .file-size {
+  .file-subtitle {
     font-size: .875rem;
     line-height: .9375rem;
     color: var(--secondary-color);
+
+    span + span {
+      &::before {
+        content: '\00a0\2022\00a0';
+      }
+    }
   }
 
   &.smaller {
@@ -141,11 +147,11 @@
       margin-top: .125rem;
     }
 
-    .file-name {
+    .file-title {
       font-weight: 400;
     }
 
-    .file-size {
+    .file-subtitle {
       line-height: 1rem;
     }
   }

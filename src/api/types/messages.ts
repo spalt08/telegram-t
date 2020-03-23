@@ -69,6 +69,7 @@ export interface ApiVoice {
 export interface ApiDocument {
   fileName: string;
   size: number;
+  timestamp?: number;
   mimeType: string;
 }
 

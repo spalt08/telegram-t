@@ -326,11 +326,12 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | undefined 
     return undefined;
   }
 
-  const { size, mimeType } = media.document;
+  const { size, mimeType, date } = media.document;
 
   return {
     size,
     mimeType,
+    timestamp: date,
     fileName: getFilenameFromDocument(media.document),
   };
 }

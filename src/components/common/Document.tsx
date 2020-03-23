@@ -23,7 +23,7 @@ const Document: FC<IProps> = ({
 }) => {
   const document = message.content.document!;
   const { extension } = getDocumentInfo(document);
-  const { fileName, size } = document;
+  const { fileName, size, timestamp } = document;
 
   const [shouldDownload, setShouldDownload] = useState();
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(getMessageMediaHash(message), !shouldDownload);
@@ -48,6 +48,7 @@ const Document: FC<IProps> = ({
       name={fileName}
       extension={extension}
       size={size}
+      timestamp={timestamp}
       smaller={smaller}
       isUploading={isUploading}
       isDownloading={isDownloading}

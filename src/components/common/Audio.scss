@@ -123,18 +123,8 @@
   }
 
   .performer + .date {
-    margin-left: .625rem;
-    position: relative;
-
     &::before {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      border-radius: 1px;
-      left: -.375rem;
-      top: .5rem;
-      background: var(--color-text-secondary);
+      content: '\00a0\2022\00a0';
     }
   }
 
@@ -234,6 +224,11 @@
 
     .duration {
       line-height: 1rem;
+    }
+
+    .message-media-loading {
+      top: 0.1875rem;
+      left: 0.1875rem;
     }
   }
 }

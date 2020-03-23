@@ -9,6 +9,8 @@
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
+  border-top-left-radius: var(--border-radius-messages-small);
+  border-top-right-radius: var(--border-radius-messages-small);
 
   &,
   &:active,
@@ -27,7 +29,7 @@
   }
 
   &:not(.active):hover {
-    color: var(--color-primary-shade);
+    background: rgba(var(--color-text-secondary-rgb), 0.08);
   }
 
   span {

@@ -54,8 +54,12 @@
     }
 
     .Spinner > div {
+      // gray spinner
+      background-image: var(--spinner-gray-data);
+
       .Message.own & {
-        background-image: url('../../../assets/spinner-green.svg');
+        // green spinner
+        background-image: var(--spinner-green-data);
       }
     }
   }

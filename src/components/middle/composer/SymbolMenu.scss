@@ -7,6 +7,10 @@
     height: var(--menu-height);
   }
 
+  .TabList {
+    padding: 0 4rem;
+  }
+
   .Transition > div:not(.active) {
     .picker-tab {
       .Loading {

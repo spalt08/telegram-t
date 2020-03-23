@@ -29,23 +29,39 @@ function getAvailableWidth(
   return availableWidth * REM;
 }
 
-function getAvailableHeight() {
+function getAvailableHeight(isGif?: boolean, aspectRatio?: number) {
+  if (
+    isGif && aspectRatio
+    && aspectRatio >= 0.75 && aspectRatio <= 1.25
+  ) {
+    return 20 * REM;
+  }
+
   return 27 * REM;
 }
 
-function calculateDimensions(
-  width: number,
-  height: number,
-  fromOwnMessage: boolean,
-  isForwarded?: boolean,
-  isWebPagePhoto?: boolean,
-  albumMediaParams?: AlbumMediaParameters,
-): IDimensions {
+function calculateDimensions({
+  width,
+  height,
+  fromOwnMessage,
+  isForwarded,
+  isWebPagePhoto,
+  isGif,
+  albumMediaParams,
+} : {
+  width: number;
+  height: number;
+  fromOwnMessage: boolean;
+  isForwarded?: boolean;
+  isWebPagePhoto?: boolean;
+  isGif?: boolean;
+  albumMediaParams?: AlbumMediaParameters;
+}): IDimensions {
   const aspectRatio = height / width;
   const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto, albumMediaParams);
   const calculatedWidth = Math.min(width, availableWidth);
   const calculatedHeight = Math.round(calculatedWidth * aspectRatio);
-  const availableHeight = getAvailableHeight();
+  const availableHeight = getAvailableHeight(isGif, aspectRatio);
 
   if (albumMediaParams) {
     return {
@@ -91,7 +107,14 @@ export function calculateInlineImageDimensions(
   albumMediaParams?: AlbumMediaParameters,
 ) {
   const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
-  return calculateDimensions(width, height, fromOwnMessage, isForwarded, isWebPagePhoto, albumMediaParams);
+  return calculateDimensions({
+    width,
+    height,
+    fromOwnMessage,
+    isForwarded,
+    isWebPagePhoto,
+    albumMediaParams,
+  });
 }
 
 export function calculateVideoDimensions(
@@ -101,7 +124,14 @@ export function calculateVideoDimensions(
   albumMediaParams?: AlbumMediaParameters,
 ) {
   const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
-  return calculateDimensions(width, height, fromOwnMessage, isForwarded, false, albumMediaParams);
+  return calculateDimensions({
+    width,
+    height,
+    fromOwnMessage,
+    isForwarded,
+    isGif: video.isGif,
+    albumMediaParams,
+  });
 }
 
 export function getPictogramDimensions(): IDimensions {
@@ -115,10 +145,18 @@ export function getStickerDimensions(sticker: ApiSticker): IDimensions {
   const { width, height } = sticker;
   const aspectRatio = (height && width) && height / width;
   const baseWidth = 16 * REM;
+  const calculatedHeight = aspectRatio ? baseWidth * aspectRatio : baseWidth;
+
+  if (aspectRatio && calculatedHeight > baseWidth) {
+    return {
+      width: Math.round(baseWidth / aspectRatio),
+      height: baseWidth,
+    };
+  }
 
   return {
     width: baseWidth,
-    height: aspectRatio ? baseWidth * aspectRatio : baseWidth,
+    height: calculatedHeight,
   };
 }
 

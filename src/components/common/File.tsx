@@ -7,12 +7,13 @@ import buildClassName from '../../util/buildClassName';
 import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './File.scss';
+import { formatMediaDateTime } from '../../util/dateFormat';
 
 type IProps = {
   name: string;
   extension?: string;
   size: number;
-  uploadProgress?: number;
+  timestamp?: number;
   className?: string;
   smaller?: boolean;
   isUploading?: boolean;
@@ -25,6 +26,7 @@ const File: FC<IProps> = ({
   name,
   size,
   extension = '',
+  timestamp,
   className,
   smaller,
   isUploading,
@@ -58,9 +60,12 @@ const File: FC<IProps> = ({
         {onClick && <i className={buildClassName('icon-download', shouldSpinnerRender && 'hidden')} />}
       </div>
       <div className="file-info">
-        <div className="file-name">{name}</div>
-        <div className="file-size">
-          {(isUploading || isDownloading) && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
+        <div className="file-title">{name}</div>
+        <div className="file-subtitle">
+          <span>
+            {(isUploading || isDownloading) && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
+          </span>
+          {timestamp && <span>{formatMediaDateTime(timestamp * 1000)}</span>}
         </div>
       </div>
     </div>
