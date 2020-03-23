@@ -40,8 +40,11 @@ const File: FC<IProps> = ({
   const sizeString = getFileSizeString(size);
 
   return (
-    <div className={buildClassName('File', className, smaller && 'smaller')}>
-      <div className="file-icon-container" onClick={onClick}>
+    <div
+      className={buildClassName('File', className, smaller && 'smaller', onClick && 'interactive')}
+      onClick={onClick}
+    >
+      <div className="file-icon-container">
         <div className={`file-icon ${color}`}>
           {extension.length <= 4 && (
             <span className="file-ext">{extension}</span>
@@ -52,6 +55,7 @@ const File: FC<IProps> = ({
             <ProgressSpinner progress={transferProgress} size={smaller ? 's' : 'm'} />
           </div>
         )}
+        {onClick && <i className={buildClassName('icon-download', shouldSpinnerRender && 'hidden')} />}
       </div>
       <div className="file-info">
         <div className="file-name">{name}</div>
