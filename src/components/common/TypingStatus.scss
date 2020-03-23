@@ -3,7 +3,7 @@
     display: inline-block;
     content: '';
     width: 1rem;
-    animation: typing-animation 1s linear infinite
+    animation: typing-animation 1s linear infinite;
   }
 
   .sender-name {
@@ -16,12 +16,15 @@
 
 @keyframes typing-animation {
   0% {
+    content: '';
+  }
+  25% {
     content: '.';
   }
-  33% {
+  50% {
     content: '..';
   }
-  66% {
+  75% {
     content: '...';
   }
 }

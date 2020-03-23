@@ -162,8 +162,6 @@
    * zoom-fade
    */
   &.zoom-fade {
-    overflow: hidden;
-
     > .from {
       transform-origin: center;
       transform: scale(1);

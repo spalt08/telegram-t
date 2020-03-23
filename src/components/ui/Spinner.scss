@@ -40,25 +40,37 @@
 
   &.white {
     > div {
-      background-image: url('../../assets/spinner-white.svg');
+      background-image: var(--spinner-white-data);
     }
 
     &.with-background {
       > div {
-        background-image: url('../../assets/spinner-white-thin.svg');
+        background-image: var(--spinner-white-thin-data);
       }
     }
   }
 
   &.blue {
     > div {
-      background-image: url('../../assets/spinner-blue.svg');
+      background-image: var(--spinner-blue-data);
     }
   }
 
   &.black {
     > div {
-      background-image: url('../../assets/spinner-black.svg');
+      background-image: var(--spinner-black-data);
+    }
+  }
+
+  &.green {
+    > div {
+      background-image: var(--spinner-green-data);
+    }
+  }
+
+  &.gray {
+    > div {
+      background-image: var(--spinner-gray-data);
     }
   }
 }

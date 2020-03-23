@@ -2,6 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 
   .Transition {
     flex-grow: 1;

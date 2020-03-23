@@ -3,7 +3,7 @@ import React, { FC } from '../../lib/teact/teact';
 import './Spinner.scss';
 
 const Spinner: FC<{
-  color?: 'blue' | 'white' | 'black';
+  color?: 'blue' | 'white' | 'black' | 'green' | 'gray';
   background?: boolean;
 }> = ({
   color = 'blue',
