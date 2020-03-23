@@ -22,6 +22,7 @@ import {
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useMedia from '../../hooks/useMedia';
 import { renderMessageText } from '../common/helpers/renderMessageText';
+import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -30,6 +31,7 @@ import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
+import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewer.scss';
 
@@ -56,6 +58,7 @@ const MediaViewer: FC<IProps> = ({
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
   const isVideo = message ? Boolean(getMessageVideo(message)) : null;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
+  const fileName = message && getMessageMediaFilename(message);
 
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
@@ -70,8 +73,11 @@ const MediaViewer: FC<IProps> = ({
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
-  const blobUrlFull = useMedia(message && getMessageMediaHash(message, 'viewerFull'));
-  const fileName = message && getMessageMediaFilename(message);
+  // TODO Fix race condition for progress callbacks of different slides
+  const {
+    mediaData: blobUrlFull,
+    downloadProgress,
+  } = useMediaWithDownloadProgress(message && getMessageMediaHash(message, 'viewerFull'));
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
@@ -182,6 +188,7 @@ const MediaViewer: FC<IProps> = ({
         {isVideo && renderVideo(
           blobUrlFull,
           blobUrlPreview || thumbDataUri,
+          downloadProgress,
           message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
           isGif,
         )}
@@ -240,7 +247,9 @@ function renderPhoto(blobUrl?: string) {
   return blobUrl ? <img src={blobUrl} alt="" /> : <Spinner color="white" />;
 }
 
-function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimensions, isGif?: boolean) {
+function renderVideo(
+  blobUrl?: string, posterData?: string, downloadProgress?: number, posterSize?: IDimensions, isGif?: boolean,
+) {
   if (blobUrl) {
     return <VideoPlayer key={blobUrl} url={blobUrl} isGif={isGif} />;
   } else {
@@ -253,7 +262,7 @@ function renderVideo(blobUrl?: string, posterData?: string, posterSize?: IDimens
             width={posterSize.width}
             height={posterSize.height}
           />
-          <Spinner color="white" />
+          <ProgressSpinner progress={downloadProgress} />
         </div>
       );
     }
