@@ -69,7 +69,7 @@ const MessageInput: FC<IProps> = ({
 
       onSend();
     }
-    if (e.key === 'ArrowUp') {
+    if (e.key === 'ArrowUp' && !html.length) {
       e.preventDefault();
       editLastChatMessage();
     }

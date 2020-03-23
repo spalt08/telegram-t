@@ -1,5 +1,5 @@
-export default function focusEditableElement(element: HTMLElement) {
-  if (element === document.activeElement) {
+export default function focusEditableElement(element: HTMLElement, force?: boolean) {
+  if (!force && element === document.activeElement) {
     return;
   }
   const selection = window.getSelection()!;
