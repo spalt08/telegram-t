@@ -10,7 +10,7 @@ import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
   onAuthError, onAuthReady, onCurrentUserId,
 } from './auth';
-import { updater } from '../updater';
+import { setUpdaterCurrentUserId, updater } from '../updater';
 import downloadMediaWithClient from './media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
@@ -136,5 +136,6 @@ async function loadCurrentUser() {
     return;
   }
 
+  setUpdaterCurrentUserId(users[0].id);
   onCurrentUserId(users[0].id);
 }

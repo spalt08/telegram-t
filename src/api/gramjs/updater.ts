@@ -4,7 +4,9 @@ import { ApiMessage, OnApiUpdate } from '../types';
 import {
   buildApiMessage,
   buildApiMessageFromShort,
-  buildApiMessageFromShortChat, buildMessageMediaContent, buildMessageTextContent,
+  buildApiMessageFromShortChat,
+  buildMessageMediaContent,
+  buildMessageTextContent,
   resolveMessageApiChatId,
   buildPoll,
   buildPollResults,
@@ -19,9 +21,14 @@ type Update = (
 ) | typeof connection.UpdateConnectionState;
 
 let onUpdate: OnApiUpdate;
+let currentUserId: number | undefined;
 
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
+}
+
+export function setUpdaterCurrentUserId(_currentUserId:number) {
+  currentUserId = _currentUserId;
 }
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
@@ -49,7 +56,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);
     } else if (update instanceof GramJs.UpdateShortMessage) {
-      message = buildApiMessageFromShort(update);
+      message = buildApiMessageFromShort(update, currentUserId!);
     } else {
       if (update.message instanceof GramJs.Message) {
         const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;
