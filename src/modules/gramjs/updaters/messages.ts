@@ -16,29 +16,33 @@ import { getMessageContent, isCommonBoxChat } from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
+function updateMessageAndPreserveMedia(global: GlobalState, chat_id: number, id: number, message: Partial<ApiMessage>) {
+  // Preserve locally uploaded media.
+  const currentMessage = selectChatMessage(global, chat_id, id);
+  if (currentMessage && message.content) {
+    const { photo, video, sticker } = getMessageContent(currentMessage);
+    if (photo && message.content.photo) {
+      message.content.photo.blobUrl = photo.blobUrl;
+      message.content.photo.thumbnail = photo.thumbnail;
+    } else if (video && message.content.video) {
+      message.content.video.blobUrl = video.blobUrl;
+    } else if (sticker && message.content.sticker) {
+      message.content.sticker.localMediaHash = sticker.localMediaHash;
+    }
+  }
+
+  return updateChatMessage(global, chat_id, id, message);
+}
+
 export function onUpdate(update: ApiUpdate) {
   const global = getGlobal();
 
   switch (update['@type']) {
     case 'newMessage': {
       const { chat_id, id, message } = update;
-
-      // Preserve locally uploaded media.
-      const currentMessage = selectChatMessage(global, chat_id, id);
-      if (currentMessage && message.content) {
-        const { photo, video, sticker } = getMessageContent(currentMessage);
-        if (photo && message.content.photo) {
-          message.content.photo.blobUrl = photo.blobUrl;
-          message.content.photo.thumbnail = photo.thumbnail;
-        } else if (video && message.content.video) {
-          message.content.video.blobUrl = video.blobUrl;
-        } else if (sticker && message.content.sticker) {
-          message.content.sticker.localMediaHash = sticker.localMediaHash;
-        }
-      }
-
       let newGlobal = global;
-      newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
+
+      newGlobal = updateMessageAndPreserveMedia(newGlobal, chat_id, id, message);
       if (selectIsViewportNewest(newGlobal, chat_id)) {
         newGlobal = updateViewportIds(newGlobal, chat_id, [id]);
       }
@@ -70,7 +74,7 @@ export function onUpdate(update: ApiUpdate) {
       }
 
       let newGlobal = global;
-      newGlobal = updateChatMessage(newGlobal, chat_id, id, message);
+      newGlobal = updateMessageAndPreserveMedia(newGlobal, chat_id, id, message);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
