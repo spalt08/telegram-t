@@ -7,6 +7,16 @@
   margin-bottom: 0.35rem;
   border-radius: var(--border-radius-default);
 
+  &.animate-opacity {
+    will-change: opacity;
+    transition: opacity .2s ease-out;
+  }
+
+  &.animate-transform {
+    will-change: transform;
+    transition: transform .2s ease-out;
+  }
+
   &:hover, &.selected {
     background: var(--color-chat-hover);
 

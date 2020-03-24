@@ -24,12 +24,12 @@ export function filterKeys<M extends any>(
   }, {});
 }
 
-export function mapValues<M extends any>(
+export function mapValues<R extends any, M extends any>(
   byKey: CollectionByKey<M>,
-  callback: (member: M, key: string, originalByKey: CollectionByKey<M>) => M,
-): CollectionByKey<M> {
-  return Object.keys(byKey).reduce((newByKey: CollectionByKey<M>, key) => {
-    newByKey[key] = callback(byKey[key], key, byKey);
+  callback: (member: M, key: string, index: number, originalByKey: CollectionByKey<M>) => R,
+): CollectionByKey<R> {
+  return Object.keys(byKey).reduce((newByKey: CollectionByKey<R>, key, index) => {
+    newByKey[key] = callback(byKey[key], key, index, byKey);
     return newByKey;
   }, {});
 }
