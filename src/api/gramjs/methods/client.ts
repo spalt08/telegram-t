@@ -21,7 +21,7 @@ let client: TelegramClient;
 let isConnected = false;
 
 export async function init(sessionId: string) {
-  const session = new sessions.CacheApiSession(sessionId);
+  const session = new sessions.StringSession(sessionId);
   client = new TelegramClient(
     session,
     process.env.TELEGRAM_T_API_ID,

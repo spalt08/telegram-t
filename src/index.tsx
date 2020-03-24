@@ -1,3 +1,7 @@
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+import 'whatwg-fetch';
+
 import './util/handleError';
 
 import React, { getDispatch, getGlobal } from './lib/teact/teactn';

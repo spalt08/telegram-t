@@ -65,12 +65,15 @@
   "dependencies": {
     "async-mutex": "^0.1.4",
     "big-integer": "painor/BigInteger.js",
+    "core-js": "^3.6.4",
     "croppie": "^2.6.4",
     "emoji-mart": "^2.11.2",
     "emoji-regex": "^8.0.0",
     "events": "^3.0.0",
     "lottie-web": "^5.5.10",
     "pako": "^1.0.10",
-    "websocket": "^1.0.30"
+    "regenerator-runtime": "^0.13.5",
+    "websocket": "^1.0.30",
+    "whatwg-fetch": "^3.0.0"
   }
 }

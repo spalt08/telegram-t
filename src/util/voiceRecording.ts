@@ -1,8 +1,8 @@
 const POLYFILL_OPTIONS = {
   OggOpusEncoderWasmPath: './OggOpusEncoder.wasm',
-  encoderWorkerFactory() {
-    return new Worker('../../node_modules/opus-media-recorder/encoderWorker.js');
-  },
+  encoderWorkerFactory: () => (
+    new Worker('../../node_modules/opus-media-recorder/encoderWorker.js')
+  ),
 };
 const MIN_RECORDING_TIME = 1000;
 
@@ -33,7 +33,7 @@ async function ensureOpusMediaRecorder() {
 }
 
 export function isSupported() {
-  return 'getUserMedia' in navigator.mediaDevices;
+  return navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices;
 }
 
 export async function start(analyzerCallback: Function) {

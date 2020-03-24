@@ -1,4 +1,4 @@
-const { readFileSync } = require('fs')
+const fs = require('fs')
 const {
     parseTl,
     serializeBytes,
@@ -56,8 +56,8 @@ function loadFromCache() {
 }
 
 function loadFromTlSchemas() {
-    const tlContent = readFileSync('./static/api.tl', 'utf-8')
-    const schemeContent = readFileSync('./static/schema.tl', 'utf-8')
+    const tlContent = fs.readFileSync('./static/api.tl', 'utf-8')
+    const schemeContent = fs.readFileSync('./static/schema.tl', 'utf-8')
     const [constructorParamsApi, functionParamsApi] = extractParams(tlContent)
     const [constructorParamsSchema, functionParamsSchema] = extractParams(schemeContent)
     const constructors = [].concat(constructorParamsApi, constructorParamsSchema)

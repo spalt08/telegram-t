@@ -1,3 +1,6 @@
+import 'core-js';
+import 'regenerator-runtime/runtime';
+
 import { ApiUpdate } from '../../types';
 import { OriginMessageEvent, WorkerMessageData } from './types';
 import { initApi, callApi } from '../provider';
