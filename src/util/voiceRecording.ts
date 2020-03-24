@@ -1,9 +1,5 @@
-// `_wasm` is to avoid Parcel default import behavior for Web Assembly.
-// @ts-ignore
-import OggOpusEncoderWasmPath from '../lib/opus-media-recorder/OggOpusEncoder._wasm';
-
 const POLYFILL_OPTIONS = {
-  OggOpusEncoderWasmPath,
+  OggOpusEncoderWasmPath: './OggOpusEncoder.wasm',
   encoderWorkerFactory() {
     return new Worker('../../node_modules/opus-media-recorder/encoderWorker.js');
   },

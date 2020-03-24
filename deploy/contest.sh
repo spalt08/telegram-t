@@ -13,7 +13,9 @@ mkdir -p ${OUT_DIR};
 
 rm -rf .cache/ dist/;
 npx parcel build src/index.html -d ${OUT_DIR}/dist --public-url ./ --no-source-maps;
+./deploy/copy_opus_wasm.sh ${OUT_DIR}/dist
 
 rm -rf .cache/ dist/;
 npx parcel build src/index.html -d ${OUT_DIR}/src --public-url ./ --no-minify;
+./deploy/copy_opus_wasm.sh ${OUT_DIR}/dist
 rm ${OUT_DIR}/src/index.html
