@@ -1,16 +1,10 @@
 {
   "presets": [
     [
-      "env",
-      {
-        "targets": {
-          "browsers": [
-            "> 2%",
-            "not ie 11",
-            "not edge 17"
-          ]
-        }
-      }
+      "@babel/preset-react"
+    ],
+    [
+      "@babel/preset-env"
     ]
   ],
   "plugins": [
