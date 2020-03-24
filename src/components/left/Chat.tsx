@@ -1,4 +1,6 @@
-import React, { FC, memo, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useLayoutEffect, useRef,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -33,6 +35,7 @@ import './Chat.scss';
 
 type IProps = {
   chatId: number;
+  orderDiff: number;
   chat: ApiChat;
   privateChatUser?: ApiUser;
   actionTargetUser?: ApiUser;
@@ -45,6 +48,7 @@ type IProps = {
 
 const Chat: FC<IProps> = ({
   chat,
+  orderDiff,
   privateChatUser,
   actionTargetUser,
   lastMessageSender,
@@ -55,11 +59,33 @@ const Chat: FC<IProps> = ({
   openChat,
   focusTopMessage,
 }) => {
+  const ref = useRef<HTMLDivElement>();
+
   const { last_message, typingStatus } = chat;
   const chatId = chat.id;
   const isAction = last_message && isActionMessage(last_message);
 
   useEnsureMessage(chatId, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
+
+  useLayoutEffect(() => {
+    const element = ref.current!;
+
+    if (orderDiff < 0) {
+      element.style.opacity = '0';
+
+      requestAnimationFrame(() => {
+        element.classList.add('animate-opacity');
+        element.style.opacity = '1';
+      });
+    } else if (orderDiff > 0) {
+      element.style.transform = `translate3d(0, ${-orderDiff * 100}%, 0)`;
+
+      requestAnimationFrame(() => {
+        element.classList.add('animate-transform');
+        element.style.transform = '';
+      });
+    }
+  }, [orderDiff]);
 
   function renderLastMessageOrTyping() {
     if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
@@ -111,7 +137,7 @@ const Chat: FC<IProps> = ({
   );
 
   return (
-    <div className={className} onClick={handleClick}>
+    <div ref={ref} className={className} onClick={handleClick}>
       {isUiReady && (
         <Avatar
           chat={chat}

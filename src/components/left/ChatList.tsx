@@ -4,7 +4,10 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
+import usePrevious from '../../hooks/usePrevious';
+import { mapValues } from '../../util/iteratees';
 import prepareChats from '../common/helpers/prepareChats';
+
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Loading from '../ui/Loading';
 import Chat from './Chat';
@@ -21,22 +24,35 @@ type IProps = {
 const ChatList: FC<IProps> = ({
   chats, listIds, selectedChatId, orderedPinnedIds, loadMoreChats,
 }) => {
-  const chatArrays = useMemo(() => (
-    listIds ? prepareChats(chats, listIds, orderedPinnedIds) : undefined
-  ), [chats, listIds, orderedPinnedIds]);
+  const [chatArrays, orderById] = useMemo(() => {
+    if (!listIds) {
+      return [];
+    }
+
+    const newChatArrays = prepareChats(chats, listIds, orderedPinnedIds);
+    const newOrderById = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats]
+      .reduce((acc, chat, index) => ({ ...acc, [chat.id]: index }), {} as Record<string, number>);
+
+    return [newChatArrays, newOrderById];
+  }, [chats, listIds, orderedPinnedIds]);
+
+  const prevOrderById = usePrevious(orderById);
+  const orderDiffById = orderById && prevOrderById
+    ? mapValues(orderById, (order, id) => order - prevOrderById[id])
+    : {};
 
   return (
     <InfiniteScroll className="ChatList custom-scroll" items={listIds} onLoadMore={loadMoreChats}>
       {listIds && listIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map(({ id }) => (
-            <Chat key={id} chatId={id} selected={id === selectedChatId} />
+            <Chat key={id} chatId={id} selected={id === selectedChatId} orderDiff={orderDiffById[id]} />
           ))}
           {chatArrays.pinnedChats.length > 0 && (
             <div className="pinned-chats-divider" />
           )}
           {chatArrays.otherChats.map(({ id }) => (
-            <Chat key={id} chatId={id} selected={id === selectedChatId} />
+            <Chat key={id} chatId={id} selected={id === selectedChatId} orderDiff={orderDiffById[id]} />
           ))}
         </div>
       ) : listIds && listIds.length === 0 ? (
