@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../../global/types';
+import { GlobalActions, GlobalState } from '../../../global/types';
 import {
   ApiAttachment,
   ApiSticker,
@@ -36,7 +36,7 @@ import './Composer.scss';
 type IProps = {
   isPrivateChat: boolean;
   editedMessage?: ApiMessage;
-} & Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
+} & Pick<GlobalState, 'connectionState'> & Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
 
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
@@ -67,7 +67,7 @@ function isSelectionInsideInput(selectionRange: Range) {
 }
 
 const Composer: FC<IProps> = ({
-  isPrivateChat, editedMessage, sendMessage, editMessage,
+  isPrivateChat, editedMessage, connectionState, sendMessage, editMessage,
 }) => {
   const [html, setHtml] = useState<string>('');
   const htmlRef = useRef<string>(html);
@@ -268,6 +268,10 @@ const Composer: FC<IProps> = ({
   }, [activeVoiceRecording]);
 
   const handleSend = useCallback(async () => {
+    if (connectionState !== 'connectionStateReady') {
+      return;
+    }
+
     let currentAttachment = attachment;
 
     if (activeVoiceRecording) {
@@ -296,7 +300,7 @@ const Composer: FC<IProps> = ({
     setHtml('');
     setAttachment(undefined);
     setIsSymbolMenuOpen(false);
-  }, [activeVoiceRecording, attachment, sendMessage, stopRecordingVoice]);
+  }, [activeVoiceRecording, attachment, connectionState, sendMessage, stopRecordingVoice]);
 
   const handleEditComplete = useCallback(() => {
     const { rawText, entities } = parseMessageInput(htmlRef.current!);
@@ -454,10 +458,12 @@ export default memo(withGlobal(
     const selectedChatId = global.chats.selectedId;
     const editingMessageId = selectedChatId ? global.chats.editingById[selectedChatId] : undefined;
     const editedMessage = editingMessageId ? selectChatMessage(global, selectedChatId!, editingMessageId) : undefined;
+    const { connectionState } = global;
 
     return {
       isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId),
       editedMessage,
+      connectionState,
     };
   },
   (setGlobal, actions) => {

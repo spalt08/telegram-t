@@ -45,7 +45,7 @@ export function selectIsViewportNewest(global: GlobalState, chatId: number) {
   const { last_message } = selectChat(global, chatId) || {};
   const viewportIds = selectViewportIds(global, chatId);
 
-  return last_message && viewportIds && viewportIds[viewportIds.length - 1] === last_message.id;
+  return last_message && viewportIds && viewportIds[viewportIds.length - 1] >= last_message.id;
 }
 
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
