@@ -155,11 +155,11 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
   const { last_message, last_read_inbox_message_id } = chat;
 
   // Edge case #1
-  if (last_message && (!last_read_inbox_message_id || last_message.id < last_read_inbox_message_id)) {
+  if (last_message && (last_read_inbox_message_id === undefined || last_message.id < last_read_inbox_message_id)) {
     return last_message.id;
   }
 
-  if (!last_read_inbox_message_id) {
+  if (last_read_inbox_message_id === undefined) {
     return undefined;
   }
 
@@ -189,7 +189,7 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
   const listedIds = selectListedIds(global, chatId);
   const byId = selectChatMessages(global, chatId);
 
-  if (!chat.unread_count || !lastReadId || !listedIds || !byId) {
+  if (!chat.unread_count || lastReadId === undefined || !listedIds || !byId) {
     return undefined;
   }
 
