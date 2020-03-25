@@ -59,7 +59,6 @@ const scrollToLastMessage = throttle((container: Element) => {
   container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 }, 300, true);
 
-let currentScrollOffset: number;
 let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
 let listItemElements: NodeListOf<HTMLDivElement>;
@@ -79,15 +78,17 @@ const MessageList: FC<IProps> = ({
   setChatScrollOffset,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
+  const scrollOffsetRef = useRef<number>();
+
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
   useOnChange(() => {
     currentAnchorId = undefined;
 
-    // We update local cached `currentScrollOffset` when switching chat.
+    // We update local cached `scrollOffsetRef` when switching chat.
     // Then we update global version every second on scrolling.
-    currentScrollOffset = chatId ? getGlobal().chats.scrollOffsetById[chatId] : 0;
+    scrollOffsetRef.current = (chatId && getGlobal().chats.scrollOffsetById[chatId]) || 0;
 
     // We only update `memoFirstUnreadId` when switching chat.
     memoFirstUnreadId = firstUnreadId;
@@ -142,7 +143,7 @@ const MessageList: FC<IProps> = ({
   const processInfiniteScroll = useCallback(() => {
     const container = containerRef.current!;
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    currentScrollOffset = scrollHeight - scrollTop;
+    scrollOffsetRef.current = scrollHeight - scrollTop;
 
     const isNearTop = scrollTop <= MESSAGE_LIST_SENSITIVE_AREA;
     const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= MESSAGE_LIST_SENSITIVE_AREA;
@@ -214,7 +215,7 @@ const MessageList: FC<IProps> = ({
     scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
 
     runThrottledForScroll(() => {
-      setChatScrollOffset({ chatId, scrollOffset: currentScrollOffset });
+      setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
 
       updateViewportMessages();
 
@@ -233,15 +234,16 @@ const MessageList: FC<IProps> = ({
     }
   }, [messageIds, loadMoreBoth]);
 
-  useLayoutEffectWithPrevDeps(([prevChatId, prevMessageIds, prevIsViewportNewest]) => {
+  useLayoutEffectWithPrevDeps(([
+    prevChatId, prevMessageIds, prevIsViewportNewest,
+  ]: [
+    typeof chatId, typeof messageIds, typeof isViewportNewest
+  ]) => {
     if (chatId === prevChatId && messageIds === prevMessageIds) {
       return;
     }
 
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+    const container = containerRef.current!;
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
@@ -249,12 +251,11 @@ const MessageList: FC<IProps> = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    const isAtBottom = currentScrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
-    // For some reason generic types are not properly resolved here.
-    const typedPrevMessageIds = prevMessageIds as typeof messageIds;
+    const scrollOffset = scrollOffsetRef.current!;
+    const isAtBottom = scrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
     const isNewMessage = (
-      isViewportNewest && prevIsViewportNewest && messageIds && typedPrevMessageIds
-      && messageIds[messageIds.length - 1] !== typedPrevMessageIds[typedPrevMessageIds.length - 1]
+      isViewportNewest && prevIsViewportNewest && messageIds && prevMessageIds
+      && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
     );
     const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
     const unreadDivider = (
@@ -266,12 +267,12 @@ const MessageList: FC<IProps> = ({
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
       const newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
-      currentScrollOffset = scrollHeight - newScrollTop;
+      scrollOffsetRef.current = scrollHeight - newScrollTop;
       container.scrollTop = newScrollTop;
     } else if (unreadDivider) {
       container.scrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
     } else {
-      container.scrollTop = scrollHeight - (currentScrollOffset || 0);
+      container.scrollTop = scrollHeight - scrollOffset;
     }
 
     listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
@@ -282,7 +283,7 @@ const MessageList: FC<IProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, isViewportNewest, updateViewportMessages]);
+  }, [chatId, messageIds, isViewportNewest, isFocusing, updateViewportMessages]);
 
   const isPrivate = Boolean(chatId && isChatPrivate(chatId));
 
@@ -406,7 +407,6 @@ function determineStickyDate(container: HTMLElement) {
 export default memo(withGlobal(
   global => {
     const chat = selectOpenChat(global);
-
     if (!chat) {
       return {};
     }

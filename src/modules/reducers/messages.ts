@@ -6,6 +6,7 @@ import {
   selectListedIds, selectChatMessages, selectViewportIds, selectOutlyingIds,
 } from '../selectors';
 import { areSortedArraysEqual } from '../../util/iteratees';
+import { MESSAGE_LIST_VIEWPORT_LIMIT } from '../../config';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -202,22 +203,19 @@ function orderHistoryIds(listedIds: number[]) {
   return listedIds.sort((a, b) => (a > 0 && b > 0 ? a - b : b - a));
 }
 
-export function updateViewportIds(
+export function addViewportId(
   global: GlobalState,
   chatId: number,
-  idsUpdate: number[],
+  newId: number,
 ): GlobalState {
   const viewportIds = selectViewportIds(global, chatId) || [];
-  const newIds = viewportIds.length ? idsUpdate.filter((id) => !viewportIds.includes(id)) : idsUpdate;
-
-  if (!newIds.length) {
+  if (viewportIds.includes(newId)) {
     return global;
   }
 
-  return replaceViewportIds(global, chatId, [
-    ...viewportIds,
-    ...newIds,
-  ]);
+  const newIds = [...viewportIds, newId].slice(-MESSAGE_LIST_VIEWPORT_LIMIT);
+
+  return replaceViewportIds(global, chatId, newIds);
 }
 
 export function safeReplaceViewportIds(
