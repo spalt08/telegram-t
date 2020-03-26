@@ -6,6 +6,7 @@
   background-color: transparent;
   cursor: pointer;
   overflow: hidden;
+  position: relative;
 
   &:last-child {
     margin-bottom: 1rem;
@@ -37,5 +38,6 @@
 
   .Spinner {
     position: absolute;
+    pointer-events: none;
   }
 }
