@@ -3,9 +3,14 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
-import { getUserFullName, isChatChannel } from '../../modules/helpers';
+import { getUserFullName, isChatChannel, isChatPrivate } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
-import { selectChat, selectChatMessage, selectSender } from '../../modules/selectors';
+import {
+  selectChat,
+  selectChatMessage,
+  selectSender,
+  selectUser,
+} from '../../modules/selectors';
 
 import Avatar from '../common/Avatar';
 
@@ -16,11 +21,12 @@ type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openUserInfo' | 'openChat
   chatId?: number;
   message?: ApiMessage;
   isChannelChatMessage?: boolean;
+  isAvatar?: boolean;
   sender?: ApiUser | ApiChat;
 };
 
 const SenderInfo: FC<IProps> = ({
-  sender, isChannelChatMessage, message, openMediaViewer, openUserInfo, openChatWithInfo,
+  sender, isChannelChatMessage, isAvatar, message, openMediaViewer, openUserInfo, openChatWithInfo,
 }) => {
   const openSenderInfo = useCallback(() => {
     if (sender) {
@@ -33,7 +39,7 @@ const SenderInfo: FC<IProps> = ({
     }
   }, [sender, openMediaViewer, isChannelChatMessage, openChatWithInfo, openUserInfo]);
 
-  if (!message || !sender) {
+  if (!sender || (!message && !isAvatar)) {
     return null;
   }
 
@@ -48,13 +54,24 @@ const SenderInfo: FC<IProps> = ({
         <div className="title">
           {isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser)}
         </div>
-        <div className="date">{formatMediaDateTime(message.date * 1000)}</div>
+        <div className="date">
+          {isAvatar ? 'Profile photo' : formatMediaDateTime(message!.date * 1000)}
+        </div>
       </div>
     </div>
   );
 };
 
-export default withGlobal((global, { chatId, messageId }) => {
+export default withGlobal((global, { chatId, messageId, isAvatar }) => {
+  if (isAvatar) {
+    const sender = isChatPrivate(chatId) ? selectUser(global, chatId) : selectChat(global, chatId);
+
+    return {
+      sender,
+      isChannelChatMessage: !isChatPrivate(chatId),
+    };
+  }
+
   if (!messageId || !chatId) {
     return {};
   }

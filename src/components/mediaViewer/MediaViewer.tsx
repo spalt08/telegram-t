@@ -4,10 +4,14 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiChat } from '../../api/types';
 
 import { calculateMediaViewerVideoDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
-import { selectChatMessage, selectChatMessages } from '../../modules/selectors';
+import {
+  selectChatMessage,
+  selectChatMessages,
+  selectChat,
+} from '../../modules/selectors';
 import {
   getChatMediaMessageIds,
   getMessagePhoto,
@@ -18,6 +22,7 @@ import {
   IDimensions,
   getMessageWebPagePhoto,
   getMessageMediaFilename,
+  getChatAvatarHash,
 } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useMedia from '../../hooks/useMedia';
@@ -39,6 +44,7 @@ type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'> & {
   chatId?: number;
   messageId?: number;
   isReversed?: boolean;
+  avatarOwner?: ApiChat;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
 };
@@ -47,6 +53,7 @@ const MediaViewer: FC<IProps> = ({
   chatId,
   messageId,
   isReversed,
+  avatarOwner,
   message,
   chatMessages,
   openMediaViewer,
@@ -58,7 +65,9 @@ const MediaViewer: FC<IProps> = ({
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
   const isVideo = message ? Boolean(getMessageVideo(message)) : null;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
-  const fileName = message && getMessageMediaFilename(message);
+  const fileName = avatarOwner
+    ? `avatar${avatarOwner.id}.jpg`
+    : message && getMessageMediaFilename(message);
 
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
@@ -66,18 +75,27 @@ const MediaViewer: FC<IProps> = ({
       : getChatMediaMessageIds(chatMessages || {}, isReversed);
   }, [isWebPagePhoto, messageId, chatMessages, isReversed]);
 
+  function getMediaHash(full?: boolean) {
+    if (avatarOwner) {
+      return getChatAvatarHash(avatarOwner, full ? 'big' : 'normal');
+    }
+
+    return message && getMessageMediaHash(message, full ? 'viewerFull' : 'viewerPreview');
+  }
+
   const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
-  const isOpen = Boolean(messageId);
+  const isOpen = Boolean(avatarOwner || messageId);
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
-  const blobUrlPreview = useMedia(message && getMessageMediaHash(message, 'viewerPreview'));
+  const blobUrlPreview = useMedia(getMediaHash());
+
   // TODO Fix race condition for progress callbacks of different slides
   const {
     mediaData: blobUrlFull,
     downloadProgress,
-  } = useMediaWithDownloadProgress(message && getMessageMediaHash(message, 'viewerFull'));
+  } = useMediaWithDownloadProgress(getMediaHash(true));
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
@@ -175,31 +193,42 @@ const MediaViewer: FC<IProps> = ({
   }
 
   function renderSlide() {
-    if (!message) {
-      return null;
+    if (avatarOwner) {
+      return (
+        <div key={chatId} className="media-viewer-content">
+          {renderPhoto(blobUrlFull || blobUrlPreview)}
+        </div>
+      );
+    } else if (message) {
+      const textParts = renderMessageText(message.content.text);
+      const hasFooter = Boolean(textParts);
+
+      return (
+        <div key={messageId} className={`media-viewer-content ${hasFooter ? 'footer' : ''}`}>
+          {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
+          {isVideo && renderVideo(
+            blobUrlFull,
+            blobUrlPreview || thumbDataUri,
+            downloadProgress,
+            message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
+            isGif,
+          )}
+          {textParts && <MediaViewerFooter text={textParts} />}
+        </div>
+      );
     }
 
-    const textParts = renderMessageText(message.content.text);
-    const hasFooter = Boolean(textParts);
-
-    return (
-      <div key={messageId} className={`media-viewer-content ${hasFooter ? 'footer' : ''}`}>
-        {isPhoto && renderPhoto(blobUrlFull || blobUrlPreview)}
-        {isVideo && renderVideo(
-          blobUrlFull,
-          blobUrlPreview || thumbDataUri,
-          downloadProgress,
-          message && calculateMediaViewerVideoDimensions(videoDimensions!, hasFooter),
-          isGif,
-        )}
-        {textParts && <MediaViewerFooter text={textParts} />}
-      </div>
-    );
+    return null;
   }
 
   function renderSenderInfo() {
     return (
-      <SenderInfo key={messageId} chatId={chatId} messageId={messageId} />
+      <SenderInfo
+        key={avatarOwner ? avatarOwner.id : messageId}
+        chatId={avatarOwner ? avatarOwner.id : chatId}
+        messageId={messageId}
+        isAvatar={Boolean(avatarOwner)}
+      />
     );
   }
 
@@ -216,6 +245,7 @@ const MediaViewer: FC<IProps> = ({
               fileName={fileName}
               onCloseMediaViewer={closeMediaViewer}
               onForward={handleForward}
+              isAvatar={Boolean(avatarOwner)}
             />
           </div>
           <Transition activeKey={selectedMediaMessageIndex} name="slow-slide">
@@ -273,13 +303,23 @@ function renderVideo(
 
 export default memo(withGlobal(
   (global) => {
-    const { chatId, messageId, isReversed } = global.mediaViewer;
+    const {
+      chatId, messageId, avatarOwnerId, isReversed,
+    } = global.mediaViewer;
+
+    if (avatarOwnerId) {
+      return {
+        messageId: -1,
+        avatarOwner: selectChat(global, avatarOwnerId),
+      };
+    }
+
     if (!chatId || !messageId) {
       return {};
     }
 
     const chatMessages = selectChatMessages(global, chatId);
-    const message = selectChatMessage(global, chatId, messageId);
+    const message = selectChatMessage(global, chatId, messageId!);
 
     if (!message) {
       return {};

@@ -1,9 +1,10 @@
-import React, { FC } from '../../lib/teact/teact';
+import { MouseEvent as ReactMouseEvent } from 'react';
+import React, { FC, useCallback } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
 import {
   getChatAvatarHash, getChatTitle, isChatPrivate,
-  getUserAvatarHash, getUserFullName, isUserOnline, isDeletedUser,
+  getUserFullName, isUserOnline, isDeletedUser,
 } from '../../modules/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import useMedia from '../../hooks/useMedia';
@@ -18,7 +19,7 @@ interface IProps {
   chat?: ApiChat;
   user?: ApiUser;
   isSavedMessages?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => void;
   className?: string;
 }
 
@@ -38,7 +39,7 @@ const Avatar: FC<IProps> = ({
     if (chat) {
       imageHash = getChatAvatarHash(chat);
     } else if (user) {
-      imageHash = getUserAvatarHash(user);
+      imageHash = getChatAvatarHash(user);
     }
   }
 
@@ -67,10 +68,17 @@ const Avatar: FC<IProps> = ({
     className,
     showOnlineStatus && isOnline && 'online',
     onClick && 'action',
+    (!isSavedMessages && !shouldRenderFullMedia) && 'no-photo',
   );
 
+  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (onClick) {
+      onClick(e, isSavedMessages || shouldRenderFullMedia);
+    }
+  }, [onClick, isSavedMessages, shouldRenderFullMedia]);
+
   return (
-    <div className={fullClassName} onClick={onClick}>
+    <div className={fullClassName} onClick={handleClick}>
       {content}
     </div>
   );

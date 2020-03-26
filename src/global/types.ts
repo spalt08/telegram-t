@@ -127,6 +127,7 @@ export type GlobalState = {
   mediaViewer: {
     chatId?: number;
     messageId?: number;
+    avatarOwnerId?: number;
     isReversed?: boolean;
   };
 

@@ -1,4 +1,5 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import { MouseEvent as ReactMouseEvent } from 'react';
+import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiTypingStatus } from '../../api/types';
@@ -10,7 +11,7 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
-type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullUser'> & {
+type IProps = {
   userId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
@@ -18,7 +19,10 @@ type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullU
   showHandle?: boolean;
   showFullInfo?: boolean;
   user?: ApiUser;
-};
+} & (
+  Pick<GlobalState, 'lastSyncTime'>
+  & Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>
+);
 
 const PrivateChatInfo: FC<IProps> = ({
   lastSyncTime,
@@ -29,6 +33,7 @@ const PrivateChatInfo: FC<IProps> = ({
   showHandle,
   showFullInfo,
   loadFullUser,
+  openMediaViewer,
 }) => {
   const { id: userId, is_self } = user || {};
 
@@ -39,6 +44,13 @@ const PrivateChatInfo: FC<IProps> = ({
       loadFullUser({ userId });
     }
   }, [is_self, userId, loadFullUser, lastSyncTime, showFullInfo]);
+
+  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
+    if (user && hasPhoto) {
+      e.stopPropagation();
+      openMediaViewer({ avatarOwnerId: user.id });
+    }
+  }, [user, openMediaViewer]);
 
   if (!user) {
     return null;
@@ -63,7 +75,13 @@ const PrivateChatInfo: FC<IProps> = ({
 
   return (
     <div className="ChatInfo">
-      <Avatar key={user.id} size={avatarSize} user={user} isSavedMessages={isSavedMessages} />
+      <Avatar
+        key={user.id}
+        size={avatarSize}
+        user={user}
+        isSavedMessages={isSavedMessages}
+        onClick={handleAvatarViewerOpen}
+      />
       <div>
         {isSavedMessages ? (
           <div className="title">Saved Messages</div>
@@ -91,7 +109,7 @@ export default withGlobal(
     };
   },
   (setGlobal, actions) => {
-    const { loadFullUser } = actions;
-    return { loadFullUser };
+    const { loadFullUser, openMediaViewer } = actions;
+    return { loadFullUser, openMediaViewer };
   },
 )(PrivateChatInfo);
