@@ -13,13 +13,16 @@ const FOCUS_DURATION = 2000;
 let blurTimeout: number;
 
 addReducer('openMediaViewer', (global, actions, payload) => {
-  const { chatId, messageId, isReversed = false } = payload!;
+  const {
+    chatId, messageId, avatarOwnerId, isReversed = false,
+  } = payload!;
 
   return {
     ...global,
     mediaViewer: {
       chatId,
       messageId,
+      avatarOwnerId,
       isReversed,
     },
     forwardMessages: {},

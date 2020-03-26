@@ -7,27 +7,32 @@ import './MediaViewerActions.scss';
 type IProps = {
   blobUrl?: string;
   fileName?: string;
+  isAvatar?: boolean;
   onCloseMediaViewer: Function;
   onForward: Function;
 };
 
 const MediaViewerActions: FC<IProps> = ({
-  blobUrl, fileName, onCloseMediaViewer, onForward,
+  blobUrl, fileName, isAvatar, onCloseMediaViewer, onForward,
 }) => {
   return (
     <div className="MediaViewerActions">
-      <Button round size="smaller" color="translucent-white" ariaLabel="Delete" className="not-implemented">
-        <i className="icon-delete" />
-      </Button>
-      <Button
-        round
-        size="smaller"
-        color="translucent-white"
-        ariaLabel="Forward"
-        onClick={onForward}
-      >
-        <i className="icon-forward" />
-      </Button>
+      {!isAvatar && (
+        <>
+          <Button round size="smaller" color="translucent-white" ariaLabel="Delete" className="not-implemented">
+            <i className="icon-delete" />
+          </Button>
+          <Button
+            round
+            size="smaller"
+            color="translucent-white"
+            ariaLabel="Forward"
+            onClick={onForward}
+          >
+            <i className="icon-forward" />
+          </Button>
+        </>
+      )}
       <Button
         href={blobUrl}
         download={fileName}

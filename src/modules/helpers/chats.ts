@@ -66,10 +66,20 @@ export function getChatLink(chat: ApiChat) {
   return username ? `t.me/${username}` : '';
 }
 
-export function getChatAvatarHash(chat: ApiChat) {
-  if (!chat.avatar) {
+export function getChatAvatarHash(
+  owner: ApiChat | ApiUser,
+  size: 'normal' | 'big' = 'normal',
+) {
+  if (!owner.avatar) {
     return undefined;
   }
 
-  return `avatar${chat.id}?${chat.avatar.hash}`;
+  const base = `avatar${owner.id}?${owner.avatar.hash}`;
+
+  switch (size) {
+    case 'big':
+      return `${base}?size=big`;
+    default:
+      return base;
+  }
 }

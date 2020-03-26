@@ -162,14 +162,6 @@ export function isUserOnline(user: ApiUser) {
   return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-export function getUserAvatarHash(user: ApiUser) {
-  if (!user.avatar) {
-    return undefined;
-  }
-
-  return `avatar${user.id}?${user.avatar.hash}`;
-}
-
 export function isDeletedUser(user: ApiUser) {
   if (!user.status || user.type['@type'] === 'userTypeBot') {
     return false;

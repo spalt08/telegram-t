@@ -1,4 +1,5 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import { MouseEvent as ReactMouseEvent } from 'react';
+import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
@@ -11,7 +12,7 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
-type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines'> & {
+type IProps = {
   chatId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
@@ -19,7 +20,10 @@ type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullC
   showFullInfo?: boolean;
   chat?: ApiChat;
   onlineCount?: number;
-};
+} & (
+  Pick<GlobalState, 'lastSyncTime'>
+  & Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines' | 'openMediaViewer'>
+);
 
 const GroupChatInfo: FC<IProps> = ({
   typingStatus,
@@ -31,6 +35,7 @@ const GroupChatInfo: FC<IProps> = ({
   onlineCount,
   loadFullChat,
   loadSuperGroupOnlines,
+  openMediaViewer,
 }) => {
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const { id: chatId } = chat || {};
@@ -44,6 +49,13 @@ const GroupChatInfo: FC<IProps> = ({
       }
     }
   }, [chatId, lastSyncTime, showFullInfo, loadFullChat, isSuperGroup, loadSuperGroupOnlines]);
+
+  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
+    if (chat && hasPhoto) {
+      e.stopPropagation();
+      openMediaViewer({ avatarOwnerId: chat.id });
+    }
+  }, [chat, openMediaViewer]);
 
   if (!chat) {
     return null;
@@ -72,7 +84,7 @@ const GroupChatInfo: FC<IProps> = ({
 
   return (
     <div className="ChatInfo">
-      <Avatar key={chat.id} size={avatarSize} chat={chat} />
+      <Avatar key={chat.id} size={avatarSize} chat={chat} onClick={handleAvatarViewerOpen} />
       <div>
         <div className="title">
           {getChatTitle(chat)}
@@ -102,7 +114,7 @@ export default withGlobal(
     return { lastSyncTime, chat, onlineCount };
   },
   (setGlobal, actions) => {
-    const { loadFullChat, loadSuperGroupOnlines } = actions;
-    return { loadFullChat, loadSuperGroupOnlines };
+    const { loadFullChat, loadSuperGroupOnlines, openMediaViewer } = actions;
+    return { loadFullChat, loadSuperGroupOnlines, openMediaViewer };
   },
 )(GroupChatInfo);

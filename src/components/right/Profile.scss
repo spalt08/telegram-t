@@ -14,6 +14,10 @@
 
     .Avatar {
       margin: 0 auto 1.5rem;
+
+      &.no-photo {
+        cursor: default !important;
+      }
     }
 
     .title {
