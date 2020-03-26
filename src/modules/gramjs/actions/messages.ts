@@ -350,7 +350,7 @@ function getViewportSlice(
       break;
     case LoadMoreDirection.Around:
     default:
-      areSomeLocal = indexForDirection > 0 && indexForDirection < length;
+      areSomeLocal = newViewportIds.length > 0;
       areAllLocal = newViewportIds.length === MESSAGE_LIST_SLICE * 2;
       break;
   }
