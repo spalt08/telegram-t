@@ -59,7 +59,6 @@ addReducer('focusMessage', (global, actions, payload) => {
   let newGlobal = global;
 
   newGlobal = updateFocusedMessage(newGlobal, chatId, messageId);
-  newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (shouldSwitchChat) {
     newGlobal = updateSelectedChatId(newGlobal, chatId);
@@ -71,6 +70,8 @@ addReducer('focusMessage', (global, actions, payload) => {
   if (viewportIds && viewportIds.includes(messageId)) {
     return newGlobal;
   }
+
+  newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (viewportIds && !shouldSwitchChat) {
     const direction = messageId < viewportIds[0] ? FocusDirection.Up : FocusDirection.Down;
