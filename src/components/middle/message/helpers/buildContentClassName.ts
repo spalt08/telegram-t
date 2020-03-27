@@ -5,15 +5,15 @@ import { getMessageContent } from '../../../../modules/helpers';
 export function buildContentClassName(
   message: ApiMessage,
   {
-    isOwn,
     hasReply,
-    isLastInGroup,
     customShape,
+    isLastInGroup,
+    isAlbum,
   }: {
-    isOwn?: boolean;
     hasReply?: boolean;
-    isLastInGroup?: boolean;
     customShape?: boolean | number;
+    isLastInGroup?: boolean;
+    isAlbum?: boolean;
   } = {},
 ) {
   const {
@@ -65,12 +65,13 @@ export function buildContentClassName(
   if (!customShape) {
     classNames.push('has-solid-background');
 
-    if (!(classNames.includes('media') && !text && !classNames.includes('is-forwarded'))) {
+    // TODO Refactor
+    if (!((photo || video) && !text && !message.forward_info)) {
       classNames.push('can-have-appendix');
+    }
 
-      if (isLastInGroup) {
-        classNames.push(isOwn ? 'has-appendix-own' : 'has-appendix-not-own');
-      }
+    if (isLastInGroup && !video && !isAlbum) {
+      classNames.push('has-appendix');
     }
   }
 

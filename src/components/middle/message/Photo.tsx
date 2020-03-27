@@ -1,5 +1,5 @@
 import { MouseEvent } from 'react';
-import React, { FC } from '../../../lib/teact/teact';
+import React, { FC, useLayoutEffect, useRef } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
@@ -10,11 +10,13 @@ import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMediaTransferState,
+  isOwnMessage,
 } from '../../../modules/helpers';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
+import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -24,6 +26,7 @@ type IProps = {
   load?: boolean;
   uploadProgress?: number;
   size?: 'inline' | 'pictogram';
+  shouldAffectAppendix?: boolean;
   albumMediaParams?: AlbumMediaParameters;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelUpload?: () => void;
@@ -34,26 +37,48 @@ const Photo: FC<IProps> = ({
   load,
   uploadProgress,
   size = 'inline',
+  shouldAffectAppendix,
   albumMediaParams,
   onClick,
   onCancelUpload,
 }) => {
+  const elementRef = useRef<HTMLDivElement>();
+
   const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
   const localBlobUrl = photo.blobUrl;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !load);
+  const fullMedia = localBlobUrl || mediaData;
   const {
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(mediaData || localBlobUrl, 'slow');
+  } = useTransitionForMedia(fullMedia, 'slow');
   const {
     isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, !mediaData && !localBlobUrl);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, !fullMedia);
 
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring && load, undefined, undefined, 'slow');
+
+  const isOwn = isOwnMessage(message);
+  useLayoutEffect(() => {
+    if (!shouldAffectAppendix) {
+      return;
+    }
+
+    const contentEl = elementRef.current!.closest<HTMLDivElement>('.message-content')!;
+
+    if (fullMedia) {
+      getCustomAppendixBg(fullMedia, isOwn).then((appendixBg) => {
+        contentEl.style.setProperty('--appendix-bg', appendixBg);
+        contentEl.style.setProperty('--appendix-thumb-opacity', '0');
+      });
+    } else {
+      contentEl.classList.add('has-appendix-thumb');
+    }
+  }, [fullMedia, isOwn, shouldAffectAppendix]);
 
   const { width, height, isSmall } = calculateMediaDimensions(message, albumMediaParams);
 
@@ -71,6 +96,7 @@ const Photo: FC<IProps> = ({
 
   return (
     <div
+      ref={elementRef}
       className={className}
       onClick={!isTransferring ? onClick : undefined}
     >
@@ -85,7 +111,7 @@ const Photo: FC<IProps> = ({
       )}
       {shouldRenderFullMedia && (
         <img
-          src={localBlobUrl || mediaData}
+          src={fullMedia}
           className={`full-media ${transitionClassNames}`}
           width={width}
           height={height}
