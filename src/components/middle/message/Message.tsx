@@ -138,8 +138,9 @@ const Message: FC<IProps> = ({
   }, [isFocused, chatId, focusMessage, focusDirection]);
 
   const isOwn = isOwnMessage(message);
-  const isReply = isReplyMessage(message);
+  const hasReply = isReplyMessage(message);
   const isForwarded = isForwardedMessage(message);
+  const isAlbum = Boolean(album);
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage,
   } = getMessageContent(message);
@@ -159,16 +160,16 @@ const Message: FC<IProps> = ({
     Boolean(message.views) && 'has-views',
     message.isEdited && 'was-edited',
     hasMedia && 'has-media',
-    isReply && 'has-reply',
+    hasReply && 'has-reply',
     isContextMenuShown && 'has-menu-open',
     isFocused && 'focused',
     isSelectedToForward && 'is-forwarding',
     message.is_deleting && 'is-deleting',
-    !!album && 'is-album',
+    isAlbum && 'is-album',
   );
   const customShape = getMessageCustomShape(message);
   const contentClassName = buildContentClassName(message, {
-    isOwn, isLastInGroup, hasReply: isReply, customShape,
+    hasReply, customShape, isLastInGroup, isAlbum,
   });
 
   const handleSenderClick = useCallback(() => {
@@ -247,13 +248,13 @@ const Message: FC<IProps> = ({
     const className = buildClassName(
       'content-inner',
       isForwarded && !customShape && 'forwarded-message',
-      isReply && 'reply-message',
+      hasReply && 'reply-message',
     );
 
     return (
       <div className={className}>
         {renderSenderName(isForwarded ? originSender : sender)}
-        {isReply && (
+        {hasReply && (
           <EmbeddedMessage
             message={replyMessage}
             sender={replyMessageSender}
@@ -279,6 +280,7 @@ const Message: FC<IProps> = ({
             message={message}
             load={loadAndPlayMedia}
             uploadProgress={uploadProgress}
+            shouldAffectAppendix={isLastInGroup && !textParts && !isForwarded}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
           />
@@ -328,7 +330,7 @@ const Message: FC<IProps> = ({
   }
 
   let style = '';
-  if (!album && (photo || video)) {
+  if (!isAlbum && (photo || video)) {
     const { width } = photo
       ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
       : (video && calculateVideoDimensions(video, isOwn, isForwarded)) || {};

@@ -119,7 +119,7 @@
     &.last-in-group {
       --border-bottom-left-radius: var(--border-radius-messages-small);
 
-      .message-content.can-have-appendix {
+      .message-content.has-appendix {
         --border-bottom-left-radius: 0;
       }
     }
@@ -142,7 +142,7 @@
     &.last-in-group {
       --border-bottom-right-radius: var(--border-radius-messages-small);
 
-      .message-content.can-have-appendix {
+      .message-content.has-appendix {
         --border-bottom-right-radius: 0;
       }
     }
@@ -162,37 +162,6 @@
       --border-top-left-radius: 0;
       --border-top-right-radius: 0;
     }
-  }
-}
-
-// Bubble appendix styles
-.has-appendix-own {
-  &::before {
-    content: '';
-    display: block;
-    position: absolute;
-    bottom: -.1875rem;
-    right: -.5625rem;
-    width: .5625rem;
-    height: 1.25rem;
-    // background-image: url('../../../../assets/chat-bubble-green.svg');
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGRlZnM+PGZpbHRlciB4PSItNTAlIiB5PSItMTQuNyUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjE0MS4yJSIgZmlsdGVyVW5pdHM9Im9iamVjdEJvdW5kaW5nQm94IiBpZD0iYSI+PGZlT2Zmc2V0IGR5PSIxIiBpbj0iU291cmNlQWxwaGEiIHJlc3VsdD0ic2hhZG93T2Zmc2V0T3V0ZXIxIi8+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMSIgaW49InNoYWRvd09mZnNldE91dGVyMSIgcmVzdWx0PSJzaGFkb3dCbHVyT3V0ZXIxIi8+PGZlQ29sb3JNYXRyaXggdmFsdWVzPSIwIDAgMCAwIDAuMDYyMTk2MjQ4MiAwIDAgMCAwIDAuMTM4NTc0MTQ0IDAgMCAwIDAgMC4xODUwMzczNjQgMCAwIDAgMC4xNSAwIiBpbj0ic2hhZG93Qmx1ck91dGVyMSIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik02IDE3SDBWMGMuMTkzIDIuODQuODc2IDUuNzY3IDIuMDUgOC43ODIuOTA0IDIuMzI1IDIuNDQ2IDQuNDg1IDQuNjI1IDYuNDhBMSAxIDAgMDE2IDE3eiIgaWQ9ImIiLz48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48dXNlIGZpbGw9IiMwMDAiIGZpbHRlcj0idXJsKCNhKSIgeGxpbms6aHJlZj0iI2IiLz48dXNlIGZpbGw9IiNFRUZGREUiIHhsaW5rOmhyZWY9IiNiIi8+PC9nPjwvc3ZnPg==);
-    background-position: bottom right;
-  }
-}
-
-.has-appendix-not-own {
-  &::before {
-    content: '';
-    display: block;
-    position: absolute;
-    bottom: -.1875rem;
-    left: -.5625rem;
-    width: .5625rem;
-    height: 1.25rem;
-    // background-image: url('../../../../assets/chat-bubble-white.svg');
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGRlZnM+PGZpbHRlciB4PSItNTAlIiB5PSItMTQuNyUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjE0MS4yJSIgZmlsdGVyVW5pdHM9Im9iamVjdEJvdW5kaW5nQm94IiBpZD0iYSI+PGZlT2Zmc2V0IGR5PSIxIiBpbj0iU291cmNlQWxwaGEiIHJlc3VsdD0ic2hhZG93T2Zmc2V0T3V0ZXIxIi8+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMSIgaW49InNoYWRvd09mZnNldE91dGVyMSIgcmVzdWx0PSJzaGFkb3dCbHVyT3V0ZXIxIi8+PGZlQ29sb3JNYXRyaXggdmFsdWVzPSIwIDAgMCAwIDAuMDYyMTk2MjQ4MiAwIDAgMCAwIDAuMTM4NTc0MTQ0IDAgMCAwIDAgMC4xODUwMzczNjQgMCAwIDAgMC4xNSAwIiBpbj0ic2hhZG93Qmx1ck91dGVyMSIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0zIDE3aDZWMGMtLjE5MyAyLjg0LS44NzYgNS43NjctMi4wNSA4Ljc4Mi0uOTA0IDIuMzI1LTIuNDQ2IDQuNDg1LTQuNjI1IDYuNDhBMSAxIDAgMDAzIDE3eiIgaWQ9ImIiLz48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48dXNlIGZpbGw9IiMwMDAiIGZpbHRlcj0idXJsKCNhKSIgeGxpbms6aHJlZj0iI2IiLz48dXNlIGZpbGw9IiNGRkYiIHhsaW5rOmhyZWY9IiNiIi8+PC9nPjwvc3ZnPg==);
-    background-position: bottom left;
   }
 }
 
