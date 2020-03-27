@@ -501,19 +501,6 @@ export async function forwardMessages({
   await Promise.all(toChats.map(async (toChat) => {
     const randomIds = messages.map(generateRandomBigInt);
 
-    const result = await invokeRequest(new GramJs.messages.ForwardMessages({
-      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
-      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
-      randomId: randomIds,
-      id: messageIds,
-    }), true);
-
-    if (!result) {
-      return;
-    }
-
-    isAnySucceeded = true;
-
     messages.forEach((message, index) => {
       const localMessage = buildForwardedMessage(toChat.id, currentUserId, message);
       localDb.localMessages[randomIds[index].toString()] = localMessage;
@@ -525,6 +512,17 @@ export async function forwardMessages({
         message: localMessage,
       });
     });
+
+    await invokeRequest(new GramJs.messages.ForwardMessages({
+      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
+      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
+      randomId: randomIds,
+      id: messageIds,
+    }), true);
+
+    if (!isAnySucceeded) {
+      isAnySucceeded = true;
+    }
   }));
 
   return isAnySucceeded;
