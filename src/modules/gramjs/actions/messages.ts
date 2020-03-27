@@ -372,15 +372,17 @@ async function forwardMessages(
       inProgress: true,
     },
   });
-  await callApi('forwardMessages', {
+  const isAnySucceeded = await callApi('forwardMessages', {
     fromChat,
     toChats,
     messages,
     currentUserId,
   });
 
-  setGlobal({
-    ...getGlobal(),
-    forwardMessages: {},
-  });
+  if (isAnySucceeded) {
+    setGlobal({
+      ...getGlobal(),
+      forwardMessages: {},
+    });
+  }
 }

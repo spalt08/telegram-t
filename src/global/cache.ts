@@ -82,6 +82,7 @@ function updateCache(global: GlobalState) {
     mediaViewer: {},
     webPagePreview: undefined,
     forwardMessages: {},
+    errors: [],
   };
 
   const json = JSON.stringify(reducedGlobal);

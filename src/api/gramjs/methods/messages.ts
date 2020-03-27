@@ -260,7 +260,7 @@ export async function deleteMessages({
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
-  await invokeRequest(
+  const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.DeleteMessages({
         channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
@@ -271,6 +271,10 @@ export async function deleteMessages({
         ...(shouldDeleteForAll && { revoke: true }),
       }),
   );
+
+  if (!result) {
+    return;
+  }
 
   onUpdate({
     '@type': 'deleteMessages',
@@ -492,9 +496,24 @@ export async function forwardMessages({
   currentUserId: number;
 }) {
   const messageIds = messages.map(({ id }) => id);
+  let isAnySucceeded: boolean = false;
 
-  await Promise.all(toChats.map((toChat) => {
+  await Promise.all(toChats.map(async (toChat) => {
     const randomIds = messages.map(generateRandomBigInt);
+
+    const result = await invokeRequest(new GramJs.messages.ForwardMessages({
+      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
+      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
+      randomId: randomIds,
+      id: messageIds,
+    }), true);
+
+    if (!result) {
+      return;
+    }
+
+    isAnySucceeded = true;
+
     messages.forEach((message, index) => {
       const localMessage = buildForwardedMessage(toChat.id, currentUserId, message);
       localDb.localMessages[randomIds[index].toString()] = localMessage;
@@ -506,14 +525,9 @@ export async function forwardMessages({
         message: localMessage,
       });
     });
-
-    return invokeRequest(new GramJs.messages.ForwardMessages({
-      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
-      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
-      randomId: randomIds,
-      id: messageIds,
-    }), true);
   }));
+
+  return isAnySucceeded;
 }
 
 function updateLocalDb(

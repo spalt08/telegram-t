@@ -53,6 +53,8 @@ const INITIAL_STATE: GlobalState = {
   mediaViewer: {},
 
   forwardMessages: {},
+
+  errors: [],
 };
 
 initCache();

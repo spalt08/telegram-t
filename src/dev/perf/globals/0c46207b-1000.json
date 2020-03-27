@@ -28,6 +28,7 @@
   "topPeers": {},
   "mediaViewer": {},
   "forwardMessages": {},
+  "errors": [],
   "users": {
     "byId": {
       "454000": {

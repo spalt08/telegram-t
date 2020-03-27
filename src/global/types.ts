@@ -9,6 +9,7 @@ import {
   ApiMessageSearchType,
   ApiWebPage,
   ApiVideo,
+  ApiError,
 } from '../api/types';
 import { FocusDirection } from '../types';
 
@@ -145,11 +146,14 @@ export type GlobalState = {
     toChatIds?: number[];
     inProgress?: boolean;
   };
+
+  errors: ApiError[];
 };
 
 export type ActionTypes = (
   // system and UI
   'init' | 'toggleChatInfo' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
+  'showError' | 'dismissError' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
