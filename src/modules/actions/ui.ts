@@ -1,4 +1,5 @@
 import { addReducer } from '../../lib/teact/teactn';
+import getReadableErrorText from '../../util/getReadableErrorText';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
 
@@ -69,5 +70,36 @@ addReducer('addRecentSticker', (global, action, payload) => {
         stickers: newStickers,
       },
     },
+  };
+});
+
+addReducer('showError', (global, actions, payload) => {
+  const { error } = payload!;
+
+  // Filter out errors that we don't want to show to the user
+  if (!getReadableErrorText(error)) {
+    return global;
+  }
+
+  const newErrors = [...global.errors];
+  const existingErrorIndex = newErrors.findIndex((err) => err.message === error.message);
+  if (existingErrorIndex !== -1) {
+    newErrors.splice(existingErrorIndex, 1);
+  }
+
+  newErrors.push(error);
+  return {
+    ...global,
+    errors: newErrors,
+  };
+});
+
+addReducer('dismissError', (global) => {
+  const newErrors = [...global.errors];
+
+  newErrors.pop();
+  return {
+    ...global,
+    errors: newErrors,
   };
 });

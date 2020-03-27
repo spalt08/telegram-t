@@ -25,6 +25,10 @@ export function onUpdate(update: ApiUpdate) {
     case 'updateCurrentUserId':
       onUpdateCurrentUserId(update);
       break;
+
+    case 'error':
+      getDispatch().showError({ error: update.error });
+      break;
   }
 }
 

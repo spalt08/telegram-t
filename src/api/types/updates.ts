@@ -145,6 +145,15 @@ export type ApiUpdateMessageImage = {
   data_uri: string;
 };
 
+export type ApiError = {
+  message: string;
+};
+
+export type ApiUpdateError = {
+  '@type': 'error';
+  error: ApiError;
+};
+
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
@@ -152,7 +161,8 @@ export type ApiUpdate = (
   ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserFullInfo |
-  ApiUpdateAvatar | ApiUpdateMessageImage
+  ApiUpdateAvatar | ApiUpdateMessageImage |
+  ApiUpdateError
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

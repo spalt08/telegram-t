@@ -2,7 +2,7 @@
   position: relative;
   z-index: var(--z-modal);
 
-  &.delete {
+  &.delete, &.error {
     .modal-dialog {
       max-width: 23rem;
     }

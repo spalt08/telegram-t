@@ -6,6 +6,7 @@ import LeftColumn from './left/LeftColumn';
 import MiddleColumn from './middle/MiddleColumn';
 import RightColumn from './right/RightColumn';
 import RightOverlay from './right/RightOverlay';
+import ErrorModalContainer from './ui/ErrorModalContainer';
 
 import './Main.scss';
 
@@ -14,6 +15,7 @@ const Main: FC = () => {
     <UiLoader page="main" key="main">
       <MediaViewer />
       <RightOverlay />
+      <ErrorModalContainer />
       <div id="Main">
         <LeftColumn />
         <MiddleColumn />

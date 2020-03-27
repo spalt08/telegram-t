@@ -10,7 +10,7 @@ import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
   onAuthError, onAuthReady, onCurrentUserId,
 } from './auth';
-import { setUpdaterCurrentUserId, updater } from '../updater';
+import { setUpdaterCurrentUserId, updater, handleError } from '../updater';
 import downloadMediaWithClient from './media';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
@@ -113,8 +113,14 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
     return result;
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(`[GramJs/client] INVOKE ERROR ${request.className}`);
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+
+    handleError(err);
     return undefined;
   }
 }

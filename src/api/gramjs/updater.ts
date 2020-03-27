@@ -330,3 +330,12 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     });
   }
 }
+
+export function handleError(err: Error) {
+  const { message } = err;
+
+  onUpdate({
+    '@type': 'error',
+    error: { message },
+  });
+}
