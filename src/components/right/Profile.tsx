@@ -9,6 +9,8 @@ import { GlobalActions } from '../../global/types';
 import { SHARED_MEDIA_SLICE } from '../../config';
 import { getMessageContentIds, isChatPrivate } from '../../modules/helpers';
 import { selectChatMessages } from '../../modules/selectors';
+import { throttle } from '../../util/schedulers';
+import fastSmoothScroll from '../../util/fastSmoothScroll';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -27,6 +29,8 @@ import './Profile.scss';
 type IProps = {
   chatId: number;
   userId?: number;
+  isSharedMedia: boolean;
+  onSharedMediaToggle: (isSharedMedia: boolean) => void;
   resolvedUserId?: number;
   chatMessages: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
@@ -46,8 +50,15 @@ const MEDIA_TYPES = [
   'audio',
 ] as const;
 
+const runThrottledForScroll = throttle((cb) => cb(), 250, false);
+const PROGRAMMATIC_SCROLL_TIMEOUT_MS = 1000;
+
+let isScrollingProgrammatically = false;
+
 const Profile: FC<IProps> = ({
   chatId,
+  isSharedMedia,
+  onSharedMediaToggle,
   resolvedUserId,
   chatMessages,
   isSearchTypeEmpty,
@@ -88,6 +99,39 @@ const Profile: FC<IProps> = ({
       window.removeEventListener('resize', setMinHeight, false);
     };
   }, []);
+
+  const determineSharedMedia = useCallback(() => {
+    const container = containerRef.current!;
+    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo')!;
+    const chatExtraEl = container.querySelector<HTMLDivElement>('.ChatExtra');
+
+    onSharedMediaToggle(container.scrollTop >= (
+      chatInfoEl.offsetHeight + 16 + (chatExtraEl ? chatExtraEl.offsetHeight : 0)
+    ));
+  }, [onSharedMediaToggle]);
+
+  useEffect(() => {
+    const container = containerRef.current!;
+    const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
+    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo')!;
+
+    if (!isSharedMedia && tabsEl.offsetTop - container.scrollTop === 0) {
+      isScrollingProgrammatically = true;
+      fastSmoothScroll(containerRef.current!, chatInfoEl, 'start', container.offsetHeight * 2);
+      setTimeout(() => {
+        isScrollingProgrammatically = false;
+        determineSharedMedia();
+      }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
+    }
+  }, [determineSharedMedia, isSharedMedia]);
+
+  const handleScroll = useCallback(() => {
+    if (isScrollingProgrammatically) {
+      return;
+    }
+
+    runThrottledForScroll(determineSharedMedia);
+  }, [determineSharedMedia]);
 
   // Workaround for scrollable content flickering during animation.
   const handleTransitionStart = useCallback(() => {
@@ -152,6 +196,7 @@ const Profile: FC<IProps> = ({
       items={messageIds}
       preloadBackwards={SHARED_MEDIA_SLICE}
       onLoadMore={searchMessages}
+      onScroll={handleScroll}
     >
       {resolvedUserId ? [
         <PrivateChatInfo userId={resolvedUserId} avatarSize="jumbo" showFullInfo />,

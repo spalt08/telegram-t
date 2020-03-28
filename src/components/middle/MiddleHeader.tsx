@@ -20,7 +20,8 @@ import HeaderPinnedMessage from './HeaderPinnedMessage';
 
 import './MiddleHeader.scss';
 
-const SEARCH_FOCUS_DELAY_MS = 50;
+// Chrome breaks layout when focusing input during transition
+const SEARCH_FOCUS_DELAY_MS = 200;
 
 type IProps = {
   chatId: number;

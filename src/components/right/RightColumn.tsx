@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect,
+  FC, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -11,6 +11,7 @@ import {
   selectIsForwardMenuOpen,
   selectIsMediaViewerOpen,
 } from '../../modules/selectors';
+import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 
 import ForwardPicker from '../common/ForwardPicker';
 import RightHeader from './RightHeader';
@@ -44,13 +45,26 @@ const RightColumn: FC<IProps> = ({
   closeMessageTextSearch,
   closeForwardMenu,
 }) => {
+  const [isSharedMedia, setIsSharedMedia] = useState(false);
+
   const isOpen = contentKey !== undefined;
+  const isSearch = contentKey === ColumnContent.Search;
+  const isForwarding = contentKey === ColumnContent.Forward;
+
   const close = useCallback(() => {
     switch (contentKey) {
       case ColumnContent.ChatInfo:
+        if (isSharedMedia) {
+          setIsSharedMedia(false);
+          break;
+        }
         toggleChatInfo();
         break;
       case ColumnContent.UserInfo:
+        if (isSharedMedia) {
+          setIsSharedMedia(false);
+          break;
+        }
         openUserInfo({ id: undefined });
         break;
       case ColumnContent.Search:
@@ -60,9 +74,24 @@ const RightColumn: FC<IProps> = ({
         closeForwardMenu();
         break;
     }
-  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo]);
+  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isSharedMedia]);
+
+  const handleSharedMediaToggle = useCallback((show: boolean) => {
+    setIsSharedMedia(show);
+  }, []);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+
+  // We need to clear `isSharedMedia` state, when changing between `ChatInfo` and `UserInfo` to prevent confusion
+  useLayoutEffectWithPrevDeps(([prevContentKey, prevSelectedChatId]) => {
+    if (
+      (prevContentKey === ColumnContent.ChatInfo && contentKey === ColumnContent.UserInfo)
+      || (prevContentKey === ColumnContent.UserInfo && contentKey === ColumnContent.ChatInfo)
+      || (prevSelectedChatId !== selectedChatId)
+    ) {
+      setIsSharedMedia(false);
+    }
+  }, [contentKey, selectedChatId]);
 
   if (!isOpen) {
     return null;
@@ -75,16 +104,26 @@ const RightColumn: FC<IProps> = ({
       case ColumnContent.Forward:
         return <ForwardPicker />;
       default:
-        return <Profile key={selectedUserId || selectedChatId} chatId={selectedChatId} userId={selectedUserId} />;
+        return (
+          <Profile
+            key={selectedUserId || selectedChatId}
+            chatId={selectedChatId}
+            userId={selectedUserId}
+            isSharedMedia={isSharedMedia}
+            onSharedMediaToggle={handleSharedMediaToggle}
+          />
+        );
     }
   }
 
-  const isSearch = contentKey === ColumnContent.Search;
-  const isForwarding = contentKey === ColumnContent.Forward;
-
   return (
     <div id="RightColumn">
-      <RightHeader onClose={close} isSearch={isSearch} isForwarding={isForwarding} />
+      <RightHeader
+        onClose={close}
+        isSearch={isSearch}
+        isForwarding={isForwarding}
+        isSharedMedia={isSharedMedia}
+      />
       <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
         {renderContent}
       </Transition>

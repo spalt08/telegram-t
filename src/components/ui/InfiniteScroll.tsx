@@ -11,6 +11,7 @@ interface IProps {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
   onLoadMore: AnyToVoidFunction;
+  onScroll?: (e: UIEvent<HTMLDivElement>) => void;
   items: any[];
   sensitiveArea?: number;
   preloadBackwards?: number;
@@ -24,6 +25,7 @@ const InfiniteScroll: FC<IProps> = ({
   ref,
   className,
   onLoadMore,
+  onScroll,
   items,
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
@@ -46,6 +48,9 @@ const InfiniteScroll: FC<IProps> = ({
   }, [items, onLoadMoreDebounced, preloadBackwards]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+    if (onScroll) {
+      onScroll(e);
+    }
     const container = e.target as HTMLElement;
     const anchor = container.firstElementChild;
     if (!anchor) {
@@ -62,7 +67,7 @@ const InfiniteScroll: FC<IProps> = ({
     }
 
     anchorTopRef.current = newAnchorTop;
-  }, [onLoadMoreDebounced, sensitiveArea]);
+  }, [onLoadMoreDebounced, onScroll, sensitiveArea]);
 
   return (
     <div ref={containerRef} className={className} onScroll={handleScroll}>
