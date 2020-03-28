@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -9,6 +9,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
+import ScrollDownButton from './ScrollDownButton';
 import Composer from './composer/Composer';
 
 import './MiddleColumn.scss';
@@ -18,7 +19,13 @@ type IProps = {
   isChannel?: boolean;
 } & Pick<GlobalActions, 'openChat'>;
 
-const MiddleColumn: FC<IProps> = ({ openChatId, isChannel, openChat }) => {
+const MiddleColumn: FC<IProps> = ({
+  openChatId,
+  isChannel,
+  openChat,
+}) => {
+  const [showFab, setShowFab] = useState(false);
+
   useEffect(() => {
     return openChatId
       ? captureEscKeyListener(() => {
@@ -32,8 +39,9 @@ const MiddleColumn: FC<IProps> = ({ openChatId, isChannel, openChat }) => {
       {openChatId && (
         <div className="messages-layout">
           <MiddleHeader chatId={openChatId} />
-          <MessageList key={openChatId} />
+          <MessageList key={openChatId} onFabToggle={setShowFab} />
           {!isChannel && <Composer />}
+          <ScrollDownButton show={showFab} />
         </div>
       )}
     </div>

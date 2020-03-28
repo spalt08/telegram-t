@@ -79,6 +79,16 @@
     }
   }
 
+  &.gray {
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    --ripple-color: rgba(0, 0, 0, .08);
+
+    @include active-styles() {
+      color: var(--color-primary);
+    }
+  }
+
   &.danger {
     background: var(--color-background);
     color: var(--color-error);
