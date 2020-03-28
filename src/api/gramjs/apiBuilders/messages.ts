@@ -74,17 +74,17 @@ type UniversalMessage = (
 export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalMessage): ApiMessage {
   let content: ApiMessage['content'] = {};
 
-  if (mtpMessage.message) {
-    content = {
-      ...content,
-      ...buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
-    };
-  }
-
   if (mtpMessage.media) {
     content = {
       ...content,
       ...buildMessageMediaContent(mtpMessage.media),
+    };
+  }
+
+  if (mtpMessage.message && !content.sticker && !content.poll && !content.contact) {
+    content = {
+      ...content,
+      ...buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
     };
   }
 
