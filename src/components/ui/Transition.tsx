@@ -9,7 +9,7 @@ import './Transition.scss';
 type ChildrenFn = () => any;
 type IProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide';
+  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
@@ -24,6 +24,7 @@ const ANIMATION_DURATION = {
   'slide-fade': 400,
   'zoom-fade': 150,
   'scroll-slide': 500,
+  fade: 150,
 };
 const END_DELAY = 50;
 
