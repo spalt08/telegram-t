@@ -21,7 +21,7 @@ interface IProps {
   onFocus?: Function;
   children: any;
   size?: 'default' | 'smaller';
-  color?: 'primary' | 'secondary' | 'danger' | 'translucent' | 'translucent-white';
+  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white';
   className?: string;
   round?: boolean;
   isText?: boolean;

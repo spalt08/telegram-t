@@ -1,0 +1,78 @@
+import { MouseEvent } from 'react';
+import React, { FC, useCallback } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+
+import { GlobalActions } from '../../global/types';
+
+import { selectChat } from '../../modules/selectors';
+import { isChatChannel } from '../../modules/helpers';
+import { formatIntegerCompact } from '../../util/textFormat';
+import buildClassName from '../../util/buildClassName';
+
+import Button from '../ui/Button';
+
+import './ScrollDownButton.scss';
+
+type IProps = {
+  show: boolean;
+  isChannel?: boolean;
+  unreadCount?: number;
+} & Pick <GlobalActions, 'focusTopMessage'>;
+
+const ScrollDownButton: FC<IProps> = ({
+  show,
+  isChannel,
+  unreadCount,
+  focusTopMessage,
+}) => {
+  const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    if (!show) {
+      return;
+    }
+
+    focusTopMessage();
+    e.currentTarget.blur();
+  }, [show, focusTopMessage]);
+
+  const fabClassName = buildClassName(
+    'ScrollDownButton',
+    show && 'revealed',
+    isChannel && 'is-channel',
+  );
+
+  return (
+    <div className={fabClassName}>
+      <Button
+        color="gray"
+        round
+        onClick={handleClick}
+      >
+        <i className="icon-down" />
+      </Button>
+      {Boolean(unreadCount) && (
+        <div className="unread-count">{formatIntegerCompact(unreadCount!)}</div>
+      )}
+    </div>
+  );
+};
+
+export default withGlobal(
+  (global) => {
+    const { selectedId: openChatId } = global.chats;
+    if (!openChatId) {
+      return {};
+    }
+
+    const chat = selectChat(global, openChatId);
+    const isChannel = chat && isChatChannel(chat);
+
+    return {
+      isChannel,
+      unreadCount: chat ? chat.unread_count : undefined,
+    };
+  },
+  (setGlobal, actions) => {
+    const { focusTopMessage } = actions;
+    return { focusTopMessage };
+  },
+)(ScrollDownButton);

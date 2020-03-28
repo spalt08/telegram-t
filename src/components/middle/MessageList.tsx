@@ -39,6 +39,7 @@ import ActionMessage from './ActionMessage';
 import './MessageList.scss';
 
 type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
+  onFabToggle: (show: boolean) => void;
   chatId?: number;
   isChannelChat?: boolean;
   messageIds?: number[];
@@ -66,6 +67,7 @@ let memoFirstUnreadId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
 const MessageList: FC<IProps> = ({
+  onFabToggle,
   chatId,
   isChannelChat,
   messageIds,
@@ -113,31 +115,46 @@ const MessageList: FC<IProps> = ({
     [loadViewportMessages, messageIds],
   );
 
+  const updateFabVisibility = useCallback(() => {
+    if (!messageIds) {
+      onFabToggle(false);
+      return;
+    }
+
+    if (!isViewportNewest) {
+      onFabToggle(true);
+      return;
+    }
+
+    const scrollBottom = scrollOffsetRef.current! - containerRef.current!.offsetHeight;
+    const isNearBottom = scrollBottom <= SCROLL_TO_LAST_THRESHOLD_PX;
+    const isAtBottom = scrollBottom === 0;
+
+    onFabToggle(firstUnreadId ? !isAtBottom : !isNearBottom);
+  }, [messageIds, isViewportNewest, firstUnreadId, onFabToggle]);
+
   const updateViewportMessages = useCallback(() => {
-    requestAnimationFrame(() => {
-      const container = containerRef.current!;
+    const container = containerRef.current!;
 
+    const {
+      allElements: mediaMessageEls, visibleIndexes: visibleMediaIndexes,
+    } = findInViewport(container, '.Message.has-media', VIEWPORT_MEDIA_MARGIN);
+    const newViewportMessageIds = visibleMediaIndexes.map((i) => Number(mediaMessageEls[i].dataset.messageId));
+    if (!areSortedArraysEqual(newViewportMessageIds, viewportMessageIds)) {
+      setViewportMessageIds(newViewportMessageIds);
+    }
+
+    if (firstUnreadId) {
       const {
-        allElements: mediaMessageEls, visibleIndexes: visibleMediaIndexes,
-      } = findInViewport(container, '.Message.has-media', VIEWPORT_MEDIA_MARGIN);
-      const newViewportMessageIds = visibleMediaIndexes.map((i) => Number(mediaMessageEls[i].dataset.messageId));
-      if (!areSortedArraysEqual(newViewportMessageIds, viewportMessageIds)) {
-        setViewportMessageIds(newViewportMessageIds);
-      }
+        allElements, visibleIndexes,
+      } = findInViewport(container, listItemElements, undefined, undefined, true);
+      const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
 
-      if (firstUnreadId) {
-        const {
-          allElements, visibleIndexes,
-        } = findInViewport(container, listItemElements, undefined, undefined, true);
-        const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
-        if (lowerElement) {
-          const maxId = Number(lowerElement.dataset.messageId);
-          if (maxId >= firstUnreadId) {
-            markMessagesRead({ maxId });
-          }
-        }
+      const maxId = lowerElement ? Number(lowerElement.dataset.messageId) : undefined;
+      if (maxId && maxId >= firstUnreadId) {
+        markMessagesRead({ maxId });
       }
-    });
+    }
   }, [firstUnreadId, markMessagesRead, viewportMessageIds]);
 
   const processInfiniteScroll = useCallback(() => {
@@ -215,13 +232,19 @@ const MessageList: FC<IProps> = ({
     scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
 
     runThrottledForScroll(() => {
+      if (!containerRef.current!.parentElement) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        updateFabVisibility();
+        updateViewportMessages();
+        determineStickyDate(containerRef.current!);
+      });
+
       setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
-
-      updateViewportMessages();
-
-      determineStickyDate(containerRef.current!);
     });
-  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages]);
+  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages, updateFabVisibility]);
 
   // Initial message loading
   useEffect(() => {
@@ -239,7 +262,7 @@ const MessageList: FC<IProps> = ({
   ]: [
     typeof chatId, typeof messageIds, typeof isViewportNewest
   ]) => {
-    if (chatId === prevChatId && messageIds === prevMessageIds) {
+    if (!chatId || !messageIds || (chatId === prevChatId && messageIds === prevMessageIds)) {
       return;
     }
 
@@ -262,28 +285,43 @@ const MessageList: FC<IProps> = ({
       !anchor && memoFirstUnreadId && container.querySelector<HTMLDivElement>('.unread-divider')
     );
 
+    let newScrollTop;
+
     if (isAtBottom && isNewMessage && isViewportNewest && prevIsViewportNewest) {
+      newScrollTop = scrollHeight - offsetHeight;
       scrollToLastMessage(container);
     } else if (anchor) {
       const newAnchorTop = anchor.getBoundingClientRect().top;
-      const newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
-      scrollOffsetRef.current = scrollHeight - newScrollTop;
+      newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
       container.scrollTop = newScrollTop;
     } else if (unreadDivider) {
-      container.scrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
+      newScrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
+      container.scrollTop = newScrollTop;
     } else {
-      container.scrollTop = scrollHeight - scrollOffset;
+      newScrollTop = scrollHeight - scrollOffset;
+      container.scrollTop = newScrollTop;
+    }
+
+    if (newScrollTop) {
+      scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
     }
 
     listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
 
-    updateViewportMessages();
+    updateFabVisibility();
+    requestAnimationFrame(updateViewportMessages);
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, isViewportNewest, isFocusing, updateViewportMessages]);
+  }, [chatId, messageIds, isViewportNewest, updateViewportMessages, onFabToggle]);
+
+  useEffect(() => {
+    if (!firstUnreadId) {
+      updateFabVisibility();
+    }
+  }, [firstUnreadId, updateFabVisibility]);
 
   const isPrivate = Boolean(chatId && isChatPrivate(chatId));
 
