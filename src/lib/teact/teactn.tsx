@@ -19,7 +19,7 @@ type Reducer = (
   payload?: ActionPayload,
 ) => GlobalState | void;
 
-type MapStateToProps = ((global: GlobalState, ownProps?: any) => AnyLiteral | null);
+type MapStateToProps<OwnProps> = ((global: GlobalState, ownProps?: OwnProps) => AnyLiteral | null);
 type MapActionsToProps = ((setGlobal: Function, actions: GlobalActions) => Partial<GlobalActions> | null);
 
 let global = {} as GlobalState;
@@ -31,7 +31,7 @@ const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
 const actions = {} as GlobalActions;
 const containers: Record<string, {
-  mapStateToProps: MapStateToProps;
+  mapStateToProps: MapStateToProps<any>;
   mapReducersToProps: MapActionsToProps;
   ownProps: Props;
   mappedProps: Props;
@@ -116,12 +116,12 @@ export function removeCallback(cb: Function) {
   }
 }
 
-export function withGlobal(
-  mapStateToProps: MapStateToProps = () => ({}),
+export function withGlobal<OwnProps = Props>(
+  mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
   mapReducersToProps: MapActionsToProps = () => ({}),
 ) {
   return (Component: FC) => {
-    return function Container(props: Props) {
+    return function Container(props: OwnProps) {
       const [id] = useState(generateIdFor(containers));
       const forceUpdate = useForceUpdate();
       useEffect(() => {
