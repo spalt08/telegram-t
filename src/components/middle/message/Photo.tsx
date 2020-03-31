@@ -73,7 +73,7 @@ const Photo: FC<IProps> = ({
     if (fullMedia) {
       getCustomAppendixBg(fullMedia, isOwn).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
-        contentEl.style.setProperty('--appendix-thumb-opacity', '0');
+        contentEl.classList.add('has-custom-appendix');
       });
     } else {
       contentEl.classList.add('has-appendix-thumb');
