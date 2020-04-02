@@ -11,10 +11,8 @@ import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';
 
-type IProps = (
-  Pick<GlobalState, 'authIsLoading' | 'authError'>
-  & Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>
-);
+type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
+type DispatchProps = Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>;
 
 const MIN_PASSWORD_LENGTH = 3;
 const PEEK_MONKEY_SHOW_DELAY = 700;
@@ -22,7 +20,7 @@ const SEGMENT_COVER_EYES = [0, 50];
 const SEGMENT_UNCOVER_EYE = [0, 20];
 const SEGMENT_COVER_EYE = [20, 0];
 
-const AuthPassword: FC<IProps> = ({
+const AuthPassword: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, setAuthPassword, clearAuthError,
 }) => {
   const [password, setPassword] = useState('');

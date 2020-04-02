@@ -20,13 +20,20 @@ import StickerButton from './StickerButton';
 
 import './StickerPicker.scss';
 
-type IProps = {
+type OwnProps = {
   className: string;
   load: boolean;
+  onStickerSelect: (sticker: ApiSticker) => void;
+};
+
+type StateProps = {
   recentStickers: ApiSticker[];
   stickerSets: Record<string, ApiStickerSet>;
-  onStickerSelect: (sticker: ApiSticker) => void;
-} & Pick<GlobalActions, 'loadStickerSets' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickers'>;
+};
+
+type DispatchProps = Pick<GlobalActions, (
+  'loadStickerSets' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickers'
+)>;
 
 type PartialStickerSet = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
 
@@ -37,7 +44,7 @@ const FOOTER_BUTTON_WIDTH = 60; // px. Includes margins
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
-const StickerPicker: FC<IProps> = ({
+const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
   recentStickers,

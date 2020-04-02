@@ -5,14 +5,15 @@ import { ApiChat } from '../../api/types';
 import { selectChat } from '../../modules/selectors';
 import { getChatDescription, getChatLink } from '../../modules/helpers';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
+};
+
+type StateProps = {
   chat: ApiChat;
 };
 
-const ChatExtra: FC<IProps> = ({
-  chat,
-}) => {
+const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
   const description = getChatDescription(chat);
   const link = getChatLink(chat);
   const url = link.indexOf('http') === 0 ? link : `http://${link}`;
@@ -41,8 +42,8 @@ const ChatExtra: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, { chatId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { chatId }) => {
     const chat = selectChat(global, chatId);
 
     return { chat };

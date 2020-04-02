@@ -40,7 +40,7 @@ import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewer.scss';
 
-type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'> & {
+type StateProps = {
   chatId?: number;
   messageId?: number;
   isReversed?: boolean;
@@ -49,7 +49,9 @@ type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'> & {
   chatMessages?: Record<number, ApiMessage>;
 };
 
-const MediaViewer: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'>;
+
+const MediaViewer: FC<StateProps & DispatchProps> = ({
   chatId,
   messageId,
   isReversed,

@@ -5,11 +5,11 @@ import { formatIntegerCompact } from '../../util/textFormat';
 
 import './Badge.scss';
 
-type IProps = {
+type OwnProps = {
   chat: ApiChat;
 };
 
-const Badge: FC<IProps> = ({ chat }) => {
+const Badge: FC<OwnProps> = ({ chat }) => {
   const classNames = ['Badge'];
 
   if (chat.unread_count) {

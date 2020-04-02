@@ -5,7 +5,7 @@ import { GlobalActions } from '../../../global/types';
 
 import StickerButton from './StickerButton';
 
-type IProps = {
+type OwnProps = {
   set: ApiStickerSet;
   load: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
@@ -14,7 +14,7 @@ type IProps = {
 const STICKER_ROW_SIZE = 5;
 const STICKER_SIZE = 80; // px
 
-const StickerSet: FC<IProps> = ({
+const StickerSet: FC<OwnProps> = ({
   set, load, loadStickers, onStickerSelect,
 }) => {
   const areLoaded = Boolean(set.stickers.length);

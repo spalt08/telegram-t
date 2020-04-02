@@ -18,10 +18,14 @@ import monkeyPath from '../../assets/monkey.svg';
 
 import './UiLoader.scss';
 
-type IProps = {
+type OwnProps = {
   page: 'main' | 'authPhoneNumber';
   children: any;
-} & Pick<GlobalState, 'isUiReady'> & Pick<GlobalActions, 'setIsUiReady'>;
+};
+
+type StateProps = Pick<GlobalState, 'isUiReady'>;
+
+type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 
 const MAX_PRELOAD_DELAY = 1000;
 
@@ -45,7 +49,7 @@ const preloadTasks = {
   authPassword: () => preloadImage(monkeyPath),
 };
 
-const UiLoader: FC<IProps> = ({
+const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   page, children, isUiReady, setIsUiReady,
 }) => {
   const { shouldRender, transitionClassNames } = useShowTransition(!isUiReady, undefined, true);

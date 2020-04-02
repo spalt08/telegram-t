@@ -12,7 +12,7 @@ import InputText from '../../ui/InputText';
 
 import './PollModal.scss';
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   onSend: (pollSummary: ApiNewPoll) => void;
   onClear: () => void;
@@ -20,7 +20,7 @@ type IProps = {
 
 const MAX_LIST_HEIGHT = 320;
 
-const PollModal: FC<IProps> = ({ isOpen, onSend, onClear }) => {
+const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   const questionInputRef = useRef<HTMLInputElement>();
   const optionsListRef = useRef<HTMLDivElement>();
   const [question, setQuestion] = useState<string>('');

@@ -13,12 +13,12 @@ import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 
 import './Media.scss';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   onClick: (id: number) => void;
 };
 
-const Media: FC<IProps> = ({ message, onClick }) => {
+const Media: FC<OwnProps> = ({ message, onClick }) => {
   const handleClick = () => {
     onClick(message.id);
   };

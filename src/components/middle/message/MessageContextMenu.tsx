@@ -14,7 +14,7 @@ type IAnchorPosition = {
   y: number;
 };
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   message: ApiMessage;
@@ -33,7 +33,7 @@ type IProps = {
 
 const SCROLLBAR_WIDTH = 10;
 
-const MessageContextMenu: FC<IProps> = ({
+const MessageContextMenu: FC<OwnProps> = ({
   isOpen,
   message,
   anchor,

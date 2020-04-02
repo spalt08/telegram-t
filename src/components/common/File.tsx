@@ -9,7 +9,7 @@ import ProgressSpinner from '../ui/ProgressSpinner';
 import './File.scss';
 import { formatMediaDateTime } from '../../util/dateFormat';
 
-type IProps = {
+type OwnProps = {
   name: string;
   extension?: string;
   size: number;
@@ -22,7 +22,7 @@ type IProps = {
   onClick?: () => void;
 };
 
-const File: FC<IProps> = ({
+const File: FC<OwnProps> = ({
   name,
   size,
   extension = '',

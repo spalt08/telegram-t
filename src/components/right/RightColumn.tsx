@@ -28,15 +28,19 @@ enum ColumnContent {
   Forward,
 }
 
-type IProps = {
+type StateProps = {
   contentKey?: ColumnContent;
   selectedChatId?: number;
   selectedUserId?: number;
-} & Pick<GlobalActions, 'toggleChatInfo' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'>;
+};
+
+type DispatchProps = Pick<GlobalActions, (
+  'toggleChatInfo' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
+)>;
 
 const TRANSITION_RENDER_COUNT = 4;
 
-const RightColumn: FC<IProps> = ({
+const RightColumn: FC<StateProps & DispatchProps> = ({
   contentKey,
   selectedChatId,
   selectedUserId,
@@ -100,14 +104,14 @@ const RightColumn: FC<IProps> = ({
   function renderContent() {
     switch (contentKey) {
       case ColumnContent.Search:
-        return <RightSearch chatId={selectedChatId} />;
+        return <RightSearch chatId={selectedChatId!} />;
       case ColumnContent.Forward:
         return <ForwardPicker />;
       default:
         return (
           <Profile
-            key={selectedUserId || selectedChatId}
-            chatId={selectedChatId}
+            key={selectedUserId || selectedChatId!}
+            chatId={selectedChatId!}
             userId={selectedUserId}
             isSharedMedia={isSharedMedia}
             onSharedMediaToggle={handleSharedMediaToggle}
@@ -141,12 +145,12 @@ export default withGlobal(
 
     const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
     const currentSearch = selectCurrentMessageSearch(global);
-    const isSearch = currentSearch && currentSearch.currentType === 'text';
+    const isSearch = Boolean(currentSearch && currentSearch.currentType === 'text');
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
     const areChatsLoaded = Boolean(chats.listIds);
-    const isUserInfo = selectedUserId && areChatsLoaded;
-    const isChatInfo = selectedChatId && showChatInfo && areChatsLoaded;
+    const isUserInfo = Boolean(selectedUserId && areChatsLoaded);
+    const isChatInfo = Boolean(selectedChatId && showChatInfo && areChatsLoaded);
 
     const contentKey = isForwarding ? (
       ColumnContent.Forward

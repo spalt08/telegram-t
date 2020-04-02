@@ -14,17 +14,22 @@ import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import RippleEffect from '../ui/RippleEffect';
 
-type IProps = {
+type OwnProps = {
+  onSearchClose: () => void;
+};
+
+type StateProps = {
+  currentUserId?: number;
   topUsers?: ApiUser[];
   recentlyFoundChatIds?: number[];
-  currentUserId?: number;
-  onSearchClose: () => void;
-} & Pick<GlobalActions, 'loadTopUsers' | 'loadContactList' | 'openChat' | 'addRecentlyFoundChatId'>;
+};
+
+type DispatchProps = Pick<GlobalActions, 'loadTopUsers' | 'loadContactList' | 'openChat' | 'addRecentlyFoundChatId'>;
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const LeftRecent: FC<IProps> = ({
+const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   topUsers, recentlyFoundChatIds, currentUserId,
   onSearchClose, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
 }) => {

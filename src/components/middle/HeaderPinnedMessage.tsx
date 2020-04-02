@@ -10,13 +10,13 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
 import RippleEffect from '../ui/RippleEffect';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   onUnpinMessage?: () => void;
   onClick?: () => void;
 };
 
-const HeaderPinnedMessage: FC<IProps> = ({
+const HeaderPinnedMessage: FC<OwnProps> = ({
   message, onUnpinMessage, onClick,
 }) => {
   const text = getMessageSummaryText(message, true);

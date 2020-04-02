@@ -3,11 +3,11 @@ import React, { FC } from '../../lib/teact/teact';
 import Spinner from './Spinner';
 import './Loading.scss';
 
-interface IProps {
+type OwnProps = {
   color?: 'blue' | 'white' | 'black';
-}
+};
 
-const Loading: FC<IProps> = ({ color = 'blue' }) => {
+const Loading: FC<OwnProps> = ({ color = 'blue' }) => {
   return (
     <div className="Loading">
       <Spinner color={color} background={color === 'white'} />

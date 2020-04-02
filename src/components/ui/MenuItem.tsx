@@ -6,15 +6,15 @@ import './MenuItem.scss';
 
 type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
-interface IProps {
+type OwnProps = {
   icon?: string;
   className?: string;
   children: any;
   onClick?: OnClickHandler;
   disabled?: boolean;
-}
+};
 
-const MenuItem: FC<IProps> = (props) => {
+const MenuItem: FC<OwnProps> = (props) => {
   const {
     icon,
     className,

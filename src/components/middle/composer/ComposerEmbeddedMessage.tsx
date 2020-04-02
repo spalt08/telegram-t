@@ -14,15 +14,17 @@ import EmbeddedMessage from '../../common/EmbeddedMessage';
 
 import './ComposerEmbeddedMessage.scss';
 
-type IProps = {
+type StateProps = {
   selectedChatId: number;
   replyingTo?: number;
   editing?: number;
   message?: ApiMessage;
   sender?: ApiUser;
-} & Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'focusMessage'>;
+};
 
-const ComposerEmbeddedMessage: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'focusMessage'>;
+
+const ComposerEmbeddedMessage: FC<StateProps & DispatchProps> = ({
   selectedChatId,
   replyingTo,
   editing,

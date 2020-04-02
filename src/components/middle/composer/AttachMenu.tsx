@@ -9,7 +9,7 @@ import MenuItem from '../../ui/MenuItem';
 
 import './AttachMenu.scss';
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   isPrivateChat: boolean;
   onFileSelect: (file: File, isQuick: boolean) => void;
@@ -20,7 +20,7 @@ type IProps = {
 const MENU_CLOSE_TIMEOUT = 250;
 let closeTimeout: NodeJS.Timeout | null = null;
 
-const AttachMenu: FC<IProps> = ({
+const AttachMenu: FC<OwnProps> = ({
   isOpen, isPrivateChat, onFileSelect, onPollCreate, onClose,
 }) => {
   const isMouseInside = useRef(false);

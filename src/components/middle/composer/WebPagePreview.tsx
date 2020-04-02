@@ -11,15 +11,19 @@ import WebPage from '../message/WebPage';
 
 import './WebPagePreview.scss';
 
-type IProps = {
+type OwnProps = {
   messageText: string;
-} & Pick<GlobalState, 'webPagePreview'> & Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview'>;
+};
+
+type StateProps = Pick<GlobalState, 'webPagePreview'>;
+
+type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview'>;
 
 const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#][=&#a-zA-Z0-9]{2,128})?/;
 
 const runThrottledForWebPagePreview = throttle((cb) => cb(), 1000, true);
 
-const WebPagePreview: FC<IProps> = ({
+const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   messageText,
   webPagePreview,
   loadWebPagePreview,

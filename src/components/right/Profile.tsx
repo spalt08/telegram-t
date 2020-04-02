@@ -26,15 +26,20 @@ import WebLink from './sharedMedia/WebLink';
 
 import './Profile.scss';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
   userId?: number;
   isSharedMedia: boolean;
   onSharedMediaToggle: (isSharedMedia: boolean) => void;
+};
+
+type StateProps = {
   resolvedUserId?: number;
   chatMessages: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
-} & Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
+};
+
+type DispatchProps = Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
 
 const TAB_TITLES = [
   'Media',
@@ -55,7 +60,7 @@ const PROGRAMMATIC_SCROLL_TIMEOUT_MS = 1000;
 
 let isScrollingProgrammatically = false;
 
-const Profile: FC<IProps> = ({
+const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   isSharedMedia,
   onSharedMediaToggle,
@@ -222,8 +227,8 @@ const Profile: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, { chatId, userId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { chatId, userId }) => {
     const chatMessages = selectChatMessages(global, userId || chatId);
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
 

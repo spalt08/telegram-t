@@ -11,7 +11,7 @@ import './WebPage.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   load?: boolean;
   inPreview?: boolean;
@@ -19,7 +19,7 @@ type IProps = {
   onCancelMediaTransfer?: () => void;
 };
 
-const WebPage: FC<IProps> = ({
+const WebPage: FC<OwnProps> = ({
   message,
   load,
   inPreview,

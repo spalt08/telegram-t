@@ -12,15 +12,15 @@ import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './StickerButton.scss';
 
-interface IProps {
+type OwnProps = {
   sticker: ApiSticker;
   load: boolean;
   title?: string;
   className?: string;
   onClick: (sticker: ApiSticker) => void;
-}
+};
 
-const StickerButton: FC<IProps> = ({
+const StickerButton: FC<OwnProps> = ({
   sticker, load, title, className, onClick,
 }) => {
   const ref = useRef<HTMLDivElement>();

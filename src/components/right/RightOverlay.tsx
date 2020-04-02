@@ -14,11 +14,13 @@ import RightHeader from './RightHeader';
 
 import './RightOverlay.scss';
 
-type IProps = {
+type StateProps = {
   isForwarding: boolean;
-} & Pick<GlobalActions, 'closeForwardMenu'>;
+};
 
-const RightOverlay: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'closeForwardMenu'>;
+
+const RightOverlay: FC<StateProps & DispatchProps> = ({
   isForwarding,
   closeForwardMenu,
 }) => {

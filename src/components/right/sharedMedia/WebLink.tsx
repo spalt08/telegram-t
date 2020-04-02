@@ -11,11 +11,11 @@ import './WebLink.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
 };
 
-const WebLink: FC<IProps> = ({ message }) => {
+const WebLink: FC<OwnProps> = ({ message }) => {
   let linkData: ApiWebPage | undefined = getMessageWebPage(message);
 
   if (!linkData) {

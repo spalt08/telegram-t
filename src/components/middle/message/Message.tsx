@@ -56,32 +56,31 @@ type MessagePositionProperties = {
   isLastInList: boolean;
 };
 
-type IProps = (
-  {
-    message: ApiMessage;
-    album?: IAlbum;
-    showAvatar?: boolean;
-    showSenderName?: boolean;
-    loadAndPlayMedia?: boolean;
-    sender?: ApiUser;
-    replyMessage?: ApiMessage;
-    replyMessageSender?: ApiUser;
-    originSender?: ApiUser;
-    canDelete?: boolean;
-    contactFirstName: string | null;
-    outgoingStatus?: ApiMessageOutgoingStatus;
-    uploadProgress?: number;
-    isFocused?: boolean;
-    isSelectedToForward?: boolean;
-    focusDirection?: FocusDirection;
-    isChatWithSelf?: boolean;
-  }
-  & MessagePositionProperties
-  & Pick<GlobalActions, (
-    'focusMessage' | 'openMediaViewer' | 'openUserInfo' |
-    'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
-  )>
-);
+type OwnProps = {
+  message: ApiMessage;
+  album?: IAlbum;
+  showAvatar?: boolean;
+  showSenderName?: boolean;
+  loadAndPlayMedia?: boolean;
+} & MessagePositionProperties;
+
+type StateProps = {
+  sender?: ApiUser;
+  replyMessage?: ApiMessage;
+  replyMessageSender?: ApiUser;
+  originSender?: ApiUser;
+  outgoingStatus?: ApiMessageOutgoingStatus;
+  uploadProgress?: number;
+  isFocused?: boolean;
+  isSelectedToForward?: boolean;
+  focusDirection?: FocusDirection;
+  isChatWithSelf?: boolean;
+};
+
+type DispatchProps = Pick<GlobalActions, (
+  'focusMessage' | 'openMediaViewer' | 'openUserInfo' |
+  'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
+)>;
 
 const NBSP = '\u00A0';
 
@@ -90,7 +89,7 @@ const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
 const RELOCATED_FOCUS_OFFSET = 1000;
 
-const Message: FC<IProps> = ({
+const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
   album,
   showAvatar,
@@ -382,8 +381,8 @@ const Message: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, ownProps: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, ownProps) => {
     const {
       message, album, showSenderName, showAvatar,
     } = ownProps;
@@ -419,7 +418,6 @@ export default memo(withGlobal(
     const isSelectedToForward = messageIds && messageIds.includes(message.id);
 
     return {
-      message,
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
       ...(replyMessage && {

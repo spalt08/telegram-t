@@ -22,13 +22,15 @@ enum ColumnContent {
   GlobalSearch,
 }
 
-type IProps = {
+type StateProps = {
   searchQuery?: string;
-} & Pick<GlobalActions, 'setGlobalSearchQuery'>;
+};
+
+type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery'>;
 
 const TRANSITION_RENDER_COUNT = 3;
 
-const LeftColumn: FC<IProps> = ({ searchQuery, setGlobalSearchQuery }) => {
+const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSearchQuery }) => {
   const [columnContent, setColumnContent] = useState<ColumnContent>(ColumnContent.ChatList);
   const isSearchOpen = columnContent !== ColumnContent.ChatList;
 

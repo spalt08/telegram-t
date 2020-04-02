@@ -11,20 +11,22 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
-type IProps = {
+type OwnProps = {
   userId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   isSavedMessages?: boolean;
   showHandle?: boolean;
   showFullInfo?: boolean;
-  user?: ApiUser;
-} & (
-  Pick<GlobalState, 'lastSyncTime'>
-  & Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>
-);
+};
 
-const PrivateChatInfo: FC<IProps> = ({
+type StateProps = {
+  user?: ApiUser;
+} & Pick<GlobalState, 'lastSyncTime'>;
+
+type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
+
+const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime,
   user,
   typingStatus,
@@ -97,8 +99,8 @@ const PrivateChatInfo: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, { userId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { userId }) => {
     const { lastSyncTime, chats } = global;
     const user = selectUser(global, userId);
 

@@ -10,15 +10,20 @@ import { isChatPrivate, getUserFirstName, getPrivateChatUserId } from '../../mod
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   message: ApiMessage;
+  onClose: () => void;
+};
+
+type StateProps = {
   canDeleteForAll: boolean;
   contactFirstName?: string;
-  onClose: () => void;
-} & Pick<GlobalActions, 'deleteMessages'>;
+};
 
-const DeleteMessageModal: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'deleteMessages'>;
+
+const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   message,
   canDeleteForAll,
@@ -58,8 +63,8 @@ const DeleteMessageModal: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, { message }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { message }) => {
     const { canDeleteForAll } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
     const contactFirstName = isChatPrivate(chat.id)

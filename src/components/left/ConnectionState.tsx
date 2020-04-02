@@ -6,9 +6,9 @@ import Spinner from '../ui/Spinner';
 
 import './ConnectionState.scss';
 
-type IProps = Pick<GlobalState, 'connectionState'>;
+type StateProps = Pick<GlobalState, 'connectionState'>;
 
-const ConnectionState: FC<IProps> = ({ connectionState }) => {
+const ConnectionState: FC<StateProps> = ({ connectionState }) => {
   const isConnecting = connectionState === 'connectionStateConnecting';
   return isConnecting && (
     <div id="ConnectionState">

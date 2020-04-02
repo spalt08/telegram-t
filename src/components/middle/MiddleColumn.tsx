@@ -14,12 +14,14 @@ import Composer from './composer/Composer';
 
 import './MiddleColumn.scss';
 
-type IProps = {
+type StateProps = {
   openChatId?: number;
   isChannel?: boolean;
-} & Pick<GlobalActions, 'openChat'>;
+};
 
-const MiddleColumn: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'openChat'>;
+
+const MiddleColumn: FC<StateProps & DispatchProps> = ({
   openChatId,
   isChannel,
   openChat,

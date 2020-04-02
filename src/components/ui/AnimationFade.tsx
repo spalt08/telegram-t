@@ -5,14 +5,14 @@ import usePrevious from '../../hooks/usePrevious';
 
 type ChildrenFn = () => any;
 
-interface IProps {
+type OwnProps = {
   isOpen: boolean;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   children: ChildrenFn;
-}
+};
 
-const AnimationFade: FC<IProps> = ({
+const AnimationFade: FC<OwnProps> = ({
   isOpen, className, onClick, children,
 }) => {
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen);

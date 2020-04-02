@@ -16,7 +16,7 @@ import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './Audio.scss';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
   uploadProgress?: number;
@@ -26,7 +26,7 @@ type IProps = {
   onCancelUpload?: () => void;
 };
 
-const Audio: FC<IProps> = ({
+const Audio: FC<OwnProps> = ({
   message,
   uploadProgress,
   inSharedMedia,

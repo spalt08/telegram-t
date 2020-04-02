@@ -38,8 +38,11 @@ import ActionMessage from './ActionMessage';
 
 import './MessageList.scss';
 
-type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'> & {
+type OwnProps = {
   onFabToggle: (show: boolean) => void;
+};
+
+type StateProps = {
   chatId?: number;
   isChannelChat?: boolean;
   messageIds?: number[];
@@ -48,6 +51,8 @@ type IProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 
   isViewportNewest: boolean;
   isFocusing: boolean;
 };
+
+type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'>;
 
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
@@ -66,7 +71,7 @@ let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
 
-const MessageList: FC<IProps> = ({
+const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onFabToggle,
   chatId,
   isChannelChat,

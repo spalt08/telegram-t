@@ -6,7 +6,7 @@ import buildClassName from '../../util/buildClassName';
 
 import './Menu.scss';
 
-interface IProps {
+type OwnProps = {
   isOpen: boolean;
   className?: string;
   style?: string;
@@ -20,9 +20,9 @@ interface IProps {
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: any;
-}
+};
 
-const Menu: FC<IProps> = ({
+const Menu: FC<OwnProps> = ({
   isOpen,
   className,
   style,

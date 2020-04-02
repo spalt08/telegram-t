@@ -9,12 +9,12 @@ import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 
 import './MessageMeta.scss';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   outgoingStatus?: ApiMessageOutgoingStatus;
 };
 
-const MessageMeta: FC<IProps> = ({ message, outgoingStatus }) => {
+const MessageMeta: FC<OwnProps> = ({ message, outgoingStatus }) => {
   return (
     <span className="MessageMeta">
       {message.views && (

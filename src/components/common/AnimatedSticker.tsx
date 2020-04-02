@@ -2,7 +2,7 @@ import React, {
   FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-type IProps = {
+type OwnProps = {
   animationData: AnyLiteral;
   width?: number;
   height?: number;
@@ -27,7 +27,7 @@ async function ensureLottie() {
   return lottiePromise;
 }
 
-const AnimatedSticker: FC<IProps> = ({
+const AnimatedSticker: FC<OwnProps> = ({
   animationData,
   width,
   height,

@@ -7,7 +7,7 @@ import usePrevious from '../../hooks/usePrevious';
 import './Transition.scss';
 
 type ChildrenFn = () => any;
-type IProps = {
+type OwnProps = {
   activeKey: any;
   name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade';
   direction?: 'auto' | 'inverse' | 1 | -1;
@@ -28,7 +28,7 @@ const ANIMATION_DURATION = {
 };
 const END_DELAY = 50;
 
-const Transition: FC<IProps> = ({
+const Transition: FC<OwnProps> = ({
   activeKey,
   name,
   direction = 'auto',

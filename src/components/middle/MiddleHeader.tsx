@@ -23,15 +23,20 @@ import './MiddleHeader.scss';
 // Chrome breaks layout when focusing input during transition
 const SEARCH_FOCUS_DELAY_MS = 200;
 
-type IProps = {
+type OwnProps = {
   chatId: number;
+};
+
+type StateProps = {
   pinnedMessageId?: number;
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
   typingStatus?: ApiTypingStatus;
-} & Pick<GlobalActions, 'openChatWithInfo' | 'openMessageTextSearch' | 'pinMessage' | 'focusMessage'>;
+};
 
-const MiddleHeader: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'openChatWithInfo' | 'openMessageTextSearch' | 'pinMessage' | 'focusMessage'>;
+
+const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   pinnedMessageId,
   pinnedMessage,
@@ -92,8 +97,8 @@ const MiddleHeader: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, { chatId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { chatId }) => {
     const chat = selectChat(global, chatId);
     if (!chat) {
       return null;

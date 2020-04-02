@@ -27,16 +27,21 @@ import Avatar from '../common/Avatar';
 
 import './RightSearch.scss';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
+};
+
+type StateProps = {
   chat: ApiChat;
   messagesById: Record<number, ApiMessage>;
   query?: string;
   totalCount?: number;
   foundIds?: number[];
-} & Pick<GlobalActions, 'searchMessages' | 'focusMessage'>;
+};
 
-const RightSearch: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'searchMessages' | 'focusMessage'>;
+
+const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   chat,
   messagesById,

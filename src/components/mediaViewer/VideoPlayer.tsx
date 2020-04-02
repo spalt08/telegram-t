@@ -2,7 +2,7 @@ import React, { FC, useState } from '../../lib/teact/teact';
 
 import './VideoPlayer.scss';
 
-type IProps = {
+type OwnProps = {
   url: string;
   isGif?: boolean;
 };
@@ -11,7 +11,7 @@ function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
   e.stopPropagation();
 }
 
-const VideoPlayer: FC<IProps> = ({ url, isGif }) => {
+const VideoPlayer: FC<OwnProps> = ({ url, isGif }) => {
   const [hasSize, setHasSize] = useState(false);
 
   function handleLoadedMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {

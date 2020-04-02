@@ -6,7 +6,7 @@ import Spinner from './Spinner';
 
 import './Radio.scss';
 
-interface IProps {
+type OwnProps = {
   id?: string;
   name: string;
   label: string;
@@ -15,9 +15,9 @@ interface IProps {
   disabled?: boolean;
   isLoading?: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-}
+};
 
-const Radio: FC<IProps> = ({
+const Radio: FC<OwnProps> = ({
   id,
   label,
   value,

@@ -14,14 +14,16 @@ import Chat from './Chat';
 
 import './ChatList.scss';
 
-type IProps = {
+type StateProps = {
   chats: Record<number, ApiChat>;
   listIds: number[];
   selectedChatId: number;
   orderedPinnedIds?: number[];
-} & Pick<GlobalActions, 'loadMoreChats'>;
+};
 
-const ChatList: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'loadMoreChats'>;
+
+const ChatList: FC<StateProps & DispatchProps> = ({
   chats, listIds, selectedChatId, orderedPinnedIds, loadMoreChats,
 }) => {
   const [chatArrays, orderById] = useMemo(() => {

@@ -2,12 +2,12 @@ import { FC, useState } from '../../lib/teact/teact';
 import React from '../../lib/teact/teactn';
 import { ApiUpdateAuthorizationStateType } from '../../api/types';
 
-type IProps = {
+type OwnProps = {
   authState?: ApiUpdateAuthorizationStateType;
   rand: string;
 };
 
-const SubTest: FC<IProps> = ({ authState, rand }) => {
+const SubTest: FC<OwnProps> = ({ authState, rand }) => {
   // eslint-disable-next-line no-console
   console.log('rendering SUB TEST', authState, rand);
 

@@ -21,7 +21,7 @@ import { calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   load?: boolean;
   uploadProgress?: number;
@@ -32,7 +32,7 @@ type IProps = {
   onCancelUpload?: () => void;
 };
 
-const Photo: FC<IProps> = ({
+const Photo: FC<OwnProps> = ({
   message,
   load,
   uploadProgress,

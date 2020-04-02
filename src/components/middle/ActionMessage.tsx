@@ -12,18 +12,21 @@ import { renderActionMessageText } from '../common/helpers/renderActionMessageTe
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import buildClassName from '../../util/buildClassName';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
+  isEmbedded?: boolean;
+};
+
+type StateProps = {
   sender?: ApiUser;
   actionTargetUser?: ApiUser;
   actionTargetMessage?: ApiMessage;
-  isEmbedded?: boolean;
   isFocused: boolean;
 };
 
 const FOCUSING_MAX_DISTANCE = 2000;
 
-const ActionMessage: FC<IProps> = ({
+const ActionMessage: FC<OwnProps & StateProps> = ({
   message, sender, actionTargetUser, actionTargetMessage, isEmbedded, isFocused,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
@@ -71,8 +74,8 @@ const ActionMessage: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, { message }: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { message }) => {
     const userId = message.sender_user_id;
     const { targetUserId: actionTargetUserId } = message.content.action || {};
     const actionTargetMessageId = message.reply_to_message_id;

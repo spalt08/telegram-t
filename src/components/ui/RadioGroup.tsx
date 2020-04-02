@@ -7,7 +7,7 @@ type IRadioOption = {
   value: string;
 };
 
-interface IProps {
+type OwnProps = {
   id?: string;
   name: string;
   options: IRadioOption[];
@@ -15,9 +15,9 @@ interface IProps {
   disabled?: boolean;
   loadingOption?: string;
   onChange: (value: string) => void;
-}
+};
 
-const RadioGroup: FC<IProps> = ({
+const RadioGroup: FC<OwnProps> = ({
   id,
   name,
   options,

@@ -7,7 +7,7 @@ import React, {
 
 import { debounce } from '../../util/schedulers';
 
-interface IProps {
+type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
   onLoadMore: AnyToVoidFunction;
@@ -16,12 +16,12 @@ interface IProps {
   sensitiveArea?: number;
   preloadBackwards?: number;
   children: any;
-}
+};
 
 const DEFAULT_SENSITIVE_AREA = 1200;
 const DEFAULT_PRELOAD_BACKWARDS = 20;
 
-const InfiniteScroll: FC<IProps> = ({
+const InfiniteScroll: FC<OwnProps> = ({
   ref,
   className,
   onLoadMore,
@@ -30,7 +30,7 @@ const InfiniteScroll: FC<IProps> = ({
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   children,
-}: IProps) => {
+}: OwnProps) => {
   let containerRef = useRef<HTMLDivElement>();
   if (ref) {
     containerRef = ref;

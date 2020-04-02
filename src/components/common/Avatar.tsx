@@ -13,7 +13,7 @@ import buildClassName from '../../util/buildClassName';
 
 import './Avatar.scss';
 
-interface IProps {
+type OwnProps = {
   size?: 'small' | 'medium' | 'large' | 'jumbo';
   showOnlineStatus?: boolean;
   chat?: ApiChat;
@@ -21,9 +21,9 @@ interface IProps {
   isSavedMessages?: boolean;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => void;
   className?: string;
-}
+};
 
-const Avatar: FC<IProps> = ({
+const Avatar: FC<OwnProps> = ({
   size = 'large',
   chat,
   user,

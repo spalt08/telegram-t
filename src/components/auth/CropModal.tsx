@@ -71,13 +71,13 @@ async function processFile(imgFile: File) {
   }
 }
 
-type IProps = {
+type OwnProps = {
   file: File;
   onChange: Function;
   onClose: () => void;
 };
 
-const CropModal: FC<IProps> = ({ file, onChange, onClose }: IProps) => {
+const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
   const [isCroppieReady, setIsCroppieReady] = useState(false);
 
   useEffect(() => {

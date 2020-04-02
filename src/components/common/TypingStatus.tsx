@@ -8,12 +8,15 @@ import { getUserFirstName } from '../../modules/helpers';
 
 import './TypingStatus.scss';
 
-type IProps = {
+type OwnProps = {
   typingStatus: ApiTypingStatus;
+};
+
+type StateProps = {
   typingUser?: ApiUser;
 };
 
-const TypingStatus: FC<IProps> = ({ typingStatus, typingUser }) => {
+const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
   const typingUserName = typingUser && !typingUser.is_self && getUserFirstName(typingUser);
 
   return (
@@ -26,8 +29,8 @@ const TypingStatus: FC<IProps> = ({ typingStatus, typingUser }) => {
   );
 };
 
-export default memo(withGlobal(
-  (global, { typingStatus }: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { typingStatus }) => {
     if (!typingStatus.userId) {
       return {};
     }

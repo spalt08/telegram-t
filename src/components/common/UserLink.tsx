@@ -3,13 +3,15 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-type IProps = Pick<GlobalActions, 'openUserInfo'> & {
+type OwnProps = {
   className?: string;
   sender?: ApiUser | ApiChat;
   children: any;
 };
 
-const UserLink: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
+
+const UserLink: FC<OwnProps & DispatchProps> = ({
   className, sender, openUserInfo, children,
 }) => {
   const openSenderInfo = useCallback(() => {

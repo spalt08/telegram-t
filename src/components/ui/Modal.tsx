@@ -9,7 +9,7 @@ import Button from './Button';
 
 import './Modal.scss';
 
-interface IProps {
+type OwnProps = {
   title?: string;
   className?: string;
   isOpen?: boolean;
@@ -19,9 +19,9 @@ interface IProps {
   children: any;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
-}
+};
 
-const Modal: FC<IProps> = (props) => {
+const Modal: FC<OwnProps> = (props) => {
   const {
     title,
     className,

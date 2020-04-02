@@ -17,10 +17,13 @@ import EmojiCategory from './EmojiCategory';
 
 import './EmojiPicker.scss';
 
-type IProps = {
+type OwnProps = {
   className?: string;
   onEmojiSelect: (emoji: string) => void;
-} & Pick<GlobalState, 'recentEmojis'> & Pick<GlobalActions, 'addRecentEmoji'>;
+};
+
+type StateProps = Pick<GlobalState, 'recentEmojis'>;
+type DispatchProps = Pick<GlobalActions, 'addRecentEmoji'>;
 
 type EmojiData = typeof import('../../../../public/emojiData.json');
 let emojiDataPromise: Promise<EmojiData>;
@@ -69,7 +72,7 @@ async function ensureEmojiIndex() {
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
-const EmojiPicker: FC<IProps> = ({
+const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className, onEmojiSelect, recentEmojis, addRecentEmoji,
 }) => {
   const containerRef = useRef<HTMLDivElement>();

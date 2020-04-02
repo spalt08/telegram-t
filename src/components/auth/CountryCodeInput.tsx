@@ -10,7 +10,7 @@ import Spinner from '../ui/Spinner';
 
 import './CountryCodeInput.scss';
 
-type IProps = {
+type OwnProps = {
   id: string;
   value?: Country;
   isLoading?: boolean;
@@ -19,7 +19,7 @@ type IProps = {
 
 const DROPDOWN_HIDING_DURATION = 100;
 
-const CountryCodeInput: FC<IProps> = (props) => {
+const CountryCodeInput: FC<OwnProps> = (props) => {
   const {
     id,
     value,

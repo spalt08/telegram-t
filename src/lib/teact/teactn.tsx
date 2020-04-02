@@ -19,7 +19,7 @@ type Reducer = (
   payload?: ActionPayload,
 ) => GlobalState | void;
 
-type MapStateToProps<OwnProps> = ((global: GlobalState, ownProps?: OwnProps) => AnyLiteral | null);
+type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral | null);
 type MapActionsToProps = ((setGlobal: Function, actions: GlobalActions) => Partial<GlobalActions> | null);
 
 let global = {} as GlobalState;

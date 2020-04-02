@@ -4,7 +4,7 @@ import Loading from './Loading';
 
 import './SearchInput.scss';
 
-type IProps = {
+type OwnProps = {
   value?: string;
   className?: string;
   focused?: boolean;
@@ -13,7 +13,7 @@ type IProps = {
   onFocus?: () => void;
 };
 
-const SearchInput: FC<IProps> = ({
+const SearchInput: FC<OwnProps> = ({
   value, className, focused, isLoading, onChange, onFocus,
 }) => {
   const inputRef = useRef<HTMLInputElement>();

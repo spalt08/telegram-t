@@ -12,7 +12,7 @@ import './Button.scss';
 type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
-interface IProps {
+type OwnProps = {
   ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
@@ -30,9 +30,9 @@ interface IProps {
   href?: string;
   download?: string;
   disabled?: boolean;
-}
+};
 
-const Button: FC<IProps> = ({
+const Button: FC<OwnProps> = ({
   ref,
   type = 'button',
   onClick,

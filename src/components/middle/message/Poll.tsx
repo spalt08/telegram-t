@@ -8,13 +8,13 @@ import RadioGroup from '../../ui/RadioGroup';
 
 import './Poll.scss';
 
-type IProps = {
+type OwnProps = {
   messageId: number;
   poll: ApiPoll;
   onSendVote: (options: string[]) => void;
 };
 
-const Poll: FC<IProps> = ({ messageId, poll, onSendVote }) => {
+const Poll: FC<OwnProps> = ({ messageId, poll, onSendVote }) => {
   const [loadingOption, setLoadingOption] = useState<string | undefined>(undefined);
   const { summary, results } = poll;
   const { results: voteResults, totalVoters } = results;

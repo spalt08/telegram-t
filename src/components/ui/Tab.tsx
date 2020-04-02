@@ -4,7 +4,7 @@ import buildClassName from '../../util/buildClassName';
 
 import './Tab.scss';
 
-type IProps = {
+type OwnProps = {
   className?: string;
   title: string;
   active?: boolean;
@@ -12,7 +12,7 @@ type IProps = {
   onClick?: () => void;
 };
 
-const Tab: FC<IProps> = ({
+const Tab: FC<OwnProps> = ({
   className,
   title,
   active,

@@ -3,7 +3,7 @@ import React, { FC } from '../../lib/teact/teact';
 import Modal from './Modal';
 import Button from './Button';
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
@@ -13,7 +13,7 @@ type IProps = {
   confirmIsDestructive?: boolean;
 };
 
-const ConfirmDialog: FC<IProps> = ({
+const ConfirmDialog: FC<OwnProps> = ({
   isOpen,
   onClose,
   onCloseAnimationEnd,

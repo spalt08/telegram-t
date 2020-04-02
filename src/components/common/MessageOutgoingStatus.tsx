@@ -2,11 +2,11 @@ import React, { FC } from '../../lib/teact/teact';
 
 import { ApiMessageOutgoingStatus } from '../../api/types';
 
-type IProps = {
+type OwnProps = {
   status: ApiMessageOutgoingStatus;
 };
 
-const MessageOutgoingStatus: FC<IProps> = ({ status }) => {
+const MessageOutgoingStatus: FC<OwnProps> = ({ status }) => {
   return (
     <span className="MessageOutgoingStatus">{renderOutgoingStatus(status)}</span>
   );

@@ -15,18 +15,23 @@ import GifButton from './GifButton';
 
 import './GifPicker.scss';
 
-type IProps = {
+type OwnProps = {
   className: string;
   load: boolean;
-  savedGifs?: ApiVideo[];
   onGifSelect: (gif: ApiVideo) => void;
-} & Pick<GlobalActions, 'loadSavedGifs'>;
+};
+
+type StateProps = {
+  savedGifs?: ApiVideo[];
+};
+
+type DispatchProps = Pick<GlobalActions, 'loadSavedGifs'>;
 
 const VIEWPORT_MARGIN = 500;
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
-const GifPicker: FC<IProps> = ({
+const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
   savedGifs,

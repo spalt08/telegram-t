@@ -11,14 +11,14 @@ import download from '../../util/download';
 
 import File from './File';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   smaller?: boolean;
   uploadProgress?: number;
   onCancelUpload?: () => void;
 };
 
-const Document: FC<IProps> = ({
+const Document: FC<OwnProps> = ({
   message, smaller, uploadProgress, onCancelUpload,
 }) => {
   const document = message.content.document!;

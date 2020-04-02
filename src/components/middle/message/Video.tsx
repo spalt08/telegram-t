@@ -19,7 +19,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
   uploadProgress?: number;
@@ -28,7 +28,7 @@ type IProps = {
   onCancelUpload?: () => void;
 };
 
-const Video: FC<IProps> = ({
+const Video: FC<OwnProps> = ({
   message,
   loadAndPlay,
   uploadProgress,

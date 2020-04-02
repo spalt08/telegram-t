@@ -1,7 +1,7 @@
 import { ChangeEvent } from 'react';
 import React, { FC } from '../../lib/teact/teact';
 
-interface IProps {
+type OwnProps = {
   id?: string;
   value?: string;
   error?: string;
@@ -9,9 +9,9 @@ interface IProps {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onShowToggle?: () => void;
-}
+};
 
-const InputText: FC<IProps> = ({
+const InputText: FC<OwnProps> = ({
   id,
   value,
   error,

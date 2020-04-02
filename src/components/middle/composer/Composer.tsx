@@ -33,10 +33,12 @@ import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
 
-type IProps = {
+type StateProps = {
   isPrivateChat: boolean;
   editedMessage?: ApiMessage;
-} & Pick<GlobalState, 'connectionState'> & Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
+} & Pick<GlobalState, 'connectionState'>;
+
+type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
 
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
@@ -66,7 +68,7 @@ function isSelectionInsideInput(selectionRange: Range) {
   return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
 }
 
-const Composer: FC<IProps> = ({
+const Composer: FC<StateProps & DispatchProps> = ({
   isPrivateChat, editedMessage, connectionState, sendMessage, editMessage,
 }) => {
   const [html, setHtml] = useState<string>('');

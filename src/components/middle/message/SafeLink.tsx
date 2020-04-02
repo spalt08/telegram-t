@@ -2,13 +2,13 @@ import React, { FC } from '../../../lib/teact/teact';
 import { DEBUG } from '../../../config';
 import convertPunycode from '../../../lib/punycode';
 
-type IProps = {
+type OwnProps = {
   url?: string;
   text: string;
   children?: any;
 };
 
-const SafeLink: FC<IProps> = ({ url, text, children }) => {
+const SafeLink: FC<OwnProps> = ({ url, text, children }) => {
   if (!url) {
     return null;
   }

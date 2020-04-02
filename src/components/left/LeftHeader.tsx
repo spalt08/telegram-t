@@ -11,16 +11,21 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import SearchInput from '../ui/SearchInput';
 import './LeftHeader.scss';
 
-type IProps = {
+type OwnProps = {
   isSearchOpen: boolean;
   searchQuery?: string;
-  isLoading: boolean;
   onSearchChange: (value: string) => void;
   onSearchOpen: () => void;
   onSearchClose: () => void;
-} & Pick<GlobalActions, 'signOut'>;
+};
 
-const LeftHeader: FC<IProps> = ({
+type StateProps = {
+  isLoading: boolean;
+};
+
+type DispatchProps = Pick<GlobalActions, 'signOut'>;
+
+const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isSearchOpen, searchQuery, isLoading, onSearchChange, onSearchOpen, onSearchClose, signOut,
 }) => {
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);

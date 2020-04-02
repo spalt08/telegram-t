@@ -12,13 +12,18 @@ import Transition from '../ui/Transition';
 
 import './RightHeader.scss';
 
-type IProps = {
+type OwnProps = {
   onClose: () => void;
   isForwarding: boolean;
   isSearch: boolean;
   isSharedMedia: boolean;
+};
+
+type StateProps = {
   searchQuery?: string;
-} & Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
+};
+
+type DispatchProps = Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
@@ -29,7 +34,7 @@ enum HeaderContent {
   Forward,
 }
 
-const RightHeader: FC<IProps> = ({
+const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isForwarding,
   isSearch,

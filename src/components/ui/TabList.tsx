@@ -6,13 +6,13 @@ import Tab from './Tab';
 
 import './TabList.scss';
 
-type IProps = {
+type OwnProps = {
   tabs: string[];
   activeTab: number;
   onSwitchTab: (index: number) => void;
 };
 
-const TabList: FC<IProps> = ({ tabs, activeTab, onSwitchTab }) => {
+const TabList: FC<OwnProps> = ({ tabs, activeTab, onSwitchTab }) => {
   const previousActiveTab = usePrevious(activeTab);
 
   return (

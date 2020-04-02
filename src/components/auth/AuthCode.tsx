@@ -12,17 +12,15 @@ import Loading from '../ui/Loading';
 
 import AnimatedSticker from '../common/AnimatedSticker';
 
-type IProps = (
-  Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>
-  & Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>
-);
+type StateProps = Pick<GlobalState, 'authPhoneNumber' | 'authIsLoading' | 'authError'>;
+type DispatchProps = Pick<GlobalActions, 'setAuthCode' | 'returnToAuthPhoneNumber' | 'clearAuthError'>;
 
 const CODE_LENGTH = 5;
 const TRACKING_START_FRAME = 15;
 const TRACKING_FRAMES_PER_SYMBOL = 20;
 const TRACKING_END_FRAME = 180;
 
-const AuthCode: FC<IProps> = ({
+const AuthCode: FC<StateProps & DispatchProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
   const [code, setCode] = useState(undefined);

@@ -33,20 +33,25 @@ import Badge from './Badge';
 
 import './Chat.scss';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
   orderDiff: number;
+  selected: boolean;
+};
+
+type StateProps = {
   chat: ApiChat;
   privateChatUser?: ApiUser;
   actionTargetUser?: ApiUser;
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
-  selected: boolean;
   isUiReady: boolean;
-} & Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
+};
 
-const Chat: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
+
+const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   orderDiff,
   privateChatUser,
@@ -165,8 +170,8 @@ const Chat: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, { chatId }: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { chatId }) => {
     const chat = selectChat(global, chatId);
     if (!chat || !chat.last_message) {
       return {};

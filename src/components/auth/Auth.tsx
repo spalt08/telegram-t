@@ -11,9 +11,9 @@ import AuthPassword from './AuthPassword';
 
 import './Auth.scss';
 
-type IProps = Pick<GlobalState, 'authState'>;
+type StateProps = Pick<GlobalState, 'authState'>;
 
-const Auth: FC<IProps> = ({ authState }) => {
+const Auth: FC<StateProps> = ({ authState }) => {
   switch (authState) {
     case 'authorizationStateWaitCode':
       return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;

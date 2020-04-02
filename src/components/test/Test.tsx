@@ -3,11 +3,11 @@ import { GlobalState } from '../../global/types';
 import SubTest from './SubTest';
 import { FC } from '../../lib/teact/teact';
 
-type IProps = Pick<GlobalState, 'authState'> & {
+type StateProps = Pick<GlobalState, 'authState'> & {
   rand: string;
 };
 
-const Test: FC<IProps> = ({ authState, rand }) => {
+const Test: FC<StateProps> = ({ authState, rand }) => {
   // eslint-disable-next-line no-console
   console.log('rendering TEST', authState, rand);
 

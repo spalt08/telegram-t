@@ -1,13 +1,13 @@
 import React, { FC, memo } from '../../../lib/teact/teact';
 import EmojiButton from './EmojiButton';
 
-interface IProps {
+type OwnProps = {
   category: EmojiCategory;
   allEmojis: AllEmojis;
   onEmojiSelect: (emoji: string, name: string) => void;
-}
+};
 
-const EmojiCategory: FC<IProps> = ({
+const EmojiCategory: FC<OwnProps> = ({
   category, allEmojis, onEmojiSelect,
 }) => {
   return (

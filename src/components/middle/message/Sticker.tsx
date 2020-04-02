@@ -14,12 +14,12 @@ import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
 };
 
-const Sticker: FC<IProps> = ({
+const Sticker: FC<OwnProps> = ({
   message, loadAndPlay,
 }) => {
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);

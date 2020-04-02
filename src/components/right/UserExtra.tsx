@@ -6,12 +6,17 @@ import { GlobalActions, GlobalState } from '../../global/types';
 import { selectUser } from '../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 
-type IProps = Pick<GlobalState, 'lastSyncTime'> & Pick<GlobalActions, 'loadFullUser'> & {
+type OwnProps = {
   userId: number;
-  user: ApiUser;
 };
 
-const UserExtra: FC<IProps> = ({ lastSyncTime, user, loadFullUser }) => {
+type StateProps = {
+  user: ApiUser;
+} & Pick<GlobalState, 'lastSyncTime'>;
+
+type DispatchProps = Pick<GlobalActions, 'loadFullUser'>;
+
+const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({ lastSyncTime, user, loadFullUser }) => {
   const {
     full_info,
     username,
@@ -66,8 +71,8 @@ const UserExtra: FC<IProps> = ({ lastSyncTime, user, loadFullUser }) => {
   );
 };
 
-export default withGlobal(
-  (global, { userId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { userId }) => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 

@@ -25,8 +25,12 @@ import Avatar from '../common/Avatar';
 import LastMessageMeta from './LastMessageMeta';
 import InfiniteScroll from '../ui/InfiniteScroll';
 
-type IProps = {
+type OwnProps = {
   searchQuery: string;
+  onSearchClose: () => void;
+};
+
+type StateProps = {
   currentUserId?: number;
   localContactIds?: number[];
   localChats?: ApiChat[];
@@ -37,12 +41,15 @@ type IProps = {
   chatsById: Record<number, ApiChat>;
   usersById: Record<number, ApiUser>;
   fetchingStatus: { chats?: boolean; messages?: boolean };
-  onSearchClose: () => void;
-} & Pick<GlobalActions, 'openChat' | 'addRecentlyFoundChatId' | 'focusMessage' | 'searchMessagesGlobal'>;
+};
+
+type DispatchProps = Pick<GlobalActions, (
+  'openChat' | 'addRecentlyFoundChatId' | 'focusMessage' | 'searchMessagesGlobal'
+)>;
 
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 5;
 
-const LeftSearch: FC<IProps> = ({
+const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   searchQuery, currentUserId,
   localContactIds, localChats, localUsers, globalChats, globalUsers,
   globalMessagesById, chatsById, usersById, fetchingStatus,

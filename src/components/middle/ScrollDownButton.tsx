@@ -13,13 +13,18 @@ import Button from '../ui/Button';
 
 import './ScrollDownButton.scss';
 
-type IProps = {
+type OwnProps = {
   show: boolean;
+};
+
+type StateProps = {
   isChannel?: boolean;
   unreadCount?: number;
-} & Pick <GlobalActions, 'focusTopMessage'>;
+};
 
-const ScrollDownButton: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'focusTopMessage'>;
+
+const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   show,
   isChannel,
   unreadCount,

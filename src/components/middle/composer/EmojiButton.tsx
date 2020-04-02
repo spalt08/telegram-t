@@ -4,12 +4,12 @@ import React, {
 
 import './EmojiButton.scss';
 
-interface IProps {
+type OwnProps = {
   emoji: Emoji;
   onClick: (emoji: string, name: string) => void;
-}
+};
 
-const EmojiButton: FC<IProps> = ({ emoji, onClick }) => {
+const EmojiButton: FC<OwnProps> = ({ emoji, onClick }) => {
   const handleClick = useCallback(() => {
     onClick(emoji.native, emoji.id);
   }, [emoji, onClick]);

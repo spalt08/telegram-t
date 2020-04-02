@@ -6,9 +6,9 @@ import Auth from './components/auth/Auth';
 import Main from './components/Main';
 // import Test from './pages/test/Test';
 
-type IProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
+type StateProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
 
-const App: FC<IProps> = ({ authState, authIsSessionRemembered }) => {
+const App: FC<StateProps> = ({ authState, authIsSessionRemembered }) => {
   // return <Test />;
 
   if (authState) {

@@ -20,20 +20,25 @@ type IAnchorPosition = {
   y: number;
 };
 
-type IProps = {
+type OwnProps = {
   isOpen: boolean;
   message: ApiMessage;
   anchor: IAnchorPosition;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
+  closeContextMenu: () => void;
+};
+
+type StateProps = {
   canReply?: boolean;
   canPin?: boolean;
   canDelete?: boolean;
   canEdit?: boolean;
-  closeContextMenu: () => void;
-} & Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
+};
 
-const ContextMenuContainer: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
+
+const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   message,
   anchor,
@@ -119,8 +124,8 @@ const ContextMenuContainer: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, { message }: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { message }) => {
     const {
       canReply, canPin, canDelete, canEdit,
     } = selectAllowedMessagedActions(global, message);

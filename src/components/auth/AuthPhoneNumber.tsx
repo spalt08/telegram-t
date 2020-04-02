@@ -17,19 +17,19 @@ import Loading from '../ui/Loading';
 import monkeyPath from '../../assets/monkey.svg';
 import { preloadImage } from '../../util/files';
 
-type IProps = (
-  Pick<GlobalState, (
-    'connectionState' |
-    'authState' | 'authPhoneNumber' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
-  )> &
-  Pick<GlobalActions, 'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'>
-);
+type StateProps = Pick<GlobalState, (
+  'connectionState' |
+  'authState' | 'authPhoneNumber' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+)>;
+type DispatchProps = Pick<GlobalActions, (
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'
+)>;
 
 const MIN_NUMBER_LENGTH = 10;
 
 let monkeyPreloadPromise: Promise<HTMLImageElement>;
 
-const AuthPhoneNumber: FC<IProps> = ({
+const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   connectionState,
   authState,
   authPhoneNumber,

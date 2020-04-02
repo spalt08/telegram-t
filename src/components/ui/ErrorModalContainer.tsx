@@ -11,11 +11,13 @@ import Button from './Button';
 
 import './ErrorModalContainer.scss';
 
-type IProps = {
+type StateProps = {
   errors: ApiError[];
-} & Pick<GlobalActions, 'dismissError'>;
+};
 
-const ErrorModalContainer: FC<IProps> = ({ errors, dismissError }) => {
+type DispatchProps = Pick<GlobalActions, 'dismissError'>;
+
+const ErrorModalContainer: FC<StateProps & DispatchProps> = ({ errors, dismissError }) => {
   if (!errors.length) {
     return null;
   }

@@ -6,11 +6,11 @@ import './MediaViewerFooter.scss';
 
 const RESIZE_THROTTLE_MS = 500;
 
-type IProps = {
+type OwnProps = {
   text: TextPart | TextPart[];
 };
 
-const MediaViewerFooter: FC<IProps> = ({ text = '' }) => {
+const MediaViewerFooter: FC<OwnProps> = ({ text = '' }) => {
   const [isMultiline, setIsMultiline] = useState(false);
   useEffect(() => {
     const footerContent = document.querySelector('.MediaViewerFooter .media-text') as HTMLDivElement | null;

@@ -4,16 +4,16 @@ import Menu from './Menu';
 
 import './DropdownMenu.scss';
 
-interface IProps {
+type OwnProps = {
   className?: string;
   trigger: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   children: any;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
-}
+};
 
-const DropdownMenu: FC<IProps> = (props) => {
+const DropdownMenu: FC<OwnProps> = (props) => {
   const {
     trigger,
     className,

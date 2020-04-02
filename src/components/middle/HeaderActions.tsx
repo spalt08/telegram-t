@@ -2,11 +2,11 @@ import React, { FC } from '../../lib/teact/teact';
 
 import Button from '../ui/Button';
 
-type IProps = {
+type OwnProps = {
   onSearchClick: () => void;
 };
 
-const HeaderActions: FC<IProps> = ({ onSearchClick }) => {
+const HeaderActions: FC<OwnProps> = ({ onSearchClick }) => {
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
   }

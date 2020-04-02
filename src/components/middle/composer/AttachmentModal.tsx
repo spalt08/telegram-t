@@ -15,7 +15,7 @@ import MessageInput from './MessageInput';
 
 import './AttachmentModal.scss';
 
-type IProps = {
+type OwnProps = {
   attachment?: ApiAttachment;
   caption?: string;
   onCaptionUpdate: (html: string) => void;
@@ -23,7 +23,7 @@ type IProps = {
   onClear: () => void;
 };
 
-const AttachmentModal: FC<IProps> = ({
+const AttachmentModal: FC<OwnProps> = ({
   attachment, caption, onCaptionUpdate, onSend, onClear,
 }) => {
   const prevAttachment = usePrevious(attachment);

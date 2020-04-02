@@ -12,20 +12,22 @@ import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
 import TypingStatus from './TypingStatus';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   showHandle?: boolean;
   showFullInfo?: boolean;
+};
+
+type StateProps = {
   chat?: ApiChat;
   onlineCount?: number;
-} & (
-  Pick<GlobalState, 'lastSyncTime'>
-  & Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines' | 'openMediaViewer'>
-);
+} & Pick<GlobalState, 'lastSyncTime'>;
 
-const GroupChatInfo: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'loadFullChat' | 'loadSuperGroupOnlines' | 'openMediaViewer'>;
+
+const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   typingStatus,
   avatarSize = 'medium',
   showHandle,
@@ -105,8 +107,8 @@ function getGroupStatus(chat: ApiChat) {
     : chatTypeString;
 }
 
-export default withGlobal(
-  (global, { chatId }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { chatId }) => {
     const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;

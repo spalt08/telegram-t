@@ -12,13 +12,13 @@ import Spinner from '../../ui/Spinner';
 
 import './GifButton.scss';
 
-interface IProps {
+type OwnProps = {
   gif: ApiVideo;
   load: boolean;
   onClick: (gif: ApiVideo) => void;
-}
+};
 
-const GifButton: FC<IProps> = ({
+const GifButton: FC<OwnProps> = ({
   gif, load, onClick,
 }) => {
   const ref = useRef<HTMLDivElement>();

@@ -4,7 +4,7 @@ import Button from '../ui/Button';
 
 import './MediaViewerActions.scss';
 
-type IProps = {
+type OwnProps = {
   blobUrl?: string;
   fileName?: string;
   isAvatar?: boolean;
@@ -12,7 +12,7 @@ type IProps = {
   onForward: Function;
 };
 
-const MediaViewerActions: FC<IProps> = ({
+const MediaViewerActions: FC<OwnProps> = ({
   blobUrl, fileName, isAvatar, onCloseMediaViewer, onForward,
 }) => {
   return (

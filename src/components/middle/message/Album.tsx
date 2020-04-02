@@ -11,13 +11,13 @@ import Video from './Video';
 
 import './Album.scss';
 
-type IProps = {
+type OwnProps = {
   album: IAlbum;
   loadAndPlay?: boolean;
   onMediaClick: (messageId: number) => void;
 };
 
-const Album: FC<IProps> = ({
+const Album: FC<OwnProps> = ({
   album,
   loadAndPlay,
   onMediaClick,

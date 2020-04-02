@@ -10,21 +10,26 @@ import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
 
-type IProps = {
+type OwnProps = {
   id: string;
   html: string;
   placeholder: string;
-  selectedChatId?: number;
-  replyingTo?: number;
   shouldSetFocus: boolean;
   onUpdate: (html: string) => void;
   onSend: Function;
-} & Pick<GlobalActions, 'editLastChatMessage'>;
+};
+
+type StateProps = {
+  selectedChatId?: number;
+  replyingTo?: number;
+};
+
+type DispatchProps = Pick<GlobalActions, 'editLastChatMessage'>;
 
 const MAX_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 
-const MessageInput: FC<IProps> = ({
+const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   id,
   html,
   placeholder,

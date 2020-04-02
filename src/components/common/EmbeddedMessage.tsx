@@ -18,7 +18,7 @@ import ActionMessage from '../middle/ActionMessage';
 
 import './EmbeddedMessage.scss';
 
-type IProps = {
+type OwnProps = {
   className?: string;
   message?: ApiMessage;
   sender?: ApiUser;
@@ -29,7 +29,7 @@ type IProps = {
 
 const NBSP = '\u00A0';
 
-const EmbeddedMessage: FC<IProps> = ({
+const EmbeddedMessage: FC<OwnProps> = ({
   className, message, sender, title, loadPictogram, onClick,
 }) => {
   const mediaThumbnail = message && getMessageMediaThumbDataUri(message);

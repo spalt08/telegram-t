@@ -1,16 +1,16 @@
 import { ChangeEvent } from 'react';
 import React, { FC } from '../../lib/teact/teact';
 
-interface IProps {
+type OwnProps = {
   id?: string;
   value?: string;
   label?: string;
   placeholder?: string;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
   children: any;
-}
+};
 
-const Select: FC<IProps> = (props) => {
+const Select: FC<OwnProps> = (props) => {
   const {
     id,
     value,

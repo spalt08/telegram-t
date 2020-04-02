@@ -8,14 +8,17 @@ import { getChatTitle, getPrivateChatUserId, getUserFirstName } from '../../modu
 
 import Avatar from './Avatar';
 
-type IProps = {
+type OwnProps = {
   chatId: number;
   onClick: () => void;
+};
+
+type StateProps = {
   chat: ApiChat;
   privateChatUser?: ApiUser;
 };
 
-const PickerSelectedItem: FC<IProps> = ({
+const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   onClick,
   chat,
   privateChatUser,
@@ -46,8 +49,8 @@ const PickerSelectedItem: FC<IProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global, { chatId }: IProps) => {
+export default memo(withGlobal<OwnProps>(
+  (global, { chatId }) => {
     const chat = selectChat(global, chatId);
     if (!chat) {
       return {};

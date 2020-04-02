@@ -17,15 +17,17 @@ import Spinner from '../ui/Spinner';
 
 import './ForwardPicker.scss';
 
-type IProps = {
+type StateProps = {
   chatsById: Record<number, ApiChat>;
   listIds?: number[];
   orderedPinnedIds?: number[];
   selectedIds?: number[];
   isLoading?: boolean;
-} & Pick<GlobalActions, 'setForwardChatIds' | 'forwardMessages' | 'loadMoreChats'>;
+};
 
-const ForwardPicker: FC<IProps> = ({
+type DispatchProps = Pick<GlobalActions, 'setForwardChatIds' | 'forwardMessages' | 'loadMoreChats'>;
+
+const ForwardPicker: FC<StateProps & DispatchProps> = ({
   chatsById,
   listIds,
   orderedPinnedIds,

@@ -17,7 +17,7 @@ import PickerSelectedItem from './PickerSelectedItem';
 
 import './Picker.scss';
 
-type IProps = {
+type OwnProps = {
   itemIds: number[];
   selectedIds: number[];
   filterValue?: string;
@@ -26,9 +26,11 @@ type IProps = {
   onSelectedIdsChange: (ids: number[]) => void;
   onFilterChange: (value: string) => void;
   onLoadMore: () => void;
-} & Pick<GlobalState, 'currentUserId'>;
+};
 
-const Picker: FC<IProps> = ({
+type StateProps = Pick<GlobalState, 'currentUserId'>;
+
+const Picker: FC<OwnProps & StateProps> = ({
   itemIds,
   selectedIds,
   filterValue,

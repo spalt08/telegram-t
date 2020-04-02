@@ -5,12 +5,12 @@ import { formatPastTimeShort } from '../../util/dateFormat';
 import MessageOutgoingStatus from '../common/MessageOutgoingStatus';
 import './LastMessageMeta.scss';
 
-type IProps = {
+type OwnProps = {
   message: ApiMessage;
   outgoingStatus?: ApiMessageOutgoingStatus;
 };
 
-const LastMessageMeta: FC<IProps> = ({ message, outgoingStatus }) => {
+const LastMessageMeta: FC<OwnProps> = ({ message, outgoingStatus }) => {
   return (
     <div className="LastMessageMeta">
       {outgoingStatus && (

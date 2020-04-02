@@ -16,16 +16,21 @@ import Avatar from '../common/Avatar';
 
 import './SenderInfo.scss';
 
-type IProps = Pick<GlobalActions, 'openMediaViewer' | 'openUserInfo' | 'openChatWithInfo'> & {
+type OwnProps = {
   messageId?: number;
   chatId?: number;
-  message?: ApiMessage;
-  isChannelChatMessage?: boolean;
   isAvatar?: boolean;
-  sender?: ApiUser | ApiChat;
 };
 
-const SenderInfo: FC<IProps> = ({
+type StateProps = {
+  sender?: ApiUser | ApiChat;
+  message?: ApiMessage;
+  isChannelChatMessage?: boolean;
+};
+
+type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openUserInfo' | 'openChatWithInfo'>;
+
+const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   sender, isChannelChatMessage, isAvatar, message, openMediaViewer, openUserInfo, openChatWithInfo,
 }) => {
   const openSenderInfo = useCallback(() => {

@@ -4,14 +4,19 @@ import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
 import { selectViewportIds } from '../../modules/selectors';
 
-type IProps = {
+type OwnProps = {
   className?: string;
   message?: ApiMessage;
   children: any;
-  isMessageInViewport?: boolean;
-} & Pick<GlobalActions, 'focusMessage'>;
+};
 
-const MessageLink: FC<IProps> = ({
+type StateProps = {
+  isMessageInViewport?: boolean;
+};
+
+type DispatchProps = Pick<GlobalActions, 'focusMessage'>;
+
+const MessageLink: FC<OwnProps & StateProps & DispatchProps> = ({
   className, message, children, isMessageInViewport, focusMessage,
 }) => {
   const handleMessageClick = useCallback((): void => {
@@ -34,10 +39,8 @@ const MessageLink: FC<IProps> = ({
   );
 };
 
-export default withGlobal(
-  (global, ownProps: IProps) => {
-    const { message } = ownProps;
-
+export default withGlobal<OwnProps>(
+  (global, { message }) => {
     if (!message) {
       return {};
     }

@@ -8,12 +8,10 @@ import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 import CropModal from './CropModal';
 
-type IProps = (
-  Pick<GlobalState, 'authIsLoading' | 'authError'>
-  & Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadProfilePhoto'>
-);
+type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
+type DispatchProps = Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadProfilePhoto'>;
 
-const AuthRegister: FC<IProps> = ({
+const AuthRegister: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, signUp, clearAuthError, uploadProfilePhoto,
 }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);

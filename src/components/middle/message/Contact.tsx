@@ -10,12 +10,15 @@ import Avatar from '../../common/Avatar';
 
 import './Contact.scss';
 
-type IProps = {
+type OwnProps = {
   contact: ApiContact;
+};
+
+type StateProps = {
   user: ApiUser;
 };
 
-const Contact: FC<IProps> = ({ contact, user }) => {
+const Contact: FC<OwnProps & StateProps> = ({ contact, user }) => {
   const {
     firstName,
     lastName,
@@ -33,8 +36,8 @@ const Contact: FC<IProps> = ({ contact, user }) => {
   );
 };
 
-export default withGlobal(
-  (global, { contact }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { contact }) => {
     return {
       user: selectUser(global, contact.userId),
     };

@@ -3,14 +3,14 @@ import React, { FC } from '../../lib/teact/teact';
 
 import './Checkbox.scss';
 
-interface IProps {
+type OwnProps = {
   id?: string;
   label: string;
   checked: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-}
+};
 
-const Checkbox: FC<IProps> = ({
+const Checkbox: FC<OwnProps> = ({
   id,
   label,
   checked,

@@ -8,14 +8,19 @@ import buildClassName from '../../../util/buildClassName';
 import { getUserFullName } from '../../../modules/helpers';
 import { selectUser, selectUserByUserName } from '../../../modules/selectors';
 
-type IProps = {
+type OwnProps = {
   userId?: number;
   userName?: string;
-  user?: ApiUser;
   children: any;
-} & Pick<GlobalActions, 'openUserInfo'>;
+};
 
-const MentionLink: FC<IProps> = ({ user, children, openUserInfo }) => {
+type StateProps = {
+  user?: ApiUser;
+};
+
+type DispatchProps = Pick<GlobalActions, 'openUserInfo'>;
+
+const MentionLink: FC<OwnProps & StateProps & DispatchProps> = ({ user, children, openUserInfo }) => {
   const title = user ? getUserFullName(user)! : undefined;
 
   const openMentionedUser = useCallback(() => {
@@ -41,8 +46,8 @@ const MentionLink: FC<IProps> = ({ user, children, openUserInfo }) => {
   );
 };
 
-export default withGlobal(
-  (global, { userId, userName }: IProps) => {
+export default withGlobal<OwnProps>(
+  (global, { userId, userName }) => {
     if (userId) {
       return {
         user: selectUser(global, userId),

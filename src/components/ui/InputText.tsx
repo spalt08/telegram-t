@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, RefObject } from 'react';
 import React, { FC } from '../../lib/teact/teact';
 
-interface IProps {
+type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
   id?: string;
   value?: string;
@@ -12,9 +12,9 @@ interface IProps {
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-}
+};
 
-const InputText: FC<IProps> = ({
+const InputText: FC<OwnProps> = ({
   ref,
   id,
   value,
