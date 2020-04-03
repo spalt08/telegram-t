@@ -45,13 +45,13 @@ export function selectIsViewportNewest(global: GlobalState, chatId: number) {
   const { last_message } = selectChat(global, chatId) || {};
   const viewportIds = selectViewportIds(global, chatId);
 
-  return last_message && viewportIds && viewportIds[viewportIds.length - 1] >= last_message.id;
+  return last_message && viewportIds ? viewportIds[viewportIds.length - 1] >= last_message.id : false;
 }
 
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
   const chatMessages = selectChatMessages(global, chatId);
 
-  return chatMessages ? chatMessages[messageId] : null;
+  return chatMessages ? chatMessages[messageId] : undefined;
 }
 
 export function selectChatMessageByPollId(global: GlobalState, pollId: string) {

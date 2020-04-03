@@ -19,7 +19,6 @@ type OwnProps = {
 };
 
 type StateProps = {
-  currentUserId?: number;
   topUsers?: ApiUser[];
   recentlyFoundChatIds?: number[];
 };
@@ -30,7 +29,7 @@ const SEARCH_CLOSE_TIMEOUT_MS = 250;
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
-  topUsers, recentlyFoundChatIds, currentUserId,
+  topUsers, recentlyFoundChatIds,
   onSearchClose, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
 }) => {
   useEffect(() => {
@@ -79,7 +78,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
           {recentlyFoundChatIds.map((id) => (
             <div className="search-result" onClick={() => handleClick(id)}>
               {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} isSavedMessages={id === currentUserId} />
+                <PrivateChatInfo userId={id} />
               ) : (
                 <GroupChatInfo chatId={id} />
               )}
@@ -92,19 +91,17 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
-    const { currentUserId } = global;
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { users: topUsers } = global.topPeers;
     const { recentlyFoundChatIds } = global.globalSearch;
 
     return {
-      currentUserId,
       topUsers,
       recentlyFoundChatIds,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
     } = actions;

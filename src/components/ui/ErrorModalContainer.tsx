@@ -48,11 +48,11 @@ function getErrorHeader(error: ApiError) {
 }
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { errors } = global;
     return { errors };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { dismissError } = actions;
     return { dismissError };
   },

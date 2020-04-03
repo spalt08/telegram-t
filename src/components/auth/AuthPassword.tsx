@@ -120,11 +120,11 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { authIsLoading, authError } = global;
     return { authIsLoading, authError };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setAuthPassword, clearAuthError } = actions;
     return { setAuthPassword, clearAuthError };
   },

@@ -6,7 +6,7 @@ const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
 export function getUserFirstName(user?: ApiUser) {
   if (!user) {
-    return null;
+    return undefined;
   }
 
   switch (user.type['@type']) {
@@ -19,9 +19,10 @@ export function getUserFirstName(user?: ApiUser) {
     case 'userTypeUnknown': {
       return 'Deleted';
     }
-  }
 
-  return null;
+    default:
+      return undefined;
+  }
 }
 
 export function getUserFullName(user?: ApiUser) {

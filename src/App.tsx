@@ -30,7 +30,7 @@ const App: FC<StateProps> = ({ authState, authIsSessionRemembered }) => {
 };
 
 export default withGlobal(
-  global => {
+  (global): StateProps => {
     const { authState, authIsSessionRemembered } = global;
     return { authState, authIsSessionRemembered };
   },

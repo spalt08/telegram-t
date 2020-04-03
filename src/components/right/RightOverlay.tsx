@@ -63,14 +63,14 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const isForwarding = selectIsForwardMenuOpen(global) && selectIsMediaViewerOpen(global);
 
     return {
       isForwarding,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { closeForwardMenu } = actions;
     return { closeForwardMenu };
   },

@@ -382,7 +382,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, ownProps) => {
+  (global, ownProps): StateProps => {
     const {
       message, album, showSenderName, showAvatar,
     } = ownProps;
@@ -420,10 +420,8 @@ export default memo(withGlobal<OwnProps>(
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
-      ...(replyMessage && {
-        replyMessage,
-        replyMessageSender,
-      }),
+      replyMessage,
+      replyMessageSender,
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
@@ -432,7 +430,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       focusMessage,
       openMediaViewer,

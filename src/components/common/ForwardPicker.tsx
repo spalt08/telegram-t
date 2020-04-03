@@ -93,7 +93,7 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const {
       chats: {
         byId: chatsById,
@@ -114,7 +114,7 @@ export default withGlobal(
       isLoading,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setForwardChatIds, forwardMessages, loadMoreChats } = actions;
 
     return { setForwardChatIds, forwardMessages, loadMoreChats };

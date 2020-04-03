@@ -47,7 +47,7 @@ const MentionLink: FC<OwnProps & StateProps & DispatchProps> = ({ user, children
 };
 
 export default withGlobal<OwnProps>(
-  (global, { userId, userName }) => {
+  (global, { userId, userName }): StateProps => {
     if (userId) {
       return {
         user: selectUser(global, userId),
@@ -58,9 +58,9 @@ export default withGlobal<OwnProps>(
       };
     }
 
-    return null;
+    return {};
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { openUserInfo } = actions;
     return { openUserInfo };
   },

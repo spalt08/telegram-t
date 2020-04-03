@@ -15,10 +15,10 @@ const Test: FC<StateProps> = ({ authState, rand }) => {
 };
 
 export default withGlobal(
-  global => {
+  (global): StateProps => {
     return {
       authState: global.authState,
-      rand: Math.random(),
+      rand: Math.random().toString(),
     };
   },
 )(Test);

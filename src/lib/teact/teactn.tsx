@@ -116,7 +116,7 @@ export function removeCallback(cb: Function) {
   }
 }
 
-export function withGlobal<OwnProps = Props>(
+export function withGlobal<OwnProps>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
   mapReducersToProps: MapActionsToProps = () => ({}),
 ) {

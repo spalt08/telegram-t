@@ -16,7 +16,6 @@ type OwnProps = {
 };
 
 type StateProps = Pick<GlobalState, 'webPagePreview'>;
-
 type DispatchProps = Pick<GlobalActions, 'loadWebPagePreview' | 'clearWebPagePreview'>;
 
 const RE_LINK = /https?:\/\/(www.)?([a-zA-Z0-9.-]{2,256})([a-zA-Z/.-]{1,256})([?|#][=&#a-zA-Z0-9]{2,128})?/;
@@ -59,12 +58,12 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global) => {
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
     const { webPagePreview } = global;
     return { webPagePreview };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadWebPagePreview, clearWebPagePreview } = actions;
     return { loadWebPagePreview, clearWebPagePreview };
   },

@@ -48,8 +48,8 @@ type StateProps = {
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
-  isViewportNewest: boolean;
-  isFocusing: boolean;
+  isViewportNewest?: boolean;
+  isFocusing?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'>;
@@ -447,8 +447,8 @@ function determineStickyDate(container: HTMLElement) {
   });
 }
 
-export default memo(withGlobal(
-  global => {
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
     const chat = selectOpenChat(global);
     if (!chat) {
       return {};
@@ -466,7 +466,7 @@ export default memo(withGlobal(
       isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       loadViewportMessages, markMessagesRead, setChatScrollOffset,
     } = actions;

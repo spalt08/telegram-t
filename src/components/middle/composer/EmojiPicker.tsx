@@ -191,12 +191,12 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  global => {
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
     const { recentEmojis } = global;
     return { recentEmojis };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { addRecentEmoji } = actions;
     return { addRecentEmoji };
   },

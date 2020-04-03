@@ -108,14 +108,14 @@ function getGroupStatus(chat: ApiChat) {
 }
 
 export default withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
 
     return { lastSyncTime, chat, onlineCount };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadFullChat, loadSuperGroupOnlines, openMediaViewer } = actions;
     return { loadFullChat, loadSuperGroupOnlines, openMediaViewer };
   },

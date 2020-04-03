@@ -106,7 +106,7 @@ function buildAvatar(photo: any) {
     return { hash: `${dcId}-${volumeId}-${localId}` };
   }
 
-  return null;
+  return undefined;
 }
 
 export function buildChatMembers(participants: GramJs.TypeChatParticipants): ApiChatMember[] | undefined {

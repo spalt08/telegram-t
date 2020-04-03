@@ -455,7 +455,7 @@ async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachm
 }
 
 export default memo(withGlobal(
-  (global) => {
+  (global): StateProps => {
     const selectedChatId = global.chats.selectedId;
     const editingMessageId = selectedChatId ? global.chats.editingById[selectedChatId] : undefined;
     const editedMessage = editingMessageId ? selectChatMessage(global, selectedChatId!, editingMessageId) : undefined;
@@ -467,7 +467,7 @@ export default memo(withGlobal(
       connectionState,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { sendMessage, editMessage } = actions;
     return { sendMessage, editMessage };
   },

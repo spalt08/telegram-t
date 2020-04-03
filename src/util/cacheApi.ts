@@ -22,9 +22,9 @@ export async function fetch(cacheName: string, key: string, type: Type) {
       return cached.blob();
     case Type.Json:
       return cached.json();
+    default:
+      return null;
   }
-
-  return null;
 }
 
 export async function save(cacheName: string, key: string, data: AnyLiteral | Blob | string) {

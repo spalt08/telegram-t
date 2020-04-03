@@ -37,7 +37,7 @@ const Contact: FC<OwnProps & StateProps> = ({ contact, user }) => {
 };
 
 export default withGlobal<OwnProps>(
-  (global, { contact }) => {
+  (global, { contact }): StateProps => {
     return {
       user: selectUser(global, contact.userId),
     };

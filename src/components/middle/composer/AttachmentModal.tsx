@@ -17,7 +17,7 @@ import './AttachmentModal.scss';
 
 type OwnProps = {
   attachment?: ApiAttachment;
-  caption?: string;
+  caption: string;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
   onClear: () => void;

@@ -43,7 +43,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
 };
 
 export default withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
 
     return { chat };

@@ -26,7 +26,7 @@ import LastMessageMeta from './LastMessageMeta';
 import InfiniteScroll from '../ui/InfiniteScroll';
 
 type OwnProps = {
-  searchQuery: string;
+  searchQuery?: string;
   onSearchClose: () => void;
 };
 
@@ -170,7 +170,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
           {localResults.map((id) => (
             <div className="search-result" onClick={() => handleChatClick(id)}>
               {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} isSavedMessages={id === currentUserId} />
+                <PrivateChatInfo userId={id} />
               ) : (
                 <GroupChatInfo chatId={id} />
               )}
@@ -204,17 +204,22 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
-    const { userIds: localContactIds } = global.contactList || {};
-    if (!localContactIds) {
-      return {};
-    }
-
-    const { currentUserId } = global;
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { byId: chatsById } = global.chats;
     const { byId: usersById } = global.users;
 
+    const { userIds: localContactIds } = global.contactList || {};
+
+    if (!localContactIds) {
+      return {
+        chatsById,
+        usersById,
+        fetchingStatus: {},
+      };
+    }
+
+    const { currentUserId } = global;
     const { fetchingStatus, globalResults, localResults } = global.globalSearch;
     const {
       chats: globalChats,
@@ -237,7 +242,7 @@ export default withGlobal(
       fetchingStatus: fetchingStatus || {},
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
     } = actions;

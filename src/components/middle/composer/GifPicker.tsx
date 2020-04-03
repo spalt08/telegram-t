@@ -88,15 +88,15 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  global => {
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
     const { gifs: savedGifs } = global.savedGifs;
 
     return {
       savedGifs,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadSavedGifs } = actions;
     return { loadSavedGifs };
   },

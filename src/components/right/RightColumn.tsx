@@ -136,7 +136,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const {
       chats,
       users,
@@ -168,7 +168,7 @@ export default withGlobal(
       selectedUserId,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       openUserInfo, toggleChatInfo, closeMessageTextSearch, closeForwardMenu,
     } = actions;

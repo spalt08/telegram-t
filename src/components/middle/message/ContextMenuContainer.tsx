@@ -125,7 +125,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }) => {
+  (global, { message }): StateProps => {
     const {
       canReply, canPin, canDelete, canEdit,
     } = selectAllowedMessagedActions(global, message);
@@ -137,7 +137,7 @@ export default memo(withGlobal<OwnProps>(
       canEdit,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       setChatReplyingTo,
       setChatEditing,

@@ -40,7 +40,7 @@ const MessageLink: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { message }) => {
+  (global, { message }): StateProps => {
     if (!message) {
       return {};
     }
@@ -50,7 +50,7 @@ export default withGlobal<OwnProps>(
 
     return { isMessageInViewport };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       focusMessage,
     } = actions;

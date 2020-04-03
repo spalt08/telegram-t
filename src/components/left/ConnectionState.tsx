@@ -19,8 +19,8 @@ const ConnectionState: FC<StateProps> = ({ connectionState }) => {
 };
 
 export default withGlobal(
-  (global => {
+  (global): StateProps => {
     const { connectionState } = global;
     return { connectionState };
-  }),
+  },
 )(ConnectionState);

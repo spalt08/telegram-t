@@ -16,8 +16,8 @@ import './ChatList.scss';
 
 type StateProps = {
   chats: Record<number, ApiChat>;
-  listIds: number[];
-  selectedChatId: number;
+  listIds?: number[];
+  selectedChatId?: number;
   orderedPinnedIds?: number[];
 };
 
@@ -44,7 +44,7 @@ const ChatList: FC<StateProps & DispatchProps> = ({
     : {};
 
   return (
-    <InfiniteScroll className="ChatList custom-scroll" items={listIds} onLoadMore={loadMoreChats}>
+    <InfiniteScroll className="ChatList custom-scroll" items={listIds || []} onLoadMore={loadMoreChats}>
       {listIds && listIds.length && chatArrays ? (
         <div>
           {chatArrays.pinnedChats.map(({ id }) => (
@@ -67,7 +67,7 @@ const ChatList: FC<StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  global => {
+  (global): StateProps => {
     const {
       chats: {
         listIds,
@@ -84,7 +84,7 @@ export default memo(withGlobal(
       orderedPinnedIds,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadMoreChats } = actions;
     return { loadMoreChats };
   },

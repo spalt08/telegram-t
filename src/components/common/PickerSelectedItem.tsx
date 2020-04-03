@@ -14,7 +14,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat: ApiChat;
+  chat?: ApiChat;
   privateChatUser?: ApiUser;
 };
 
@@ -50,7 +50,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     if (!chat) {
       return {};

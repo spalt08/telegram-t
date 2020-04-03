@@ -64,8 +64,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const [, onMediaQueryChanged] = useState(null);
 
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
-  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : null;
-  const isVideo = message ? Boolean(getMessageVideo(message)) : null;
+  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
+  const isVideo = message ? Boolean(getMessageVideo(message)) : false;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
   const fileName = avatarOwner
     ? `avatar${avatarOwner.id}.jpg`
@@ -304,7 +304,7 @@ function renderVideo(
 }
 
 export default memo(withGlobal(
-  (global) => {
+  (global): StateProps => {
     const {
       chatId, messageId, avatarOwnerId, isReversed,
     } = global.mediaViewer;
@@ -335,7 +335,7 @@ export default memo(withGlobal(
       chatMessages,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { openMediaViewer, openForwardMenu } = actions;
     return { openMediaViewer, openForwardMenu };
   },

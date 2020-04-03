@@ -90,15 +90,15 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { fetchingStatus } = global.globalSearch;
 
     return {
-      isLoading: fetchingStatus && (fetchingStatus.chats || fetchingStatus.messages),
+      isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { signOut } = actions;
     return { signOut };
   },

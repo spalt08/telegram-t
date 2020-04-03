@@ -22,9 +22,9 @@ function renderOutgoingStatus(outgoingStatus: ApiMessageOutgoingStatus) {
       return <i className="icon-message-delivered" />;
     case 'failed':
       return <i className="icon-message-sending-error" />;
+    default:
+      return null;
   }
-
-  return null;
 }
 
 export default MessageOutgoingStatus;

@@ -51,7 +51,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { chats: { selectedId: openChatId, listIds } } = global;
     if (!listIds || !openChatId) {
       return {};
@@ -65,7 +65,7 @@ export default withGlobal(
       isChannel,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { openChat } = actions;
     return { openChat };
   },

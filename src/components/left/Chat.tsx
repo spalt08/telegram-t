@@ -40,18 +40,19 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat: ApiChat;
+  chat?: ApiChat;
   privateChatUser?: ApiUser;
   actionTargetUser?: ApiUser;
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
-  isUiReady: boolean;
+  isUiReady?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
 
 const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
+  chatId,
   chat,
   orderDiff,
   privateChatUser,
@@ -66,8 +67,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>();
 
-  const { last_message, typingStatus } = chat;
-  const chatId = chat.id;
+  const { last_message, typingStatus } = chat || {};
   const isAction = last_message && isActionMessage(last_message);
 
   useEnsureMessage(chatId, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
@@ -91,6 +91,18 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       });
     }
   }, [orderDiff]);
+
+  const handleClick = useCallback(() => {
+    if (selected) {
+      focusTopMessage();
+    } else {
+      openChat({ id: chatId });
+    }
+  }, [selected, focusTopMessage, openChat, chatId]);
+
+  if (!chat) {
+    return null;
+  }
 
   function renderLastMessageOrTyping() {
     if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
@@ -126,14 +138,6 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       </p>
     );
   }
-
-  const handleClick = useCallback(() => {
-    if (selected) {
-      focusTopMessage();
-    } else {
-      openChat({ id: chatId });
-    }
-  }, [selected, focusTopMessage, openChat, chatId]);
 
   const className = buildClassName(
     'Chat',
@@ -171,14 +175,14 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     if (!chat || !chat.last_message) {
       return {};
     }
 
     const { sender_user_id, reply_to_message_id, is_outgoing } = chat.last_message;
-    const lastMessageSender = sender_user_id && selectUser(global, sender_user_id);
+    const lastMessageSender = sender_user_id ? selectUser(global, sender_user_id) : undefined;
     const lastMessageAction = getMessageAction(chat.last_message);
     const actionTargetMessage = lastMessageAction && reply_to_message_id
       ? selectChatMessage(global, chat.id, reply_to_message_id)
@@ -189,7 +193,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      ...(lastMessageSender && { lastMessageSender }),
+      lastMessageSender,
       ...(is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.last_message) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
@@ -197,7 +201,7 @@ export default memo(withGlobal<OwnProps>(
       isUiReady,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { openChat, focusTopMessage } = actions;
     return { openChat, focusTopMessage };
   },

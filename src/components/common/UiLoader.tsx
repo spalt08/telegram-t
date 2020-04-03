@@ -19,7 +19,7 @@ import monkeyPath from '../../assets/monkey.svg';
 import './UiLoader.scss';
 
 type OwnProps = {
-  page: 'main' | 'authPhoneNumber';
+  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber';
   children: any;
 };
 
@@ -87,12 +87,12 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { isUiReady } = global;
     return { isUiReady };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setIsUiReady } = actions;
     return { setIsUiReady };
   },

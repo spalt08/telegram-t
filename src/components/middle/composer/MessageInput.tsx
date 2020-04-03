@@ -43,7 +43,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   const inputRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
-    if (html !== undefined && html !== inputRef.current!.innerHTML) {
+    if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
     }
     updateInputHeight();
@@ -113,8 +113,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
 
     if (!selectedChatId) {
@@ -126,7 +126,7 @@ export default withGlobal(
       replyingTo: replyingToById[selectedChatId],
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { editLastChatMessage } = actions;
     return { editLastChatMessage };
   },

@@ -17,8 +17,8 @@ import Avatar from '../common/Avatar';
 import './SenderInfo.scss';
 
 type OwnProps = {
-  messageId?: number;
   chatId?: number;
+  messageId?: number;
   isAvatar?: boolean;
 };
 
@@ -67,43 +67,45 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal((global, { chatId, messageId, isAvatar }) => {
-  if (isAvatar) {
-    const sender = isChatPrivate(chatId) ? selectUser(global, chatId) : selectChat(global, chatId);
+export default withGlobal<OwnProps>(
+  (global, { chatId, messageId, isAvatar }): StateProps => {
+    if (isAvatar && chatId) {
+      const sender = isChatPrivate(chatId) ? selectUser(global, chatId) : selectChat(global, chatId);
+
+      return {
+        sender,
+        isChannelChatMessage: !isChatPrivate(chatId),
+      };
+    }
+
+    if (!messageId || !chatId) {
+      return {};
+    }
+
+    let sender;
+    let isChannelChatMessage = false;
+    const chat = selectChat(global, chatId);
+    const message = selectChatMessage(global, chatId, messageId);
+
+    if (!message) {
+      return {};
+    }
+
+    if (chat && isChatChannel(chat)) {
+      sender = chat;
+      isChannelChatMessage = true;
+    } else {
+      sender = selectSender(global, message as ApiMessage);
+    }
 
     return {
+      isChannelChatMessage,
       sender,
-      isChannelChatMessage: !isChatPrivate(chatId),
+      message,
     };
-  }
-
-  if (!messageId || !chatId) {
-    return {};
-  }
-
-  let sender;
-  let isChannelChatMessage = false;
-  const chat = selectChat(global, chatId);
-  const message = selectChatMessage(global, chatId, messageId);
-
-  if (!message) {
-    return {};
-  }
-
-  if (chat && isChatChannel(chat)) {
-    sender = chat;
-    isChannelChatMessage = true;
-  } else {
-    sender = selectSender(global, message as ApiMessage);
-  }
-
-  return {
-    isChannelChatMessage,
-    sender,
-    message,
-  };
-},
-(setGlobal, actions) => {
-  const { openMediaViewer, openUserInfo, openChatWithInfo } = actions;
-  return { openMediaViewer, openUserInfo, openChatWithInfo };
-})(SenderInfo);
+  },
+  (setGlobal, actions): DispatchProps => {
+    const { openMediaViewer, openUserInfo, openChatWithInfo } = actions;
+    return { openMediaViewer, openUserInfo, openChatWithInfo };
+  },
+)(SenderInfo);

@@ -31,9 +31,9 @@ const UserLink: FC<OwnProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default withGlobal<OwnProps>(
   undefined,
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { openUserInfo } = actions;
     return { openUserInfo };
   },

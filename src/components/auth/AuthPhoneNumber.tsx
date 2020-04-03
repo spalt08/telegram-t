@@ -163,7 +163,7 @@ function getNumberWithCode(phoneNumber: string = '', country?: Country) {
 }
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const {
       connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
     } = global;
@@ -171,7 +171,7 @@ export default withGlobal(
       connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
     } = actions;

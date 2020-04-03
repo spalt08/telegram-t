@@ -15,7 +15,7 @@ import EmbeddedMessage from '../../common/EmbeddedMessage';
 import './ComposerEmbeddedMessage.scss';
 
 type StateProps = {
-  selectedChatId: number;
+  selectedChatId?: number;
   replyingTo?: number;
   editing?: number;
   message?: ApiMessage;
@@ -72,7 +72,7 @@ const ComposerEmbeddedMessage: FC<StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { chats: { selectedId: selectedChatId, replyingToById, editingById } } = global;
     const replyingTo = selectedChatId ? replyingToById[selectedChatId] : undefined;
     const editing = selectedChatId ? editingById[selectedChatId] : undefined;
@@ -80,7 +80,9 @@ export default memo(withGlobal(
     const message = replyingTo || editing
       ? selectChatMessage(global, selectedChatId!, (replyingTo || editing)!)
       : undefined;
-    const sender = replyingTo && message && message.sender_user_id && selectUser(global, message.sender_user_id);
+    const sender = replyingTo && message && message.sender_user_id
+      ? selectUser(global, message.sender_user_id)
+      : undefined;
 
     return {
       selectedChatId,
@@ -90,7 +92,7 @@ export default memo(withGlobal(
       sender,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setChatReplyingTo, setChatEditing, focusMessage } = actions;
     return { setChatReplyingTo, setChatEditing, focusMessage };
   },

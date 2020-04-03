@@ -146,11 +146,11 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  global => {
+  (global): StateProps => {
     const { authPhoneNumber, authIsLoading, authError } = global;
     return { authPhoneNumber, authIsLoading, authError };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setAuthCode, returnToAuthPhoneNumber, clearAuthError } = actions;
     return { setAuthCode, returnToAuthPhoneNumber, clearAuthError };
   },

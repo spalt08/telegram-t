@@ -14,9 +14,9 @@ import './RightHeader.scss';
 
 type OwnProps = {
   onClose: () => void;
-  isForwarding: boolean;
-  isSearch: boolean;
-  isSharedMedia: boolean;
+  isForwarding?: boolean;
+  isSearch?: boolean;
+  isSharedMedia?: boolean;
 };
 
 type StateProps = {
@@ -99,13 +99,13 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { query: searchQuery } = selectCurrentMessageSearch(global) || {};
 
     return { searchQuery };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       setMessageSearchQuery, searchMessages,
     } = actions;

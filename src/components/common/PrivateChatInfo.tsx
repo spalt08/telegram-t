@@ -15,13 +15,14 @@ type OwnProps = {
   userId: number;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
-  isSavedMessages?: boolean;
+  forceShowSelf?: boolean;
   showHandle?: boolean;
   showFullInfo?: boolean;
 };
 
 type StateProps = {
   user?: ApiUser;
+  isSavedMessages?: boolean;
 } & Pick<GlobalState, 'lastSyncTime'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser' | 'openMediaViewer'>;
@@ -100,17 +101,17 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { userId }) => {
-    const { lastSyncTime, chats } = global;
+  (global, { userId, forceShowSelf }): StateProps => {
+    const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 
     return {
       lastSyncTime,
       user,
-      isSavedMessages: user && user.is_self && user.id === chats.selectedId,
+      isSavedMessages: !forceShowSelf && user && user.is_self,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadFullUser, openMediaViewer } = actions;
     return { loadFullUser, openMediaViewer };
   },

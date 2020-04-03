@@ -87,12 +87,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { query } = global.globalSearch;
 
     return { searchQuery: query };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setGlobalSearchQuery } = actions;
     return { setGlobalSearchQuery };
   },

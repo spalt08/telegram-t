@@ -219,8 +219,8 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  global => {
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
     const { all, recent } = global.stickers;
 
     return {
@@ -228,7 +228,7 @@ export default memo(withGlobal(
       stickerSets: all.byId,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       loadStickerSets,
       loadRecentStickers,

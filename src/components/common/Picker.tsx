@@ -1,9 +1,6 @@
 import React, {
   FC, useCallback, useRef, useEffect,
 } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
-
-import { GlobalState } from '../../global/types';
 
 import { isChatPrivate } from '../../modules/helpers';
 
@@ -28,15 +25,12 @@ type OwnProps = {
   onLoadMore: () => void;
 };
 
-type StateProps = Pick<GlobalState, 'currentUserId'>;
-
-const Picker: FC<OwnProps & StateProps> = ({
+const Picker: FC<OwnProps> = ({
   itemIds,
   selectedIds,
   filterValue,
   filterPlaceholder,
   notFoundText,
-  currentUserId,
   onSelectedIdsChange,
   onFilterChange,
   onLoadMore,
@@ -70,7 +64,7 @@ const Picker: FC<OwnProps & StateProps> = ({
           checked={selectedIds.includes(id)}
         />
         {isChatPrivate(id) ? (
-          <PrivateChatInfo userId={id} isSavedMessages={id === currentUserId} />
+          <PrivateChatInfo userId={id} />
         ) : (
           <GroupChatInfo chatId={id} />
         )}
@@ -100,9 +94,4 @@ const Picker: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
-    const { currentUserId } = global;
-    return { currentUserId };
-  },
-)(Picker);
+export default Picker;

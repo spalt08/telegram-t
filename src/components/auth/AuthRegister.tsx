@@ -120,11 +120,11 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { authIsLoading, authError } = global;
     return { authIsLoading, authError };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { signUp, clearAuthError, uploadProfilePhoto } = actions;
     return { signUp, clearAuthError, uploadProfilePhoto };
   },

@@ -30,7 +30,7 @@ const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) =
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { typingStatus }) => {
+  (global, { typingStatus }): StateProps => {
     if (!typingStatus.userId) {
       return {};
     }

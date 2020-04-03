@@ -35,7 +35,7 @@ type OwnProps = {
 
 type StateProps = {
   resolvedUserId?: number;
-  chatMessages: Record<number, ApiMessage>;
+  chatMessages?: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
 };
 
@@ -165,19 +165,19 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           messageIds.map((id) => (
             <Media
               key={id}
-              message={chatMessages[id]}
+              message={chatMessages![id]}
               onClick={handleSelectMedia}
             />
           ))
         ) : mediaType === 'documents' ? (
           messageIds.map((id) => (
-            <Document key={id} message={chatMessages[id]} showTimeStamp smaller />
+            <Document key={id} message={chatMessages![id]} showTimeStamp smaller />
           ))
         ) : mediaType === 'links' ? (
           messageIds.map((id) => (
             <WebLink
               key={id}
-              message={chatMessages[id]}
+              message={chatMessages![id]}
             />
           ))
         ) : mediaType === 'audio' ? (
@@ -185,8 +185,8 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
             <Audio
               key={id}
               inSharedMedia
-              message={chatMessages[id]}
-              date={chatMessages[id].date}
+              message={chatMessages![id]}
+              date={chatMessages![id].date}
             />
           ))
         ) : null}
@@ -204,8 +204,13 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       onScroll={handleScroll}
     >
       {resolvedUserId ? [
-        <PrivateChatInfo userId={resolvedUserId} avatarSize="jumbo" showFullInfo />,
-        <UserExtra userId={resolvedUserId} />,
+        <PrivateChatInfo
+          userId={resolvedUserId}
+          avatarSize="jumbo"
+          forceShowSelf={resolvedUserId !== chatId}
+          showFullInfo
+        />,
+        <UserExtra userId={resolvedUserId} forceShowSelf={resolvedUserId !== chatId} />,
       ] : [
         <GroupChatInfo chatId={chatId} avatarSize="jumbo" showFullInfo />,
         <GroupExtra chatId={chatId} />,
@@ -228,7 +233,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { chatId, userId }) => {
+  (global, { chatId, userId }): StateProps => {
     const chatMessages = selectChatMessages(global, userId || chatId);
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
 
@@ -245,7 +250,7 @@ export default withGlobal<OwnProps>(
       isSearchTypeEmpty: !searchType,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { setMessageSearchMediaType, searchMessages, openMediaViewer } = actions;
     return { setMessageSearchMediaType, searchMessages, openMediaViewer };
   },

@@ -32,8 +32,8 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat: ApiChat;
-  messagesById: Record<number, ApiMessage>;
+  chat?: ApiChat;
+  messagesById?: Record<number, ApiMessage>;
   query?: string;
   totalCount?: number;
   foundIds?: number[];
@@ -52,7 +52,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   focusMessage,
 }) => {
   const foundResults = useMemo(() => {
-    if (!query || !foundIds || !foundIds.length) {
+    if (!query || !foundIds || !foundIds.length || !messagesById) {
       return MEMO_EMPTY_ARRAY;
     }
 
@@ -81,10 +81,10 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return (
       <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
-        <Avatar chat={isChatChannel(chat) ? chat : undefined} user={user} />
+        <Avatar chat={chat && isChatChannel(chat) ? chat : undefined} user={user} />
         <div className="info">
           <div className="title">
-            <h3>{isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
+            <h3>{chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
             <LastMessageMeta message={message} />
           </div>
           <p className="subtitle">{renderTextWithHighlight(text, query!)}</p>
@@ -115,8 +115,8 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const chat = selectOpenChat(global);
     const messagesById = chat && selectChatMessages(global, chat.id);
 
@@ -136,7 +136,7 @@ export default withGlobal(
       foundIds,
     };
   },
-  (global, actions) => {
+  (global, actions): DispatchProps => {
     const { searchMessages, focusMessage } = actions;
     return { searchMessages, focusMessage };
   },

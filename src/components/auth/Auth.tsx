@@ -28,7 +28,7 @@ const Auth: FC<StateProps> = ({ authState }) => {
 };
 
 export default withGlobal(
-  global => {
+  (global): StateProps => {
     const { authState } = global;
     return { authState };
   },

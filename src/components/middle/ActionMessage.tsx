@@ -75,18 +75,19 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }) => {
+  (global, { message }): StateProps => {
     const userId = message.sender_user_id;
     const { targetUserId: actionTargetUserId } = message.content.action || {};
     const actionTargetMessageId = message.reply_to_message_id;
+    const actionTargetMessage = actionTargetMessageId
+      ? selectChatMessage(global, message.chat_id, actionTargetMessageId)
+      : undefined;
     const isFocused = message.id === selectFocusedMessageId(global, message.chat_id);
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
-      ...(actionTargetMessageId && {
-        actionTargetMessage: selectChatMessage(global, message.chat_id, actionTargetMessageId),
-      }),
+      actionTargetMessage,
       isFocused,
     };
   },

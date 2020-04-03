@@ -64,19 +64,19 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { message }) => {
+  (global, { message }): StateProps => {
     const { canDeleteForAll } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
     const contactFirstName = isChatPrivate(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
-      : null;
+      : undefined;
 
     return {
       canDeleteForAll,
       contactFirstName,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { deleteMessages } = actions;
     return { deleteMessages };
   },

@@ -50,7 +50,7 @@ export function getChatTitle(chat: ApiChat, user?: ApiUser) {
 
 export function getChatDescription(chat: ApiChat) {
   if (!chat.full_info) {
-    return null;
+    return undefined;
   }
   return chat.full_info.about;
 }

@@ -8,6 +8,7 @@ import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 
 type OwnProps = {
   userId: number;
+  forceShowSelf?: boolean;
 };
 
 type StateProps = {
@@ -16,7 +17,9 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser'>;
 
-const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({ lastSyncTime, user, loadFullUser }) => {
+const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
+  lastSyncTime, user, forceShowSelf, loadFullUser,
+}) => {
   const {
     full_info,
     username,
@@ -30,7 +33,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({ lastSyncTime, us
     }
   }, [is_self, loadFullUser, user.id, lastSyncTime]);
 
-  if (is_self) {
+  if (is_self && !forceShowSelf) {
     return null;
   }
 
@@ -72,13 +75,13 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({ lastSyncTime, us
 };
 
 export default withGlobal<OwnProps>(
-  (global, { userId }) => {
+  (global, { userId }): StateProps => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 
     return { lastSyncTime, user };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { loadFullUser } = actions;
     return { loadFullUser };
   },

@@ -61,8 +61,8 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
-  (global) => {
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
     const { selectedId: openChatId } = global.chats;
     if (!openChatId) {
       return {};
@@ -76,7 +76,7 @@ export default withGlobal(
       unreadCount: chat ? chat.unread_count : undefined,
     };
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const { focusTopMessage } = actions;
     return { focusTopMessage };
   },

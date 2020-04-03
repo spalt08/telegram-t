@@ -98,12 +98,8 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    if (!chat) {
-      return null;
-    }
-
     let target: ApiChat | ApiUser | undefined = chat;
     if (isChatPrivate(chatId)) {
       const id = chat && getPrivateChatUserId(chat);
@@ -112,29 +108,29 @@ export default withGlobal<OwnProps>(
 
     if (target && target.full_info) {
       const { typingStatus } = chat;
-      const { pinned_message_id } = target.full_info;
-      const pinnedMessage = pinned_message_id && selectChatMessage(global, chatId, pinned_message_id);
+      const { pinned_message_id: pinnedMessageId } = target.full_info;
+      const pinnedMessage = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
 
       if (pinnedMessage) {
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
 
         return {
-          pinnedMessageId: pinned_message_id,
+          pinnedMessageId,
           pinnedMessage,
           canUnpin: canPin,
           typingStatus,
         };
       } else {
         return {
-          pinnedMessageId: pinned_message_id,
+          pinnedMessageId,
           typingStatus,
         };
       }
     }
 
-    return null;
+    return {};
   },
-  (setGlobal, actions) => {
+  (setGlobal, actions): DispatchProps => {
     const {
       openChatWithInfo,
       openMessageTextSearch,
