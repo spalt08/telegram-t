@@ -143,7 +143,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage,
   } = getMessageContent(message);
-  const textParts = renderMessageText(text);
+  const textParts = renderMessageText(message);
   const hasMedia = (
     getMessageMediaHash(message, 'inline')
     || hasMessageLocalBlobUrl(message)
@@ -171,12 +171,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     hasReply, customShape, isLastInGroup, isAlbum,
   });
 
-  const handleSenderClick = useCallback(() => {
-    if (!sender) {
+  const handleSenderClick = useCallback((user?: ApiUser) => {
+    if (!user) {
       return;
     }
-    openUserInfo({ id: sender.id });
-  }, [openUserInfo, sender]);
+    openUserInfo({ id: user.id });
+  }, [openUserInfo]);
 
   const handleReplyClick = useCallback((): void => {
     focusMessage({ chatId, messageId: message.reply_to_message_id });
@@ -237,7 +237,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return (
-      <div className="message-title interactive" onClick={handleSenderClick}>
+      <div className="message-title interactive" onClick={() => handleSenderClick(user)}>
         {user ? getUserFullName(user) : NBSP}
       </div>
     );
@@ -351,7 +351,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         <Avatar
           size="small"
           user={sender}
-          onClick={handleSenderClick}
+          onClick={() => handleSenderClick(sender)}
           className={!isLastInGroup ? 'hidden' : ''}
         />
       )}

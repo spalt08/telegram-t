@@ -373,7 +373,6 @@ const Composer: FC<StateProps & DispatchProps> = ({
             round
             color="translucent"
             onMouseEnter={handleOpenSymbolMenu}
-            onFocus={handleOpenSymbolMenu}
           >
             <i className="icon-smile" />
           </Button>

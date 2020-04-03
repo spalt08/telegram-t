@@ -202,7 +202,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
         </div>
       );
     } else if (message) {
-      const textParts = renderMessageText(message.content.text);
+      const textParts = renderMessageText(message);
       const hasFooter = Boolean(textParts);
 
       return (

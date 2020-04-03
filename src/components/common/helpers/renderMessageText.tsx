@@ -1,18 +1,19 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from '../../../lib/teact/teact';
-import { ApiFormattedText, ApiMessageEntity, ApiMessageEntityTypes } from '../../../api/types';
+import { ApiMessageEntity, ApiMessageEntityTypes, ApiMessage } from '../../../api/types';
 import { DEBUG } from '../../../config';
+import { getMessageText } from '../../../modules/helpers';
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../../middle/message/SafeLink';
 
 export type TextPart = string | Element;
 
-export function renderMessageText(formattedText?: ApiFormattedText) {
-  if (
-    !formattedText
-    || formattedText['@type'] !== 'formattedText'
-  ) {
-    return undefined;
+export function renderMessageText(message: ApiMessage) {
+  const formattedText = message.content.text;
+
+  if (!formattedText || formattedText['@type'] !== 'formattedText') {
+    const rawText = getMessageText(message);
+    return rawText ? [rawText] : undefined;
   }
   const { text, entities } = formattedText;
   if (!text) {

@@ -15,11 +15,12 @@ type OwnProps = {
   message: ApiMessage;
   smaller?: boolean;
   uploadProgress?: number;
+  showTimeStamp?: boolean;
   onCancelUpload?: () => void;
 };
 
 const Document: FC<OwnProps> = ({
-  message, smaller, uploadProgress, onCancelUpload,
+  message, smaller, uploadProgress, showTimeStamp, onCancelUpload,
 }) => {
   const document = message.content.document!;
   const { extension } = getDocumentInfo(document);
@@ -48,7 +49,7 @@ const Document: FC<OwnProps> = ({
       name={fileName}
       extension={extension}
       size={size}
-      timestamp={timestamp}
+      timestamp={showTimeStamp ? timestamp : undefined}
       smaller={smaller}
       isUploading={isUploading}
       isDownloading={isDownloading}

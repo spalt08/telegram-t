@@ -63,11 +63,10 @@ export function buildContentClassName(
   }
 
   if (!customShape) {
-    classNames.push('has-solid-background');
+    classNames.push('has-shadow');
 
-    // TODO Refactor
-    if (!((photo || video) && !text && !message.forward_info)) {
-      classNames.push('can-have-appendix');
+    if (hasReply || message.forward_info || !((photo || video) && !text)) {
+      classNames.push('has-solid-background');
     }
 
     if (isLastInGroup && !video && !isAlbum) {

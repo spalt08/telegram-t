@@ -76,7 +76,6 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
 
   if (mtpMessage.media) {
     content = {
-      ...content,
       ...buildMessageMediaContent(mtpMessage.media),
     };
   }
