@@ -26,7 +26,6 @@ type OwnProps = {
   anchor: IAnchorPosition;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
-  closeContextMenu: () => void;
 };
 
 type StateProps = {

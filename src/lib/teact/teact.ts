@@ -457,7 +457,7 @@ export function useRef(initial = null) {
   }), []);
 }
 
-export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
+export function memo<T extends FC>(Component: T, areEqual = arePropsShallowEqual) {
   return function MemoWrapper(props: Props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const propsRef = useRef(props);
@@ -469,7 +469,7 @@ export function memo(Component: FC, areEqual = arePropsShallowEqual): FC {
     }
 
     return renderedRef.current;
-  };
+  } as T;
 }
 
 // We need to keep it here for JSX.

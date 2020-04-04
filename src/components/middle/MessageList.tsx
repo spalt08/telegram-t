@@ -395,7 +395,7 @@ function renderMessages(
         };
         const loadAndPlayMedia = (
           viewportMessageIds.includes(message.id)
-          || (message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
+          || (!!message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
         );
 
         const renderedMessage = (

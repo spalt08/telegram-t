@@ -21,7 +21,7 @@ enum Tabs {
 
 // Getting enum string values for display in Tabs.
 // See: https://www.typescriptlang.org/docs/handbook/enums.html#reverse-mappings
-const TAB_TITLES = Object.values(Tabs).filter((value) => typeof value === 'string');
+const TAB_TITLES = Object.values(Tabs).filter((value): value is string => typeof value === 'string');
 const MENU_CLOSE_TIMEOUT = 250;
 const TRANSITION_NAME = navigator.userAgent.includes('Safari') ? 'slide' : 'scroll-slide';
 

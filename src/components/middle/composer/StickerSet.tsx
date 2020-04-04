@@ -1,12 +1,13 @@
 import React, { FC, memo, useEffect } from '../../../lib/teact/teact';
 
-import { ApiStickerSet, ApiSticker } from '../../../api/types';
 import { GlobalActions } from '../../../global/types';
+import { ApiSticker } from '../../../api/types';
+import { StickerSetOrRecent } from '../../../types';
 
 import StickerButton from './StickerButton';
 
 type OwnProps = {
-  set: ApiStickerSet;
+  set: StickerSetOrRecent;
   load: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
 } & Pick<GlobalActions, 'loadStickers'>;

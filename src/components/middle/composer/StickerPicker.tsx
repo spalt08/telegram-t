@@ -5,6 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiStickerSet, ApiSticker } from '../../../api/types';
+import { StickerSetOrRecent } from '../../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -34,8 +35,6 @@ type StateProps = {
 type DispatchProps = Pick<GlobalActions, (
   'loadStickerSets' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickers'
 )>;
-
-type PartialStickerSet = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
 
 const SMOOTH_SCROLL_DISTANCE = 500;
 // For some reason, parallel `scrollIntoView` executions are conflicting.
@@ -67,7 +66,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
-    const themeSets: PartialStickerSet[] = Object.values(stickerSets);
+    const themeSets: StickerSetOrRecent[] = Object.values(stickerSets);
 
     if (recentStickers.length) {
       themeSets.unshift({
@@ -147,7 +146,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     runThrottledForScroll(updateVisibleSetIndexes);
   }, [updateVisibleSetIndexes]);
 
-  function renderSetButton(set: PartialStickerSet, index: number) {
+  function renderSetButton(set: StickerSetOrRecent, index: number) {
     const stickerSetCover = set.stickers[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',

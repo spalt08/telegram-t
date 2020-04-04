@@ -1,4 +1,4 @@
-import { ApiMessage } from '../api/types';
+import { ApiMessage, ApiStickerSet } from '../api/types';
 
 export enum LoadMoreDirection {
   Backwards,
@@ -17,3 +17,5 @@ export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];
 }
+
+export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
