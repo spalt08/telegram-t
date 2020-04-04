@@ -165,8 +165,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const processInfiniteScroll = useCallback(() => {
     const container = containerRef.current!;
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    scrollOffsetRef.current = scrollHeight - scrollTop;
-
     const isNearTop = scrollTop <= MESSAGE_LIST_SENSITIVE_AREA;
     const isNearBottom = scrollHeight - (scrollTop + offsetHeight) <= MESSAGE_LIST_SENSITIVE_AREA;
     const currentAnchor = currentAnchorId && document.getElementById(currentAnchorId);
@@ -224,6 +222,9 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [isViewportNewest, loadMoreBackwards, loadMoreForwards]);
 
   const handleScroll = useCallback(() => {
+    const container = containerRef.current!;
+    scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
+
     if (!isFocusing) {
       processInfiniteScroll();
     } else {
@@ -237,14 +238,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
 
     runThrottledForScroll(() => {
-      if (!containerRef.current!.parentElement) {
+      if (!container.parentElement) {
         return;
       }
 
       requestAnimationFrame(() => {
         updateFabVisibility();
         updateViewportMessages();
-        determineStickyDate(containerRef.current!);
+        determineStickyDate(container);
       });
 
       setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
