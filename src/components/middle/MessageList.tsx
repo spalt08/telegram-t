@@ -57,10 +57,10 @@ type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesR
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
 const INDICATOR_TOP_MARGIN = 10;
-const HIDE_STICKY_TIMEOUT = 450;
+const SCROLL_THROTTLE = 1000;
 const FOCUSING_DURATION = 1000;
 
-const runThrottledForScroll = throttle((cb) => cb(), 1000, false);
+const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, false);
 const scrollToLastMessage = throttle((container: Element) => {
   container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 }, 300, true);
@@ -224,7 +224,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current!;
-    scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
+    const newScrollOffset = container.scrollHeight - container.scrollTop;
+
+    if (newScrollOffset === scrollOffsetRef.current) {
+      return;
+    }
+
+    scrollOffsetRef.current = newScrollOffset;
+    setIsScrolling(true);
 
     if (!isFocusing) {
       processInfiniteScroll();
@@ -232,21 +239,20 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       setTimeout(processInfiniteScroll, FOCUSING_DURATION);
     }
 
-    setIsScrolling(true);
-    if (scrollTimeout) {
-      clearTimeout(scrollTimeout);
-    }
-    scrollTimeout = setTimeout(() => setIsScrolling(false), HIDE_STICKY_TIMEOUT);
-
     runThrottledForScroll(() => {
       if (!container.parentElement) {
         return;
       }
 
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(() => setIsScrolling(false), SCROLL_THROTTLE + 100);
+
       requestAnimationFrame(() => {
         updateFabVisibility();
         updateViewportMessages();
-        determineStickyDate(container);
+        determineStuckDate(container);
       });
 
       setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
@@ -333,6 +339,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       container.scrollTop = newScrollTop;
+      determineStuckDate(container, true);
     }
 
     scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
@@ -463,12 +470,14 @@ function renderMessages(
   return flatten(dateGroups);
 }
 
-function determineStickyDate(container: HTMLElement) {
+function determineStuckDate(container: HTMLElement, forceHide = false) {
   const allElements = container.querySelectorAll<HTMLDivElement>('.message-date-header');
   const containerTop = container.scrollTop;
 
   Array.from(allElements).forEach((el) => {
-    el.classList.toggle('is-sticky', el.offsetTop - containerTop === INDICATOR_TOP_MARGIN);
+    const isStuck = el.offsetTop - containerTop === INDICATOR_TOP_MARGIN;
+    el.classList.toggle('stuck', isStuck);
+    el.classList.toggle('hidden', isStuck && forceHide);
   });
 }
 
