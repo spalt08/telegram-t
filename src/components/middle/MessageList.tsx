@@ -89,6 +89,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [containerHeight, setContainerHeight] = useState();
 
   useOnChange(() => {
     currentAnchorId = undefined;
@@ -252,6 +253,23 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages, updateFabVisibility]);
 
+  // Container resize observer.
+  useEffect(() => {
+    if (!('ResizeObserver' in window) || process.env.NODE_ENV === 'perf') {
+      return undefined;
+    }
+
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerHeight(entry.contentRect.height);
+    });
+
+    observer.observe(containerRef.current!);
+
+    return () => {
+      observer.disconnect();
+    };
+  });
+
   // Initial message loading
   useEffect(() => {
     const container = containerRef.current!;
@@ -264,11 +282,15 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [messageIds, loadMoreBoth]);
 
   useLayoutEffectWithPrevDeps(([
-    prevChatId, prevMessageIds, prevIsViewportNewest,
+    prevChatId, prevMessageIds, prevIsViewportNewest, prevContainerHeight,
   ]: [
-    typeof chatId, typeof messageIds, typeof isViewportNewest
+    typeof chatId, typeof messageIds, typeof isViewportNewest, typeof containerHeight
   ]) => {
-    if (!chatId || !messageIds || (chatId === prevChatId && messageIds === prevMessageIds)) {
+    if (!chatId || !messageIds || (
+      chatId === prevChatId
+      && messageIds === prevMessageIds
+      && prevContainerHeight === containerHeight
+    )) {
       return;
     }
 
@@ -281,11 +303,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
     const scrollOffset = scrollOffsetRef.current!;
-    const isAtBottom = scrollOffset - offsetHeight <= SCROLL_TO_LAST_THRESHOLD_PX;
-    const isNewMessage = (
-      isViewportNewest && prevIsViewportNewest && messageIds && prevMessageIds
-      && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
+    const isAtBottom = isViewportNewest && prevIsViewportNewest && (
+      scrollOffset - (prevContainerHeight || offsetHeight) <= SCROLL_TO_LAST_THRESHOLD_PX
     );
+    const isNewMessage = (
+      prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
+    );
+    const isResized = prevContainerHeight !== containerHeight;
     const anchor = currentAnchorId ? document.getElementById(currentAnchorId) : undefined;
     const unreadDivider = (
       !anchor && memoFirstUnreadId && container.querySelector<HTMLDivElement>('.unread-divider')
@@ -293,25 +317,25 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
     let newScrollTop;
 
-    if (isAtBottom && isNewMessage && isViewportNewest && prevIsViewportNewest) {
+    if (isAtBottom && isNewMessage) {
       newScrollTop = scrollHeight - offsetHeight;
       scrollToLastMessage(container);
-    } else if (anchor) {
-      const newAnchorTop = anchor.getBoundingClientRect().top;
-      newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
-      container.scrollTop = newScrollTop;
-    } else if (unreadDivider) {
-      newScrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
-      container.scrollTop = newScrollTop;
     } else {
-      newScrollTop = scrollHeight - scrollOffset;
+      if (isAtBottom && isResized) {
+        newScrollTop = scrollHeight - offsetHeight;
+      } else if (anchor) {
+        const newAnchorTop = anchor.getBoundingClientRect().top;
+        newScrollTop = scrollTop + (newAnchorTop - currentAnchorTop);
+      } else if (unreadDivider) {
+        newScrollTop = unreadDivider.offsetTop - INDICATOR_TOP_MARGIN;
+      } else {
+        newScrollTop = scrollHeight - scrollOffset;
+      }
+
       container.scrollTop = newScrollTop;
     }
 
-    if (newScrollTop) {
-      scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
-    }
-
+    scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
     listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
 
     updateFabVisibility();
@@ -321,7 +345,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, isViewportNewest, updateViewportMessages, onFabToggle]);
+  }, [chatId, messageIds, isViewportNewest, containerHeight, updateViewportMessages, onFabToggle]);
 
   useEffect(() => {
     if (!firstUnreadId) {
