@@ -1,7 +1,4 @@
-import { GLOBAL_STATE_CACHE_KEY } from '../config';
-
-const ERROR_TEXT = `Shoot!
-Something went wrong, please see the error details in Dev Tools Console.`;
+import { DEBUG_ALERT_MSG, GLOBAL_STATE_CACHE_KEY } from '../config';
 
 window.onerror = handleError;
 window.addEventListener('unhandledrejection', handleError);
@@ -21,8 +18,7 @@ function handleError(...args: any[]) {
   }
 
   // For startup errors, we just clean the cache and refresh the page.
-  const hasCache = Boolean(localStorage.getItem(GLOBAL_STATE_CACHE_KEY));
-  if (hasCache && Date.now() - startedAt <= STARTUP_TIMEOUT) {
+  if (Date.now() - startedAt <= STARTUP_TIMEOUT) {
     localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
 
     isReloading = true;
@@ -39,6 +35,6 @@ function handleError(...args: any[]) {
 
   if (NODE_ENV === 'development' || NODE_ENV === 'staging') {
     // eslint-disable-next-line no-alert
-    window.alert(ERROR_TEXT);
+    window.alert(DEBUG_ALERT_MSG);
   }
 }

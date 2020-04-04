@@ -1,3 +1,4 @@
+import { DEBUG, DEBUG_ALERT_MSG } from '../../config';
 import { onTickEnd, onTickEndThenRaf, throttleWithRaf } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
@@ -247,7 +248,20 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.hooks.memos.cursor = 0;
 
   const { Component, props } = componentInstance;
-  const newRenderedValue = Component(props);
+  let newRenderedValue;
+
+  try {
+    newRenderedValue = Component(props);
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      // eslint-disable-next-line no-alert
+      window.alert(DEBUG_ALERT_MSG);
+    }
+
+    newRenderedValue = componentInstance.renderedValue;
+  }
 
   if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;

@@ -1,24 +1,45 @@
-import React, { withGlobal } from '../../lib/teact/teactn';
+import React, { FC, useState } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState } from '../../global/types';
+
 import SubTest from './SubTest';
-import { FC } from '../../lib/teact/teact';
+import ErrorTest from './ErrorTest';
 
 type StateProps = Pick<GlobalState, 'authState'> & {
-  rand: string;
+  globalRand: number;
 };
 
-const Test: FC<StateProps> = ({ authState, rand }) => {
-  // eslint-disable-next-line no-console
-  console.log('rendering TEST', authState, rand);
+let lastTimeout: number | undefined;
 
-  return <SubTest authState={authState} rand={rand} />;
+const Test: FC<StateProps> = ({ authState, globalRand }) => {
+  // eslint-disable-next-line no-console
+  console.log('rendering `Test`', authState, globalRand);
+
+  const [ownRand, setOwnRand] = useState(0);
+
+  if (lastTimeout) {
+    clearTimeout(lastTimeout);
+    lastTimeout = undefined;
+  }
+
+  lastTimeout = window.setTimeout(() => {
+    setOwnRand(Math.random());
+  }, 3000);
+
+  return (
+    <div>
+      <h2>Test page</h2>
+      <SubTest authState={authState} parentRand={globalRand} />
+      <ErrorTest parentRand={ownRand} />
+    </div>
+  );
 };
 
 export default withGlobal(
   (global): StateProps => {
     return {
       authState: global.authState,
-      rand: Math.random().toString(),
+      globalRand: Math.random(),
     };
   },
 )(Test);

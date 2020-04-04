@@ -2,6 +2,7 @@ import React, {
   FC, Props, useEffect, useState,
 } from './teact';
 
+import { DEBUG, DEBUG_ALERT_MSG } from '../../config';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import generateIdFor from '../../util/generateIdFor';
 import { throttleWithRaf } from '../../util/schedulers';
@@ -78,10 +79,24 @@ function updateContainers() {
     const {
       mapStateToProps, mapReducersToProps, ownProps, mappedProps, forceUpdate,
     } = containers[id];
-    const newMappedProps = {
-      ...mapStateToProps(global, ownProps),
-      ...mapReducersToProps(setGlobal, actions),
-    };
+
+    let newMappedProps;
+
+    try {
+      newMappedProps = {
+        ...mapStateToProps(global, ownProps),
+        ...mapReducersToProps(setGlobal, actions),
+      };
+    } catch (err) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        // eslint-disable-next-line no-alert
+        window.alert(DEBUG_ALERT_MSG);
+      }
+
+      return;
+    }
 
     if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps, newMappedProps)) {
       containers[id].mappedProps = newMappedProps;
@@ -147,10 +162,20 @@ export function withGlobal<OwnProps>(
         containers[id].areMappedPropsChanged = false;
       } else {
         containers[id].ownProps = props;
-        containers[id].mappedProps = {
-          ...mapStateToProps(global, props),
-          ...mapReducersToProps(setGlobal, actions),
-        };
+
+        try {
+          containers[id].mappedProps = {
+            ...mapStateToProps(global, props),
+            ...mapReducersToProps(setGlobal, actions),
+          };
+        } catch (err) {
+          if (DEBUG) {
+            // eslint-disable-next-line no-console
+            console.error(err);
+            // eslint-disable-next-line no-alert
+            window.alert(DEBUG_ALERT_MSG);
+          }
+        }
       }
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...containers[id].mappedProps} {...props} />;

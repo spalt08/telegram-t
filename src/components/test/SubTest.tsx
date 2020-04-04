@@ -4,25 +4,25 @@ import { ApiUpdateAuthorizationStateType } from '../../api/types';
 
 type OwnProps = {
   authState?: ApiUpdateAuthorizationStateType;
-  rand: string;
+  parentRand: number;
 };
 
-const SubTest: FC<OwnProps> = ({ authState, rand }) => {
+const SubTest: FC<OwnProps> = ({ authState, parentRand }) => {
   // eslint-disable-next-line no-console
-  console.log('rendering SUB TEST', authState, rand);
+  console.log('rendering `SubTest`', authState, parentRand);
 
   const [value, setValue] = useState(0);
 
   return (
     <div>
-      <div>
-        THIS IS A SubTest PAGE
-      </div>
+      <h3>
+        THIS IS `SubTest` Component
+      </h3>
       <div>
         authState: {authState}!
       </div>
       <div>
-        rand: {rand}!
+        parentRand: {parentRand}!
       </div>
       <div>
         state value: {value}!
