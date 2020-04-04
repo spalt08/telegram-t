@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiMessage } from '../../../api/types';
+import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { calculateVideoDimensions, AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 import {
@@ -24,6 +24,7 @@ type OwnProps = {
   loadAndPlay?: boolean;
   uploadProgress?: number;
   albumMediaParams?: AlbumMediaParameters;
+  lastSyncTime?: number;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onCancelUpload?: () => void;
 };
@@ -33,16 +34,16 @@ const Video: FC<OwnProps> = ({
   loadAndPlay,
   uploadProgress,
   albumMediaParams,
+  lastSyncTime,
   onClick,
   onCancelUpload,
 }) => {
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
-
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const {
-    mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !loadAndPlay);
+  const { mediaData, downloadProgress } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
+    getMessageMediaHash(message, 'inline'), !loadAndPlay, undefined, lastSyncTime,
+  );
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(localBlobUrl || mediaData, 'slow');
   const {
     isTransferring, transferProgress,

@@ -8,6 +8,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   noLoad = false,
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
   mediaFormat: T = ApiMediaFormat.BlobUrl,
+  cacheBuster?: number,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
 
@@ -18,7 +19,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
     if (!noLoad && mediaHash && !mediaData) {
       mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(onMediaLoad);
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster]);
 
   return { mediaData, downloadProgress };
 };

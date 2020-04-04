@@ -25,6 +25,7 @@ import {
   isReplyMessage,
   isForwardedMessage,
   getMessageCustomShape,
+  getMessageVideo,
 } from '../../../modules/helpers';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -75,11 +76,11 @@ type StateProps = {
   isSelectedToForward?: boolean;
   focusDirection?: FocusDirection;
   isChatWithSelf?: boolean;
+  lastSyncTime?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openUserInfo' |
-  'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
+  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
 )>;
 
 const NBSP = '\u00A0';
@@ -105,6 +106,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isSelectedToForward,
   focusDirection,
   isChatWithSelf,
+  lastSyncTime,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
@@ -289,6 +291,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
+            lastSyncTime={lastSyncTime}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
           />
@@ -417,6 +420,9 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds } = global.forwardMessages;
     const isSelectedToForward = messageIds && messageIds.includes(message.id);
 
+    const isVideo = Boolean(getMessageVideo(message));
+    const { lastSyncTime } = global;
+
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
@@ -425,9 +431,11 @@ export default memo(withGlobal<OwnProps>(
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
+      ...(isFocused && { focusDirection }),
       isSelectedToForward,
-      focusDirection,
       isChatWithSelf,
+      // Heavy inline videos are never cached and should be re-fetched after connection.
+      ...(isVideo && { lastSyncTime }),
     };
   },
   (setGlobal, actions): DispatchProps => {
