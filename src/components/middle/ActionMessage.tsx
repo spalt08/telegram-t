@@ -7,7 +7,7 @@ import {
   ApiUser,
   ApiMessage,
 } from '../../api/types';
-import { selectUser, selectChatMessage, selectFocusedMessageId } from '../../modules/selectors';
+import { selectUser, selectChatMessage, selectIsMessageFocused } from '../../modules/selectors';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import buildClassName from '../../util/buildClassName';
@@ -82,13 +82,12 @@ export default memo(withGlobal<OwnProps>(
     const actionTargetMessage = actionTargetMessageId
       ? selectChatMessage(global, message.chat_id, actionTargetMessageId)
       : undefined;
-    const isFocused = message.id === selectFocusedMessageId(global, message.chat_id);
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
-      isFocused,
+      isFocused: selectIsMessageFocused(global, message),
     };
   },
 )(ActionMessage));

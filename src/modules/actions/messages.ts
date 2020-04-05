@@ -7,6 +7,7 @@ import {
 import {
   selectFirstUnreadId, selectOpenChat, selectRealLastReadId, selectViewportIds,
 } from '../selectors';
+import { isMessageIdNewer } from '../helpers';
 
 const FOCUS_DURATION = 2000;
 
@@ -46,7 +47,7 @@ addReducer('focusTopMessage', (global, actions) => {
 });
 
 addReducer('focusMessage', (global, actions, payload) => {
-  const { chatId, messageId } = payload!;
+  const { chatId, messageId, noHighlight } = payload!;
   const shouldSwitchChat = chatId !== global.chats.selectedId;
 
   if (blurTimeout) {
@@ -61,7 +62,7 @@ addReducer('focusMessage', (global, actions, payload) => {
 
   let newGlobal = global;
 
-  newGlobal = updateFocusedMessage(newGlobal, chatId, messageId);
+  newGlobal = updateFocusedMessage(newGlobal, chatId, messageId, noHighlight);
 
   if (shouldSwitchChat) {
     newGlobal = updateSelectedChatId(newGlobal, chatId);
@@ -77,7 +78,7 @@ addReducer('focusMessage', (global, actions, payload) => {
   newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (viewportIds && !shouldSwitchChat) {
-    const direction = messageId < viewportIds[0] ? FocusDirection.Up : FocusDirection.Down;
+    const direction = isMessageIdNewer(messageId, viewportIds[0]) ? FocusDirection.Down : FocusDirection.Up;
     newGlobal = updateFocusDirection(newGlobal, direction);
   }
 

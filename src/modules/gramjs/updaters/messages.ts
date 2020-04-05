@@ -12,7 +12,7 @@ import { GlobalState } from '../../../global/types';
 import {
   selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds, selectChatMessageByPollId,
 } from '../../selectors';
-import { getMessageContent, isCommonBoxChat } from '../../helpers';
+import { getMessageContent, isCommonBoxChat, isMessageIdNewer } from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
@@ -55,6 +55,10 @@ export function onUpdate(update: ApiUpdate) {
       }
 
       setGlobal(newGlobal);
+
+      if (chat_id === global.chats.selectedId && message.is_outgoing) {
+        getDispatch().focusMessage({ chatId: chat_id, messageId: id, noHighlight: true });
+      }
 
       // Edge case: New message in an old (not loaded) chat.
       const { listIds } = newGlobal.chats;
@@ -290,18 +294,11 @@ function updateChatLastMessage(
   const currentLastMessage = chats.byId[chatId] && chats.byId[chatId].last_message;
 
   if (currentLastMessage && !force) {
-    // TODO @refactoring Use 1e9+ for local IDs instead of 0-
-    const isNewer = (
+    const isSameOrNewer = (
       currentLastMessage.id === message.id || currentLastMessage.id === message.prev_local_id
-    ) || (
-      currentLastMessage.id < 0 && message.id < currentLastMessage.id
-    ) || (
-      currentLastMessage.id >= 0 && (
-        message.id < 0 || message.id > currentLastMessage.id
-      )
-    );
+    ) || isMessageIdNewer(message.id, currentLastMessage.id);
 
-    if (!isNewer) {
+    if (!isSameOrNewer) {
       return global;
     }
   }

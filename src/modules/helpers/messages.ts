@@ -150,3 +150,8 @@ export function isMessageLocal(message: ApiMessage) {
 export function getMessageAction(message: ApiMessage) {
   return message.content.action;
 }
+
+// TODO @refactoring Use 1e9+ for local IDs instead of 0-
+export function isMessageIdNewer(a: number, b: number) {
+  return a > 0 && b > 0 ? a > b : a < b;
+}

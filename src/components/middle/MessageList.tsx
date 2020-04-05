@@ -301,6 +301,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const container = containerRef.current!;
+    listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
+
+    if (isFocusing) {
+      return;
+    }
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
@@ -343,8 +348,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
-    listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
-
     updateFabVisibility();
     requestAnimationFrame(updateViewportMessages);
 
@@ -352,7 +355,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-  }, [chatId, messageIds, isViewportNewest, containerHeight, updateViewportMessages, onFabToggle]);
+  }, [chatId, messageIds, isViewportNewest, containerHeight, isFocusing, updateFabVisibility, updateViewportMessages]);
 
   useEffect(() => {
     if (!firstUnreadId) {
