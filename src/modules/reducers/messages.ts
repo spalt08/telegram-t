@@ -61,21 +61,6 @@ export function replaceViewportIds(
   });
 }
 
-export function replaceChatMessagesById(
-  global: GlobalState, chatId: number, updatedById: Record<number, ApiMessage>,
-): GlobalState {
-  if (!Object.keys(updatedById).length) {
-    return global;
-  }
-
-  const byId = selectChatMessages(global, chatId);
-
-  return replaceChatMessages(global, chatId, {
-    ...byId,
-    ...updatedById,
-  });
-}
-
 export function addChatMessagesById(
   global: GlobalState, chatId: number, newById: Record<number, ApiMessage>,
 ): GlobalState {
