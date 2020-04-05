@@ -65,6 +65,7 @@ export type GlobalState = {
     chatId?: number;
     messageId?: number;
     direction?: FocusDirection;
+    noHighlight?: boolean;
   };
 
   fileUploads: {

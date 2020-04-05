@@ -510,6 +510,7 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
   return `${defaultBase}${String(document.id)}.${extension}`;
 }
 
+// TODO @refactoring Use 1e9+ for local IDs instead of 0-
 let localMessageCounter = -1;
 
 export function buildLocalMessage(

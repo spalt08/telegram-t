@@ -9,12 +9,12 @@ import { FocusDirection, IAlbum } from '../../../types';
 
 import {
   selectChat,
-  selectFocusedMessageId,
   selectChatMessage,
   selectUploadProgress,
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
+  selectIsMessageFocused,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -73,8 +73,9 @@ type StateProps = {
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
   isFocused?: boolean;
-  isSelectedToForward?: boolean;
   focusDirection?: FocusDirection;
+  noFocusHighlight?: boolean;
+  isSelectedToForward?: boolean;
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
 };
@@ -88,7 +89,7 @@ const NBSP = '\u00A0';
 // This is the max scroll offset within existing viewport.
 const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
-const RELOCATED_FOCUS_OFFSET = 1000;
+const RELOCATED_FOCUS_OFFSET = 1200;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -103,8 +104,9 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   outgoingStatus,
   uploadProgress,
   isFocused,
-  isSelectedToForward,
   focusDirection,
+  noFocusHighlight,
+  isSelectedToForward,
   isChatWithSelf,
   lastSyncTime,
   isFirstInGroup,
@@ -163,7 +165,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     hasMedia && 'has-media',
     hasReply && 'has-reply',
     isContextMenuShown && 'has-menu-open',
-    isFocused && 'focused',
+    isFocused && !noFocusHighlight && 'focused',
     isSelectedToForward && 'is-forwarding',
     message.is_deleting && 'is-deleting',
     isAlbum && 'is-album',
@@ -408,11 +410,10 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const uploadProgress = selectUploadProgress(global, message);
-    const focusedId = selectFocusedMessageId(global, chatId);
-    const isFocused = focusedId && album
-      ? album.messages.map(({ id }) => id).includes(focusedId)
-      : message.id === focusedId;
-    const { direction: focusDirection } = (isFocused && global.focusedMessage) || {};
+    const isFocused = album
+      ? album.messages.some((m) => selectIsMessageFocused(global, m))
+      : selectIsMessageFocused(global, message);
+    const { direction: focusDirection, noHighlight: noFocusHighlight } = (isFocused && global.focusedMessage) || {};
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = chat && selectIsChatWithSelf(global, chat);
@@ -431,7 +432,7 @@ export default memo(withGlobal<OwnProps>(
       ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
-      ...(isFocused && { focusDirection }),
+      ...(isFocused && { focusDirection, noFocusHighlight }),
       isSelectedToForward,
       isChatWithSelf,
       // Heavy inline videos are never cached and should be re-fetched after connection.

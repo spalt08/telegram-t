@@ -72,6 +72,7 @@ function updateCache(global: GlobalState) {
     isUiReady: false,
     lastSyncTime: undefined,
     messages: reduceMessages(global),
+    focusedMessage: {},
     fileUploads: { byMessageKey: {} },
     stickers: reduceStickers(global),
     savedGifs: reduceSavedGifs(global),
