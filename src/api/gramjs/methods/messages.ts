@@ -33,6 +33,7 @@ import {
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { requestChatUpdate } from './chats';
 
 type OnUploadProgress = (
   messageLocalId: number,
@@ -302,26 +303,7 @@ export async function markMessagesRead({
       }),
   );
 
-  const result = await invokeRequest(new GramJs.messages.GetPeerDialogs({
-    peers: [new GramJs.InputDialogPeer({
-      peer: buildInputPeer(chat.id, chat.access_hash),
-    })],
-  }));
-
-  if (!result || !result.dialogs.length || !(result.dialogs[0] instanceof GramJs.Dialog)) {
-    return;
-  }
-
-  const { readInboxMaxId, unreadCount } = result.dialogs[0];
-
-  onUpdate({
-    '@type': 'updateChat',
-    id: chat.id,
-    chat: {
-      last_read_inbox_message_id: readInboxMaxId,
-      unread_count: unreadCount,
-    },
-  });
+  void requestChatUpdate(chat);
 }
 
 export async function readMessageContents({ messageId }: { messageId: number }) {
