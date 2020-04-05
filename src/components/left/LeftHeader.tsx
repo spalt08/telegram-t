@@ -120,7 +120,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <AttentionIndicator show={isSettingsAttentionNeeded} />
+      {hasMenu && <AttentionIndicator show={isSettingsAttentionNeeded} />}
       <Transition name="slide-fade" activeKey={headerKey} renderCount={TRANSITION_RENDER_COUNT}>
         {renderHeaderContent}
       </Transition>
