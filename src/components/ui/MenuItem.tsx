@@ -1,6 +1,7 @@
 import React, { FC } from '../../lib/teact/teact';
 
 import RippleEffect from './RippleEffect';
+import AttentionIndicator from './AttentionIndicator';
 
 import './MenuItem.scss';
 
@@ -12,6 +13,7 @@ type OwnProps = {
   children: any;
   onClick?: OnClickHandler;
   disabled?: boolean;
+  attention?: boolean;
 };
 
 const MenuItem: FC<OwnProps> = (props) => {
@@ -21,6 +23,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     children,
     onClick,
     disabled,
+    attention,
   } = props;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -38,6 +41,7 @@ const MenuItem: FC<OwnProps> = (props) => {
         )}
         {children}
         <RippleEffect />
+        {attention && <AttentionIndicator show={attention} />}
       </button>
     </div>
   );

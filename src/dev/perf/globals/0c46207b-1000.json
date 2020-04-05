@@ -28,6 +28,11 @@
   "topPeers": {},
   "mediaViewer": {},
   "forwardMessages": {},
+  "settings": {
+    "byKey": {
+      "animationLevel": 1
+    }
+  },
   "errors": [],
   "users": {
     "byId": {

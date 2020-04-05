@@ -15,7 +15,7 @@ import GroupChatInfo from '../common/GroupChatInfo';
 import RippleEffect from '../ui/RippleEffect';
 
 type OwnProps = {
-  onSearchClose: () => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -30,7 +30,7 @@ const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   topUsers, recentlyFoundChatIds,
-  onSearchClose, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
+  onReset, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
 }) => {
   useEffect(() => {
     runThrottled(() => {
@@ -43,12 +43,12 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleClick = useCallback(
     (id: number) => {
       openChat({ id });
-      onSearchClose();
+      onReset();
       setTimeout(() => {
         addRecentlyFoundChatId({ id });
       }, SEARCH_CLOSE_TIMEOUT_MS);
     },
-    [openChat, addRecentlyFoundChatId, onSearchClose],
+    [openChat, addRecentlyFoundChatId, onReset],
   );
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {

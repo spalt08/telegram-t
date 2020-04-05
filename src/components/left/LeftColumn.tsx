@@ -4,6 +4,8 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+import { LeftColumnContent } from '../../types';
+
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import LeftHeader from './LeftHeader';
@@ -12,15 +14,9 @@ import ChatList from './ChatList';
 import LeftRecent from './LeftRecent';
 import LeftSearch from './LeftSearch';
 import Transition from '../ui/Transition';
+import Settings from './settings/Settings';
 
 import './LeftColumn.scss';
-
-enum ColumnContent {
-  // eslint-disable-next-line no-shadow
-  ChatList,
-  RecentChats,
-  GlobalSearch,
-}
 
 type StateProps = {
   searchQuery?: string;
@@ -28,58 +24,58 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery'>;
 
-const TRANSITION_RENDER_COUNT = 3;
+const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 
 const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSearchQuery }) => {
-  const [columnContent, setColumnContent] = useState<ColumnContent>(ColumnContent.ChatList);
-  const isSearchOpen = columnContent !== ColumnContent.ChatList;
+  const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
 
-  const handleOpenSearch = useCallback(() => {
-    if (!searchQuery) {
-      setColumnContent(ColumnContent.RecentChats);
-    }
-  }, [searchQuery]);
-
-  const handleCloseSearch = useCallback(() => {
-    setColumnContent(ColumnContent.ChatList);
+  const handleReset = useCallback(() => {
+    setContent(LeftColumnContent.ChatList);
     setGlobalSearchQuery({ query: '' });
   }, [setGlobalSearchQuery]);
 
-  const handleSearchQueryChange = useCallback((query: string) => {
-    setColumnContent(query.length ? ColumnContent.GlobalSearch : ColumnContent.RecentChats);
+  const handleSearchQuery = useCallback((query: string) => {
+    setContent(query.length ? LeftColumnContent.GlobalSearch : LeftColumnContent.RecentChats);
 
     if (query !== searchQuery) {
       setGlobalSearchQuery({ query });
     }
   }, [setGlobalSearchQuery, searchQuery]);
 
+  const handleSelectSettings = useCallback(() => {
+    setContent(LeftColumnContent.Settings);
+  }, []);
+
   useEffect(
-    () => (isSearchOpen ? captureEscKeyListener(handleCloseSearch) : undefined),
-    [isSearchOpen, handleCloseSearch],
+    () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(handleReset) : undefined),
+    [content, handleReset],
   );
 
   function renderContent() {
-    switch (columnContent) {
-      case ColumnContent.RecentChats:
-        return <LeftRecent onSearchClose={handleCloseSearch} />;
-      case ColumnContent.GlobalSearch:
-        return <LeftSearch searchQuery={searchQuery} onSearchClose={handleCloseSearch} />;
-      default:
+    switch (content) {
+      case LeftColumnContent.ChatList:
         return <ChatList />;
+      case LeftColumnContent.RecentChats:
+        return <LeftRecent onReset={handleReset} />;
+      case LeftColumnContent.GlobalSearch:
+        return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
+      case LeftColumnContent.Settings:
+        return <Settings />;
     }
+
+    return undefined;
   }
 
   return (
     <div id="LeftColumn">
       <LeftHeader
-        isSearchOpen={isSearchOpen}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchQueryChange}
-        onSearchOpen={handleOpenSearch}
-        onSearchClose={handleCloseSearch}
+        content={content}
+        onSearchQuery={handleSearchQuery}
+        onSelectSettings={handleSelectSettings}
+        onReset={handleReset}
       />
       <ConnectionState />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={columnContent}>
+      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
         {renderContent}
       </Transition>
     </div>

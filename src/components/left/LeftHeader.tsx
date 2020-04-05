@@ -1,83 +1,129 @@
 import React, {
-  FC, useState, useCallback, useMemo,
+  FC, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+import { LeftColumnContent } from '../../types';
+
+import buildClassName from '../../util/buildClassName';
+
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import AttentionIndicator from '../ui/AttentionIndicator';
+import Transition from '../ui/Transition';
 import SearchInput from '../ui/SearchInput';
+
 import './LeftHeader.scss';
 
 type OwnProps = {
-  isSearchOpen: boolean;
-  searchQuery?: string;
-  onSearchChange: (value: string) => void;
-  onSearchOpen: () => void;
-  onSearchClose: () => void;
+  content: LeftColumnContent;
+  onSearchQuery: (query: string) => void;
+  onSelectSettings: () => void;
+  onReset: () => void;
 };
 
 type StateProps = {
+  searchQuery?: string;
   isLoading: boolean;
+  isSettingsAttentionNeeded: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'signOut'>;
 
+const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
+
 const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
-  isSearchOpen, searchQuery, isLoading, onSearchChange, onSearchOpen, onSearchClose, signOut,
+  content,
+  onSearchQuery,
+  onSelectSettings,
+  onReset,
+  searchQuery,
+  isLoading,
+  isSettingsAttentionNeeded,
+  signOut,
 }) => {
+  const hasMenu = content === LeftColumnContent.ChatList;
+  const hasSearch = [
+    LeftColumnContent.ChatList, LeftColumnContent.RecentChats, LeftColumnContent.GlobalSearch,
+  ].includes(content);
+  const headerKey = hasSearch ? 0 : content;
+
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);
 
-  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+  const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
       <Button
         round
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={isSearchOpen ? onSearchClose : onTrigger}
+        onMouseDown={hasMenu ? onTrigger : onReset}
       >
-        <div className={`animated-menu-icon ${isSearchOpen ? 'state-back' : ''}`} />
+        <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
     );
-  }, [isSearchOpen, onSearchClose]);
+  }, [hasMenu, onReset]);
 
-  function openSignOutConfirmation() {
+  const openSignOutConfirmation = useCallback(() => {
     setIsSignOutDialogOpen(true);
-  }
+  }, []);
 
-  function closeSignOutConfirmation() {
+  const closeSignOutConfirmation = useCallback(() => {
     setIsSignOutDialogOpen(false);
-  }
+  }, []);
 
   const handleSignOutMessage = useCallback(() => {
     closeSignOutConfirmation();
     signOut();
-  }, [signOut]);
+  }, [closeSignOutConfirmation, signOut]);
+
+  const handleSearchFocus = useCallback(() => {
+    onSearchQuery('');
+  }, [onSearchQuery]);
+
+  function renderHeaderContent() {
+    switch (headerKey) {
+      case LeftColumnContent.Settings:
+        return <h3>Settings</h3>;
+      default:
+        return (
+          <SearchInput
+            value={searchQuery}
+            focused={content !== LeftColumnContent.ChatList}
+            isLoading={isLoading}
+            onChange={onSearchQuery}
+            onFocus={handleSearchFocus}
+          />
+        );
+    }
+  }
 
   return (
     <div id="LeftHeader">
       <DropdownMenu
-        trigger={MenuButton}
+        trigger={MainButton}
       >
         <MenuItem className="not-implemented" disabled icon="group">New Group</MenuItem>
         <MenuItem className="not-implemented" disabled icon="user">Contacts</MenuItem>
         <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
         <MenuItem className="not-implemented" disabled icon="saved-messages">Saved</MenuItem>
-        <MenuItem className="not-implemented" disabled icon="settings">Settings</MenuItem>
+        <MenuItem
+          icon="settings"
+          onClick={onSelectSettings}
+          attention={isSettingsAttentionNeeded}
+        >
+          Settings
+        </MenuItem>
         <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
-      <SearchInput
-        value={searchQuery}
-        focused={isSearchOpen}
-        isLoading={isLoading}
-        onChange={onSearchChange}
-        onFocus={onSearchOpen}
-      />
-
+      <AttentionIndicator show={isSettingsAttentionNeeded} />
+      <Transition name="slide-fade" activeKey={headerKey} renderCount={TRANSITION_RENDER_COUNT}>
+        {renderHeaderContent}
+      </Transition>
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
@@ -92,10 +138,13 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global): StateProps => {
-    const { fetchingStatus } = global.globalSearch;
+    const { query: searchQuery, fetchingStatus } = global.globalSearch;
+    const { isAnimationLevelSettingViewed } = global.settings;
 
     return {
+      searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
+      isSettingsAttentionNeeded: !isAnimationLevelSettingViewed,
     };
   },
   (setGlobal, actions): DispatchProps => {

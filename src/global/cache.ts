@@ -83,6 +83,7 @@ function updateCache(global: GlobalState) {
     mediaViewer: {},
     webPagePreview: undefined,
     forwardMessages: {},
+    settings: reduceSettings(global),
     errors: [],
   };
 
@@ -129,5 +130,13 @@ function reduceStickers(global: GlobalState) {
 function reduceSavedGifs(global: GlobalState) {
   return {
     gifs: global.savedGifs.gifs,
+  };
+}
+
+function reduceSettings(global: GlobalState) {
+  const { byKey } = global.settings;
+
+  return {
+    byKey,
   };
 }

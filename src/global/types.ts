@@ -11,7 +11,7 @@ import {
   ApiVideo,
   ApiError,
 } from '../api/types';
-import { FocusDirection } from '../types';
+import { FocusDirection, ISettings } from '../types';
 
 export type GlobalState = {
   showChatInfo: boolean;
@@ -148,6 +148,11 @@ export type GlobalState = {
     inProgress?: boolean;
   };
 
+  settings: {
+    byKey: ISettings;
+    isAnimationLevelSettingViewed?: boolean;
+  };
+
   errors: ApiError[];
 };
 
@@ -174,6 +179,8 @@ export type ActionTypes = (
   'searchMessages' | 'readMessageContents' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  // settings
+  'setSettingOption' | 'clearAnimationSettingAttention' |
   // misc
   'openMediaViewer' |
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |
