@@ -205,7 +205,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     // Chats
   } else if (update instanceof GramJs.UpdateReadHistoryInbox) {
     onUpdate({
-      '@type': 'updateChat',
+      '@type': 'updateChatInbox',
       id: getApiChatIdFromMtpPeer(update.peer),
       chat: {
         last_read_inbox_message_id: update.maxId,

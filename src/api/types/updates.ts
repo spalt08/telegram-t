@@ -49,6 +49,12 @@ export type ApiUpdateChat = {
   chat: Partial<ApiChat>;
 };
 
+export type ApiUpdateChatInbox = {
+  '@type': 'updateChatInbox';
+  id: number;
+  chat: Partial<ApiChat>;
+};
+
 export type ApiUpdateChatTypingStatus = {
   '@type': 'updateChatTypingStatus';
   id: number;
@@ -156,7 +162,7 @@ export type ApiUpdateError = {
 
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
-  ApiUpdateChat | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
+  ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateCommonBoxMessages | ApiUpdateDeleteMessages |
   ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
