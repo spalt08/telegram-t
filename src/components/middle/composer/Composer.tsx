@@ -146,10 +146,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       const { items } = e.clipboardData;
       const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
       const file = media && media.getAsFile();
-      const pastedText = e.clipboardData.getData('text')
-        .substring(0, MAX_MESSAGE_LENGTH)
-        .replace(/<br[ ]?\/?>/g, '\n')
-        .replace(/</g, '&lt;');
+      const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
 
       if (!file && !pastedText) {
         return;
