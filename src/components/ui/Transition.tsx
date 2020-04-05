@@ -13,6 +13,8 @@ type OwnProps = {
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
+  id?: string;
+  className?: string;
   onStart?: () => void;
   onStop?: () => void;
   children: ChildrenFn;
@@ -34,6 +36,8 @@ const Transition: FC<OwnProps> = ({
   direction = 'auto',
   renderCount,
   shouldRestoreHeight,
+  id,
+  className,
   onStart,
   onStop,
   children,
@@ -169,7 +173,7 @@ const Transition: FC<OwnProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={['Transition', name].join(' ')}>
+    <div ref={containerRef} id={id} className={[className, 'Transition', name].join(' ')}>
       {contents}
     </div>
   );

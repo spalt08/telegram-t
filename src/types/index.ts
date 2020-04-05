@@ -18,4 +18,15 @@ export interface IAlbum {
   messages: ApiMessage[];
 }
 
+export interface ISettings extends Record<string, any> {
+  animationLevel: 0 | 1 | 2;
+}
+
 export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
+
+export enum LeftColumnContent {
+  ChatList,
+  RecentChats,
+  GlobalSearch,
+  Settings,
+}

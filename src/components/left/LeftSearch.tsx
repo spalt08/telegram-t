@@ -27,7 +27,7 @@ import InfiniteScroll from '../ui/InfiniteScroll';
 
 type OwnProps = {
   searchQuery?: string;
-  onSearchClose: () => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -53,17 +53,17 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   searchQuery, currentUserId,
   localContactIds, localChats, localUsers, globalChats, globalUsers,
   globalMessagesById, chatsById, usersById, fetchingStatus,
-  onSearchClose, openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
+  onReset, openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
 }) => {
   const handleChatClick = useCallback(
     (id: number) => {
       openChat({ id });
-      onSearchClose();
+      onReset();
       if (id !== currentUserId) {
         addRecentlyFoundChatId({ id });
       }
     },
-    [currentUserId, openChat, addRecentlyFoundChatId, onSearchClose],
+    [currentUserId, openChat, addRecentlyFoundChatId, onReset],
   );
 
   const localResults = useMemo(() => {
