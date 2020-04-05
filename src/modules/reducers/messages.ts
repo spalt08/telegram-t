@@ -232,20 +232,23 @@ export function safeReplaceViewportIds(
   );
 }
 
-export function updateFocusedMessage(global: GlobalState, chatId?: number, messageId?: number) {
+export function updateFocusedMessage(
+  global: GlobalState, chatId?: number, messageId?: number, noHighlight = false,
+): GlobalState {
   return {
     ...global,
     focusedMessage: {
       ...global.focusedMessage,
       chatId,
       messageId,
+      noHighlight,
     },
   };
 }
 
 export function updateFocusDirection(
   global: GlobalState, direction?: FocusDirection,
-) {
+): GlobalState {
   return {
     ...global,
     focusedMessage: {
