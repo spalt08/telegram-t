@@ -1,4 +1,4 @@
-import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 
@@ -13,6 +13,17 @@ export function onUpdate(update: ApiUpdate) {
   switch (update['@type']) {
     case 'updateChat': {
       setGlobal(updateChat(global, update.id, update.chat));
+
+      break;
+    }
+
+    case 'updateChatInbox': {
+      setGlobal(updateChat(global, update.id, update.chat));
+
+      const chat = selectChat(global, update.id);
+      if (chat.unread_mention_count) {
+        getDispatch().requestChatUpdate({ chatId: chat.id });
+      }
 
       break;
     }
@@ -44,6 +55,9 @@ export function onUpdate(update: ApiUpdate) {
 
       setGlobal(updateChat(global, update.chat_id, {
         unread_count: chat.unread_count ? chat.unread_count + 1 : 1,
+        ...(update.message.hasMention && {
+          unread_mention_count: chat.unread_mention_count ? chat.unread_mention_count + 1 : 1,
+        }),
       }));
 
       break;
