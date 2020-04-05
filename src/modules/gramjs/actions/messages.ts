@@ -8,7 +8,7 @@ import { callApi } from '../../../api/gramjs';
 import { areSortedArraysIntersecting, buildCollectionByKey } from '../../../util/iteratees';
 import {
   addUsers,
-  replaceChatMessagesById,
+  addChatMessagesById,
   safeReplaceViewportIds,
   updateChatMessage,
   updateListedIds,
@@ -281,7 +281,7 @@ async function loadViewportMessages(
 
   let newGlobal = getGlobal();
 
-  newGlobal = replaceChatMessagesById(newGlobal, chatId, byId);
+  newGlobal = addChatMessagesById(newGlobal, chatId, byId);
   newGlobal = isOutlying ? updateOutlyingIds(newGlobal, chatId, ids) : updateListedIds(newGlobal, chatId, ids);
   newGlobal = addUsers(newGlobal, buildCollectionByKey(users, 'id'));
 
