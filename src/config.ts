@@ -21,3 +21,6 @@ export const CHAT_LIST_SLICE = 50;
 export const SHARED_MEDIA_SLICE = 30;
 export const MESSAGE_SEARCH_SLICE = 30;
 export const GLOBAL_SEARCH_SLICE = 20;
+
+export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
+export const DEFAULT_ANIMATION_LEVEL = 1;

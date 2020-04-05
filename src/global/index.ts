@@ -2,6 +2,7 @@ import { addReducer } from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 
+import { DEFAULT_ANIMATION_LEVEL } from '../config';
 import { initCache, loadCache } from './cache';
 
 const INITIAL_STATE: GlobalState = {
@@ -53,6 +54,12 @@ const INITIAL_STATE: GlobalState = {
   mediaViewer: {},
 
   forwardMessages: {},
+
+  settings: {
+    byKey: {
+      animationLevel: DEFAULT_ANIMATION_LEVEL,
+    },
+  },
 
   errors: [],
 };

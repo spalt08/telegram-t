@@ -4,9 +4,31 @@
   align-items: center;
   flex-shrink: 0;
   background-color: var(--color-background);
+  position: relative;
 
-  .Button {
-    margin-right: 0.875rem;
+  > .Transition {
+    height: 100%;
+
+    > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .SearchInput {
+    margin-left: 0.875rem;
+  }
+
+  h3 {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-left: 1.375rem;
+  }
+
+  .AttentionIndicator {
+    top: 0.5rem;
+    left: 2.75rem;
   }
 
   .animated-menu-icon {
