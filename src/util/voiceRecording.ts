@@ -1,8 +1,8 @@
+import { initOpusWorker } from '../workers';
+
 const POLYFILL_OPTIONS = {
   OggOpusEncoderWasmPath: './OggOpusEncoder.wasm',
-  encoderWorkerFactory() {
-    return new Worker('../../node_modules/opus-media-recorder/encoderWorker.js');
-  },
+  encoderWorkerFactory: initOpusWorker,
 };
 const MIN_RECORDING_TIME = 1000;
 

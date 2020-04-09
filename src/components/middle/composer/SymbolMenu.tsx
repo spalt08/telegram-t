@@ -27,7 +27,7 @@ const TRANSITION_NAME = navigator.userAgent.includes('Safari') ? 'slide' : 'scro
 
 let closeTimeout: NodeJS.Timeout | null = null;
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;

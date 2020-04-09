@@ -27,7 +27,7 @@ import Avatar from '../common/Avatar';
 
 import './RightSearch.scss';
 
-type OwnProps = {
+export type OwnProps = {
   chatId: number;
 };
 

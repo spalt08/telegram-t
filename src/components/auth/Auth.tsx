@@ -5,9 +5,9 @@ import { GlobalState } from '../../global/types';
 
 import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
-import AuthCode from './AuthCode';
-import AuthRegister from './AuthRegister';
-import AuthPassword from './AuthPassword';
+import AuthCode from './AuthCode.async';
+import AuthPassword from './AuthPassword.async';
+import AuthRegister from './AuthRegister.async';
 
 import './Auth.scss';
 

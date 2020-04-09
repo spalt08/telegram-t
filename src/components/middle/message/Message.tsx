@@ -40,7 +40,7 @@ import EmbeddedMessage from '../../common/EmbeddedMessage';
 import Document from '../../common/Document';
 import Audio from '../../common/Audio';
 import MessageMeta from './MessageMeta';
-import ContextMenuContainer from './ContextMenuContainer';
+import ContextMenuContainer from './ContextMenuContainer.async';
 import Sticker from './Sticker';
 import Photo from './Photo';
 import Video from './Video';

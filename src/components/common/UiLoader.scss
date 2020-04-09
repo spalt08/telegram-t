@@ -18,9 +18,7 @@
       background: white;
       min-width: 15.5rem;
       max-width: 26.5rem;
-    }
 
-    .left {
       @media (min-width: 1680px) {
         border-left: 1px solid var(--color-borders);
       }

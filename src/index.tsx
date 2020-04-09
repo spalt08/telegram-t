@@ -5,6 +5,7 @@ import TeactDOM from './lib/teact/teact-dom';
 
 import './global';
 import './modules';
+import './workers';
 
 import App from './App';
 
