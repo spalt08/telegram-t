@@ -10,6 +10,7 @@ import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
+import { Bundles, loadModule } from '../../util/moduleLoader';
 
 import './UiLoader.scss';
 
@@ -27,7 +28,7 @@ type StateProps = Pick<GlobalState, 'isUiReady'>;
 
 type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 
-const MAX_PRELOAD_DELAY = 1000;
+const MAX_PRELOAD_DELAY = 1500;
 
 function preloadAvatars() {
   return Promise.all(Object.values(getGlobal().chats.byId).map((chat) => {
@@ -38,7 +39,8 @@ function preloadAvatars() {
 
 const preloadTasks = {
   main: () => Promise.all([
-    preloadFonts(),
+    loadModule(Bundles.Main, 'Main')
+      .then(preloadFonts),
     preloadAvatars(),
   ]),
   authPhoneNumber: () => Promise.all([
