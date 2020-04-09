@@ -15,7 +15,7 @@ import MessageInput from './MessageInput';
 
 import './AttachmentModal.scss';
 
-type OwnProps = {
+export type OwnProps = {
   attachment?: ApiAttachment;
   caption: string;
   onCaptionUpdate: (html: string) => void;

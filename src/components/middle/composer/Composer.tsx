@@ -21,14 +21,14 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import getMessageTextAsHtml from './helpers/getMessageTextAsHtml';
 
-import DeleteMessageModal from '../../common/DeleteMessageModal';
+import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
-import AttachMenu from './AttachMenu';
-import SymbolMenu from './SymbolMenu';
+import AttachMenu from './AttachMenu.async';
+import SymbolMenu from './SymbolMenu.async';
 import MessageInput from './MessageInput';
 import ComposerEmbeddedMessage from './ComposerEmbeddedMessage';
-import AttachmentModal from './AttachmentModal';
-import PollModal from './PollModal';
+import AttachmentModal from './AttachmentModal.async';
+import PollModal from './PollModal.async';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';

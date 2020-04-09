@@ -11,12 +11,12 @@ import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 
+import './UiLoader.scss';
+
 // @ts-ignore
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
-
-import './UiLoader.scss';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber';

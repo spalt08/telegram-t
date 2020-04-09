@@ -14,7 +14,7 @@ import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import RippleEffect from '../ui/RippleEffect';
 
-type OwnProps = {
+export type OwnProps = {
   onReset: () => void;
 };
 

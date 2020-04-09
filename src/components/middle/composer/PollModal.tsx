@@ -12,7 +12,7 @@ import InputText from '../../ui/InputText';
 
 import './PollModal.scss';
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   onSend: (pollSummary: ApiNewPoll) => void;
   onClear: () => void;

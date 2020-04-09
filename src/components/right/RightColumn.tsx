@@ -13,10 +13,10 @@ import {
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 
-import ForwardPicker from '../common/ForwardPicker';
+import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
 import Profile from './Profile';
-import RightSearch from './RightSearch';
+import RightSearch from './RightSearch.async';
 import Transition from '../ui/Transition';
 
 import './RightColumn.scss';

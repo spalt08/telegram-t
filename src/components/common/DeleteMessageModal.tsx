@@ -10,7 +10,7 @@ import { isChatPrivate, getUserFirstName, getPrivateChatUserId } from '../../mod
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   message: ApiMessage;
   onClose: () => void;

@@ -9,7 +9,7 @@ import { selectIsForwardMenuOpen, selectIsMediaViewerOpen } from '../../modules/
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useShowTransition from '../../hooks/useShowTransition';
 
-import ForwardPicker from '../common/ForwardPicker';
+import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
 
 import './RightOverlay.scss';

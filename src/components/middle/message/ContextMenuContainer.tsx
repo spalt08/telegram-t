@@ -20,7 +20,7 @@ type IAnchorPosition = {
   y: number;
 };
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   message: ApiMessage;
   anchor: IAnchorPosition;

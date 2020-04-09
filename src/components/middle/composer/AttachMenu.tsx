@@ -9,7 +9,7 @@ import MenuItem from '../../ui/MenuItem';
 
 import './AttachMenu.scss';
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   isPrivateChat: boolean;
   onFileSelect: (file: File, isQuick: boolean) => void;
