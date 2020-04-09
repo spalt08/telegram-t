@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -13,16 +13,21 @@ import {
   ApiFormattedText,
 } from '../../../api/types';
 
+import { EDITABLE_INPUT_ID } from '../../../config';
+
 import { selectChatMessage } from '../../../modules/selectors';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
-import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
-import * as voiceRecording from '../../../util/voiceRecording';
+import { blobToFile } from '../../../util/files';
 import focusEditableElement from '../../../util/focusEditableElement';
-import { throttle } from '../../../util/schedulers';
 import parseMessageInput from './helpers/parseMessageInput';
-import getMessageTextAsHtml from './helpers/getMessageTextAsHtml';
-import usePrevious from '../../../hooks/usePrevious';
+import buildAttachment from './helpers/buildAttachment';
+
+import useOverlay from '../../../hooks/useOverlay';
+import useVoiceRecording from './hooks/useVoiceRecording';
+import useClipboardPaste from './hooks/useClipboardPaste';
+import useDraft from './hooks/useDraft';
+import useEditing from './hooks/useEditing';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -35,18 +40,16 @@ import PollModal from './PollModal.async';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
-import { DRAFT_THROTTLE } from '../../../config';
+import usePrevious from '../../../hooks/usePrevious';
 
 type StateProps = {
   isPrivateChat: boolean;
   editedMessage?: ApiMessage;
-  selectedChatId?: number;
+  chatId?: number;
   draft?: ApiFormattedText;
 } & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage' | 'saveDraft' | 'clearDraft'>;
-
-type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
 enum MainButtonState {
   Send = 'send',
@@ -54,21 +57,13 @@ enum MainButtonState {
   Edit = 'edit',
 }
 
-const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
-const MAX_QUICK_FILE_SIZE = 10 * 1024 ** 2; // 10 MB
-const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
-const EDITABLE_INPUT_ID = 'editable-message-text';
 const MAX_NESTING_PARENTS = 5;
-const MAX_MESSAGE_LENGTH = 4096;
-
-// Used to avoid running throttled callbacks when chat changes.
-let currentChatId: number | undefined;
 
 const Composer: FC<StateProps & DispatchProps> = ({
   isPrivateChat,
   editedMessage,
-  selectedChatId,
+  chatId,
   draft,
   connectionState,
   sendMessage,
@@ -77,79 +72,29 @@ const Composer: FC<StateProps & DispatchProps> = ({
   clearDraft,
 }) => {
   const [html, setHtml] = useState<string>('');
-  const htmlRef = useRef<string>(html);
-
-  const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
-  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
-  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
-  const canOpenAttachMenu = useRef(true);
-
-  const [isSymbolMenuOpen, setIsSymbolMenuOpen] = useState(false);
-
-  const recordButtonRef = useRef<HTMLButtonElement>();
-  const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
-  const startRecordTimeRef = useRef<number>();
-  const [currentRecordTime, setCurrentRecordTime] = useState();
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const mainButtonState = editedMessage
-    ? MainButtonState.Edit
-    : !VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
-      ? MainButtonState.Send
-      : MainButtonState.Record;
-
-  const updateDraft = useCallback((chatId: number) => {
-    if (htmlRef.current.length && !editedMessage) {
-      saveDraft({ chatId, draft: parseMessageInput(htmlRef.current!) });
-    } else {
-      clearDraft({ chatId });
-    }
-  }, [clearDraft, editedMessage, saveDraft]);
 
   // Cache for frequently updated state
+  const htmlRef = useRef<string>(html);
   useEffect(() => {
     htmlRef.current = html;
   }, [html]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const runThrottledForSaveDraft = useMemo(() => throttle((cb) => cb(), DRAFT_THROTTLE, false), [selectedChatId]);
+  const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
 
-  // Update draft when input changes
-  const prevHtml = usePrevious(html);
-  currentChatId = selectedChatId;
-  useEffect(() => {
-    if (!selectedChatId || prevHtml === html) {
-      return;
-    }
+  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useOverlay();
+  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useOverlay();
+  const [isPollModalOpen, openPollModal, closePollModal] = useOverlay();
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useOverlay();
 
-    if (html.length) {
-      runThrottledForSaveDraft(() => {
-        if (currentChatId !== selectedChatId) {
-          return;
-        }
-
-        updateDraft(selectedChatId);
-      });
-    } else {
-      updateDraft(selectedChatId);
-    }
-  }, [html, prevHtml, runThrottledForSaveDraft, selectedChatId, updateDraft]);
-
-  // Handle editing message
-  useEffect(() => {
-    if (!editedMessage) {
-      setHtml('');
-      return;
-    }
-
-    setHtml(getMessageTextAsHtml(editedMessage.content.text));
-
-    requestAnimationFrame(() => {
-      const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-      focusEditableElement(messageInput, true);
-    });
-  }, [editedMessage]);
+  const {
+    isVoiceRecordingSupported,
+    startRecordingVoice,
+    stopRecordingVoice,
+    activeVoiceRecording,
+    currentRecordTime,
+    recordButtonRef,
+    startRecordTimeRef,
+  } = useVoiceRecording();
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
     const selection = window.getSelection()!;
@@ -172,82 +117,26 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }
   }, []);
 
-  // Subscribe and handle `window.blur`
+  const resetComposer = useCallback(() => {
+    setHtml('');
+    setAttachment(undefined);
+    closeSymbolMenu(false);
+  }, [closeSymbolMenu]);
+
+  // Handle chat change
+  const prevChatId = usePrevious(chatId);
   useEffect(() => {
-    function handleBlur() {
-      if (selectedChatId) {
-        updateDraft(selectedChatId);
-      }
+    if (!prevChatId || chatId === prevChatId) {
+      return;
     }
 
-    window.addEventListener('blur', handleBlur);
+    stopRecordingVoice();
+    resetComposer();
+  }, [chatId, prevChatId, resetComposer, stopRecordingVoice]);
 
-    return () => {
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, [selectedChatId, updateDraft]);
-
-  // Subscribe and handle `document.onpaste`
-  useEffect(() => {
-    async function handlePaste(e: ClipboardEvent) {
-      if (!e.clipboardData) {
-        return;
-      }
-
-      const input = document.getElementById('editable-message-text');
-      if (input !== document.activeElement) {
-        return;
-      }
-
-      const { items } = e.clipboardData;
-      const media = Array.from(items).find((item) => CLIPBOARD_ACCEPTED_TYPES.includes(item.type));
-      const file = media && media.getAsFile();
-      const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
-
-      if (!file && !pastedText) {
-        return;
-      }
-
-      e.preventDefault();
-
-      if (file && !editedMessage) {
-        setAttachment(await buildAttachment(file, true));
-      }
-
-      if (pastedText) {
-        insertTextAndUpdateCursor(pastedText);
-      }
-    }
-
-    document.addEventListener('paste', handlePaste, false);
-
-    return () => {
-      document.removeEventListener('paste', handlePaste, false);
-    };
-  }, [insertTextAndUpdateCursor, editedMessage]);
-
-  const handleOpenAttachMenu = useCallback(() => {
-    if (canOpenAttachMenu.current) {
-      setIsAttachMenuOpen(true);
-    }
-  }, []);
-
-  const handleCloseAttachMenu = useCallback(() => {
-    setIsAttachMenuOpen(false);
-  }, []);
-
-  const handleOpenPollCreation = useCallback(() => {
-    setIsPollModalOpen(true);
-  }, []);
-
-  const handleClosePollCreation = useCallback(() => {
-    setIsPollModalOpen(false);
-  }, []);
-
-  const handlePollSend = useCallback((pollSummary: ApiNewPoll) => {
-    sendMessage({ pollSummary });
-    setIsPollModalOpen(false);
-  }, [sendMessage]);
+  const handleEditComplete = useEditing(htmlRef, setHtml, editedMessage, resetComposer, openDeleteModal, editMessage);
+  useDraft(draft, chatId, html, htmlRef, setHtml, editedMessage, saveDraft, clearDraft);
+  useClipboardPaste(insertTextAndUpdateCursor, setAttachment, editedMessage);
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
     setAttachment(await buildAttachment(file, isQuick));
@@ -256,101 +145,6 @@ const Composer: FC<StateProps & DispatchProps> = ({
   const handleClearAttachment = useCallback(() => {
     setAttachment(undefined);
   }, []);
-
-  const handleOpenSymbolMenu = useCallback(() => {
-    setIsSymbolMenuOpen(true);
-  }, []);
-
-  const handleCloseSymbolMenu = useCallback(() => {
-    setIsSymbolMenuOpen(false);
-  }, []);
-
-  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
-    sendMessage({ sticker });
-    setIsSymbolMenuOpen(false);
-  }, [sendMessage]);
-
-  const handleGifSelect = useCallback((gif: ApiVideo) => {
-    sendMessage({ gif });
-    setIsSymbolMenuOpen(false);
-  }, [sendMessage]);
-
-  const handleDeleteModalClose = useCallback(() => {
-    setIsDeleteModalOpen(false);
-  }, []);
-
-  const handleRecordVoice = useCallback(async () => {
-    try {
-      const stop = await voiceRecording.start((tickVolume: number) => {
-        if (recordButtonRef.current) {
-          const volumeLevel = ((tickVolume - 128) / 127) * 2;
-          const volumeFactor = volumeLevel ? 0.25 + volumeLevel * 0.75 : 0;
-          if (startRecordTimeRef.current && Date.now() % 4 === 0) {
-            recordButtonRef.current.style.boxShadow = `0 0 0 ${volumeFactor * 50}px rgba(0,0,0,.15)`;
-          }
-          setCurrentRecordTime(Date.now());
-        }
-      });
-      startRecordTimeRef.current = Date.now();
-      setCurrentRecordTime(Date.now());
-
-      setActiveVoiceRecording({ stop });
-      canOpenAttachMenu.current = false;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }, []);
-
-  const stopRecordingVoice = useCallback(() => {
-    if (!activeVoiceRecording) {
-      return undefined;
-    }
-
-    setActiveVoiceRecording(undefined);
-    startRecordTimeRef.current = null;
-    setCurrentRecordTime(undefined);
-    if (recordButtonRef.current) {
-      recordButtonRef.current.style.boxShadow = 'none';
-    }
-    setTimeout(() => {
-      canOpenAttachMenu.current = true;
-    }, 250);
-    try {
-      return activeVoiceRecording!.stop();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      return undefined;
-    }
-  }, [activeVoiceRecording]);
-
-  const resetComposer = useCallback(() => {
-    setHtml('');
-    setAttachment(undefined);
-    setIsSymbolMenuOpen(false);
-  }, []);
-
-  // Handle chat change
-  const prevSelectedChatId = usePrevious(selectedChatId);
-  useEffect(() => {
-    if (!prevSelectedChatId || selectedChatId === prevSelectedChatId) {
-      return;
-    }
-
-    updateDraft(prevSelectedChatId);
-    stopRecordingVoice();
-    resetComposer();
-
-    if (draft) {
-      setHtml(getMessageTextAsHtml(draft));
-
-      requestAnimationFrame(() => {
-        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
-        focusEditableElement(messageInput, true);
-      });
-    }
-  }, [draft, prevSelectedChatId, resetComposer, selectedChatId, stopRecordingVoice, updateDraft]);
 
   const handleSend = useCallback(async () => {
     if (connectionState !== 'connectionStateReady') {
@@ -383,32 +177,32 @@ const Composer: FC<StateProps & DispatchProps> = ({
     });
 
     resetComposer();
-    clearDraft({ chatId: selectedChatId, localOnly: true });
+    clearDraft({ chatId, localOnly: true });
   }, [
-    activeVoiceRecording, attachment, connectionState, selectedChatId,
+    activeVoiceRecording, attachment, connectionState, chatId,
     sendMessage, stopRecordingVoice, resetComposer, clearDraft,
   ]);
 
-  const handleEditComplete = useCallback(() => {
-    const { text, entities } = parseMessageInput(htmlRef.current!);
+  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
+    sendMessage({ sticker });
+    closeSymbolMenu();
+  }, [closeSymbolMenu, sendMessage]);
 
-    if (!editedMessage) {
-      return;
-    }
+  const handleGifSelect = useCallback((gif: ApiVideo) => {
+    sendMessage({ gif });
+    closeSymbolMenu();
+  }, [closeSymbolMenu, sendMessage]);
 
-    if (!text) {
-      setIsDeleteModalOpen(true);
-      return;
-    }
+  const handlePollSend = useCallback((pollSummary: ApiNewPoll) => {
+    sendMessage({ pollSummary });
+    closePollModal();
+  }, [closePollModal, sendMessage]);
 
-    editMessage({
-      messageId: editedMessage.id,
-      text,
-      entities,
-    });
-
-    resetComposer();
-  }, [editedMessage, editMessage, resetComposer]);
+  const mainButtonState = editedMessage
+    ? MainButtonState.Edit
+    : !isVoiceRecordingSupported || activeVoiceRecording || (html && !attachment)
+      ? MainButtonState.Send
+      : MainButtonState.Record;
 
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
@@ -416,7 +210,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
         handleSend();
         break;
       case MainButtonState.Record:
-        handleRecordVoice();
+        startRecordingVoice();
         break;
       case MainButtonState.Edit:
         handleEditComplete();
@@ -424,7 +218,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       default:
         break;
     }
-  }, [mainButtonState, handleSend, handleRecordVoice, handleEditComplete]);
+  }, [mainButtonState, handleSend, startRecordingVoice, handleEditComplete]);
 
   return (
     <div className="Composer">
@@ -437,13 +231,13 @@ const Composer: FC<StateProps & DispatchProps> = ({
       />
       <PollModal
         isOpen={isPollModalOpen}
-        onClear={handleClosePollCreation}
+        onClear={closePollModal}
         onSend={handlePollSend}
       />
       {editedMessage && (
         <DeleteMessageModal
           isOpen={isDeleteModalOpen}
-          onClose={handleDeleteModalClose}
+          onClose={closeDeleteModal}
           message={editedMessage}
         />
       )}
@@ -455,7 +249,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             className={`${isSymbolMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onMouseEnter={handleOpenSymbolMenu}
+            onMouseEnter={openSymbolMenu}
           >
             <i className="icon-smile" />
           </Button>
@@ -472,8 +266,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
               color="translucent"
-              onMouseEnter={handleOpenAttachMenu}
-              onFocus={handleOpenAttachMenu}
+              onMouseEnter={openAttachMenu}
+              onFocus={openAttachMenu}
             >
               <i className="icon-attach" />
             </Button>
@@ -487,12 +281,12 @@ const Composer: FC<StateProps & DispatchProps> = ({
             isOpen={isAttachMenuOpen}
             isPrivateChat={isPrivateChat}
             onFileSelect={handleFileSelect}
-            onPollCreate={handleOpenPollCreation}
-            onClose={handleCloseAttachMenu}
+            onPollCreate={openPollModal}
+            onClose={closeAttachMenu}
           />
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
-            onClose={handleCloseSymbolMenu}
+            onClose={closeSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
@@ -536,32 +330,19 @@ function isSelectionInsideInput(selectionRange: Range) {
   return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
 }
 
-async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachment> {
-  if (!isQuick || file.size >= MAX_QUICK_FILE_SIZE) {
-    return { file };
-  }
-
-  return {
-    file,
-    quick: file.type.startsWith('image/')
-      ? await getImageDataFromFile(file)
-      : await getVideoDataFromFile(file),
-  };
-}
-
 export default memo(withGlobal(
   (global): StateProps => {
-    const selectedChatId = global.chats.selectedId;
-    const editingMessageId = selectedChatId ? global.chats.editingById[selectedChatId] : undefined;
-    const editedMessage = editingMessageId ? selectChatMessage(global, selectedChatId!, editingMessageId) : undefined;
+    const chatId = global.chats.selectedId;
+    const editingMessageId = chatId ? global.chats.editingById[chatId] : undefined;
+    const editedMessage = editingMessageId ? selectChatMessage(global, chatId!, editingMessageId) : undefined;
     const { connectionState, chats: { draftsById } } = global;
 
     return {
-      isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId),
+      isPrivateChat: !!chatId && isChatPrivate(chatId),
       editedMessage,
       connectionState,
-      selectedChatId,
-      draft: selectedChatId ? draftsById[selectedChatId] : undefined,
+      chatId,
+      draft: chatId ? draftsById[chatId] : undefined,
     };
   },
   (setGlobal, actions): DispatchProps => {
