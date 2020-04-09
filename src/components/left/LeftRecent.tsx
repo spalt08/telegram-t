@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useCallback,
+  FC, useEffect, useCallback, useRef,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -32,6 +32,8 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   topUsers, recentlyFoundChatIds,
   onReset, loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
 }) => {
+  const topUsersRef = useRef<HTMLDivElement>();
+
   useEffect(() => {
     runThrottled(() => {
       loadTopUsers();
@@ -39,6 +41,20 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
       loadContactList();
     });
   }, [loadTopUsers, loadContactList]);
+
+  useEffect(() => {
+    const topUsersEl = topUsersRef.current!;
+
+    function scrollFooter(e: WheelEvent) {
+      topUsersEl.scrollLeft += e.deltaY / 3;
+    }
+
+    topUsersEl.addEventListener('wheel', scrollFooter, { passive: true });
+
+    return () => {
+      topUsersEl.removeEventListener('wheel', scrollFooter);
+    };
+  }, []);
 
   const handleClick = useCallback(
     (id: number) => {
@@ -51,17 +67,12 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
     [openChat, addRecentlyFoundChatId, onReset],
   );
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.currentTarget.scrollLeft += e.deltaY / 3;
-  }, []);
-
   return (
     <div className="LeftRecent custom-scroll">
       {topUsers && (
         <div className="search-section">
           <h3 className="section-heading">People</h3>
-          <div className="top-peers" onWheel={handleWheel}>
+          <div ref={topUsersRef} className="top-peers">
             {topUsers.map((user) => (
               <div className="top-peer-item" onClick={() => handleClick(user.id)}>
                 <Avatar user={user} />

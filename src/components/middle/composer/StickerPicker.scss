@@ -11,11 +11,11 @@
   &-footer {
     height: 3rem;
     border-top: 1px solid var(--color-borders);
-    display: flex;
-    align-items: center;
+    padding: 0.125rem 0;
     overflow-x: auto;
     overflow-y: hidden;
     user-select: none;
+    white-space: nowrap;
 
     scrollbar-width: none;
     scrollbar-color: rgba(0, 0, 0, 0);
@@ -35,6 +35,11 @@
       flex-shrink: 0;
       width: 0.1px;
       height: 1rem;
+    }
+
+    .sticker-set-button {
+      display: inline-flex;
+      vertical-align: middle;
     }
   }
 

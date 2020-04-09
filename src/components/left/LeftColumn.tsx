@@ -61,9 +61,9 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
         return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
       case LeftColumnContent.Settings:
         return <Settings />;
+      default:
+        return null;
     }
-
-    return undefined;
   }
 
   return (
