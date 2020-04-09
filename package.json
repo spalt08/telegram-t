@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "parcel src/index.html && deploy/copy_opus_wasm.sh",
+    "dev": "mkdir -p dist/ && deploy/copy_opus_wasm.sh && parcel src/index.html",
     "build:staging": "NODE_ENV=staging parcel build src/index.html --public-url ./ && deploy/copy_opus_wasm.sh",
     "build:contest": "./deploy/contest.sh",
     "build:github:all": "./deploy/github.sh",

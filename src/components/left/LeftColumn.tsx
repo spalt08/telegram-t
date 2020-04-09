@@ -11,10 +11,10 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import LeftHeader from './LeftHeader';
 import ConnectionState from './ConnectionState';
 import ChatList from './ChatList';
-import LeftRecent from './LeftRecent';
-import LeftSearch from './LeftSearch';
+import LeftRecent from './LeftRecent.async';
+import LeftSearch from './LeftSearch.async';
 import Transition from '../ui/Transition';
-import Settings from './settings/Settings';
+import Settings from './settings/Settings.async';
 
 import './LeftColumn.scss';
 

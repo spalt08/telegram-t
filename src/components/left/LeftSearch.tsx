@@ -25,7 +25,7 @@ import Avatar from '../common/Avatar';
 import LastMessageMeta from './LastMessageMeta';
 import InfiniteScroll from '../ui/InfiniteScroll';
 
-type OwnProps = {
+export type OwnProps = {
   searchQuery?: string;
   onReset: () => void;
 };
