@@ -1,4 +1,4 @@
-import { ApiMessageEntity, ApiMessageEntityTypes } from '../../../../api/types';
+import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../../../../api/types';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   B: ApiMessageEntityTypes.Bold,
@@ -17,16 +17,16 @@ const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
 const MAX_TAG_DEEPNESS = 3;
 const MAX_MESSAGE_LENGTH = 4096;
 
-export default function parseMessageInput(html: string) {
+export default function parseMessageInput(html: string): ApiFormattedText {
   const fragment = document.createElement('div');
   fragment.innerHTML = parseMarkdown(html);
-  const rawText = fragment.innerText.trim().slice(0, MAX_MESSAGE_LENGTH);
+  const text = fragment.innerText.trim().slice(0, MAX_MESSAGE_LENGTH);
   let textIndex = 0;
   let recursionDeepness = 0;
   const entities: ApiMessageEntity[] = [];
 
   function addEntity(node: ChildNode) {
-    const { index, entity } = getEntityDataFromNode(node, rawText, textIndex);
+    const { index, entity } = getEntityDataFromNode(node, text, textIndex);
 
     if (entity) {
       textIndex = index;
@@ -47,7 +47,8 @@ export default function parseMessageInput(html: string) {
   });
 
   return {
-    rawText,
+    '@type': 'formattedText',
+    text,
     entities: entities.length ? entities : undefined,
   };
 }

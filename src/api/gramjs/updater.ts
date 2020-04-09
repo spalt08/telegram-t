@@ -136,7 +136,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     if (update instanceof GramJs.UpdateShortSentMessage) {
       if (localMessage.content.text && update.entities) {
         newContent = {
-          ...buildMessageTextContent(localMessage.content.text.text, update.entities),
+          text: buildMessageTextContent(localMessage.content.text.text, update.entities),
         };
       }
       if (update.media) {

@@ -20,6 +20,7 @@ const INITIAL_STATE: GlobalState = {
     scrollOffsetById: {},
     replyingToById: {},
     editingById: {},
+    draftsById: {},
   },
 
   messages: {
@@ -67,5 +68,5 @@ const INITIAL_STATE: GlobalState = {
 initCache();
 
 addReducer('init', () => {
-  return loadCache() || INITIAL_STATE;
+  return loadCache(INITIAL_STATE) || INITIAL_STATE;
 });

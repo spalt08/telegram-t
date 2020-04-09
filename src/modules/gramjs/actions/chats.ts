@@ -55,6 +55,58 @@ addReducer('requestChatUpdate', (global, actions, payload) => {
   void callApi('requestChatUpdate', chat);
 });
 
+addReducer('saveDraft', (global, actions, payload) => {
+  const { chatId, draft } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat || !draft.text) {
+    return global;
+  }
+
+  const draftsById = { ...global.chats.draftsById };
+  draftsById[chatId] = draft;
+
+  const { text, entities } = draft;
+
+  void callApi('saveDraft', {
+    chat,
+    text,
+    entities,
+    replyToMsgId: global.chats.replyingToById[chatId],
+  });
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      draftsById,
+    },
+  };
+});
+
+addReducer('clearDraft', (global, actions, payload) => {
+  const { chatId, localOnly } = payload!;
+  const chat = selectChat(global, chatId);
+
+  const draftsById = { ...global.chats.draftsById };
+  if (!chat || !draftsById[chatId]) {
+    return global;
+  }
+
+  delete draftsById[chatId];
+
+  if (!localOnly) {
+    void callApi('clearDraft', chat);
+  }
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      draftsById,
+    },
+  };
+});
+
 async function loadChats(offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,

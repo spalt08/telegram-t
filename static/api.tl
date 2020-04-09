@@ -851,6 +851,7 @@ messages.createChat#9cb126e users:Vector<InputUser> title:string = Updates;
 messages.getDhConfig#26cf8950 version:int random_length:int = messages.DhConfig;
 messages.readMessageContents#36a73f77 id:Vector<int> = messages.AffectedMessages;
 messages.getPeerDialogs#e470bcfd peers:Vector<InputDialogPeer> = messages.PeerDialogs;
+messages.saveDraft#bc39e14b flags:# no_webpage:flags.1?true reply_to_msg_id:flags.0?int peer:InputPeer message:string entities:flags.3?Vector<MessageEntity> = Bool;
 messages.getAllStickers#1c9618b1 hash:int = messages.AllStickers;
 messages.getRecentStickers#5ea192c9 flags:# attached:flags.0?true hash:int = messages.RecentStickers;
 messages.getStickerSet#2619a90e stickerset:InputStickerSet = messages.StickerSet;

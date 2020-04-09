@@ -80,10 +80,14 @@
       .sender-name {
         color: var(--color-text);
       }
+
+      .draft {
+        color: var(--color-error);
+      }
     }
 
     .last-message {
-      .sender-name {
+      .sender-name, .draft {
         &::after {
           content: ': ';
         }

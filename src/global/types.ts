@@ -10,6 +10,7 @@ import {
   ApiWebPage,
   ApiVideo,
   ApiError,
+  ApiFormattedText,
 } from '../api/types';
 import { FocusDirection, ISettings } from '../types';
 
@@ -49,6 +50,7 @@ export type GlobalState = {
     replyingToById: Record<number, number | undefined>;
     editingById: Record<number, number | undefined>;
     orderedPinnedIds?: number[];
+    draftsById: Record<number, ApiFormattedText>;
   };
 
   messages: {
@@ -184,7 +186,8 @@ export type ActionTypes = (
   // misc
   'openMediaViewer' |
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |
-  'loadWebPagePreview' | 'clearWebPagePreview'
+  'loadWebPagePreview' | 'clearWebPagePreview' |
+  'saveDraft' | 'clearDraft' | 'loadChatDrafts'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

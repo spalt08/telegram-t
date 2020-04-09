@@ -1,7 +1,7 @@
-import { ApiMessage, ApiMessageEntityTypes, ApiMessageEntity } from '../../../../api/types';
+import { ApiMessageEntityTypes, ApiMessageEntity, ApiFormattedText } from '../../../../api/types';
 
-export default function getMessageTextAsHtml(message: ApiMessage) {
-  const { text, entities } = message.content.text || {};
+export default function getMessageTextAsHtml(formattedText?: ApiFormattedText) {
+  const { text, entities } = formattedText || {};
   if (!text) {
     return '';
   }
