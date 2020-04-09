@@ -169,6 +169,7 @@ export async function sendMessage(
   const mtpEntities = entities && entities.map(buildMtpMessageEntity);
 
   await invokeRequest(new RequestClass({
+    clearDraft: true,
     message: text || '',
     entities: mtpEntities,
     peer: buildInputPeer(chat.id, chat.access_hash),

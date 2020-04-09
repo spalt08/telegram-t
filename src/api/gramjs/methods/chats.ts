@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  OnApiUpdate, ApiChat, ApiMessage, ApiUser,
+  OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText,
 } from '../../types';
 
 import { invokeRequest } from './client';
@@ -12,11 +12,11 @@ import {
   buildApiChatFromPreview,
   getApiChatIdFromMtpPeer,
 } from '../apiBuilders/chats';
-import { buildApiMessage } from '../apiBuilders/messages';
+import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
-import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
+import { buildInputEntity, buildInputPeer, buildMtpMessageEntity } from '../gramjsBuilders';
 
 let onUpdate: OnApiUpdate;
 
@@ -49,6 +49,8 @@ export async function fetchChats({
   );
   const peersByKey = preparePeers(result);
   const chats: ApiChat[] = [];
+  const draftsById: Record<number, ApiFormattedText> = {};
+  const replyingToById: Record<number, number> = {};
 
   result.dialogs.forEach((dialog) => {
     if (!(dialog instanceof GramJs.Dialog)) {
@@ -59,6 +61,16 @@ export async function fetchChats({
     const chat = buildApiChatFromDialog(dialog, peerEntity);
     chat.last_message = lastMessagesByChatId[chat.id];
     chats.push(chat);
+
+    if (dialog.draft) {
+      const { formattedText, replyingToId } = buildMessageDraft(dialog.draft) || {};
+      if (formattedText) {
+        draftsById[chat.id] = formattedText;
+      }
+      if (replyingToId) {
+        replyingToById[chat.id] = replyingToId;
+      }
+    }
   });
 
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
@@ -68,6 +80,8 @@ export async function fetchChats({
     chat_ids: chatIds,
     chats,
     users,
+    draftsById,
+    replyingToById,
   };
 }
 
@@ -159,6 +173,34 @@ export async function requestChatUpdate(chat: ApiChat) {
       last_message: lastMessage,
     },
   });
+}
+
+export function saveDraft({
+  chat,
+  text,
+  entities,
+  replyToMsgId,
+}: {
+  chat: ApiChat;
+  text: string;
+  entities?: ApiMessageEntity[];
+  replyToMsgId?: number;
+}) {
+  return invokeRequest(new GramJs.messages.SaveDraft({
+    peer: buildInputPeer(chat.id, chat.access_hash),
+    message: text,
+    ...(entities && {
+      entities: entities.map(buildMtpMessageEntity),
+    }),
+    replyToMsgId,
+  }));
+}
+
+export function clearDraft(chat: ApiChat) {
+  return invokeRequest(new GramJs.messages.SaveDraft({
+    peer: buildInputPeer(chat.id, chat.access_hash),
+    message: '',
+  }));
 }
 
 async function getFullChatInfo(chatId: number) {

@@ -31,9 +31,9 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   const hasPreview = Boolean(webPagePreview);
 
   useEffect(() => {
-    const { rawText } = parseMessageInput(messageText);
-    if (rawText.length && rawText.match(RE_LINK)) {
-      runThrottledForWebPagePreview(() => loadWebPagePreview({ text: rawText }));
+    const { text } = parseMessageInput(messageText);
+    if (text.length && text.match(RE_LINK)) {
+      runThrottledForWebPagePreview(() => loadWebPagePreview({ text }));
     } else {
       clearWebPagePreview();
     }

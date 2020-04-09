@@ -5,7 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText,
 } from '../../api/types';
 
 import {
@@ -47,6 +47,7 @@ type StateProps = {
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   isUiReady?: boolean;
+  draft?: ApiFormattedText;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
@@ -62,6 +63,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   actionTargetMessage,
   selected,
   isUiReady,
+  draft,
   openChat,
   focusTopMessage,
 }) => {
@@ -107,6 +109,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderLastMessageOrTyping() {
     if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
+    }
+
+    if (draft && draft.text.length) {
+      return (
+        <p className="last-message">
+          <span className="draft">Draft</span>
+          {draft.text}
+        </p>
+      );
     }
 
     if (!last_message) {
@@ -189,7 +200,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
-    const { isUiReady } = global;
+    const { isUiReady, chats: { draftsById } } = global;
 
     return {
       chat,
@@ -199,6 +210,7 @@ export default memo(withGlobal<OwnProps>(
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
       isUiReady,
+      draft: draftsById[chatId],
     };
   },
   (setGlobal, actions): DispatchProps => {
