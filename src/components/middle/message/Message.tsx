@@ -341,7 +341,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
-      style = `width: ${calculatedWidth}px`;
+      const extraPadding = isForwarded ? 26 : 0;
+      style = `width: ${calculatedWidth + extraPadding}px`;
     }
   }
 

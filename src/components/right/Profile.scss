@@ -146,8 +146,18 @@
     &.audio-list {
       padding: 1.25rem;
 
-      & .Audio + .Audio {
-        margin-top: 1.6875rem;
+      & .Audio {
+        .media-loading {
+          top: 0;
+          left: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        & + .Audio {
+          margin-top: 1.6875rem;
+        }
       }
     }
   }

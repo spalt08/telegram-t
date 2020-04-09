@@ -103,7 +103,7 @@ const Video: FC<OwnProps> = ({
             height={height}
             alt=""
           />
-          <div className="message-media-loading open shown">
+          <div className="media-loading open shown">
             <div className="message-media-play-button">
               <i className="icon-large-play" />
             </div>
@@ -111,7 +111,7 @@ const Video: FC<OwnProps> = ({
         </>
       )}
       {shouldSpinnerRender && (
-        <div className={`message-media-loading ${spinnerClassNames}`}>
+        <div className={`media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelUpload} />
         </div>
       )}
