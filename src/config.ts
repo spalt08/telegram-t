@@ -24,3 +24,5 @@ export const GLOBAL_SEARCH_SLICE = 20;
 
 export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
 export const DEFAULT_ANIMATION_LEVEL = 1;
+
+export const DRAFT_THROTTLE = 10000; // 10s
