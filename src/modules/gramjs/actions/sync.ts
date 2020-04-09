@@ -59,6 +59,14 @@ async function loadAndReplaceChats() {
     chats: {
       ...global.chats,
       scrollOffsetById: {},
+      draftsById: {
+        ...global.chats.draftsById,
+        ...result.draftsById,
+      },
+      replyingToById: {
+        ...global.chats.replyingToById,
+        ...result.replyingToById,
+      },
     },
   };
 

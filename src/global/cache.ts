@@ -27,19 +27,19 @@ export function initCache() {
   });
 }
 
-export function loadCache() {
+export function loadCache(initialState: GlobalState) {
   if (!GLOBAL_STATE_CACHE_DISABLED) {
     const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
     if (hasActiveSession) {
       addCallback(updateCacheThrottled);
-      return readCache();
+      return readCache(initialState);
     }
   }
 
   return undefined;
 }
 
-function readCache() {
+function readCache(initialState: GlobalState) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.time('global-state-cache-read');
@@ -53,7 +53,10 @@ function readCache() {
     console.timeEnd('global-state-cache-read');
   }
 
-  return global;
+  return {
+    ...initialState,
+    ...global,
+  };
 }
 
 function updateCache(global: GlobalState) {

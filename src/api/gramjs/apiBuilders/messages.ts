@@ -16,6 +16,7 @@ import {
   ApiNewPoll,
   ApiWebPage,
   ApiMessageEntity,
+  ApiFormattedText,
 } from '../../types';
 
 import { getApiChatIdFromMtpPeer } from './chats';
@@ -83,7 +84,7 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
   if (mtpMessage.message && !content.sticker && !content.poll && !content.contact) {
     content = {
       ...content,
-      ...buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
+      text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
     };
   }
 
@@ -117,13 +118,22 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
 export function buildMessageTextContent(
   message: string,
   entities?: GramJs.TypeMessageEntity[],
-): ApiMessage['content'] {
+): ApiFormattedText {
   return {
-    text: {
-      '@type': 'formattedText' as const,
-      text: message,
-      ...(entities && { entities: entities.map(buildApiMessageEntity) }),
-    },
+    '@type': 'formattedText' as const,
+    text: message,
+    ...(entities && { entities: entities.map(buildApiMessageEntity) }),
+  };
+}
+
+export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
+  if (draft instanceof GramJs.DraftMessageEmpty || !draft.message) {
+    return undefined;
+  }
+
+  return {
+    formattedText: buildMessageTextContent(draft.message, draft.entities),
+    replyingToId: draft.replyToMsgId,
   };
 }
 

@@ -10,6 +10,7 @@ import {
   ApiVideo,
   ApiNewPoll,
   ApiMessage,
+  ApiFormattedText,
 } from '../../../api/types';
 
 import { selectChatMessage } from '../../../modules/selectors';
@@ -18,8 +19,10 @@ import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import { blobToFile, getImageDataFromFile, getVideoDataFromFile } from '../../../util/files';
 import * as voiceRecording from '../../../util/voiceRecording';
 import focusEditableElement from '../../../util/focusEditableElement';
+import { throttle } from '../../../util/schedulers';
 import parseMessageInput from './helpers/parseMessageInput';
 import getMessageTextAsHtml from './helpers/getMessageTextAsHtml';
+import usePrevious from '../../../hooks/usePrevious';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -36,9 +39,11 @@ import './Composer.scss';
 type StateProps = {
   isPrivateChat: boolean;
   editedMessage?: ApiMessage;
+  selectedChatId?: number;
+  draft?: ApiFormattedText;
 } & Pick<GlobalState, 'connectionState'>;
 
-type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage'>;
+type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage' | 'saveDraft' | 'clearDraft'>;
 
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
@@ -56,6 +61,8 @@ const EDITABLE_INPUT_ID = 'editable-message-text';
 const MAX_NESTING_PARENTS = 5;
 const MAX_MESSAGE_LENGTH = 4096;
 
+const runThrottledForSaveDraft = throttle((cb) => cb(), 2000, false);
+
 function isSelectionInsideInput(selectionRange: Range) {
   const { commonAncestorContainer } = selectionRange;
   let parentNode: HTMLElement | null = commonAncestorContainer as HTMLElement;
@@ -69,7 +76,15 @@ function isSelectionInsideInput(selectionRange: Range) {
 }
 
 const Composer: FC<StateProps & DispatchProps> = ({
-  isPrivateChat, editedMessage, connectionState, sendMessage, editMessage,
+  isPrivateChat,
+  editedMessage,
+  selectedChatId,
+  draft,
+  connectionState,
+  sendMessage,
+  editMessage,
+  saveDraft,
+  clearDraft,
 }) => {
   const [html, setHtml] = useState<string>('');
   const htmlRef = useRef<string>(html);
@@ -104,7 +119,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
       return;
     }
 
-    setHtml(getMessageTextAsHtml(editedMessage));
+    setHtml(getMessageTextAsHtml(editedMessage.content.text));
+
     requestAnimationFrame(() => {
       const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
       focusEditableElement(messageInput, true);
@@ -256,7 +272,6 @@ const Composer: FC<StateProps & DispatchProps> = ({
     setTimeout(() => {
       canOpenAttachMenu.current = true;
     }, 250);
-
     try {
       return activeVoiceRecording!.stop();
     } catch (err) {
@@ -265,6 +280,54 @@ const Composer: FC<StateProps & DispatchProps> = ({
       return undefined;
     }
   }, [activeVoiceRecording]);
+
+  const resetComposer = useCallback(() => {
+    setHtml('');
+    setAttachment(undefined);
+    setIsSymbolMenuOpen(false);
+  }, []);
+
+  const prevSelectedChatId = usePrevious(selectedChatId);
+  useEffect(() => {
+    if (selectedChatId === prevSelectedChatId) {
+      return;
+    }
+
+    // This ensures that chat draft is properly saved/cleared when changing chats (in addition to `handleUpdate` check)
+    if (htmlRef.current.length && !editedMessage) {
+      saveDraft({ chatId: prevSelectedChatId, draft: parseMessageInput(htmlRef.current!) });
+    } else {
+      clearDraft({ chatId: prevSelectedChatId });
+    }
+
+    if (activeVoiceRecording) {
+      stopRecordingVoice();
+    }
+    resetComposer();
+
+    if (draft) {
+      setHtml(getMessageTextAsHtml(draft));
+
+      requestAnimationFrame(() => {
+        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+        focusEditableElement(messageInput, true);
+      });
+    }
+  }, [
+    prevSelectedChatId, selectedChatId, activeVoiceRecording, draft, editedMessage,
+    saveDraft, clearDraft, stopRecordingVoice, resetComposer,
+  ]);
+
+  const handleUpdate = useCallback((newHtml: string) => {
+    setHtml(newHtml);
+    runThrottledForSaveDraft(() => {
+      if (newHtml.length && !editedMessage) {
+        saveDraft({ chatId: selectedChatId, draft: parseMessageInput(htmlRef.current!) });
+      } else if (draft) {
+        clearDraft({ chatId: selectedChatId });
+      }
+    });
+  }, [editedMessage, draft, saveDraft, selectedChatId, clearDraft]);
 
   const handleSend = useCallback(async () => {
     if (connectionState !== 'connectionStateReady') {
@@ -284,45 +347,45 @@ const Composer: FC<StateProps & DispatchProps> = ({
       }
     }
 
-    const { rawText, entities } = parseMessageInput(htmlRef.current!);
+    const { text, entities } = parseMessageInput(htmlRef.current!);
 
-    if (!currentAttachment && !rawText) {
+    if (!currentAttachment && !text) {
       return;
     }
 
     sendMessage({
-      text: rawText,
+      text,
       entities,
       attachment: currentAttachment,
     });
 
-    setHtml('');
-    setAttachment(undefined);
-    setIsSymbolMenuOpen(false);
-  }, [activeVoiceRecording, attachment, connectionState, sendMessage, stopRecordingVoice]);
+    resetComposer();
+    clearDraft({ chatId: selectedChatId, localOnly: true });
+  }, [
+    activeVoiceRecording, attachment, connectionState, selectedChatId,
+    sendMessage, stopRecordingVoice, resetComposer, clearDraft,
+  ]);
 
   const handleEditComplete = useCallback(() => {
-    const { rawText, entities } = parseMessageInput(htmlRef.current!);
+    const { text, entities } = parseMessageInput(htmlRef.current!);
 
     if (!editedMessage) {
       return;
     }
 
-    if (!rawText) {
+    if (!text) {
       setIsDeleteModalOpen(true);
       return;
     }
 
     editMessage({
       messageId: editedMessage.id,
-      text: rawText,
+      text,
       entities,
     });
 
-    setHtml('');
-    setAttachment(undefined);
-    setIsSymbolMenuOpen(false);
-  }, [editedMessage, editMessage]);
+    resetComposer();
+  }, [editedMessage, editMessage, resetComposer]);
 
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
@@ -377,7 +440,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             id="message-input-text"
             html={!attachment ? html : ''}
             placeholder="Message"
-            onUpdate={setHtml}
+            onUpdate={handleUpdate}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
           />
@@ -456,16 +519,22 @@ export default memo(withGlobal(
     const selectedChatId = global.chats.selectedId;
     const editingMessageId = selectedChatId ? global.chats.editingById[selectedChatId] : undefined;
     const editedMessage = editingMessageId ? selectChatMessage(global, selectedChatId!, editingMessageId) : undefined;
-    const { connectionState } = global;
+    const { connectionState, chats: { draftsById } } = global;
 
     return {
       isPrivateChat: !!selectedChatId && isChatPrivate(selectedChatId),
       editedMessage,
       connectionState,
+      selectedChatId,
+      draft: selectedChatId ? draftsById[selectedChatId] : undefined,
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const { sendMessage, editMessage } = actions;
-    return { sendMessage, editMessage };
+    const {
+      sendMessage, editMessage, saveDraft, clearDraft,
+    } = actions;
+    return {
+      sendMessage, editMessage, saveDraft, clearDraft,
+    };
   },
 )(Composer));
