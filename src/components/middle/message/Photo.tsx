@@ -119,7 +119,7 @@ const Photo: FC<OwnProps> = ({
         />
       )}
       {shouldRenderSpinner && (
-        <div className={`message-media-loading ${spinnerClassNames}`}>
+        <div className={`media-loading ${spinnerClassNames}`}>
           <ProgressSpinner progress={transferProgress} onClick={onCancelUpload} />
         </div>
       )}

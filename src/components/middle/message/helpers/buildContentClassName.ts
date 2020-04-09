@@ -21,6 +21,7 @@ export function buildContentClassName(
   } = getMessageContent(message);
 
   const classNames = ['message-content'];
+  const isMediaWithNoText = (photo || video) && !text;
 
   if (typeof customShape === 'number') {
     classNames.push(`emoji-only emoji-only-${customShape}`);
@@ -65,11 +66,11 @@ export function buildContentClassName(
   if (!customShape) {
     classNames.push('has-shadow');
 
-    if (hasReply || message.forward_info || !((photo || video) && !text)) {
+    if (hasReply || message.forward_info || !isMediaWithNoText) {
       classNames.push('has-solid-background');
     }
 
-    if (isLastInGroup && !video && !isAlbum) {
+    if (isLastInGroup && ((photo && !isAlbum) || !isMediaWithNoText)) {
       classNames.push('has-appendix');
     }
   }
