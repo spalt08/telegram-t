@@ -26,6 +26,12 @@ type OwnProps = {
   onCancelUpload?: () => void;
 };
 
+enum PlayState {
+  Idle,
+  Playing,
+  Paused,
+}
+
 const Audio: FC<OwnProps> = ({
   message,
   uploadProgress,
@@ -37,7 +43,8 @@ const Audio: FC<OwnProps> = ({
   const { content: { audio, voice }, isMediaUnread } = message;
 
   const audioRef = useRef<HTMLAudioElement>();
-  const [isActive, setIsActive] = useState<boolean>(false);
+  const [playState, setPlayState] = useState<PlayState>(PlayState.Idle);
+  const isActive = playState === PlayState.Playing;
   const [progress, setProgress] = useState<number>(0);
   const {
     mediaData, downloadProgress,
@@ -52,7 +59,7 @@ const Audio: FC<OwnProps> = ({
   } = useShowTransition(isTransferring && isActive);
 
   const togglePlay = useCallback(() => {
-    setIsActive((active) => !active);
+    setPlayState((state) => (state === PlayState.Playing ? PlayState.Paused : PlayState.Playing));
   }, []);
 
   useEffect(() => {
@@ -72,7 +79,7 @@ const Audio: FC<OwnProps> = ({
           setProgress(audioEl.currentTime / audioEl.duration);
         });
         audioEl.addEventListener('ended', () => {
-          setIsActive(false);
+          setPlayState(PlayState.Paused);
         });
         audioRef.current = audioEl;
       }
@@ -111,7 +118,7 @@ const Audio: FC<OwnProps> = ({
     buttonClassNames.push('loading');
   } else if (isActive) {
     buttonClassNames.push('pause');
-  } else if (audioRef.current) {
+  } else if (audioRef.current && playState === PlayState.Paused) {
     buttonClassNames.push('play');
   }
 
@@ -127,7 +134,7 @@ const Audio: FC<OwnProps> = ({
         <i className="icon-pause" />
       </Button>
       {shouldSpinnerRender && (
-        <div className={buildClassName('message-media-loading', spinnerClassNames)}>
+        <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner
             progress={transferProgress}
             transparent

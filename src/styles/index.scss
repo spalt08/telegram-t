@@ -123,7 +123,11 @@ div[role="button"] {
     display: block;
   }
 
-  .thumbnail ~ .full-media, .message-media-loading {
+  video {
+    object-fit: cover;
+  }
+
+  .thumbnail ~ .full-media, .media-loading {
     position: absolute;
   }
 
