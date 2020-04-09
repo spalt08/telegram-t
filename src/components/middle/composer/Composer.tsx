@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -35,6 +35,7 @@ import PollModal from './PollModal.async';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
+import { DRAFT_THROTTLE } from '../../../config';
 
 type StateProps = {
   isPrivateChat: boolean;
@@ -61,19 +62,8 @@ const EDITABLE_INPUT_ID = 'editable-message-text';
 const MAX_NESTING_PARENTS = 5;
 const MAX_MESSAGE_LENGTH = 4096;
 
-const runThrottledForSaveDraft = throttle((cb) => cb(), 2000, false);
-
-function isSelectionInsideInput(selectionRange: Range) {
-  const { commonAncestorContainer } = selectionRange;
-  let parentNode: HTMLElement | null = commonAncestorContainer as HTMLElement;
-  let iterations = 1;
-  while (parentNode && parentNode.id !== EDITABLE_INPUT_ID && iterations < MAX_NESTING_PARENTS) {
-    parentNode = parentNode.parentElement;
-    iterations++;
-  }
-
-  return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
-}
+// Used to avoid running throttled callbacks when chat changes.
+let currentChatId: number | undefined;
 
 const Composer: FC<StateProps & DispatchProps> = ({
   isPrivateChat,
@@ -109,10 +99,44 @@ const Composer: FC<StateProps & DispatchProps> = ({
       ? MainButtonState.Send
       : MainButtonState.Record;
 
+  const updateDraft = useCallback((chatId: number) => {
+    if (htmlRef.current.length && !editedMessage) {
+      saveDraft({ chatId, draft: parseMessageInput(htmlRef.current!) });
+    } else {
+      clearDraft({ chatId });
+    }
+  }, [clearDraft, editedMessage, saveDraft]);
+
+  // Cache for frequently updated state
   useEffect(() => {
     htmlRef.current = html;
   }, [html]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const runThrottledForSaveDraft = useMemo(() => throttle((cb) => cb(), DRAFT_THROTTLE, false), [selectedChatId]);
+
+  // Update draft when input changes
+  const prevHtml = usePrevious(html);
+  currentChatId = selectedChatId;
+  useEffect(() => {
+    if (!selectedChatId || prevHtml === html) {
+      return;
+    }
+
+    if (html.length) {
+      runThrottledForSaveDraft(() => {
+        if (currentChatId !== selectedChatId) {
+          return;
+        }
+
+        updateDraft(selectedChatId);
+      });
+    } else {
+      updateDraft(selectedChatId);
+    }
+  }, [html, prevHtml, runThrottledForSaveDraft, selectedChatId, updateDraft]);
+
+  // Handle editing message
   useEffect(() => {
     if (!editedMessage) {
       setHtml('');
@@ -148,6 +172,22 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }
   }, []);
 
+  // Subscribe and handle `window.blur`
+  useEffect(() => {
+    function handleBlur() {
+      if (selectedChatId) {
+        updateDraft(selectedChatId);
+      }
+    }
+
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [selectedChatId, updateDraft]);
+
+  // Subscribe and handle `document.onpaste`
   useEffect(() => {
     async function handlePaste(e: ClipboardEvent) {
       if (!e.clipboardData) {
@@ -263,6 +303,10 @@ const Composer: FC<StateProps & DispatchProps> = ({
   }, []);
 
   const stopRecordingVoice = useCallback(() => {
+    if (!activeVoiceRecording) {
+      return undefined;
+    }
+
     setActiveVoiceRecording(undefined);
     startRecordTimeRef.current = null;
     setCurrentRecordTime(undefined);
@@ -287,22 +331,15 @@ const Composer: FC<StateProps & DispatchProps> = ({
     setIsSymbolMenuOpen(false);
   }, []);
 
+  // Handle chat change
   const prevSelectedChatId = usePrevious(selectedChatId);
   useEffect(() => {
-    if (selectedChatId === prevSelectedChatId) {
+    if (!prevSelectedChatId || selectedChatId === prevSelectedChatId) {
       return;
     }
 
-    // This ensures that chat draft is properly saved/cleared when changing chats (in addition to `handleUpdate` check)
-    if (htmlRef.current.length && !editedMessage) {
-      saveDraft({ chatId: prevSelectedChatId, draft: parseMessageInput(htmlRef.current!) });
-    } else {
-      clearDraft({ chatId: prevSelectedChatId });
-    }
-
-    if (activeVoiceRecording) {
-      stopRecordingVoice();
-    }
+    updateDraft(prevSelectedChatId);
+    stopRecordingVoice();
     resetComposer();
 
     if (draft) {
@@ -313,21 +350,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
         focusEditableElement(messageInput, true);
       });
     }
-  }, [
-    prevSelectedChatId, selectedChatId, activeVoiceRecording, draft, editedMessage,
-    saveDraft, clearDraft, stopRecordingVoice, resetComposer,
-  ]);
-
-  const handleUpdate = useCallback((newHtml: string) => {
-    setHtml(newHtml);
-    runThrottledForSaveDraft(() => {
-      if (newHtml.length && !editedMessage) {
-        saveDraft({ chatId: selectedChatId, draft: parseMessageInput(htmlRef.current!) });
-      } else if (draft) {
-        clearDraft({ chatId: selectedChatId });
-      }
-    });
-  }, [editedMessage, draft, saveDraft, selectedChatId, clearDraft]);
+  }, [draft, prevSelectedChatId, resetComposer, selectedChatId, stopRecordingVoice, updateDraft]);
 
   const handleSend = useCallback(async () => {
     if (connectionState !== 'connectionStateReady') {
@@ -440,7 +463,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             id="message-input-text"
             html={!attachment ? html : ''}
             placeholder="Message"
-            onUpdate={handleUpdate}
+            onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
           />
@@ -500,6 +523,18 @@ const Composer: FC<StateProps & DispatchProps> = ({
     </div>
   );
 };
+
+function isSelectionInsideInput(selectionRange: Range) {
+  const { commonAncestorContainer } = selectionRange;
+  let parentNode: HTMLElement | null = commonAncestorContainer as HTMLElement;
+  let iterations = 1;
+  while (parentNode && parentNode.id !== EDITABLE_INPUT_ID && iterations < MAX_NESTING_PARENTS) {
+    parentNode = parentNode.parentElement;
+    iterations++;
+  }
+
+  return Boolean(parentNode && parentNode.id === EDITABLE_INPUT_ID);
+}
 
 async function buildAttachment(file: File, isQuick: boolean): Promise<ApiAttachment> {
   if (!isQuick || file.size >= MAX_QUICK_FILE_SIZE) {
