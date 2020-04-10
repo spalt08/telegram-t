@@ -204,7 +204,7 @@ export async function requestChatUpdate(chat: ApiChat) {
 
   const dialog = result.dialogs[0];
   const lastMessage = buildApiMessage(result.messages[0]);
-  if (!dialog || !(dialog instanceof GramJs.Dialog) || !lastMessage) {
+  if (!dialog || !(dialog instanceof GramJs.Dialog)) {
     return;
   }
 

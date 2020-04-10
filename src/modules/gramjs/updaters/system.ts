@@ -29,6 +29,15 @@ export function onUpdate(update: ApiUpdate) {
     case 'error':
       getDispatch().showError({ error: update.error });
       break;
+
+    case 'updateResetContactList':
+      setGlobal({
+        ...getGlobal(),
+        contactList: {
+          hash: 0,
+          userIds: [],
+        },
+      });
   }
 }
 
