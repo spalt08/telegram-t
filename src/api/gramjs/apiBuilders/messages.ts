@@ -24,6 +24,7 @@ import { isPeerUser } from './peers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
 import { reduceWaveform } from '../gramjsBuilders';
+import { fetchFile } from '../../../util/files';
 
 const LOCAL_VIDEO_TEMP_ID = 'temp';
 
@@ -524,7 +525,7 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
 // TODO @refactoring Use 1e9+ for local IDs instead of 0-
 let localMessageCounter = -1;
 
-export function buildLocalMessage(
+export async function buildLocalMessage(
   chatId: number,
   currentUserId: number,
   text?: string,
@@ -534,7 +535,7 @@ export function buildLocalMessage(
   sticker?: ApiSticker,
   gif?: ApiVideo,
   pollSummary?: ApiNewPoll,
-): ApiMessage {
+): Promise<ApiMessage> {
   const localId = localMessageCounter--;
 
   return {
@@ -548,7 +549,7 @@ export function buildLocalMessage(
           entities,
         },
       }),
-      ...(attachment && buildUploadingMedia(attachment)),
+      ...(attachment && await buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
       ...(pollSummary && buildNewPoll(pollSummary, localId)),
@@ -601,23 +602,20 @@ export function buildForwardedMessage(
   };
 }
 
-function buildUploadingMedia(
+async function buildUploadingMedia(
   attachment: ApiAttachment,
-): ApiMessage['content'] {
-  const { type: mimeType, name: fileName, size } = attachment.file;
+): Promise<ApiMessage['content']> {
+  const { filename: fileName, blobUrl } = attachment;
+  const { type: mimeType, size } = await fetchFile(blobUrl, fileName);
 
   if (attachment.quick) {
-    const { width, height, blobUrl } = attachment.quick;
+    const { width, height } = attachment.quick;
 
     if (mimeType.startsWith('image/')) {
       return {
         photo: {
-          thumbnail: {
-            width,
-            height,
-            dataUri: blobUrl,
-          },
           sizes: [],
+          thumbnail: { width, height, dataUri: '' }, // Used only for dimensions.
           blobUrl,
         },
       };

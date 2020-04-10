@@ -18,7 +18,6 @@ import { EDITABLE_INPUT_ID } from '../../../config';
 import { selectChatMessage } from '../../../modules/selectors';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
-import { blobToFile } from '../../../util/files';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
@@ -139,7 +138,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
   useClipboardPaste(insertTextAndUpdateCursor, setAttachment, editedMessage);
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
-    setAttachment(await buildAttachment(file, isQuick));
+    setAttachment(await buildAttachment(file.name, file, isQuick));
   }, []);
 
   const handleClearAttachment = useCallback(() => {
@@ -157,10 +156,12 @@ const Composer: FC<StateProps & DispatchProps> = ({
       const record = await stopRecordingVoice();
       if (record) {
         const { blob, duration, waveform } = record;
-        currentAttachment = {
-          file: blobToFile(blob, VOICE_RECORDING_FILENAME),
-          voice: { duration, waveform },
-        };
+        currentAttachment = await buildAttachment(
+          VOICE_RECORDING_FILENAME,
+          blob,
+          false,
+          { voice: { duration, waveform } },
+        );
       }
     }
 

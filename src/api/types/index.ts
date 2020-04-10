@@ -9,9 +9,11 @@ export type ApiOnProgress = (
 ) => void;
 
 export interface ApiAttachment {
-  file: File;
+  blobUrl: string;
+  filename: string;
+  mimeType: string;
+  size: number;
   quick?: {
-    blobUrl: string;
     width: number;
     height: number;
   };
