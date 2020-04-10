@@ -118,11 +118,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Both }), 1000, true, false),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loadViewportMessages, messageIds],
+    [loadViewportMessages, chatId, messageIds],
   );
 
   const updateFabVisibility = useCallback(() => {
-    if (!messageIds) {
+    if (!messageIds || !messageIds.length) {
       onFabToggle(false);
       return;
     }
@@ -285,7 +285,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     )) {
       loadMoreBoth();
     }
-  }, [messageIds, loadMoreBoth]);
+  }, [chatId, messageIds, loadMoreBoth]);
 
   useLayoutEffectWithPrevDeps(([
     prevChatId, prevMessageIds, prevIsViewportNewest, prevContainerHeight,

@@ -106,7 +106,7 @@ export default withGlobal<OwnProps>(
       target = id ? selectUser(global, id) : undefined;
     }
 
-    if (target && target.full_info) {
+    if (chat && target && target.full_info) {
       const { typingStatus } = chat;
       const { pinned_message_id: pinnedMessageId } = target.full_info;
       const pinnedMessage = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;

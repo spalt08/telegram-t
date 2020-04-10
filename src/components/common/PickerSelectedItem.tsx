@@ -57,10 +57,11 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const privateChatUserId = getPrivateChatUserId(chat);
+    const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
 
     return {
       chat,
-      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
+      privateChatUser,
     };
   },
 )(PickerSelectedItem));

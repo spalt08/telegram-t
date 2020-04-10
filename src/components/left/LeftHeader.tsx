@@ -6,6 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { LeftColumnContent } from '../../types';
 
+import { SUPPORT_BOT_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
 import DropdownMenu from '../ui/DropdownMenu';
@@ -29,9 +30,10 @@ type StateProps = {
   searchQuery?: string;
   isLoading: boolean;
   isSettingsAttentionNeeded: boolean;
+  currentUserId?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'signOut'>;
+type DispatchProps = Pick<GlobalActions, 'signOut' | 'openChat'>;
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 
@@ -43,7 +45,9 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   searchQuery,
   isLoading,
   isSettingsAttentionNeeded,
+  currentUserId,
   signOut,
+  openChat,
 }) => {
   const hasMenu = content === LeftColumnContent.ChatList;
   const hasSearch = [
@@ -84,6 +88,14 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     onSearchQuery('');
   }, [onSearchQuery]);
 
+  const handleSelectSaved = useCallback(() => {
+    openChat({ id: currentUserId });
+  }, [currentUserId, openChat]);
+
+  const handleSelectSupport = useCallback(() => {
+    openChat({ id: SUPPORT_BOT_ID });
+  }, [openChat]);
+
   function renderHeaderContent() {
     switch (headerKey) {
       case LeftColumnContent.Settings:
@@ -109,7 +121,12 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <MenuItem className="not-implemented" disabled icon="group">New Group</MenuItem>
         <MenuItem className="not-implemented" disabled icon="user">Contacts</MenuItem>
         <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
-        <MenuItem className="not-implemented" disabled icon="saved-messages">Saved</MenuItem>
+        <MenuItem
+          icon="saved-messages"
+          onClick={handleSelectSaved}
+        >
+          Saved
+        </MenuItem>
         <MenuItem
           icon="settings"
           onClick={onSelectSettings}
@@ -117,7 +134,12 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           Settings
         </MenuItem>
-        <MenuItem className="not-implemented" disabled icon="help">Help</MenuItem>
+        <MenuItem
+          icon="help"
+          onClick={handleSelectSupport}
+        >
+          Help
+        </MenuItem>
         <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
       {hasMenu && <AttentionIndicator show={isSettingsAttentionNeeded} />}
@@ -140,15 +162,17 @@ export default withGlobal<OwnProps>(
   (global): StateProps => {
     const { query: searchQuery, fetchingStatus } = global.globalSearch;
     const { isAnimationLevelSettingViewed } = global.settings;
+    const { currentUserId } = global;
 
     return {
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
       isSettingsAttentionNeeded: !isAnimationLevelSettingViewed,
+      currentUserId,
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const { signOut } = actions;
-    return { signOut };
+    const { signOut, openChat } = actions;
+    return { signOut, openChat };
   },
 )(LeftHeader);

@@ -12,7 +12,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  user: ApiUser;
+  user?: ApiUser;
 } & Pick<GlobalState, 'lastSyncTime'>;
 
 type DispatchProps = Pick<GlobalActions, 'loadFullUser'>;
@@ -21,25 +21,25 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   lastSyncTime, user, forceShowSelf, loadFullUser,
 }) => {
   const {
+    id: userId,
     full_info,
     username,
     phone_number,
     is_self,
-  } = user;
+  } = user || {};
 
   useEffect(() => {
     if (lastSyncTime && !is_self) {
-      loadFullUser({ userId: user.id });
+      loadFullUser({ userId });
     }
-  }, [is_self, loadFullUser, user.id, lastSyncTime]);
+  }, [is_self, loadFullUser, userId, lastSyncTime]);
 
-  if (is_self && !forceShowSelf) {
+  if (!user || (is_self && !forceShowSelf)) {
     return null;
   }
 
   const bio = full_info && full_info.bio;
-
-  const formattedNumber = formatPhoneNumberWithCode(phone_number);
+  const formattedNumber = phone_number && formatPhoneNumberWithCode(phone_number);
 
   return (
     <div className="ChatExtra">
@@ -52,7 +52,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         </div>
       )}
-      {!!username.length && (
+      {username && !!username.length && (
         <div className="item">
           <i className="icon-username" />
           <div>
@@ -61,7 +61,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
         </div>
       )}
-      {!!phone_number.length && (
+      {formattedNumber && !!formattedNumber.length && (
         <div className="item">
           <i className="icon-phone" />
           <div>

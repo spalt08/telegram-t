@@ -2,7 +2,7 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { CHAT_LIST_SLICE } from '../../../config';
+import { CHAT_LIST_SLICE, SUPPORT_BOT_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { addUsers, updateChatListIds, updateChats } from '../../reducers';
 import { selectChat } from '../../selectors';
@@ -12,6 +12,23 @@ import { debounce, throttle } from '../../../util/schedulers';
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
+
+addReducer('openChat', (global, actions, payload) => {
+  const { id } = payload!;
+  const { currentUserId } = global;
+  const chat = selectChat(global, id);
+
+  // Currently, there is no way to load Channel or User only with their ID.
+  // Furthermore, outside of `Saved Messages` and `Help` links,
+  // it is unlikely for user to open a chat that isn't already loaded
+  if (!chat) {
+    if (id === SUPPORT_BOT_ID) {
+      void callApi('fetchSupportChat');
+    } else if (id === currentUserId) {
+      void callApi('fetchChatWithSelf');
+    }
+  }
+});
 
 addReducer('loadMoreChats', (global) => {
   const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
@@ -51,6 +68,9 @@ addReducer('loadTopChats', () => {
 addReducer('requestChatUpdate', (global, actions, payload) => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
 
   void callApi('requestChatUpdate', chat);
 });
