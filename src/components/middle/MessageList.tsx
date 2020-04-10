@@ -403,7 +403,18 @@ function renderMessages(
     ) => {
       if (senderGroup.length === 1 && !isAlbum(senderGroup[0]) && isActionMessage(senderGroup[0])) {
         const message = senderGroup[0];
-        return <ActionMessage key={message.id} message={message} />;
+        const renderedMessage = <ActionMessage key={message.id} message={message} />;
+
+        if (message.id === memoFirstUnreadId) {
+          return (
+            <>
+              <div className="unread-divider"><span>Unread messages</span></div>
+              {renderedMessage}
+            </>
+          );
+        }
+
+        return renderedMessage;
       }
 
       return flatten(senderGroup.map((
