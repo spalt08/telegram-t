@@ -110,6 +110,7 @@
   }
 
   .waveform {
+    cursor: pointer;
     margin-left: 1px;
   }
 
@@ -142,6 +143,8 @@
     position: relative;
     margin-left: -6px;
     top: 1px;
+    cursor: pointer;
+    user-select: none;
 
     &::before {
       content: '';
