@@ -12,12 +12,12 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
 
-  const [, onMediaLoad] = useState(null);
+  const [, setIsLoaded] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(mediaData ? 1 : 0);
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(onMediaLoad);
+      mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(() => setIsLoaded(true));
     }
   }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster]);
 

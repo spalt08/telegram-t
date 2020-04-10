@@ -6,11 +6,11 @@ import {
 
 export default <B extends Bundles, M extends BundleModules<B>>(bundleName: B, moduleName: M, noLoad = false) => {
   const module = getModuleFromMemory(bundleName, moduleName);
-  const [, onLoad] = useState(null);
+  const [, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!noLoad && !module) {
-      loadModule(bundleName, moduleName).then(onLoad);
+      loadModule(bundleName, moduleName).then(() => setIsLoaded(true));
     }
   }, [bundleName, module, moduleName, noLoad]);
 
