@@ -1,6 +1,7 @@
 import { GlobalState } from '../../global/types';
+import { ApiUser } from '../../api/types';
 
-export function selectUser(global: GlobalState, userId: number) {
+export function selectUser(global: GlobalState, userId: number): ApiUser | undefined {
   return global.users.byId[userId];
 }
 

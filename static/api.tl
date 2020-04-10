@@ -860,7 +860,6 @@ messages.getWebPagePreview#8b68b0cc flags:# message:string entities:flags.3?Vect
 messages.searchGlobal#bf7225a4 flags:# folder_id:flags.0?int q:string offset_rate:int offset_peer:InputPeer offset_id:int limit:int = messages.Messages;
 messages.getDocumentByHash#338e2464 sha256:bytes size:int mime_type:string = Document;
 messages.editMessage#48f71778 flags:# no_webpage:flags.1?true peer:InputPeer id:int message:flags.11?string media:flags.14?InputMedia reply_markup:flags.2?ReplyMarkup entities:flags.3?Vector<MessageEntity> schedule_date:flags.15?int = Updates;
-messages.getPeerDialogs#e470bcfd peers:Vector<InputDialogPeer> = messages.PeerDialogs;
 messages.getWebPage#32ca8f91 url:string hash:int = WebPage;
 messages.uploadMedia#519bc2b1 peer:InputPeer media:InputMedia = MessageMedia;
 messages.updatePinnedMessage#d2aaf7ec flags:# silent:flags.0?true peer:InputPeer id:int = Updates;
@@ -876,6 +875,7 @@ upload.saveBigFilePart#de7b673d file_id:long file_part:int file_total_parts:int 
 help.getConfig#c4f9186b = Config;
 help.getNearestDc#1fb33026 = NearestDc;
 help.acceptTermsOfService#ee72f79a id:DataJSON = Bool;
+help.getSupport#9cdf08cd = help.Support;
 channels.readHistory#cc104937 channel:InputChannel max_id:int = Bool;
 channels.deleteMessages#84c1fd4e channel:InputChannel id:Vector<int> = messages.AffectedMessages;
 channels.getMessages#ad8c9a23 channel:InputChannel id:Vector<InputMessage> = messages.Messages;

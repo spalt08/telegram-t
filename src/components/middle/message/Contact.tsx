@@ -15,7 +15,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  user: ApiUser;
+  user?: ApiUser;
 };
 
 const Contact: FC<OwnProps & StateProps> = ({ contact, user }) => {

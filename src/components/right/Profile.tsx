@@ -106,9 +106,16 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const determineSharedMedia = useCallback(() => {
-    const container = containerRef.current!;
-    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo')!;
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
     const chatExtraEl = container.querySelector<HTMLDivElement>('.ChatExtra');
+    if (!chatInfoEl) {
+      return;
+    }
 
     onSharedMediaToggle(container.scrollTop >= (
       chatInfoEl.offsetHeight + 16 + (chatExtraEl ? chatExtraEl.offsetHeight : 0)
@@ -116,13 +123,16 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onSharedMediaToggle]);
 
   useEffect(() => {
-    const container = containerRef.current!;
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
     const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
-    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo')!;
+    const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
 
-    if (!isSharedMedia && tabsEl.offsetTop - container.scrollTop === 0) {
+    if (chatInfoEl && !isSharedMedia && tabsEl.offsetTop - container.scrollTop === 0) {
       isScrollingProgrammatically = true;
-      fastSmoothScroll(containerRef.current!, chatInfoEl, 'start', container.offsetHeight * 2);
+      fastSmoothScroll(container, chatInfoEl, 'start', container.offsetHeight * 2);
       setTimeout(() => {
         isScrollingProgrammatically = false;
         determineSharedMedia();

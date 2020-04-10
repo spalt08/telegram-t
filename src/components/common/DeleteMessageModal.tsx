@@ -17,7 +17,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  canDeleteForAll: boolean;
+  canDeleteForAll?: boolean;
   contactFirstName?: string;
 };
 
@@ -67,7 +67,7 @@ export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const { canDeleteForAll } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chat_id);
-    const contactFirstName = isChatPrivate(chat.id)
+    const contactFirstName = chat && isChatPrivate(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
 

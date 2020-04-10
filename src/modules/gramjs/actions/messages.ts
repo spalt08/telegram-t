@@ -103,6 +103,10 @@ addReducer('loadMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
   const chat = selectChat(global, chatId);
 
+  if (!chat) {
+    return;
+  }
+
   void loadMessage(chat, messageId);
 });
 
@@ -217,6 +221,7 @@ addReducer('clearWebPagePreview', (global) => {
 addReducer('sendPollVote', (global, actions, payload) => {
   const { chatId, messageId, options } = payload!;
   const chat = selectChat(global, chatId);
+
   if (chat) {
     void callApi('sendPollVote', { chat, messageId, options });
   }
@@ -225,8 +230,8 @@ addReducer('sendPollVote', (global, actions, payload) => {
 addReducer('forwardMessages', (global) => {
   const { currentUserId } = global;
   const { fromChatId, messageIds, toChatIds } = global.forwardMessages;
-  const fromChat = fromChatId && selectChat(global, fromChatId);
-  const toChats = toChatIds && toChatIds.map((id) => selectChat(global, id)).filter(Boolean);
+  const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
+  const toChats = toChatIds && toChatIds.map((id) => selectChat(global, id)).filter<ApiChat>(Boolean as any);
   const messages = fromChatId && messageIds
     ? messageIds.map((id) => selectChatMessage(global, fromChatId, id)).filter<ApiMessage>(Boolean as any)
     : undefined;

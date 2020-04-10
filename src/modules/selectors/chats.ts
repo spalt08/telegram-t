@@ -4,7 +4,7 @@ import { GlobalState } from '../../global/types';
 import { getPrivateChatUserId, isChatSuperGroup, isUserOnline } from '../helpers';
 import { selectUser } from './users';
 
-export function selectChat(global: GlobalState, chatId: number) {
+export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
 }
 

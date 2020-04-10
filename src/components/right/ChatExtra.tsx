@@ -10,10 +10,14 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat: ApiChat;
+  chat?: ApiChat;
 };
 
 const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
+  if (!chat) {
+    return null;
+  }
+
   const description = getChatDescription(chat);
   const link = getChatLink(chat);
   const url = link.indexOf('http') === 0 ? link : `http://${link}`;
