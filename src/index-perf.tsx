@@ -1,8 +1,9 @@
 import React, { getGlobal, setGlobal } from './lib/teact/teactn';
 import TeactDOM from './lib/teact/teact-dom';
-
 // import './store';
 import './modules';
+
+import { Bundles, loadModule } from './util/moduleLoader';
 
 import App from './App';
 
@@ -22,6 +23,10 @@ function renderNothing() {
   );
 }
 
+function preloadMainBundle() {
+  return loadModule(Bundles.Main, 'Main');
+}
+
 // getDispatch().init();
 // renderApp();
 
@@ -30,4 +35,5 @@ function renderNothing() {
   setGlobal,
   renderApp,
   renderNothing,
+  preloadMainBundle,
 };
