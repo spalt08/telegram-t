@@ -29,8 +29,16 @@ const AttachmentModal: FC<OwnProps> = ({
   const prevAttachment = usePrevious(attachment);
   const renderingAttachment = attachment || prevAttachment;
   const isOpen = Boolean(attachment);
-  const photo = renderingAttachment && renderingAttachment.file.type.startsWith('image/') && renderingAttachment.quick;
-  const video = renderingAttachment && renderingAttachment.file.type.startsWith('video/') && renderingAttachment.quick;
+
+  let photo: ApiAttachment | undefined;
+  let video: ApiAttachment | undefined;
+  if (renderingAttachment) {
+    if (renderingAttachment.mimeType.startsWith('image/')) {
+      photo = renderingAttachment;
+    } else if (renderingAttachment.mimeType.startsWith('video/')) {
+      video = renderingAttachment;
+    }
+  }
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
 
@@ -71,9 +79,9 @@ const AttachmentModal: FC<OwnProps> = ({
       {!photo && !video && (
         <div className="document-wrapper">
           <File
-            name={renderingAttachment.file.name}
-            extension={getFileExtension(renderingAttachment.file.name, renderingAttachment.file.type)}
-            size={renderingAttachment.file.size}
+            name={renderingAttachment.filename}
+            extension={getFileExtension(renderingAttachment.filename, renderingAttachment.mimeType)}
+            size={renderingAttachment.size}
             smaller
           />
         </div>
