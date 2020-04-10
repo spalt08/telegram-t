@@ -84,9 +84,7 @@ export function selectIsMessageFocused(global: GlobalState, message: ApiMessage)
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
-  const chat = selectChat(global, message.chat_id);
-
-  const { last_read_outbox_message_id } = chat || {};
+  const { last_read_outbox_message_id } = selectChat(global, message.chat_id) || {};
   return isMessageLocal(message) || (last_read_outbox_message_id && last_read_outbox_message_id < message.id);
 }
 
@@ -124,8 +122,12 @@ export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): bo
 
 export function selectAllowedMessagedActions(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chat_id);
+  if (!chat) {
+    return {};
+  }
+
   const isPrivate = isChatPrivate(chat.id);
-  const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat);
+  const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat!);
   const isBasicGroup = isChatBasicGroup(chat);
   const isSuperGroup = isChatSuperGroup(chat);
   const isChannel = isChatChannel(chat);
@@ -135,9 +137,11 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   const isSuperGroupOrChannelAdmin = (isSuperGroup || isChannel) && isAdminOrOwner;
 
   const canReply = !isChannel;
-  const canPin = isChatWithSelf || isBasicGroup || isSuperGroupOrChannelAdmin;
+  const canPin = Boolean(isChatWithSelf || isBasicGroup || isSuperGroupOrChannelAdmin);
   const canDelete = isPrivate || isBasicGroup || isSuperGroupOrChannelAdmin || isOwnMessage;
-  const canDeleteForAll = canDelete && ((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin);
+  const canDeleteForAll = canDelete
+    ? Boolean((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin)
+    : false;
 
   const canEdit = isOwnMessage
     && Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
@@ -158,6 +162,9 @@ export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
 
 export function selectRealLastReadId(global: GlobalState, chatId: number) {
   const chat = selectChat(global, chatId);
+  if (!chat) {
+    return undefined;
+  }
   const { last_message, last_read_inbox_message_id } = chat;
 
   // Edge case #1
@@ -187,7 +194,7 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
 
 export function selectFirstUnreadId(global: GlobalState, chatId: number) {
   const chat = selectChat(global, chatId);
-  if (!chat.unread_count) {
+  if (!chat || !chat.unread_count) {
     return undefined;
   }
 

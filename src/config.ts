@@ -25,6 +25,8 @@ export const GLOBAL_SEARCH_SLICE = 20;
 export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
 export const DEFAULT_ANIMATION_LEVEL = 1;
 
+export const SUPPORT_BOT_ID = 470000;
+
 export const DRAFT_THROTTLE = 10000; // 10s
 
 export const EDITABLE_INPUT_ID = 'editable-message-text';

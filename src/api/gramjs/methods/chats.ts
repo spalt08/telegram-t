@@ -38,7 +38,7 @@ export async function fetchChats({
   }));
 
   if (!result || result instanceof GramJs.messages.DialogsNotModified) {
-    return null;
+    return undefined;
   }
 
   updateLocalDb(result);
@@ -120,27 +120,73 @@ export async function fetchSuperGroupOnlines(chat: ApiChat) {
 }
 
 export async function searchChats({ query, limit }: { query: string; limit?: number }) {
-  try {
-    const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit }));
-    if (!result) {
-      return undefined;
-    }
-
-    updateLocalDb(result);
-
-    const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
-    const allChats = [...result.chats, ...result.users].map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
-    const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
-
-    return {
-      localChats: allChats.filter((r) => localPeerIds.includes(r.id)),
-      localUsers: allUsers.filter((u) => localPeerIds.includes(u.id)),
-      globalChats: allChats.filter((r) => !localPeerIds.includes(r.id)),
-      globalUsers: allUsers.filter((u) => !localPeerIds.includes(u.id)),
-    };
-  } catch (err) {
+  const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit }));
+  if (!result) {
     return undefined;
   }
+
+  updateLocalDb(result);
+
+  const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
+  const allChats = [...result.chats, ...result.users].map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
+  const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+
+  return {
+    localChats: allChats.filter((r) => localPeerIds.includes(r.id)),
+    localUsers: allUsers.filter((u) => localPeerIds.includes(u.id)),
+    globalChats: allChats.filter((r) => !localPeerIds.includes(r.id)),
+    globalUsers: allUsers.filter((u) => !localPeerIds.includes(u.id)),
+  };
+}
+
+export async function fetchSupportChat() {
+  const result = await invokeRequest(new GramJs.help.GetSupport());
+
+  if (!result) {
+    return;
+  }
+
+  const { user } = result;
+  if (user instanceof GramJs.User) {
+    localDb.users[user.id] = user;
+  }
+
+  const chat = buildApiChatFromPreview(user);
+  if (!chat) {
+    return;
+  }
+
+  onUpdate({
+    '@type': 'updateChat',
+    id: chat.id,
+    chat,
+  });
+}
+
+export async function fetchChatWithSelf() {
+  const result = await invokeRequest(new GramJs.users.GetUsers({
+    id: [new GramJs.InputUserSelf()],
+  }));
+
+  if (!result || !result.length) {
+    return;
+  }
+
+  const user = result[0];
+  if (user instanceof GramJs.User) {
+    localDb.users[user.id] = user;
+  }
+
+  const chat = buildApiChatFromPreview(user);
+  if (!chat) {
+    return;
+  }
+
+  onUpdate({
+    '@type': 'updateChat',
+    id: chat.id,
+    chat,
+  });
 }
 
 export async function requestChatUpdate(chat: ApiChat) {

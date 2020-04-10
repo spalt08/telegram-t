@@ -21,7 +21,7 @@ export function onUpdate(update: ApiUpdate) {
       setGlobal(updateChat(global, update.id, update.chat));
 
       const chat = selectChat(global, update.id);
-      if (chat.unread_mention_count) {
+      if (chat && chat.unread_mention_count) {
         getDispatch().requestChatUpdate({ chatId: chat.id });
       }
 
@@ -35,7 +35,7 @@ export function onUpdate(update: ApiUpdate) {
       setTimeout(() => {
         const newGlobal = getGlobal();
         const chat = selectChat(newGlobal, id);
-        if (typingStatus && chat.typingStatus && chat.typingStatus.timestamp === typingStatus.timestamp) {
+        if (chat && typingStatus && chat.typingStatus && chat.typingStatus.timestamp === typingStatus.timestamp) {
           setGlobal(updateChat(newGlobal, id, { typingStatus: undefined }));
         }
       }, TYPING_STATUS_CLEAR_DELAY);

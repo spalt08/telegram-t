@@ -317,7 +317,7 @@ function findCommonBoxChatId(global: GlobalState, messageId: number) {
   const { byChatId } = global.messages;
   return Number(Object.keys(byChatId).find((chatId) => {
     const chat = selectChat(global, Number(chatId));
-    return isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
+    return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
   }));
 }
 

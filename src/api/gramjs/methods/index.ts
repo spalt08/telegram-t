@@ -4,7 +4,7 @@ import {
 } from './auth';
 import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
-  saveDraft, clearDraft,
+  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf,
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
@@ -42,6 +42,8 @@ export default {
   fetchFullChat,
   fetchSuperGroupOnlines,
   searchChats,
+  fetchSupportChat,
+  fetchChatWithSelf,
   requestChatUpdate,
   saveDraft,
   clearDraft,
