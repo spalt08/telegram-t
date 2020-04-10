@@ -2,7 +2,7 @@ import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 
-import { updateChat } from '../../reducers';
+import { updateChat, replaceChatListIds, updateChatListIds } from '../../reducers';
 import { selectChat } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
@@ -12,7 +12,27 @@ export function onUpdate(update: ApiUpdate) {
 
   switch (update['@type']) {
     case 'updateChat': {
-      setGlobal(updateChat(global, update.id, update.chat));
+      // Edge case: Chat is old and not yet loaded.
+      const { listIds } = global.chats;
+      if (!listIds || !listIds.includes(update.id)) {
+        getDispatch().loadTopChats();
+      } else {
+        setGlobal(updateChat(global, update.id, update.chat));
+      }
+
+      break;
+    }
+
+    case 'updateChatJoin': {
+      setGlobal(updateChatListIds(global, [update.id]));
+      break;
+    }
+
+    case 'updateChatLeave': {
+      const { listIds } = global.chats;
+      if (listIds) {
+        setGlobal(replaceChatListIds(global, listIds.filter((listId) => listId !== update.id)));
+      }
 
       break;
     }
@@ -103,6 +123,49 @@ export function onUpdate(update: ApiUpdate) {
       };
 
       setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateChatMembers': {
+      const targetChat = global.chats.byId[update.id];
+      const { replacedMembers, addedMember, deletedMemberId } = update;
+      if (!targetChat) {
+        return;
+      }
+
+      let shouldUpdate = false;
+      let members = targetChat.full_info && targetChat.full_info.members
+        ? [...targetChat.full_info.members]
+        : [];
+
+      if (replacedMembers) {
+        members = replacedMembers;
+        shouldUpdate = true;
+      } else if (addedMember) {
+        if (
+          !members.length
+          || !members.some((m) => m.user_id === addedMember.user_id)
+        ) {
+          members.push(addedMember);
+          shouldUpdate = true;
+        }
+      } else if (members.length && deletedMemberId) {
+        const deleteIndex = members.findIndex((m) => m.user_id === deletedMemberId);
+        if (deleteIndex > -1) {
+          members.slice(deleteIndex, 1);
+          shouldUpdate = true;
+        }
+      }
+
+      if (shouldUpdate) {
+        setGlobal(updateChat(global, update.id, {
+          members_count: members.length,
+          full_info: {
+            members,
+          },
+        }));
+      }
 
       break;
     }

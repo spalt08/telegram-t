@@ -24,6 +24,7 @@ export interface ApiChat {
   };
   username?: string;
   members_count?: number;
+  joinDate?: number;
   // Obtained from GetFullChat / GetFullChannel
   full_info?: ApiChatFullInfo;
   // Obtained from GetOnlines
