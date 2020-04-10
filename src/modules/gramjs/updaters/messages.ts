@@ -69,7 +69,7 @@ export function onUpdate(update: ApiUpdate) {
       break;
     }
 
-    case 'editMessage': {
+    case 'updateMessage': {
       const { chat_id, id, message } = update;
 
       const currentMessage = selectChatMessage(global, chat_id, id);
@@ -183,6 +183,20 @@ export function onUpdate(update: ApiUpdate) {
         if (chatId) {
           newGlobal = updateChatMessage(newGlobal, chatId, id, messageUpdate);
         }
+      });
+
+      setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateChannelMessages': {
+      const { channelId, ids, messageUpdate } = update;
+
+      let newGlobal = global;
+
+      ids.forEach((id) => {
+        newGlobal = updateChatMessage(newGlobal, channelId, id, messageUpdate);
       });
 
       setGlobal(newGlobal);

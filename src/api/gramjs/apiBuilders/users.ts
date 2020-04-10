@@ -7,7 +7,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   }
 
   const avatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
-    && { hash: mtpUser.photo.photoId.toString() };
+    ? { hash: mtpUser.photo.photoId.toString() }
+    : undefined;
 
   return {
     id: mtpUser.id,
@@ -20,7 +21,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     phone_number: mtpUser.phone || '',
     status: buildApiUserStatus(mtpUser.status),
     ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
-    ...(avatar && { avatar }),
+    avatar,
   };
 }
 

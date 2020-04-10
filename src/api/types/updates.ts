@@ -1,4 +1,9 @@
-import { ApiChat, ApiChatFullInfo, ApiTypingStatus } from './chats';
+import {
+  ApiChat,
+  ApiChatFullInfo,
+  ApiTypingStatus,
+  ApiChatMember,
+} from './chats';
 import { ApiMessage, ApiPoll } from './messages';
 import { ApiUser, ApiUserFullInfo } from './users';
 
@@ -49,6 +54,16 @@ export type ApiUpdateChat = {
   chat: Partial<ApiChat>;
 };
 
+export type ApiUpdateChatJoin = {
+  '@type': 'updateChatJoin';
+  id: number;
+};
+
+export type ApiUpdateChatLeave = {
+  '@type': 'updateChatLeave';
+  id: number;
+};
+
 export type ApiUpdateChatInbox = {
   '@type': 'updateChatInbox';
   id: number;
@@ -67,6 +82,14 @@ export type ApiUpdateChatFullInfo = {
   full_info: Partial<ApiChatFullInfo>;
 };
 
+export type ApiUpdateChatMembers = {
+  '@type': 'updateChatMembers';
+  id: number;
+  replacedMembers?: ApiChatMember[];
+  addedMember?: ApiChatMember;
+  deletedMemberId?: number;
+};
+
 export type ApiUpdatePinnedChatIds = {
   '@type': 'updatePinnedChatIds';
   ids: number[];
@@ -79,8 +102,8 @@ export type ApiUpdateNewMessage = {
   message: Partial<ApiMessage>;
 };
 
-export type ApiUpdateEditMessage = {
-  '@type': 'editMessage';
+export type ApiUpdateMessage= {
+  '@type': 'updateMessage';
   chat_id: number;
   id: number;
   message: Partial<ApiMessage>;
@@ -104,6 +127,13 @@ export type ApiUpdateMessageSendFailed = {
 
 export type ApiUpdateCommonBoxMessages = {
   '@type': 'updateCommonBoxMessages';
+  ids: number[];
+  messageUpdate: Partial<ApiMessage>;
+};
+
+export type ApiUpdateChannelMessages = {
+  '@type': 'updateChannelMessages';
+  channelId: number;
   ids: number[];
   messageUpdate: Partial<ApiMessage>;
 };
@@ -160,15 +190,20 @@ export type ApiUpdateError = {
   error: ApiError;
 };
 
+export type ApiUpdateResetContacts = {
+  '@type': 'updateResetContactList';
+};
+
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateNewMessage | ApiUpdateEditMessage | ApiUpdateCommonBoxMessages | ApiUpdateDeleteMessages |
-  ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
+  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave |
+  ApiUpdateNewMessage | ApiUpdateMessage| ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
+  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |
-  ApiUpdateError
+  ApiUpdateError | ApiUpdateResetContacts
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -30,6 +30,7 @@ import {
   reduceWaveform,
   buildInputPoll,
   buildMtpMessageEntity,
+  isMessageWithMedia,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -203,7 +204,7 @@ export async function editMessage({
   };
 
   onUpdate({
-    '@type': 'editMessage',
+    '@type': 'updateMessage',
     id: message.id,
     chat_id: chat.id,
     message: messageUpdate,
@@ -536,22 +537,4 @@ function updateLocalDb(
       localDb.messages[messageFullId] = message;
     }
   });
-}
-
-function isMessageWithMedia(message: GramJs.Message) {
-  const { media } = message;
-
-  if (!media) {
-    return false;
-  }
-
-  return (
-    media instanceof GramJs.MessageMediaPhoto
-    || media instanceof GramJs.MessageMediaDocument
-    || (
-      media instanceof GramJs.MessageMediaWebPage
-      && media.webpage instanceof GramJs.WebPage
-      && media.webpage.photo instanceof GramJs.Photo
-    )
-  );
 }

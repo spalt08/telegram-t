@@ -25,7 +25,10 @@ export function buildApiChatFromDialog(
     is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
     ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
     ...(avatar && { avatar }),
-    ...(!(peerEntity instanceof GramJs.User) && { members_count: peerEntity.participantsCount }),
+    ...(!(peerEntity instanceof GramJs.User) && {
+      members_count: peerEntity.participantsCount,
+      joinDate: peerEntity.date,
+    }),
   };
 }
 
@@ -52,6 +55,7 @@ export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUs
     ...(('verified' in preview) && { is_verified: preview.verified }),
     ...(!(preview instanceof GramJs.User) && {
       members_count: preview.participantsCount,
+      joinDate: preview.date,
     }),
   };
 }
@@ -98,7 +102,7 @@ function getUserName(user: GramJs.User) {
   return user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined;
 }
 
-function buildAvatar(photo: any) {
+export function buildAvatar(photo: any) {
   if (photo instanceof GramJs.UserProfilePhoto) {
     return { hash: photo.photoId.toString() };
   } else if (photo instanceof GramJs.ChatPhoto) {
@@ -109,17 +113,21 @@ function buildAvatar(photo: any) {
   return undefined;
 }
 
+export function buildChatMember(member: GramJs.TypeChatParticipant): ApiChatMember {
+  return {
+    '@type': 'chatMember',
+    user_id: member.userId,
+    inviter_id: 'inviterId' in member ? member.inviterId : undefined,
+    joined_date: 'date' in member ? member.date : undefined,
+  };
+}
+
 export function buildChatMembers(participants: GramJs.TypeChatParticipants): ApiChatMember[] | undefined {
   if (!(participants instanceof GramJs.ChatParticipants)) {
     return undefined;
   }
 
-  return participants.participants.map((member) => ({
-    '@type': 'chatMember',
-    user_id: member.userId,
-    inviter_id: 'inviterId' in member ? member.inviterId : undefined,
-    joined_date: 'date' in member ? member.date : undefined,
-  }));
+  return participants.participants.map(buildChatMember);
 }
 
 export function buildChatInviteLink(exportedInvite: GramJs.TypeExportedChatInvite) {

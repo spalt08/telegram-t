@@ -191,3 +191,50 @@ export function calculateResultHash(ids: number[]) {
 
   return hash;
 }
+
+export function isMessageWithMedia(message: GramJs.Message) {
+  const { media } = message;
+
+  if (!media) {
+    return false;
+  }
+
+  return (
+    media instanceof GramJs.MessageMediaPhoto
+    || media instanceof GramJs.MessageMediaDocument
+    || (
+      media instanceof GramJs.MessageMediaWebPage
+      && media.webpage instanceof GramJs.WebPage
+      && media.webpage.photo instanceof GramJs.Photo
+    )
+  );
+}
+
+export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
+  if (photo instanceof GramJs.PhotoEmpty) {
+    return new GramJs.ChatPhotoEmpty();
+  }
+
+  const { dcId } = photo;
+  const nonStrippedSizes = photo.sizes
+    .filter((s: any): s is (GramJs.PhotoSize | GramJs.PhotoCachedSize) => {
+      return s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoCachedSize;
+    });
+
+  if (!nonStrippedSizes.length) {
+    return new GramJs.ChatPhotoEmpty();
+  }
+
+  const smallSize = nonStrippedSizes.find((s) => s.type === 'a');
+  const largeSize = nonStrippedSizes.find((s) => s.type === 'c') || nonStrippedSizes.find((s) => s.type === 'b');
+
+  if (!smallSize || !largeSize) {
+    return new GramJs.ChatPhotoEmpty();
+  }
+
+  return new GramJs.ChatPhoto({
+    dcId,
+    photoSmall: smallSize && smallSize.location,
+    photoBig: largeSize && largeSize.location,
+  });
+}
