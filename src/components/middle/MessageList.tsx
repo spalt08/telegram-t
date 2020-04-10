@@ -261,7 +261,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Container resize observer.
   useEffect(() => {
-    if (!('ResizeObserver' in window)) {
+    if (!('ResizeObserver' in window) || process.env.NODE_ENV === 'perf') {
       return undefined;
     }
 
