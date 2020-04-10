@@ -32,6 +32,12 @@ enum PlayState {
   Paused,
 }
 
+interface ISeekMethods {
+  handleStartSeek: (event: React.MouseEvent<HTMLElement>) => void;
+  handleSeek: (event: React.MouseEvent<HTMLElement>) => void;
+  handleStopSeek: () => void;
+}
+
 const Audio: FC<OwnProps> = ({
   message,
   uploadProgress,
@@ -45,6 +51,7 @@ const Audio: FC<OwnProps> = ({
   const audioRef = useRef<HTMLAudioElement>();
   const [playState, setPlayState] = useState<PlayState>(PlayState.Idle);
   const isActive = playState === PlayState.Playing;
+  const isSeeking = useRef<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const {
     mediaData, downloadProgress,
@@ -104,8 +111,36 @@ const Audio: FC<OwnProps> = ({
     };
   }, []);
 
+  const seek = (event: React.MouseEvent<HTMLElement>) => {
+    const audioEl = audioRef.current;
+    if (audioEl && isSeeking.current) {
+      const seekBar = event.currentTarget.closest('.seekline,.waveform');
+      if (seekBar) {
+        const { width, left } = seekBar.getBoundingClientRect();
+        audioEl.currentTime = (audioEl.duration * ((event.clientX - left) / width));
+      }
+    }
+  };
+
+  const handleStartSeek = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    isSeeking.current = true;
+    seek(event);
+  }, []);
+
+  const handleSeek = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    seek(event);
+  }, [isSeeking]);
+
+  const handleStopSeek = useCallback(() => {
+    isSeeking.current = false;
+  }, []);
+
+  const seekHandlers = { handleStartSeek, handleSeek, handleStopSeek };
   const isOwn = isOwnMessage(message);
-  const renderedWaveform = useMemo(() => voice && renderWaveform(voice, progress, isOwn), [voice, progress, isOwn]);
+  const renderedWaveform = useMemo(
+    () => voice && renderWaveform(voice, progress, isOwn, seekHandlers),
+    [voice, progress, isOwn, seekHandlers.handleSeek],
+  );
 
   const className = buildClassName(
     'Audio media-inner',
@@ -143,12 +178,20 @@ const Audio: FC<OwnProps> = ({
           />
         </div>
       )}
-      {audio ? renderAudio(audio, isActive, progress, date) : renderVoice(voice!, renderedWaveform, isMediaUnread)}
+      {audio
+        ? renderAudio(audio, isActive, progress, seekHandlers, date)
+        : renderVoice(voice!, renderedWaveform, isMediaUnread)}
     </div>
   );
 };
 
-function renderAudio(audio: ApiAudio, isActive: boolean, progress: number, date?: number) {
+function renderAudio(
+  audio: ApiAudio,
+  isActive: boolean,
+  progress: number,
+  { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
+  date?: number,
+) {
   const {
     title, performer, duration, fileName,
   } = audio;
@@ -158,7 +201,12 @@ function renderAudio(audio: ApiAudio, isActive: boolean, progress: number, date?
     <div className="content">
       <p className="title">{title || fileName}</p>
       {showSeekline && (
-        <div className="seekline">
+        <div
+          className="seekline"
+          onMouseDown={handleStartSeek}
+          onMouseMove={handleSeek}
+          onMouseUp={handleStopSeek}
+        >
           <span className="seekline-progress">
             <i
               // @ts-ignore
@@ -201,7 +249,9 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, isMediaUnread?: boo
   );
 }
 
-function renderWaveform(voice: ApiVoice, progress = 0, isOwn = false) {
+function renderWaveform(
+  voice: ApiVoice, progress = 0, isOwn = false, { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
+) {
   const { waveform, duration } = voice;
 
   if (!waveform) {
@@ -231,12 +281,17 @@ function renderWaveform(voice: ApiVoice, progress = 0, isOwn = false) {
   });
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <img
       src={src}
       alt=""
       width={width}
       height={height}
       className="waveform"
+      draggable={false}
+      onMouseDown={handleStartSeek}
+      onMouseMove={handleSeek}
+      onMouseUp={handleStopSeek}
     />
   );
 }
