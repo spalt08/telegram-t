@@ -11,11 +11,11 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
 
-  const [, onMediaLoad] = useState(null);
+  const [, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, mediaFormat).then(onMediaLoad);
+      mediaLoader.fetch(mediaHash, mediaFormat).then(() => setIsLoaded(true));
     }
   }, [noLoad, mediaHash, mediaData, mediaFormat]);
 
