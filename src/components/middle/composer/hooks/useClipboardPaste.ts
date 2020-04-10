@@ -34,7 +34,7 @@ export default (
       e.preventDefault();
 
       if (file && !editedMessage) {
-        setAttachment(await buildAttachment(file, true));
+        setAttachment(await buildAttachment(file.name, file, true));
       }
 
       if (pastedText) {

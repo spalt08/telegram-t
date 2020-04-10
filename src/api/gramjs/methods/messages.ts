@@ -34,6 +34,7 @@ import {
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { requestChatUpdate } from './chats';
+import { fetchFile } from '../../../util/files';
 
 type OnUploadProgress = (
   messageLocalId: number,
@@ -141,7 +142,7 @@ export async function sendMessage(
   },
   onProgress: OnUploadProgress,
 ) {
-  const localMessage = buildLocalMessage(
+  const localMessage = await buildLocalMessage(
     chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
   );
   onUpdate({
@@ -221,17 +222,20 @@ export async function editMessage({
 }
 
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: OnUploadProgress) {
-  const inputFile = await uploadFile(attachment.file, (progress) => {
+  const {
+    filename, blobUrl, mimeType, quick, voice,
+  } = attachment;
+
+  const file = await fetchFile(blobUrl, filename);
+  const inputFile = await uploadFile(file, (progress) => {
     onProgress(localMessage.id, progress);
   });
-
-  const { file: { type: mimeType, name: fileName }, quick, voice } = attachment;
 
   if (quick && mimeType.startsWith('image/')) {
     return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
   }
 
-  const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName })];
+  const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (voice) {
     const { duration, waveform } = voice;
     attributes.push(new GramJs.DocumentAttributeAudio({

@@ -13,7 +13,7 @@ import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
-export default async function (
+export default async function downloadMedia(
   { url, mediaFormat }: { url: string; mediaFormat: ApiMediaFormat },
   client: TelegramClient,
   isConnected: boolean,

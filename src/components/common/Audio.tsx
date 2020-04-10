@@ -129,7 +129,7 @@ const Audio: FC<OwnProps> = ({
 
   const handleSeek = useCallback((event: React.MouseEvent<HTMLElement>) => {
     seek(event);
-  }, [isSeeking]);
+  }, []);
 
   const handleStopSeek = useCallback(() => {
     isSeeking.current = false;
@@ -139,7 +139,7 @@ const Audio: FC<OwnProps> = ({
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(
     () => voice && renderWaveform(voice, progress, isOwn, seekHandlers),
-    [voice, progress, isOwn, seekHandlers.handleSeek],
+    [voice, progress, isOwn, seekHandlers],
   );
 
   const className = buildClassName(
