@@ -303,10 +303,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const container = containerRef.current!;
     listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
 
-    if (isFocusing) {
-      return;
-    }
-
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
@@ -331,6 +327,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     if (isAtBottom && isNewMessage) {
       newScrollTop = scrollHeight - offsetHeight;
       scrollToLastMessage(container);
+    } else if (isFocusing) {
+      return;
     } else {
       if (isAtBottom && isResized) {
         newScrollTop = scrollHeight - offsetHeight;
