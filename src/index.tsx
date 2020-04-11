@@ -4,7 +4,7 @@ import React, { getDispatch, getGlobal } from './lib/teact/teactn';
 import TeactDOM from './lib/teact/teact-dom';
 
 import './global';
-import './modules';
+import './modules/actions';
 import './workers';
 
 import App from './App';

@@ -1,14 +1,15 @@
 import { addReducer, getDispatch } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
+
 import { GRAMJS_SESSION_ID_KEY, ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
-import onUpdate from '../updaters';
 
-addReducer('init', (global: GlobalState) => {
+addReducer('init', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
   const isAnimationLevelSettingViewed = Boolean(localStorage.getItem(ANIMATION_SETTINGS_VIEWED_KEY));
-  void initApi(onUpdate, sessionId);
+
+  void initApi(actions.apiUpdate, sessionId);
 
   return {
     ...global,

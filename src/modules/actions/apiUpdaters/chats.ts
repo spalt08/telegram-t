@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 
@@ -7,15 +7,13 @@ import { selectChat } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
-export function onUpdate(update: ApiUpdate) {
-  const global = getGlobal();
-
+addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
       // Edge case: Chat is old and not yet loaded.
       const { listIds } = global.chats;
       if (!listIds || !listIds.includes(update.id)) {
-        getDispatch().loadTopChats();
+        actions.loadTopChats();
       } else {
         setGlobal(updateChat(global, update.id, update.chat));
       }
@@ -42,7 +40,7 @@ export function onUpdate(update: ApiUpdate) {
 
       const chat = selectChat(global, update.id);
       if (chat && chat.unread_mention_count) {
-        getDispatch().requestChatUpdate({ chatId: chat.id });
+        actions.requestChatUpdate({ chatId: chat.id });
       }
 
       break;
@@ -170,4 +168,4 @@ export function onUpdate(update: ApiUpdate) {
       break;
     }
   }
-}
+});

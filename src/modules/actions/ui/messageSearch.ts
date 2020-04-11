@@ -1,6 +1,6 @@
-import { addReducer } from '../../lib/teact/teactn';
-import { replaceMessageSearchResults, updateMessageSearchType } from '../reducers';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { addReducer } from '../../../lib/teact/teactn';
+import { replaceMessageSearchResults, updateMessageSearchType } from '../../reducers';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 addReducer('openMessageTextSearch', (global) => {
   const chatId = global.chats.selectedId;

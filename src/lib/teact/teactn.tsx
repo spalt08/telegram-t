@@ -17,7 +17,7 @@ type ActionPayload = AnyLiteral;
 type Reducer = (
   global: GlobalState,
   actions: GlobalActions,
-  payload?: ActionPayload,
+  payload: any,
 ) => GlobalState | void;
 
 type MapStateToProps<OwnProps = undefined> = ((global: GlobalState, ownProps: OwnProps) => AnyLiteral | null);
