@@ -21,6 +21,7 @@ import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
+import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
@@ -80,14 +81,14 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     if (orderDiff < 0) {
       element.style.opacity = '0';
 
-      requestAnimationFrame(() => {
+      fastRaf(() => {
         element.classList.add('animate-opacity');
         element.style.opacity = '1';
       });
     } else if (orderDiff > 0) {
       element.style.transform = `translate3d(0, ${-orderDiff * 100}%, 0)`;
 
-      requestAnimationFrame(() => {
+      fastRaf(() => {
         element.classList.add('animate-transform');
         element.style.transform = '';
       });

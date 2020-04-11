@@ -2,6 +2,8 @@ import React, {
   FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
+import { fastRaf } from '../../util/schedulers';
+
 type OwnProps = {
   animationData: AnyLiteral;
   width?: number;
@@ -75,7 +77,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       exec();
     } else {
       ensureLottie().then(() => {
-        requestAnimationFrame(exec);
+        fastRaf(exec);
       });
     }
   }, [animation, animationData, noLoop, speed, onLoad]);

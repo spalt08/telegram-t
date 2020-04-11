@@ -1,5 +1,5 @@
 import { DEBUG, DEBUG_ALERT_MSG } from '../../config';
-import { onTickEnd, onTickEndThenRaf, throttleWithRaf } from '../../util/schedulers';
+import { fastRaf, onTickEnd, throttleWithRaf } from '../../util/schedulers';
 import { flatten, orderBy } from '../../util/iteratees';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
 
@@ -415,7 +415,7 @@ function useLayoutEffectBase(
 }
 
 export function useEffect(effect: () => Function | void, dependencies?: any[]) {
-  return useLayoutEffectBase(onTickEndThenRaf, effect, dependencies);
+  return useLayoutEffectBase(fastRaf, effect, dependencies);
 }
 
 export function useLayoutEffect(effect: () => Function | void, dependencies?: any[]) {
