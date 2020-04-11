@@ -64,10 +64,10 @@ export function throttle<F extends AnyToVoidFunction>(
 }
 
 export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
-  return throttleWith(requestAnimationFrame, fn);
+  return throttleWith(fastRaf, fn);
 }
 
-export function throttleWithNextTick<F extends AnyToVoidFunction>(fn: F) {
+export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onTickEnd, fn);
 }
 
@@ -98,13 +98,6 @@ export function onTickEnd(cb: NoneToVoidFunction) {
   Promise.resolve().then(cb);
 }
 
-// RAF itself may be slow, so we want to postpone it to the tick end.
-export function onTickEndThenRaf(cb: NoneToVoidFunction) {
-  onTickEnd(() => {
-    requestAnimationFrame(cb);
-  });
-}
-
 function runNow(fn: NoneToVoidFunction) {
   fn();
 }
@@ -112,3 +105,18 @@ function runNow(fn: NoneToVoidFunction) {
 export const pause = (ms: number) => new Promise((resolve) => {
   setTimeout(() => resolve(), ms);
 });
+
+let fastRafCallbacks: NoneToVoidFunction[] | undefined;
+export function fastRaf(callback: NoneToVoidFunction) {
+  if (!fastRafCallbacks) {
+    fastRafCallbacks = [callback];
+
+    requestAnimationFrame(() => {
+      const currentCallbacks = fastRafCallbacks!;
+      fastRafCallbacks = undefined;
+      currentCallbacks.forEach((cb) => cb());
+    });
+  } else {
+    fastRafCallbacks.push(callback);
+  }
+}
