@@ -1,6 +1,6 @@
-import { addReducer } from '../../lib/teact/teactn';
+import { addReducer } from '../../../lib/teact/teactn';
 
-import { updateGlobalSearch } from '../reducers';
+import { updateGlobalSearch } from '../../reducers';
 
 const MAX_RECENTLY_FOUND_IDS = 10;
 

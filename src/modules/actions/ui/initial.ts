@@ -1,7 +1,31 @@
-import { addReducer } from '../../lib/teact/teactn';
-import getReadableErrorText from '../../util/getReadableErrorText';
+import { addReducer } from '../../../lib/teact/teactn';
+
+import getReadableErrorText from '../../../util/getReadableErrorText';
 
 const MAX_STORED_EMOJIS = 18; // Represents two rows of recent emojis
+
+addReducer('setAuthPhoneNumber', (global, actions, payload) => {
+  const { phoneNumber } = payload!;
+
+  return {
+    ...global,
+    authPhoneNumber: phoneNumber,
+  };
+});
+
+addReducer('setAuthRememberMe', (global, actions, payload) => {
+  return {
+    ...global,
+    authRememberMe: Boolean(payload),
+  };
+});
+
+addReducer('clearAuthError', (global) => {
+  return {
+    ...global,
+    authError: undefined,
+  };
+});
 
 addReducer('setIsUiReady', (global, actions, payload) => {
   const { isUiReady } = payload!;

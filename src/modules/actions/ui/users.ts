@@ -1,9 +1,9 @@
-import { addReducer } from '../../lib/teact/teactn';
+import { addReducer } from '../../../lib/teact/teactn';
 
-import { GlobalState } from '../../global/types';
+import { GlobalState } from '../../../global/types';
 
-import { updateSelectedUserId } from '../reducers';
-import { selectOpenChat } from '../selectors';
+import { updateSelectedUserId } from '../../reducers';
+import { selectOpenChat } from '../../selectors';
 
 addReducer('openUserInfo', (global, actions, payload) => {
   const { id } = payload!;

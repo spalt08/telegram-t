@@ -1,32 +1,30 @@
-import { getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 
 import { updateUser } from '../../reducers';
 
-export function onUpdate(update: ApiUpdate) {
-  const global = getGlobal();
-
+addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateUser': {
-      setGlobal(updateUser(global, update.id, update.user));
-
-      break;
+      return updateUser(global, update.id, update.user);
     }
 
     case 'updateUserFullInfo': {
       const { id, full_info } = update;
       const targetUser = global.users.byId[id];
       if (!targetUser) {
-        return;
+        return undefined;
       }
 
-      setGlobal(updateUser(global, id, {
+      return updateUser(global, id, {
         full_info: {
           ...targetUser.full_info,
           ...full_info,
         },
-      }));
+      });
     }
   }
-}
+
+  return undefined;
+});

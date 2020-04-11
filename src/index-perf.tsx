@@ -1,7 +1,7 @@
 import React, { getGlobal, setGlobal } from './lib/teact/teactn';
 import TeactDOM from './lib/teact/teact-dom';
 // import './store';
-import './modules';
+import './modules/actions';
 
 import { Bundles, loadModule } from './util/moduleLoader';
 

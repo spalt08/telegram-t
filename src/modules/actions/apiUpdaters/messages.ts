@@ -1,4 +1,4 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate, ApiMessage, PollAnswerVote } from '../../../api/types';
 import {
@@ -16,33 +16,13 @@ import { getMessageContent, isCommonBoxChat, isMessageIdNewer } from '../../help
 
 const ANIMATION_DELAY = 350;
 
-function updateMessageAndPreserveMedia(global: GlobalState, chat_id: number, id: number, message: Partial<ApiMessage>) {
-  // Preserve locally uploaded media.
-  const currentMessage = selectChatMessage(global, chat_id, id);
-  if (currentMessage && message.content) {
-    const { photo, video, sticker } = getMessageContent(currentMessage);
-    if (photo && message.content.photo) {
-      message.content.photo.blobUrl = photo.blobUrl;
-      message.content.photo.thumbnail = photo.thumbnail;
-    } else if (video && message.content.video) {
-      message.content.video.blobUrl = video.blobUrl;
-    } else if (sticker && message.content.sticker) {
-      message.content.sticker.localMediaHash = sticker.localMediaHash;
-    }
-  }
-
-  return updateChatMessage(global, chat_id, id, message);
-}
-
-export function onUpdate(update: ApiUpdate) {
-  const global = getGlobal();
-
+addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'newMessage': {
       const { chat_id, id, message } = update;
       let newGlobal = global;
 
-      newGlobal = updateMessageAndPreserveMedia(newGlobal, chat_id, id, message);
+      newGlobal = updateWithLocalMedia(newGlobal, chat_id, id, message);
       newGlobal = updateListedIds(newGlobal, chat_id, [id]);
       if (selectIsViewportNewest(newGlobal, chat_id)) {
         newGlobal = addViewportId(newGlobal, chat_id, id);
@@ -57,13 +37,13 @@ export function onUpdate(update: ApiUpdate) {
       setGlobal(newGlobal);
 
       if (chat_id === global.chats.selectedId && message.is_outgoing) {
-        getDispatch().focusMessage({ chatId: chat_id, messageId: id, noHighlight: true });
+        actions.focusMessage({ chatId: chat_id, messageId: id, noHighlight: true });
       }
 
       // Edge case: New message in an old (not loaded) chat.
       const { listIds } = newGlobal.chats;
       if (!listIds || !listIds.includes(chat_id)) {
-        getDispatch().loadTopChats();
+        actions.loadTopChats();
       }
 
       break;
@@ -78,7 +58,7 @@ export function onUpdate(update: ApiUpdate) {
       }
 
       let newGlobal = global;
-      newGlobal = updateMessageAndPreserveMedia(newGlobal, chat_id, id, message);
+      newGlobal = updateWithLocalMedia(newGlobal, chat_id, id, message);
 
       const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
       newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
@@ -133,7 +113,7 @@ export function onUpdate(update: ApiUpdate) {
 
         setGlobal(newGlobal);
 
-        getDispatch().requestChatUpdate({ chatId: chat_id });
+        actions.requestChatUpdate({ chatId: chat_id });
 
         setTimeout(() => {
           setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
@@ -167,7 +147,7 @@ export function onUpdate(update: ApiUpdate) {
       setGlobal(newGlobal);
 
       chatIds.forEach((chatId) => {
-        getDispatch().requestChatUpdate({ chatId });
+        actions.requestChatUpdate({ chatId });
       });
 
       break;
@@ -296,6 +276,24 @@ export function onUpdate(update: ApiUpdate) {
       break;
     }
   }
+});
+
+function updateWithLocalMedia(global: GlobalState, chat_id: number, id: number, message: Partial<ApiMessage>) {
+  // Preserve locally uploaded media.
+  const currentMessage = selectChatMessage(global, chat_id, id);
+  if (currentMessage && message.content) {
+    const { photo, video, sticker } = getMessageContent(currentMessage);
+    if (photo && message.content.photo) {
+      message.content.photo.blobUrl = photo.blobUrl;
+      message.content.photo.thumbnail = photo.thumbnail;
+    } else if (video && message.content.video) {
+      message.content.video.blobUrl = video.blobUrl;
+    } else if (sticker && message.content.sticker) {
+      message.content.sticker.localMediaHash = sticker.localMediaHash;
+    }
+  }
+
+  return updateChatMessage(global, chat_id, id, message);
 }
 
 function updateChatLastMessage(

@@ -159,9 +159,10 @@ export type GlobalState = {
 };
 
 export type ActionTypes = (
-  // system and UI
-  'init' | 'toggleChatInfo' | 'saveSession' | 'sync' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
-  'showError' | 'dismissError' |
+  // system
+  'init' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
+  // ui
+  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |

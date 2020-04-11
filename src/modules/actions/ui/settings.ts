@@ -1,7 +1,7 @@
-import { addReducer } from '../../lib/teact/teactn';
-import { ISettings } from '../../types';
+import { addReducer } from '../../../lib/teact/teactn';
+import { ISettings } from '../../../types';
 
-import { ANIMATION_SETTINGS_VIEWED_KEY } from '../../config';
+import { ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
 
 addReducer('init', (global) => {
   const { animationLevel } = global.settings.byKey;

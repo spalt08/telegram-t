@@ -1,4 +1,6 @@
-import { getDispatch, getGlobal, setGlobal } from '../../../lib/teact/teactn';
+import {
+  addReducer, getDispatch, getGlobal, setGlobal,
+} from '../../../lib/teact/teactn';
 
 import {
   ApiUpdate,
@@ -7,8 +9,14 @@ import {
   ApiUpdateConnectionState,
   ApiUpdateCurrentUserId,
 } from '../../../api/types';
+import { DEBUG } from '../../../config';
 
-export function onUpdate(update: ApiUpdate) {
+addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[GramJs] UPDATE', update['@type'], { update });
+  }
+
   switch (update['@type']) {
     case 'updateAuthorizationState':
       onUpdateAuthorizationState(update);
@@ -27,7 +35,7 @@ export function onUpdate(update: ApiUpdate) {
       break;
 
     case 'error':
-      getDispatch().showError({ error: update.error });
+      actions.showError({ error: update.error });
       break;
 
     case 'updateResetContactList':
@@ -38,8 +46,9 @@ export function onUpdate(update: ApiUpdate) {
           userIds: [],
         },
       });
+      break;
   }
-}
+});
 
 function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
   const global = getGlobal();

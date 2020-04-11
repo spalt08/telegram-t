@@ -1,13 +1,13 @@
-import { FocusDirection } from '../../types';
+import { FocusDirection } from '../../../types';
 
-import { addReducer, getGlobal, setGlobal } from '../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
   replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
-} from '../reducers';
+} from '../../reducers';
 import {
   selectFirstUnreadId, selectOpenChat, selectRealLastReadId, selectViewportIds,
-} from '../selectors';
-import { isMessageIdNewer } from '../helpers';
+} from '../../selectors';
+import { isMessageIdNewer } from '../../helpers';
 
 const FOCUS_DURATION = 2000;
 

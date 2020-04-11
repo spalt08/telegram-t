@@ -1,11 +1,11 @@
-import { addReducer } from '../../lib/teact/teactn';
+import { addReducer } from '../../../lib/teact/teactn';
 import {
   updateChatReplyingTo,
   updateChatScrollOffset,
   updateSelectedChatId,
   updateChatEditing,
-} from '../reducers';
-import { selectChatMessages, selectIsOwnMessage, selectAllowedMessagedActions } from '../selectors';
+} from '../../reducers';
+import { selectChatMessages, selectIsOwnMessage, selectAllowedMessagedActions } from '../../selectors';
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
