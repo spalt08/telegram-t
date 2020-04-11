@@ -43,6 +43,10 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [loadTopUsers, loadContactList]);
 
   useEffect(() => {
+    if (!topUsers) {
+      return undefined;
+    }
+
     const topUsersEl = topUsersRef.current!;
 
     function scrollFooter(e: WheelEvent) {
@@ -54,7 +58,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
     return () => {
       topUsersEl.removeEventListener('wheel', scrollFooter);
     };
-  }, []);
+  }, [topUsers]);
 
   const handleClick = useCallback(
     (id: number) => {
