@@ -1,9 +1,14 @@
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved
+import OggOpusEncoderWasmPath from 'url:../../node_modules/opus-media-recorder/OggOpusEncoder.wasm';
+
 import { initOpusWorker } from '../workers';
 
 const POLYFILL_OPTIONS = {
-  OggOpusEncoderWasmPath: './OggOpusEncoder.wasm',
+  OggOpusEncoderWasmPath,
   encoderWorkerFactory: initOpusWorker,
 };
+
 const MIN_RECORDING_TIME = 1000;
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
@@ -19,14 +24,14 @@ interface OpusMediaRecorder extends MediaRecorder {
 const RECORDER_PARAMS = { mimeType: 'audio/ogg; codecs=opus' };
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
-let opusMediaRecorderPromise: Promise<OpusMediaRecorder>;
+let opusMediaRecorderPromise: Promise<{ default: OpusMediaRecorder }>;
 let OpusMediaRecorder: OpusMediaRecorder;
 
 async function ensureOpusMediaRecorder() {
   if (!opusMediaRecorderPromise) {
     // @ts-ignore
     opusMediaRecorderPromise = import('opus-media-recorder');
-    OpusMediaRecorder = await opusMediaRecorderPromise;
+    OpusMediaRecorder = (await opusMediaRecorderPromise).default;
   }
 
   return opusMediaRecorderPromise;

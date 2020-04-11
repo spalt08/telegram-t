@@ -2,16 +2,41 @@
   "name": "telegram-t",
   "version": "1.0.0-0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "dev": "shx mkdir -p dist/ && shx cp ./node_modules/opus-media-recorder/OggOpusEncoder.wasm dist && parcel src/index.html",
-    "build:staging": "NODE_ENV=staging parcel build src/index.html --public-url ./ && deploy/copy_opus_wasm.sh",
+    "dev": "shx mkdir -p .parcel-cache/dist/ && parcel src/index.html",
+    "build:staging": "shx rm -rf dist/ && NODE_ENV=staging parcel build src/index.html --target target:staging --no-scope-hoist",
     "build:contest": "./deploy/contest.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "gramjs:types": "node ./src/lib/gramjs/tl/types-generator/generate.js"
+  },
+  "target:staging": "dist/index.html",
+  "target:contest:dist": "build-contest/dist/index.html",
+  "target:contest:src": "build-contest/src/index.html",
+  "targets": {
+    "target:staging": {
+      "context": "browser",
+      "isLibrary": false,
+      "publicUrl": "./",
+      "minify": true
+    },
+    "target:contest:dist": {
+      "context": "browser",
+      "isLibrary": false,
+      "publicUrl": "./",
+      "minify": true
+    },
+    "target:contest:src": {
+      "context": "browser",
+      "isLibrary": false,
+      "publicUrl": "./",
+      "minify": false
+    }
+  },
+  "alias": {
+    "big-integer": "./src/lib/BigIntegerPatched"
   },
   "husky": {
     "hooks": {
@@ -25,9 +50,10 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@babel/core": "^7.9.0",
-    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.9.4",
+    "@babel/preset-typescript": "^7.9.0",
     "@types/croppie": "^2.5.4",
     "@types/css-font-loading-module": "0.0.2",
     "@types/dom-mediacapture-record": "^1.0.3",
@@ -39,6 +65,7 @@
     "@typescript-eslint/parser": "^2.6.1",
     "autoprefixer": "^9.7.3",
     "babel-eslint": "^10.0.3",
+    "babel-runtime": "^6.26.0",
     "browserlist": "^1.0.1",
     "caniuse-lite": "^1.0.30001036",
     "eslint": "^6.6.0",
@@ -53,11 +80,10 @@
     "husky": "^3.0.9",
     "lint-staged": "^9.4.2",
     "opus-media-recorder": "^0.7.19",
-    "parcel": "^1.12.4",
+    "parcel": "^2.0.0-nightly.226",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
-    "postcss-modules": "^1.5.0",
     "react": "^16.12.0",
-    "sass": "^1.23.3",
+    "sass": "^1.25.0",
     "shx": "^0.3.2",
     "terser": "^4.3.9",
     "ts-node": "^8.6.1",

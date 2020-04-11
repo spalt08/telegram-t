@@ -15,9 +15,12 @@ import { Bundles, loadModule } from '../../util/moduleLoader';
 import './UiLoader.scss';
 
 // @ts-ignore
-import telegramLogoPath from '../../assets/telegram-logo.svg';
+// eslint-disable-next-line import/no-unresolved, import/order
+import telegramLogoPath from 'url:../../assets/telegram-logo.svg';
+
 // @ts-ignore
-import monkeyPath from '../../assets/monkey.svg';
+// eslint-disable-next-line import/no-unresolved, import/order
+import monkeyPath from 'url:../../assets/monkey.svg';
 
 type OwnProps = {
   page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber';

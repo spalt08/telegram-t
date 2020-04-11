@@ -13,9 +13,11 @@ import CountryCodeInput from './CountryCodeInput';
 import Checkbox from '../ui/Checkbox';
 import Loading from '../ui/Loading';
 
-// @ts-ignore
-import monkeyPath from '../../assets/monkey.svg';
 import { preloadImage } from '../../util/files';
+
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved, import/order
+import monkeyPath from 'url:../../assets/monkey.svg';
 
 type StateProps = Pick<GlobalState, (
   'connectionState' |

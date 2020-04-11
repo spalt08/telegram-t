@@ -63,7 +63,7 @@ async function ensureEmojiData() {
 async function ensureEmojiIndex() {
   if (!emojiIndexPromise) {
     // eslint-disable-next-line max-len
-    emojiIndexPromise = import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index') as unknown as Promise<NimbleEmojiIndexLib>;
+    emojiIndexPromise = import('emoji-mart/dist-modern/utils/emoji-index/nimble-emoji-index') as Promise<NimbleEmojiIndexLib>;
     EmojiIndex = (await emojiIndexPromise).default;
   }
 

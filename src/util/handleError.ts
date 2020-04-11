@@ -28,7 +28,7 @@ function handleError(...args: any[]) {
   }
 
   const error = typeof args[4] === 'object' ? args[4].error : undefined;
-  // Parcel bug.
+  // @parcelbug (v1).
   if (NODE_ENV === 'development' && error && error.message.includes('css-loader.js')) {
     return;
   }

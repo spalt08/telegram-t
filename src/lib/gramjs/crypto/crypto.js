@@ -49,16 +49,18 @@ const numberOfRounds = {
     24: 12,
     32: 14
 }
-_tables = [[[], [], [], [], []], [[], [], [], [], []]]
 
+const _tables = [[[], [], [], [], []], [[], [], [], [], []]]
 
-var encTable = _tables[0], decTable = _tables[1],
+const encTable = _tables[0], decTable = _tables[1],
     sbox = encTable[4], sboxInv = decTable[4],
-    i, x, xInv, d = [], th = [], x2, x4, x8, s, tEnc, tDec;
+    d = [], th = []
+
+let i, x, xInv, x2, x4, x8, s, tEnc, tDec
 
 // Compute double and third tables
 for (i = 0; i < 256; i++) {
-    th[(d[i] = i << 1 ^ (i >> 7) * 283) ^ i] = i;
+    th[(d[i] = i << 1 ^ (i >> 7) * 283) ^ i] = i
 }
 
 for (x = xInv = 0; !sbox[x]; x ^= x2 || 1, xInv = th[xInv] || 1) {

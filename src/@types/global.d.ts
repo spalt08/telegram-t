@@ -36,4 +36,6 @@ declare module 'pako/dist/pako_inflate' {
   function inflate(...args: any[]): string;
 }
 
+declare module 'emoji-mart/dist-modern/utils/emoji-index/nimble-emoji-index'
+
 type WindowWithPerf = typeof window & { perf: AnyLiteral };

@@ -1,21 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-#if ! git diff-index --quiet HEAD --; then
-#    echo "[ERR] Please commit changes first"
-#    exit 1
-#fi
-
 OUT_DIR=build-contest/
 
 rm -rf ${OUT_DIR};
 mkdir -p ${OUT_DIR};
 
-rm -rf .cache/ dist/;
-npx parcel build src/index.html -d ${OUT_DIR}/dist --public-url ./ --no-source-maps;
-./deploy/copy_opus_wasm.sh ${OUT_DIR}/dist
+rm -rf .parcel-cache/
+npx parcel build src/index.html --target=target:contest:dist --no-scope-hoist --no-source-maps
 
-rm -rf .cache/ dist/;
-npx parcel build src/index.html -d ${OUT_DIR}/src --public-url ./ --no-minify;
-./deploy/copy_opus_wasm.sh ${OUT_DIR}/dist
-rm ${OUT_DIR}/src/index.html
+rm -rf .parcel-cache/
+npx parcel build src/index.html --target=target:contest:src --no-scope-hoist
