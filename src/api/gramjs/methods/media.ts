@@ -1,4 +1,4 @@
-import { inflate } from 'pako/dist/pako_inflate';
+import { inflate } from 'pako/lib/inflate';
 
 import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 import {

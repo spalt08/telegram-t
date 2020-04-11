@@ -7,7 +7,7 @@ rm -rf ${OUT_DIR};
 mkdir -p ${OUT_DIR};
 
 rm -rf .parcel-cache/
-npx parcel build src/index.html --target=target:contest:dist --no-scope-hoist --no-source-maps
+PARCEL_BUNDLE_ANALYZER=1 npx parcel build src/index.html --target=target:contest:dist --no-source-maps
 
 rm -rf .parcel-cache/
-npx parcel build src/index.html --target=target:contest:src --no-scope-hoist
+PARCEL_BUNDLE_ANALYZER=1 npx parcel build src/index.html --target=target:contest:src

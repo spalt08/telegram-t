@@ -1,5 +1,5 @@
 const { serializeBytes } = require('../index')
-const { inflate } = require('pako/dist/pako_inflate')
+const { inflate } = require('pako/lib/inflate')
 //CONTEST const { deflate } = require('pako/dist/pako_deflate')
 
 class GZIPPacked {

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "shx mkdir -p .parcel-cache/dist/ && parcel src/index.html",
-    "build:staging": "shx rm -rf dist/ && NODE_ENV=staging parcel build src/index.html --target target:staging --no-scope-hoist",
+    "build:staging": "shx rm -rf dist/ && PARCEL_BUNDLE_ANALYZER=1 NODE_ENV=staging parcel build src/index.html --target target:staging",
     "build:contest": "./deploy/contest.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",

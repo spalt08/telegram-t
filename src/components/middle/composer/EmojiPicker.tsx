@@ -30,7 +30,7 @@ let emojiDataPromise: Promise<EmojiData>;
 let emojiData: EmojiData;
 
 type NimbleEmojiIndexLib = typeof import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index');
-let emojiIndexPromise: Promise<NimbleEmojiIndexLib>;
+let emojiIndexPromise: Promise<{ default: NimbleEmojiIndexLib }>;
 let EmojiIndex: NimbleEmojiIndexLib['default'];
 
 type EmojiCategoryData = { id: string; name: string; emojis: string[] };
@@ -53,7 +53,7 @@ const SMOOTH_SCROLL_DISTANCE = 800;
 
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
-    emojiDataPromise = import('../../../../public/emojiData.json') as unknown as Promise<EmojiData>;
+    emojiDataPromise = import('../../../../public/emojiData.json');
     emojiData = await emojiDataPromise;
   }
 
@@ -63,8 +63,9 @@ async function ensureEmojiData() {
 async function ensureEmojiIndex() {
   if (!emojiIndexPromise) {
     // eslint-disable-next-line max-len
-    emojiIndexPromise = import('emoji-mart/dist-modern/utils/emoji-index/nimble-emoji-index') as Promise<NimbleEmojiIndexLib>;
-    EmojiIndex = (await emojiIndexPromise).default;
+    emojiIndexPromise = import('emoji-mart/dist-modern/utils/emoji-index/nimble-emoji-index');
+    // @parcelbug
+    EmojiIndex = (await emojiIndexPromise).default.default;
   }
 
   return emojiIndexPromise;
