@@ -10,13 +10,13 @@ const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
-      // Edge case: Chat is old and not yet loaded.
       const { listIds } = global.chats;
       if (!listIds || !listIds.includes(update.id)) {
+        // Chat can appear in dialogs list.
         actions.loadTopChats();
-      } else {
-        setGlobal(updateChat(global, update.id, update.chat));
       }
+
+      setGlobal(updateChat(global, update.id, update.chat));
 
       break;
     }

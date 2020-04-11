@@ -83,3 +83,7 @@ export function getChatAvatarHash(
       return base;
   }
 }
+
+export function isChatSummaryOnly(chat: ApiChat) {
+  return !chat.last_message;
+}

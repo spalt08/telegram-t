@@ -8,6 +8,7 @@ import { addUsers, updateChatListIds, updateChats } from '../../reducers';
 import { selectChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
+import { isChatSummaryOnly } from '../../helpers';
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -27,6 +28,8 @@ addReducer('openChat', (global, actions, payload) => {
     } else if (id === currentUserId) {
       void callApi('fetchChatWithSelf');
     }
+  } else if (isChatSummaryOnly(chat)) {
+    actions.requestChatUpdate({ chatId: id });
   }
 });
 
