@@ -1,9 +1,9 @@
-import { useState } from '../lib/teact/teact';
+import { useCallback, useState } from '../lib/teact/teact';
 
 export default () => {
   const [, setTrigger] = useState<boolean>(false);
 
-  return () => {
+  return useCallback(() => {
     setTrigger((trigger) => !trigger);
-  };
+  }, []);
 };
