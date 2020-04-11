@@ -3,14 +3,14 @@ import { useCallback, useEffect, useMemo } from '../../../../lib/teact/teact';
 import { ApiFormattedText, ApiMessage } from '../../../../api/types';
 import { GlobalActions } from '../../../../global/types';
 
-import { DRAFT_THROTTLE, EDITABLE_INPUT_ID } from '../../../../config';
+import { DRAFT_DEBOUNCE, EDITABLE_INPUT_ID } from '../../../../config';
 import usePrevious from '../../../../hooks/usePrevious';
-import { throttle } from '../../../../util/schedulers';
+import { debounce } from '../../../../util/schedulers';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../helpers/parseMessageInput';
 import getMessageTextAsHtml from '../helpers/getMessageTextAsHtml';
 
-// Used to avoid running throttled callbacks when chat changes.
+// Used to avoid running debounced callbacks when chat changes.
 let currentChatId: number | undefined;
 
 export default (
@@ -32,7 +32,7 @@ export default (
   }, [clearDraft, editedMessage, htmlRef, saveDraft]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const runThrottledForSaveDraft = useMemo(() => throttle((cb) => cb(), DRAFT_THROTTLE, false), [chatId]);
+  const runDebouncedForSaveDraft = useMemo(() => debounce((cb) => cb(), DRAFT_DEBOUNCE, false), [chatId]);
 
   const prevChatId = usePrevious(chatId);
 
@@ -45,7 +45,7 @@ export default (
     }
 
     if (html.length) {
-      runThrottledForSaveDraft(() => {
+      runDebouncedForSaveDraft(() => {
         if (currentChatId !== chatId) {
           return;
         }
@@ -55,7 +55,7 @@ export default (
     } else {
       updateDraft(chatId);
     }
-  }, [chatId, html, prevChatId, prevHtml, runThrottledForSaveDraft, updateDraft]);
+  }, [chatId, html, prevChatId, prevHtml, runDebouncedForSaveDraft, updateDraft]);
 
   // Handle chat change
   useEffect(() => {
