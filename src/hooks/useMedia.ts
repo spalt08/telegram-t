@@ -1,7 +1,9 @@
+import { useEffect } from '../lib/teact/teact';
+
 import { ApiMediaFormat } from '../api/types';
 
-import { useState, useEffect } from '../lib/teact/teact';
 import * as mediaLoader from '../util/mediaLoader';
+import useForceUpdate from './useForceUpdate';
 
 export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaHash: string | undefined,
@@ -10,14 +12,13 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaFormat: T = ApiMediaFormat.BlobUrl,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
-
-  const [, setIsLoaded] = useState(false);
+  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, mediaFormat).then(() => setIsLoaded(true));
+      mediaLoader.fetch(mediaHash, mediaFormat).then(forceUpdate);
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, forceUpdate]);
 
   return mediaData;
 };
