@@ -1,5 +1,6 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
 import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
+import windowSize from '../../../util/windowSize';
 
 export type AlbumMediaParameters = {
   mediaCount: number;
@@ -10,7 +11,7 @@ export type AlbumMediaParameters = {
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
-const REM = 16;
+export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
 
 function getAvailableWidth(
   fromOwnMessage: boolean,
@@ -19,14 +20,14 @@ function getAvailableWidth(
   albumMediaParams?: AlbumMediaParameters,
 ) {
   const { columnCount, isFullWidth } = albumMediaParams || {};
-  let extraPadding = isForwarded ? 1.75 : isWebPagePhoto ? 1.625 : 0;
+  let extraPaddingRem = isForwarded ? 1.75 : isWebPagePhoto ? 1.625 : 0;
   if (columnCount && !isFullWidth) {
-    extraPadding += 0.125 * (columnCount - 1);
+    extraPaddingRem += 0.125 * (columnCount - 1);
   }
-  const maxMessageWidth = fromOwnMessage ? 30 : 29;
-  const availableWidth = (maxMessageWidth - extraPadding) / (columnCount && !isFullWidth ? columnCount : 1);
+  const maxMessageWidthRem = fromOwnMessage ? 30 : 29;
+  const availableWidthRem = (maxMessageWidthRem - extraPaddingRem) / (columnCount && !isFullWidth ? columnCount : 1);
 
-  return availableWidth * REM;
+  return availableWidthRem * REM;
 }
 
 function getAvailableHeight(isGif?: boolean, aspectRatio?: number) {
@@ -40,7 +41,7 @@ function getAvailableHeight(isGif?: boolean, aspectRatio?: number) {
   return 27 * REM;
 }
 
-function calculateDimensions({
+function calculateDimensionsForMessageMedia({
   width,
   height,
   fromOwnMessage,
@@ -59,43 +60,22 @@ function calculateDimensions({
 }): IDimensions {
   const aspectRatio = height / width;
   const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto, albumMediaParams);
-  const calculatedWidth = Math.min(width, availableWidth);
-  const calculatedHeight = Math.round(calculatedWidth * aspectRatio);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
 
-  if (albumMediaParams) {
-    return {
-      width: availableWidth,
-      height: Math.round(availableWidth * aspectRatio),
-    };
-  }
-
-  if (calculatedHeight > availableHeight) {
-    return {
-      width: Math.round(availableHeight / aspectRatio),
-      height: availableHeight,
-    };
-  }
-
-  return {
-    width: calculatedWidth,
-    height: Math.round(calculatedWidth * aspectRatio),
-  };
+  return calculateDimensions(availableWidth, availableHeight, width, height, albumMediaParams);
 }
 
-function getMediaViewerAvailableDimensions(withFooter: boolean): IDimensions {
+export function getMediaViewerAvailableDimensions(withFooter: boolean): IDimensions {
   const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
-  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  const bodyWidth = document.body.clientWidth;
-  const bodyHeight = document.body.clientHeight;
-  let occupiedHeight = 8.25;
+  const { width: windowWidth, height: windowHeight } = windowSize.get();
+  let occupiedHeightRem = 8.25;
   if (withFooter) {
-    occupiedHeight = mql.matches ? 11.5 : 16.5;
+    occupiedHeightRem = mql.matches ? 10 : 15;
   }
 
   return {
-    width: bodyWidth - rem,
-    height: bodyHeight - occupiedHeight * rem,
+    width: Math.min(windowWidth - 3 * REM, windowWidth * 0.76),
+    height: windowHeight - occupiedHeightRem * REM,
   };
 }
 
@@ -107,7 +87,8 @@ export function calculateInlineImageDimensions(
   albumMediaParams?: AlbumMediaParameters,
 ) {
   const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
-  return calculateDimensions({
+
+  return calculateDimensionsForMessageMedia({
     width,
     height,
     fromOwnMessage,
@@ -124,7 +105,8 @@ export function calculateVideoDimensions(
   albumMediaParams?: AlbumMediaParameters,
 ) {
   const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
-  return calculateDimensions({
+
+  return calculateDimensionsForMessageMedia({
     width,
     height,
     fromOwnMessage,
@@ -160,11 +142,29 @@ export function getStickerDimensions(sticker: ApiSticker): IDimensions {
   };
 }
 
-export function calculateMediaViewerVideoDimensions({ width, height }: IDimensions, withFooter: boolean): IDimensions {
-  const aspectRatio = height / width;
+export function calculateMediaViewerDimensions({ width, height }: IDimensions, withFooter: boolean): IDimensions {
   const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(withFooter);
-  const calculatedWidth = Math.min(width, availableWidth);
+
+  return calculateDimensions(availableWidth, availableHeight, width, height);
+}
+
+export function calculateDimensions(
+  availableWidth: number,
+  availableHeight: number,
+  mediaWidth: number,
+  mediaHeight: number,
+  albumMediaParams?: AlbumMediaParameters,
+): IDimensions {
+  const aspectRatio = mediaHeight / mediaWidth;
+  const calculatedWidth = Math.min(mediaWidth, availableWidth);
   const calculatedHeight = Math.round(calculatedWidth * aspectRatio);
+
+  if (albumMediaParams) {
+    return {
+      width: availableWidth,
+      height: Math.round(availableWidth * aspectRatio),
+    };
+  }
 
   if (calculatedHeight > availableHeight) {
     return {

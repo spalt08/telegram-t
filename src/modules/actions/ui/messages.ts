@@ -15,7 +15,7 @@ let blurTimeout: number;
 
 addReducer('openMediaViewer', (global, actions, payload) => {
   const {
-    chatId, messageId, avatarOwnerId, isReversed = false,
+    chatId, messageId, avatarOwnerId, isFromSharedMedia = false,
   } = payload!;
 
   return {
@@ -24,7 +24,7 @@ addReducer('openMediaViewer', (global, actions, payload) => {
       chatId,
       messageId,
       avatarOwnerId,
-      isReversed,
+      isFromSharedMedia,
     },
     forwardMessages: {},
   };

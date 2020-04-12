@@ -4,11 +4,18 @@
   video {
     display: block;
     max-width: 76vw;
-    max-height: calc(100vh - 15rem);
+    max-height: calc(100vh - 8.25rem);
     height: auto;
     margin: auto;
+    object-fit: contain;
     @media (max-height: 640px) {
       max-height: calc(100vh - 10rem);
+    }
+    @at-root .has-footer #{&} {
+      max-height: calc(100vh - 15rem);
+      @media (max-height: 640px) {
+        max-height: calc(100vh - 10rem);
+      }
     }
   }
 }

@@ -165,7 +165,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const handleSelectMedia = useCallback((messageId) => {
-    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isReversed: true });
+    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isFromSharedMedia: true });
   }, [chatId, resolvedUserId, openMediaViewer]);
 
   function renderSharedMedia() {

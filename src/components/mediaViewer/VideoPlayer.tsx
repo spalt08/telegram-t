@@ -7,10 +7,6 @@ type OwnProps = {
   isGif?: boolean;
 };
 
-function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
-  e.stopPropagation();
-}
-
 const VideoPlayer: FC<OwnProps> = ({ url, isGif }) => {
   const [hasSize, setHasSize] = useState(false);
 
@@ -19,6 +15,12 @@ const VideoPlayer: FC<OwnProps> = ({ url, isGif }) => {
 
     if (videoEl.videoWidth > 0) {
       setHasSize(true);
+    }
+  }
+
+  function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
+    if (!isGif) {
+      e.stopPropagation();
     }
   }
 

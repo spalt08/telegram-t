@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 import { throttle } from '../../util/schedulers';
 import { TextPart } from '../common/helpers/renderMessageText';
+import { REM } from '../common/helpers/mediaDimensions';
 
 import './MediaViewerFooter.scss';
 
@@ -17,9 +18,8 @@ const MediaViewerFooter: FC<OwnProps> = ({ text = '' }) => {
 
     const checkIsMultiline = () => {
       const height = footerContent ? footerContent.clientHeight : 0;
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-      setIsMultiline(height > rem * 2);
+      setIsMultiline(height > REM * 2);
     };
 
     // First run for initial detection of multiline footer text

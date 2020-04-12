@@ -132,7 +132,7 @@ export type GlobalState = {
     chatId?: number;
     messageId?: number;
     avatarOwnerId?: number;
-    isReversed?: boolean;
+    isFromSharedMedia?: boolean;
   };
 
   topPeers: {
