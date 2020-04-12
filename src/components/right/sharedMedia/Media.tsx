@@ -32,12 +32,12 @@ const Media: FC<OwnProps> = ({ message, onClick }) => {
   const video = getMessageVideo(message);
 
   return (
-    <div onClick={handleClick} className="Media">
+    <div onClick={handleClick} className="Media" id={`shared-media${message.id}`}>
       {shouldRenderThumb && (
         <img src={thumbDataUri} className="blur" alt="" />
       )}
       {shouldRenderFullMedia && (
-        <img src={mediaBlobUrl} className={transitionClassNames} alt="" />
+        <img src={mediaBlobUrl} className={`${transitionClassNames} full-media`} alt="" />
       )}
       {video && <span className="video-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</span>}
     </div>

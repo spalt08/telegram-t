@@ -177,6 +177,7 @@ export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, rev
 export function getPhotoFullDimensions(photo: ApiPhoto): IDimensions | undefined {
   return (
     photo.sizes.find((size) => size.type === 'z')
+    || photo.sizes.find((size) => size.type === 'y')
     || getPhotoInlineDimensions(photo)
   );
 }
