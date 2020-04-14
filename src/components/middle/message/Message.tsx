@@ -7,6 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 import { FocusDirection, IAlbum } from '../../../types';
 
+import { pick } from '../../../util/iteratees';
 import {
   selectChat,
   selectChatMessage,
@@ -441,21 +442,13 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const {
-      focusMessage,
-      openMediaViewer,
-      cancelSendingMessage,
-      openUserInfo,
-      readMessageContents,
-      sendPollVote,
-    } = actions;
-    return {
-      focusMessage,
-      openMediaViewer,
-      cancelSendingMessage,
-      openUserInfo,
-      readMessageContents,
-      sendPollVote,
-    };
+    return pick(actions, [
+      'focusMessage',
+      'openMediaViewer',
+      'cancelSendingMessage',
+      'openUserInfo',
+      'readMessageContents',
+      'sendPollVote',
+    ]);
   },
 )(Message));
