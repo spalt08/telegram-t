@@ -34,6 +34,13 @@ export function mapValues<R extends any, M extends any>(
   }, {});
 }
 
+export function pick<T, K extends keyof T>(object: T, keys: K[]) {
+  return keys.reduce((result, key) => {
+    result[key] = object[key];
+    return result;
+  }, {} as Pick<T, K>);
+}
+
 export function orderBy<T>(
   collection: T[],
   orderKey: (keyof T) | OrderCallback<T> | ((keyof T) | OrderCallback<T>)[],
