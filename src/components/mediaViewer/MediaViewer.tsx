@@ -73,7 +73,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
   const isVideo = message ? Boolean(getMessageVideo(message)) : false;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
-  const isRichAnimations = animationLevel === FULL_ANIMATION_LEVEL;
+  const isRichAnimations = animationLevel === FULL_ANIMATION_LEVEL && !avatarOwner;
   const fileName = avatarOwner
     ? `avatar${avatarOwner.id}.jpg`
     : message && getMessageMediaFilename(message);
@@ -306,8 +306,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
 function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
   return blobUrl
-    // @ts-ignore teact feature
-    ? <img src={blobUrl} alt="" style={`width: ${imageSize!.width}px; height: ${imageSize!.height}px;`} />
+    ? (
+      <img
+        src={blobUrl}
+        alt=""
+        // @ts-ignore teact feature
+        style={imageSize ? `width: ${imageSize!.width}px; height: ${imageSize!.height}px;` : ''}
+      />
+    )
     : <Spinner color="white" />;
 }
 
