@@ -40,7 +40,7 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   if (!mtpStatus || mtpStatus instanceof GramJs.UserStatusEmpty) {
     return { '@type': 'userStatusEmpty' };
   } else if (mtpStatus instanceof GramJs.UserStatusOnline) {
-    return { '@type': 'userStatusOnline' };
+    return { '@type': 'userStatusOnline', expires: mtpStatus.expires };
   } else if (mtpStatus instanceof GramJs.UserStatusOffline) {
     return { '@type': 'userStatusOffline', was_online: mtpStatus.wasOnline };
   } else if (mtpStatus instanceof GramJs.UserStatusRecently) {

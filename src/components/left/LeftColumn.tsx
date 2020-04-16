@@ -8,13 +8,14 @@ import { LeftColumnContent } from '../../types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
+import Transition from '../ui/Transition';
 import LeftHeader from './LeftHeader';
 import ConnectionState from './ConnectionState';
 import ChatList from './ChatList';
 import LeftRecent from './LeftRecent.async';
 import LeftSearch from './LeftSearch.async';
-import Transition from '../ui/Transition';
 import Settings from './settings/Settings.async';
+import ContactList from './ContactList.async';
 
 import './LeftColumn.scss';
 
@@ -28,22 +29,33 @@ const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 
 const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSearchQuery }) => {
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
+  const [contactsFilter, setContactsFilter] = useState<string>('');
 
   const handleReset = useCallback(() => {
     setContent(LeftColumnContent.ChatList);
+    setContactsFilter('');
     setGlobalSearchQuery({ query: '' });
   }, [setGlobalSearchQuery]);
 
   const handleSearchQuery = useCallback((query: string) => {
+    if (content === LeftColumnContent.Contacts) {
+      setContactsFilter(query);
+      return;
+    }
+
     setContent(query.length ? LeftColumnContent.GlobalSearch : LeftColumnContent.RecentChats);
 
     if (query !== searchQuery) {
       setGlobalSearchQuery({ query });
     }
-  }, [setGlobalSearchQuery, searchQuery]);
+  }, [content, setGlobalSearchQuery, searchQuery]);
 
   const handleSelectSettings = useCallback(() => {
     setContent(LeftColumnContent.Settings);
+  }, []);
+
+  const handleSelectContacts = useCallback(() => {
+    setContent(LeftColumnContent.Contacts);
   }, []);
 
   useEffect(
@@ -61,6 +73,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
         return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
       case LeftColumnContent.Settings:
         return <Settings />;
+      case LeftColumnContent.Contacts:
+        return <ContactList filter={contactsFilter} />;
       default:
         return null;
     }
@@ -70,8 +84,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
     <div id="LeftColumn">
       <LeftHeader
         content={content}
+        contactsFilter={contactsFilter}
         onSearchQuery={handleSearchQuery}
         onSelectSettings={handleSelectSettings}
+        onSelectContacts={handleSelectContacts}
         onReset={handleReset}
       />
       <ConnectionState />

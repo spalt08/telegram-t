@@ -1,10 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { OnApiUpdate, ApiUser } from '../../types';
+import { OnApiUpdate, ApiUser, ApiChat } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
-import { buildInputEntity, calculateResultHash } from '../gramjsBuilders';
+import { buildInputEntity, calculateResultHash, buildInputPeer } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import localDb from '../localDb';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
 
 let onUpdate: OnApiUpdate;
 
@@ -91,5 +92,23 @@ export async function fetchContactList({ hash = 0 }: { hash?: number }) {
       ...result.contacts.map(({ userId }) => userId),
     ]),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
+    chats: result.users.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any),
   };
+}
+
+export async function fetchUsers({ users } : { users: ApiUser[] }) {
+  const result = await invokeRequest(new GramJs.users.GetUsers({
+    id: users.map(({ id, access_hash }) => buildInputPeer(id, access_hash)),
+  }));
+  if (!result || !result.length) {
+    return undefined;
+  }
+
+  result.forEach((user) => {
+    if (user instanceof GramJs.User) {
+      localDb.users[user.id] = user;
+    }
+  });
+
+  return result.map(buildApiUser).filter<ApiUser>(Boolean as any);
 }

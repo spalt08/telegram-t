@@ -2,9 +2,10 @@ import { addReducer, setGlobal, getGlobal } from '../../../lib/teact/teactn';
 
 import { callApi } from '../../../api/gramjs';
 import { selectUser } from '../../selectors';
-import { addUsers } from '../../reducers';
+import { addUsers, updateChats } from '../../reducers';
 import { debounce } from '../../../util/schedulers';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { ApiUser } from '../../../api/types';
 
 const runDebouncedForFetchFullUser = debounce((cb) => cb(), 500, false, true);
 const TOP_PEERS_REQUEST_COOLDOWN = 60000; // 1 min
@@ -83,11 +84,22 @@ async function loadContactList(hash?: number) {
     return;
   }
 
+  let newGlobal = addUsers(getGlobal(), buildCollectionByKey(contactList.users, 'id'));
+  newGlobal = updateChats(newGlobal, buildCollectionByKey(contactList.chats, 'id'));
+
+  // Sort contact list by Last Name (or First Name), with latinic names being placed first
+  const getCompareString = (user: ApiUser) => (user.last_name || user.first_name || '');
+  const collator = new Intl.Collator('en-US');
+
+  const sortedUsers = contactList.users.sort((a, b) => (
+    collator.compare(getCompareString(a), getCompareString(b))
+  )).filter((user) => !user.is_self);
+
   setGlobal({
-    ...addUsers(getGlobal(), buildCollectionByKey(contactList.users, 'id')),
+    ...newGlobal,
     contactList: {
       hash: contactList.hash,
-      userIds: contactList.users.map((user) => user.id),
+      userIds: sortedUsers.map((user) => user.id),
     },
   });
 }

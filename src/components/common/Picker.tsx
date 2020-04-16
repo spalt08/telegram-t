@@ -58,7 +58,7 @@ const Picker: FC<OwnProps> = ({
 
   function renderItem(id: number) {
     return (
-      <div key={id} className="picker-list-item" onClick={() => handleItemClick(id)}>
+      <div key={id} className="chat-item-clickable picker-list-item" onClick={() => handleItemClick(id)}>
         <Checkbox
           label=""
           checked={selectedIds.includes(id)}

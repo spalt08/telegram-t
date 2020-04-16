@@ -168,7 +168,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Contacts and Chats</h3>
           {localResults.map((id) => (
-            <div className="search-result" onClick={() => handleChatClick(id)}>
+            <div className="chat-item-clickable search-result" onClick={() => handleChatClick(id)}>
               {isChatPrivate(id) ? (
                 <PrivateChatInfo userId={id} />
               ) : (
@@ -183,7 +183,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Global Search</h3>
           {globalResults.map((id) => (
-            <div className="search-result" onClick={() => handleChatClick(id)}>
+            <div className="chat-item-clickable search-result" onClick={() => handleChatClick(id)}>
               {isChatPrivate(id) ? (
                 <PrivateChatInfo userId={id} showHandle />
               ) : (

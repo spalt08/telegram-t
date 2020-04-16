@@ -11,7 +11,7 @@ import {
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
 } from './messages';
 import {
-  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers, fetchContactList,
+  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers, fetchContactList, fetchUsers,
 } from './users';
 import {
   fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
@@ -52,6 +52,7 @@ export default {
   uploadProfilePhoto,
   fetchTopUsers,
   fetchContactList,
+  fetchUsers,
   fetchStickerSets,
   fetchRecentStickers,
   fetchStickers,

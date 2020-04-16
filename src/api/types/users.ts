@@ -32,4 +32,5 @@ export interface ApiUserStatus {
     'userStatusOffline' | 'userStatusOnline' | 'userStatusRecently'
   );
   was_online?: number;
+  expires?: number;
 }

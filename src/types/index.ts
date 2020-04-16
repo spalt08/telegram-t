@@ -29,4 +29,5 @@ export enum LeftColumnContent {
   RecentChats,
   GlobalSearch,
   Settings,
+  Contacts,
 }

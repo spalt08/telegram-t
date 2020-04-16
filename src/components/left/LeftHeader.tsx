@@ -21,8 +21,10 @@ import './LeftHeader.scss';
 
 type OwnProps = {
   content: LeftColumnContent;
+  contactsFilter: string;
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
+  onSelectContacts: () => void;
   onReset: () => void;
 };
 
@@ -39,8 +41,10 @@ const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 
 const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
+  contactsFilter,
   onSearchQuery,
   onSelectSettings,
+  onSelectContacts,
   onReset,
   searchQuery,
   isLoading,
@@ -51,7 +55,10 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const hasMenu = content === LeftColumnContent.ChatList;
   const hasSearch = [
-    LeftColumnContent.ChatList, LeftColumnContent.RecentChats, LeftColumnContent.GlobalSearch,
+    LeftColumnContent.ChatList,
+    LeftColumnContent.RecentChats,
+    LeftColumnContent.GlobalSearch,
+    LeftColumnContent.Contacts,
   ].includes(content);
   const headerKey = hasSearch ? 0 : content;
 
@@ -103,8 +110,8 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       default:
         return (
           <SearchInput
-            value={searchQuery}
-            focused={content !== LeftColumnContent.ChatList}
+            value={contactsFilter || searchQuery}
+            focused={content === LeftColumnContent.RecentChats || content === LeftColumnContent.GlobalSearch}
             isLoading={isLoading}
             onChange={onSearchQuery}
             onFocus={handleSearchFocus}
@@ -119,7 +126,12 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         trigger={MainButton}
       >
         <MenuItem className="not-implemented" disabled icon="group">New Group</MenuItem>
-        <MenuItem className="not-implemented" disabled icon="user">Contacts</MenuItem>
+        <MenuItem
+          icon="user"
+          onClick={onSelectContacts}
+        >
+          Contacts
+        </MenuItem>
         <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
         <MenuItem
           icon="saved-messages"
