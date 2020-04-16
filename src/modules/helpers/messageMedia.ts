@@ -31,6 +31,12 @@ export function getMessageVideo(message: ApiMessage) {
   return message.content.video;
 }
 
+export function getMessageRoundVideo(message: ApiMessage) {
+  const { video } = message.content;
+
+  return video && video.isRound ? video : undefined;
+}
+
 export function getMessageAudio(message: ApiMessage) {
   return message.content.audio;
 }
@@ -157,7 +163,7 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.isGif || video.duration <= MAX_INLINE_VIDEO_DURATION;
+  return video.isGif || video.isRound || video.duration <= MAX_INLINE_VIDEO_DURATION;
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {
@@ -217,7 +223,9 @@ export function getMessageContentIds(
 
   switch (contentType) {
     case 'media':
-      validator = (message: ApiMessage) => getMessagePhoto(message) || getMessageVideo(message);
+      validator = (message: ApiMessage) => {
+        return getMessagePhoto(message) || (getMessageVideo(message) && !getMessageRoundVideo(message));
+      };
       break;
 
     case 'documents':

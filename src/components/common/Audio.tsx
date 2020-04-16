@@ -10,7 +10,6 @@ import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgre
 import useShowTransition from '../../hooks/useShowTransition';
 import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
-import { fastRaf } from '../../util/schedulers';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -73,9 +72,7 @@ const Audio: FC<OwnProps> = ({
   useEffect(() => {
     const audioEl = audioRef.current;
     if (audioEl) {
-      fastRaf(() => {
-        setProgress(audioEl.currentTime / audioEl.duration);
-      });
+      setProgress(audioEl.currentTime / audioEl.duration);
     }
   }, [progress]);
 

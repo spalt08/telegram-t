@@ -12,6 +12,7 @@ export type AlbumMediaParameters = {
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
+export const ROUND_VIDEO_DIMENSIONS = 200;
 
 function getAvailableWidth(
   fromOwnMessage: boolean,
