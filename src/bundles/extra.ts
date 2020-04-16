@@ -6,6 +6,7 @@ export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
 export { default as LeftRecent } from '../components/left/LeftRecent';
 export { default as LeftSearch } from '../components/left/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';
+export { default as ContactList } from '../components/left/ContactList';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
 

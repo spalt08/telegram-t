@@ -97,19 +97,22 @@ function updateCache(global: GlobalState) {
 function reduceMessages(global: GlobalState) {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
-  if (global.chats.listIds) {
-    global.chats.listIds.forEach((chatId) => {
-      const current = global.messages.byChatId[chatId];
-      if (!current || !current.viewportIds) {
-        return;
-      }
+  const savedIds = [
+    ...(global.chats.listIds || []),
+    ...(global.chats.selectedId ? [global.chats.selectedId] : []),
+  ];
 
-      byChatId[chatId] = {
-        ...global.messages.byChatId[chatId],
-        byId: filterKeys(current.byId, current.viewportIds),
-      };
-    });
-  }
+  savedIds.forEach((chatId) => {
+    const current = global.messages.byChatId[chatId];
+    if (!current || !current.viewportIds) {
+      return;
+    }
+
+    byChatId[chatId] = {
+      ...global.messages.byChatId[chatId],
+      byId: filterKeys(current.byId, current.viewportIds),
+    };
+  });
 
   return {
     ...global.messages,
