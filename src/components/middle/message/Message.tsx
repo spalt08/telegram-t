@@ -32,7 +32,9 @@ import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
-import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
+import {
+  calculateInlineImageDimensions, calculateVideoDimensions, ROUND_VIDEO_DIMENSIONS,
+} from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth } from './helpers/mediaDimensions';
 
@@ -49,6 +51,7 @@ import Contact from './Contact';
 import Poll from './Poll';
 import WebPage from './WebPage';
 import Album from './Album';
+import RoundVideo from './RoundVideo';
 
 import './Message.scss';
 
@@ -289,7 +292,14 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             onCancelUpload={handleCancelUpload}
           />
         )}
-        {!album && video && (
+        {!album && video && video.isRound && (
+          <RoundVideo
+            message={message}
+            loadAndPlay={loadAndPlayMedia}
+            lastSyncTime={lastSyncTime}
+          />
+        )}
+        {!album && video && !video.isRound && (
           <Video
             message={message}
             loadAndPlay={loadAndPlayMedia}
@@ -338,7 +348,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   if (!isAlbum && (photo || video)) {
     const { width } = photo
       ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
-      : (video && calculateVideoDimensions(video, isOwn, isForwarded)) || {};
+      : (video && (video.isRound
+        ? { width: ROUND_VIDEO_DIMENSIONS }
+        : calculateVideoDimensions(video, isOwn, isForwarded))
+      ) || {};
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
