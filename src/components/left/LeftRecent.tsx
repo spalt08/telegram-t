@@ -91,7 +91,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Recent</h3>
           {recentlyFoundChatIds.map((id) => (
-            <div className="search-result" onClick={() => handleClick(id)}>
+            <div className="chat-item-clickable search-result" onClick={() => handleClick(id)}>
               {isChatPrivate(id) ? (
                 <PrivateChatInfo userId={id} />
               ) : (
