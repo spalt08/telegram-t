@@ -7,15 +7,16 @@ type ChildrenFn = () => any;
 
 type OwnProps = {
   isOpen: boolean;
+  id?: string;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   children: ChildrenFn;
 };
 
 const AnimationFade: FC<OwnProps> = ({
-  isOpen, className, onClick, children,
+  isOpen, id, className, onClick, children,
 }) => {
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, 'slow');
   const prevIsOpen = usePrevious(isOpen);
   const prevChildren = usePrevious(children);
   const fromChildrenRef = useRef<ChildrenFn>();
@@ -26,7 +27,7 @@ const AnimationFade: FC<OwnProps> = ({
 
   return (
     shouldRender && (
-      <div className={[className, transitionClassNames].join(' ')} onClick={onClick}>
+      <div id={id} className={[className, transitionClassNames].join(' ')} onClick={onClick}>
         {isOpen ? children() : fromChildrenRef.current!()}
       </div>
     )

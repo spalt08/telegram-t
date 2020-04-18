@@ -261,7 +261,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   return (
     <AnimationFade
-      className="MediaViewer"
+      id="MediaViewer"
       isOpen={isOpen}
       onClick={handleClose}
     >

@@ -1,4 +1,4 @@
-import React, { FC } from '../lib/teact/teact';
+import React, { FC, useEffect } from '../lib/teact/teact';
 
 import MediaViewer from './mediaViewer/MediaViewer.async';
 import LeftColumn from './left/LeftColumn';
@@ -10,6 +10,10 @@ import ErrorModalContainer from './ui/ErrorModalContainer';
 import './Main.scss';
 
 const Main: FC = () => {
+  useEffect(() => {
+    document.body.classList.add('no-overflow');
+  });
+
   return (
     <div id="Main">
       <MediaViewer />

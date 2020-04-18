@@ -17,155 +17,161 @@ import windowSize from '../../../util/windowSize';
 const ANIMATION_DURATION = 200;
 
 export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSharedMedia?: boolean) {
-  const messageEl = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`);
-  if (!messageEl) {
-    return;
-  }
+  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
+  const fromImage = container.querySelector<HTMLImageElement>('img.full-media, video')!;
 
-  const fromImage = messageEl.querySelector('img.full-media,video') as HTMLImageElement;
-  if (!fromImage) {
-    return;
-  }
-
-  const mediaViewerContentEl = document.querySelector('.MediaViewer .media-viewer-content')!;
   const { width: windowWidth } = windowSize.get();
   const { photo, video, webPage } = getMessageContent(message);
   const mediaSize = video ? getVideoDimensions(video) : getPhotoFullDimensions((photo || webPage!.photo)!);
   const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(hasFooter);
-  const { width: finalWidth, height: finalHeight } = calculateDimensions(
+  const { width: toWidth, height: toHeight } = calculateDimensions(
     availableWidth, availableHeight, mediaSize!.width, mediaSize!.height,
   );
-  const {
-    animatedImage,
-    dimensions: {
-      width: startWidth, height: startHeight, top: startTop, left: startLeft,
-    },
-  } = createAnimatedImage(fromImage);
-  const finalLeft = (windowWidth - finalWidth) / 2;
-  const finalTop = getTopOffset(hasFooter) + (availableHeight - finalHeight) / 2;
-  const translateX = (finalWidth - startWidth) / -2;
-  const translateY = (finalHeight - startHeight) / -2;
-  const scaleX = startWidth / finalWidth;
-  const scaleY = startHeight / finalHeight;
-  const isFullyVisible = isElementFullyVisible(fromImage);
+  const toLeft = (windowWidth - toWidth) / 2;
+  const toTop = getTopOffset(hasFooter) + (availableHeight - toHeight) / 2;
 
-  applyStyles(animatedImage, {
-    width: `${finalWidth}px`,
-    height: `${finalHeight}px`,
-    transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`,
-    opacity: (isFromSharedMedia || !isFullyVisible) ? '0' : '1',
+  let {
+    top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
+  } = fromImage.getBoundingClientRect();
+
+  if (isFromSharedMedia) {
+    const uncovered = uncover(toWidth, toHeight, fromTop, fromLeft, fromWidth, fromHeight);
+    fromTop = uncovered.top;
+    fromLeft = uncovered.left;
+    fromWidth = uncovered.width;
+    fromHeight = uncovered.height;
+  }
+
+  const fromTranslateX = (fromLeft + fromWidth / 2) - (toLeft + toWidth / 2);
+  const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
+  const fromScaleX = fromWidth / toWidth;
+  const fromScaleY = fromHeight / toHeight;
+
+  const ghost = createGhost(fromImage);
+  applyStyles(ghost, {
+    top: `${toTop}px`,
+    left: `${toLeft}px`,
+    width: `${toWidth}px`,
+    height: `${toHeight}px`,
+    transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScaleX}, ${fromScaleY})`,
   });
 
-  document.body.style.overflow = 'hidden';
-  document.body.appendChild(animatedImage);
-
-  mediaViewerContentEl.classList.add('hide-image');
+  document.body.classList.add('ghost-animating');
 
   requestAnimationFrame(() => {
-    const finalTranslateX = startLeft - finalLeft;
-    const finalTranslateY = startTop - finalTop;
+    document.body.appendChild(ghost);
 
-    animatedImage.classList.add('animate');
-    applyStyles(animatedImage, {
-      transform: `translate3d(${finalTranslateX * -1}px, ${finalTranslateY * -1}px, 0) scale(1, 1)`,
-      opacity: '1',
+    requestAnimationFrame(() => {
+      ghost.style.transform = '';
+
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          document.body.removeChild(ghost);
+          document.body.classList.remove('ghost-animating');
+        });
+      }, ANIMATION_DURATION + 50);
     });
-
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        mediaViewerContentEl.classList.remove('hide-image');
-        document.body.removeChild(animatedImage);
-      });
-    }, ANIMATION_DURATION);
   });
 }
 
-export function animateClosing(message: ApiMessage, fromSharedLibrary: boolean) {
-  const messageEl = document.getElementById(fromSharedLibrary ? `shared-media${message.id}` : `message${message.id}`);
-  const mediaViewerContentEl = document.querySelector('.MediaViewer .active .media-viewer-content')!;
-  if (!messageEl || !mediaViewerContentEl) {
-    return;
-  }
-
-  const fromImage = mediaViewerContentEl.querySelector('img[src],video') as HTMLImageElement;
-  const toImage = messageEl.querySelector('img.full-media,img.thumbnail,video') as HTMLImageElement;
+export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) {
+  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
+  const toImage = container.querySelector<HTMLImageElement>('img.full-media, img.thumbnail, video');
+  const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
+    '.active .media-viewer-content img, .active .media-viewer-content video',
+  );
   if (!fromImage || !toImage) {
     return;
   }
 
   const {
-    animatedImage,
-    dimensions: {
-      width: startWidth, height: startHeight, top: startTop, left: startLeft,
-    },
-  } = createAnimatedImage(fromImage, true);
+    top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
+  } = fromImage.getBoundingClientRect();
+  const {
+    top: targetTop, left: toLeft, width: toWidth, height: toHeight,
+  } = toImage.getBoundingClientRect();
 
-  document.body.appendChild(animatedImage);
+  let toTop = targetTop;
+  if (!isElementInViewport(container)) {
+    const { height: windowHeight } = windowSize.get();
+    toTop = targetTop < fromTop ? -toHeight : windowHeight;
+  }
+
+  const fromTranslateX = (fromLeft + fromWidth / 2) - (toLeft + toWidth / 2);
+  const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
+  let fromScaleX = fromWidth / toWidth;
+  let fromScaleY = fromHeight / toHeight;
+  const shouldFadeOut = !isFromSharedMedia && !isMessageFullyVisible(container);
+
+  if (isFromSharedMedia) {
+    if (fromScaleX > fromScaleY) {
+      fromScaleX = fromScaleY;
+    } else if (fromScaleY > fromScaleX) {
+      fromScaleY = fromScaleX;
+    }
+  }
+
+  const ghost = createGhost(toImage);
+  applyStyles(ghost, {
+    top: `${toTop}px`,
+    left: `${toLeft}px`,
+    width: `${toWidth}px`,
+    height: `${toHeight}px`,
+    transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScaleX}, ${fromScaleY})`,
+  });
 
   requestAnimationFrame(() => {
-    const {
-      width: finalWidth,
-      height: finalHeight,
-      top: imageTop,
-      left: finalLeft,
-    } = toImage.getBoundingClientRect();
-    const { height: windowHeight } = windowSize.get();
-    const finalTop = isElementInViewport(messageEl)
-      ? imageTop
-      : (imageTop < startTop ? -finalHeight : windowHeight);
+    document.body.classList.add('ghost-animating');
+    document.body.appendChild(ghost);
 
-    const translateX = finalLeft - startLeft + (finalWidth - startWidth) / 2;
-    const translateY = finalTop - startTop + (finalHeight - startHeight) / 2;
-    const scaleX = finalWidth / startWidth;
-    const scaleY = finalHeight / startHeight;
-    const isFullyVisible = isElementFullyVisible(toImage);
+    requestAnimationFrame(() => {
+      ghost.style.transform = '';
+      if (shouldFadeOut) {
+        ghost.style.opacity = '0';
+      }
 
-    animatedImage.classList.add('animate');
-    if (fromSharedLibrary || !isFullyVisible) {
-      animatedImage.classList.add('slow');
-    }
-    applyStyles(animatedImage, {
-      transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`,
-      opacity: (fromSharedLibrary || !isFullyVisible) ? '0' : '1',
+      if (isFromSharedMedia) {
+        (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
+      } else {
+        ghost.classList.add('rounded-corners');
+      }
+
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          document.body.removeChild(ghost);
+          document.body.classList.remove('ghost-animating');
+        });
+      }, ANIMATION_DURATION + 50);
     });
-
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        document.body.removeChild(animatedImage);
-        document.body.style.overflow = 'visible';
-      });
-    }, ANIMATION_DURATION);
   });
 }
 
-function createAnimatedImage<T extends HTMLImageElement | HTMLVideoElement>(element: T, moveNode = false) {
-  const {
-    top, left, width: availableWidth, height: availableHeight,
-  } = element.getBoundingClientRect();
-  const animatedImage = document.createElement('div');
-  animatedImage.classList.add('ghost-image');
-  applyStyles(animatedImage, {
-    top: `${top}px`,
-    left: `${left}px`,
-    width: `${availableWidth}px`,
-    height: `${availableHeight}px`,
-  });
+function createGhost<T extends HTMLImageElement | HTMLVideoElement>(element: T) {
+  const ghost = document.createElement('div');
+  ghost.classList.add('ghost');
 
-  if (moveNode) {
-    animatedImage.appendChild(element);
-  } else {
-    const clonedElement = element.cloneNode() as T;
-    ['id', 'style', 'width', 'height', 'class'].forEach(((value) => {
-      clonedElement.removeAttribute(value);
-    }));
-    animatedImage.appendChild(clonedElement);
+  const clonedElement = element.cloneNode() as T;
+  ['id', 'style', 'width', 'height', 'class'].forEach(((value) => {
+    clonedElement.removeAttribute(value);
+  }));
+  ghost.appendChild(clonedElement);
+
+  return ghost;
+}
+
+function uncover(realWidth: number, realHeight: number, top: number, left: number, width: number, height: number) {
+  if (realWidth > realHeight) {
+    const srcWidth = width;
+    width = height * (realWidth / realHeight);
+    left -= (width - srcWidth) / 2;
+  } else if (realHeight > realWidth) {
+    const srcHeight = height;
+    height = width * (realHeight / realWidth);
+    top -= (height - srcHeight) / 2;
   }
 
   return {
-    animatedImage,
-    dimensions: {
-      top, left, width: availableWidth, height: availableHeight,
-    },
+    top, left, width, height,
   };
 }
 
@@ -180,16 +186,11 @@ function isElementInViewport(el: HTMLElement) {
   return (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
 }
 
-function isElementFullyVisible(el: HTMLElement) {
-  if (el.style.display === 'none') {
-    return false;
-  }
+function isMessageFullyVisible(el: HTMLElement) {
+  const container = document.querySelector<HTMLDivElement>('.MessageList')!;
 
-  const messageList = document.getElementById('MessageList')!;
-  const rect = el.getBoundingClientRect();
-  const listRect = messageList.getBoundingClientRect();
-
-  return (rect.top >= listRect.top && rect.bottom <= listRect.bottom);
+  return el.offsetTop > container.scrollTop
+    && el.offsetTop + el.offsetHeight < container.scrollTop + container.offsetHeight;
 }
 
 function getTopOffset(hasFooter: boolean) {
