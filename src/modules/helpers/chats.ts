@@ -74,13 +74,13 @@ export function getChatAvatarHash(
     return undefined;
   }
 
-  const base = `avatar${owner.id}?${owner.avatar.hash}`;
+  const base = `avatar${owner.id}`;
 
   switch (size) {
     case 'big':
-      return `${base}?size=big`;
+      return `${base}?size=big&${owner.avatar.hash}`;
     default:
-      return base;
+      return `${base}?${owner.avatar.hash}`;
   }
 }
 
