@@ -1,3 +1,5 @@
+import { pause } from './schedulers';
+
 export function blobToDataUri(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -40,6 +42,26 @@ export function preloadVideo(url: string): Promise<HTMLVideoElement> {
     video.onerror = reject;
     video.src = url;
   });
+}
+
+export async function createPosterForVideo(url: string): Promise<string | undefined> {
+  const video = await preloadVideo(url);
+
+  return Promise.race([
+    pause(2000) as Promise<undefined>,
+    new Promise<string>((resolve, reject) => {
+      video.onseeked = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(video, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+      video.onerror = reject;
+      video.currentTime = Math.min(video.duration, 1);
+    }),
+  ]);
 }
 
 export async function fetchFile(blobUrl: string, fileName: string) {

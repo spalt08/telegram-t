@@ -50,6 +50,7 @@ export interface ApiVideo {
   isGif?: boolean;
   thumbnail?: ApiThumbnail;
   blobUrl?: string;
+  size: number;
 }
 
 export interface ApiAudio {
@@ -71,6 +72,8 @@ export interface ApiDocument {
   size: number;
   timestamp?: number;
   mimeType: string;
+  thumbnail?: ApiThumbnail;
+  previewBlobUrl?: string;
 }
 
 export interface ApiContact {

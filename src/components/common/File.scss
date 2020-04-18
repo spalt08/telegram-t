@@ -13,7 +13,8 @@
   }
 
   .file-progress,
-  .file-icon {
+  .file-icon,
+  .file-preview {
     width: 3.375rem;
     height: 3.375rem;
     margin-right: .75rem;
@@ -56,6 +57,21 @@
       border-width: 0 1.125rem 1.125rem 0;
       border-style: solid;
       transition: border-width .15s ease-in;
+    }
+  }
+
+  .file-preview {
+    background: transparent;
+    overflow: hidden;
+
+    & + .icon-download,
+    & + .file-progress {
+      background: rgba(black, 0.5);
+      border-radius: var(--border-radius-messages-small);
+    }
+
+    img {
+      object-fit: cover;
     }
   }
 
@@ -130,7 +146,8 @@
 
     .icon-download,
     .file-progress,
-    .file-icon {
+    .file-icon,
+    .file-preview {
       width: 3rem;
       height: 3rem;
     }

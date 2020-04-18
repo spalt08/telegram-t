@@ -32,7 +32,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
   let photo: ApiAttachment | undefined;
   let video: ApiAttachment | undefined;
-  if (renderingAttachment) {
+  if (renderingAttachment && renderingAttachment.quick) {
     if (renderingAttachment.mimeType.startsWith('image/')) {
       photo = renderingAttachment;
     } else if (renderingAttachment.mimeType.startsWith('video/')) {
@@ -81,6 +81,7 @@ const AttachmentModal: FC<OwnProps> = ({
           <File
             name={renderingAttachment.filename}
             extension={getFileExtension(renderingAttachment.filename, renderingAttachment.mimeType)}
+            previewData={renderingAttachment.previewBlobUrl}
             size={renderingAttachment.size}
             smaller
           />

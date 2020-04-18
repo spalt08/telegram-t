@@ -4,15 +4,17 @@ import React, {
 
 import { ApiMessage } from '../../api/types';
 
-import { getDocumentInfo } from './helpers/documentInfo';
-import { getMediaTransferState, getMessageMediaHash } from '../../modules/helpers';
+import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
+import { getMediaTransferState, getMessageMediaHash, getMessageMediaThumbDataUri } from '../../modules/helpers';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useMedia from '../../hooks/useMedia';
 import download from '../../util/download';
 
 import File from './File';
 
 type OwnProps = {
   message: ApiMessage;
+  load?: boolean;
   smaller?: boolean;
   uploadProgress?: number;
   showTimeStamp?: boolean;
@@ -20,10 +22,10 @@ type OwnProps = {
 };
 
 const Document: FC<OwnProps> = ({
-  message, smaller, uploadProgress, showTimeStamp, onCancelUpload,
+  message, load, smaller, uploadProgress, showTimeStamp, onCancelUpload,
 }) => {
   const document = message.content.document!;
-  const { extension } = getDocumentInfo(document);
+  const extension = getDocumentExtension(document) || '';
   const { fileName, size, timestamp } = document;
 
   const [shouldDownload, setShouldDownload] = useState();
@@ -31,6 +33,11 @@ const Document: FC<OwnProps> = ({
   const {
     isUploading, isDownloading, transferProgress,
   } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload);
+
+  const hasPreview = getDocumentHasPreview(document);
+  const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
+  const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
+  const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !load);
 
   // TODO Support canceling
   const handleDownload = useCallback(() => {
@@ -50,6 +57,8 @@ const Document: FC<OwnProps> = ({
       extension={extension}
       size={size}
       timestamp={showTimeStamp ? timestamp : undefined}
+      thumbnailDataUri={thumbDataUri}
+      previewData={localBlobUrl || previewData}
       smaller={smaller}
       isUploading={isUploading}
       isDownloading={isDownloading}

@@ -321,6 +321,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         {document && (
           <Document
             message={message}
+            load={loadAndPlayMedia}
             uploadProgress={uploadProgress}
             onCancelUpload={handleCancelUpload}
           />

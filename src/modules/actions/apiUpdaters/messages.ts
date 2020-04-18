@@ -282,7 +282,9 @@ function updateWithLocalMedia(global: GlobalState, chat_id: number, id: number, 
   // Preserve locally uploaded media.
   const currentMessage = selectChatMessage(global, chat_id, id);
   if (currentMessage && message.content) {
-    const { photo, video, sticker } = getMessageContent(currentMessage);
+    const {
+      photo, video, sticker, document,
+    } = getMessageContent(currentMessage);
     if (photo && message.content.photo) {
       message.content.photo.blobUrl = photo.blobUrl;
       message.content.photo.thumbnail = photo.thumbnail;
@@ -290,6 +292,8 @@ function updateWithLocalMedia(global: GlobalState, chat_id: number, id: number, 
       message.content.video.blobUrl = video.blobUrl;
     } else if (sticker && message.content.sticker) {
       message.content.sticker.localMediaHash = sticker.localMediaHash;
+    } else if (document && message.content.document) {
+      message.content.document.previewBlobUrl = document.previewBlobUrl;
     }
   }
 

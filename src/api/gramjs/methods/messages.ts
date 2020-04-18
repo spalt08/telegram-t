@@ -143,7 +143,7 @@ export async function sendMessage(
   },
   onProgress: OnUploadProgress,
 ) {
-  const localMessage = await buildLocalMessage(
+  const localMessage = buildLocalMessage(
     chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
   );
   onUpdate({
@@ -232,11 +232,23 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     onProgress(localMessage.id, progress);
   });
 
-  if (quick && mimeType.startsWith('image/')) {
-    return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
-  }
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
+  if (quick) {
+    if (mimeType.startsWith('image/')) {
+      return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
+    } else {
+      const { width, height, duration } = quick;
+      if (duration !== undefined) {
+        attributes.push(new GramJs.DocumentAttributeVideo({
+          duration,
+          w: width,
+          h: height,
+        }));
+      }
+    }
+  }
+
   if (voice) {
     const { duration, waveform } = voice;
     attributes.push(new GramJs.DocumentAttributeAudio({
