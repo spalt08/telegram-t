@@ -16,9 +16,11 @@ export interface ApiAttachment {
   quick?: {
     width: number;
     height: number;
+    duration?: number;
   };
   voice?: {
     duration: number;
     waveform: number[];
   };
+  previewBlobUrl?: string;
 }

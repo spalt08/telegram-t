@@ -181,7 +181,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           ))
         ) : mediaType === 'documents' ? (
           messageIds.map((id) => (
-            <Document key={id} message={chatMessages![id]} showTimeStamp smaller />
+            <Document key={id} message={chatMessages![id]} showTimeStamp smaller load />
           ))
         ) : mediaType === 'links' ? (
           messageIds.map((id) => (

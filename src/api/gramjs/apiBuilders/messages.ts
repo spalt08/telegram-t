@@ -24,7 +24,6 @@ import { isPeerUser } from './peers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
 import { reduceWaveform } from '../gramjsBuilders';
-import { fetchFile } from '../../../util/files';
 
 const LOCAL_VIDEO_TEMP_ID = 'temp';
 
@@ -252,6 +251,7 @@ export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | un
     isRound,
     isGif: Boolean(gifAttr),
     thumbnail: buildApiThumbnailFromStripped(document.thumbs),
+    size: document.size,
   };
 }
 
@@ -333,13 +333,18 @@ function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | undefined 
     return undefined;
   }
 
-  const { size, mimeType, date } = media.document;
+  const {
+    size, mimeType, date, thumbs,
+  } = media.document;
+
+  const thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
 
   return {
     size,
     mimeType,
     timestamp: date,
     fileName: getFilenameFromDocument(media.document),
+    thumbnail,
   };
 }
 
@@ -525,7 +530,7 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
 // TODO @refactoring Use 1e9+ for local IDs instead of 0-
 let localMessageCounter = -1;
 
-export async function buildLocalMessage(
+export function buildLocalMessage(
   chatId: number,
   currentUserId: number,
   text?: string,
@@ -535,7 +540,7 @@ export async function buildLocalMessage(
   sticker?: ApiSticker,
   gif?: ApiVideo,
   pollSummary?: ApiNewPoll,
-): Promise<ApiMessage> {
+): ApiMessage {
   const localId = localMessageCounter--;
 
   return {
@@ -549,7 +554,7 @@ export async function buildLocalMessage(
           entities,
         },
       }),
-      ...(attachment && await buildUploadingMedia(attachment)),
+      ...(attachment && buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
       ...(pollSummary && buildNewPoll(pollSummary, localId)),
@@ -602,14 +607,19 @@ export function buildForwardedMessage(
   };
 }
 
-async function buildUploadingMedia(
+function buildUploadingMedia(
   attachment: ApiAttachment,
-): Promise<ApiMessage['content']> {
-  const { filename: fileName, blobUrl } = attachment;
-  const { type: mimeType, size } = await fetchFile(blobUrl, fileName);
+): ApiMessage['content'] {
+  const {
+    filename: fileName,
+    blobUrl,
+    previewBlobUrl,
+    mimeType,
+    size,
+  } = attachment;
 
   if (attachment.quick) {
-    const { width, height } = attachment.quick;
+    const { width, height, duration } = attachment.quick;
 
     if (mimeType.startsWith('image/')) {
       return {
@@ -623,11 +633,13 @@ async function buildUploadingMedia(
       return {
         video: {
           id: LOCAL_VIDEO_TEMP_ID,
-          duration: 0,
+          duration: duration || 0,
           fileName,
           width,
           height,
           blobUrl,
+          ...(previewBlobUrl && { thumbnail: { width, height, dataUri: previewBlobUrl } }),
+          size,
         },
       };
     }
@@ -654,6 +666,7 @@ async function buildUploadingMedia(
         mimeType,
         fileName,
         size,
+        ...(previewBlobUrl && { previewBlobUrl }),
       },
     };
   }

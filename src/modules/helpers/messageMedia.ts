@@ -4,19 +4,21 @@ import {
   ApiVideo,
 } from '../../api/types';
 import { getMessageKey, matchLinkInMessageText, isMessageLocal } from './messages';
+import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
 
 export type IDimensions = {
   width: number;
   height: number;
 };
 
-const MAX_INLINE_VIDEO_DURATION = 10;
+const MAX_INLINE_VIDEO_SIZE = 5 * 1024 ** 2; // 5 MB
 
 export function getMessageMedia(message: ApiMessage) {
   return getMessagePhoto(message)
     || getMessageVideo(message)
     || getMessageSticker(message)
-    || getMessageWebPagePhoto(message);
+    || getMessageWebPagePhoto(message)
+    || getMessageDocument(message);
 }
 
 export function getMessageContent(message: ApiMessage) {
@@ -135,7 +137,21 @@ export function getMessageMediaHash(
     }
   }
 
-  if (sticker || audio || voice || document) {
+  if (document) {
+    switch (target) {
+      case 'inline':
+      case 'pictogram':
+        if (!getDocumentHasPreview(document) || hasMessageLocalBlobUrl(message)) {
+          return undefined;
+        }
+
+        return `${base}?size=m`;
+      default:
+        return base;
+    }
+  }
+
+  if (sticker || audio || voice) {
     return base;
   }
 
@@ -157,13 +173,13 @@ export function getMessageMediaFilename(message: ApiMessage) {
 }
 
 export function hasMessageLocalBlobUrl(message: ApiMessage) {
-  const { photo, video } = message.content;
+  const { photo, video, document } = message.content;
 
-  return (photo && photo.blobUrl) || (video && video.blobUrl);
+  return (photo && photo.blobUrl) || (video && video.blobUrl) || (document && document.previewBlobUrl);
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.isGif || video.isRound || video.duration <= MAX_INLINE_VIDEO_DURATION;
+  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE;
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {

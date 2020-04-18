@@ -49,13 +49,6 @@ export function getColorFromExtension(extension: string) {
   }
 }
 
-export function getDocumentInfo(document: ApiDocument) {
-  const { size } = document;
-  const extension = getDocumentExtension(document) || '';
-
-  return {
-    size: getFileSizeString(size),
-    extension,
-    color: getColorFromExtension(extension),
-  };
+export function getDocumentHasPreview(document: ApiDocument) {
+  return Boolean(document.previewBlobUrl || document.thumbnail);
 }

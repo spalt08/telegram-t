@@ -124,6 +124,20 @@ export function getPictogramDimensions(): IDimensions {
   };
 }
 
+export function getDocumentThumbnailDimensions(smaller?: boolean): IDimensions {
+  if (smaller) {
+    return {
+      width: 3 * REM,
+      height: 3 * REM,
+    };
+  }
+
+  return {
+    width: 3.375 * REM,
+    height: 3.375 * REM,
+  };
+}
+
 export function getStickerDimensions(sticker: ApiSticker): IDimensions {
   const { width, height } = sticker;
   const aspectRatio = (height && width) && height / width;
