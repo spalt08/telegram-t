@@ -18,6 +18,11 @@ const ANIMATION_DURATION = 200;
 
 export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSharedMedia?: boolean) {
   const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
+  // TODO Support opening from album.
+  if (!container) {
+    return;
+  }
+
   const fromImage = container.querySelector<HTMLImageElement>('img.full-media, video')!;
 
   const { width: windowWidth } = windowSize.get();
@@ -76,6 +81,10 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
 
 export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) {
   const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
+  if (!container) {
+    return;
+  }
+
   const toImage = container.querySelector<HTMLImageElement>('img.full-media, img.thumbnail, video');
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
     '.active .media-viewer-content img, .active .media-viewer-content video',
@@ -101,7 +110,9 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
   const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
   let fromScaleX = fromWidth / toWidth;
   let fromScaleY = fromHeight / toHeight;
-  const shouldFadeOut = !isFromSharedMedia && !isMessageFullyVisible(container);
+  const shouldFadeOut = !isFromSharedMedia && (
+    !isMessageFullyVisible(container) || container.classList.contains('is-album')
+  );
 
   if (isFromSharedMedia) {
     if (fromScaleX > fromScaleY) {

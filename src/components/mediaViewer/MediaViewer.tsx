@@ -4,13 +4,14 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, ApiChat } from '../../api/types';
+import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
 
 import { calculateMediaViewerDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import {
   selectChatMessage,
   selectChatMessages,
   selectChat,
+  selectUser,
 } from '../../modules/selectors';
 import {
   getChatAvatarHash,
@@ -48,7 +49,7 @@ type StateProps = {
   chatId?: number;
   messageId?: number;
   isFromSharedMedia?: boolean;
-  avatarOwner?: ApiChat;
+  avatarOwner?: ApiChat | ApiUser;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
   animationLevel?: 0 | 1 | 2;
@@ -353,7 +354,7 @@ export default memo(withGlobal(
     if (avatarOwnerId) {
       return {
         messageId: -1,
-        avatarOwner: selectChat(global, avatarOwnerId),
+        avatarOwner: selectChat(global, avatarOwnerId) || selectUser(global, avatarOwnerId),
         animationLevel,
       };
     }

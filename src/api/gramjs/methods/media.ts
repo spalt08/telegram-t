@@ -40,7 +40,7 @@ export default async function downloadMedia(
 }
 
 async function download(url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress) {
-  const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w)?/);
+  const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
   }
@@ -99,7 +99,7 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
 
     return { mimeType, data };
   } else {
-    const data = await client.downloadProfilePhoto(entity, false);
+    const data = await client.downloadProfilePhoto(entity, sizeType === 'big');
     const mimeType = 'image/jpeg';
 
     return { mimeType, data };
