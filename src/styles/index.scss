@@ -21,6 +21,10 @@ html, body {
   color: var(--color-text);
 }
 
+body.no-overflow {
+  overflow: hidden;
+}
+
 #root {
   height: 100%;
   max-width: 1680px;

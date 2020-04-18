@@ -1,4 +1,4 @@
-.MediaViewer {
+#MediaViewer {
   position: fixed;
   top: 0;
   left: 0;
@@ -17,6 +17,18 @@
   justify-items: stretch;
   align-items: center;
   grid-template-areas: "header" "media";
+
+  // Potential perf improvement
+  &:not(.shown) {
+    display: block !important;
+    transform: scale(0);
+  }
+
+  body.ghost-animating & {
+    > .Transition, > button {
+      visibility: hidden;
+    }
+  }
 
   .media-viewer-head {
     display: flex;
@@ -49,10 +61,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &.hide-image {
-      visibility: hidden;
-    }
 
     &.has-footer {
       padding-top: 4.25rem;
@@ -131,23 +139,22 @@
   }
 }
 
-.ghost-image {
+.ghost {
   position: absolute;
   z-index: var(--z-media-viewer);
   will-change: transform, opacity;
   overflow: hidden;
+  border-radius: 0;
+  transition: transform .2s ease, opacity .2s ease;
+
+  &.rounded-corners {
+    border-radius: var(--border-radius-messages);
+  }
 
   img,
   video {
     width: 100%;
     height: 100%;
     user-select: none;
-  }
-
-  &.animate {
-    transition: transform .15s, opacity .15s;
-    &.slow {
-      transition: transform .2s, opacity .2s;
-    }
   }
 }

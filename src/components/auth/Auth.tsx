@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState } from '../../global/types';
@@ -14,6 +14,10 @@ import './Auth.scss';
 type StateProps = Pick<GlobalState, 'authState'>;
 
 const Auth: FC<StateProps> = ({ authState }) => {
+  useEffect(() => {
+    document.body.classList.remove('no-overflow');
+  });
+
   switch (authState) {
     case 'authorizationStateWaitCode':
       return <UiLoader page="authCode" key="authCode"><AuthCode /></UiLoader>;
