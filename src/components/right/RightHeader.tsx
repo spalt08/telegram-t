@@ -9,6 +9,7 @@ import { selectCurrentMessageSearch } from '../../modules/selectors';
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
+import { ProfileState } from './Profile';
 
 import './RightHeader.scss';
 
@@ -16,7 +17,7 @@ type OwnProps = {
   onClose: () => void;
   isForwarding?: boolean;
   isSearch?: boolean;
-  isSharedMedia?: boolean;
+  profileState?: ProfileState;
 };
 
 type StateProps = {
@@ -30,6 +31,7 @@ const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 enum HeaderContent {
   Profile,
   SharedMedia,
+  MemberList,
   Search,
   Forward,
 }
@@ -38,7 +40,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isForwarding,
   isSearch,
-  isSharedMedia,
+  profileState,
   searchQuery,
   setMessageSearchQuery,
   searchMessages,
@@ -52,8 +54,10 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     HeaderContent.Forward
   ) : isSearch ? (
     HeaderContent.Search
-  ) : isSharedMedia ? (
+  ) : profileState === ProfileState.SharedMedia ? (
     HeaderContent.SharedMedia
+  ) : profileState === ProfileState.MemberList ? (
+    HeaderContent.MemberList
   ) : HeaderContent.Profile;
 
   function renderHeaderContent() {
@@ -64,6 +68,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return <SearchInput value={searchQuery} onChange={handleSearchQueryChange} />;
       case HeaderContent.SharedMedia:
         return <h3>Shared Media</h3>;
+      case HeaderContent.MemberList:
+        return <h3>Members</h3>;
       default:
         return (
           <>
@@ -81,6 +87,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
+  const isBackButton = contentKey === HeaderContent.SharedMedia || contentKey === HeaderContent.MemberList;
+
   return (
     <div className="RightHeader">
       <Button
@@ -90,7 +98,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         onClick={onClose}
       >
-        <div className={`animated-close-icon ${contentKey === HeaderContent.SharedMedia ? 'state-back' : ''}`} />
+        <div className={`animated-close-icon ${isBackButton ? 'state-back' : ''}`} />
       </Button>
       <Transition name="slide-fade" activeKey={contentKey}>
         {renderHeaderContent}

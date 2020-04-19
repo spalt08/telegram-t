@@ -8,14 +8,13 @@ import { ApiUser } from '../../api/types';
 
 import { throttle } from '../../util/schedulers';
 import searchWords from '../../util/searchWords';
-import { getUserFullName } from '../../modules/helpers';
+import { getUserFullName, getSortedUserIds } from '../../modules/helpers';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import RippleEffect from '../ui/RippleEffect';
 import Loading from '../ui/Loading';
 
 import './ContactList.scss';
-import { orderBy } from '../../util/iteratees';
 
 export type OwnProps = {
   filter: string;
@@ -60,31 +59,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
       return fullName && searchWords(fullName, filter);
     }) : contactIds;
 
-    return orderBy(resultIds, (id) => {
-      const user = usersById[id];
-      if (!user || !user.status) {
-        return 0;
-      }
-
-      const now = Date.now() / 1000;
-
-      if (user.status['@type'] === 'userStatusOnline') {
-        return user.status.expires;
-      } else if (user.status['@type'] === 'userStatusOffline' && user.status.was_online) {
-        return user.status.was_online;
-      }
-
-      switch (user.status['@type']) {
-        case 'userStatusRecently':
-          return now - 60 * 60 * 24;
-        case 'userStatusLastWeek':
-          return now - 60 * 60 * 24 * 7;
-        case 'userStatusLastMonth':
-          return now - 60 * 60 * 24 * 7 * 30;
-        default:
-          return 0;
-      }
-    }, 'desc');
+    return getSortedUserIds(resultIds, usersById);
   }, [filter, usersById, contactIds]);
 
   if (!displayedIds) {

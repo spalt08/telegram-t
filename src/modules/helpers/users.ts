@@ -1,6 +1,7 @@
 import { ApiUser } from '../../api/types';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
 import { isChatPrivate } from './chats';
+import { orderBy } from '../../util/iteratees';
 
 const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
@@ -183,4 +184,32 @@ export function getSenderName(chatId: number, sender?: ApiUser) {
   }
 
   return getUserFirstName(sender);
+}
+
+export function getSortedUserIds(userIds: number[], usersById: Record<number, ApiUser>) {
+  return orderBy(userIds, (id) => {
+    const user = usersById[id];
+    if (!user || !user.status) {
+      return 0;
+    }
+
+    const now = Date.now() / 1000;
+
+    if (user.status['@type'] === 'userStatusOnline') {
+      return user.status.expires;
+    } else if (user.status['@type'] === 'userStatusOffline' && user.status.was_online) {
+      return user.status.was_online;
+    }
+
+    switch (user.status['@type']) {
+      case 'userStatusRecently':
+        return now - 60 * 60 * 24;
+      case 'userStatusLastWeek':
+        return now - 60 * 60 * 24 * 7;
+      case 'userStatusLastMonth':
+        return now - 60 * 60 * 24 * 7 * 30;
+      default:
+        return 0;
+    }
+  }, 'desc');
 }

@@ -85,19 +85,13 @@ export async function fetchChats({
   };
 }
 
-export async function fetchFullChat(chat: ApiChat) {
+export function fetchFullChat(chat: ApiChat) {
   const { id, access_hash } = chat;
   const input = buildInputEntity(id, access_hash);
 
-  const full_info = input instanceof GramJs.InputChannel
-    ? await getFullChannelInfo(input)
-    : await getFullChatInfo(input as number);
-
-  onUpdate({
-    '@type': 'updateChat',
-    id,
-    chat: { full_info },
-  });
+  return input instanceof GramJs.InputChannel
+    ? getFullChannelInfo(input)
+    : getFullChatInfo(input as number);
 }
 
 export async function fetchSuperGroupOnlines(chat: ApiChat) {
@@ -253,8 +247,10 @@ async function getFullChatInfo(chatId: number) {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
-    return undefined;
+    return {};
   }
+
+  updateLocalDb(result);
 
   const {
     about,
@@ -266,10 +262,13 @@ async function getFullChatInfo(chatId: number) {
   const members = buildChatMembers(participants);
 
   return {
-    about,
-    members,
-    pinned_message_id: pinnedMsgId,
-    invite_link: buildChatInviteLink(exportedInvite),
+    fullInfo: {
+      about,
+      members,
+      pinned_message_id: pinnedMsgId,
+      invite_link: buildChatInviteLink(exportedInvite),
+    },
+    users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
   };
 }
 
@@ -277,7 +276,7 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChannelFull)) {
-    return undefined;
+    return {};
   }
 
   const {
@@ -291,9 +290,12 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
     : undefined;
 
   return {
-    about,
-    pinned_message_id: pinnedMsgId,
-    invite_link,
+    fullInfo: {
+      about,
+      pinned_message_id: pinnedMsgId,
+      invite_link,
+    },
+    users: undefined,
   };
 }
 
@@ -311,7 +313,10 @@ function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsS
   return store;
 }
 
-function updateLocalDb(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.contacts.Found) {
+function updateLocalDb(result: (
+  GramJs.messages.Dialogs | GramJs.messages.DialogsSlice |
+  GramJs.contacts.Found | GramJs.messages.ChatFull
+)) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {
       localDb.users[user.id] = user;

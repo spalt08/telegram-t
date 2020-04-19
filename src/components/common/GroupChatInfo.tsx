@@ -4,9 +4,16 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
-import { getChatTypeString, getChatTitle, isChatSuperGroup } from '../../modules/helpers';
+import {
+  getChatTypeString,
+  getChatTitle,
+  isChatSuperGroup,
+  isChatBasicGroup,
+} from '../../modules/helpers';
 import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';
+import buildClassName from '../../util/buildClassName';
+import { DEBUG } from '../../config';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
@@ -84,8 +91,13 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
+  const className = buildClassName(
+    'ChatInfo',
+    DEBUG && isChatBasicGroup(chat) && 'legacy-group-chat',
+  );
+
   return (
-    <div className="ChatInfo">
+    <div className={className}>
       <Avatar key={chat.id} size={avatarSize} chat={chat} onClick={handleAvatarViewerOpen} />
       <div>
         <div className="title">

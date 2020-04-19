@@ -255,6 +255,9 @@ export function getMessageContentIds(
     case 'audio':
       validator = getMessageAudio;
       break;
+
+    default:
+      return [] as Array<number>;
   }
 
   return Object.keys(messages)
