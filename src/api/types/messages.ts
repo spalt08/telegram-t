@@ -211,4 +211,4 @@ export interface ApiMessage {
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
-export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio';
+export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'members';

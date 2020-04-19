@@ -3,18 +3,24 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage } from '../../api/types';
+import {
+  ApiMessage,
+  ApiMessageSearchType,
+  ApiChatMember,
+  ApiUser,
+} from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
-import { getMessageContentIds, isChatPrivate } from '../../modules/helpers';
-import { selectChatMessages } from '../../modules/selectors';
+import { getMessageContentIds, isChatPrivate, getSortedUserIds } from '../../modules/helpers';
+import { selectChatMessages, selectChat } from '../../modules/selectors';
 import { throttle } from '../../util/schedulers';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
+import RippleEffect from '../ui/RippleEffect';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Document from '../common/Document';
@@ -26,20 +32,30 @@ import WebLink from './sharedMedia/WebLink';
 
 import './Profile.scss';
 
+export enum ProfileState {
+  Profile,
+  SharedMedia,
+  MemberList,
+}
+
 type OwnProps = {
   chatId: number;
   userId?: number;
-  isSharedMedia: boolean;
-  onSharedMediaToggle: (isSharedMedia: boolean) => void;
+  profileState: ProfileState;
+  onProfileStateChange: (state: ProfileState) => void;
 };
 
 type StateProps = {
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
+  groupChatMembers?: ApiChatMember[];
+  usersById?: Record<number, ApiUser>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer' | 'openUserInfo'
+)>;
 
 const TAB_TITLES = [
   'Media',
@@ -62,24 +78,51 @@ let isScrollingProgrammatically = false;
 
 const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
-  isSharedMedia,
-  onSharedMediaToggle,
+  profileState,
+  onProfileStateChange,
   resolvedUserId,
   chatMessages,
   isSearchTypeEmpty,
+  groupChatMembers,
+  usersById,
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
+  openUserInfo,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const [activeTab, setActiveTab] = useState(0);
 
-  const mediaType = MEDIA_TYPES[activeTab];
+  const tabTitles = useMemo(() => ([
+    ...(groupChatMembers ? ['Members'] : []),
+    ...TAB_TITLES,
+  ].slice(0, 4)), [groupChatMembers]);
+
+  const mediaTypes = useMemo(() => ([
+    ...(groupChatMembers ? ['members'] : []),
+    ...MEDIA_TYPES,
+  ].slice(0, 4)) as ApiMessageSearchType[], [groupChatMembers]);
+
+  const mediaType = mediaTypes[activeTab];
 
   const messageIds = useMemo(
     () => (mediaType && chatMessages ? getMessageContentIds(chatMessages, mediaType).reverse() : []),
     [chatMessages, mediaType],
   );
+
+  const memberIds = useMemo(() => {
+    if (!groupChatMembers || !usersById) {
+      return [];
+    }
+
+    return getSortedUserIds(groupChatMembers.map(({ user_id }) => user_id), usersById);
+  }, [groupChatMembers, usersById]);
+
+  const handleLoadMore = useCallback((loadMoreOptions) => {
+    if (mediaType !== 'members') {
+      searchMessages(loadMoreOptions);
+    }
+  }, [searchMessages, mediaType]);
 
   useEffect(() => {
     if (mediaType) {
@@ -117,10 +160,21 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
-    onSharedMediaToggle(container.scrollTop >= (
+    let state: ProfileState = ProfileState.Profile;
+    if (container.scrollTop >= (
       chatInfoEl.offsetHeight + 16 + (chatExtraEl ? chatExtraEl.offsetHeight : 0)
-    ));
-  }, [onSharedMediaToggle]);
+    )) {
+      state = mediaType === 'members'
+        ? ProfileState.MemberList
+        : ProfileState.SharedMedia;
+    }
+
+    onProfileStateChange(state);
+  }, [onProfileStateChange, mediaType]);
+
+  useEffect(() => {
+    determineSharedMedia();
+  }, [determineSharedMedia, mediaType]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -130,7 +184,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
     const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
 
-    if (chatInfoEl && !isSharedMedia && tabsEl.offsetTop - container.scrollTop === 0) {
+    if (chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop === 0) {
       isScrollingProgrammatically = true;
       fastSmoothScroll(container, chatInfoEl, 'start', container.offsetHeight * 2);
       setTimeout(() => {
@@ -138,7 +192,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         determineSharedMedia();
       }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
     }
-  }, [determineSharedMedia, isSharedMedia]);
+  }, [determineSharedMedia, profileState]);
 
   const handleScroll = useCallback(() => {
     if (isScrollingProgrammatically) {
@@ -164,9 +218,13 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     container.style.marginRight = '0';
   }, []);
 
-  const handleSelectMedia = useCallback((messageId) => {
+  const handleSelectMedia = useCallback((messageId: number) => {
     openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isFromSharedMedia: true });
   }, [chatId, resolvedUserId, openMediaViewer]);
+
+  const handleMemberClick = useCallback((id: number) => {
+    openUserInfo({ id });
+  }, [openUserInfo]);
 
   function renderSharedMedia() {
     return (
@@ -199,6 +257,13 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               date={chatMessages![id].date}
             />
           ))
+        ) : mediaType === 'members' ? (
+          memberIds.map((id) => (
+            <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
+              <PrivateChatInfo userId={id} forceShowSelf />
+              <RippleEffect />
+            </div>
+          ))
         ) : null}
       </div>
     );
@@ -208,9 +273,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     <InfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
-      items={messageIds}
+      items={mediaType === 'members' ? memberIds : messageIds}
       preloadBackwards={SHARED_MEDIA_SLICE}
-      onLoadMore={searchMessages}
+      onLoadMore={handleLoadMore}
       onScroll={handleScroll}
     >
       {resolvedUserId ? [
@@ -229,14 +294,14 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         <Transition
           name="slide"
           activeKey={activeTab}
-          renderCount={TAB_TITLES.length}
+          renderCount={tabTitles.length}
           shouldRestoreHeight
           onStart={handleTransitionStart}
           onStop={handleTransitionStop}
         >
           {renderSharedMedia}
         </Transition>
-        <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
+        <TabList activeTab={activeTab} tabs={tabTitles} onSwitchTab={setActiveTab} />
       </div>
     </InfiniteScroll>
   );
@@ -244,8 +309,12 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   (global, { chatId, userId }): StateProps => {
+    const chat = selectChat(global, chatId);
     const chatMessages = selectChatMessages(global, userId || chatId);
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
+    const { byId: usersById } = global.users;
+
+    const groupChatMembers = chat && chat.full_info && chat.full_info.members;
 
     let resolvedUserId;
     if (userId) {
@@ -258,10 +327,18 @@ export default withGlobal<OwnProps>(
       resolvedUserId,
       chatMessages,
       isSearchTypeEmpty: !searchType,
+      ...(groupChatMembers && {
+        groupChatMembers,
+        usersById,
+      }),
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const { setMessageSearchMediaType, searchMessages, openMediaViewer } = actions;
-    return { setMessageSearchMediaType, searchMessages, openMediaViewer };
+    const {
+      setMessageSearchMediaType, searchMessages, openMediaViewer, openUserInfo,
+    } = actions;
+    return {
+      setMessageSearchMediaType, searchMessages, openMediaViewer, openUserInfo,
+    };
   },
 )(Profile);

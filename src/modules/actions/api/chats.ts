@@ -4,11 +4,14 @@ import {
 
 import { CHAT_LIST_SLICE, SUPPORT_BOT_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
-import { addUsers, updateChatListIds, updateChats } from '../../reducers';
+import {
+  addUsers, updateChatListIds, updateChats, updateUsers, updateChat,
+} from '../../reducers';
 import { selectChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly } from '../../helpers';
+import { ApiChat } from '../../../api/types';
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -51,7 +54,7 @@ addReducer('loadFullChat', (global, actions, payload) => {
     return;
   }
 
-  runDebouncedForFetchFullChat(() => callApi('fetchFullChat', chat));
+  runDebouncedForFetchFullChat(() => loadFullChat(chat));
 });
 
 addReducer('loadSuperGroupOnlines', (global, actions, payload) => {
@@ -151,6 +154,20 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateChatListIds(global, chat_ids);
+
+  setGlobal(global);
+}
+
+async function loadFullChat(chat: ApiChat) {
+  const { users, fullInfo } = await callApi('fetchFullChat', chat);
+
+  let global = getGlobal();
+
+  if (users) {
+    global = updateUsers(global, buildCollectionByKey(users, 'id'));
+  }
+
+  global = updateChat(global, chat.id, { full_info: fullInfo });
 
   setGlobal(global);
 }

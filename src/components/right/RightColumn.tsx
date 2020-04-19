@@ -15,7 +15,7 @@ import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps
 
 import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
-import Profile from './Profile';
+import Profile, { ProfileState } from './Profile';
 import RightSearch from './RightSearch.async';
 import Transition from '../ui/Transition';
 
@@ -49,7 +49,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   closeMessageTextSearch,
   closeForwardMenu,
 }) => {
-  const [isSharedMedia, setIsSharedMedia] = useState(false);
+  const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
+  const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
   const isSearch = contentKey === ColumnContent.Search;
@@ -58,15 +59,15 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const close = useCallback(() => {
     switch (contentKey) {
       case ColumnContent.ChatInfo:
-        if (isSharedMedia) {
-          setIsSharedMedia(false);
+        if (isScrolledDown) {
+          setProfileState(ProfileState.Profile);
           break;
         }
         toggleChatInfo();
         break;
       case ColumnContent.UserInfo:
-        if (isSharedMedia) {
-          setIsSharedMedia(false);
+        if (isScrolledDown) {
+          setProfileState(ProfileState.Profile);
           break;
         }
         openUserInfo({ id: undefined });
@@ -78,11 +79,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         closeForwardMenu();
         break;
     }
-  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isSharedMedia]);
-
-  const handleSharedMediaToggle = useCallback((show: boolean) => {
-    setIsSharedMedia(show);
-  }, []);
+  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isScrolledDown]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 
@@ -93,7 +90,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
       || (prevContentKey === ColumnContent.UserInfo && contentKey === ColumnContent.ChatInfo)
       || (prevSelectedChatId !== selectedChatId)
     ) {
-      setIsSharedMedia(false);
+      setProfileState(ProfileState.Profile);
     }
   }, [contentKey, selectedChatId]);
 
@@ -113,8 +110,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
             key={selectedUserId || selectedChatId!}
             chatId={selectedChatId!}
             userId={selectedUserId}
-            isSharedMedia={isSharedMedia}
-            onSharedMediaToggle={handleSharedMediaToggle}
+            profileState={profileState}
+            onProfileStateChange={setProfileState}
           />
         );
     }
@@ -126,7 +123,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         onClose={close}
         isSearch={isSearch}
         isForwarding={isForwarding}
-        isSharedMedia={isSharedMedia}
+        profileState={profileState}
       />
       <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
         {renderContent}
