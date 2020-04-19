@@ -176,7 +176,25 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
     return undefined;
   }
 
-  // Edge case #2
+  const byId = selectChatMessages(global, chatId);
+  if (byId && byId[last_read_inbox_message_id]) {
+    return last_read_inbox_message_id;
+  }
+
+  // Edge case #2.1
+  const outlyingIds = selectOutlyingIds(global, chatId);
+  if (outlyingIds && outlyingIds.length) {
+    const closestId = outlyingIds.find((id, i) => (
+      id === last_read_inbox_message_id
+      || (id < last_read_inbox_message_id && outlyingIds[i + 1] > last_read_inbox_message_id)
+    ));
+
+    if (closestId) {
+      return closestId;
+    }
+  }
+
+  // Edge case #2.2
   const listedIds = selectListedIds(global, chatId);
   if (listedIds && listedIds.length) {
     const closestId = listedIds.find((id, i) => (
@@ -199,14 +217,29 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
   }
 
   const lastReadId = selectRealLastReadId(global, chatId);
-  const listedIds = selectListedIds(global, chatId);
   const byId = selectChatMessages(global, chatId);
 
-  if (!chat.unread_count || lastReadId === undefined || !listedIds || !byId) {
+  if (!chat.unread_count || lastReadId === undefined || !byId) {
     return undefined;
   }
 
-  return listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
+  const outlyingIds = selectOutlyingIds(global, chatId);
+  if (outlyingIds) {
+    const found = outlyingIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
+    if (found) {
+      return found;
+    }
+  }
+
+  const listedIds = selectListedIds(global, chatId);
+  if (listedIds) {
+    const found = listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
+    if (found) {
+      return found;
+    }
+  }
+
+  return undefined;
 }
 
 export function selectIsForwardMenuOpen(global: GlobalState) {
