@@ -4,8 +4,8 @@ import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 import { ApiMediaFormat } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 
+import { getChatAvatarHash } from '../../modules/helpers/chats'; // Direct import for better module splitting
 import useShowTransition from '../../hooks/useShowTransition';
-import { getChatAvatarHash } from '../../modules/helpers';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';

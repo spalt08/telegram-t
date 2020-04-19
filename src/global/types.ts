@@ -160,7 +160,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system
-  'init' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
+  'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
   // ui
   'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth

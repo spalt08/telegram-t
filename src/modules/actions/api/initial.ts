@@ -1,11 +1,13 @@
-import { addReducer, getDispatch } from '../../../lib/teact/teactn';
+import {
+  addReducer, getDispatch, getGlobal, setGlobal,
+} from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
 
 import { GRAMJS_SESSION_ID_KEY, ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 
-addReducer('init', (global: GlobalState, actions) => {
+addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
   const isAnimationLevelSettingViewed = Boolean(localStorage.getItem(ANIMATION_SETTINGS_VIEWED_KEY));
 
@@ -98,4 +100,20 @@ async function signOut() {
   localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
 
   getDispatch().init();
+}
+
+addReducer('loadNearestCountry', (global) => {
+  const { connectionState } = global;
+
+  if (connectionState === 'connectionStateReady') {
+    void loadNearestCountry();
+  }
+});
+
+async function loadNearestCountry() {
+  const authNearestCountry = await callApi('fetchNearestCountry');
+  setGlobal({
+    ...getGlobal(),
+    authNearestCountry,
+  });
 }

@@ -11,16 +11,19 @@ type RequestStates = {
   callback: AnyToVoidFunction;
 };
 
-const worker = new Worker('./worker.ts');
+let worker: Worker;
 const requestStates: Record<string, RequestStates> = {};
 
 export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
-  subscribeToWorker(onUpdate);
+  if (!worker) {
+    worker = new Worker('./worker.ts');
+    subscribeToWorker(onUpdate);
+  }
 
   return sendToWorker({
     type: 'initApi',
     args: [sessionId],
-  }, true);
+  });
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
@@ -28,7 +31,7 @@ export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<
     type: 'callMethod',
     name: fnName,
     args,
-  }, true) as MethodResponse<T>;
+  }) as MethodResponse<T>;
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
@@ -53,12 +56,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
   });
 }
 
-function sendToWorker(message: OriginMessageData, shouldWaitForResponse = false) {
-  if (!shouldWaitForResponse) {
-    worker.postMessage(message);
-    return null;
-  }
-
+function sendToWorker(message: OriginMessageData) {
   const messageId = generateIdFor(requestStates);
   const payload = {
     messageId,

@@ -22,14 +22,6 @@ addReducer('loadFullUser', (global, actions, payload) => {
   runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
 });
 
-addReducer('loadNearestCountry', (global) => {
-  const { connectionState } = global;
-
-  if (connectionState === 'connectionStateReady') {
-    void loadNearestCountry();
-  }
-});
-
 addReducer('loadTopUsers', (global) => {
   const { users: usersHash } = global.topPeers.hashes || {};
   const { users: usersLastRequested } = global.topPeers.lastRequestedAt || {};
@@ -43,14 +35,6 @@ addReducer('loadContactList', (global) => {
   const { hash } = global.contactList || {};
   void loadContactList(hash);
 });
-
-async function loadNearestCountry() {
-  const authNearestCountry = await callApi('fetchNearestCountry');
-  setGlobal({
-    ...getGlobal(),
-    authNearestCountry,
-  });
-}
 
 async function loadTopUsers(usersHash?: number) {
   const result = await callApi('fetchTopUsers', { hash: usersHash });

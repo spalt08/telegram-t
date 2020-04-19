@@ -38,6 +38,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       actions.showError({ error: update.error });
       break;
 
+    // TODO Move to another module
     case 'updateResetContactList':
       setGlobal({
         ...getGlobal(),
@@ -82,8 +83,6 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         getDispatch().saveSession({ sessionId: session_id });
       }
 
-      onConnect();
-
       break;
     }
   }
@@ -98,20 +97,15 @@ function onUpdateAuthorizationError(update: ApiUpdateAuthorizationError) {
 
 function onUpdateConnectionState(update: ApiUpdateConnectionState) {
   const connectionState = update.connection_state['@type'];
+  const global = getGlobal();
 
   setGlobal({
-    ...getGlobal(),
+    ...global,
     connectionState,
   });
 
-  switch (connectionState) {
-    case 'connectionStateReady': {
-      onConnect();
-
-      break;
-    }
-    default:
-      break;
+  if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
+    getDispatch().sync();
   }
 }
 
@@ -122,11 +116,4 @@ function onUpdateCurrentUserId(update: ApiUpdateCurrentUserId) {
     ...getGlobal(),
     currentUserId,
   });
-}
-
-function onConnect() {
-  const { connectionState, authState } = getGlobal();
-  if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
-    getDispatch().sync();
-  }
 }
