@@ -1,7 +1,9 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { GlobalState } from '../../global/types';
+import { GlobalActions, GlobalState } from '../../global/types';
+
+import '../../modules/actions/initial';
 
 import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
@@ -10,13 +12,17 @@ import AuthPassword from './AuthPassword.async';
 import AuthRegister from './AuthRegister.async';
 
 import './Auth.scss';
+import { pick } from '../../util/iteratees';
 
 type StateProps = Pick<GlobalState, 'authState'>;
+type DispatchProps = Pick<GlobalActions, 'initApi'>;
 
-const Auth: FC<StateProps> = ({ authState }) => {
+const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
   useEffect(() => {
     document.body.classList.remove('no-overflow');
-  });
+
+    initApi();
+  }, [initApi]);
 
   switch (authState) {
     case 'authorizationStateWaitCode':
@@ -32,8 +38,6 @@ const Auth: FC<StateProps> = ({ authState }) => {
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authState } = global;
-    return { authState };
-  },
+  (global): StateProps => pick(global, ['authState']),
+  (global, actions): DispatchProps => pick(actions, ['initApi']),
 )(Auth);

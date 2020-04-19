@@ -1,4 +1,11 @@
 import React, { FC, useEffect } from '../lib/teact/teact';
+import { withGlobal } from '../lib/teact/teactn';
+
+import { GlobalActions, GlobalState } from '../global/types';
+
+import '../modules/actions/all';
+
+import { pick } from '../util/iteratees';
 
 import MediaViewer from './mediaViewer/MediaViewer.async';
 import LeftColumn from './left/LeftColumn';
@@ -9,10 +16,19 @@ import ErrorModalContainer from './ui/ErrorModalContainer';
 
 import './Main.scss';
 
-const Main: FC = () => {
+type StateProps = Pick<GlobalState, 'connectionState'>;
+type DispatchProps = Pick<GlobalActions, 'initApi'>;
+
+const Main: FC<StateProps & DispatchProps> = ({ connectionState, initApi }) => {
   useEffect(() => {
     document.body.classList.add('no-overflow');
-  });
+
+    // Initial connection after loading async bundle
+    if (connectionState !== 'connectionStateReady') {
+      initApi();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div id="Main">
@@ -26,4 +42,7 @@ const Main: FC = () => {
   );
 };
 
-export default Main;
+export default withGlobal(
+  (global): StateProps => pick(global, ['connectionState']),
+  (global, actions): DispatchProps => pick(actions, ['initApi']),
+)(Main);
