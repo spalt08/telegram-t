@@ -327,7 +327,7 @@ export default withGlobal<OwnProps>(
       resolvedUserId,
       chatMessages,
       isSearchTypeEmpty: !searchType,
-      ...(groupChatMembers && {
+      ...(!userId && groupChatMembers && {
         groupChatMembers,
         usersById,
       }),
