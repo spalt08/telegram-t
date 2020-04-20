@@ -24,7 +24,7 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 const MIN_CHUNK_SIZE = 4096
 const DEFAULT_CHUNK_SIZE = 64 // kb
 // All types
-const sizeTypes = ['w', 'y', 'x', 'm', 's']
+const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's']
 
 
 class TelegramClient {
