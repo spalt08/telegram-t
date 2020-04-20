@@ -30,6 +30,12 @@
     }
   }
 
+  &:not(.open) {
+    .media-viewer-head {
+      pointer-events: none;
+    }
+  }
+
   .media-viewer-head {
     display: flex;
     grid-area: header;
@@ -149,6 +155,10 @@
 
   &.rounded-corners {
     border-radius: var(--border-radius-messages);
+  }
+
+  &.circle {
+    border-radius: 50%;
   }
 
   img,

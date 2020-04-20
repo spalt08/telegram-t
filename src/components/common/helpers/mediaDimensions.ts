@@ -13,6 +13,7 @@ export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
 export const ROUND_VIDEO_DIMENSIONS = 200;
+export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
 
 function getAvailableWidth(
   fromOwnMessage: boolean,
@@ -50,7 +51,7 @@ function calculateDimensionsForMessageMedia({
   isWebPagePhoto,
   isGif,
   albumMediaParams,
-} : {
+}: {
   width: number;
   height: number;
   fromOwnMessage: boolean;

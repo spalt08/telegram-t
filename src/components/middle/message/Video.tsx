@@ -20,6 +20,7 @@ import buildClassName from '../../../util/buildClassName';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
 type OwnProps = {
+  id?: string;
   message: ApiMessage;
   loadAndPlay?: boolean;
   uploadProgress?: number;
@@ -30,6 +31,7 @@ type OwnProps = {
 };
 
 const Video: FC<OwnProps> = ({
+  id,
   message,
   loadAndPlay,
   uploadProgress,
@@ -68,6 +70,7 @@ const Video: FC<OwnProps> = ({
 
   return (
     <div
+      id={id}
       className={className}
       onClick={!isTransferring ? onClick : undefined}
     >

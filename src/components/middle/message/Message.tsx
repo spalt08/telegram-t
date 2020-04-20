@@ -5,7 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
-import { FocusDirection, IAlbum } from '../../../types';
+import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import {
@@ -191,11 +191,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [focusMessage, chatId, message.reply_to_message_id]);
 
   const handleMediaClick = useCallback((): void => {
-    openMediaViewer({ chatId, messageId });
+    openMediaViewer({ chatId, messageId, origin: MediaViewerOrigin.Inline });
   }, [chatId, messageId, openMediaViewer]);
 
   const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
-    openMediaViewer({ chatId, messageId: albumMessageId });
+    openMediaViewer({ chatId, messageId: albumMessageId, origin: MediaViewerOrigin.Album });
   }, [chatId, openMediaViewer]);
 
   const handleReadMedia = useCallback((): void => {

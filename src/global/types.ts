@@ -12,7 +12,7 @@ import {
   ApiError,
   ApiFormattedText,
 } from '../api/types';
-import { FocusDirection, ISettings } from '../types';
+import { FocusDirection, ISettings, MediaViewerOrigin } from '../types';
 
 export type GlobalState = {
   showChatInfo: boolean;
@@ -132,7 +132,7 @@ export type GlobalState = {
     chatId?: number;
     messageId?: number;
     avatarOwnerId?: number;
-    isFromSharedMedia?: boolean;
+    origin?: MediaViewerOrigin;
   };
 
   topPeers: {

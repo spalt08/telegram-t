@@ -5,22 +5,25 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
+import { MediaViewerOrigin } from '../../types';
 
-import { calculateMediaViewerDimensions, MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import {
+  calculateMediaViewerDimensions, MEDIA_VIEWER_MEDIA_QUERY, AVATAR_FULL_DIMENSIONS,
+} from '../common/helpers/mediaDimensions';
+import {
+  selectChat,
   selectChatMessage,
   selectChatMessages,
-  selectChat,
   selectUser,
 } from '../../modules/selectors';
 import {
   getChatAvatarHash,
   getChatMediaMessageIds,
-  getMessagePhoto,
-  getMessageVideo,
   getMessageMediaFilename,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
+  getMessagePhoto,
+  getMessageVideo,
   getMessageWebPagePhoto,
   getPhotoFullDimensions,
   getVideoDimensions,
@@ -48,7 +51,7 @@ import './MediaViewer.scss';
 type StateProps = {
   chatId?: number;
   messageId?: number;
-  isFromSharedMedia?: boolean;
+  origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
@@ -60,7 +63,7 @@ type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'>;
 const MediaViewer: FC<StateProps & DispatchProps> = ({
   chatId,
   messageId,
-  isFromSharedMedia,
+  origin,
   avatarOwner,
   message,
   chatMessages,
@@ -69,12 +72,13 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   animationLevel,
 }) => {
   const [, onMediaQueryChanged] = useState(null);
-  const prevIsFromSharedMedia = usePrevious(isFromSharedMedia);
+  const prevOrigin = usePrevious(origin);
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
   const isVideo = message ? Boolean(getMessageVideo(message)) : false;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
-  const isRichAnimations = animationLevel === FULL_ANIMATION_LEVEL && !avatarOwner;
+  const isRichAnimations = animationLevel === FULL_ANIMATION_LEVEL;
+  const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const fileName = avatarOwner
     ? `avatar${avatarOwner.id}.jpg`
     : message && getMessageMediaFilename(message);
@@ -97,7 +101,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
   const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
   const isOpen = Boolean(avatarOwner || messageId);
-  const previousMessage = usePrevious<ApiMessage | undefined>(message);
+  const prevMessage = usePrevious<ApiMessage | undefined>(message);
+  const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPictogram = useMedia(message && isFromSharedMedia && getMessageMediaHash(message, 'pictogram'));
@@ -130,16 +135,16 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isRichAnimations && isOpen && !previousMessage) {
+    if (isRichAnimations && isOpen && !prevMessage && !prevAvatarOwner) {
       const textParts = message ? renderMessageText(message) : null;
       const hasFooter = Boolean(textParts);
-      animateOpening(message!, hasFooter, isFromSharedMedia);
+      animateOpening(message!, hasFooter, origin!);
     }
 
-    if (isRichAnimations && !isOpen && previousMessage) {
-      animateClosing(previousMessage, prevIsFromSharedMedia!);
+    if (isRichAnimations && !isOpen && (prevMessage || prevAvatarOwner)) {
+      animateClosing(prevMessage!, prevOrigin!);
     }
-  }, [isRichAnimations, isOpen, isFromSharedMedia, prevIsFromSharedMedia, message, previousMessage]);
+  }, [isRichAnimations, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner]);
 
   const getMessageId = (fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
@@ -202,7 +207,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     openMediaViewer({
       chatId,
       messageId: messageId ? getMessageId(messageId, -1) : undefined,
-      isFromSharedMedia,
+      origin,
     });
   }
 
@@ -213,7 +218,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     openMediaViewer({
       chatId,
       messageId: messageId ? getMessageId(messageId, 1) : undefined,
-      isFromSharedMedia,
+      origin,
     });
   }
 
@@ -221,7 +226,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     if (avatarOwner) {
       return (
         <div key={chatId} className="media-viewer-content">
-          {renderPhoto(blobUrlFull || blobUrlPreview)}
+          {renderPhoto(blobUrlFull || blobUrlPreview, calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false))}
         </div>
       );
     } else if (message) {
@@ -345,7 +350,7 @@ function renderVideo(
 export default memo(withGlobal(
   (global): StateProps => {
     const {
-      chatId, messageId, avatarOwnerId, isFromSharedMedia,
+      chatId, messageId, avatarOwnerId, origin,
     } = global.mediaViewer;
     const {
       animationLevel,
@@ -356,6 +361,7 @@ export default memo(withGlobal(
         messageId: -1,
         avatarOwner: selectChat(global, avatarOwnerId) || selectUser(global, avatarOwnerId),
         animationLevel,
+        origin,
       };
     }
 
@@ -373,7 +379,7 @@ export default memo(withGlobal(
     return {
       chatId,
       messageId,
-      isFromSharedMedia: Boolean(isFromSharedMedia),
+      origin,
       message,
       chatMessages,
       animationLevel,

@@ -4,6 +4,8 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
+import { MediaViewerOrigin } from '../../types';
+
 import {
   getChatTypeString,
   getChatTitle,
@@ -62,9 +64,12 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (chat && hasPhoto) {
       e.stopPropagation();
-      openMediaViewer({ avatarOwnerId: chat.id });
+      openMediaViewer({
+        avatarOwnerId: chat.id,
+        origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
+      });
     }
-  }, [chat, openMediaViewer]);
+  }, [chat, avatarSize, openMediaViewer]);
 
   if (!chat) {
     return null;

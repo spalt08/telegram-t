@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
+import { MediaViewerOrigin } from '../../types';
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
 
@@ -51,9 +52,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (user && hasPhoto) {
       e.stopPropagation();
-      openMediaViewer({ avatarOwnerId: user.id });
+      openMediaViewer({
+        avatarOwnerId: user.id,
+        origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
+      });
     }
-  }, [user, openMediaViewer]);
+  }, [user, avatarSize, openMediaViewer]);
 
   if (!user) {
     return null;
