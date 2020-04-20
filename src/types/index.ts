@@ -31,3 +31,11 @@ export enum LeftColumnContent {
   Settings,
   Contacts,
 }
+
+export enum MediaViewerOrigin {
+  Inline,
+  SharedMedia,
+  ProfileAvatar,
+  MiddleHeaderAvatar,
+  Album,
+}

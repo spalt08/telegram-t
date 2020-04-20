@@ -1,33 +1,34 @@
 import { ApiMessage } from '../../../api/types';
+import { MediaViewerOrigin } from '../../../types';
 
+import { getMessageContent, getPhotoFullDimensions, getVideoDimensions } from '../../../modules/helpers';
 import {
-  getMessageContent,
-  getPhotoFullDimensions,
-  getVideoDimensions,
-} from '../../../modules/helpers';
-import {
-  REM,
-  MEDIA_VIEWER_MEDIA_QUERY,
+  AVATAR_FULL_DIMENSIONS,
   calculateDimensions,
   getMediaViewerAvailableDimensions,
+  MEDIA_VIEWER_MEDIA_QUERY,
+  REM,
 } from '../../common/helpers/mediaDimensions';
 
 import windowSize from '../../../util/windowSize';
 
 const ANIMATION_DURATION = 200;
 
-export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSharedMedia?: boolean) {
-  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
-  // TODO Support opening from album.
-  if (!container) {
+export function animateOpening(message: ApiMessage, hasFooter: boolean, origin: MediaViewerOrigin) {
+  const { mediaEl: fromImage } = getNodes(message, origin)!;
+  if (!fromImage) {
     return;
   }
 
-  const fromImage = container.querySelector<HTMLImageElement>('img.full-media, video')!;
-
   const { width: windowWidth } = windowSize.get();
-  const { photo, video, webPage } = getMessageContent(message);
-  const mediaSize = video ? getVideoDimensions(video) : getPhotoFullDimensions((photo || webPage!.photo)!);
+
+  let mediaSize;
+  if (message) {
+    const { photo, video, webPage } = getMessageContent(message);
+    mediaSize = video ? getVideoDimensions(video) : getPhotoFullDimensions((photo || webPage!.photo)!);
+  } else {
+    mediaSize = AVATAR_FULL_DIMENSIONS;
+  }
   const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(hasFooter);
   const { width: toWidth, height: toHeight } = calculateDimensions(
     availableWidth, availableHeight, mediaSize!.width, mediaSize!.height,
@@ -39,7 +40,7 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
     top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
   } = fromImage.getBoundingClientRect();
 
-  if (isFromSharedMedia) {
+  if (origin === MediaViewerOrigin.SharedMedia) {
     const uncovered = uncover(toWidth, toHeight, fromTop, fromLeft, fromWidth, fromHeight);
     fromTop = uncovered.top;
     fromLeft = uncovered.left;
@@ -74,18 +75,17 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 50);
+      }, ANIMATION_DURATION + 100);
     });
   });
 }
 
-export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) {
-  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
-  if (!container) {
+export function animateClosing(message: ApiMessage, origin: MediaViewerOrigin) {
+  const { container, mediaEl: toImage } = getNodes(message, origin);
+  if (!toImage) {
     return;
   }
 
-  const toImage = container.querySelector<HTMLImageElement>('img.full-media, img.thumbnail, video');
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
     '.active .media-viewer-content img, .active .media-viewer-content video',
   );
@@ -110,11 +110,12 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
   const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
   let fromScaleX = fromWidth / toWidth;
   let fromScaleY = fromHeight / toHeight;
-  const shouldFadeOut = !isFromSharedMedia && (
-    !isMessageFullyVisible(container) || container.classList.contains('is-album')
+
+  const shouldFadeOut = origin === MediaViewerOrigin.Album || (
+    origin === MediaViewerOrigin.Inline && !isMessageFullyVisible(container)
   );
 
-  if (isFromSharedMedia) {
+  if (origin === MediaViewerOrigin.SharedMedia) {
     if (fromScaleX > fromScaleY) {
       fromScaleX = fromScaleY;
     } else if (fromScaleY > fromScaleX) {
@@ -141,10 +142,19 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
         ghost.style.opacity = '0';
       }
 
-      if (isFromSharedMedia) {
-        (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
-      } else {
-        ghost.classList.add('rounded-corners');
+      switch (origin) {
+        case MediaViewerOrigin.Inline:
+          ghost.classList.add('rounded-corners');
+          break;
+
+        case MediaViewerOrigin.SharedMedia:
+          (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
+          break;
+
+        case MediaViewerOrigin.MiddleHeaderAvatar:
+        case MediaViewerOrigin.ProfileAvatar:
+          ghost.classList.add('circle');
+          break;
       }
 
       setTimeout(() => {
@@ -152,7 +162,7 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 50);
+      }, ANIMATION_DURATION + 100);
     });
   });
 }
@@ -216,4 +226,43 @@ function getTopOffset(hasFooter: boolean) {
 
 function applyStyles(element: HTMLElement, styles: Record<string, string>) {
   Object.assign(element.style, styles);
+}
+
+function getNodes(message: ApiMessage, origin: MediaViewerOrigin) {
+  let containerSelector;
+  let mediaSelector;
+
+  switch (origin) {
+    case MediaViewerOrigin.Album:
+      containerSelector = `#album-media-${message.id}`;
+      mediaSelector = '.full-media';
+      break;
+
+    case MediaViewerOrigin.SharedMedia:
+      containerSelector = `#shared-media${message.id}`;
+      mediaSelector = '.full-media';
+      break;
+
+    case MediaViewerOrigin.MiddleHeaderAvatar:
+      containerSelector = '.MiddleHeader .ChatInfo .Avatar';
+      mediaSelector = 'img.avatar-media';
+      break;
+
+    case MediaViewerOrigin.ProfileAvatar:
+      containerSelector = '#RightColumn .active .Profile > .ChatInfo .Avatar';
+      mediaSelector = 'img.avatar-media';
+      break;
+
+    case MediaViewerOrigin.Inline:
+    default:
+      containerSelector = `#message${message.id}`;
+      mediaSelector = '.message-content .full-media';
+  }
+
+  const container = document.querySelector<HTMLElement>(containerSelector)!;
+
+  return {
+    container,
+    mediaEl: container.querySelector(mediaSelector) as HTMLImageElement | HTMLVideoElement,
+  };
 }

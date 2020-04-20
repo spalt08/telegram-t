@@ -53,7 +53,7 @@ const Avatar: FC<OwnProps> = ({
   } else if (isDeleted) {
     content = <i className="icon-avatar-deleted-account" />;
   } else if (shouldRenderFullMedia) {
-    content = <img src={dataUri} className={transitionClassNames} alt="" decoding="async" />;
+    content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
     const userName = getUserFullName(user);
     content = userName ? getFirstLetters(userName).slice(0, 2) : null;

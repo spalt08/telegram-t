@@ -10,6 +10,7 @@ import {
   ApiUser,
 } from '../../api/types';
 import { GlobalActions } from '../../global/types';
+import { MediaViewerOrigin } from '../../types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
 import { getMessageContentIds, isChatPrivate, getSortedUserIds } from '../../modules/helpers';
@@ -219,7 +220,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const handleSelectMedia = useCallback((messageId: number) => {
-    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isFromSharedMedia: true });
+    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, origin: MediaViewerOrigin.SharedMedia });
   }, [chatId, resolvedUserId, openMediaViewer]);
 
   const handleMemberClick = useCallback((id: number) => {

@@ -22,6 +22,7 @@ import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
 type OwnProps = {
+  id?: string;
   message: ApiMessage;
   load?: boolean;
   uploadProgress?: number;
@@ -33,6 +34,7 @@ type OwnProps = {
 };
 
 const Photo: FC<OwnProps> = ({
+  id,
   message,
   load,
   uploadProgress,
@@ -96,6 +98,7 @@ const Photo: FC<OwnProps> = ({
 
   return (
     <div
+      id={id}
       ref={elementRef}
       className={className}
       onClick={!isTransferring ? onClick : undefined}

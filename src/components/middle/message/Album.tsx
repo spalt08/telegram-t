@@ -96,6 +96,7 @@ const Album: FC<OwnProps> = ({
     if (photo) {
       return (
         <Photo
+          id={`album-media-${message.id}`}
           message={message}
           load={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
@@ -105,6 +106,7 @@ const Album: FC<OwnProps> = ({
     } else if (video) {
       return (
         <Video
+          id={`album-media-${message.id}`}
           message={message}
           loadAndPlay={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
