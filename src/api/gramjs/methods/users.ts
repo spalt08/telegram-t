@@ -92,7 +92,7 @@ export async function fetchContactList({ hash = 0 }: { hash?: number }) {
       ...result.contacts.map(({ userId }) => userId),
     ]),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
-    chats: result.users.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any),
+    chats: result.users.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any),
   };
 }
 

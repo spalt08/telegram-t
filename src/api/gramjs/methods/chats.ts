@@ -122,7 +122,9 @@ export async function searchChats({ query, limit }: { query: string; limit?: num
   updateLocalDb(result);
 
   const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
-  const allChats = [...result.chats, ...result.users].map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
+  const allChats = [...result.chats, ...result.users]
+    .map((user) => buildApiChatFromPreview(user))
+    .filter<ApiChat>(Boolean as any);
   const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
 
   return {
