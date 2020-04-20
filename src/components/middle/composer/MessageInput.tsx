@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useEffect, useLayoutEffect, useRef,
+  FC, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
