@@ -9,6 +9,7 @@ import { GlobalActions } from '../../../global/types';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 
 type OwnProps = {
   id: string;
@@ -42,11 +43,14 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const inputRef = useRef<HTMLDivElement>();
 
-  useLayoutEffect(() => {
+  useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
     }
-    updateInputHeight();
+
+    if (prevHtml !== undefined && prevHtml !== html) {
+      updateInputHeight();
+    }
   }, [html]);
 
   function focusInput() {
@@ -60,11 +64,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   function updateInputHeight() {
     const input = inputRef.current!;
 
-    if (input.scrollHeight !== input.offsetHeight) {
-      input.style.height = 'auto';
-      input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
-    }
-
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
     input.classList.toggle('overflown', input.scrollHeight > MAX_INPUT_HEIGHT);
   }
 
