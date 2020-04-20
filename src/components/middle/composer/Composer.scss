@@ -180,7 +180,8 @@
     line-height: 1.5rem;
 
     &.overflown {
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     &.touched, &:focus {
@@ -204,9 +205,8 @@
 
   .form-control {
     margin-bottom: 0;
-
     background: transparent !important;
-    border-color: transparent !important;
+    border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     caret-color: var(--color-text);

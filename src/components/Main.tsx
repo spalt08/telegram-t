@@ -21,8 +21,6 @@ type DispatchProps = Pick<GlobalActions, 'initApi'>;
 
 const Main: FC<StateProps & DispatchProps> = ({ connectionState, initApi }) => {
   useEffect(() => {
-    document.body.classList.add('no-overflow');
-
     // Initial connection after loading async bundle
     if (connectionState !== 'connectionStateReady') {
       initApi();

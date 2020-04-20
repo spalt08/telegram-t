@@ -70,6 +70,7 @@ let currentAnchorTop: number;
 let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
 let scrollTimeout: NodeJS.Timeout | null = null;
+let isScrollTopJustUpdated = false;
 
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onFabToggle,
@@ -223,14 +224,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [isViewportNewest, loadMoreBackwards, loadMoreForwards]);
 
   const handleScroll = useCallback(() => {
-    const container = containerRef.current!;
-    const newScrollOffset = container.scrollHeight - container.scrollTop;
-
-    if (newScrollOffset === scrollOffsetRef.current) {
+    if (isScrollTopJustUpdated) {
+      isScrollTopJustUpdated = false;
       return;
     }
 
-    scrollOffsetRef.current = newScrollOffset;
+    const container = containerRef.current!;
+    scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
     setIsScrolling(true);
 
     if (!isFocusing) {
@@ -281,7 +281,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const container = containerRef.current!;
 
     if (!messageIds || (
-      container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_LIST_SLICE * 2
+      messageIds.length < MESSAGE_LIST_SLICE && container.scrollHeight <= container.clientHeight
     )) {
       loadMoreBoth();
     }
@@ -342,6 +342,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       container.scrollTop = newScrollTop;
+      isScrollTopJustUpdated = true;
       determineStuckDate(container, true);
     }
 

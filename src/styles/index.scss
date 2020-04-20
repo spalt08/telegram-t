@@ -19,10 +19,11 @@ html, body {
   font-size: 16px;
   font-family: 'Roboto', sans-serif;
   color: var(--color-text);
+  overflow: hidden;
 }
 
-body.no-overflow {
-  overflow: hidden;
+body.scrollable {
+  overflow: auto;
 }
 
 #root {
