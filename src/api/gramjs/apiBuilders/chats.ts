@@ -32,7 +32,10 @@ export function buildApiChatFromDialog(
   };
 }
 
-export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUser): ApiChat | undefined {
+export function buildApiChatFromPreview(
+  preview: GramJs.TypeChat | GramJs.TypeUser,
+  omitType?: boolean,
+): ApiChat | undefined {
   if (
     !(preview instanceof GramJs.Chat)
     && !(preview instanceof GramJs.Channel)
@@ -43,7 +46,7 @@ export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUs
 
   const avatar = preview.photo && buildAvatar(preview.photo);
 
-  return {
+  const chat: ApiChat = {
     id: preview instanceof GramJs.User ? preview.id : -preview.id,
     type: {
       '@type': getApiChatTypeFromPeerEntity(preview),
@@ -58,6 +61,12 @@ export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUs
       joinDate: preview.date,
     }),
   };
+
+  if (omitType) {
+    delete chat.type;
+  }
+
+  return chat;
 }
 
 export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {

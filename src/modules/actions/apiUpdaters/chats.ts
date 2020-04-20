@@ -2,7 +2,12 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiUpdate } from '../../../api/types';
 
-import { updateChat, replaceChatListIds, updateChatListIds } from '../../reducers';
+import {
+  updateChat,
+  replaceChatListIds,
+  updateChatListIds,
+  updateSelectedChatId,
+} from '../../reducers';
 import { selectChat } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
@@ -28,8 +33,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'updateChatLeave': {
       const { listIds } = global.chats;
+
       if (listIds) {
-        setGlobal(replaceChatListIds(global, listIds.filter((listId) => listId !== update.id)));
+        let newGlobal = global;
+        newGlobal = replaceChatListIds(newGlobal, listIds.filter((listId) => listId !== update.id));
+        const { selectedId } = newGlobal.chats;
+        if (selectedId === update.id) {
+          newGlobal = updateSelectedChatId(newGlobal, undefined);
+        }
+        setGlobal(newGlobal);
       }
 
       break;

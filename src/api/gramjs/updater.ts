@@ -137,12 +137,21 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         });
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
         // eslint-disable-next-line no-underscore-dangle
-        const deletedUser = update._entities && update._entities.find((e): e is GramJs.User => (
-          e instanceof GramJs.User && e.id === action.userId
-        ));
-        if (deletedUser && deletedUser.self) {
+        if (update._entities && update._entities.some((e): e is GramJs.User => (
+          e instanceof GramJs.User && !!e.self && e.id === action.userId
+        ))) {
           onUpdate({
             '@type': 'updateChatLeave',
+            id: message.chat_id,
+          });
+        }
+      } else if (action instanceof GramJs.MessageActionChatAddUser) {
+        // eslint-disable-next-line no-underscore-dangle
+        if (update._entities && update._entities.some((e): e is GramJs.User => (
+          e instanceof GramJs.User && !!e.self && action.users.includes(e.id)
+        ))) {
+          onUpdate({
+            '@type': 'updateChatJoin',
             id: message.chat_id,
           });
         }
@@ -409,21 +418,22 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       const channel = _entities.find((e): e is GramJs.Channel => (e instanceof GramJs.Channel));
       const isForbidden = _entities.some((e) => e instanceof GramJs.ChannelForbidden);
       const isVisible = !(isForbidden || (channel && channel.left));
-      const chat = channel && buildApiChatFromPreview(channel);
+      // When `chatUpdate` is built from a preview,
+      // it can have an incorrect type of `channel` for supergroup chats.
+      // Since chat entitiy can't change its type anyway, we can safely ignore it.
+      const chat = channel && buildApiChatFromPreview(channel, true);
 
-      if (!chat) {
-        return;
+      if (chat) {
+        onUpdate({
+          '@type': 'updateChat',
+          id: chat.id,
+          chat,
+        });
       }
 
       onUpdate({
-        '@type': 'updateChat',
-        id: chat.id,
-        chat,
-      });
-
-      onUpdate({
         '@type': isVisible ? 'updateChatJoin' : 'updateChatLeave',
-        id: chat.id,
+        id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       });
     }
 

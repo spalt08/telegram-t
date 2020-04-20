@@ -436,7 +436,7 @@ export async function searchMessagesGlobal({
 
     const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
     const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
-    const chats = result.chats.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
+    const chats = result.chats.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any);
 
     let totalCount = messages.length;
     let nextRate: number | undefined;
