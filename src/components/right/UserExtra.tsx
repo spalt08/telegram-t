@@ -3,8 +3,10 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
+
 import { selectUser } from '../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
+import { pick } from '../../util/iteratees';
 
 type OwnProps = {
   userId: number;
@@ -22,24 +24,24 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const {
     id: userId,
-    full_info,
+    fullInfo,
     username,
-    phone_number,
-    is_self,
+    phoneNumber,
+    isSelf,
   } = user || {};
 
   useEffect(() => {
-    if (lastSyncTime && !is_self) {
+    if (lastSyncTime && !isSelf) {
       loadFullUser({ userId });
     }
-  }, [is_self, loadFullUser, userId, lastSyncTime]);
+  }, [isSelf, loadFullUser, userId, lastSyncTime]);
 
-  if (!user || (is_self && !forceShowSelf)) {
-    return null;
+  if (!user || (isSelf && !forceShowSelf)) {
+    return undefined;
   }
 
-  const bio = full_info && full_info.bio;
-  const formattedNumber = phone_number && formatPhoneNumberWithCode(phone_number);
+  const bio = fullInfo && fullInfo.bio;
+  const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
 
   return (
     <div className="ChatExtra">
@@ -81,8 +83,5 @@ export default withGlobal<OwnProps>(
 
     return { lastSyncTime, user };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullUser } = actions;
-    return { loadFullUser };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser']),
 )(UserExtra);

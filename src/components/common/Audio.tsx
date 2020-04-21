@@ -228,7 +228,7 @@ function renderAudio(
         </div>
       )}
       <p className="duration">
-        {progress > 0 ? `${formatMediaDuration(duration * progress)} / ` : null}
+        {progress > 0 ? `${formatMediaDuration(duration * progress)} / ` : undefined}
         {formatMediaDuration(duration)}
       </p>
     </div>
@@ -253,7 +253,7 @@ function renderWaveform(
   const { waveform, duration } = voice;
 
   if (!waveform) {
-    return null;
+    return undefined;
   }
 
   const reducedLengthHalf = duration < 10 && Math.round(((0.5 + 0.5 * (duration / 10)) * 63) / 2);

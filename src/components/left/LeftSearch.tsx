@@ -7,7 +7,7 @@ import { ApiUser, ApiChat, ApiMessage } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 
 import searchWords from '../../util/searchWords';
-import { unique } from '../../util/iteratees';
+import { unique, pick } from '../../util/iteratees';
 import {
   getUserFullName,
   isChatPrivate,
@@ -20,10 +20,10 @@ import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import RippleEffect from '../ui/RippleEffect';
 import Avatar from '../common/Avatar';
-import LastMessageMeta from './LastMessageMeta';
+import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import LastMessageMeta from './LastMessageMeta';
 
 export type OwnProps = {
   searchQuery?: string;
@@ -78,7 +78,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
           return false;
         }
         const fullName = getUserFullName(user);
-        return user.is_self
+        return user.isSelf
           ? searchWords('Saved Messages', searchQuery)
           : (
             (fullName && searchWords(fullName, searchQuery))
@@ -118,11 +118,11 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderFoundMessage(message: ApiMessage) {
     const text = getMessageSummaryText(message);
-    const chat = chatsById[message.chat_id];
-    const user = message.sender_user_id ? usersById[message.sender_user_id] : undefined;
+    const chat = chatsById[message.chatId];
+    const user = message.senderUserId ? usersById[message.senderUserId] : undefined;
 
     if (!text || !chat) {
-      return null;
+      return undefined;
     }
 
     const handleClick = () => {
@@ -242,12 +242,10 @@ export default withGlobal<OwnProps>(
       fetchingStatus: fetchingStatus || {},
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
-    } = actions;
-    return {
-      openChat, addRecentlyFoundChatId, focusMessage, searchMessagesGlobal,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openChat',
+    'addRecentlyFoundChatId',
+    'focusMessage',
+    'searchMessagesGlobal',
+  ]),
 )(LeftSearch);

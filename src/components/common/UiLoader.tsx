@@ -11,6 +11,7 @@ import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
+import { pick } from '../../util/iteratees';
 
 import './UiLoader.scss';
 
@@ -33,7 +34,7 @@ const MAX_PRELOAD_DELAY = 1500;
 function preloadAvatars() {
   return Promise.all(Object.values(getGlobal().chats.byId).map((chat) => {
     const avatarHash = getChatAvatarHash(chat);
-    return avatarHash ? mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri) : null;
+    return avatarHash ? mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri) : undefined;
   }));
 }
 
@@ -90,12 +91,6 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { isUiReady } = global;
-    return { isUiReady };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setIsUiReady } = actions;
-    return { setIsUiReady };
-  },
+  (global): StateProps => pick(global, ['isUiReady']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
 )(UiLoader);

@@ -24,10 +24,10 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   privateChatUser,
 }) => {
   if (!chat) {
-    return null;
+    return undefined;
   }
 
-  const name = privateChatUser && !privateChatUser.is_self
+  const name = privateChatUser && !privateChatUser.isSelf
     ? getUserFirstName(privateChatUser)
     : getChatTitle(chat, privateChatUser);
 
@@ -37,7 +37,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         chat={chat}
         user={privateChatUser}
         size="small"
-        isSavedMessages={privateChatUser && privateChatUser.is_self}
+        isSavedMessages={privateChatUser && privateChatUser.isSelf}
       />
       <div className="picker-selected-item-name">
         {name}

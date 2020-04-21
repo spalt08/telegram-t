@@ -4,7 +4,6 @@ import { withGlobal } from '../lib/teact/teactn';
 import { GlobalActions, GlobalState } from '../global/types';
 
 import '../modules/actions/all';
-
 import { pick } from '../util/iteratees';
 
 import MediaViewer from './mediaViewer/MediaViewer.async';

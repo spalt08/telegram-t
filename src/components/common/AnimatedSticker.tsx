@@ -40,7 +40,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   speed,
   onLoad,
 }) => {
-  const [animation, setAnimation] = useState(null);
+  const [animation, setAnimation] = useState(undefined);
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
 

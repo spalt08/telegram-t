@@ -18,7 +18,7 @@ export type OwnProps = {
 };
 
 const MENU_CLOSE_TIMEOUT = 250;
-let closeTimeout: NodeJS.Timeout | null = null;
+let closeTimeout: number;
 
 const AttachMenu: FC<OwnProps> = ({
   isOpen, isPrivateChat, onFileSelect, onPollCreate, onClose,
@@ -30,7 +30,7 @@ const AttachMenu: FC<OwnProps> = ({
       clearTimeout(closeTimeout);
     }
     if (isOpen) {
-      closeTimeout = setTimeout(() => {
+      closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
         }
@@ -47,7 +47,7 @@ const AttachMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    closeTimeout = setTimeout(() => {
+    closeTimeout = window.setTimeout(() => {
       if (!isMouseInside.current) {
         onClose();
       }

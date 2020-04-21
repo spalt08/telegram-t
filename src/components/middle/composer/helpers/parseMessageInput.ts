@@ -47,7 +47,6 @@ export default function parseMessageInput(html: string): ApiFormattedText {
   });
 
   return {
-    '@type': 'formattedText',
     text,
     entities: entities.length ? entities : undefined,
   };

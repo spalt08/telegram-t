@@ -115,7 +115,7 @@ const Album: FC<OwnProps> = ({
       );
     }
 
-    return null;
+    return undefined;
   }
 
   const className = buildClassName(

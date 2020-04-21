@@ -17,7 +17,7 @@ addReducer('loadFullUser', (global, actions, payload) => {
     return;
   }
 
-  const { id, access_hash: accessHash } = user;
+  const { id, accessHash } = user;
 
   runDebouncedForFetchFullUser(() => callApi('fetchFullUser', { id, accessHash }));
 });
@@ -72,12 +72,12 @@ async function loadContactList(hash?: number) {
   newGlobal = updateChats(newGlobal, buildCollectionByKey(contactList.chats, 'id'));
 
   // Sort contact list by Last Name (or First Name), with latinic names being placed first
-  const getCompareString = (user: ApiUser) => (user.last_name || user.first_name || '');
+  const getCompareString = (user: ApiUser) => (user.lastName || user.firstName || '');
   const collator = new Intl.Collator('en-US');
 
   const sortedUsers = contactList.users.sort((a, b) => (
     collator.compare(getCompareString(a), getCompareString(b))
-  )).filter((user) => !user.is_self);
+  )).filter((user) => !user.isSelf);
 
   setGlobal({
     ...newGlobal,

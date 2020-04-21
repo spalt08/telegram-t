@@ -10,7 +10,7 @@ export function getMessageKey(chatId: number, messageId: number) {
 }
 
 export function getMessageOriginalId(message: ApiMessage) {
-  return message.prev_local_id || message.id;
+  return message.previousLocalId || message.id;
 }
 
 export function getMessageSummaryText(message: ApiMessage, hasPictogram = false) {
@@ -120,15 +120,15 @@ export function matchLinkInMessageText(message: ApiMessage) {
 }
 
 export function isOwnMessage(message: ApiMessage) {
-  return message.is_outgoing;
+  return message.isOutgoing;
 }
 
 export function isReplyMessage(message: ApiMessage) {
-  return Boolean(message.reply_to_message_id);
+  return Boolean(message.replyToMessageId);
 }
 
 export function isForwardedMessage(message: ApiMessage) {
-  return Boolean(message.forward_info);
+  return Boolean(message.forwardInfo);
 }
 
 export function isActionMessage(message: ApiMessage) {
@@ -136,11 +136,11 @@ export function isActionMessage(message: ApiMessage) {
 }
 
 export function getSendingState(message: ApiMessage) {
-  if (!message.sending_state) {
+  if (!message.sendingState) {
     return 'succeeded';
   }
 
-  return message.sending_state['@type'] === 'messageSendingStateFailed' ? 'failed' : 'pending';
+  return message.sendingState === 'messageSendingStateFailed' ? 'failed' : 'pending';
 }
 
 export function isMessageLocal(message: ApiMessage) {

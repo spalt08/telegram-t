@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions, GlobalState } from '../../global/types';
 
 import '../../modules/actions/initial';
+import { pick } from '../../util/iteratees';
 
 import UiLoader from '../common/UiLoader';
 import AuthPhoneNumber from './AuthPhoneNumber';
@@ -12,7 +13,6 @@ import AuthPassword from './AuthPassword.async';
 import AuthRegister from './AuthRegister.async';
 
 import './Auth.scss';
-import { pick } from '../../util/iteratees';
 
 type StateProps = Pick<GlobalState, 'authState'>;
 type DispatchProps = Pick<GlobalActions, 'initApi'>;

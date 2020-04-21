@@ -8,6 +8,7 @@ import { LeftColumnContent } from '../../types';
 
 import { SUPPORT_BOT_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
+import { pick } from '../../util/iteratees';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -183,8 +184,5 @@ export default withGlobal<OwnProps>(
       currentUserId,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { signOut, openChat } = actions;
-    return { signOut, openChat };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['signOut', 'openChat']),
 )(LeftHeader);

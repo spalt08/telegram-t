@@ -6,7 +6,9 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
 import getMonkeyAnimationData from '../common/helpers/monkeys';
+
 import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';
@@ -120,12 +122,6 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authIsLoading, authError } = global;
-    return { authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setAuthPassword, clearAuthError } = actions;
-    return { setAuthPassword, clearAuthError };
-  },
+  (global): StateProps => pick(global, ['authIsLoading', 'authError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthPassword', 'clearAuthError']),
 )(AuthPassword);

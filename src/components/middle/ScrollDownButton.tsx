@@ -8,6 +8,7 @@ import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
+import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 
@@ -73,11 +74,8 @@ export default withGlobal<OwnProps>(
 
     return {
       isChannel,
-      unreadCount: chat ? chat.unread_count : undefined,
+      unreadCount: chat ? chat.unreadCount : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { focusLastMessage } = actions;
-    return { focusLastMessage };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['focusLastMessage']),
 )(ScrollDownButton);

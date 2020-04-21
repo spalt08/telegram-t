@@ -26,7 +26,7 @@ const Sticker: FC<OwnProps> = ({
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 
   const sticker = message.content.sticker!;
-  const isAnimated = sticker.is_animated;
+  const { isAnimated } = sticker;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(

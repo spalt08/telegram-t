@@ -19,7 +19,7 @@ function _raiseCastFail(entity, target) {
  Gets the input peer for the given "entity" (user, chat or channel).
 
  A ``TypeError`` is raised if the given entity isn't a supported type
- or if ``check_hash is True`` but the entity's ``access_hash is None``
+ or if ``check_hash is True`` but the entity's ``accessHash is None``
  *or* the entity contains ``min`` information. In this case, the hash
  cannot be used for general purposes, and thus is not returned to avoid
  any issues which can derive from invalid access hashes.
@@ -57,7 +57,7 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
                 accessHash: entity.accessHash,
             })
         } else {
-            throw new Error('User without access_hash or min info cannot be input')
+            throw new Error('User without accessHash or min info cannot be input')
         }
     }
     if (entity instanceof constructors.Chat || entity instanceof constructors.ChatEmpty ||
@@ -71,7 +71,7 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
                 accessHash: entity.accessHash
             })
         } else {
-            throw new TypeError('Channel without access_hash or min info cannot be input')
+            throw new TypeError('Channel without accessHash or min info cannot be input')
         }
     }
     if (entity instanceof constructors.ChannelForbidden) {
@@ -107,7 +107,7 @@ function getInputPeer(entity, allowSelf = true, checkHash = true) {
     }
 
     if (entity instanceof constructors.PeerChat) {
-        return new constructors.InputPeerChat(entity.chat_id)
+        return new constructors.InputPeerChat(entity.chatId)
     }
 
     _raiseCastFail(entity, 'InputPeer')
@@ -395,8 +395,8 @@ function getPeer(peer) {
  can be identified back. User ID is left unmodified, chat ID is negated,
  and channel ID is prefixed with -100:
 
- * ``user_id``
- * ``-chat_id``
+ * ``userId``
+ * ``-chatId``
  * ``-100channel_id``
 
  The original ID and the peer type class can be returned with

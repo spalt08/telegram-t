@@ -6,6 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
 import {
   selectCurrentMessageSearch,
   selectIsForwardMenuOpen,
@@ -95,7 +96,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   }, [contentKey, selectedChatId]);
 
   if (!isOpen) {
-    return null;
+    return undefined;
   }
 
   function renderContent() {
@@ -165,12 +166,10 @@ export default withGlobal(
       selectedUserId,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      openUserInfo, toggleChatInfo, closeMessageTextSearch, closeForwardMenu,
-    } = actions;
-    return {
-      openUserInfo, toggleChatInfo, closeMessageTextSearch, closeForwardMenu,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openUserInfo',
+    'toggleChatInfo',
+    'closeMessageTextSearch',
+    'closeForwardMenu',
+  ]),
 )(RightColumn);

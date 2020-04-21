@@ -30,7 +30,7 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export function onRequestPhoneNumber() {
-  onUpdate(buildAuthState('authorizationStateWaitPhoneNumber'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitPhoneNumber'));
 
   return new Promise<string>((resolve) => {
     authPromiseResolvers.resolvePhoneNumber = resolve;
@@ -38,7 +38,7 @@ export function onRequestPhoneNumber() {
 }
 
 export function onRequestCode() {
-  onUpdate(buildAuthState('authorizationStateWaitCode'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitCode'));
 
   return new Promise<string>((resolve, reject) => {
     authPromiseResolvers.resolveCode = resolve;
@@ -47,7 +47,7 @@ export function onRequestCode() {
 }
 
 export function onRequestPassword() {
-  onUpdate(buildAuthState('authorizationStateWaitPassword'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitPassword'));
 
   return new Promise<string>((resolve) => {
     authPromiseResolvers.resolvePassword = resolve;
@@ -55,7 +55,7 @@ export function onRequestPassword() {
 }
 
 export function onRequestRegistration() {
-  onUpdate(buildAuthState('authorizationStateWaitRegistration'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitRegistration'));
 
   return new Promise<[string, string?]>((resolve) => {
     authPromiseResolvers.resolveRegistration = resolve;
@@ -89,24 +89,22 @@ export function onAuthError(err: Error) {
 
 export function onAuthReady(sessionId: string) {
   onUpdate({
-    ...buildAuthState('authorizationStateReady'),
-    session_id: sessionId,
+    ...buildAuthStateUpdate('authorizationStateReady'),
+    sessionId,
   });
 }
 
 export function onCurrentUserId(currentUserId: number) {
   onUpdate({
     '@type': 'updateCurrentUserId',
-    current_user_id: currentUserId,
+    currentUserId,
   });
 }
 
-export function buildAuthState(authState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
+export function buildAuthStateUpdate(authorizationState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
   return {
     '@type': 'updateAuthorizationState',
-    authorization_state: {
-      '@type': authState,
-    },
+    authorizationState,
   };
 }
 

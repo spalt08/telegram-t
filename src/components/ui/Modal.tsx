@@ -44,7 +44,7 @@ const Modal: FC<OwnProps> = (props) => {
   }, [isOpen]);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   function renderHeader() {
@@ -53,7 +53,7 @@ const Modal: FC<OwnProps> = (props) => {
     }
 
     if (!title) {
-      return null;
+      return undefined;
     }
 
     return (

@@ -923,7 +923,7 @@ class TelegramClient {
             return utils.getInputPeer(await this._getEntityFromString(peer))
         }
         // If we're a bot and the user has messaged us privately users.getUsers
-        // will work with access_hash = 0. Similar for channels.getChannels.
+        // will work with accessHash = 0. Similar for channels.getChannels.
         // If we're not a bot but the user is in our contacts, it seems to work
         // regardless. These are the only two special-cased requests.
         peer = utils.getPeer(peer)

@@ -19,30 +19,30 @@ const ANIMATION_DELAY = 350;
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'newMessage': {
-      const { chat_id, id, message } = update;
+      const { chatId, id, message } = update;
       let newGlobal = global;
 
-      newGlobal = updateWithLocalMedia(newGlobal, chat_id, id, message);
-      newGlobal = updateListedIds(newGlobal, chat_id, [id]);
-      if (selectIsViewportNewest(newGlobal, chat_id)) {
-        newGlobal = addViewportId(newGlobal, chat_id, id);
+      newGlobal = updateWithLocalMedia(newGlobal, chatId, id, message);
+      newGlobal = updateListedIds(newGlobal, chatId, [id]);
+      if (selectIsViewportNewest(newGlobal, chatId)) {
+        newGlobal = addViewportId(newGlobal, chatId, id);
       }
 
-      const chat = selectChat(newGlobal, chat_id);
+      const chat = selectChat(newGlobal, chatId);
       if (chat) {
-        const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
-        newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
+        const newMessage = selectChatMessage(newGlobal, chatId, id)!;
+        newGlobal = updateChatLastMessage(newGlobal, chatId, newMessage);
       }
 
       setGlobal(newGlobal);
 
-      if (chat_id === global.chats.selectedId && message.is_outgoing) {
+      if (chatId === global.chats.selectedId && message.isOutgoing) {
         actions.focusLastMessage();
       }
 
       // Edge case: New message in an old (not loaded) chat.
       const { listIds } = newGlobal.chats;
-      if (!listIds || !listIds.includes(chat_id)) {
+      if (!listIds || !listIds.includes(chatId)) {
         actions.loadTopChats();
       }
 
@@ -50,18 +50,18 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateMessage': {
-      const { chat_id, id, message } = update;
+      const { chatId, id, message } = update;
 
-      const currentMessage = selectChatMessage(global, chat_id, id);
+      const currentMessage = selectChatMessage(global, chatId, id);
       if (!currentMessage) {
         return;
       }
 
       let newGlobal = global;
-      newGlobal = updateWithLocalMedia(newGlobal, chat_id, id, message);
+      newGlobal = updateWithLocalMedia(newGlobal, chatId, id, message);
 
-      const newMessage = selectChatMessage(newGlobal, chat_id, id)!;
-      newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
+      const newMessage = selectChatMessage(newGlobal, chatId, id)!;
+      newGlobal = updateChatLastMessage(newGlobal, chatId, newMessage);
 
       setGlobal(newGlobal);
 
@@ -69,24 +69,24 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateMessageSendSucceeded': {
-      const { chat_id, local_id, message } = update;
+      const { chatId, localId, message } = update;
 
       let newGlobal = global;
 
-      newGlobal = updateListedIds(newGlobal, chat_id, [message.id]);
-      if (selectIsViewportNewest(newGlobal, chat_id)) {
-        newGlobal = addViewportId(newGlobal, chat_id, message.id);
+      newGlobal = updateListedIds(newGlobal, chatId, [message.id]);
+      if (selectIsViewportNewest(newGlobal, chatId)) {
+        newGlobal = addViewportId(newGlobal, chatId, message.id);
       }
 
-      newGlobal = updateChatMessage(newGlobal, chat_id, message.id, {
-        ...selectChatMessage(newGlobal, chat_id, local_id),
+      newGlobal = updateChatMessage(newGlobal, chatId, message.id, {
+        ...selectChatMessage(newGlobal, chatId, localId),
         ...message,
-        prev_local_id: local_id,
+        previousLocalId: localId,
       });
-      newGlobal = deleteChatMessages(newGlobal, chat_id, [local_id]);
+      newGlobal = deleteChatMessages(newGlobal, chatId, [localId]);
 
-      const newMessage = selectChatMessage(newGlobal, chat_id, message.id)!;
-      newGlobal = updateChatLastMessage(newGlobal, chat_id, newMessage);
+      const newMessage = selectChatMessage(newGlobal, chatId, message.id)!;
+      newGlobal = updateChatLastMessage(newGlobal, chatId, newMessage);
 
       setGlobal(newGlobal);
 
@@ -94,60 +94,60 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'deleteMessages': {
-      const { ids, chat_id } = update;
+      const { ids, chatId } = update;
 
       let newGlobal = global;
 
       // Channel update.
-      if (chat_id) {
+      if (chatId) {
         ids.forEach((id) => {
-          newGlobal = updateChatMessage(newGlobal, chat_id, id, {
-            is_deleting: true,
-          });
-
-          const newLastMessage = findLastMessage(newGlobal, chat_id);
-          if (newLastMessage) {
-            newGlobal = updateChatLastMessage(newGlobal, chat_id, newLastMessage, true);
-          }
-        });
-
-        setGlobal(newGlobal);
-
-        actions.requestChatUpdate({ chatId: chat_id });
-
-        setTimeout(() => {
-          setGlobal(deleteChatMessages(getGlobal(), chat_id, ids));
-        }, ANIMATION_DELAY);
-
-        return;
-      }
-
-      const chatIds: number[] = [];
-
-      ids.forEach((id) => {
-        const chatId = findCommonBoxChatId(newGlobal, id);
-        if (chatId) {
-          chatIds.push(chatId);
-
           newGlobal = updateChatMessage(newGlobal, chatId, id, {
-            is_deleting: true,
+            isDeleting: true,
           });
 
           const newLastMessage = findLastMessage(newGlobal, chatId);
           if (newLastMessage) {
             newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
           }
+        });
+
+        setGlobal(newGlobal);
+
+        actions.requestChatUpdate({ chatId });
+
+        setTimeout(() => {
+          setGlobal(deleteChatMessages(getGlobal(), chatId, ids));
+        }, ANIMATION_DELAY);
+
+        return;
+      }
+
+      const commonBoxChatIds: number[] = [];
+
+      ids.forEach((id) => {
+        const commonBoxChatId = findCommonBoxChatId(newGlobal, id);
+        if (commonBoxChatId) {
+          commonBoxChatIds.push(commonBoxChatId);
+
+          newGlobal = updateChatMessage(newGlobal, commonBoxChatId, id, {
+            isDeleting: true,
+          });
+
+          const newLastMessage = findLastMessage(newGlobal, commonBoxChatId);
+          if (newLastMessage) {
+            newGlobal = updateChatLastMessage(newGlobal, commonBoxChatId, newLastMessage, true);
+          }
 
           setTimeout(() => {
-            setGlobal(deleteChatMessages(getGlobal(), chatId, [id]));
+            setGlobal(deleteChatMessages(getGlobal(), commonBoxChatId, [id]));
           }, ANIMATION_DELAY);
         }
       });
 
       setGlobal(newGlobal);
 
-      chatIds.forEach((chatId) => {
-        actions.requestChatUpdate({ chatId });
+      commonBoxChatIds.forEach((commonBoxChatId) => {
+        actions.requestChatUpdate({ chatId: commonBoxChatId });
       });
 
       break;
@@ -207,7 +207,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
         setGlobal(updateChatMessage(
           global,
-          message.chat_id,
+          message.chatId,
           message.id,
           {
             content: {
@@ -255,7 +255,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       setGlobal(updateChatMessage(
         global,
-        message.chat_id,
+        message.chatId,
         message.id,
         {
           content: {
@@ -278,9 +278,9 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   }
 });
 
-function updateWithLocalMedia(global: GlobalState, chat_id: number, id: number, message: Partial<ApiMessage>) {
+function updateWithLocalMedia(global: GlobalState, chatId: number, id: number, message: Partial<ApiMessage>) {
   // Preserve locally uploaded media.
-  const currentMessage = selectChatMessage(global, chat_id, id);
+  const currentMessage = selectChatMessage(global, chatId, id);
   if (currentMessage && message.content) {
     const {
       photo, video, sticker, document,
@@ -297,7 +297,7 @@ function updateWithLocalMedia(global: GlobalState, chat_id: number, id: number, 
     }
   }
 
-  return updateChatMessage(global, chat_id, id, message);
+  return updateChatMessage(global, chatId, id, message);
 }
 
 function updateChatLastMessage(
@@ -307,11 +307,11 @@ function updateChatLastMessage(
   force = false,
 ) {
   const { chats } = global;
-  const currentLastMessage = chats.byId[chatId] && chats.byId[chatId].last_message;
+  const currentLastMessage = chats.byId[chatId] && chats.byId[chatId].lastMessage;
 
   if (currentLastMessage && !force) {
     const isSameOrNewer = (
-      currentLastMessage.id === message.id || currentLastMessage.id === message.prev_local_id
+      currentLastMessage.id === message.id || currentLastMessage.id === message.previousLocalId
     ) || isMessageIdNewer(message.id, currentLastMessage.id);
 
     if (!isSameOrNewer) {
@@ -319,12 +319,12 @@ function updateChatLastMessage(
     }
   }
 
-  return updateChat(global, chatId, { last_message: message });
+  return updateChat(global, chatId, { lastMessage: message });
 }
 
 function findCommonBoxChatId(global: GlobalState, messageId: number) {
   const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
-    isCommonBoxChat(chat) && chat.last_message && chat.last_message.id === messageId
+    isCommonBoxChat(chat) && chat.lastMessage && chat.lastMessage.id === messageId
   ));
   if (fromLastMessage) {
     return fromLastMessage.id;
@@ -348,7 +348,7 @@ function findLastMessage(global: GlobalState, chatId: number) {
   let i = listedIds.length;
   while (i--) {
     const message = byId[listedIds[i]];
-    if (!message.is_deleting) {
+    if (!message.isDeleting) {
       return message;
     }
   }

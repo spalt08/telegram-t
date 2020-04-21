@@ -4,6 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import { debounce } from '../../util/schedulers';
+import { pick } from '../../util/iteratees';
 import { selectCurrentMessageSearch } from '../../modules/selectors';
 
 import SearchInput from '../ui/SearchInput';
@@ -113,12 +114,5 @@ export default withGlobal<OwnProps>(
 
     return { searchQuery };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setMessageSearchQuery, searchMessages,
-    } = actions;
-    return {
-      setMessageSearchQuery, searchMessages,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['setMessageSearchQuery', 'searchMessages']),
 )(RightHeader);

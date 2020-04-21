@@ -9,11 +9,12 @@ import { ApiChat } from '../../api/types';
 import { isChatChannel, getChatTitle } from '../../modules/helpers';
 import prepareChats from './helpers/prepareChats';
 import searchWords from '../../util/searchWords';
+import { pick } from '../../util/iteratees';
 
-import Picker from './Picker';
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import Spinner from '../ui/Spinner';
+import Picker from './Picker';
 
 import './ForwardPicker.scss';
 
@@ -114,9 +115,5 @@ export default withGlobal(
       isLoading,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setForwardChatIds, forwardMessages, loadMoreChats } = actions;
-
-    return { setForwardChatIds, forwardMessages, loadMoreChats };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatIds', 'forwardMessages', 'loadMoreChats']),
 )(ForwardPicker);

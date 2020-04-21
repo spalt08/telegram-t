@@ -101,7 +101,7 @@ export function getMessageMediaHash(
     return undefined;
   }
 
-  const base = getMessageKey(message.chat_id, message.id);
+  const base = getMessageKey(message.chatId, message.id);
 
   if (photo || webPagePhoto) {
     switch (target) {

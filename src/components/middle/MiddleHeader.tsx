@@ -8,11 +8,17 @@ import {
   ApiUser,
   ApiTypingStatus,
 } from '../../api/types';
+
 import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
 import {
-  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
+  selectChat,
+  selectChatMessage,
+  selectUser,
+  selectAllowedMessagedActions,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
+import { pick } from '../../util/iteratees';
+
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import HeaderActions from './HeaderActions';
@@ -69,7 +75,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handlePinnedMessageClick = useCallback((): void => {
     if (pinnedMessage) {
-      focusMessage({ chatId: pinnedMessage.chat_id, messageId: pinnedMessage.id });
+      focusMessage({ chatId: pinnedMessage.chatId, messageId: pinnedMessage.id });
     }
   }, [focusMessage, pinnedMessage]);
 
@@ -106,9 +112,9 @@ export default withGlobal<OwnProps>(
       target = id ? selectUser(global, id) : undefined;
     }
 
-    if (chat && target && target.full_info) {
+    if (chat && target && target.fullInfo) {
       const { typingStatus } = chat;
-      const { pinned_message_id: pinnedMessageId } = target.full_info;
+      const { pinnedMessageId } = target.fullInfo;
       const pinnedMessage = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
 
       if (pinnedMessage) {
@@ -130,18 +136,10 @@ export default withGlobal<OwnProps>(
 
     return {};
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      openChatWithInfo,
-      openMessageTextSearch,
-      pinMessage,
-      focusMessage,
-    } = actions;
-    return {
-      openChatWithInfo,
-      openMessageTextSearch,
-      pinMessage,
-      focusMessage,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openChatWithInfo',
+    'openMessageTextSearch',
+    'pinMessage',
+    'focusMessage',
+  ]),
 )(MiddleHeader);

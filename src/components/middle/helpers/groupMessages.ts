@@ -21,7 +21,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId: number) {
     datetime: Number(getDayStart(messages[0].date * 1000)),
     senderGroups: [currentSenderGroup],
   };
-  let currentAlbum: IAlbum | null;
+  let currentAlbum: IAlbum | undefined;
 
   const dateGroups: MessageDateGroup[] = [currentDateGroup];
 
@@ -46,7 +46,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId: number) {
       && (!nextMessage || !nextMessage.groupedId || nextMessage.groupedId !== currentAlbum.albumId)
     ) {
       currentSenderGroup.push(currentAlbum);
-      currentAlbum = null;
+      currentAlbum = undefined;
     }
     if (nextMessage) {
       const nextMessageDatetime = Number(getDayStart(nextMessage.date * 1000));
@@ -61,8 +61,8 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId: number) {
         currentDateGroup.senderGroups.push(currentSenderGroup);
       } else if (
         nextMessage.id === firstUnreadId
-        || message.sender_user_id !== nextMessage.sender_user_id
-        || message.is_outgoing !== nextMessage.is_outgoing
+        || message.senderUserId !== nextMessage.senderUserId
+        || message.isOutgoing !== nextMessage.isOutgoing
         || isActionMessage(message)
         || isActionMessage(nextMessage)
       ) {

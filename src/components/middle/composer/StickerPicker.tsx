@@ -13,6 +13,7 @@ import { getFirstLetters } from '../../../util/textFormat';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -227,18 +228,10 @@ export default memo(withGlobal<OwnProps>(
       stickerSets: all.byId,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      loadStickerSets,
-      loadRecentStickers,
-      loadStickers,
-      addRecentSticker,
-    } = actions;
-    return {
-      loadStickerSets,
-      loadRecentStickers,
-      loadStickers,
-      addRecentSticker,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadStickerSets',
+    'loadRecentStickers',
+    'loadStickers',
+    'addRecentSticker',
+  ]),
 )(StickerPicker));

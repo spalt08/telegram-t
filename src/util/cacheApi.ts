@@ -12,7 +12,7 @@ export async function fetch(cacheName: string, key: string, type: Type) {
   const cache = await cacheApi.open(cacheName);
   const cached = await cache.match(request);
   if (!cached) {
-    return null;
+    return undefined;
   }
 
   switch (type) {
@@ -23,7 +23,7 @@ export async function fetch(cacheName: string, key: string, type: Type) {
     case Type.Json:
       return cached.json();
     default:
-      return null;
+      return undefined;
   }
 }
 

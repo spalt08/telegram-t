@@ -21,12 +21,14 @@ import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
+import { pick } from '../../../util/iteratees';
 
 import useOverlay from '../../../hooks/useOverlay';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
 import useDraft from './hooks/useDraft';
 import useEditing from './hooks/useEditing';
+import usePrevious from '../../../hooks/usePrevious';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -39,7 +41,6 @@ import PollModal from './PollModal.async';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
-import usePrevious from '../../../hooks/usePrevious';
 
 type StateProps = {
   isPrivateChat: boolean;
@@ -346,12 +347,10 @@ export default memo(withGlobal(
       draft: chatId ? draftsById[chatId] : undefined,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      sendMessage, editMessage, saveDraft, clearDraft,
-    } = actions;
-    return {
-      sendMessage, editMessage, saveDraft, clearDraft,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'sendMessage',
+    'editMessage',
+    'saveDraft',
+    'clearDraft',
+  ]),
 )(Composer));

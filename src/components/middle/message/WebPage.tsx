@@ -43,7 +43,7 @@ const WebPage: FC<OwnProps> = ({
   }, [webPage, isSquarePhoto, onMediaClick]);
 
   if (!webPage) {
-    return null;
+    return undefined;
   }
 
   const {

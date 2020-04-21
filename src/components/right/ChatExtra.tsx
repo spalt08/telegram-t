@@ -2,6 +2,7 @@ import React, { FC } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
+
 import { selectChat } from '../../modules/selectors';
 import { getChatDescription, getChatLink } from '../../modules/helpers';
 
@@ -15,7 +16,7 @@ type StateProps = {
 
 const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
   if (!chat) {
-    return null;
+    return undefined;
   }
 
   const description = getChatDescription(chat);

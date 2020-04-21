@@ -6,6 +6,7 @@ import { GlobalActions } from '../../global/types';
 import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
 
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
@@ -65,8 +66,5 @@ export default withGlobal(
       isChannel,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openChat } = actions;
-    return { openChat };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),
 )(MiddleColumn);

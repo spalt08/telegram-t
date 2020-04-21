@@ -1,8 +1,11 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalActions } from '../../global/types';
 import { ApiMessage } from '../../api/types';
+
 import { selectViewportIds } from '../../modules/selectors';
+import { pick } from '../../util/iteratees';
 
 type OwnProps = {
   className?: string;
@@ -21,7 +24,7 @@ const MessageLink: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const handleMessageClick = useCallback((): void => {
     if (message) {
-      focusMessage({ chatId: message.chat_id, messageId: message.id });
+      focusMessage({ chatId: message.chatId, messageId: message.id });
     }
   }, [focusMessage, message]);
 
@@ -45,17 +48,10 @@ export default withGlobal<OwnProps>(
       return {};
     }
 
-    const viewportIds = selectViewportIds(global, message.chat_id);
+    const viewportIds = selectViewportIds(global, message.chatId);
     const isMessageInViewport = viewportIds && viewportIds.includes(message.id);
 
     return { isMessageInViewport };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      focusMessage,
-    } = actions;
-    return {
-      focusMessage,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage']),
 )(MessageLink);

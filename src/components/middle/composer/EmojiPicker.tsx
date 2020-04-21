@@ -10,6 +10,7 @@ import { throttle } from '../../../util/schedulers';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -192,12 +193,6 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { recentEmojis } = global;
-    return { recentEmojis };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { addRecentEmoji } = actions;
-    return { addRecentEmoji };
-  },
+  (global): StateProps => pick(global, ['recentEmojis']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['addRecentEmoji']),
 )(EmojiPicker));

@@ -23,6 +23,7 @@ import {
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
+import { pick } from '../../util/iteratees';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 
 import Avatar from '../common/Avatar';
@@ -70,10 +71,10 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>();
 
-  const { last_message, typingStatus } = chat || {};
-  const isAction = last_message && isActionMessage(last_message);
+  const { lastMessage, typingStatus } = chat || {};
+  const isAction = lastMessage && isActionMessage(lastMessage);
 
-  useEnsureMessage(chatId, isAction ? last_message!.reply_to_message_id : undefined, actionTargetMessage);
+  useEnsureMessage(chatId, isAction ? lastMessage!.replyToMessageId : undefined, actionTargetMessage);
 
   useLayoutEffect(() => {
     const element = ref.current!;
@@ -104,11 +105,11 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [selected, focusLastMessage, openChat, chatId]);
 
   if (!chat) {
-    return null;
+    return undefined;
   }
 
   function renderLastMessageOrTyping() {
-    if (typingStatus && last_message && typingStatus.timestamp > last_message.date * 1000) {
+    if (typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
@@ -121,15 +122,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       );
     }
 
-    if (!last_message) {
-      return null;
+    if (!lastMessage) {
+      return undefined;
     }
 
     if (isAction) {
       return (
         <p className="last-message">
           {renderActionMessageText(
-            last_message,
+            lastMessage,
             lastMessageSender,
             actionTargetUser,
             actionTargetMessage,
@@ -146,7 +147,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         {senderName && (
           <span className="sender-name">{senderName}</span>
         )}
-        {getMessageSummaryText(last_message)}
+        {getMessageSummaryText(lastMessage)}
       </p>
     );
   }
@@ -164,16 +165,16 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           chat={chat}
           user={privateChatUser}
           showOnlineStatus
-          isSavedMessages={privateChatUser && privateChatUser.is_self}
+          isSavedMessages={privateChatUser && privateChatUser.isSelf}
         />
       )}
       <div className="info">
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
-          {chat.is_verified && <VerifiedIcon />}
-          {chat.is_muted && <i className="icon-muted-chat" />}
-          {chat.last_message && (
-            <LastMessageMeta message={chat.last_message} outgoingStatus={lastMessageOutgoingStatus} />
+          {chat.isVerified && <VerifiedIcon />}
+          {chat.isMuted && <i className="icon-muted-chat" />}
+          {chat.lastMessage && (
+            <LastMessageMeta message={chat.lastMessage} outgoingStatus={lastMessageOutgoingStatus} />
           )}
         </div>
         <div className="subtitle">
@@ -189,15 +190,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    if (!chat || !chat.last_message) {
+    if (!chat || !chat.lastMessage) {
       return {};
     }
 
-    const { sender_user_id, reply_to_message_id, is_outgoing } = chat.last_message;
-    const lastMessageSender = sender_user_id ? selectUser(global, sender_user_id) : undefined;
-    const lastMessageAction = getMessageAction(chat.last_message);
-    const actionTargetMessage = lastMessageAction && reply_to_message_id
-      ? selectChatMessage(global, chat.id, reply_to_message_id)
+    const { senderUserId, replyToMessageId, isOutgoing } = chat.lastMessage;
+    const lastMessageSender = senderUserId ? selectUser(global, senderUserId) : undefined;
+    const lastMessageAction = getMessageAction(chat.lastMessage);
+    const actionTargetMessage = lastMessageAction && replyToMessageId
+      ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
@@ -206,7 +207,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       lastMessageSender,
-      ...(is_outgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.last_message) }),
+      ...(isOutgoing && { lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage) }),
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
@@ -214,8 +215,5 @@ export default memo(withGlobal<OwnProps>(
       draft: draftsById[chatId],
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openChat, focusLastMessage } = actions;
-    return { openChat, focusLastMessage };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openChat', 'focusLastMessage']),
 )(Chat));

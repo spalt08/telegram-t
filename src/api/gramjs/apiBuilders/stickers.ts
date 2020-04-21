@@ -31,7 +31,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
   return {
     id: String(document.id),
     emoji,
-    is_animated: isAnimated,
+    isAnimated,
     width,
     height,
     thumbnail,

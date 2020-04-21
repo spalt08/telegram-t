@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
 import { selectIsForwardMenuOpen, selectIsMediaViewerOpen } from '../../modules/selectors';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -46,7 +47,7 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
   } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -56,7 +57,7 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
         <RightHeader onClose={onClose} />
         {isForwarding ? (
           <ForwardPicker />
-        ) : null}
+        ) : undefined}
       </div>
     </div>
   );
@@ -70,8 +71,5 @@ export default withGlobal(
       isForwarding,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { closeForwardMenu } = actions;
-    return { closeForwardMenu };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['closeForwardMenu']),
 )(RightOverlay);

@@ -35,7 +35,7 @@ addReducer('focusLastMessage', (global, actions) => {
   }
 
   const chatId = selectedChat.id;
-  const messageId = selectedChat.last_message && selectedChat.last_message.id;
+  const messageId = selectedChat.lastMessage && selectedChat.lastMessage.id;
 
   if (messageId) {
     actions.focusMessage({ chatId, messageId, noHighlight: true });

@@ -11,7 +11,7 @@ export type TextPart = string | Element;
 export function renderMessageText(message: ApiMessage) {
   const formattedText = message.content.text;
 
-  if (!formattedText || formattedText['@type'] !== 'formattedText') {
+  if (!formattedText || !formattedText.text) {
     const rawText = getMessageText(message);
     return rawText ? [rawText] : undefined;
   }

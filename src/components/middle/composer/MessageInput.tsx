@@ -9,6 +9,7 @@ import { GlobalActions } from '../../../global/types';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 
 type OwnProps = {
@@ -127,8 +128,5 @@ export default withGlobal<OwnProps>(
       replyingTo: replyingToById[selectedChatId],
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { editLastChatMessage } = actions;
-    return { editLastChatMessage };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['editLastChatMessage']),
 )(MessageInput);

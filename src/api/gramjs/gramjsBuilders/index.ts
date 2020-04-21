@@ -10,6 +10,7 @@ import {
   ApiMessageEntityTypes,
 } from '../../types';
 import localDb from '../localDb';
+import { pick } from '../../../util/iteratees';
 
 const WAVEFORM_LENGTH = 63;
 const WAVEFORM_MAX_VALUE = 255;
@@ -88,13 +89,11 @@ export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
     return undefined;
   }
 
-  const { id, accessHash, fileReference } = document;
-
-  const inputDocument = new GramJs.InputDocument({
-    id,
-    accessHash,
-    fileReference,
-  });
+  const inputDocument = new GramJs.InputDocument(pick(document, [
+    'id',
+    'accessHash',
+    'fileReference',
+  ]));
 
   return new GramJs.InputMediaDocument({ id: inputDocument });
 }

@@ -1,5 +1,6 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
@@ -11,6 +12,7 @@ import {
   selectSender,
   selectUser,
 } from '../../modules/selectors';
+import { pick } from '../../util/iteratees';
 
 import Avatar from '../common/Avatar';
 
@@ -45,7 +47,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [sender, openMediaViewer, isChannelChatMessage, openChatWithInfo, openUserInfo]);
 
   if (!sender || (!message && !isAvatar)) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -104,8 +106,5 @@ export default withGlobal<OwnProps>(
       message,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openMediaViewer, openUserInfo, openChatWithInfo } = actions;
-    return { openMediaViewer, openUserInfo, openChatWithInfo };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openMediaViewer', 'openUserInfo', 'openChatWithInfo']),
 )(SenderInfo);

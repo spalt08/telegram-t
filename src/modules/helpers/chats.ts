@@ -5,23 +5,23 @@ export function isChatPrivate(chatId: number) {
 }
 
 export function isChatBasicGroup(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeBasicGroup';
+  return chat.type === 'chatTypeBasicGroup';
 }
 
 export function isChatSuperGroup(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeSuperGroup';
+  return chat.type === 'chatTypeSuperGroup';
 }
 
 export function isChatChannel(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeChannel';
+  return chat.type === 'chatTypeChannel';
 }
 
 export function isCommonBoxChat(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeBasicGroup';
+  return chat.type === 'chatTypePrivate' || chat.type === 'chatTypeBasicGroup';
 }
 
 export function getChatTypeString(chat: ApiChat) {
-  switch (chat.type['@type']) {
+  switch (chat.type) {
     case 'chatTypePrivate':
       return 'Private Chat';
     case 'chatTypeBasicGroup':
@@ -35,32 +35,32 @@ export function getChatTypeString(chat: ApiChat) {
 }
 
 export function getPrivateChatUserId(chat: ApiChat) {
-  if (chat.type['@type'] !== 'chatTypePrivate' && chat.type['@type'] !== 'chatTypeSecret') {
+  if (chat.type !== 'chatTypePrivate' && chat.type !== 'chatTypeSecret') {
     return undefined;
   }
   return chat.id;
 }
 
 export function getChatTitle(chat: ApiChat, user?: ApiUser) {
-  if (user && chat.id === user.id && user.is_self) {
+  if (user && chat.id === user.id && user.isSelf) {
     return 'Saved Messages';
   }
   return chat.title || 'Deleted account';
 }
 
 export function getChatDescription(chat: ApiChat) {
-  if (!chat.full_info) {
+  if (!chat.fullInfo) {
     return undefined;
   }
-  return chat.full_info.about;
+  return chat.fullInfo.about;
 }
 
 export function getChatLink(chat: ApiChat) {
   const { username } = chat;
-  const { invite_link } = chat.full_info || {};
+  const { inviteLink } = chat.fullInfo || {};
 
-  if (invite_link && invite_link.length) {
-    return invite_link;
+  if (inviteLink && inviteLink.length) {
+    return inviteLink;
   }
 
   return username ? `t.me/${username}` : '';
@@ -85,5 +85,5 @@ export function getChatAvatarHash(
 }
 
 export function isChatSummaryOnly(chat: ApiChat) {
-  return !chat.last_message;
+  return !chat.lastMessage;
 }
