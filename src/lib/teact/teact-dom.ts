@@ -53,6 +53,7 @@ function renderWithVirtual(
   index: number,
   skipComponentUpdate = false,
   insertAfterOrPrepend?: Element | 'prepend',
+  fragment?: DocumentFragment,
 ) {
   if (
     !skipComponentUpdate
@@ -85,7 +86,7 @@ function renderWithVirtual(
     } else if ((insertAfterOrPrepend instanceof Element) && insertAfterOrPrepend.nextSibling) {
       parentEl.insertBefore(node, insertAfterOrPrepend.nextSibling);
     } else {
-      parentEl.appendChild(node);
+      (fragment || parentEl).appendChild(node);
     }
   } else if ($current && !$new) {
     unmountTree($current);
@@ -211,6 +212,7 @@ function renderChildren(
 
   const maxLength = Math.max($current.children.length, $new.children.length);
   const newChildren = [];
+  const fragment = $new.children.length > $current.children.length + 1 ? document.createDocumentFragment() : undefined;
 
   for (let i = 0; i < maxLength; i++) {
     const $newChild = renderWithVirtual(
@@ -219,11 +221,18 @@ function renderChildren(
       $new.children[i],
       $new,
       i,
+      undefined,
+      undefined,
+      i >= $current.children.length ? fragment : undefined,
     );
 
     if ($newChild) {
       newChildren.push($newChild);
     }
+  }
+
+  if (fragment) {
+    currentEl.appendChild(fragment);
   }
 
   return newChildren;
