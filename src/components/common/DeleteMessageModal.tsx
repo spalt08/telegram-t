@@ -6,6 +6,7 @@ import { GlobalActions } from '../../global/types';
 
 import { selectAllowedMessagedActions, selectChat, selectUser } from '../../modules/selectors';
 import { isChatPrivate, getUserFirstName, getPrivateChatUserId } from '../../modules/helpers';
+import { pick } from '../../util/iteratees';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -66,7 +67,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
 export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const { canDeleteForAll } = selectAllowedMessagedActions(global, message);
-    const chat = selectChat(global, message.chat_id);
+    const chat = selectChat(global, message.chatId);
     const contactFirstName = chat && isChatPrivate(chat.id)
       ? getUserFirstName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
@@ -76,8 +77,5 @@ export default withGlobal<OwnProps>(
       contactFirstName,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { deleteMessages } = actions;
-    return { deleteMessages };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['deleteMessages']),
 )(DeleteMessageModal);

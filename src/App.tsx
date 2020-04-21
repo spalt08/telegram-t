@@ -2,6 +2,9 @@ import { FC } from './lib/teact/teact';
 import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalState } from './global/types';
+
+import { pick } from './util/iteratees';
+
 import Auth from './components/auth/Auth';
 import UiLoader from './components/common/UiLoader';
 import Main from './components/Main.async';
@@ -39,8 +42,5 @@ function renderMain() {
 }
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authState, authIsSessionRemembered } = global;
-    return { authState, authIsSessionRemembered };
-  },
+  (global): StateProps => pick(global, ['authState', 'authIsSessionRemembered']),
 )(App);

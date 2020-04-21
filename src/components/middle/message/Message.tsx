@@ -44,6 +44,7 @@ import Document from '../../common/Document';
 import Audio from '../../common/Audio';
 import MessageMeta from './MessageMeta';
 import ContextMenuContainer from './ContextMenuContainer.async';
+import { IAnchorPosition } from './ContextMenuContainer';
 import Sticker from './Sticker';
 import Photo from './Photo';
 import Video from './Video';
@@ -125,11 +126,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
-  const { chat_id: chatId, id: messageId } = message;
+  const { chatId, id: messageId } = message;
 
-  useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
+  useEnsureMessage(chatId, message.replyToMessageId, replyMessage);
 
   useLayoutEffect(() => {
     const messagesContainer = window.document.getElementById('MessageList');
@@ -157,7 +158,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     || hasMessageLocalBlobUrl(message)
     || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
   );
-  const isContextMenuShown = contextMenuPosition !== null;
+  const isContextMenuShown = contextMenuPosition !== undefined;
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -171,7 +172,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isContextMenuShown && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
     isSelectedToForward && 'is-forwarding',
-    message.is_deleting && 'is-deleting',
+    message.isDeleting && 'is-deleting',
     isAlbum && 'is-album',
   );
   const customShape = getMessageCustomShape(message);
@@ -187,8 +188,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openUserInfo]);
 
   const handleReplyClick = useCallback((): void => {
-    focusMessage({ chatId, messageId: message.reply_to_message_id });
-  }, [focusMessage, chatId, message.reply_to_message_id]);
+    focusMessage({ chatId, messageId: message.replyToMessageId });
+  }, [focusMessage, chatId, message.replyToMessageId]);
 
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({ chatId, messageId, origin: MediaViewerOrigin.Inline });
@@ -203,8 +204,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [messageId, readMessageContents]);
 
   const handleCancelUpload = useCallback(() => {
-    cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
-  }, [cancelSendingMessage, message.chat_id, message.id]);
+    cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
+  }, [cancelSendingMessage, message.chatId, message.id]);
 
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (e.button === 2) {
@@ -229,7 +230,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const handleContextMenuHide = useCallback(() => {
-    setContextMenuPosition(null);
+    setContextMenuPosition(undefined);
   }, []);
 
   const handleVoteSend = useCallback((options: string[]) => {
@@ -238,10 +239,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function renderSenderName(user?: ApiUser) {
     if (
-      (!showSenderName && !message.forward_info)
+      (!showSenderName && !message.forwardInfo)
       || !user || photo || video || customShape
     ) {
-      return null;
+      return undefined;
     }
 
     return (
@@ -383,13 +384,13 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
       >
-        {message.forward_info && !customShape && (
+        {message.forwardInfo && !customShape && (
           <div className="message-title">Forwarded message</div>
         )}
         {renderContent()}
         <MessageMeta message={message} outgoingStatus={outgoingStatus} />
       </div>
-      {Boolean(contextMenuPosition) && (
+      {contextMenuPosition && (
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuPosition}
@@ -407,22 +408,22 @@ export default memo(withGlobal<OwnProps>(
     const {
       message, album, showSenderName, showAvatar,
     } = ownProps;
-    const chatId = message.chat_id;
+    const { chatId } = message;
 
-    const replyMessage = message.reply_to_message_id
-      ? selectChatMessage(global, chatId, message.reply_to_message_id)
+    const replyMessage = message.replyToMessageId
+      ? selectChatMessage(global, chatId, message.replyToMessageId)
       : undefined;
-    const replyMessageSender = replyMessage && replyMessage.sender_user_id
-      ? selectUser(global, replyMessage.sender_user_id)
+    const replyMessageSender = replyMessage && replyMessage.senderUserId
+      ? selectUser(global, replyMessage.senderUserId)
       : undefined;
 
     let userId;
     let originUserId;
     if (showSenderName || showAvatar) {
-      userId = message.sender_user_id;
+      userId = message.senderUserId;
     }
-    if (message.forward_info) {
-      originUserId = message.forward_info.origin.sender_user_id;
+    if (message.forwardInfo) {
+      originUserId = message.forwardInfo.origin.senderUserId;
     }
 
     const uploadProgress = selectUploadProgress(global, message);
@@ -445,7 +446,7 @@ export default memo(withGlobal<OwnProps>(
       ...(originUserId && { originSender: selectUser(global, originUserId) }),
       replyMessage,
       replyMessageSender,
-      ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
+      ...(message.isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
       ...(isFocused && { focusDirection, noFocusHighlight }),
@@ -455,14 +456,12 @@ export default memo(withGlobal<OwnProps>(
       ...(isVideo && { lastSyncTime }),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    return pick(actions, [
-      'focusMessage',
-      'openMediaViewer',
-      'cancelSendingMessage',
-      'openUserInfo',
-      'readMessageContents',
-      'sendPollVote',
-    ]);
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'focusMessage',
+    'openMediaViewer',
+    'cancelSendingMessage',
+    'openUserInfo',
+    'readMessageContents',
+    'sendPollVote',
+  ]),
 )(Message));

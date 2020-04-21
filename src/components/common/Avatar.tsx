@@ -46,7 +46,7 @@ const Avatar: FC<OwnProps> = ({
   const dataUri = useMedia(imageHash, false, ApiMediaFormat.DataUri);
   const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
 
-  let content: string | null = '';
+  let content: string | undefined = '';
 
   if (isSavedMessages) {
     content = <i className="icon-avatar-saved-messages" />;
@@ -56,7 +56,7 @@ const Avatar: FC<OwnProps> = ({
     content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
     const userName = getUserFullName(user);
-    content = userName ? getFirstLetters(userName).slice(0, 2) : null;
+    content = userName ? getFirstLetters(userName).slice(0, 2) : undefined;
   } else if (chat) {
     const title = getChatTitle(chat);
     content = title && getFirstLetters(title).slice(0, isChatPrivate(chat.id) ? 2 : 1);

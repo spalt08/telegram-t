@@ -8,6 +8,7 @@ import { ApiUser } from '../../api/types';
 
 import { throttle } from '../../util/schedulers';
 import searchWords from '../../util/searchWords';
+import { pick } from '../../util/iteratees';
 import { getUserFullName, getSortedUserIds } from '../../modules/helpers';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -91,8 +92,5 @@ export default withGlobal<OwnProps>(
       contactIds,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadContactList, openChat } = actions;
-    return { loadContactList, openChat };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'openChat']),
 )(ContactList);

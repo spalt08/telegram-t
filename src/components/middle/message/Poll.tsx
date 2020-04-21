@@ -41,7 +41,7 @@ const Poll: FC<OwnProps> = ({ messageId, poll, onSendVote }) => {
 
   function renderResultOption(answer: PollAnswer) {
     if (!voteResults || !totalVoters) {
-      return null;
+      return undefined;
     }
 
     const result = voteResults.find((r) => r.option === answer.option);

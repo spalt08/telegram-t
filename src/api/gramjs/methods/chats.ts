@@ -14,7 +14,7 @@ import {
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import localDb from '../localDb';
 import { buildInputEntity, buildInputPeer, buildMtpMessageEntity } from '../gramjsBuilders';
 
@@ -45,7 +45,7 @@ export async function fetchChats({
 
   const lastMessagesByChatId = buildCollectionByKey(
     result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any),
-    'chat_id',
+    'chatId',
   );
   const peersByKey = preparePeers(result);
   const chats: ApiChat[] = [];
@@ -59,7 +59,7 @@ export async function fetchChats({
 
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
     const chat = buildApiChatFromDialog(dialog, peerEntity);
-    chat.last_message = lastMessagesByChatId[chat.id];
+    chat.lastMessage = lastMessagesByChatId[chat.id];
     chats.push(chat);
 
     if (dialog.draft) {
@@ -77,7 +77,7 @@ export async function fetchChats({
   const chatIds = chats.map((chat) => chat.id);
 
   return {
-    chat_ids: chatIds,
+    chatIds,
     chats,
     users,
     draftsById,
@@ -86,8 +86,8 @@ export async function fetchChats({
 }
 
 export function fetchFullChat(chat: ApiChat) {
-  const { id, access_hash } = chat;
-  const input = buildInputEntity(id, access_hash);
+  const { id, accessHash } = chat;
+  const input = buildInputEntity(id, accessHash);
 
   return input instanceof GramJs.InputChannel
     ? getFullChannelInfo(input)
@@ -95,9 +95,9 @@ export function fetchFullChat(chat: ApiChat) {
 }
 
 export async function fetchSuperGroupOnlines(chat: ApiChat) {
-  const { id, access_hash } = chat;
+  const { id, accessHash } = chat;
 
-  const peer = buildInputPeer(id, access_hash);
+  const peer = buildInputPeer(id, accessHash);
   const result = await invokeRequest(new GramJs.messages.GetOnlines({ peer }));
 
   if (!result) {
@@ -109,7 +109,7 @@ export async function fetchSuperGroupOnlines(chat: ApiChat) {
   onUpdate({
     '@type': 'updateChat',
     id,
-    chat: { online_count: onlines },
+    chat: { onlineCount: onlines },
   });
 }
 
@@ -125,7 +125,7 @@ export async function searchChats({ query, limit }: { query: string; limit?: num
   const allChats = [...result.chats, ...result.users]
     .map((user) => buildApiChatFromPreview(user))
     .filter<ApiChat>(Boolean as any);
-  const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+  const allUsers = result.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
 
   return {
     localChats: allChats.filter((r) => localPeerIds.includes(r.id)),
@@ -186,11 +186,11 @@ export async function fetchChatWithSelf() {
 }
 
 export async function requestChatUpdate(chat: ApiChat) {
-  const { id, access_hash } = chat;
+  const { id, accessHash } = chat;
 
   const result = await invokeRequest(new GramJs.messages.GetPeerDialogs({
     peers: [new GramJs.InputDialogPeer({
-      peer: buildInputPeer(id, access_hash),
+      peer: buildInputPeer(id, accessHash),
     })],
   }));
 
@@ -208,11 +208,10 @@ export async function requestChatUpdate(chat: ApiChat) {
     '@type': 'updateChat',
     id,
     chat: {
-      last_read_outbox_message_id: dialog.readOutboxMaxId,
-      last_read_inbox_message_id: dialog.readInboxMaxId,
-      unread_count: dialog.unreadCount,
-      unread_mention_count: dialog.unreadMentionsCount,
-      last_message: lastMessage,
+      lastReadOutboxMessageId: dialog.readOutboxMaxId,
+      lastReadInboxMessageId: dialog.readInboxMaxId,
+      ...pick(dialog, ['unreadCount', 'unreadMentionsCount']),
+      lastMessage,
     },
   });
 }
@@ -229,7 +228,7 @@ export function saveDraft({
   replyToMsgId?: number;
 }) {
   return invokeRequest(new GramJs.messages.SaveDraft({
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     message: text,
     ...(entities && {
       entities: entities.map(buildMtpMessageEntity),
@@ -240,7 +239,7 @@ export function saveDraft({
 
 export function clearDraft(chat: ApiChat) {
   return invokeRequest(new GramJs.messages.SaveDraft({
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     message: '',
   }));
 }
@@ -267,8 +266,8 @@ async function getFullChatInfo(chatId: number) {
     fullInfo: {
       about,
       members,
-      pinned_message_id: pinnedMsgId,
-      invite_link: buildChatInviteLink(exportedInvite),
+      pinnedMessageId: pinnedMsgId,
+      inviteLink: buildChatInviteLink(exportedInvite),
     },
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
   };
@@ -287,15 +286,15 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
     exportedInvite,
   } = result.fullChat;
 
-  const invite_link = exportedInvite instanceof GramJs.ChatInviteExported
+  const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
     ? exportedInvite.link
     : undefined;
 
   return {
     fullInfo: {
       about,
-      pinned_message_id: pinnedMsgId,
-      invite_link,
+      pinnedMessageId: pinnedMsgId,
+      inviteLink,
     },
     users: undefined,
   };

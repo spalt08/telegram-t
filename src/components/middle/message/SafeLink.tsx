@@ -10,7 +10,7 @@ type OwnProps = {
 
 const SafeLink: FC<OwnProps> = ({ url, text, children }) => {
   if (!url) {
-    return null;
+    return undefined;
   }
 
   const classNames = ['text-entity-link'];

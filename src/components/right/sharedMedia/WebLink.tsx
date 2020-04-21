@@ -39,7 +39,7 @@ const WebLink: FC<OwnProps> = ({ message }) => {
   }, [linkData]);
 
   if (!linkData) {
-    return null;
+    return undefined;
   }
 
   const {

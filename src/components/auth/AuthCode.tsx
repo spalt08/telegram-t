@@ -6,6 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import getMonkeyAnimationData from '../common/helpers/monkeys';
+import { pick } from '../../util/iteratees';
 
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
@@ -146,12 +147,6 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authPhoneNumber, authIsLoading, authError } = global;
-    return { authPhoneNumber, authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setAuthCode, returnToAuthPhoneNumber, clearAuthError } = actions;
-    return { setAuthCode, returnToAuthPhoneNumber, clearAuthError };
-  },
+  (global): StateProps => pick(global, ['authPhoneNumber', 'authIsLoading', 'authError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthCode', 'returnToAuthPhoneNumber', 'clearAuthError']),
 )(AuthCode);

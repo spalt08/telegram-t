@@ -9,6 +9,7 @@ import { ApiVideo } from '../../../api/types';
 import findInViewport from '../../../util/findInViewport';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
+import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
 import GifButton from './GifButton';
@@ -83,7 +84,7 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             load={visibleIndexes.includes(index)}
           />
         ))
-      ) : null}
+      ) : undefined}
     </div>
   );
 };
@@ -96,8 +97,5 @@ export default memo(withGlobal<OwnProps>(
       savedGifs,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadSavedGifs } = actions;
-    return { loadSavedGifs };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadSavedGifs']),
 )(GifPicker));

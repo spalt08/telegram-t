@@ -5,7 +5,7 @@ import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
 import usePrevious from '../../hooks/usePrevious';
-import { mapValues } from '../../util/iteratees';
+import { mapValues, pick } from '../../util/iteratees';
 import prepareChats from '../common/helpers/prepareChats';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -84,8 +84,5 @@ export default memo(withGlobal(
       orderedPinnedIds,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadMoreChats } = actions;
-    return { loadMoreChats };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats']),
 )(ChatList));

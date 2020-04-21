@@ -51,7 +51,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       setGlobal(updateChat(global, update.id, update.chat));
 
       const chat = selectChat(global, update.id);
-      if (chat && chat.unread_mention_count) {
+      if (chat && chat.unreadMentionsCount) {
         actions.requestChatUpdate({ chatId: chat.id });
       }
 
@@ -74,19 +74,19 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'newMessage': {
-      if (update.message.is_outgoing) {
+      if (update.message.isOutgoing) {
         return;
       }
 
-      const chat = selectChat(global, update.chat_id);
+      const chat = selectChat(global, update.chatId);
       if (!chat) {
         return;
       }
 
-      setGlobal(updateChat(global, update.chat_id, {
-        unread_count: chat.unread_count ? chat.unread_count + 1 : 1,
+      setGlobal(updateChat(global, update.chatId, {
+        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
         ...(update.message.hasMention && {
-          unread_mention_count: chat.unread_mention_count ? chat.unread_mention_count + 1 : 1,
+          unreadMentionsCount: chat.unreadMentionsCount ? chat.unreadMentionsCount + 1 : 1,
         }),
       }));
 
@@ -94,16 +94,16 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateChatFullInfo': {
-      const { full_info } = update;
+      const { fullInfo } = update;
       const targetChat = global.chats.byId[update.id];
       if (!targetChat) {
         return;
       }
 
       setGlobal(updateChat(global, update.id, {
-        full_info: {
-          ...targetChat.full_info,
-          ...full_info,
+        fullInfo: {
+          ...targetChat.fullInfo,
+          ...fullInfo,
         },
       }));
 
@@ -117,10 +117,10 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       let newGlobal = global;
 
       allChats.forEach((chat) => {
-        if (!chat.is_pinned && ids.includes(chat.id)) {
-          newGlobal = updateChat(newGlobal, chat.id, { is_pinned: true });
-        } else if (chat.is_pinned && !ids.includes(chat.id)) {
-          newGlobal = updateChat(newGlobal, chat.id, { is_pinned: false });
+        if (!chat.isPinned && ids.includes(chat.id)) {
+          newGlobal = updateChat(newGlobal, chat.id, { isPinned: true });
+        } else if (chat.isPinned && !ids.includes(chat.id)) {
+          newGlobal = updateChat(newGlobal, chat.id, { isPinned: false });
         }
       });
 
@@ -145,8 +145,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       let shouldUpdate = false;
-      let members = targetChat.full_info && targetChat.full_info.members
-        ? [...targetChat.full_info.members]
+      let members = targetChat.fullInfo && targetChat.fullInfo.members
+        ? [...targetChat.fullInfo.members]
         : [];
 
       if (replacedMembers) {
@@ -155,13 +155,13 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       } else if (addedMember) {
         if (
           !members.length
-          || !members.some((m) => m.user_id === addedMember.user_id)
+          || !members.some((m) => m.userId === addedMember.userId)
         ) {
           members.push(addedMember);
           shouldUpdate = true;
         }
       } else if (members.length && deletedMemberId) {
-        const deleteIndex = members.findIndex((m) => m.user_id === deletedMemberId);
+        const deleteIndex = members.findIndex((m) => m.userId === deletedMemberId);
         if (deleteIndex > -1) {
           members.slice(deleteIndex, 1);
           shouldUpdate = true;
@@ -170,8 +170,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       if (shouldUpdate) {
         setGlobal(updateChat(global, update.id, {
-          members_count: members.length,
-          full_info: {
+          membersCount: members.length,
+          fullInfo: {
             members,
           },
         }));

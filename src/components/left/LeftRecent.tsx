@@ -8,6 +8,7 @@ import { ApiUser } from '../../api/types';
 
 import { getUserFirstName, isChatPrivate } from '../../modules/helpers';
 import { throttle } from '../../util/schedulers';
+import { pick } from '../../util/iteratees';
 
 import Avatar from '../common/Avatar';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -116,12 +117,10 @@ export default withGlobal<OwnProps>(
       recentlyFoundChatIds,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
-    } = actions;
-    return {
-      loadTopUsers, loadContactList, openChat, addRecentlyFoundChatId,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadTopUsers',
+    'loadContactList',
+    'openChat',
+    'addRecentlyFoundChatId',
+  ]),
 )(LeftRecent);

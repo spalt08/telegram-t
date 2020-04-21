@@ -5,8 +5,10 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiUser, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
+
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
+import { pick } from '../../util/iteratees';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
@@ -39,15 +41,15 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   loadFullUser,
   openMediaViewer,
 }) => {
-  const { id: userId, is_self } = user || {};
+  const { id: userId, isSelf } = user || {};
 
   useEffect(() => {
     // `Saved Messages` is the only private chat that supports pinned messages.
     // We need to call for `loadFullUser` to get pinned message ID.
-    if (showFullInfo && lastSyncTime && userId && is_self) {
+    if (showFullInfo && lastSyncTime && userId && isSelf) {
       loadFullUser({ userId });
     }
-  }, [is_self, userId, loadFullUser, lastSyncTime, showFullInfo]);
+  }, [isSelf, userId, loadFullUser, lastSyncTime, showFullInfo]);
 
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (user && hasPhoto) {
@@ -60,12 +62,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [user, avatarSize, openMediaViewer]);
 
   if (!user) {
-    return null;
+    return undefined;
   }
 
   function renderStatusOrTyping() {
     if (!user) {
-      return null;
+      return undefined;
     }
 
     if (typingStatus) {
@@ -95,7 +97,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
         ) : (
           <div className="title">
             {getUserFullName(user)}
-            {user && user.is_verified && <VerifiedIcon />}
+            {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}
         {!isSavedMessages && renderStatusOrTyping()}
@@ -112,11 +114,8 @@ export default withGlobal<OwnProps>(
     return {
       lastSyncTime,
       user,
-      isSavedMessages: !forceShowSelf && user && user.is_self,
+      isSavedMessages: !forceShowSelf && user && user.isSelf,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullUser, openMediaViewer } = actions;
-    return { loadFullUser, openMediaViewer };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
 )(PrivateChatInfo);

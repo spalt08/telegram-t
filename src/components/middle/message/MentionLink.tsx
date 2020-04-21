@@ -5,6 +5,7 @@ import { GlobalActions } from '../../../global/types';
 import { ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
 import { getUserFullName } from '../../../modules/helpers';
 import { selectUser, selectUserByUserName } from '../../../modules/selectors';
 
@@ -60,8 +61,5 @@ export default withGlobal<OwnProps>(
 
     return {};
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openUserInfo } = actions;
-    return { openUserInfo };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openUserInfo']),
 )(MentionLink);

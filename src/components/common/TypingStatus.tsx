@@ -17,7 +17,7 @@ type StateProps = {
 };
 
 const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
-  const typingUserName = typingUser && !typingUser.is_self && getUserFirstName(typingUser);
+  const typingUserName = typingUser && !typingUser.isSelf && getUserFirstName(typingUser);
 
   return (
     <p className="typing-status">

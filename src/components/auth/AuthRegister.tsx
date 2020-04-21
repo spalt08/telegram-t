@@ -4,6 +4,8 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
+
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 import CropModal from './CropModal';
@@ -120,12 +122,6 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authIsLoading, authError } = global;
-    return { authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { signUp, clearAuthError, uploadProfilePhoto } = actions;
-    return { signUp, clearAuthError, uploadProfilePhoto };
-  },
+  (global): StateProps => pick(global, ['authIsLoading', 'authError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['signUp', 'clearAuthError', 'uploadProfilePhoto']),
 )(AuthRegister);

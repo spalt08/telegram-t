@@ -18,7 +18,7 @@ const asCacheApiType = {
 };
 
 const MEMORY_CACHE: Record<string, ApiPreparedMedia> = {};
-const FETCH_PROMISES: Record<string, Promise<ApiPreparedMedia | null>> = {};
+const FETCH_PROMISES: Record<string, Promise<ApiPreparedMedia | undefined>> = {};
 
 export function fetch<T extends ApiMediaFormat>(url: string, mediaFormat: T, onProgress?: ApiOnProgress) {
   if (!FETCH_PROMISES[url]) {
@@ -30,7 +30,7 @@ export function fetch<T extends ApiMediaFormat>(url: string, mediaFormat: T, onP
 
       delete FETCH_PROMISES[url];
 
-      return null;
+      return undefined;
     });
   }
 

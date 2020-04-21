@@ -21,6 +21,7 @@ import {
 } from '../../modules/helpers';
 import { selectChatMessages, selectChat } from '../../modules/selectors';
 import { throttle } from '../../util/schedulers';
+import { pick } from '../../util/iteratees';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
 
 import Transition from '../ui/Transition';
@@ -124,7 +125,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       return [];
     }
 
-    return getSortedUserIds(groupChatMembers.map(({ user_id }) => user_id), usersById);
+    return getSortedUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
   }, [groupChatMembers, usersById]);
 
   const handleLoadMore = useCallback((loadMoreOptions) => {
@@ -275,7 +276,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               </div>
             ))
             : <Loading />
-        ) : null}
+        ) : undefined}
       </div>
     );
   }
@@ -326,7 +327,7 @@ export default withGlobal<OwnProps>(
     const { byId: usersById } = global.users;
 
     const hasMembersTab = !userId && chat && isChatBasicGroup(chat);
-    const groupChatMembers = chat && chat.full_info && chat.full_info.members;
+    const groupChatMembers = chat && chat.fullInfo && chat.fullInfo.members;
 
     let resolvedUserId;
     if (userId) {
@@ -346,12 +347,10 @@ export default withGlobal<OwnProps>(
       }),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setMessageSearchMediaType, searchMessages, openMediaViewer, openUserInfo,
-    } = actions;
-    return {
-      setMessageSearchMediaType, searchMessages, openMediaViewer, openUserInfo,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setMessageSearchMediaType',
+    'searchMessages',
+    'openMediaViewer',
+    'openUserInfo',
+  ]),
 )(Profile);

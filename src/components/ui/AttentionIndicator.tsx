@@ -13,7 +13,7 @@ const AttentionIndicator: FC<OwnProps> = ({ show }) => {
   const { shouldRender, transitionClassNames } = useShowTransition(show, undefined, undefined, false);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   const className = buildClassName(

@@ -8,6 +8,7 @@ import { ApiMessage } from '../../../api/types';
 
 import { selectAllowedMessagedActions } from '../../../modules/selectors';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
+import { pick } from '../../../util/iteratees';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
@@ -15,7 +16,7 @@ import MessageContextMenu from './MessageContextMenu';
 
 import './ContextMenuContainer.scss';
 
-type IAnchorPosition = {
+export type IAnchorPosition = {
   x: number;
   y: number;
 };
@@ -72,12 +73,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onClose]);
 
   const handleReply = useCallback(() => {
-    setChatReplyingTo({ chatId: message.chat_id, messageId: message.id });
+    setChatReplyingTo({ chatId: message.chatId, messageId: message.id });
     closeMenu();
   }, [setChatReplyingTo, message, closeMenu]);
 
   const handleEdit = useCallback(() => {
-    setChatEditing({ chatId: message.chat_id, messageId: message.id });
+    setChatEditing({ chatId: message.chatId, messageId: message.id });
     closeMenu();
   }, [setChatEditing, message, closeMenu]);
 
@@ -87,7 +88,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [pinMessage, message, closeMenu]);
 
   const handleForward = useCallback(() => {
-    openForwardMenu({ fromChatId: message.chat_id, messageIds: [message.id] });
+    openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
     closeMenu();
   }, [openForwardMenu, message, closeMenu]);
 
@@ -136,18 +137,10 @@ export default memo(withGlobal<OwnProps>(
       canEdit,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setChatReplyingTo,
-      setChatEditing,
-      pinMessage,
-      openForwardMenu,
-    } = actions;
-    return {
-      setChatReplyingTo,
-      setChatEditing,
-      pinMessage,
-      openForwardMenu,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setChatReplyingTo',
+    'setChatEditing',
+    'pinMessage',
+    'openForwardMenu',
+  ]),
 )(ContextMenuContainer));

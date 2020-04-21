@@ -12,20 +12,20 @@ type OwnProps = {
 const Badge: FC<OwnProps> = ({ chat }) => {
   const classNames = ['Badge'];
 
-  if (chat.unread_count) {
-    if (chat.is_muted) {
+  if (chat.unreadCount) {
+    if (chat.isMuted) {
       classNames.push('muted');
     }
 
-    if (chat.unread_mention_count) {
+    if (chat.unreadMentionsCount) {
       return (
         <div className="Badge-wrapper">
           <div className="Badge mention">
             <i className="icon-username" />
           </div>
-          {chat.unread_count > 1 && (
+          {chat.unreadCount > 1 && (
             <div className={classNames.join(' ')}>
-              {chat.unread_count}
+              {chat.unreadCount}
             </div>
           )}
         </div>
@@ -34,10 +34,10 @@ const Badge: FC<OwnProps> = ({ chat }) => {
 
     return (
       <div className={classNames.join(' ')}>
-        {formatIntegerCompact(chat.unread_count)}
+        {formatIntegerCompact(chat.unreadCount)}
       </div>
     );
-  } else if (chat.is_pinned) {
+  } else if (chat.isPinned) {
     classNames.push('pinned');
 
     return (
@@ -47,7 +47,7 @@ const Badge: FC<OwnProps> = ({ chat }) => {
     );
   }
 
-  return null;
+  return undefined;
 };
 
 export default Badge;

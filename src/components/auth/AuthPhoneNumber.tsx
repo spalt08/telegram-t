@@ -5,7 +5,10 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
+
 import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../util/phoneNumber';
+import { preloadImage } from '../../util/files';
+import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -15,7 +18,6 @@ import Loading from '../ui/Loading';
 
 // @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
-import { preloadImage } from '../../util/files';
 
 type StateProps = Pick<GlobalState, (
   'connectionState' |
@@ -163,20 +165,19 @@ function getNumberWithCode(phoneNumber: string = '', country?: Country) {
 }
 
 export default withGlobal(
-  (global): StateProps => {
-    const {
-      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
-    } = global;
-    return {
-      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
-    };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
-    } = actions;
-    return {
-      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
-    };
-  },
+  (global): StateProps => pick(global, [
+    'connectionState',
+    'authState',
+    'authPhoneNumber',
+    'authIsLoading',
+    'authError',
+    'authRememberMe',
+    'authNearestCountry',
+  ]),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setAuthPhoneNumber',
+    'setAuthRememberMe',
+    'clearAuthError',
+    'loadNearestCountry',
+  ]),
 )(AuthPhoneNumber);

@@ -25,7 +25,7 @@ const StickerButton: FC<OwnProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>();
 
-  const isAnimated = sticker.is_animated;
+  const { isAnimated } = sticker;
   const localMediaHash = `sticker${sticker.id}`;
 
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, ApiMediaFormat.BlobUrl);

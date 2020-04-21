@@ -15,6 +15,7 @@ import {
 import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
+import { pick } from '../../util/iteratees';
 import { DEBUG } from '../../config';
 
 import Avatar from './Avatar';
@@ -72,12 +73,12 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [chat, avatarSize, openMediaViewer]);
 
   if (!chat) {
-    return null;
+    return undefined;
   }
 
   function renderStatusOrTyping() {
     if (!chat) {
-      return null;
+      return undefined;
     }
 
     if (typingStatus) {
@@ -107,7 +108,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       <div>
         <div className="title">
           {getChatTitle(chat)}
-          {chat.is_verified && <VerifiedIcon />}
+          {chat.isVerified && <VerifiedIcon />}
         </div>
         {renderStatusOrTyping()}
       </div>
@@ -117,10 +118,10 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
 function getGroupStatus(chat: ApiChat) {
   const chatTypeString = getChatTypeString(chat);
-  const { members_count } = chat;
+  const { membersCount } = chat;
 
-  return members_count
-    ? `${formatInteger(members_count)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+  return membersCount
+    ? `${formatInteger(membersCount)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
     : chatTypeString;
 }
 
@@ -132,8 +133,5 @@ export default withGlobal<OwnProps>(
 
     return { lastSyncTime, chat, onlineCount };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullChat, loadSuperGroupOnlines, openMediaViewer } = actions;
-    return { loadFullChat, loadSuperGroupOnlines, openMediaViewer };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'loadSuperGroupOnlines', 'openMediaViewer']),
 )(GroupChatInfo);

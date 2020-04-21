@@ -7,6 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { LeftColumnContent } from '../../types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
 
 import Transition from '../ui/Transition';
 import LeftHeader from './LeftHeader';
@@ -76,7 +77,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
       case LeftColumnContent.Contacts:
         return <ContactList filter={contactsFilter} />;
       default:
-        return null;
+        return undefined;
     }
   }
 
@@ -101,11 +102,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
 export default withGlobal(
   (global): StateProps => {
     const { query } = global.globalSearch;
-
     return { searchQuery: query };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setGlobalSearchQuery } = actions;
-    return { setGlobalSearchQuery };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['setGlobalSearchQuery']),
 )(LeftColumn);

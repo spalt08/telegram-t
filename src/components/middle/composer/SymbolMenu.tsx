@@ -25,7 +25,7 @@ const TAB_TITLES = Object.values(Tabs).filter((value): value is string => typeof
 const MENU_CLOSE_TIMEOUT = 250;
 const TRANSITION_NAME = navigator.userAgent.includes('Safari') ? 'slide' : 'scroll-slide';
 
-let closeTimeout: NodeJS.Timeout | null = null;
+let closeTimeout: number;
 
 export type OwnProps = {
   isOpen: boolean;
@@ -51,7 +51,7 @@ const SymbolMenu: FC<OwnProps> = ({
       clearTimeout(closeTimeout);
     }
     if (isOpen) {
-      closeTimeout = setTimeout(() => {
+      closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
         }
@@ -68,7 +68,7 @@ const SymbolMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    closeTimeout = setTimeout(() => {
+    closeTimeout = window.setTimeout(() => {
       if (!isMouseInside.current) {
         onClose();
       }
@@ -102,7 +102,7 @@ const SymbolMenu: FC<OwnProps> = ({
         );
     }
 
-    return null;
+    return undefined;
   }
 
   return (

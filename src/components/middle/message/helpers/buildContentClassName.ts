@@ -55,7 +55,7 @@ export function buildContentClassName(
     }
   }
 
-  if (message.forward_info && !customShape) {
+  if (message.forwardInfo && !customShape) {
     classNames.push('is-forwarded');
   }
 
@@ -66,7 +66,7 @@ export function buildContentClassName(
   if (!customShape) {
     classNames.push('has-shadow');
 
-    if (hasReply || message.forward_info || !isMediaWithNoText) {
+    if (hasReply || message.forwardInfo || !isMediaWithNoText) {
       classNames.push('has-solid-background');
     }
 

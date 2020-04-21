@@ -5,5 +5,5 @@ export default function preloadFonts() {
     return Promise.all(SITE_FONTS.map((font) => document.fonts.load(font)));
   }
 
-  return null;
+  return undefined;
 }

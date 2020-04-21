@@ -36,6 +36,7 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import { animateOpening, animateClosing } from './helpers/ghostAnimation';
 import { FULL_ANIMATION_LEVEL } from '../../config';
+import { pick } from '../../util/iteratees';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -71,7 +72,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   openForwardMenu,
   animationLevel,
 }) => {
-  const [, onMediaQueryChanged] = useState(null);
+  const [, onMediaQueryChanged] = useState(undefined);
   const prevOrigin = usePrevious(origin);
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
@@ -136,7 +137,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (isRichAnimations && isOpen && !prevMessage && !prevAvatarOwner) {
-      const textParts = message ? renderMessageText(message) : null;
+      const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
       animateOpening(message!, hasFooter, origin!);
     }
@@ -251,7 +252,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       );
     }
 
-    return null;
+    return undefined;
   }
 
   function renderSenderInfo() {
@@ -385,8 +386,5 @@ export default memo(withGlobal(
       animationLevel,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openMediaViewer, openForwardMenu } = actions;
-    return { openMediaViewer, openForwardMenu };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openMediaViewer', 'openForwardMenu']),
 )(MediaViewer));

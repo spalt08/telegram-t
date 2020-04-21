@@ -2,6 +2,7 @@ import React, { FC, useMemo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+import { GlobalActions } from '../../global/types';
 
 import {
   selectUser,
@@ -16,8 +17,7 @@ import {
   getUserFullName,
 } from '../../modules/helpers';
 import LastMessageMeta from '../left/LastMessageMeta';
-import { GlobalActions } from '../../global/types';
-import { orderBy } from '../../util/iteratees';
+import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
 
@@ -61,7 +61,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
       return {
         message,
-        user: message.sender_user_id ? selectUser(getGlobal(), message.sender_user_id) : undefined,
+        user: message.senderUserId ? selectUser(getGlobal(), message.senderUserId) : undefined,
         onClick: () => focusMessage({ chatId, messageId: id }),
       };
     });
@@ -76,7 +76,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   }) => {
     const text = getMessageText(message);
     if (!text) {
-      return null;
+      return undefined;
     }
 
     return (
@@ -136,8 +136,5 @@ export default withGlobal<OwnProps>(
       foundIds,
     };
   },
-  (global, actions): DispatchProps => {
-    const { searchMessages, focusMessage } = actions;
-    return { searchMessages, focusMessage };
-  },
+  (global, actions): DispatchProps => pick(actions, ['searchMessages', 'focusMessage']),
 )(RightSearch);

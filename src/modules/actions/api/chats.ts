@@ -37,11 +37,11 @@ addReducer('openChat', (global, actions, payload) => {
 });
 
 addReducer('loadMoreChats', (global) => {
-  const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.last_message));
+  const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.lastMessage));
   const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
 
   if (lastChat) {
-    void loadChats(lastChat.id, lastChat.last_message!.date);
+    void loadChats(lastChat.id, lastChat.lastMessage!.date);
   } else {
     void loadChats();
   }
@@ -143,17 +143,17 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
     return;
   }
 
-  const { chat_ids } = result;
+  const { chatIds } = result;
 
-  if (chat_ids.length > 0 && chat_ids[0] === offsetId) {
-    chat_ids.shift();
+  if (chatIds.length > 0 && chatIds[0] === offsetId) {
+    chatIds.shift();
   }
 
   let global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChatListIds(global, chat_ids);
+  global = updateChatListIds(global, chatIds);
 
   setGlobal(global);
 }
@@ -172,7 +172,7 @@ async function loadFullChat(chat: ApiChat) {
     global = updateUsers(global, buildCollectionByKey(users, 'id'));
   }
 
-  global = updateChat(global, chat.id, { full_info: fullInfo });
+  global = updateChat(global, chat.id, { fullInfo });
 
   setGlobal(global);
 }

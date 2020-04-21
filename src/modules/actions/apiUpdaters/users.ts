@@ -11,16 +11,16 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateUserFullInfo': {
-      const { id, full_info } = update;
+      const { id, fullInfo } = update;
       const targetUser = global.users.byId[id];
       if (!targetUser) {
         return undefined;
       }
 
       return updateUser(global, id, {
-        full_info: {
-          ...targetUser.full_info,
-          ...full_info,
+        fullInfo: {
+          ...targetUser.fullInfo,
+          ...fullInfo,
         },
       });
     }

@@ -36,10 +36,10 @@ export async function fetchFullUser({
     '@type': 'updateUser',
     id,
     user: {
-      full_info: {
+      fullInfo: {
         bio: about,
-        common_chats_count: commonChatsCount,
-        pinned_message_id: pinnedMsgId,
+        commonChatsCount,
+        pinnedMessageId: pinnedMsgId,
       },
     },
   });
@@ -66,7 +66,7 @@ export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
     return undefined;
   }
 
-  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
 
   return {
     hash: calculateResultHash(users.map(({ id }) => id)),
@@ -98,7 +98,7 @@ export async function fetchContactList({ hash = 0 }: { hash?: number }) {
 
 export async function fetchUsers({ users } : { users: ApiUser[] }) {
   const result = await invokeRequest(new GramJs.users.GetUsers({
-    id: users.map(({ id, access_hash }) => buildInputPeer(id, access_hash)),
+    id: users.map(({ id, accessHash }) => buildInputPeer(id, accessHash)),
   }));
   if (!result || !result.length) {
     return undefined;

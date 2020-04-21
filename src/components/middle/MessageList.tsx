@@ -23,7 +23,12 @@ import {
   isChatPrivate,
   isOwnMessage,
 } from '../../modules/helpers';
-import { areSortedArraysEqual, flatten, orderBy } from '../../util/iteratees';
+import {
+  areSortedArraysEqual,
+  flatten,
+  orderBy,
+  pick,
+} from '../../util/iteratees';
 import { debounce, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -69,7 +74,7 @@ let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
 let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
-let scrollTimeout: NodeJS.Timeout | null = null;
+let scrollTimeout: number;
 let isScrollTopJustUpdated = false;
 
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -247,7 +252,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
-      scrollTimeout = setTimeout(() => setIsScrolling(false), SCROLL_THROTTLE + 100);
+      scrollTimeout = window.setTimeout(() => setIsScrolling(false), SCROLL_THROTTLE + 100);
 
       requestAnimationFrame(() => {
         updateFabVisibility();
@@ -423,7 +428,7 @@ function renderMessages(
         const message = isAlbum(messageOrAlbum) ? messageOrAlbum.messages[0] : messageOrAlbum;
         const album = isAlbum(messageOrAlbum) ? messageOrAlbum : undefined;
 
-        if (message.prev_local_id && currentAnchorId === `message${message.prev_local_id}`) {
+        if (message.previousLocalId && currentAnchorId === `message${message.previousLocalId}`) {
           currentAnchorId = `message${message.id}`;
         }
 
@@ -439,7 +444,7 @@ function renderMessages(
         };
         const loadAndPlayMedia = (
           viewportMessageIds.includes(message.id)
-          || (!!message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
+          || (!!message.previousLocalId && viewportMessageIds.includes(message.previousLocalId))
         );
 
         const renderedMessage = (
@@ -513,13 +518,9 @@ export default memo(withGlobal<OwnProps>(
       isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      loadViewportMessages, markMessagesRead, setChatScrollOffset,
-    } = actions;
-
-    return {
-      loadViewportMessages, markMessagesRead, setChatScrollOffset,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadViewportMessages',
+    'markMessagesRead',
+    'setChatScrollOffset',
+  ]),
 )(MessageList));

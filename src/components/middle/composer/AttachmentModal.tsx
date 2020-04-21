@@ -50,7 +50,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
   function renderHeader() {
     if (!renderingAttachment) {
-      return null;
+      return undefined;
     }
 
     return (
@@ -65,7 +65,7 @@ const AttachmentModal: FC<OwnProps> = ({
   }
 
   if (!renderingAttachment) {
-    return null;
+    return undefined;
   }
 
   return (

@@ -27,19 +27,19 @@ export function selectIsChatWithSelf(global: GlobalState, chat: ApiChat) {
 
   const user = selectUser(global, userId);
 
-  return user && user.is_self;
+  return user && user.isSelf;
 }
 
 export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
   if (isChatSuperGroup(chat)) {
-    return chat.online_count;
+    return chat.onlineCount;
   }
 
-  if (!chat.full_info || !chat.full_info.members) {
+  if (!chat.fullInfo || !chat.fullInfo.members) {
     return undefined;
   }
 
-  const memberIds = chat.full_info.members.map((m) => m.user_id);
+  const memberIds = chat.fullInfo.members.map((m) => m.userId);
   return memberIds.reduce((onlineCount, memberId) => {
     if (global.users.byId[memberId] && isUserOnline(global.users.byId[memberId])) {
       return onlineCount + 1;

@@ -10,10 +10,10 @@ export function getUserFirstName(user?: ApiUser) {
     return undefined;
   }
 
-  switch (user.type['@type']) {
+  switch (user.type) {
     case 'userTypeBot':
     case 'userTypeRegular': {
-      return user.first_name;
+      return user.firstName;
     }
 
     case 'userTypeDeleted':
@@ -35,19 +35,19 @@ export function getUserFullName(user?: ApiUser) {
     return 'Deleted account';
   }
 
-  switch (user.type['@type']) {
+  switch (user.type) {
     case 'userTypeBot':
     case 'userTypeRegular': {
-      if (user.first_name && user.last_name) {
-        return `${user.first_name} ${user.last_name}`;
+      if (user.firstName && user.lastName) {
+        return `${user.firstName} ${user.lastName}`;
       }
 
-      if (user.first_name) {
-        return user.first_name;
+      if (user.firstName) {
+        return user.firstName;
       }
 
-      if (user.last_name) {
-        return user.last_name;
+      if (user.lastName) {
+        return user.lastName;
       }
 
       break;
@@ -67,7 +67,7 @@ export function getUserStatus(user: ApiUser) {
     return 'service notifications';
   }
 
-  if (user.type && user.type['@type'] === 'userTypeBot') {
+  if (user.type && user.type === 'userTypeBot') {
     return 'bot';
   }
 
@@ -75,7 +75,7 @@ export function getUserStatus(user: ApiUser) {
     return '';
   }
 
-  switch (user.status['@type']) {
+  switch (user.status.type) {
     case 'userStatusEmpty': {
       return 'last seen a long time ago';
     }
@@ -89,18 +89,18 @@ export function getUserStatus(user: ApiUser) {
     }
 
     case 'userStatusOffline': {
-      const { was_online } = user.status;
+      const { wasOnline } = user.status;
 
-      if (!was_online) return 'offline';
+      if (!wasOnline) return 'offline';
 
       const now = new Date();
-      const wasOnline = new Date(was_online * 1000);
+      const wasOnlineDate = new Date(wasOnline * 1000);
 
-      if (wasOnline >= now) {
+      if (wasOnlineDate >= now) {
         return 'last seen just now';
       }
 
-      const diff = new Date(now.getTime() - wasOnline.getTime());
+      const diff = new Date(now.getTime() - wasOnlineDate.getTime());
 
       // within a minute
       if (diff.getTime() / 1000 < 60) {
@@ -116,7 +116,7 @@ export function getUserStatus(user: ApiUser) {
       // today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (wasOnline > today) {
+      if (wasOnlineDate > today) {
         // up to 6 hours ago
         if (diff.getTime() / 1000 < 6 * 60 * 60) {
           const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
@@ -124,18 +124,18 @@ export function getUserStatus(user: ApiUser) {
         }
 
         // other
-        return `last seen today at ${formatTime(wasOnline)}`;
+        return `last seen today at ${formatTime(wasOnlineDate)}`;
       }
 
       // yesterday
       const yesterday = new Date();
       yesterday.setDate(now.getDate() - 1);
       today.setHours(0, 0, 0, 0);
-      if (wasOnline > yesterday) {
-        return `last seen yesterday at ${formatTime(wasOnline)}`;
+      if (wasOnlineDate > yesterday) {
+        return `last seen yesterday at ${formatTime(wasOnlineDate)}`;
       }
 
-      return `last seen ${formatFullDate(wasOnline)}`;
+      return `last seen ${formatFullDate(wasOnlineDate)}`;
     }
 
     case 'userStatusOnline': {
@@ -145,9 +145,10 @@ export function getUserStatus(user: ApiUser) {
     case 'userStatusRecently': {
       return 'last seen recently';
     }
-  }
 
-  return null;
+    default:
+      return undefined;
+  }
 }
 
 export function isUserOnline(user: ApiUser) {
@@ -161,17 +162,17 @@ export function isUserOnline(user: ApiUser) {
     return false;
   }
 
-  return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
+  return status.type === 'userStatusOnline' && type !== 'userTypeBot';
 }
 
 export function isDeletedUser(user: ApiUser) {
-  if (!user.status || user.type['@type'] === 'userTypeBot') {
+  if (!user.status || user.type === 'userTypeBot') {
     return false;
   }
 
-  return user.type['@type'] === 'userTypeDeleted'
-    || user.type['@type'] === 'userTypeUnknown'
-    || user.status['@type'] === 'userStatusEmpty';
+  return user.type === 'userTypeDeleted'
+    || user.type === 'userTypeUnknown'
+    || user.status.type === 'userStatusEmpty';
 }
 
 export function getSenderName(chatId: number, sender?: ApiUser) {
@@ -179,7 +180,7 @@ export function getSenderName(chatId: number, sender?: ApiUser) {
     return undefined;
   }
 
-  if (sender.is_self) {
+  if (sender.isSelf) {
     return 'You';
   }
 
@@ -195,13 +196,13 @@ export function getSortedUserIds(userIds: number[], usersById: Record<number, Ap
 
     const now = Date.now() / 1000;
 
-    if (user.status['@type'] === 'userStatusOnline') {
+    if (user.status.type === 'userStatusOnline') {
       return user.status.expires;
-    } else if (user.status['@type'] === 'userStatusOffline' && user.status.was_online) {
-      return user.status.was_online;
+    } else if (user.status.type === 'userStatusOffline' && user.status.wasOnline) {
+      return user.status.wasOnline;
     }
 
-    switch (user.status['@type']) {
+    switch (user.status.type) {
       case 'userStatusRecently':
         return now - 60 * 60 * 24;
       case 'userStatusLastWeek':

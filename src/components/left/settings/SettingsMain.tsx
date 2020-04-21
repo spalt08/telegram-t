@@ -8,11 +8,12 @@ import { ApiUser } from '../../../api/types';
 import { selectUser } from '../../../modules/selectors';
 import { getUserFullName } from '../../../modules/helpers';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
+import { pick } from '../../../util/iteratees';
 
 // import MenuItem from '../../ui/MenuItem';
 import RangeSlider from '../../ui/RangeSlider';
-import Avatar from '../../common/Avatar';
 import AttentionIndicator from '../../ui/AttentionIndicator';
+import Avatar from '../../common/Avatar';
 
 type StateProps = {
   isAnimationLevelBadgeShown: boolean;
@@ -59,7 +60,7 @@ const SettingsMain: FC<StateProps & DispatchProps> = ({
           <div className="settings-current-user">
             <Avatar user={currentUser} size="jumbo" />
             <p className="name">{getUserFullName(currentUser)}</p>
-            <p className="phone">{formatPhoneNumberWithCode(currentUser.phone_number)}</p>
+            <p className="phone">{formatPhoneNumberWithCode(currentUser.phoneNumber)}</p>
           </div>
         )}
         {/* <MenuItem className="not-implemented" disabled icon="edit">Edit Profile</MenuItem>
@@ -98,8 +99,5 @@ export default withGlobal(
       currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
     };
   },
-  (setGlobal, actions) => {
-    const { setSettingOption, clearAnimationSettingAttention } = actions;
-    return { setSettingOption, clearAnimationSettingAttention };
-  },
+  (setGlobal, actions) => pick(actions, ['setSettingOption', 'clearAnimationSettingAttention']),
 )(SettingsMain);

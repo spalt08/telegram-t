@@ -5,6 +5,7 @@ import { GlobalActions } from '../../global/types';
 import { ApiError } from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
+import { pick } from '../../util/iteratees';
 
 import Modal from './Modal';
 import Button from './Button';
@@ -19,7 +20,7 @@ type DispatchProps = Pick<GlobalActions, 'dismissError'>;
 
 const ErrorModalContainer: FC<StateProps & DispatchProps> = ({ errors, dismissError }) => {
   if (!errors.length) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -48,12 +49,6 @@ function getErrorHeader(error: ApiError) {
 }
 
 export default withGlobal(
-  (global): StateProps => {
-    const { errors } = global;
-    return { errors };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { dismissError } = actions;
-    return { dismissError };
-  },
+  (global): StateProps => pick(global, ['errors']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['dismissError']),
 )(ErrorModalContainer);

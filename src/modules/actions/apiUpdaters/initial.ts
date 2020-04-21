@@ -53,7 +53,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
 function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
   const global = getGlobal();
-  const authState = update.authorization_state['@type'];
+  const authState = update.authorizationState;
 
   setGlobal({
     ...global,
@@ -79,9 +79,9 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         lastSyncTime: Date.now(),
       });
 
-      const { session_id } = update;
-      if (session_id && getGlobal().authRememberMe) {
-        getDispatch().saveSession({ sessionId: session_id });
+      const { sessionId } = update;
+      if (sessionId && getGlobal().authRememberMe) {
+        getDispatch().saveSession({ sessionId });
       }
 
       break;
@@ -97,7 +97,7 @@ function onUpdateAuthorizationError(update: ApiUpdateAuthorizationError) {
 }
 
 function onUpdateConnectionState(update: ApiUpdateConnectionState) {
-  const connectionState = update.connection_state['@type'];
+  const { connectionState } = update;
   const global = getGlobal();
 
   setGlobal({
@@ -111,7 +111,7 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 }
 
 function onUpdateCurrentUserId(update: ApiUpdateCurrentUserId) {
-  const currentUserId = update.current_user_id;
+  const { currentUserId } = update;
 
   setGlobal({
     ...getGlobal(),

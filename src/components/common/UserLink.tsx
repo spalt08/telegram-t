@@ -1,7 +1,10 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
+
+import { pick } from '../../util/iteratees';
 
 type OwnProps = {
   className?: string;
@@ -33,8 +36,5 @@ const UserLink: FC<OwnProps & DispatchProps> = ({
 
 export default withGlobal<OwnProps>(
   undefined,
-  (setGlobal, actions): DispatchProps => {
-    const { openUserInfo } = actions;
-    return { openUserInfo };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openUserInfo']),
 )(UserLink);

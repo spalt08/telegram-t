@@ -79,7 +79,7 @@ async function loadAndReplaceChats() {
 
   global = replaceUsers(global, buildCollectionByKey(savedUsers, 'id'));
   global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
-  global = replaceChatListIds(global, result.chat_ids);
+  global = replaceChatListIds(global, result.chatIds);
   global = {
     ...global,
     chats: {
@@ -169,7 +169,7 @@ async function loadAndUpdateUsers() {
 function loadTopMessages(chat: ApiChat) {
   return callApi('fetchMessages', {
     chat,
-    offsetId: chat.last_read_inbox_message_id,
+    offsetId: chat.lastReadInboxMessageId,
     addOffset: -(Math.round(TOP_MESSAGES_LIMIT / 2) + 1),
     limit: TOP_MESSAGES_LIMIT,
   });
