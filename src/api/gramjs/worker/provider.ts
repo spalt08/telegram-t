@@ -2,10 +2,11 @@ import { OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
 import { WorkerMessageEvent, OriginMessageData, ThenArg } from './types';
 
+import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
 
 type RequestStates = {
-  promise: Promise<ThenArg<MethodResponse<keyof Methods>>>;
+  promise: Promise<ThenArg<MethodResponse<keyof Methods>>>; // Re-wrap because of `postMessage`
   resolve: Function;
   reject: Function;
   callback: AnyToVoidFunction;
@@ -26,7 +27,16 @@ export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   });
 }
 
-export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
+export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
+  if (!worker) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('API is not initialized');
+    }
+
+    return undefined;
+  }
+
   return sendToWorker({
     type: 'callMethod',
     name: fnName,

@@ -159,7 +159,12 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
 }
 
 async function loadFullChat(chat: ApiChat) {
-  const { users, fullInfo } = await callApi('fetchFullChat', chat);
+  const result = await callApi('fetchFullChat', chat);
+  if (!result) {
+    return;
+  }
+
+  const { users, fullInfo } = result;
 
   let global = getGlobal();
 

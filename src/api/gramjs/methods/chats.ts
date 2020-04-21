@@ -249,7 +249,7 @@ async function getFullChatInfo(chatId: number) {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
-    return {};
+    return undefined;
   }
 
   updateLocalDb(result);
@@ -278,7 +278,7 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChannelFull)) {
-    return {};
+    return undefined;
   }
 
   const {
