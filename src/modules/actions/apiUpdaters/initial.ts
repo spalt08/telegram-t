@@ -76,6 +76,7 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       setGlobal({
         ...getGlobal(),
         isLoggingOut: false,
+        lastSyncTime: Date.now(),
       });
 
       const { session_id } = update;

@@ -139,6 +139,10 @@
 
     &.members-list {
       padding: 0.5rem 1rem;
+
+      .Loading {
+        height: 50vh;
+      }
     }
   }
 }
