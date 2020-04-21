@@ -22,22 +22,22 @@ type StateProps = {
   unreadCount?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusTopMessage'>;
+type DispatchProps = Pick<GlobalActions, 'focusLastMessage'>;
 
 const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   show,
   isChannel,
   unreadCount,
-  focusTopMessage,
+  focusLastMessage,
 }) => {
   const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     if (!show) {
       return;
     }
 
-    focusTopMessage();
+    focusLastMessage();
     e.currentTarget.blur();
-  }, [show, focusTopMessage]);
+  }, [show, focusLastMessage]);
 
   const fabClassName = buildClassName(
     'ScrollDownButton',
@@ -77,7 +77,7 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const { focusTopMessage } = actions;
-    return { focusTopMessage };
+    const { focusLastMessage } = actions;
+    return { focusLastMessage };
   },
 )(ScrollDownButton);

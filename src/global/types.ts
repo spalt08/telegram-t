@@ -172,7 +172,7 @@ export type ActionTypes = (
   'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusTopMessage' | 'sendPollVote' | 'editMessage' |
+  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |
   // forwarding messages
   'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search

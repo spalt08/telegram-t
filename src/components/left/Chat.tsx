@@ -51,7 +51,7 @@ type StateProps = {
   draft?: ApiFormattedText;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusTopMessage'>;
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusLastMessage'>;
 
 const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
@@ -66,7 +66,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   isUiReady,
   draft,
   openChat,
-  focusTopMessage,
+  focusLastMessage,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
@@ -97,11 +97,11 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleClick = useCallback(() => {
     if (selected) {
-      focusTopMessage();
+      focusLastMessage();
     } else {
       openChat({ id: chatId });
     }
-  }, [selected, focusTopMessage, openChat, chatId]);
+  }, [selected, focusLastMessage, openChat, chatId]);
 
   if (!chat) {
     return null;
@@ -215,7 +215,7 @@ export default memo(withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => {
-    const { openChat, focusTopMessage } = actions;
-    return { openChat, focusTopMessage };
+    const { openChat, focusLastMessage } = actions;
+    return { openChat, focusLastMessage };
   },
 )(Chat));

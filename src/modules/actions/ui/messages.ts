@@ -4,9 +4,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
   replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
 } from '../../reducers';
-import {
-  selectFirstUnreadId, selectOpenChat, selectRealLastReadId, selectViewportIds,
-} from '../../selectors';
+import { selectOpenChat, selectViewportIds } from '../../selectors';
 import { isMessageIdNewer } from '../../helpers';
 
 const FOCUS_DURATION = 2000;
@@ -30,19 +28,17 @@ addReducer('openMediaViewer', (global, actions, payload) => {
   };
 });
 
-addReducer('focusTopMessage', (global, actions) => {
+addReducer('focusLastMessage', (global, actions) => {
   const selectedChat = selectOpenChat(global);
   if (!selectedChat) {
     return;
   }
 
   const chatId = selectedChat.id;
-  const messageId = selectedChat.unread_count
-    ? selectFirstUnreadId(global, chatId) || selectRealLastReadId(global, chatId)
-    : selectedChat.last_message && selectedChat.last_message.id;
+  const messageId = selectedChat.last_message && selectedChat.last_message.id;
 
   if (messageId) {
-    actions.focusMessage({ chatId, messageId });
+    actions.focusMessage({ chatId, messageId, noHighlight: true });
   }
 });
 

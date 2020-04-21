@@ -37,7 +37,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       setGlobal(newGlobal);
 
       if (chat_id === global.chats.selectedId && message.is_outgoing) {
-        actions.focusMessage({ chatId: chat_id, messageId: id, noHighlight: true });
+        actions.focusLastMessage();
       }
 
       // Edge case: New message in an old (not loaded) chat.
