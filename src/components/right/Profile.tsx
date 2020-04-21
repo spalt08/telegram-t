@@ -13,7 +13,12 @@ import { GlobalActions } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
-import { getMessageContentIds, isChatPrivate, getSortedUserIds } from '../../modules/helpers';
+import {
+  getMessageContentIds,
+  isChatPrivate,
+  getSortedUserIds,
+  isChatBasicGroup,
+} from '../../modules/helpers';
 import { selectChatMessages, selectChat } from '../../modules/selectors';
 import { throttle } from '../../util/schedulers';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
@@ -22,6 +27,7 @@ import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
 import RippleEffect from '../ui/RippleEffect';
+import Loading from '../ui/Loading';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Document from '../common/Document';
@@ -50,6 +56,7 @@ type StateProps = {
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
+  hasMembersTab?: boolean;
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
 };
@@ -84,6 +91,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   resolvedUserId,
   chatMessages,
   isSearchTypeEmpty,
+  hasMembersTab,
   groupChatMembers,
   usersById,
   setMessageSearchMediaType,
@@ -95,14 +103,14 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   const [activeTab, setActiveTab] = useState(0);
 
   const tabTitles = useMemo(() => ([
-    ...(groupChatMembers ? ['Members'] : []),
+    ...(hasMembersTab ? ['Members'] : []),
     ...TAB_TITLES,
-  ].slice(0, 4)), [groupChatMembers]);
+  ].slice(0, 4)), [hasMembersTab]);
 
   const mediaTypes = useMemo(() => ([
-    ...(groupChatMembers ? ['members'] : []),
+    ...(hasMembersTab ? ['members'] : []),
     ...MEDIA_TYPES,
-  ].slice(0, 4)) as ApiMessageSearchType[], [groupChatMembers]);
+  ].slice(0, 4)) as ApiMessageSearchType[], [hasMembersTab]);
 
   const mediaType = mediaTypes[activeTab];
 
@@ -259,12 +267,14 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
             />
           ))
         ) : mediaType === 'members' ? (
-          memberIds.map((id) => (
-            <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
-              <PrivateChatInfo userId={id} forceShowSelf />
-              <RippleEffect />
-            </div>
-          ))
+          memberIds.length
+            ? memberIds.map((id) => (
+              <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
+                <PrivateChatInfo userId={id} forceShowSelf />
+                <RippleEffect />
+              </div>
+            ))
+            : <Loading />
         ) : null}
       </div>
     );
@@ -315,6 +325,7 @@ export default withGlobal<OwnProps>(
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
     const { byId: usersById } = global.users;
 
+    const hasMembersTab = !userId && chat && isChatBasicGroup(chat);
     const groupChatMembers = chat && chat.full_info && chat.full_info.members;
 
     let resolvedUserId;
@@ -328,7 +339,8 @@ export default withGlobal<OwnProps>(
       resolvedUserId,
       chatMessages,
       isSearchTypeEmpty: !searchType,
-      ...(!userId && groupChatMembers && {
+      hasMembersTab,
+      ...(hasMembersTab && groupChatMembers && {
         groupChatMembers,
         usersById,
       }),
