@@ -37,9 +37,7 @@ export function formatPhoneNumber(input: string, country?: Country) {
   let phoneNumber = input.replace(/[^\d]+/g, '');
   if (country) {
     phoneNumber = phoneNumber.substr(country.code.length - 1);
-  }
-
-  if (!country && input.startsWith('+')) {
+  } else if (input.startsWith('+')) {
     return input;
   }
 

@@ -140,6 +140,8 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
         onInput={onCodeChange}
         value={code}
         error={authError}
+        autoComplete="one-time-code"
+        inputMode="decimal"
       />
       {authIsLoading && <Loading />}
     </div>

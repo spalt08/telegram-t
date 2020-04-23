@@ -20,6 +20,7 @@
 
   &.item-count-2 {
     display: flex;
+    max-height: 27rem;
 
     > .media-inner:last-child {
       margin-left: var(--album-media-gap) !important;

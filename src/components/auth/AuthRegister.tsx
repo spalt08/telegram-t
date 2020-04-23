@@ -105,12 +105,14 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
           onChange={handleFirstNameChange}
           value={firstName}
           error={authError}
+          autoComplete="given-name"
         />
         <InputText
           id="registration-last-name"
           label="Last Name (optional)"
           onChange={handleLastNameChange}
           value={lastName}
+          autoComplete="family-name"
         />
         {isButtonShown && (
           <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>

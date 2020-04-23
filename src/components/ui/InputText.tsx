@@ -8,6 +8,8 @@ type OwnProps = {
   label?: string;
   error?: string;
   placeholder?: string;
+  autoComplete?: string;
+  inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -21,6 +23,8 @@ const InputText: FC<OwnProps> = ({
   label,
   error,
   placeholder,
+  autoComplete,
+  inputMode,
   onChange,
   onInput,
   onKeyPress,
@@ -42,11 +46,13 @@ const InputText: FC<OwnProps> = ({
         type="text"
         id={id}
         value={value || ''}
+        placeholder={placeholder || label}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         onChange={onChange}
         onInput={onInput}
         onKeyPress={onKeyPress}
         onBlur={onBlur}
-        placeholder={placeholder || label}
       />
       {(error || label) && (
         <label>{error || label}</label>

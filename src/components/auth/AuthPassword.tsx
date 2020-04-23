@@ -108,10 +108,10 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
         <InputPassword
           id="sign-in-password"
           showPassword={showPassword}
-          onChange={onPasswordChange}
-          onShowToggle={togglePasswordVisibility}
           value={password}
           error={authError}
+          onChange={onPasswordChange}
+          onShowToggle={togglePasswordVisibility}
         />
         {canSubmit && (
           <Button type="submit" isLoading={authIsLoading}>Next</Button>

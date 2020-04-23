@@ -35,9 +35,10 @@ const InputText: FC<OwnProps> = ({
         type={showPassword ? 'text' : 'password'}
         id={id}
         value={value || ''}
+        placeholder="Password"
+        autoComplete="current-password"
         onChange={onChange}
         onKeyPress={onKeyPress}
-        placeholder="Password"
       />
       <label>{error || 'Password'}</label>
       <div
