@@ -177,7 +177,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   );
   const customShape = getMessageCustomShape(message);
   const contentClassName = buildContentClassName(message, {
-    hasReply, customShape, isLastInGroup, isAlbum,
+    hasReply, customShape, isLastInGroup,
   });
 
   const handleSenderClick = useCallback((user?: ApiUser) => {
@@ -280,6 +280,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Album
             album={album}
             loadAndPlay={loadAndPlayMedia}
+            hasCustomAppendix={isLastInGroup && !text}
             onMediaClick={handleAlbumMediaClick}
           />
         )}
@@ -369,12 +370,11 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       className={containerClassName}
       data-message-id={messageId}
     >
-      {showAvatar && (
+      {showAvatar && isLastInGroup && (
         <Avatar
           size="small"
           user={sender}
           onClick={() => handleSenderClick(sender)}
-          className={!isLastInGroup ? 'hidden' : ''}
         />
       )}
       <div

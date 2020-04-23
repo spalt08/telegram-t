@@ -8,12 +8,10 @@ export function buildContentClassName(
     hasReply,
     customShape,
     isLastInGroup,
-    isAlbum,
   }: {
     hasReply?: boolean;
     customShape?: boolean | number;
     isLastInGroup?: boolean;
-    isAlbum?: boolean;
   } = {},
 ) {
   const {
@@ -70,7 +68,7 @@ export function buildContentClassName(
       classNames.push('has-solid-background');
     }
 
-    if (isLastInGroup && ((photo && !isAlbum) || !isMediaWithNoText)) {
+    if (isLastInGroup && (photo || !isMediaWithNoText)) {
       classNames.push('has-appendix');
     }
   }

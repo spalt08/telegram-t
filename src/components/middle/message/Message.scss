@@ -21,12 +21,26 @@
     transition: opacity .2s, transform .2s ease-in;
   }
 
+  > .Avatar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+
   &.last-in-group {
     margin-bottom: 0.625rem;
   }
 
   &.last-in-list {
     margin-bottom: 0.375rem;
+  }
+
+  &:not(.own) {
+    padding-left: 2.5rem;
+
+    .no-avatars & {
+      padding-left: 0;
+    }
   }
 
   &.own {

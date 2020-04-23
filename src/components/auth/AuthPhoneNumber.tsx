@@ -135,9 +135,10 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
         <InputText
           id="sign-in-phone-number"
           label="Phone Number"
-          onChange={handlePhoneNumberChange}
           value={fullNumber}
           error={authError}
+          inputMode="tel"
+          onChange={handlePhoneNumberChange}
         />
         <Checkbox
           id="sign-in-keep-session"

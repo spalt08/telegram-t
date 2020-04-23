@@ -49,22 +49,29 @@
       padding-right: 1rem;
     }
 
-    .site-description::after {
-      display: none;
-    }
-
     .media-inner {
       order: 2;
       flex-shrink: 0;
     }
   }
 
+  &:not(.with-square-photo) {
+    .site-name,
+    .site-title,
+    .site-description {
+      &:last-child::after {
+        content: '';
+        display: inline-block;
+        width: var(--meta-safe-area-size);
+        height: 0.5rem;
+      }
+    }
+  }
+
   .site-name,
   .site-description,
-  .site-link,
   .site-title {
     word-break: break-word;
-    max-width: calc(100% - var(--meta-safe-area-size));
   }
 
   .site-name {
@@ -80,13 +87,6 @@
   .site-description {
     line-height: 1rem;
     margin-bottom: 0;
-
-    &::after {
-      content: '';
-      display: inline-block;
-      width: var(--meta-safe-area-size);
-      height: 0.5rem;
-    }
   }
 }
 
