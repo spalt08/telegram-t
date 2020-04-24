@@ -6,6 +6,7 @@ import { ApiChat } from '../../api/types';
 
 import usePrevious from '../../hooks/usePrevious';
 import { mapValues, pick } from '../../util/iteratees';
+import { getChatOrder } from '../../modules/helpers';
 import prepareChats from '../common/helpers/prepareChats';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -46,15 +47,27 @@ const ChatList: FC<StateProps & DispatchProps> = ({
   return (
     <InfiniteScroll className="ChatList custom-scroll" items={listIds || []} onLoadMore={loadMoreChats}>
       {listIds && listIds.length && chatArrays ? (
-        <div>
-          {chatArrays.pinnedChats.map(({ id }) => (
-            <Chat key={id} chatId={id} selected={id === selectedChatId} orderDiff={orderDiffById[id]} />
+        <div teactFastList>
+          {chatArrays.pinnedChats.map(({ id }, i) => (
+            <Chat
+              key={id}
+              teactOrderKey={i}
+              chatId={id}
+              selected={id === selectedChatId}
+              orderDiff={orderDiffById[id]}
+            />
           ))}
           {chatArrays.pinnedChats.length > 0 && (
-            <div className="pinned-chats-divider" />
+            <div key="chats-divider" className="pinned-chats-divider" />
           )}
-          {chatArrays.otherChats.map(({ id }) => (
-            <Chat key={id} chatId={id} selected={id === selectedChatId} orderDiff={orderDiffById[id]} />
+          {chatArrays.otherChats.map((chat) => (
+            <Chat
+              key={chat.id}
+              teactOrderKey={getChatOrder(chat)}
+              chatId={chat.id}
+              selected={chat.id === selectedChatId}
+              orderDiff={orderDiffById[chat.id]}
+            />
           ))}
         </div>
       ) : listIds && listIds.length === 0 ? (

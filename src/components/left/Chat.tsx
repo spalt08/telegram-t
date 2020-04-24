@@ -54,6 +54,8 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusLastMessage'>;
 
+const ANIMATION_DURATION = 200;
+
 const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
   chat,
@@ -76,6 +78,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEnsureMessage(chatId, isAction ? lastMessage!.replyToMessageId : undefined, actionTargetMessage);
 
+  // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
     const element = ref.current!;
 
@@ -93,7 +96,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         element.classList.add('animate-transform');
         element.style.transform = '';
       });
+    } else {
+      return;
     }
+
+    setTimeout(() => {
+      fastRaf(() => {
+        element.classList.remove('animate-opacity', 'animate-transform');
+      });
+    }, ANIMATION_DURATION + 50);
   }, [orderDiff]);
 
   const handleClick = useCallback(() => {

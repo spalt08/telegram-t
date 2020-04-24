@@ -1,5 +1,14 @@
 declare const process: NodeJS.Process;
 
+declare namespace React {
+  interface Attributes {
+    // Optimization for DOM nodes prepends and inserts
+    teactFastList?: boolean;
+    // Optimization for DOM nodes reordering. Requires `teactFastList` for parent
+    teactOrderKey?: number;
+  }
+}
+
 type AnyLiteral = Record<string, any>;
 type AnyClass = new (...args: any[]) => any;
 type AnyFunction = (...args: any) => any;

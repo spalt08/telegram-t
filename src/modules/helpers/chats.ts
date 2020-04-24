@@ -87,3 +87,7 @@ export function getChatAvatarHash(
 export function isChatSummaryOnly(chat: ApiChat) {
   return !chat.lastMessage;
 }
+
+export function getChatOrder(chat: ApiChat) {
+  return Math.max(chat.joinDate || 0, chat.lastMessage ? chat.lastMessage.date : 0);
+}
