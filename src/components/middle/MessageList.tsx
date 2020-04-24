@@ -380,7 +380,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     <div ref={containerRef} id="MessageList" className={className} onScroll={handleScroll}>
       {messageIds ? (
         // @ts-ignore
-        <div className="messages-container" teactChildrenKeyOrder="asc">
+        <div className="messages-container" teactFastList>
           {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
         </div>
       ) : (
@@ -412,7 +412,9 @@ function renderMessages(
         if (message.id === memoFirstUnreadId) {
           return (
             <>
-              <div className="unread-divider"><span>Unread messages</span></div>
+              <div className="unread-divider" key="unread-divider">
+                <span>Unread messages</span>
+              </div>
               {renderedMessage}
             </>
           );
@@ -464,7 +466,9 @@ function renderMessages(
         if (message.id === memoFirstUnreadId) {
           return (
             <>
-              <div className="unread-divider"><span>Unread messages</span></div>
+              <div className="unread-divider" key="unread-divider">
+                <span>Unread messages</span>
+              </div>
               {renderedMessage}
             </>
           );
@@ -475,9 +479,12 @@ function renderMessages(
     });
 
     return (
-      // @ts-ignore
-      <div className="message-date-group" key={dateGroup.datetime} teactChildrenKeyOrder="asc">
-        <div className="message-date-header" key={-Infinity}>
+      <div
+        className="message-date-group"
+        key={dateGroup.datetime}
+        teactFastList
+      >
+        <div className="message-date-header" key="date-header">
           <span>{formatHumanDate(dateGroup.datetime)}</span>
         </div>
         {flatten(senderGroups)}

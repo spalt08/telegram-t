@@ -8,7 +8,7 @@ import { pick } from './util/iteratees';
 import Auth from './components/auth/Auth';
 import UiLoader from './components/common/UiLoader';
 import Main from './components/Main.async';
-// import Test from './pages/test/Test';
+// import Test from './components/test/TestOrdered';
 
 type StateProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
 
