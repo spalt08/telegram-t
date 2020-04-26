@@ -14,7 +14,9 @@ import windowSize from '../../../util/windowSize';
 
 const ANIMATION_DURATION = 200;
 
-export function animateOpening(message: ApiMessage, hasFooter: boolean, origin: MediaViewerOrigin) {
+export function animateOpening(
+  message: ApiMessage, hasFooter: boolean, origin: MediaViewerOrigin, bestImageData: string,
+) {
   const { mediaEl: fromImage } = getNodes(message, origin)!;
   if (!fromImage) {
     return;
@@ -53,7 +55,7 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, origin: 
   const fromScaleX = fromWidth / toWidth;
   const fromScaleY = fromHeight / toHeight;
 
-  const ghost = createGhost(fromImage);
+  const ghost = createGhost(bestImageData);
   applyStyles(ghost, {
     top: `${toTop}px`,
     left: `${toLeft}px`,
@@ -167,15 +169,21 @@ export function animateClosing(message: ApiMessage, origin: MediaViewerOrigin) {
   });
 }
 
-function createGhost<T extends HTMLImageElement | HTMLVideoElement>(element: T) {
+function createGhost(source: string | HTMLImageElement | HTMLVideoElement) {
   const ghost = document.createElement('div');
   ghost.classList.add('ghost');
 
-  const clonedElement = element.cloneNode() as T;
-  ['id', 'style', 'width', 'height', 'class'].forEach(((value) => {
-    clonedElement.removeAttribute(value);
-  }));
-  ghost.appendChild(clonedElement);
+  const img = new Image();
+
+  if (typeof source === 'string') {
+    img.src = source;
+  } else if (source instanceof HTMLVideoElement) {
+    img.src = source.poster;
+  } else {
+    img.src = source.src;
+  }
+
+  ghost.appendChild(img);
 
   return ghost;
 }

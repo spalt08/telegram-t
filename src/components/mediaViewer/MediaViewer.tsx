@@ -113,6 +113,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     mediaData: blobUrlFull,
     downloadProgress,
   } = useMediaWithDownloadProgress(getMediaHash(true));
+  const bestImageData = (!isVideo && blobUrlFull) || blobUrlPreview || blobUrlPictogram || thumbDataUri;
   const photoDimensions = isPhoto ? getPhotoFullDimensions((
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
@@ -139,13 +140,13 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     if (isRichAnimations && isOpen && !prevMessage && !prevAvatarOwner) {
       const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
-      animateOpening(message!, hasFooter, origin!);
+      animateOpening(message!, hasFooter, origin!, bestImageData!);
     }
 
     if (isRichAnimations && !isOpen && (prevMessage || prevAvatarOwner)) {
       animateClosing(prevMessage!, prevOrigin!);
     }
-  }, [isRichAnimations, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner]);
+  }, [isRichAnimations, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner, bestImageData]);
 
   const getMessageId = (fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
