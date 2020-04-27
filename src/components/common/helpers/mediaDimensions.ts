@@ -86,7 +86,7 @@ export function getMediaViewerAvailableDimensions(withFooter: boolean): IDimensi
   }
 
   return {
-    width: Math.min(windowWidth - 3 * REM, windowWidth * 0.76),
+    width: windowWidth,
     height: windowHeight - occupiedHeightRem * REM,
   };
 }
