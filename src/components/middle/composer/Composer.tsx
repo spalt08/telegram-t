@@ -15,7 +15,7 @@ import {
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 
-import { selectChatMessage } from '../../../modules/selectors';
+import { selectChatMessage, selectIsChatWithBot } from '../../../modules/selectors';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
@@ -44,7 +44,7 @@ import WebPagePreview from './WebPagePreview';
 import './Composer.scss';
 
 type StateProps = {
-  isPrivateChat: boolean;
+  canAttachPoll: boolean;
   editedMessage?: ApiMessage;
   chatId?: number;
   draft?: ApiFormattedText;
@@ -64,7 +64,7 @@ const MAX_NESTING_PARENTS = 5;
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
 const Composer: FC<StateProps & DispatchProps> = ({
-  isPrivateChat,
+  canAttachPoll,
   editedMessage,
   chatId,
   draft,
@@ -198,8 +198,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
     closeSymbolMenu();
   }, [closeSymbolMenu, sendMessage]);
 
-  const handlePollSend = useCallback((pollSummary: ApiNewPoll) => {
-    sendMessage({ pollSummary });
+  const handlePollSend = useCallback((poll: ApiNewPoll) => {
+    sendMessage({ poll });
     closePollModal();
   }, [closePollModal, sendMessage]);
 
@@ -283,7 +283,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
           )}
           <AttachMenu
             isOpen={isAttachMenuOpen}
-            isPrivateChat={isPrivateChat}
+            canAttachPoll={canAttachPoll}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             onClose={closeAttachMenu}
@@ -342,7 +342,7 @@ export default memo(withGlobal(
     const { connectionState, chats: { draftsById } } = global;
 
     return {
-      isPrivateChat: !!chatId && isChatPrivate(chatId),
+      canAttachPoll: !!chatId && (!isChatPrivate(chatId) || !!selectIsChatWithBot(global, chatId)),
       editedMessage,
       connectionState,
       chatId,

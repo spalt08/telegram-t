@@ -113,7 +113,14 @@ export interface ApiPoll {
   };
 }
 
-export type ApiNewPoll = ApiPoll['summary'];
+export type ApiNewPoll = {
+  summary: ApiPoll['summary'];
+  quiz?: {
+    correctAnswers: string[];
+    solution?: string;
+    solutionEntities?: ApiMessageEntity[];
+  };
+};
 
 export interface ApiAction {
   text: string;
