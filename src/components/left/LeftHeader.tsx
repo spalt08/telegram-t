@@ -104,6 +104,10 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: SUPPORT_BOT_ID });
   }, [openChat]);
 
+  const isSearchFocused = content === LeftColumnContent.RecentChats
+    || content === LeftColumnContent.GlobalSearch
+    || content === LeftColumnContent.Contacts;
+
   function renderHeaderContent() {
     switch (headerKey) {
       case LeftColumnContent.Settings:
@@ -112,7 +116,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return (
           <SearchInput
             value={contactsFilter || searchQuery}
-            focused={content === LeftColumnContent.RecentChats || content === LeftColumnContent.GlobalSearch}
+            focused={isSearchFocused}
             isLoading={isLoading}
             onChange={onSearchQuery}
             onFocus={handleSearchFocus}

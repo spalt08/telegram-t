@@ -32,6 +32,7 @@ import usePrevious from '../../../hooks/usePrevious';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
+import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
 import MessageInput from './MessageInput';
@@ -59,6 +60,8 @@ enum MainButtonState {
 
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 const MAX_NESTING_PARENTS = 5;
+// When voice recording is active, composer placeholder will hide to prevent overlapping
+const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
 const Composer: FC<StateProps & DispatchProps> = ({
   isPrivateChat,
@@ -247,32 +250,31 @@ const Composer: FC<StateProps & DispatchProps> = ({
         <ComposerEmbeddedMessage />
         <WebPagePreview messageText={!attachment ? html : ''} />
         <div className="message-input-wrapper">
-          <Button
+          <ResponsiveHoverButton
             className={`${isSymbolMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onMouseEnter={openSymbolMenu}
+            onActivate={openSymbolMenu}
           >
             <i className="icon-smile" />
-          </Button>
+          </ResponsiveHoverButton>
           <MessageInput
             id="message-input-text"
             html={!attachment ? html : ''}
-            placeholder="Message"
+            placeholder={window.innerWidth < SCREEN_WIDTH_TO_HIDE_PLACEHOLDER && !activeVoiceRecording ? 'Message' : ''}
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
           />
           {!activeVoiceRecording && !editedMessage && (
-            <Button
+            <ResponsiveHoverButton
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
               color="translucent"
-              onMouseEnter={openAttachMenu}
-              onFocus={openAttachMenu}
+              onActivate={openAttachMenu}
             >
               <i className="icon-attach" />
-            </Button>
+            </ResponsiveHoverButton>
           )}
           {activeVoiceRecording && (
             <span className="recording-state">

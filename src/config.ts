@@ -31,3 +31,7 @@ export const SUPPORT_BOT_ID = 470000;
 export const DRAFT_DEBOUNCE = 10000; // 10s
 
 export const EDITABLE_INPUT_ID = 'editable-message-text';
+
+export const MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1120; // px
+export const MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN = 830; // px
+export const MOBILE_SCREEN_MAX_WIDTH = 600; // px

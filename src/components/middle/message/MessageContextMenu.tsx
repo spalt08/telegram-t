@@ -72,9 +72,12 @@ const MessageContextMenu: FC<OwnProps> = ({
       if (x + menuRect.width + SCROLLBAR_WIDTH < rootRect.width + rootRect.left) {
         setPositionX('left');
         x += 3;
-      } else {
+      } else if (x - menuRect.width > 0) {
         setPositionX('right');
         x -= 3;
+      } else {
+        setPositionX('left');
+        x = 16;
       }
 
       if (y + menuRect.height + SCROLLBAR_WIDTH < rootRect.height + rootRect.top) {

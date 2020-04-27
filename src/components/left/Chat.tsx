@@ -110,9 +110,8 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleClick = useCallback(() => {
     if (selected) {
       focusLastMessage();
-    } else {
-      openChat({ id: chatId });
     }
+    openChat({ id: chatId });
   }, [selected, focusLastMessage, openChat, chatId]);
 
   if (!chat) {

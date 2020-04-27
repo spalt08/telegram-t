@@ -3,6 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { openSystemFileDialog } from '../../../util/systemFileDialog';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -29,7 +30,7 @@ const AttachMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    if (isOpen) {
+    if (isOpen && !IS_TOUCH_ENV) {
       closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
@@ -82,9 +83,9 @@ const AttachMenu: FC<OwnProps> = ({
       onClose={onClose}
       className="AttachMenu"
       onCloseAnimationEnd={onClose}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      noCloseOnBackdrop
+      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
       <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>

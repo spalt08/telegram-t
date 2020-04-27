@@ -5,6 +5,7 @@ import './ui/globalSearch';
 import './ui/messageSearch';
 import './ui/users';
 import './ui/settings';
+import './ui/misc';
 
 import './api/initial';
 import './api/chats';

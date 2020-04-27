@@ -15,7 +15,8 @@ import {
 import { FocusDirection, ISettings, MediaViewerOrigin } from '../types';
 
 export type GlobalState = {
-  showChatInfo: boolean;
+  isChatInfoShown: boolean;
+  isLeftColumnShown: boolean;
   isUiReady: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
