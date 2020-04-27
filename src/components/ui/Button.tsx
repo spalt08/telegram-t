@@ -1,6 +1,6 @@
 import { MouseEvent as ReactMouseEvent, FocusEvent, RefObject } from 'react';
 
-import React, { FC, useRef } from '../../lib/teact/teact';
+import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -12,12 +12,13 @@ import './Button.scss';
 type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
 type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
 
-type OwnProps = {
+export type OwnProps = {
   ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
   onClick?: Function;
   onMouseDown?: Function;
   onMouseEnter?: Function;
+  onMouseLeave?: Function;
   onFocus?: Function;
   children: any;
   size?: 'default' | 'smaller';
@@ -38,6 +39,7 @@ const Button: FC<OwnProps> = ({
   onClick,
   onMouseDown,
   onMouseEnter,
+  onMouseLeave,
   onFocus,
   children,
   size = 'default',
@@ -67,6 +69,13 @@ const Button: FC<OwnProps> = ({
     isLoading && 'loading',
   );
 
+  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (onMouseDown) {
+      onMouseDown(e);
+    }
+  }, [onMouseDown]);
+
   if (href) {
     return (
       <a
@@ -89,8 +98,9 @@ const Button: FC<OwnProps> = ({
       type={type}
       className={fullClassName}
       onClick={onClick ? onClick as MouseEventHandler : undefined}
-      onMouseDown={onMouseDown ? onMouseDown as MouseEventHandler : undefined}
+      onMouseDown={handleMouseDown}
       onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
+      onMouseLeave={onMouseLeave ? onMouseLeave as MouseEventHandler : undefined}
       onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
       aria-label={ariaLabel}
       title={ariaLabel}

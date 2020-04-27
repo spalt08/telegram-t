@@ -2,6 +2,10 @@
   position: relative;
   max-width: var(--max-width);
 
+  @media (max-width: 600px) {
+    max-width: 75vw;
+  }
+
   .text-content {
     margin: 0;
     word-break: break-word;

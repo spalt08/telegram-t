@@ -5,3 +5,60 @@
     height: calc(100% - 3.75rem);
   }
 }
+
+#RightColumnOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-modal);
+
+  #RightColumn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 26.5rem;
+    height: 100%;
+    transform: translate3d(26.5rem, 0, 0);
+    transition: transform .3s ease;
+    background: var(--color-background);
+    border-left: 1px solid var(--color-borders);
+    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+    will-change: transform;
+
+    @media (max-width: 600px) {
+      width: 100vw;
+      transform: translate3d(110vw, 0, 0);
+    }
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: black;
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+
+  &:not(.shown) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &.open {
+    #RightColumn {
+      transform: translate3d(0, 0, 0);
+    }
+
+    @media (max-width: 600px) {
+      .overlay-backdrop {
+        opacity: 0.5;
+      }
+    }
+  }
+}

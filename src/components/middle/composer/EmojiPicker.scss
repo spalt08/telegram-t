@@ -14,5 +14,29 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
+
+    @media (max-width: 600px) {
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: block;
+      white-space: nowrap;
+      padding: 0.4375rem 0;
+
+      scrollbar-width: none;
+      scrollbar-color: rgba(0, 0, 0, 0);
+
+      &::-webkit-scrollbar {
+        height: 0;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0);
+      }
+
+      .symbol-set-button {
+        display: inline-flex;
+        vertical-align: middle;
+      }
+    }
   }
 }

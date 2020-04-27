@@ -13,6 +13,9 @@ import {
   selectIsMediaViewerOpen,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useShowTransition from '../../hooks/useShowTransition';
+import useUpdateOnResize from '../../hooks/useUpdateOnResize';
+import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 
 import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
@@ -56,6 +59,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isOpen = contentKey !== undefined;
   const isSearch = contentKey === ColumnContent.Search;
   const isForwarding = contentKey === ColumnContent.Forward;
+  const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+
+  useUpdateOnResize();
 
   const close = useCallback(() => {
     switch (contentKey) {
@@ -73,9 +79,14 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         }
         openUserInfo({ id: undefined });
         break;
-      case ColumnContent.Search:
+      case ColumnContent.Search: {
+        const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.blur();
+        }
         closeMessageTextSearch();
         break;
+      }
       case ColumnContent.Forward:
         closeForwardMenu();
         break;
@@ -83,6 +94,14 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isScrolledDown]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+
+  // Close Right Column when it transforms into overlayed state on screen resize
+  useEffect(() => {
+    if (isOpen && isOverlaying) {
+      close();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverlaying]);
 
   // We need to clear `isSharedMedia` state, when changing between `ChatInfo` and `UserInfo` to prevent confusion
   useLayoutEffectWithPrevDeps(([prevContentKey, prevSelectedChatId]) => {
@@ -95,7 +114,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [contentKey, selectedChatId]);
 
-  if (!isOpen) {
+  const { transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+
+  if (!isOverlaying && !isOpen) {
     return undefined;
   }
 
@@ -118,19 +139,32 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }
 
-  return (
-    <div id="RightColumn">
-      <RightHeader
-        onClose={close}
-        isSearch={isSearch}
-        isForwarding={isForwarding}
-        profileState={profileState}
-      />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
-        {renderContent}
-      </Transition>
-    </div>
-  );
+  function renderColumn() {
+    return (
+      <div id="RightColumn">
+        <RightHeader
+          onClose={close}
+          isSearch={isSearch}
+          isForwarding={isForwarding}
+          profileState={profileState}
+        />
+        <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
+          {renderContent}
+        </Transition>
+      </div>
+    );
+  }
+
+  if (isOverlaying) {
+    return (
+      <div id="RightColumnOverlay" className={transitionClassNames}>
+        <div className="overlay-backdrop" onClick={close} />
+        {renderColumn()}
+      </div>
+    );
+  }
+
+  return renderColumn();
 };
 
 export default withGlobal(
@@ -138,7 +172,7 @@ export default withGlobal(
     const {
       chats,
       users,
-      showChatInfo,
+      isChatInfoShown,
     } = global;
 
     const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
@@ -148,7 +182,7 @@ export default withGlobal(
     const selectedUserId = users.selectedId;
     const areChatsLoaded = Boolean(chats.listIds);
     const isUserInfo = Boolean(selectedUserId && areChatsLoaded);
-    const isChatInfo = Boolean(selectedChatId && showChatInfo && areChatsLoaded);
+    const isChatInfo = Boolean(selectedChatId && isChatInfoShown && areChatsLoaded);
 
     const contentKey = isForwarding ? (
       ColumnContent.Forward

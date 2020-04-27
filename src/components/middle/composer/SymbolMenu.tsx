@@ -4,6 +4,8 @@ import React, {
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
+import { IS_TOUCH_ENV } from '../../../util/environment';
+
 import Menu from '../../ui/Menu';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -50,7 +52,7 @@ const SymbolMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    if (isOpen) {
+    if (isOpen && !IS_TOUCH_ENV) {
       closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
@@ -113,8 +115,9 @@ const SymbolMenu: FC<OwnProps> = ({
       onClose={onClose}
       className="SymbolMenu"
       onCloseAnimationEnd={onClose}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
       <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
       <div className="SymbolMenu-main">

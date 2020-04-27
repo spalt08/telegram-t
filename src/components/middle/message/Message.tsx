@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef, useState,
+  FC, memo, useCallback, useLayoutEffect, useRef, useState, useEffect,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -95,6 +95,7 @@ const NBSP = '\u00A0';
 const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
 const RELOCATED_FOCUS_OFFSET = 1200;
+const LONG_TAP_DURATION_MS = 250;
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -232,6 +233,61 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleContextMenuHide = useCallback(() => {
     setContextMenuPosition(undefined);
   }, []);
+
+  // Support for context menu on touch-devices
+  useEffect(() => {
+    const messageEl = elementRef.current;
+    if (!messageEl) {
+      return undefined;
+    }
+
+    let timer: number;
+
+    const clearLongPressTimer = () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+
+    const emulateContextMenuEvent = (originalEvent: TouchEvent) => {
+      clearLongPressTimer();
+
+      const { clientX, clientY } = originalEvent.touches[0];
+
+      if (contextMenuPosition) {
+        return;
+      }
+
+      // temporarily intercept and clear the next click
+      messageEl.addEventListener('touchend', function cancelClickOnce(e) {
+        messageEl.removeEventListener('touchend', cancelClickOnce, true);
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        e.stopPropagation();
+      }, true);
+
+      setIsContextMenuOpen(true);
+      setContextMenuPosition({ x: clientX, y: clientY });
+    };
+
+    const startLongPressTimer = (e: TouchEvent) => {
+      clearLongPressTimer();
+      timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);
+    };
+
+    messageEl.addEventListener('touchstart', startLongPressTimer, true);
+    messageEl.addEventListener('touchcancel', clearLongPressTimer, true);
+    messageEl.addEventListener('touchend', clearLongPressTimer, true);
+    messageEl.addEventListener('touchmove', clearLongPressTimer, true);
+
+    return () => {
+      clearLongPressTimer();
+      messageEl.removeEventListener('touchstart', startLongPressTimer, true);
+      messageEl.removeEventListener('touchcancel', clearLongPressTimer, true);
+      messageEl.removeEventListener('touchend', clearLongPressTimer, true);
+      messageEl.removeEventListener('touchmove', clearLongPressTimer, true);
+    };
+  }, [contextMenuPosition]);
 
   const handleVoteSend = useCallback((options: string[]) => {
     sendPollVote({ chatId, messageId, options });

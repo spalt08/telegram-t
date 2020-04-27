@@ -19,7 +19,7 @@ addReducer('openChatWithInfo', (global, actions, payload) => {
   global = updateSelectedChatId(global, id);
   global = {
     ...global,
-    showChatInfo: true,
+    isChatInfoShown: true,
   };
 
   return global;

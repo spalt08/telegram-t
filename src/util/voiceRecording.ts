@@ -33,7 +33,7 @@ async function ensureOpusMediaRecorder() {
 }
 
 export function isSupported() {
-  return 'getUserMedia' in navigator.mediaDevices;
+  return navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices;
 }
 
 export async function start(analyzerCallback: Function) {

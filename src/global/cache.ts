@@ -4,7 +4,12 @@ import { GlobalState } from './types';
 
 import { throttle } from '../util/schedulers';
 import {
-  DEBUG, GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY,
+  DEBUG,
+  GLOBAL_STATE_CACHE_DISABLED,
+  GLOBAL_STATE_CACHE_KEY,
+  GRAMJS_SESSION_ID_KEY,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
 import { filterKeys } from '../util/iteratees';
 
@@ -66,11 +71,10 @@ function updateCache(global: GlobalState) {
 
   const reducedGlobal: GlobalState = {
     ...global,
-    chats: {
-      ...global.chats,
-      replyingToById: {},
-      editingById: {},
-    },
+    isChatInfoShown: reduceShowChatInfo(global),
+    isLeftColumnShown: true,
+    users: reduceUsers(global),
+    chats: reduceChats(global),
     connectionState: undefined,
     isUiReady: false,
     lastSyncTime: undefined,
@@ -92,6 +96,30 @@ function updateCache(global: GlobalState) {
 
   const json = JSON.stringify(reducedGlobal);
   localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
+}
+
+function reduceShowChatInfo(global: GlobalState) {
+  return window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+    ? global.isChatInfoShown
+    : false;
+}
+
+function reduceUsers(global: GlobalState) {
+  return window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+    ? global.users
+    : {
+      ...global.users,
+      selectedId: undefined,
+    };
+}
+
+function reduceChats(global: GlobalState) {
+  return {
+    ...global.chats,
+    replyingToById: {},
+    editingById: {},
+    ...(window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH && { selectedId: undefined }),
+  };
 }
 
 function reduceMessages(global: GlobalState) {

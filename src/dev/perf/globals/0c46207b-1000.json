@@ -1,5 +1,6 @@
 {
-  "showRightColumn": true,
+  "isChatInfoShown": true,
+  "isLeftColumnShown": true,
   "fileUploads": {
     "byMessageKey": {}
   },

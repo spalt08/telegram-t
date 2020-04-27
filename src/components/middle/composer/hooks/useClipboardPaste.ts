@@ -2,6 +2,7 @@ import { useEffect } from '../../../../lib/teact/teact';
 import { ApiAttachment, ApiMessage } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
+import { EDITABLE_INPUT_ID } from '../../../../config';
 
 const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_MESSAGE_LENGTH = 4096;
@@ -17,7 +18,7 @@ export default (
         return;
       }
 
-      const input = document.getElementById('editable-message-text');
+      const input = document.getElementById(EDITABLE_INPUT_ID);
       if (input !== document.activeElement) {
         return;
       }

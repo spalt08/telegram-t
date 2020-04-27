@@ -11,6 +11,7 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
+import { EDITABLE_INPUT_ID } from '../../../config';
 
 type OwnProps = {
   id: string;
@@ -103,7 +104,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     <div id={id}>
       <div
         ref={inputRef}
-        id="editable-message-text"
+        id={EDITABLE_INPUT_ID}
         className={buildClassName('form-control custom-scroll', html.length > 0 && 'touched')}
         contentEditable
         onClick={focusInput}

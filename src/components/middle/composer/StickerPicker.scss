@@ -46,6 +46,10 @@
   .symbol-set-container {
     width: 25rem;
     line-height: 0;
+
+    @media (max-width: 600px) {
+      width: 100%;
+    }
   }
 
   .sticker-set-button {

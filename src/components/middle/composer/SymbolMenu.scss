@@ -2,6 +2,10 @@
   --menu-width: 26.25rem;
   --menu-height: 23.25rem;
 
+  @media (max-width: 600px) {
+    --menu-width: calc(100vw - 2rem);
+  }
+
   &-main {
     width: var(--menu-width);
     height: var(--menu-height);
@@ -25,11 +29,13 @@
     }
   }
 
-  .backdrop {
-    position: absolute;
-    top: -1rem;
-    right: auto;
-    width: 3.5rem;
+  .is-pointer-env & {
+    .backdrop {
+      position: absolute;
+      top: -1rem;
+      right: auto;
+      width: 3.5rem;
+    }
   }
 
   .bubble {
@@ -52,10 +58,6 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-  }
-
-  &-container {
-    position: relative;
   }
 
   &-button {

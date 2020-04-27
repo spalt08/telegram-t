@@ -1,4 +1,3 @@
-import { MouseEvent } from 'react';
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -31,13 +30,12 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   unreadCount,
   focusLastMessage,
 }) => {
-  const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  const handleClick = useCallback(() => {
     if (!show) {
       return;
     }
 
     focusLastMessage();
-    e.currentTarget.blur();
   }, [show, focusLastMessage]);
 
   const fabClassName = buildClassName(

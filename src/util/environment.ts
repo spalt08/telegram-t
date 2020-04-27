@@ -19,3 +19,5 @@ export function getPlatform() {
 
   return os;
 }
+
+export const IS_TOUCH_ENV = 'ontouchstart' in document.documentElement;
