@@ -11,6 +11,7 @@ export default (
   insertTextAndUpdateCursor: (text: string) => void,
   setAttachment: (attachment: ApiAttachment) => void,
   editedMessage: ApiMessage | undefined,
+  openPollModal: () => void,
 ) => {
   useEffect(() => {
     async function handlePaste(e: ClipboardEvent) {
@@ -29,6 +30,11 @@ export default (
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
 
       if (!file && !pastedText) {
+        return;
+      }
+
+      if (pastedText.startsWith('%QUIZ%')) {
+        openPollModal();
         return;
       }
 

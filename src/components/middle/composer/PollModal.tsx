@@ -52,13 +52,43 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
   useEffect(() => focusInput(questionInputRef), [focusInput, isOpen]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const solutionEl = solutionRef.current;
 
     if (solutionEl && solution !== solutionEl.innerHTML) {
       solutionEl.innerHTML = solution;
     }
   }, [solution]);
+
+  useEffect(() => {
+    function handlePaste(e: ClipboardEvent) {
+      if (!e.clipboardData) {
+        return;
+      }
+
+      const pastedText = e.clipboardData.getData('text').substring(0);
+      if (!pastedText.startsWith('%QUIZ%')) {
+        return;
+      }
+
+      e.preventDefault();
+
+      requestAnimationFrame(() => {
+        const parsed = JSON.parse(pastedText.replace('%QUIZ%', ''));
+        setIsQuizMode(true);
+        setQuestion(parsed.question);
+        setOptions(parsed.options);
+        setCorrectOption(parsed.correctOption);
+        setSolution(parsed.solution);
+      });
+    }
+
+    document.addEventListener('paste', handlePaste, false);
+
+    return () => {
+      document.removeEventListener('paste', handlePaste, false);
+    };
+  }, []);
 
   const addNewOption = useCallback((newOptions: string[] = []) => {
     setOptions([...newOptions, '']);
@@ -232,7 +262,12 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
         <h3 className="options-header">Options</h3>
 
         {isQuizMode ? (
-          <RadioGroup name="correctOption" options={renderRadioOptions()} onChange={setCorrectOption} />
+          <RadioGroup
+            name="correctOption"
+            options={renderRadioOptions()}
+            selected={correctOption}
+            onChange={setCorrectOption}
+          />
         ) : (
           renderOptions()
         )}

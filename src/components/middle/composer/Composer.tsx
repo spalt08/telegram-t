@@ -38,7 +38,7 @@ import SymbolMenu from './SymbolMenu.async';
 import MessageInput from './MessageInput';
 import ComposerEmbeddedMessage from './ComposerEmbeddedMessage';
 import AttachmentModal from './AttachmentModal.async';
-import PollModal from './PollModal.async';
+import PollModal from './PollModal';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
@@ -138,7 +138,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const handleEditComplete = useEditing(htmlRef, setHtml, editedMessage, resetComposer, openDeleteModal, editMessage);
   useDraft(draft, chatId, html, htmlRef, setHtml, editedMessage, saveDraft, clearDraft);
-  useClipboardPaste(insertTextAndUpdateCursor, setAttachment, editedMessage);
+  useClipboardPaste(insertTextAndUpdateCursor, setAttachment, editedMessage, openPollModal);
 
   const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
     setAttachment(await buildAttachment(file.name, file, isQuick));
