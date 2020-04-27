@@ -30,9 +30,14 @@
     }
   }
 
-  &:not(.open) {
-    .media-viewer-head {
+  &:not(.open),
+  .closing {
+    .SenderInfo {
       pointer-events: none;
+      .Avatar,
+      .meta {
+        transition: none;
+      }
     }
   }
 
