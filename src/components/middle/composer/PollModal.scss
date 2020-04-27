@@ -37,6 +37,23 @@
     }
   }
 
+  .quiz-mode {
+    margin-top: 1.5rem;
+
+    .options-header {
+      margin-bottom: 0.5rem;
+    }
+
+    .note {
+      margin-top: 0.5rem;
+    }
+  }
+
+  .note {
+    font-size: smaller;
+    color: var(--color-text-secondary)
+  }
+
   .input-group:last-child {
     margin-bottom: 0.5rem;
   }

@@ -10,8 +10,3 @@ export function selectUserByUserName(global: GlobalState, userName: string) {
     (user) => user.username.toLowerCase() === userName.toLowerCase(),
   );
 }
-
-export function selectOpenUser(global: GlobalState) {
-  const { byId, selectedId } = global.users;
-  return selectedId ? byId[selectedId] : undefined;
-}

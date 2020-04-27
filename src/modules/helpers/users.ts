@@ -175,6 +175,10 @@ export function isDeletedUser(user: ApiUser) {
     || user.status.type === 'userStatusEmpty';
 }
 
+export function isUserBot(user: ApiUser) {
+  return user.type === 'userTypeBot';
+}
+
 export function getSenderName(chatId: number, sender?: ApiUser) {
   if (!sender || isChatPrivate(chatId)) {
     return undefined;

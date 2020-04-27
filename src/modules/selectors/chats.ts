@@ -1,7 +1,9 @@
 import { ApiChat } from '../../api/types';
 import { GlobalState } from '../../global/types';
 
-import { getPrivateChatUserId, isChatSuperGroup, isUserOnline } from '../helpers';
+import {
+  getPrivateChatUserId, isChatSuperGroup, isUserBot, isUserOnline,
+} from '../helpers';
 import { selectUser } from './users';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
@@ -47,4 +49,12 @@ export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
 
     return onlineCount;
   }, 0);
+}
+
+export function selectIsChatWithBot(global: GlobalState, chatId: number) {
+  const chat = selectChat(global, chatId);
+  const userId = chat && getPrivateChatUserId(chat);
+  const user = userId && selectUser(global, userId);
+
+  return user && isUserBot(user);
 }

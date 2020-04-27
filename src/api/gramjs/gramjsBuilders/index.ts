@@ -98,16 +98,30 @@ export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
   return new GramJs.InputMediaDocument({ id: inputDocument });
 }
 
-export function buildInputPoll(pollSummary: ApiNewPoll, randomId: BigInt.BigInteger) {
-  const { question, answers } = pollSummary;
+export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteger) {
+  const { summary, quiz } = pollParams;
 
   const poll = new GramJs.Poll({
     id: randomId,
-    question,
-    answers: answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
+    question: summary.question,
+    answers: summary.answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
+    quiz: summary.quiz,
   });
 
-  return new GramJs.InputMediaPoll({ poll });
+  if (!quiz) {
+    return new GramJs.InputMediaPoll({ poll });
+  }
+
+  const correctAnswers = quiz.correctAnswers.map((key) => Buffer.from(key));
+  const { solution } = quiz;
+  const solutionEntities = quiz.solutionEntities ? quiz.solutionEntities.map(buildMtpMessageEntity) : [];
+
+  return new GramJs.InputMediaPoll({
+    poll,
+    correctAnswers,
+    solution,
+    solutionEntities,
+  });
 }
 
 export function generateRandomBigInt() {

@@ -517,7 +517,7 @@ export function buildLocalMessage(
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
-  pollSummary?: ApiNewPoll,
+  poll?: ApiNewPoll,
 ): ApiMessage {
   const localId = localMessageCounter--;
 
@@ -534,7 +534,7 @@ export function buildLocalMessage(
       ...(attachment && buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
-      ...(pollSummary && buildNewPoll(pollSummary, localId)),
+      ...(poll && buildNewPoll(poll, localId)),
     },
     date: Math.round(Date.now() / 1000),
     isOutgoing: true,
@@ -643,11 +643,11 @@ function buildUploadingMedia(
   }
 }
 
-function buildNewPoll(pollSummary: ApiNewPoll, localId: number) {
+function buildNewPoll(poll: ApiNewPoll, localId: number) {
   return {
     poll: {
       id: localId.toString(),
-      summary: pick(pollSummary, ['question', 'answers']),
+      summary: pick(poll.summary, ['question', 'answers']),
       results: {},
     },
   };

@@ -129,7 +129,7 @@ export async function sendMessage(
     attachment,
     sticker,
     gif,
-    pollSummary,
+    poll,
   }: {
     chat: ApiChat;
     currentUserId: number;
@@ -139,12 +139,12 @@ export async function sendMessage(
     attachment?: ApiAttachment;
     sticker?: ApiSticker;
     gif?: ApiVideo;
-    pollSummary?: ApiNewPoll;
+    poll?: ApiNewPoll;
   },
   onProgress: OnUploadProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
+    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
   );
   onUpdate({
     '@type': 'newMessage',
@@ -163,8 +163,8 @@ export async function sendMessage(
     media = buildInputMediaDocument(sticker);
   } else if (gif) {
     media = buildInputMediaDocument(gif);
-  } else if (pollSummary) {
-    media = buildInputPoll(pollSummary, randomId);
+  } else if (poll) {
+    media = buildInputPoll(poll, randomId);
   }
 
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;

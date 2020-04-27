@@ -12,7 +12,7 @@ import './AttachMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  isPrivateChat: boolean;
+  canAttachPoll: boolean;
   onFileSelect: (file: File, isQuick: boolean) => void;
   onPollCreate: () => void;
   onClose: () => void;
@@ -22,7 +22,7 @@ const MENU_CLOSE_TIMEOUT = 250;
 let closeTimeout: number;
 
 const AttachMenu: FC<OwnProps> = ({
-  isOpen, isPrivateChat, onFileSelect, onPollCreate, onClose,
+  isOpen, canAttachPoll, onFileSelect, onPollCreate, onClose,
 }) => {
   const isMouseInside = useRef(false);
 
@@ -89,7 +89,7 @@ const AttachMenu: FC<OwnProps> = ({
     >
       <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
       <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
-      {!isPrivateChat && (
+      {canAttachPoll && (
         <MenuItem icon="poll" onClick={onPollCreate}>Poll</MenuItem>
       )}
     </Menu>
