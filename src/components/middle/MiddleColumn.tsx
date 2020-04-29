@@ -7,6 +7,8 @@ import { selectChat } from '../../modules/selectors';
 import { isChatChannel } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
+import usePrevious from '../../hooks/usePrevious';
+import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN } from '../../config';
 
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
@@ -28,6 +30,18 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   openChat,
 }) => {
   const [showFab, setShowFab] = useState(false);
+  const prevChatId = usePrevious(openChatId, true);
+  const prevIsChannel = usePrevious(isChannel, true);
+
+  const isDesktop = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
+
+  const renderingChatId = isDesktop
+    ? openChatId
+    : openChatId || prevChatId;
+
+  const renderingIsChannel = isDesktop
+    ? isChannel
+    : isChannel !== undefined ? isChannel : prevIsChannel;
 
   useEffect(() => {
     return openChatId
@@ -39,11 +53,11 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="MiddleColumn">
-      {openChatId && (
+      {renderingChatId && (
         <div className="messages-layout">
-          <MiddleHeader chatId={openChatId} />
-          <MessageList key={openChatId} onFabToggle={setShowFab} />
-          {!isChannel && <Composer />}
+          <MiddleHeader chatId={renderingChatId} />
+          <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
+          {!renderingIsChannel && <Composer />}
           <ScrollDownButton show={showFab} />
         </div>
       )}
