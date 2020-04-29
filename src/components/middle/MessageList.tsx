@@ -13,8 +13,8 @@ import {
   selectViewportIds,
   selectIsViewportNewest,
   selectFirstUnreadId,
-  selectOpenChat,
   selectFocusedMessageId,
+  selectChat,
 } from '../../modules/selectors';
 import {
   getMessageOriginalId,
@@ -44,11 +44,11 @@ import ActionMessage from './ActionMessage';
 import './MessageList.scss';
 
 type OwnProps = {
+  chatId: number;
   onFabToggle: (show: boolean) => void;
 };
 
 type StateProps = {
-  chatId?: number;
   isChannelChat?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
@@ -507,16 +507,13 @@ function determineStuckDate(container: HTMLElement, forceHide = false) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const chat = selectOpenChat(global);
+  (global, { chatId }): StateProps => {
+    const chat = selectChat(global, chatId);
     if (!chat) {
       return {};
     }
 
-    const chatId = chat.id;
-
     return {
-      chatId,
       isChannelChat: isChatChannel(chat),
       messageIds: selectViewportIds(global, chatId),
       messagesById: selectChatMessages(global, chatId),
