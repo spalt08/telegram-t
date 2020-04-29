@@ -17,31 +17,22 @@ const cropperResultOptions: Croppie.ResultOptions & { type: 'blob' } = {
   circle: false,
 };
 
-let Croppie: typeof import('croppie');
-let cropper: Croppie;
+type ICroppie = typeof import('croppie');
+let Croppie: ICroppie;
+let croppiePromise: Promise<{ default: ICroppie }>;
 
-async function requireCroppie() {
-  try {
-    [Croppie] = await Promise.all([
-      // For some reason the type checker expects module to be imported within `default` namespace,
-      // but in fact it is imported directly.
-      import('croppie') as unknown as typeof import('croppie'),
-      // @ts-ignore
-      import('croppie/croppie.css'),
-    ]);
-
-    return true;
-  } catch (err) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-
-    return false;
+async function ensureCroppie() {
+  if (!croppiePromise) {
+    croppiePromise = import('../../lib/croppie') as unknown as Promise<{ default: ICroppie }>;
+    Croppie = (await croppiePromise).default;
   }
+
+  return croppiePromise;
 }
 
-async function processFile(imgFile: File) {
+let cropper: Croppie;
+
+async function initCropper(imgFile: File) {
   try {
     const cropContainer = document.getElementById('avatar-crop');
     if (!cropContainer) {
@@ -66,8 +57,10 @@ async function processFile(imgFile: File) {
     const dataUri = await blobToDataUri(imgFile);
     await cropper.bind({ url: dataUri });
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   }
 }
 
@@ -86,14 +79,15 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
     }
 
     if (!isCroppieReady) {
-      requireCroppie().then(setIsCroppieReady);
+      ensureCroppie().then(() => setIsCroppieReady(true));
+
       return;
     }
 
-    void processFile(file);
-  }, [isCroppieReady, file]);
+    initCropper(file);
+  }, [file, isCroppieReady]);
 
-  async function cropAvatar() {
+  async function handleCropClick() {
     if (!cropper) {
       return;
     }
@@ -117,7 +111,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
       ) : (
         <Loading />
       )}
-      <Button className="confirm-button" round color="primary" onClick={cropAvatar}>
+      <Button className="confirm-button" round color="primary" onClick={handleCropClick}>
         <i className="icon-check" />
       </Button>
     </Modal>
