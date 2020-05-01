@@ -24,9 +24,21 @@ const AnimationFade: FC<IProps> = ({
     fromChildrenRef.current = prevChildren;
   }
 
+  if (isOpen && !prevIsOpen) {
+    console.log('transition start show');
+    console.time('transition');
+  } else if (!isOpen && prevIsOpen) {
+    console.log('transition start hide');
+    console.time('transition');
+  }
+
   return (
     shouldRender && (
-      <div className={[className, 'overlay', ...transitionClassNames].join(' ')} onClick={onClick}>
+      <div
+        className={[className, 'overlay', ...transitionClassNames].join(' ')}
+        onClick={onClick}
+        onTransitionEnd={() => console.timeEnd('transition')}
+      >
         {isOpen ? children() : fromChildrenRef.current!()}
       </div>
     )
