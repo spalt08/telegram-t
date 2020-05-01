@@ -1,8 +1,9 @@
 import React, {
-  FC, useEffect, useState,
+  FC, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import './AnimationFade.scss';
+import usePrevious from '../../hooks/usePrevious';
 
 interface IProps {
   show: boolean;
@@ -24,11 +25,22 @@ const AnimationFade: FC<IProps> = ({ show, children }) => {
     }
   };
 
+  const isOpen = show;
+  const prevIsOpen = usePrevious(isOpen);
+
+  if (isOpen && !prevIsOpen) {
+    console.log('transition start show');
+    console.time('transition');
+  } else if (!isOpen && prevIsOpen) {
+    console.log('transition start hide');
+    console.time('transition');
+  }
+
   return (
     shouldRender && (
       <div
         className={`AnimationFade${show ? 'In' : 'Out'}`}
-        onAnimationEnd={onAnimationEnd}
+        onAnimationEnd={() => { console.timeEnd('transition'); onAnimationEnd(); }}
       >
         {children}
       </div>
