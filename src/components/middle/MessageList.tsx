@@ -8,6 +8,7 @@ import { GlobalActions } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { MESSAGE_LIST_SENSITIVE_AREA, MESSAGE_LIST_SLICE } from '../../config';
+import { IS_TOUCH_ENV } from '../../util/environment';
 import {
   selectChatMessages,
   selectViewportIds,
@@ -65,6 +66,9 @@ const INDICATOR_TOP_MARGIN = 10;
 const SCROLL_THROTTLE = 1000;
 const FOCUSING_DURATION = 1000;
 
+// TODO Check if this workaround is only required for iOS 13+
+const SCROLL_DEBOUNCE_ARGS = IS_TOUCH_ENV ? [700, false, true] : [1000, true, false];
+
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, false);
 const scrollToLastMessage = throttle((container: Element) => {
   container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
@@ -118,8 +122,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [loadMoreBackwards, loadMoreForwards, loadMoreBoth] = useMemo(
     () => [
-      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
-      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+      // @ts-ignore
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), ...SCROLL_DEBOUNCE_ARGS),
+      // @ts-ignore
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), ...SCROLL_DEBOUNCE_ARGS),
       debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Both }), 1000, true, false),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
