@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
@@ -29,7 +29,7 @@ import {
   orderBy,
   pick,
 } from '../../util/iteratees';
-import { debounce, throttle } from '../../util/schedulers';
+import { debounce, fastRaf, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
@@ -74,7 +74,6 @@ let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
 let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
-let scrollTimeout: number;
 let isScrollTopJustUpdated = false;
 
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -94,7 +93,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const scrollOffsetRef = useRef<number>();
 
   const [viewportMessageIds, setViewportMessageIds] = useState([]);
-  const [isScrolling, setIsScrolling] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [containerHeight, setContainerHeight] = useState();
 
   useOnChange(() => {
@@ -236,7 +235,6 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
     const container = containerRef.current!;
     scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
-    setIsScrolling(true);
 
     if (!isFocusing) {
       processInfiniteScroll();
@@ -249,20 +247,23 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         return;
       }
 
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      scrollTimeout = window.setTimeout(() => setIsScrolling(false), SCROLL_THROTTLE + 100);
+      setIsScrolled(true);
+      updateStickyDateOnScroll(container);
 
-      requestAnimationFrame(() => {
+      fastRaf(() => {
         updateFabVisibility();
         updateViewportMessages();
-        determineStuckDate(container);
       });
 
       setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
     });
-  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages, updateFabVisibility]);
+  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateFabVisibility, updateViewportMessages]);
+
+  useLayoutEffect(() => {
+    if (isScrolled) {
+      updateStickyDateOnScroll(containerRef.current!, true);
+    }
+  }, [isScrolled]);
 
   // Container resize observer.
   useEffect(() => {
@@ -348,12 +349,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
       container.scrollTop = newScrollTop;
       isScrollTopJustUpdated = true;
-      determineStuckDate(container, true);
     }
 
     scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
     updateFabVisibility();
-    requestAnimationFrame(updateViewportMessages);
+    fastRaf(updateViewportMessages);
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
@@ -373,7 +373,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     'MessageList custom-scroll',
     isPrivate && 'no-avatars',
     isChannelChat && 'is-channel no-avatars bottom-padding',
-    isScrolling && 'is-scrolling',
+    isScrolled && 'scrolled',
   );
 
   return (
@@ -495,14 +495,50 @@ function renderMessages(
   return flatten(dateGroups);
 }
 
-function determineStuckDate(container: HTMLElement, forceHide = false) {
+let scrollEndTimeout: number | undefined;
+
+function updateStickyDateOnScroll(container: HTMLElement, forceHide = false) {
+  if (!scrollEndTimeout) {
+    const currentInvisible = container.querySelector<HTMLDivElement>('.message-date-header.invisible');
+    if (currentInvisible) {
+      currentInvisible.classList.remove('invisible');
+    }
+
+    const stuckDateEl = findStuckDate(container);
+    if (!stuckDateEl) {
+      return;
+    }
+
+    stuckDateEl.classList.add('invisible');
+
+    if (forceHide) {
+      stuckDateEl.classList.add('no-transition');
+    }
+
+    fastRaf(() => {
+      stuckDateEl.classList.remove('invisible', 'no-transition');
+    });
+  } else {
+    clearTimeout(scrollEndTimeout);
+  }
+
+  scrollEndTimeout = window.setTimeout(() => {
+    const stuckDateEl = findStuckDate(container);
+    if (stuckDateEl) {
+      stuckDateEl.classList.add('invisible');
+    }
+    scrollEndTimeout = undefined;
+  }, SCROLL_THROTTLE + 100);
+}
+
+function findStuckDate(container: HTMLElement) {
   const allElements = container.querySelectorAll<HTMLDivElement>('.message-date-header');
   const containerTop = container.scrollTop;
 
-  Array.from(allElements).forEach((el) => {
-    const isStuck = el.offsetTop - containerTop === INDICATOR_TOP_MARGIN;
-    el.classList.toggle('stuck', isStuck);
-    el.classList.toggle('hidden', isStuck && forceHide);
+  return Array.from(allElements).find((el) => {
+    const { offsetTop, offsetHeight } = el;
+    const top = offsetTop - containerTop;
+    return -offsetHeight <= top && top <= INDICATOR_TOP_MARGIN;
   });
 }
 
