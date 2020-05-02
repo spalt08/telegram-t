@@ -23,6 +23,7 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
   autoPlay: 'autoplay',
   autoComplete: 'autocomplete',
 };
+const INDEX_KEY_PREFIX = '__indexKey#';
 
 const $head: VirtualDomHead = { children: [] };
 let DEBUG_virtualTreeSize = 1;
@@ -223,7 +224,7 @@ function renderChildren(
   $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
 ) {
   if ($new.props.teactFastList) {
-    return renderOrderedChildren($current, $new, currentEl);
+    return renderFastListChildren($current, $new, currentEl);
   }
 
   const maxLength = Math.max($current.children.length, $new.children.length);
@@ -252,24 +253,32 @@ function renderChildren(
   return newChildren;
 }
 
-function renderOrderedChildren($current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement) {
+function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement) {
   const newKeys = new Set(
     $new.children.map(($newChild) => ('props' in $newChild && $newChild.props.key)),
   );
 
   let currentRemainingIndex = 0;
   const remainingByKey = $current.children
-    .reduce((acc, $currentChild) => {
-      const key = 'props' in $currentChild ? $currentChild.props.key : undefined;
-      if (key === undefined) {
-        throw new Error('[Teact] Parent with `teactFastList` should not contain children without keys');
-      }
+    .reduce((acc, $currentChild, i) => {
+      let key = 'props' in $currentChild ? $currentChild.props.key : undefined;
 
       // First we handle removed children
-      if (!newKeys.has(key)) {
+      if (key && !newKeys.has(key)) {
         renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
 
         return acc;
+      } else if (!key) {
+        const $newChild = $new.children[i];
+        const newChildKey = ('props' in $newChild) ? $newChild.props.key : undefined;
+        // If a non-key element remains at the same index we preserve it with a virtual `key`
+        if ($newChild && !newChildKey) {
+          key = `${INDEX_KEY_PREFIX}${i}`;
+        } else {
+          renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
+
+          return acc;
+        }
       }
 
       // Then we build up info about remaining children
@@ -291,7 +300,7 @@ function renderOrderedChildren($current: VirtualRealElement, $new: VirtualRealEl
   let currentPreservedIndex = 0;
 
   $new.children.forEach(($newChild, i) => {
-    const key = 'props' in $newChild ? $newChild.props.key : undefined;
+    const key = 'props' in $newChild ? $newChild.props.key : `${INDEX_KEY_PREFIX}${i}`;
     const currentChildInfo = remainingByKey[key];
 
     if (!currentChildInfo) {
@@ -311,12 +320,12 @@ function renderOrderedChildren($current: VirtualRealElement, $new: VirtualRealEl
       fragmentQueue = undefined;
     }
 
-    // This is a "magic" property that telling us the element is updated
+    // This is a "magic" `teactOrderKey` property that tells us the element is updated
     const order = 'props' in $newChild ? $newChild.props.teactOrderKey : undefined;
     const shouldMoveNode = currentChildInfo.index !== currentPreservedIndex && currentChildInfo.order !== order;
     const isMovingDown = shouldMoveNode && currentPreservedIndex > currentChildInfo.index;
 
-    // When the node goes down, preserved indexing actually breaks, so the magic `teactOrderKey` should help.
+    // When the node goes down, preserved indexing actually breaks, so the "magic" should help.
     if (!shouldMoveNode || isMovingDown) {
       currentPreservedIndex++;
     }
