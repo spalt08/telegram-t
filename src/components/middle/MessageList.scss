@@ -98,26 +98,26 @@
   }
 
   .message-date-header {
-    position: sticky;
-    top: 0.625rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
     z-index: var(--z-message-date-header);
     pointer-events: none;
+    opacity: 1;
 
-    &.stuck {
-      transition: opacity .3s ease;
+    transition: opacity .3s ease;
+
+    &.no-transition {
+      transition: none !important;
+    }
+
+    &.invisible {
       opacity: 0;
-
-      &.hidden {
-        visibility: hidden;
-      }
     }
   }
 
-  &.is-scrolling .message-date-header.stuck {
-    visibility: visible !important;
-    opacity: 1;
+  &.scrolled .message-date-header {
+    position: sticky;
+    top: 0.625rem;
   }
 
   .unread-divider,
