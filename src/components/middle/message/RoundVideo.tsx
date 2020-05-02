@@ -38,7 +38,7 @@ const RoundVideo: FC<OwnProps> = ({
 }) => {
   const playingProgressRef = useRef<HTMLDivElement>();
   const playerRef = useRef<HTMLVideoElement>();
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isActivated, setIsActivated] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
@@ -55,41 +55,34 @@ const RoundVideo: FC<OwnProps> = ({
   } = useShowTransition(isTransferring && loadAndPlay);
 
   useEffect(() => {
-    if (blobUrl) {
-      const playerEl = playerRef.current!;
-      playerEl.addEventListener('timeupdate', () => {
-        setProgress(playerEl.currentTime / playerEl.duration);
-      });
+    if (!isActivated) {
+      return;
     }
-  }, [blobUrl]);
 
-  useEffect(() => {
     const circumference = 94 * 2 * Math.PI;
     const strokeDashOffset = circumference - progress * circumference;
 
-    if (isPlaying) {
-      const playerEl = playerRef.current!;
-      const playingProgressEl = playingProgressRef.current!;
-      const svgEl = playingProgressEl.firstElementChild;
+    const playerEl = playerRef.current!;
+    const playingProgressEl = playingProgressRef.current!;
+    const svgEl = playingProgressEl.firstElementChild;
 
-      if (!svgEl) {
-        playingProgressEl.innerHTML = `<svg width="200px" height="200px">
+    if (!svgEl) {
+      playingProgressEl.innerHTML = `<svg width="200px" height="200px">
           <circle cx="100" cy="100" r="94" class="progress-circle" transform="rotate(-90, 100, 100)"
             stroke-dasharray="${circumference} ${circumference}"
             stroke-dashoffset="${circumference}"
           />
         </svg>`;
-      } else {
-        (svgEl.firstElementChild as SVGElement).setAttribute('stroke-dashoffset', strokeDashOffset.toString());
-      }
-
-      setProgress(playerEl.currentTime / playerEl.duration);
+    } else {
+      (svgEl.firstElementChild as SVGElement).setAttribute('stroke-dashoffset', strokeDashOffset.toString());
     }
-  }, [isPlaying, progress]);
+
+    setProgress(playerEl.currentTime / playerEl.duration);
+  }, [isActivated, progress]);
 
   const handleClick = useCallback(() => {
     const playerEl = playerRef.current!;
-    if (isPlaying) {
+    if (isActivated) {
       if (playerEl.paused) {
         playerEl.play();
       } else {
@@ -97,14 +90,21 @@ const RoundVideo: FC<OwnProps> = ({
       }
     } else {
       playerEl.currentTime = 0;
-      setIsPlaying(true);
+      setIsActivated(true);
     }
-  }, [isPlaying]);
+  }, [isActivated]);
+
+  const handleTimeUpdate = useCallback((e: React.UIEvent<HTMLVideoElement>) => {
+    const playerEl = e.currentTarget;
+
+    setProgress(playerEl.currentTime / playerEl.duration);
+  }, []);
 
   const handleEnded = useCallback(() => {
-    setIsPlaying(false);
+    setIsActivated(false);
     setProgress(0);
     playerRef.current!.play();
+
     requestAnimationFrame(() => {
       playingProgressRef.current!.innerHTML = '';
     });
@@ -138,13 +138,14 @@ const RoundVideo: FC<OwnProps> = ({
           className={`full-media ${transitionClassNames}`}
           width={ROUND_VIDEO_DIMENSIONS}
           height={ROUND_VIDEO_DIMENSIONS}
-          autoPlay={!isPlaying}
-          muted={!isPlaying}
-          loop={!isPlaying}
+          autoPlay={!isActivated}
+          muted={!isActivated}
+          loop={!isActivated}
           playsinline
           poster={thumbDataUri}
           ref={playerRef}
-          onEnded={handleEnded}
+          onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
+          onEnded={isActivated ? handleEnded : undefined}
         >
           <source src={blobUrl} />
         </video>
@@ -156,8 +157,8 @@ const RoundVideo: FC<OwnProps> = ({
         </div>
       )}
       <div className="message-media-duration">
-        {isPlaying ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
-        {(!isPlaying || playerRef.current!.paused) && <i className="icon-muted-chat" />}
+        {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
+        {(!isActivated || playerRef.current!.paused) && <i className="icon-muted-chat" />}
       </div>
     </div>
   );
