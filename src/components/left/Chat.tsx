@@ -103,6 +103,8 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     setTimeout(() => {
       fastRaf(() => {
         element.classList.remove('animate-opacity', 'animate-transform');
+        element.style.opacity = '';
+        element.style.transform = '';
       });
     }, ANIMATION_DURATION + 50);
   }, [orderDiff]);
