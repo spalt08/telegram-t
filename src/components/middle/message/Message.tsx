@@ -7,6 +7,7 @@ import { GlobalActions } from '../../../global/types';
 import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
 import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
 
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import {
   selectChat,
@@ -234,8 +235,12 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     setContextMenuPosition(undefined);
   }, []);
 
-  // Support for context menu on touch-devices
+  // Support context menu on touch-devices
   useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      return undefined;
+    }
+
     const messageEl = elementRef.current;
     if (!messageEl) {
       return undefined;
@@ -275,6 +280,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);
     };
 
+    // @peft Consider event delegation
     messageEl.addEventListener('touchstart', startLongPressTimer, true);
     messageEl.addEventListener('touchcancel', clearLongPressTimer, true);
     messageEl.addEventListener('touchend', clearLongPressTimer, true);
@@ -405,12 +411,16 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   let style = '';
   if (!isAlbum && (photo || video)) {
-    const { width } = photo
-      ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
-      : (video && (video.isRound
-        ? { width: ROUND_VIDEO_DIMENSIONS }
-        : calculateVideoDimensions(video, isOwn, isForwarded))
-      ) || {};
+    let width: number | undefined;
+    if (photo) {
+      width = calculateInlineImageDimensions(photo, isOwn, isForwarded).width;
+    } else if (video) {
+      if (video.isRound) {
+        width = ROUND_VIDEO_DIMENSIONS;
+      } else {
+        width = calculateVideoDimensions(video, isOwn, isForwarded).width;
+      }
+    }
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
