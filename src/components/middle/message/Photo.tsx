@@ -77,7 +77,7 @@ const Photo: FC<OwnProps> = ({
         onCancelUpload();
       }
     } else if (!fullMediaData) {
-      setIsDownloadAllowed((isAllowed: boolean) => !isAllowed);
+      setIsDownloadAllowed((isAllowed) => !isAllowed);
     } else if (onClick) {
       onClick();
     }

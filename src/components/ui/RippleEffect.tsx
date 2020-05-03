@@ -17,7 +17,7 @@ const DELAY_MS = 90;
 const MAX_ACTUAL_DELAY_MS = 200;
 
 const RippleEffect: FC<{ delayed?: boolean }> = ({ delayed = false }) => {
-  const [ripples, setRipples] = useState([]);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
   const lastClickAtRef = useRef<number>();
 
   const cleanUpDebounced = useMemo(() => {

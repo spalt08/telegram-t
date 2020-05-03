@@ -96,7 +96,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const scrollOffsetRef = useRef<number>();
 
-  const [viewportMessageIds, setViewportMessageIds] = useState([]);
+  const [viewportMessageIds, setViewportMessageIds] = useState<number[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const [containerHeight, setContainerHeight] = useState();
 

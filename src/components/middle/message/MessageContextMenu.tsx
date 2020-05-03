@@ -49,8 +49,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const [positionX, setPositionX] = useState('right');
-  const [positionY, setPositionY] = useState('bottom');
+  const [positionX, setPositionX] = useState<'right' | 'left'>('right');
+  const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
   const [style, setStyle] = useState('');
   const copyOptions = getMessageCopyOptions(message, onClose);
 

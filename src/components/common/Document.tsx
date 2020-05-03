@@ -47,7 +47,7 @@ const Document: FC<OwnProps> = ({
         onCancelUpload();
       }
     } else {
-      setIsDownloadAllowed((isAllowed: boolean) => !isAllowed);
+      setIsDownloadAllowed((isAllowed) => !isAllowed);
     }
   }, [isUploading, onCancelUpload]);
 
