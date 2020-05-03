@@ -161,7 +161,7 @@
     justify-content: center;
     align-items: center;
 
-    &.has-viewer {
+    &.interactive {
       cursor: pointer;
     }
   }
@@ -193,6 +193,25 @@
     justify-content: center;
   }
 
+  .icon-download {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+
+    &:before {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.375rem;
+      height: 3.375rem;
+      border-radius: 50%;
+      background: rgba(black, 0.25);
+    }
+  }
+
   .message-media-duration,
   .message-upload-progress {
     background: rgba(0, 0, 0, .25);
@@ -214,11 +233,11 @@
   }
 
   .message-media-play-button {
-    width: 4rem;
-    height: 4rem;
+    width: 3.375rem;
+    height: 3.375rem;
     border-radius: 50%;
     background: rgba(black, 0.25);
-    padding: 0.75rem;
+    padding: 0.5rem;
 
     i {
       font-size: 2.5rem;

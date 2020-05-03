@@ -7,13 +7,13 @@ export type WorkerMessageData = {
   type: 'update';
   update: ApiUpdate;
 } | {
-  messageId: number;
   type: 'methodResponse';
+  messageId: string;
   response?: ThenArg<MethodResponse<keyof Methods>>;
   error?: { message: string };
 } | {
-  messageId: number;
   type: 'methodCallback';
+  messageId: string;
   callbackArgs: any[];
 } | {
   type: 'unhandledError';
@@ -24,14 +24,20 @@ export interface WorkerMessageEvent {
   data: WorkerMessageData;
 }
 
-export type OriginMessageData = {
+export type OriginRequest = {
   type: 'initApi';
+  messageId?: string;
   args: [string];
 } | {
-  messageId?: number;
   type: 'callMethod';
+  messageId?: string;
   name: keyof Methods;
   args: MethodArgs<keyof Methods>;
+};
+
+export type OriginMessageData = OriginRequest | {
+  type: 'cancelProgress';
+  messageId: string;
 };
 
 export interface OriginMessageEvent {

@@ -129,7 +129,7 @@ export function downloadMedia(args: { url: string; mediaFormat: ApiMediaFormat }
   return downloadMediaWithClient(args, client, isConnected, onProgress);
 }
 
-export function uploadFile(file: File, onProgress?: (progress: number) => void) {
+export function uploadFile(file: File, onProgress?: ApiOnProgress) {
   return client.uploadFile({ file, onProgress });
 }
 

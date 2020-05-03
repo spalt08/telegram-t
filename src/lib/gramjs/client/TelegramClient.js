@@ -389,6 +389,10 @@ class TelegramClient {
                     fileWriter.write(result.bytes)
 
                     if (args.progressCallback) {
+                        if (args.progressCallback.isCanceled) {
+                            throw new Error('USER_CANCELED')
+                        }
+
                         const progress = fileWriter.getValue().length / fileSize
                         args.progressCallback(progress)
                     }

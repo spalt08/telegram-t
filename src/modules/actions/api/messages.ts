@@ -1,10 +1,10 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiMessage } from '../../../api/types';
+import { ApiChat, ApiMessage, ApiOnProgress } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { MESSAGE_LIST_SLICE } from '../../../config';
-import { callApi } from '../../../api/gramjs';
+import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import { areSortedArraysIntersecting, buildCollectionByKey } from '../../../util/iteratees';
 import {
   addUsers,
@@ -25,7 +25,8 @@ import {
   selectRealLastReadId,
   selectChatMessage,
 } from '../../selectors';
-import { getMessageKey } from '../../helpers';
+
+const uploadProgressCallbacks: Record<string, ApiOnProgress> = {};
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
@@ -123,24 +124,40 @@ addReducer('sendMessage', (global, actions, payload) => {
   } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
-  void callApi('sendMessage', {
-    chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
-  }, (messageLocalId: number, progress: number) => {
-    const messageKey = getMessageKey(chat.id, messageLocalId);
+  const progressCallback = attachment ? (progress: number, messageLocalId: number) => {
+    if (!uploadProgressCallbacks[messageLocalId]) {
+      uploadProgressCallbacks[messageLocalId] = progressCallback!;
+    }
+
     const newGlobal = getGlobal();
 
     setGlobal({
       ...newGlobal,
       fileUploads: {
-        byMessageKey: {
-          ...newGlobal.fileUploads.byMessageKey,
-          [messageKey]: { progress },
+        byMessageLocalId: {
+          ...newGlobal.fileUploads.byMessageLocalId,
+          [messageLocalId]: { progress },
         },
       },
     });
-  });
+  } : undefined;
 
-  actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
+  (async () => {
+    await callApi('sendMessage', {
+      chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
+    }, progressCallback);
+
+    if (progressCallback) {
+      const callbackKey = Object.keys(uploadProgressCallbacks).find((key) => (
+        uploadProgressCallbacks[key] === progressCallback
+      ));
+      if (callbackKey) {
+        delete uploadProgressCallbacks[callbackKey];
+      }
+    }
+
+    actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
+  })();
 });
 
 addReducer('editMessage', (global, actions, payload) => {
@@ -160,8 +177,20 @@ addReducer('editMessage', (global, actions, payload) => {
   actions.setChatEditing({ chatId: chat.id, messageId: undefined });
 });
 
-addReducer('cancelSendingMessage', () => {
-  // const { chatId, messageId } = payload!;
+addReducer('cancelSendingMessage', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+  const message = selectChatMessage(global, chatId, messageId);
+  const progressCallback = message && uploadProgressCallbacks[message.previousLocalId || message.id];
+  if (!progressCallback) {
+    return;
+  }
+
+  cancelApiProgress(progressCallback);
+  actions.apiUpdate({
+    '@type': 'deleteMessages',
+    ids: [messageId],
+    chatId,
+  });
 });
 
 addReducer('pinMessage', (global, actions, payload) => {

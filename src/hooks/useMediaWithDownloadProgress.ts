@@ -1,4 +1,4 @@
-import { useState, useEffect } from '../lib/teact/teact';
+import { useState, useEffect, useRef } from '../lib/teact/teact';
 
 import { ApiMediaFormat } from '../api/types';
 
@@ -15,12 +15,24 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
   const forceUpdate = useForceUpdate();
   const [downloadProgress, setDownloadProgress] = useState(mediaData ? 1 : 0);
+  const isDownloadingRef = useRef(false);
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(forceUpdate);
+      isDownloadingRef.current = true;
+      mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(() => {
+        isDownloadingRef.current = false;
+        forceUpdate();
+      });
     }
   }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate]);
+
+  useEffect(() => {
+    if (noLoad && isDownloadingRef.current) {
+      mediaLoader.cancelProgress(setDownloadProgress);
+      setDownloadProgress(0);
+    }
+  }, [noLoad]);
 
   return { mediaData, downloadProgress };
 };

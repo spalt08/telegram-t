@@ -72,7 +72,7 @@ export type GlobalState = {
   };
 
   fileUploads: {
-    byMessageKey: Record<string, {
+    byMessageLocalId: Record<string, {
       progress: number;
     }>;
   };

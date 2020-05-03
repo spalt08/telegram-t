@@ -4,7 +4,6 @@ import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
 import { selectChat, selectIsChatWithSelf } from './chats';
 import { selectUser } from './users';
 import {
-  getMessageKey,
   getMessageText,
   getSendingState,
   isChatBasicGroup,
@@ -154,8 +153,7 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
-  const messageKey = getMessageKey(message.chatId, message.previousLocalId || message.id);
-  const fileTransfer = global.fileUploads.byMessageKey[messageKey];
+  const fileTransfer = global.fileUploads.byMessageLocalId[message.previousLocalId || message.id];
 
   return fileTransfer ? fileTransfer.progress : undefined;
 }

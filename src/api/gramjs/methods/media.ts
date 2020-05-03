@@ -89,10 +89,7 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
-    const progressCallback = onProgress ? (progress: number) => {
-      onProgress(progress);
-    } : undefined;
-    const data = await client.downloadMedia(entity, { sizeType, progressCallback });
+    const data = await client.downloadMedia(entity, { sizeType, progressCallback: onProgress });
     const mimeType = entity instanceof GramJs.Message
       ? getMessageMediaMimeType(entity, Boolean(sizeType))
       : (entity as GramJs.Document).mimeType;
