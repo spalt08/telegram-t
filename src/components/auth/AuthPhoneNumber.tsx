@@ -44,8 +44,8 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   clearAuthError,
   loadNearestCountry,
 }) => {
-  const [country, setCountry] = useState(undefined);
-  const [phoneNumber, setPhoneNumber] = useState(undefined);
+  const [country, setCountry] = useState();
+  const [phoneNumber, setPhoneNumber] = useState();
   const [isTouched, setIsTouched] = useState(false);
 
   const fullNumber = getNumberWithCode(phoneNumber, country);

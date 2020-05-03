@@ -81,7 +81,7 @@ const RoundVideo: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (!mediaData) {
-      setIsDownloadAllowed((isAllowed: boolean) => !isAllowed);
+      setIsDownloadAllowed((isAllowed) => !isAllowed);
 
       return;
     }

@@ -26,7 +26,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
     isLoading,
     onChange,
   } = props;
-  const [filter, setFilter] = useState(undefined);
+  const [filter, setFilter] = useState();
   const [filteredList, setFilteredList] = useState(countryList);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 

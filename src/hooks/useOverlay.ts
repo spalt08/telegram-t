@@ -1,6 +1,6 @@
 import { useCallback, useState } from '../lib/teact/teact';
 
-export default (isDisabled = false) => {
+export default (isDisabled = false): [boolean, AnyToVoidFunction, AnyToVoidFunction] => {
   const [isOpen, setIsOpen] = useState(false);
 
   const open = useCallback(() => {

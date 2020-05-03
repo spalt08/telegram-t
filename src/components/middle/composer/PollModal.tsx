@@ -32,7 +32,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   const [options, setOptions] = useState<string[]>(['']);
   const [isQuizMode, setIsQuizMode] = useState(false);
   const [solution, setSolution] = useState<string>();
-  const [correctOption, setCorrectOption] = useState(false);
+  const [correctOption, setCorrectOption] = useState<string>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
   const focusInput = useCallback((ref: RefObject<HTMLInputElement>) => {
@@ -100,15 +100,15 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     const answers = optionsTrimmed
       .map((text, index) => ({
         text: text.trim(),
-        option: index.toString(),
-        ...(index.toString() === correctOption && { correct: true }),
+        option: String(index),
+        ...(String(index) === correctOption && { correct: true }),
       }));
 
     const payload: ApiNewPoll = {
       summary: {
         question: questionTrimmed,
         answers,
-        quiz: isQuizMode,
+        ...(isQuizMode && { quiz: isQuizMode }),
       },
     };
 

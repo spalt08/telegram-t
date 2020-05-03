@@ -24,9 +24,9 @@ const TRACKING_END_FRAME = 180;
 const AuthCode: FC<StateProps & DispatchProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
-  const [code, setCode] = useState(undefined);
-  const [idleMonkeyData, setIdleMonkeyData] = useState(undefined);
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
+  const [code, setCode] = useState();
+  const [idleMonkeyData, setIdleMonkeyData] = useState();
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);
@@ -112,7 +112,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
             className={!isTracking ? 'hidden' : 'shown'}
             animationData={trackingMonkeyData}
             play={isTracking}
-            playSegment={isTracking && getTrackingFrames()}
+            playSegment={isTracking ? getTrackingFrames() : undefined}
             speed={2}
             noLoop
           />

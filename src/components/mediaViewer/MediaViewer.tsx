@@ -72,7 +72,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   openForwardMenu,
   animationLevel,
 }) => {
-  const [, onMediaQueryChanged] = useState(undefined);
+  const [, onMediaQueryChanged] = useState();
   const prevOrigin = usePrevious(origin);
   const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
