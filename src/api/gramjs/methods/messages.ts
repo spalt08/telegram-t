@@ -10,6 +10,7 @@ import {
   ApiVideo,
   ApiNewPoll,
   ApiMessageEntity,
+  ApiOnProgress,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
@@ -36,11 +37,6 @@ import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { requestChatUpdate } from './chats';
 import { fetchFile } from '../../../util/files';
-
-type OnUploadProgress = (
-  messageLocalId: number,
-  progress: number, // Float between 0 and 1.
-) => void;
 
 let onUpdate: OnApiUpdate;
 
@@ -141,7 +137,7 @@ export async function sendMessage(
     gif?: ApiVideo;
     poll?: ApiNewPoll;
   },
-  onProgress: OnUploadProgress,
+  onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
     chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
@@ -158,7 +154,7 @@ export async function sendMessage(
 
   let media: GramJs.TypeInputMedia | undefined;
   if (attachment) {
-    media = await uploadMedia(localMessage, attachment, onProgress);
+    media = await uploadMedia(localMessage, attachment, onProgress!);
   } else if (sticker) {
     media = buildInputMediaDocument(sticker);
   } else if (gif) {
@@ -221,16 +217,20 @@ export async function editMessage({
   }), true);
 }
 
-async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: OnUploadProgress) {
+async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
     filename, blobUrl, mimeType, quick, voice,
   } = attachment;
 
   const file = await fetchFile(blobUrl, filename);
-  const inputFile = await uploadFile(file, (progress) => {
-    onProgress(localMessage.id, progress);
-  });
-
+  const patchedOnProgress: ApiOnProgress = (progress) => {
+    if (onProgress.isCanceled) {
+      patchedOnProgress.isCanceled = true;
+    } else {
+      onProgress(progress, localMessage.id);
+    }
+  };
+  const inputFile = await uploadFile(file, patchedOnProgress);
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (quick) {

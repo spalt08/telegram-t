@@ -2,7 +2,7 @@
   "isChatInfoShown": true,
   "isLeftColumnShown": true,
   "fileUploads": {
-    "byMessageKey": {}
+    "byMessageLocalId": {}
   },
   "recentEmojis": [
     "grinning",

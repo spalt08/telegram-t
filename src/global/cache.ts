@@ -80,7 +80,7 @@ function updateCache(global: GlobalState) {
     lastSyncTime: undefined,
     messages: reduceMessages(global),
     focusedMessage: {},
-    fileUploads: { byMessageKey: {} },
+    fileUploads: { byMessageLocalId: {} },
     stickers: reduceStickers(global),
     savedGifs: reduceSavedGifs(global),
     globalSearch: {

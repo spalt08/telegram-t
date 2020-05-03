@@ -26,13 +26,6 @@ const ProgressSpinner: FC<{
   const circumference = circleRadius * 2 * Math.PI;
   const container = useRef<HTMLDivElement>();
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (onClick) {
-      e.stopPropagation();
-      onClick();
-    }
-  };
-
   useEffect(() => {
     if (!container.current) {
       return;
@@ -64,7 +57,7 @@ const ProgressSpinner: FC<{
   }, [container, circumference, borderRadius, circleRadius, progress]);
 
   const className = buildClassName(
-    `ProgressSpinner not-implemented size-${size}`,
+    `ProgressSpinner size-${size}`,
     transparent && 'transparent',
   );
 
@@ -72,7 +65,7 @@ const ProgressSpinner: FC<{
     <div
       ref={container}
       className={className}
-      onClick={handleClick}
+      onClick={onClick}
     />
   );
 };

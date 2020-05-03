@@ -1,2 +1,2 @@
-// export { initApi, callApi } from './provider';
-export { initApi, callApi } from './worker/provider';
+// export { initApi, callApi, cancelApiProgress } from './provider';
+export { initApi, callApi, cancelApiProgress } from './worker/provider';

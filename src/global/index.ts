@@ -29,7 +29,7 @@ const INITIAL_STATE: GlobalState = {
   },
 
   fileUploads: {
-    byMessageKey: {},
+    byMessageLocalId: {},
   },
 
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],

@@ -1,9 +1,11 @@
-import { MouseEvent } from 'react';
-import React, { FC, useLayoutEffect, useRef } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useLayoutEffect, useRef, useState,
+} from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
 import { AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
 
+import { AUTO_LOAD_MEDIA } from '../../../config';
 import {
   getMessagePhoto,
   getMessageWebPagePhoto,
@@ -15,6 +17,7 @@ import {
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
+import usePrevious from '../../../hooks/usePrevious';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
@@ -29,7 +32,7 @@ type OwnProps = {
   size?: 'inline' | 'pictogram';
   shouldAffectAppendix?: boolean;
   albumMediaParams?: AlbumMediaParameters;
-  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  onClick?: () => void;
   onCancelUpload?: () => void;
 };
 
@@ -48,21 +51,37 @@ const Photo: FC<OwnProps> = ({
 
   const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
   const localBlobUrl = photo.blobUrl;
-
   const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !load);
-  const fullMedia = localBlobUrl || mediaData;
-  const {
-    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
-  } = useTransitionForMedia(fullMedia, 'slow');
-  const {
-    isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, !fullMedia);
 
+  const [isDownloadAllowed, setIsDownloadAllowed] = useState(AUTO_LOAD_MEDIA);
+  const shouldDownload = isDownloadAllowed && load;
+  const {
+    mediaData, downloadProgress,
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, size), !shouldDownload);
+  const fullMediaData = localBlobUrl || mediaData;
+  const {
+    isUploading, isTransferring, transferProgress,
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !fullMediaData);
+  const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring && load, undefined, undefined, 'slow');
+  } = useShowTransition(isTransferring, undefined, wasDownloadDisabled, 'slow');
+  const {
+    shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
+  } = useTransitionForMedia(fullMediaData, 'slow');
+
+  const handleClick = useCallback(() => {
+    if (isUploading) {
+      if (onCancelUpload) {
+        onCancelUpload();
+      }
+    } else if (!fullMediaData) {
+      setIsDownloadAllowed((isAllowed: boolean) => !isAllowed);
+    } else if (onClick) {
+      onClick();
+    }
+  }, [fullMediaData, isUploading, onCancelUpload, onClick]);
 
   const isOwn = isOwnMessage(message);
   useLayoutEffect(() => {
@@ -72,21 +91,21 @@ const Photo: FC<OwnProps> = ({
 
     const contentEl = elementRef.current!.closest<HTMLDivElement>('.message-content')!;
 
-    if (fullMedia) {
-      getCustomAppendixBg(fullMedia, isOwn).then((appendixBg) => {
+    if (fullMediaData) {
+      getCustomAppendixBg(fullMediaData, isOwn).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.classList.add('has-custom-appendix');
       });
     } else {
       contentEl.classList.add('has-appendix-thumb');
     }
-  }, [fullMedia, isOwn, shouldAffectAppendix]);
+  }, [fullMediaData, isOwn, shouldAffectAppendix]);
 
   const { width, height, isSmall } = calculateMediaDimensions(message, albumMediaParams);
 
   const className = buildClassName(
     'media-inner',
-    !isTransferring && 'has-viewer',
+    !isUploading && 'interactive',
     isSmall && 'small-image',
     width === height && 'square-image',
   );
@@ -101,7 +120,7 @@ const Photo: FC<OwnProps> = ({
       id={id}
       ref={elementRef}
       className={className}
-      onClick={!isTransferring ? onClick : undefined}
+      onClick={isUploading ? undefined : handleClick}
     >
       {shouldRenderThumb && (
         <img
@@ -114,7 +133,7 @@ const Photo: FC<OwnProps> = ({
       )}
       {shouldRenderFullMedia && (
         <img
-          src={fullMedia}
+          src={fullMediaData}
           className={`full-media ${transitionClassNames}`}
           width={width}
           height={height}
@@ -123,8 +142,11 @@ const Photo: FC<OwnProps> = ({
       )}
       {shouldRenderSpinner && (
         <div className={`media-loading ${spinnerClassNames}`}>
-          <ProgressSpinner progress={transferProgress} onClick={onCancelUpload} />
+          <ProgressSpinner progress={transferProgress} onClick={handleClick} />
         </div>
+      )}
+      {!fullMediaData && !isDownloadAllowed && (
+        <i className="icon-download" />
       )}
       {isTransferring && (
         <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>

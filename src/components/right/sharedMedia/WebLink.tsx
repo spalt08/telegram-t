@@ -5,7 +5,7 @@ import { ApiMessage, ApiWebPage } from '../../../api/types';
 import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
 
-import Photo from '../../middle/message/Photo';
+import Media from './Media';
 
 import './WebLink.scss';
 
@@ -66,12 +66,7 @@ const WebLink: FC<OwnProps> = ({ message }) => {
       data-initial={(siteName || displayUrl)[0]}
     >
       {photo && (
-        <Photo
-          message={message}
-          load
-          onClick={handleMediaClick}
-          size="pictogram"
-        />
+        <Media message={message} onClick={handleMediaClick} />
       )}
       <p className="site-title">{title || siteName || displayUrl}</p>
       {truncatedDescription && <p className="site-description">{description}</p>}

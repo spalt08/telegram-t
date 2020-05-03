@@ -1,6 +1,6 @@
-import { OnApiUpdate } from '../../types';
+import { ApiOnProgress, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import { WorkerMessageEvent, OriginMessageData, ThenArg } from './types';
+import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
 
 import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
@@ -21,7 +21,7 @@ export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
     subscribeToWorker(onUpdate);
   }
 
-  return sendToWorker({
+  return makeRequest({
     type: 'initApi',
     args: [sessionId],
   });
@@ -37,11 +37,28 @@ export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<
     return undefined;
   }
 
-  return sendToWorker({
+  return makeRequest({
     type: 'callMethod',
     name: fnName,
     args,
   }) as MethodResponse<T>;
+}
+
+export function cancelApiProgress(progressCallback: ApiOnProgress) {
+  progressCallback.isCanceled = true;
+
+  const callbackMessageId = Object.keys(requestStates).find((messageId) => {
+    return requestStates[messageId].callback === progressCallback;
+  });
+
+  if (!callbackMessageId) {
+    return;
+  }
+
+  worker.postMessage({
+    type: 'cancelProgress',
+    messageId: callbackMessageId,
+  });
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
@@ -66,9 +83,9 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
   });
 }
 
-function sendToWorker(message: OriginMessageData) {
+function makeRequest(message: OriginRequest) {
   const messageId = generateIdFor(requestStates);
-  const payload = {
+  const payload: OriginRequest = {
     messageId,
     ...message,
   };

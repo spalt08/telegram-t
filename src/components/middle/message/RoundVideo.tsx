@@ -7,15 +7,14 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
+
+import { AUTO_LOAD_MEDIA } from '../../../config';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import {
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-} from '../../../modules/helpers';
+import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
-import buildClassName from '../../../util/buildClassName';
+import usePrevious from '../../../hooks/usePrevious';
 import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -26,33 +25,33 @@ type OwnProps = {
   message: ApiMessage;
   loadAndPlay?: boolean;
   lastSyncTime?: number;
-  onCancelDownload?: () => void;
 };
 
 const RoundVideo: FC<OwnProps> = ({
   message,
   loadAndPlay,
   lastSyncTime,
-  onCancelDownload = () => {
-  },
 }) => {
   const playingProgressRef = useRef<HTMLDivElement>();
   const playerRef = useRef<HTMLVideoElement>();
-  const [isActivated, setIsActivated] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const video = message.content.video!;
-  const localBlobUrl = video.blobUrl;
+
   const thumbDataUri = getMessageMediaThumbDataUri(message);
+
+  const [isDownloadAllowed, setIsDownloadAllowed] = useState(AUTO_LOAD_MEDIA);
+  const shouldDownload = isDownloadAllowed && loadAndPlay;
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
-    getMessageMediaHash(message, 'inline'), !loadAndPlay, undefined, lastSyncTime,
+    getMessageMediaHash(message, 'inline'), !shouldDownload, undefined, lastSyncTime,
   );
-  const blobUrl = localBlobUrl || mediaData;
-  const isTransferring = !blobUrl;
-  const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(blobUrl, 'slow');
+  const isTransferring = isDownloadAllowed && !mediaData;
+  const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring && loadAndPlay);
+  } = useShowTransition(isTransferring, undefined, wasDownloadDisabled);
+  const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
+
+  const [isActivated, setIsActivated] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     if (!isActivated) {
@@ -81,6 +80,12 @@ const RoundVideo: FC<OwnProps> = ({
   }, [isActivated, progress]);
 
   const handleClick = useCallback(() => {
+    if (!mediaData) {
+      setIsDownloadAllowed((isAllowed: boolean) => !isAllowed);
+
+      return;
+    }
+
     const playerEl = playerRef.current!;
     if (isActivated) {
       if (playerEl.paused) {
@@ -92,7 +97,7 @@ const RoundVideo: FC<OwnProps> = ({
       playerEl.currentTime = 0;
       setIsActivated(true);
     }
-  }, [isActivated]);
+  }, [isActivated, mediaData]);
 
   const handleTimeUpdate = useCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
@@ -110,16 +115,12 @@ const RoundVideo: FC<OwnProps> = ({
     });
   }, []);
 
-  const className = buildClassName(
-    'RoundVideo',
-    'media-inner',
-    !isTransferring && 'playable',
-  );
+  const video = message.content.video!;
 
   return (
     <div
-      className={className}
-      onClick={!shouldSpinnerRender ? handleClick : undefined}
+      className="RoundVideo media-inner"
+      onClick={handleClick}
     >
       {shouldRenderThumb && (
         <div className="thumbnail-wrapper">
@@ -132,7 +133,7 @@ const RoundVideo: FC<OwnProps> = ({
           />
         </div>
       )}
-      {blobUrl && (
+      {mediaData && (
         // eslint-disable-next-line jsx-a11y/media-has-caption
         <video
           className={`full-media ${transitionClassNames}`}
@@ -147,14 +148,17 @@ const RoundVideo: FC<OwnProps> = ({
           onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
           onEnded={isActivated ? handleEnded : undefined}
         >
-          <source src={blobUrl} />
+          <source src={mediaData} />
         </video>
       )}
       <div className="progress" ref={playingProgressRef} />
       {shouldSpinnerRender && (
-        <div className={`media-loading not-implemented ${spinnerClassNames}`}>
-          <ProgressSpinner progress={downloadProgress} onClick={onCancelDownload} />
+        <div className={`media-loading ${spinnerClassNames}`}>
+          <ProgressSpinner progress={downloadProgress} />
         </div>
+      )}
+      {!mediaData && !isDownloadAllowed && (
+        <i className="icon-download" />
       )}
       <div className="message-media-duration">
         {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}

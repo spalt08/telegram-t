@@ -1,4 +1,4 @@
-import { OnApiUpdate } from '../types';
+import { ApiOnProgress, OnApiUpdate } from '../types';
 import { Methods, MethodArgs, MethodResponse } from './methods/types';
 
 import { init as initUpdater } from './updater';
@@ -22,4 +22,8 @@ export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
   // @ts-ignore
   return methods[fnName](...args) as MethodResponse<T>;
+}
+
+export function cancelApiProgress(progressCallback: ApiOnProgress) {
+  progressCallback.isCanceled = true;
 }

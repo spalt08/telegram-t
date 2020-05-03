@@ -7,7 +7,7 @@ import {
 } from '../api/types';
 
 import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
-import { callApi } from '../api/gramjs';
+import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { preloadImage } from './files';
 
@@ -39,6 +39,10 @@ export function fetch<T extends ApiMediaFormat>(url: string, mediaFormat: T, onP
 
 export function getFromMemory<T extends ApiMediaFormat>(url: string) {
   return MEMORY_CACHE[url] as ApiMediaFormatToPrepared<T>;
+}
+
+export function cancelProgress(progressCallback: ApiOnProgress) {
+  cancelApiProgress(progressCallback);
 }
 
 async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, onProgress?: ApiOnProgress) {
