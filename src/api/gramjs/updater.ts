@@ -239,6 +239,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateCommonBoxMessages',
       ids: update.messages,
       messageUpdate: {
+        hasUnreadMention: false,
         isMediaUnread: false,
       },
     });
@@ -248,6 +249,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       channelId: update.channelId,
       ids: update.messages,
       messageUpdate: {
+        hasUnreadMention: false,
         isMediaUnread: false,
       },
     });

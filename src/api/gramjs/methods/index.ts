@@ -4,10 +4,10 @@ import {
 } from './auth';
 import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
-  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf,
+  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf, markChatRead,
 } from './chats';
 import {
-  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
+  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead,
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
 } from './messages';
 import {
@@ -31,8 +31,8 @@ export default {
   sendMessage,
   pinMessage,
   deleteMessages,
+  markChatRead,
   markMessagesRead,
-  readMessageContents,
   searchMessages,
   searchMessagesGlobal,
   fetchWebPagePreview,

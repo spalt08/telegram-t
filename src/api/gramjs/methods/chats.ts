@@ -16,7 +16,9 @@ import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import localDb from '../localDb';
-import { buildInputEntity, buildInputPeer, buildMtpMessageEntity } from '../gramjsBuilders';
+import {
+  buildInputEntity, buildInputPeer, buildMtpMessageEntity, getEntityTypeById,
+} from '../gramjsBuilders';
 
 let onUpdate: OnApiUpdate;
 
@@ -298,6 +300,28 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
     },
     users: undefined,
   };
+}
+
+export async function markChatRead({
+  chat, maxId,
+}: {
+  chat: ApiChat; maxId?: number;
+}) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  await invokeRequest(
+    isChannel
+      ? new GramJs.channels.ReadHistory({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        maxId,
+      })
+      : new GramJs.messages.ReadHistory({
+        peer: buildInputPeer(chat.id, chat.accessHash),
+        maxId,
+      }),
+  );
+
+  void requestChatUpdate(chat);
 }
 
 function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {

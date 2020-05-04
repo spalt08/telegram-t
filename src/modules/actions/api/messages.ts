@@ -224,15 +224,9 @@ addReducer('markMessagesRead', (global, actions, payload) => {
     return;
   }
 
-  const { maxId } = payload || {};
+  const { messageIds } = payload!;
 
-  void callApi('markMessagesRead', { chat, maxId });
-});
-
-addReducer('readMessageContents', (global, actions, payload) => {
-  const { messageId } = payload!;
-
-  void callApi('readMessageContents', { messageId });
+  void callApi('markMessagesRead', { chat, messageIds });
 });
 
 addReducer('loadWebPagePreview', (global, actions, payload) => {

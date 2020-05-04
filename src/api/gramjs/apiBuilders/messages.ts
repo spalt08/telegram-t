@@ -111,8 +111,8 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
     views: mtpMessage.views,
     ...(isEdited && { isEdited }),
     ...(isMediaUnread && { isMediaUnread }),
+    ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
     ...(mtpMessage.groupedId && { groupedId: mtpMessage.groupedId.toString() }),
-    ...(mtpMessage.mentioned && { hasMention: true }),
   };
 }
 
