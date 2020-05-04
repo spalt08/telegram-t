@@ -58,7 +58,9 @@ type StateProps = {
   isFocusing?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadViewportMessages' | 'markChatRead' | 'markMessagesRead' | 'setChatScrollOffset'
+)>;
 
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
@@ -90,6 +92,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   isViewportNewest,
   isFocusing,
   loadViewportMessages,
+  markChatRead,
   markMessagesRead,
   setChatScrollOffset,
 }) => {
@@ -161,6 +164,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       setViewportMessageIds(newViewportMessageIds);
     }
 
+    const {
+      allElements: mentionMessageEls, visibleIndexes: visibleMentionIndexes,
+    } = findInViewport(container, '.Message.has-unread-mention', VIEWPORT_MEDIA_MARGIN);
+    const readMessageIds = visibleMentionIndexes.map((i) => Number(mentionMessageEls[i].dataset.messageId));
+    if (readMessageIds.length) {
+      markMessagesRead({ messageIds: readMessageIds });
+    }
+
     if (firstUnreadId) {
       const {
         allElements, visibleIndexes,
@@ -169,10 +180,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
       const maxId = lowerElement ? Number(lowerElement.dataset.messageId) : undefined;
       if (maxId && maxId >= firstUnreadId) {
-        markMessagesRead({ maxId });
+        markChatRead({ maxId });
       }
     }
-  }, [firstUnreadId, markMessagesRead, viewportMessageIds]);
+  }, [firstUnreadId, markChatRead, markMessagesRead, viewportMessageIds]);
 
   const processInfiniteScroll = useCallback(() => {
     const container = containerRef.current!;
@@ -566,6 +577,7 @@ export default memo(withGlobal<OwnProps>(
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadViewportMessages',
+    'markChatRead',
     'markMessagesRead',
     'setChatScrollOffset',
   ]),

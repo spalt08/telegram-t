@@ -7,7 +7,7 @@ import { callApi } from '../../../api/gramjs';
 import {
   addUsers, updateChatListIds, updateChats, updateUsers, updateChat,
 } from '../../reducers';
-import { selectChat } from '../../selectors';
+import { selectChat, selectOpenChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly } from '../../helpers';
@@ -79,6 +79,17 @@ addReducer('requestChatUpdate', (global, actions, payload) => {
   }
 
   void callApi('requestChatUpdate', chat);
+});
+
+addReducer('markChatRead', (global, actions, payload) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
+
+  const { maxId } = payload || {};
+
+  void callApi('markChatRead', { chat, maxId });
 });
 
 addReducer('saveDraft', (global, actions, payload) => {

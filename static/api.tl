@@ -892,4 +892,5 @@ channels.getParticipants#123e05e9 channel:InputChannel filter:ChannelParticipant
 channels.getParticipant#546dd7a6 channel:InputChannel user_id:InputUser = channels.ChannelParticipant;
 channels.getChannels#a7f6bbb id:Vector<InputChannel> = messages.Chats;
 channels.getFullChannel#8736a09 channel:InputChannel = messages.ChatFull;
+channels.readMessageContents#eab5dc38 channel:InputChannel id:Vector<int> = Bool;
 // LAYER 112

@@ -12,6 +12,7 @@ import {
   isChatPrivate,
   isChatSuperGroup,
   isForwardedMessage,
+  isCommonBoxChat,
 } from '../helpers';
 
 const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
@@ -243,4 +244,19 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
 export function selectIsForwardMenuOpen(global: GlobalState) {
   const { forwardMessages } = global;
   return Boolean(forwardMessages.fromChatId);
+}
+
+export function selectCommonBoxChatId(global: GlobalState, messageId: number) {
+  const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
+    isCommonBoxChat(chat) && chat.lastMessage && chat.lastMessage.id === messageId
+  ));
+  if (fromLastMessage) {
+    return fromLastMessage.id;
+  }
+
+  const { byChatId } = global.messages;
+  return Number(Object.keys(byChatId).find((chatId) => {
+    const chat = selectChat(global, Number(chatId));
+    return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
+  }));
 }

@@ -87,7 +87,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
+  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'markMessagesRead' | 'sendPollVote'
 )>;
 
 const NBSP = '\u00A0';
@@ -123,7 +123,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   openMediaViewer,
   openUserInfo,
   cancelSendingMessage,
-  readMessageContents,
+  markMessagesRead,
   sendPollVote,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
@@ -176,6 +176,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isSelectedToForward && 'is-forwarding',
     message.isDeleting && 'is-deleting',
     isAlbum && 'is-album',
+    message.hasUnreadMention && 'has-unread-mention',
   );
   const customShape = getMessageCustomShape(message);
   const contentClassName = buildContentClassName(message, {
@@ -202,8 +203,8 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [chatId, openMediaViewer]);
 
   const handleReadMedia = useCallback((): void => {
-    readMessageContents({ messageId });
-  }, [messageId, readMessageContents]);
+    markMessagesRead({ messageIds: [messageId] });
+  }, [messageId, markMessagesRead]);
 
   const handleCancelUpload = useCallback(() => {
     cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
@@ -527,7 +528,7 @@ export default memo(withGlobal<OwnProps>(
     'openMediaViewer',
     'cancelSendingMessage',
     'openUserInfo',
-    'readMessageContents',
+    'markMessagesRead',
     'sendPollVote',
   ]),
 )(Message));

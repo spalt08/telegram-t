@@ -10,9 +10,15 @@ import {
 } from '../../reducers';
 import { GlobalState } from '../../../global/types';
 import {
-  selectChat, selectChatMessage, selectChatMessages, selectIsViewportNewest, selectListedIds, selectChatMessageByPollId,
+  selectChat,
+  selectChatMessage,
+  selectChatMessages,
+  selectIsViewportNewest,
+  selectListedIds,
+  selectChatMessageByPollId,
+  selectCommonBoxChatId,
 } from '../../selectors';
-import { getMessageContent, isCommonBoxChat, isMessageIdNewer } from '../../helpers';
+import { getMessageContent, isMessageIdNewer } from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
@@ -125,7 +131,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const commonBoxChatIds: number[] = [];
 
       ids.forEach((id) => {
-        const commonBoxChatId = findCommonBoxChatId(newGlobal, id);
+        const commonBoxChatId = selectCommonBoxChatId(newGlobal, id);
         if (commonBoxChatId) {
           commonBoxChatIds.push(commonBoxChatId);
 
@@ -159,7 +165,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       let newGlobal = global;
 
       ids.forEach((id) => {
-        const chatId = findCommonBoxChatId(newGlobal, id);
+        const chatId = selectCommonBoxChatId(newGlobal, id);
         if (chatId) {
           newGlobal = updateChatMessage(newGlobal, chatId, id, messageUpdate);
         }
@@ -320,21 +326,6 @@ function updateChatLastMessage(
   }
 
   return updateChat(global, chatId, { lastMessage: message });
-}
-
-function findCommonBoxChatId(global: GlobalState, messageId: number) {
-  const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
-    isCommonBoxChat(chat) && chat.lastMessage && chat.lastMessage.id === messageId
-  ));
-  if (fromLastMessage) {
-    return fromLastMessage.id;
-  }
-
-  const { byChatId } = global.messages;
-  return Number(Object.keys(byChatId).find((chatId) => {
-    const chat = selectChat(global, Number(chatId));
-    return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
-  }));
 }
 
 function findLastMessage(global: GlobalState, chatId: number) {

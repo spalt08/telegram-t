@@ -8,7 +8,7 @@ import {
   updateChatListIds,
   updateSelectedChatId,
 } from '../../reducers';
-import { selectChat } from '../../selectors';
+import { selectChat, selectCommonBoxChatId } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
@@ -50,11 +50,6 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateChatInbox': {
       setGlobal(updateChat(global, update.id, update.chat));
 
-      const chat = selectChat(global, update.id);
-      if (chat && chat.unreadMentionsCount) {
-        actions.requestChatUpdate({ chatId: chat.id });
-      }
-
       break;
     }
 
@@ -85,10 +80,34 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
       setGlobal(updateChat(global, update.chatId, {
         unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-        ...(update.message.hasMention && {
+        ...(update.message.hasUnreadMention && {
           unreadMentionsCount: chat.unreadMentionsCount ? chat.unreadMentionsCount + 1 : 1,
         }),
       }));
+
+      break;
+    }
+
+    case 'updateCommonBoxMessages':
+    case 'updateChannelMessages': {
+      const { ids, messageUpdate } = update;
+      if (messageUpdate.hasUnreadMention !== false) {
+        return;
+      }
+
+      let newGlobal = global;
+
+      ids.forEach((id) => {
+        const chatId = 'channelId' in update ? update.channelId : selectCommonBoxChatId(newGlobal, id);
+        const chat = selectChat(newGlobal, chatId);
+        if (chat && chat.unreadMentionsCount) {
+          newGlobal = updateChat(newGlobal, chatId, {
+            unreadMentionsCount: chat.unreadMentionsCount - 1,
+          });
+        }
+      });
+
+      setGlobal(newGlobal);
 
       break;
     }

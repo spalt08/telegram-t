@@ -35,7 +35,6 @@ import {
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { requestChatUpdate } from './chats';
 import { fetchFile } from '../../../util/files';
 
 let onUpdate: OnApiUpdate;
@@ -302,36 +301,34 @@ export async function deleteMessages({
 }
 
 export async function markMessagesRead({
-  chat, maxId,
+  chat, messageIds,
 }: {
-  chat: ApiChat; maxId?: number;
+  chat: ApiChat; messageIds: number[];
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
   await invokeRequest(
     isChannel
-      ? new GramJs.channels.ReadHistory({
+      ? new GramJs.channels.ReadMessageContents({
         channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-        maxId,
+        id: messageIds,
       })
-      : new GramJs.messages.ReadHistory({
-        peer: buildInputPeer(chat.id, chat.accessHash),
-        maxId,
+      : new GramJs.messages.ReadMessageContents({
+        id: messageIds,
       }),
+    true,
   );
 
-  void requestChatUpdate(chat);
-}
-
-export async function readMessageContents({ messageId }: { messageId: number }) {
-  await invokeRequest(new GramJs.messages.ReadMessageContents({
-    id: [messageId],
-  }), true);
-
   onUpdate({
-    '@type': 'updateCommonBoxMessages',
-    ids: [messageId],
+    ...(isChannel ? {
+      '@type': 'updateChannelMessages',
+      channelId: chat.id,
+    } : {
+      '@type': 'updateCommonBoxMessages',
+    }),
+    ids: messageIds,
     messageUpdate: {
+      hasUnreadMention: false,
       isMediaUnread: false,
     },
   });
