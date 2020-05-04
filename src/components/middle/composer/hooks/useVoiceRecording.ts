@@ -4,8 +4,6 @@ import * as voiceRecording from '../../../../util/voiceRecording';
 
 type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result> } | undefined;
 
-const VOICE_RECORDING_SUPPORTED = voiceRecording.isSupported();
-
 export default () => {
   const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
@@ -55,7 +53,6 @@ export default () => {
   }, [activeVoiceRecording]);
 
   return {
-    isVoiceRecordingSupported: VOICE_RECORDING_SUPPORTED,
     startRecordingVoice,
     stopRecordingVoice,
     activeVoiceRecording,

@@ -10,6 +10,7 @@ import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { preloadImage } from './files';
+import { isWebpSupported } from './environment';
 
 const asCacheApiType = {
   [ApiMediaFormat.DataUri]: cacheApi.Type.Text,
@@ -86,7 +87,7 @@ function prepareMedia(mediaData: ApiParsedMedia): ApiPreparedMedia {
 }
 
 async function preload(blobUrl: string, mimeType: string) {
-  if (mimeType.startsWith('image/')) {
+  if (mimeType.startsWith('image/') && (mimeType !== 'image/webp' || isWebpSupported())) {
     await preloadImage(blobUrl);
   }
 }

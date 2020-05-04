@@ -20,4 +20,16 @@ export function getPlatform() {
   return os;
 }
 
-export const IS_TOUCH_ENV = 'ontouchstart' in document.documentElement;
+export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
+export const IS_VOICE_RECORDING_SUPPORTED = navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices;
+export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentElement.style;
+
+let isWebpSupportedCache: boolean | undefined;
+
+export function isWebpSupported() {
+  if (isWebpSupportedCache === undefined) {
+    isWebpSupportedCache = document.createElement('canvas').toDataURL('image/webp').startsWith('data:image/webp');
+  }
+
+  return isWebpSupportedCache;
+}
