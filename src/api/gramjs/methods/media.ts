@@ -90,9 +90,17 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
     const data = await client.downloadMedia(entity, { sizeType, progressCallback: onProgress });
-    const mimeType = entity instanceof GramJs.Message
-      ? getMessageMediaMimeType(entity, Boolean(sizeType))
-      : (entity as GramJs.Document).mimeType;
+    let mimeType;
+
+    if (entityType === 'sticker' && sizeType) {
+      mimeType = 'image/webp';
+    } else if (sizeType) {
+      mimeType = 'image/jpeg';
+    } else if (entity instanceof GramJs.Message) {
+      mimeType = getMessageMediaMimeType(entity);
+    } else {
+      mimeType = (entity as GramJs.Document).mimeType;
+    }
 
     return { mimeType, data };
   } else {
@@ -103,12 +111,12 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
   }
 }
 
-function getMessageMediaMimeType(message: GramJs.Message, isThumb = false) {
+function getMessageMediaMimeType(message: GramJs.Message) {
   if (!message || !message.media) {
     return undefined;
   }
 
-  if (isThumb || message.media instanceof GramJs.MessageMediaPhoto) {
+  if (message.media instanceof GramJs.MessageMediaPhoto) {
     return 'image/jpeg';
   }
 

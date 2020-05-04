@@ -6,6 +6,7 @@ import { ApiMediaFormat, ApiSticker } from '../../../api/types';
 
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
+import webpHero from '../../../util/webpHero';
 import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -27,6 +28,7 @@ const StickerButton: FC<OwnProps> = ({
 
   const { isAnimated } = sticker;
   const localMediaHash = `sticker${sticker.id}`;
+  const stickerSelector = `sticker-button-${sticker.id}`;
 
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, ApiMediaFormat.BlobUrl);
   const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
@@ -35,6 +37,7 @@ const StickerButton: FC<OwnProps> = ({
   const lottieData = useMedia(localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+  const canAnimatedPlay = isAnimationLoaded && shouldPlay;
 
   const play = isAnimated ? () => {
     setShouldPlay(true);
@@ -64,6 +67,14 @@ const StickerButton: FC<OwnProps> = ({
     };
   }, [shouldPlay, stop]);
 
+  useEffect(() => {
+    if (!canAnimatedPlay && previewBlobUrl) {
+      webpHero({
+        selectors: `.${stickerSelector}`,
+      });
+    }
+  }, [canAnimatedPlay, previewBlobUrl, stickerSelector]);
+
   const handleClick = useCallback(
     () => onClick({
       ...sticker,
@@ -74,11 +85,12 @@ const StickerButton: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'StickerButton',
+    stickerSelector,
     className,
     transitionClassNames,
   );
 
-  const style = isAnimationLoaded && shouldPlay ? '' : `background-image: url(${previewBlobUrl})`;
+  const style = canAnimatedPlay ? '' : `background-image: url(${previewBlobUrl})`;
 
   return (
     <div

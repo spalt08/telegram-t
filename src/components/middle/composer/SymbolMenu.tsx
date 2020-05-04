@@ -4,7 +4,7 @@ import React, {
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_SMOOTH_SCROLL_SUPPORTED, IS_TOUCH_ENV } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
 import TabList from '../../ui/TabList';
@@ -25,7 +25,7 @@ enum Tabs {
 // See: https://www.typescriptlang.org/docs/handbook/enums.html#reverse-mappings
 const TAB_TITLES = Object.values(Tabs).filter((value): value is string => typeof value === 'string');
 const MENU_CLOSE_TIMEOUT = 250;
-const TRANSITION_NAME = navigator.userAgent.includes('Safari') ? 'slide' : 'scroll-slide';
+const TRANSITION_NAME = IS_SMOOTH_SCROLL_SUPPORTED ? 'scroll-slide' : 'slide';
 
 let closeTimeout: number;
 

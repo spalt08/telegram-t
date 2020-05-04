@@ -58,7 +58,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     id: String(id),
     accessHash: String(accessHash),
     title,
-    thumbnail: thumb ? buildApiThumbnailFromStripped([thumb]) : undefined,
+    thumbnail: thumb ? buildApiThumbnailFromStripped([thumb], 'image/webp') : undefined,
     count,
     hash,
     stickers: [],

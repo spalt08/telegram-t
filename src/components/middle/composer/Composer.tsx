@@ -14,7 +14,7 @@ import {
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-
+import { IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
 import { selectChatMessage, selectIsChatWithBot } from '../../../modules/selectors';
 import { isChatPrivate } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
@@ -90,7 +90,6 @@ const Composer: FC<StateProps & DispatchProps> = ({
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useOverlay();
 
   const {
-    isVoiceRecordingSupported,
     startRecordingVoice,
     stopRecordingVoice,
     activeVoiceRecording,
@@ -205,7 +204,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
-    : !isVoiceRecordingSupported || activeVoiceRecording || (html && !attachment)
+    : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
       ? MainButtonState.Send
       : MainButtonState.Record;
 
