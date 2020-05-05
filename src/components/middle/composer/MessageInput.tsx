@@ -12,6 +12,7 @@ import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import { EDITABLE_INPUT_ID } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 type OwnProps = {
   id: string;
@@ -83,7 +84,11 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  useEffect(focusInput, [selectedChatId, replyingTo, shouldSetFocus]);
+  useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      focusInput();
+    }
+  }, [selectedChatId, replyingTo, shouldSetFocus]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
