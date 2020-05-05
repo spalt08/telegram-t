@@ -72,7 +72,7 @@
     "events": "^3.0.0",
     "lottie-web": "^5.5.10",
     "pako": "^1.0.10",
-    "webp-hero": "korenskoy/webp-hero#bbe7dec021fa3173f023277ff9abfb2b7061ec12",
+    "webp-hero-tt": "^0.0.0-dev.25tt",
     "websocket": "^1.0.30"
   }
 }
