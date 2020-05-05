@@ -1,9 +1,9 @@
-import { WebpMachine as TWebpMachine, PolyfillDocumentOptions as TPolyfillDocumentOptions } from 'webp-hero';
+import { WebpMachine as TWebpMachine, PolyfillDocumentOptions as TPolyfillDocumentOptions } from 'webp-hero-tt';
 
 import { DEBUG } from '../config';
 import { isWebpSupported } from './environment';
 
-type WebpHero = typeof import('webp-hero');
+type WebpHero = typeof import('webp-hero-tt');
 
 let wepbHeroPromise: Promise<WebpHero>;
 let webpHero: TWebpMachine;
@@ -22,7 +22,7 @@ export default async (params: TPolyfillDocumentOptions) => {
 
 async function ensureWebpHero() {
   if (!wepbHeroPromise) {
-    wepbHeroPromise = import('webp-hero/dist/webp-machine') as unknown as Promise<WebpHero>;
+    wepbHeroPromise = import('webp-hero-tt/dist/webp-machine') as unknown as Promise<WebpHero>;
     const { WebpMachine } = await wepbHeroPromise;
 
     webpHero = new WebpMachine({
