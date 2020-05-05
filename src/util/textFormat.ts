@@ -1,27 +1,26 @@
 export function formatInteger(value: number) {
-  return String(value).replace(/\d(?=(\d{3})+$)/g, '$&,');
+  return String(value).replace(/\d(?=(\d{3})+$)/g, '$& ');
 }
 
 function formatFixedNumber(number: number) {
   const fixed = String(number.toFixed(1));
   if (fixed.substr(-2) === '.0') {
-    return number.toFixed(0);
+    return Math.round(number);
   }
 
-  return number.toFixed(1);
+  return number.toFixed(1).replace('.', ',');
 }
 
 export function formatIntegerCompact(views: number) {
-  if (views < 10000) {
+  if (views < 1e3) {
     return views;
   }
-  const thousands = views / 1000;
-  if (thousands < 1000) {
-    return `${formatFixedNumber(thousands)}K`;
+
+  if (views < 1e6) {
+    return `${formatFixedNumber(views / 1e3)}K`;
   }
 
-  const millions = views / 1000000;
-  return `${formatFixedNumber(millions)}M`;
+  return `${formatFixedNumber(views / 1e6)}M`;
 }
 
 export function getFirstLetters(phrase: string) {
