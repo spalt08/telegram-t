@@ -20,8 +20,8 @@ const gramJsUpdateEventBuilder = { build: (update: object) => update };
 let client: TelegramClient;
 let isConnected = false;
 
-export async function init(sessionId: string) {
-  const session = new sessions.CacheApiSession(sessionId);
+export async function init() {
+  const session = new sessions.HardcodeSession();
   client = new TelegramClient(
     session,
     process.env.TELEGRAM_T_API_ID,

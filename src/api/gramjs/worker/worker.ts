@@ -12,7 +12,7 @@ onmessage = async (message: OriginMessageEvent) => {
 
   switch (data.type) {
     case 'initApi': {
-      await initApi(onUpdate, data.args[0]);
+      await initApi(onUpdate);
       break;
     }
     case 'callMethod': {

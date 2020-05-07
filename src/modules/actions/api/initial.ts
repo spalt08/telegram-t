@@ -1,21 +1,20 @@
 import {
-  addReducer, getDispatch, getGlobal, setGlobal,
+  addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
 import { GlobalState } from '../../../global/types';
 
-import { GRAMJS_SESSION_ID_KEY, ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
+import { ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 
 addReducer('initApi', (global: GlobalState, actions) => {
-  const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
   const isAnimationLevelSettingViewed = Boolean(localStorage.getItem(ANIMATION_SETTINGS_VIEWED_KEY));
 
-  void initApi(actions.apiUpdate, sessionId);
+  void initApi(actions.apiUpdate);
 
   return {
     ...global,
-    authIsSessionRemembered: Boolean(sessionId),
+    authIsSessionRemembered: true,
     settings: {
       ...global.settings,
       isAnimationLevelSettingViewed,
@@ -86,20 +85,13 @@ addReducer('returnToAuthPhoneNumber', (global) => {
   };
 });
 
-addReducer('saveSession', (global, actions, payload) => {
-  const { sessionId } = payload!;
-  localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
-});
-
 addReducer('signOut', () => {
   void signOut();
 });
 
-async function signOut() {
-  await callApi('destroy');
-  localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
-
-  getDispatch().init();
+function signOut() {
+  // eslint-disable-next-line no-alert
+  window.alert('Not Allowed');
 }
 
 addReducer('loadNearestCountry', (global) => {

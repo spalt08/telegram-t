@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "shx mkdir -p dist/ && shx cp ./node_modules/opus-media-recorder/OggOpusEncoder.wasm dist && parcel src/index.html",
-    "build:staging": "NODE_ENV=staging parcel build src/index.html --public-url ./ && deploy/copy_opus_wasm.sh",
+    "build:staging": "NODE_ENV=production parcel build src/index.html --public-url ./ --no-source-maps && deploy/copy_opus_wasm.sh",
     "build:contest": "./deploy/contest.sh",
     "build:github:all": "./deploy/github.sh",
     "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",

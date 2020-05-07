@@ -9,14 +9,14 @@ import { init as initUsers } from './methods/users';
 import { init as initClient } from './methods/client';
 import methods from './methods';
 
-export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
+export async function initApi(onUpdate: OnApiUpdate) {
   initUpdater(onUpdate);
   initAuth(onUpdate);
   initChats(onUpdate);
   initMessages(onUpdate);
   initUsers(onUpdate);
 
-  await initClient(sessionId);
+  await initClient();
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {

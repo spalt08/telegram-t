@@ -7,7 +7,6 @@ import {
   DEBUG,
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
-  GRAMJS_SESSION_ID_KEY,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
@@ -34,7 +33,7 @@ export function initCache() {
 
 export function loadCache(initialState: GlobalState) {
   if (!GLOBAL_STATE_CACHE_DISABLED) {
-    const hasActiveSession = localStorage.getItem(GRAMJS_SESSION_ID_KEY);
+    const hasActiveSession = true;
     if (hasActiveSession) {
       addCallback(updateCacheThrottled);
       return readCache(initialState);

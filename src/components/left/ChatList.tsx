@@ -14,6 +14,7 @@ import Loading from '../ui/Loading';
 import Chat from './Chat';
 
 import './ChatList.scss';
+import { RESTRICTED_TO_CHAT_ID } from '../../config';
 
 type StateProps = {
   chats: Record<number, ApiChat>;
@@ -83,18 +84,16 @@ export default memo(withGlobal(
   (global): StateProps => {
     const {
       chats: {
-        listIds,
         byId: chats,
         selectedId: selectedChatId,
-        orderedPinnedIds,
       },
     } = global;
 
     return {
-      chats,
-      listIds,
+      chats: chats[RESTRICTED_TO_CHAT_ID] ? pick(chats, [RESTRICTED_TO_CHAT_ID]) : {},
+      listIds: [RESTRICTED_TO_CHAT_ID],
       selectedChatId,
-      orderedPinnedIds,
+      orderedPinnedIds: [],
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats']),

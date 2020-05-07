@@ -10,7 +10,6 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 
 import Transition from '../ui/Transition';
-import LeftHeader from './LeftHeader';
 import ConnectionState from './ConnectionState';
 import ChatList from './ChatList';
 import LeftRecent from './LeftRecent.async';
@@ -38,27 +37,6 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
     setGlobalSearchQuery({ query: '' });
   }, [setGlobalSearchQuery]);
 
-  const handleSearchQuery = useCallback((query: string) => {
-    if (content === LeftColumnContent.Contacts) {
-      setContactsFilter(query);
-      return;
-    }
-
-    setContent(query.length ? LeftColumnContent.GlobalSearch : LeftColumnContent.RecentChats);
-
-    if (query !== searchQuery) {
-      setGlobalSearchQuery({ query });
-    }
-  }, [content, setGlobalSearchQuery, searchQuery]);
-
-  const handleSelectSettings = useCallback(() => {
-    setContent(LeftColumnContent.Settings);
-  }, []);
-
-  const handleSelectContacts = useCallback(() => {
-    setContent(LeftColumnContent.Contacts);
-  }, []);
-
   useEffect(
     () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(handleReset) : undefined),
     [content, handleReset],
@@ -83,14 +61,6 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
 
   return (
     <div id="LeftColumn">
-      <LeftHeader
-        content={content}
-        contactsFilter={contactsFilter}
-        onSearchQuery={handleSearchQuery}
-        onSelectSettings={handleSelectSettings}
-        onSelectContacts={handleSelectContacts}
-        onReset={handleReset}
-      />
       <ConnectionState />
       <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
         {renderContent}

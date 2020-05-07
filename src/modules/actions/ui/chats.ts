@@ -6,15 +6,24 @@ import {
   updateChatEditing,
 } from '../../reducers';
 import { selectChatMessages, selectIsOwnMessage, selectAllowedMessagedActions } from '../../selectors';
+import { RESTRICTED_TO_CHAT_ID } from '../../../config';
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
+
+  if (id !== RESTRICTED_TO_CHAT_ID) {
+    return undefined;
+  }
 
   return updateSelectedChatId(global, id);
 });
 
 addReducer('openChatWithInfo', (global, actions, payload) => {
   const { id } = payload!;
+
+  if (id !== RESTRICTED_TO_CHAT_ID) {
+    return undefined;
+  }
 
   global = updateSelectedChatId(global, id);
   global = {

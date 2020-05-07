@@ -37,3 +37,5 @@ export const MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN = 830; // px
 export const MOBILE_SCREEN_MAX_WIDTH = 600; // px
 
 export const AUTO_LOAD_MEDIA = true;
+
+export const RESTRICTED_TO_CHAT_ID = 983000232;

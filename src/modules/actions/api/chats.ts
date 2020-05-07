@@ -2,7 +2,7 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
-import { CHAT_LIST_SLICE, SUPPORT_BOT_ID } from '../../../config';
+import { CHAT_LIST_SLICE, RESTRICTED_TO_CHAT_ID, SUPPORT_BOT_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   addUsers, updateChatListIds, updateChats, updateUsers, updateChat,
@@ -19,6 +19,11 @@ const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
+
+  if (id !== RESTRICTED_TO_CHAT_ID) {
+    return;
+  }
+
   const { currentUserId } = global;
   const chat = selectChat(global, id);
 
