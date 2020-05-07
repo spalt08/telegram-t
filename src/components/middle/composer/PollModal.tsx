@@ -1,10 +1,11 @@
 import { ChangeEvent, RefObject } from 'react';
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
 import { ApiNewPoll } from '../../../api/types';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import parseMessageInput from './helpers/parseMessageInput';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -13,7 +14,6 @@ import Checkbox from '../../ui/Checkbox';
 import RadioGroup from '../../ui/RadioGroup';
 
 import './PollModal.scss';
-import parseMessageInput from './helpers/parseMessageInput';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -287,7 +287,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
             <h3 className="options-header">Solution</h3>
             <div
               ref={solutionRef}
-              className="form-control"
+              className="form-control solution"
               contentEditable
               onChange={(e) => setSolution(e.currentTarget.innerHTML)}
             />
