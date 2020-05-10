@@ -48,7 +48,6 @@ type StateProps = {
   lastMessageSender?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
-  isUiReady?: boolean;
   draft?: ApiFormattedText;
 };
 
@@ -66,7 +65,6 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   lastMessageOutgoingStatus,
   actionTargetMessage,
   selected,
-  isUiReady,
   draft,
   openChat,
   focusLastMessage,
@@ -172,14 +170,12 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div ref={ref} className={className} onClick={handleClick}>
-      {isUiReady && (
-        <Avatar
-          chat={chat}
-          user={privateChatUser}
-          showOnlineStatus
-          isSavedMessages={privateChatUser && privateChatUser.isSelf}
-        />
-      )}
+      <Avatar
+        chat={chat}
+        user={privateChatUser}
+        showOnlineStatus
+        isSavedMessages={privateChatUser && privateChatUser.isSelf}
+      />
       <div className="info">
         <div className="title">
           <h3>{getChatTitle(chat, privateChatUser)}</h3>
@@ -214,7 +210,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
-    const { isUiReady, chats: { draftsById } } = global;
+    const { chats: { draftsById } } = global;
 
     return {
       chat,
@@ -223,7 +219,6 @@ export default memo(withGlobal<OwnProps>(
       ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
-      isUiReady,
       draft: draftsById[chatId],
     };
   },
