@@ -32,9 +32,23 @@ type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 const MAX_PRELOAD_DELAY = 1500;
 
 function preloadAvatars() {
-  return Promise.all(Object.values(getGlobal().chats.byId).map((chat) => {
+  const { listIds, byId } = getGlobal().chats;
+  if (!listIds) {
+    return undefined;
+  }
+
+  return Promise.all(listIds.map((chatId) => {
+    const chat = byId[chatId];
+    if (!chat) {
+      return undefined;
+    }
+
     const avatarHash = getChatAvatarHash(chat);
-    return avatarHash ? mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri) : undefined;
+    if (!avatarHash) {
+      return undefined;
+    }
+
+    return mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri);
   }));
 }
 
