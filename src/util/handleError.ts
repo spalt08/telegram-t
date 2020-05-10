@@ -1,4 +1,4 @@
-import { DEBUG_ALERT_MSG, GLOBAL_STATE_CACHE_KEY } from '../config';
+import { DEBUG_ALERT_MSG, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '../config';
 
 window.onerror = handleError;
 window.addEventListener('unhandledrejection', handleError);
@@ -17,9 +17,15 @@ function handleError(...args: any[]) {
     return;
   }
 
-  // For startup errors, we just clean the cache and refresh the page.
+  // For startup errors, we just clean the cache or the session and refresh the page.
   if (Date.now() - startedAt <= STARTUP_TIMEOUT) {
-    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+    if (localStorage.getItem(GLOBAL_STATE_CACHE_KEY)) {
+      localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+    } else if (localStorage.getItem(GRAMJS_SESSION_ID_KEY)) {
+      localStorage.removeItem(GRAMJS_SESSION_ID_KEY);
+    } else {
+      return;
+    }
 
     isReloading = true;
     window.location.reload();
