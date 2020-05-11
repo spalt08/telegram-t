@@ -191,35 +191,36 @@ export default withGlobal<OwnProps>(
       target = id ? selectUser(global, id) : undefined;
     }
 
+    const { typingStatus } = chat || {};
+
+    const state = {
+      typingStatus,
+      isLeftColumnShown,
+      chatsById,
+    };
+
     if (chat && target && target.fullInfo) {
-      const { typingStatus } = chat;
       const { pinnedMessageId } = target.fullInfo;
       const pinnedMessage = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
-
-      const state = {
-        pinnedMessageId,
-        typingStatus,
-        isLeftColumnShown,
-        chatsById,
-      };
 
       if (pinnedMessage) {
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
 
         return {
           ...state,
+          pinnedMessageId,
           pinnedMessage,
           canUnpin: canPin,
         };
       } else {
-        return state;
+        return {
+          ...state,
+          pinnedMessageId,
+        };
       }
     }
 
-    return {
-      isLeftColumnShown,
-      chatsById,
-    };
+    return state;
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChatWithInfo',
