@@ -1,15 +1,12 @@
 import React, { FC, useEffect } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../lib/teact/teactn';
+import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMediaFormat } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
 
-import { getChatAvatarHash } from '../../modules/helpers/chats'; // Direct import for better module splitting
 import useShowTransition from '../../hooks/useShowTransition';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
-import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import { pick } from '../../util/iteratees';
 
@@ -29,34 +26,12 @@ type StateProps = Pick<GlobalState, 'isUiReady'>;
 
 type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 
-const MAX_PRELOAD_DELAY = 1500;
-
-function preloadAvatars() {
-  const { listIds, byId } = getGlobal().chats;
-  if (!listIds) {
-    return undefined;
-  }
-
-  return Promise.all(listIds.map((chatId) => {
-    const chat = byId[chatId];
-    if (!chat) {
-      return undefined;
-    }
-
-    const avatarHash = getChatAvatarHash(chat);
-    if (!avatarHash) {
-      return undefined;
-    }
-
-    return mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri);
-  }));
-}
+const MAX_PRELOAD_DELAY = 1000;
 
 const preloadTasks = {
   main: () => Promise.all([
     loadModule(Bundles.Main, 'Main')
       .then(preloadFonts),
-    preloadAvatars(),
   ]),
   authPhoneNumber: () => Promise.all([
     preloadFonts(),
