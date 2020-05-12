@@ -1,9 +1,14 @@
 .typing-status {
+  display: flex;
+  align-items: baseline;
+
   &::after {
     display: inline-block;
-    content: '';
-    width: 1rem;
-    animation: typing-animation 1s linear infinite;
+    content: '...';
+    width: 0;
+    line-height: 1;
+    overflow: hidden;
+    animation: typing-animation 1s steps(4, start) infinite;
   }
 
   .sender-name {
@@ -15,16 +20,7 @@
 }
 
 @keyframes typing-animation {
-  0% {
-    content: '';
-  }
-  25% {
-    content: '.';
-  }
-  50% {
-    content: '..';
-  }
-  75% {
-    content: '...';
+  to {
+    width: 1rem;
   }
 }
