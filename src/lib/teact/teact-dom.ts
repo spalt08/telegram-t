@@ -13,6 +13,7 @@ import {
   VirtualElementComponent,
   VirtualRealElement,
 } from './teact';
+import generateIdFor from '../../util/generateIdFor';
 
 type VirtualDomHead = {
   children: [VirtualElement] | [];
@@ -25,7 +26,7 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
 
-const $head: VirtualDomHead = { children: [] };
+const headsByElement: Record<string, VirtualDomHead> = {};
 let DEBUG_virtualTreeSize = 1;
 
 function render($element: VirtualElement, parentEl: HTMLElement | null) {
@@ -33,7 +34,15 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
     return undefined;
   }
 
-  $head.children = [renderWithVirtual(parentEl, undefined, $element, $head, 0) as VirtualElement];
+  let headId = parentEl.getAttribute('data-teact-head-id');
+  if (!headId) {
+    headId = generateIdFor(headsByElement);
+    headsByElement[headId] = { children: [] };
+    parentEl.setAttribute('data-teact-head-id', headId);
+  }
+
+  const $head = headsByElement[headId];
+  $head.children = [renderWithVirtual(parentEl, $head.children[0], $element, $head, 0) as VirtualElement];
 
   if (process.env.NODE_ENV === 'perf') {
     DEBUG_virtualTreeSize = 0;

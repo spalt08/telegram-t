@@ -32,6 +32,12 @@ body.scrollable {
   margin: 0 auto;
 }
 
+#portals {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .hidden {
   visibility: hidden;
 }
