@@ -91,6 +91,12 @@ export type ApiUpdatePinnedChatIds = {
   ids: number[];
 };
 
+export type ApiUpdateChatPinned = {
+  '@type': 'updateChatPinned';
+  id: number;
+  isPinned: boolean;
+};
+
 export type ApiUpdateNewMessage = {
   '@type': 'newMessage';
   chatId: number;
@@ -193,7 +199,7 @@ export type ApiUpdateResetContacts = {
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave |
+  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
   ApiUpdateNewMessage | ApiUpdateMessage| ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

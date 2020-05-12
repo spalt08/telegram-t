@@ -15,7 +15,7 @@ type StateProps = {
 };
 
 const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
-  if (!chat) {
+  if (!chat || chat.isRestricted) {
     return undefined;
   }
 
@@ -38,7 +38,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
         <div className="item">
           <i className="icon-username" />
           <div>
-            <a className="title" href={url}>{link}</a>
+            <a className="title" href={url} target="_blank" rel="noopener noreferrer">{link}</a>
             <p className="subtitle">Link</p>
           </div>
         </div>

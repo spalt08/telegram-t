@@ -30,7 +30,7 @@ export default function getReadableErrorText(error: ApiError) {
   // Currently Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
   if (message.startsWith('A wait of')) {
     const extraPartIndex = message.indexOf(' (caused by');
-    return message.substring(0, extraPartIndex);
+    return extraPartIndex > 0 ? message.substring(0, extraPartIndex) : message;
   }
 
   return READABLE_ERROR_MESSAGES[message];

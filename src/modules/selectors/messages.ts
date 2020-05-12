@@ -6,12 +6,14 @@ import { selectUser } from './users';
 import {
   getMessageText,
   getSendingState,
-  isChatBasicGroup,
   isChatChannel,
   isMessageLocal,
   isChatPrivate,
-  isChatSuperGroup,
   isForwardedMessage,
+  getCanPostInChat,
+  isUserRightBanned,
+  getHasAdminRight,
+  isChatBasicGroup,
   isCommonBoxChat,
 } from '../helpers';
 
@@ -122,31 +124,45 @@ export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): bo
 
 export function selectAllowedMessagedActions(global: GlobalState, message: ApiMessage) {
   const chat = selectChat(global, message.chatId);
-  if (!chat) {
+  if (!chat || chat.isRestricted) {
     return {};
   }
 
   const isPrivate = isChatPrivate(chat.id);
-  const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat!);
+  const isChatWithSelf = Boolean(isPrivate && selectIsChatWithSelf(global, chat!));
   const isBasicGroup = isChatBasicGroup(chat);
-  const isSuperGroup = isChatSuperGroup(chat);
   const isChannel = isChatChannel(chat);
 
   const isOwnMessage = selectIsOwnMessage(global, message);
-  const isAdminOrOwner = !isPrivate && false; // TODO Implement.
-  const isSuperGroupOrChannelAdmin = (isSuperGroup || isChannel) && isAdminOrOwner;
-
-  const canReply = !isChannel;
-  const canPin = Boolean(isChatWithSelf || isBasicGroup || isSuperGroupOrChannelAdmin);
-  const canDelete = isPrivate || isBasicGroup || isSuperGroupOrChannelAdmin || isOwnMessage;
-  const canDeleteForAll = canDelete
-    ? Boolean((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin)
-    : false;
-
-  const canEdit = isOwnMessage
-    && Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
+  const isMessageEditable = Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
     && Boolean(getMessageText(message))
     && !isForwardedMessage(message);
+
+  const canReply = getCanPostInChat(chat);
+
+  const canPin = isPrivate
+    ? isChatWithSelf
+    : chat.isCreator
+      || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
+      || getHasAdminRight(chat, 'pinMessages');
+
+  const canDelete = isPrivate
+    || isOwnMessage
+    || isBasicGroup
+    || chat.isCreator
+    || getHasAdminRight(chat, 'deleteMessages');
+
+  const canDeleteForAll = canDelete && (
+    (isPrivate && !isChatWithSelf)
+    || (isBasicGroup && (
+      isOwnMessage || getHasAdminRight(chat, 'deleteMessages')
+    ))
+  );
+
+  const canEdit = isMessageEditable && (
+    isOwnMessage
+    || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
+  );
 
   return {
     canReply, canEdit, canPin, canDelete, canDeleteForAll,

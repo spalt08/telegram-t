@@ -4,6 +4,7 @@ import React, {
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
+import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import { IS_SMOOTH_SCROLL_SUPPORTED, IS_TOUCH_ENV } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
@@ -31,6 +32,7 @@ let closeTimeout: number;
 
 export type OwnProps = {
   isOpen: boolean;
+  allowedAttachmentOptions: IAllowedAttachmentOptions;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
   onStickerSelect: (sticker: ApiSticker) => void;
@@ -38,7 +40,8 @@ export type OwnProps = {
 };
 
 const SymbolMenu: FC<OwnProps> = ({
-  isOpen, onClose, onEmojiSelect, onStickerSelect, onGifSelect,
+  isOpen, allowedAttachmentOptions,
+  onClose, onEmojiSelect, onStickerSelect, onGifSelect,
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const isActivated = useRef(false);
@@ -77,6 +80,8 @@ const SymbolMenu: FC<OwnProps> = ({
     }, MENU_CLOSE_TIMEOUT);
   }, [onClose]);
 
+  const { canSendStickers, canSendGifs } = allowedAttachmentOptions;
+
   function renderContent() {
     switch (activeTab) {
       case Tabs.Emoji:
@@ -90,7 +95,8 @@ const SymbolMenu: FC<OwnProps> = ({
         return (
           <StickerPicker
             className="picker-tab"
-            load={isOpen}
+            load={canSendStickers ? isOpen : false}
+            canSendStickers={canSendStickers}
             onStickerSelect={onStickerSelect}
           />
         );
@@ -98,7 +104,8 @@ const SymbolMenu: FC<OwnProps> = ({
         return (
           <GifPicker
             className="picker-tab"
-            load={isOpen}
+            load={canSendGifs ? isOpen : false}
+            canSendGifs={canSendGifs}
             onGifSelect={onGifSelect}
           />
         );

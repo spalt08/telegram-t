@@ -23,6 +23,18 @@ export interface ApiChat {
   username?: string;
   membersCount?: number;
   joinDate?: number;
+  adminRights?: ApiChatAdminRights;
+  currentUserBannedRights?: ApiChatBannedRights;
+  defaultBannedRights?: ApiChatBannedRights;
+  isCreator?: boolean;
+  isRestricted?: boolean;
+  restrictionReason?: ApiRestrictionReason;
+
+  migratedTo?: {
+    chatId: number;
+    accessHash?: string;
+  };
+
   // Obtained from GetFullChat / GetFullChannel
   fullInfo?: ApiChatFullInfo;
   // Obtained from GetOnlines
@@ -42,10 +54,49 @@ export interface ApiChatFullInfo {
   members?: ApiChatMember[];
   pinnedMessageId?: number;
   inviteLink?: string;
+  slowMode?: {
+    seconds: number;
+    nextSendDate?: number;
+  };
+  migratedFrom?: {
+    chatId: number;
+    maxMessageId?: number;
+  };
 }
 
 export interface ApiChatMember {
   userId: number;
   inviterId?: number;
   joinedDate?: number;
+}
+
+export interface ApiChatAdminRights {
+  changeInfo?: boolean;
+  postMessages?: boolean;
+  editMessages?: boolean;
+  deleteMessages?: boolean;
+  banUsers?: boolean;
+  inviteUsers?: boolean;
+  pinMessages?: boolean;
+  addAdmins?: boolean;
+}
+
+export interface ApiChatBannedRights {
+  viewMessages?: boolean;
+  sendMessages?: boolean;
+  sendMedia?: boolean;
+  sendStickers?: boolean;
+  sendGifs?: boolean;
+  sendGames?: boolean;
+  sendInline?: boolean;
+  embedLinks?: boolean;
+  sendPolls?: boolean;
+  changeInfo?: boolean;
+  inviteUsers?: boolean;
+  pinMessages?: boolean;
+}
+
+export interface ApiRestrictionReason {
+  reason: string;
+  text: string;
 }

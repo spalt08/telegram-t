@@ -25,6 +25,7 @@ import './StickerPicker.scss';
 type OwnProps = {
   className: string;
   load: boolean;
+  canSendStickers: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
 };
 
@@ -47,6 +48,7 @@ const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
+  canSendStickers,
   recentStickers,
   stickerSets,
   onStickerSelect,
@@ -185,10 +187,14 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', className);
 
-  if (!areLoaded) {
+  if (!areLoaded || !canSendStickers) {
     return (
       <div className={fullClassName}>
-        <Loading />
+        {!canSendStickers ? (
+          <div className="picker-disabled">Sending stickers is not allowed in this chat.</div>
+        ) : (
+          <Loading />
+        )}
       </div>
     );
   }

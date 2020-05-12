@@ -178,11 +178,7 @@ async function loadFullChat(chat: ApiChat) {
   const { users, fullInfo } = result;
 
   let global = getGlobal();
-
-  if (users) {
-    global = updateUsers(global, buildCollectionByKey(users, 'id'));
-  }
-
+  global = updateUsers(global, buildCollectionByKey(users, 'id'));
   global = updateChat(global, chat.id, { fullInfo });
 
   setGlobal(global);

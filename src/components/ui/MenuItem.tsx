@@ -40,7 +40,9 @@ const MenuItem: FC<OwnProps> = (props) => {
           <i className={`icon-${icon}`} />
         )}
         {children}
-        <RippleEffect />
+        {!disabled && (
+          <RippleEffect />
+        )}
         {attention && <AttentionIndicator show={attention} />}
       </button>
     </div>

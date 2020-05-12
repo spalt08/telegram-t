@@ -1,6 +1,8 @@
 @mixin active-styles() {
-  &:hover, &:active, &.active, &:focus {
-    @content;
+  &:not(.disabled):not(:disabled) {
+    &:hover, &:active, &.active, &:focus {
+      @content;
+    }
   }
 }
 
@@ -25,7 +27,6 @@
   &.disabled {
     opacity: 0.5;
     cursor: default;
-    pointer-events: none;
   }
 
   &.round {

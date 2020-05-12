@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiRestrictionReason } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
@@ -23,6 +23,7 @@ import {
   isChatChannel,
   isChatPrivate,
   isOwnMessage,
+  getCanPostInChat,
 } from '../../modules/helpers';
 import {
   areSortedArraysEqual,
@@ -51,11 +52,14 @@ type OwnProps = {
 
 type StateProps = {
   isChannelChat?: boolean;
+  isReadOnlyChannel?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
   isViewportNewest?: boolean;
   isFocusing?: boolean;
+  isRestricted?: boolean;
+  restrictionReason?: ApiRestrictionReason;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -86,11 +90,14 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onFabToggle,
   chatId,
   isChannelChat,
+  isReadOnlyChannel,
   messageIds,
   messagesById,
   firstUnreadId,
   isViewportNewest,
   isFocusing,
+  isRestricted,
+  restrictionReason,
   loadViewportMessages,
   markChatRead,
   markMessagesRead,
@@ -101,7 +108,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [viewportMessageIds, setViewportMessageIds] = useState<number[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [containerHeight, setContainerHeight] = useState();
+  const [containerHeight, setContainerHeight] = useState<number | undefined>();
 
   useOnChange(() => {
     currentAnchorId = undefined;
@@ -389,20 +396,33 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const className = buildClassName(
     'MessageList custom-scroll',
     isPrivate && 'no-avatars',
-    isChannelChat && 'is-channel no-avatars bottom-padding',
+    isChannelChat && 'no-avatars',
+    isReadOnlyChannel && 'bottom-padding',
     isScrolled && 'scrolled',
   );
 
+  function renderContent() {
+    if (!messageIds && isRestricted) {
+      return (
+        <div className="chat-restricted">
+          <p>{restrictionReason ? restrictionReason.text : 'This is a private chat'}</p>
+        </div>
+      );
+    }
+
+    return messageIds ? (
+      // @ts-ignore
+      <div className="messages-container" teactFastList>
+        {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
+      </div>
+    ) : (
+      <Loading color="white" />
+    );
+  }
+
   return (
     <div ref={containerRef} id="MessageList" className={className} onScroll={handleScroll}>
-      {messageIds ? (
-        // @ts-ignore
-        <div className="messages-container" teactFastList>
-          {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
-        </div>
-      ) : (
-        <Loading color="white" />
-      )}
+      {renderContent()}
     </div>
   );
 };
@@ -566,8 +586,14 @@ export default memo(withGlobal<OwnProps>(
       return {};
     }
 
+    const { isRestricted, restrictionReason } = chat;
+    const isChannelChat = isChatChannel(chat);
+
     return {
-      isChannelChat: isChatChannel(chat),
+      isRestricted,
+      restrictionReason,
+      isChannelChat,
+      isReadOnlyChannel: isChannelChat && !getCanPostInChat(chat),
       messageIds: selectViewportIds(global, chatId),
       messagesById: selectChatMessages(global, chatId),
       firstUnreadId: selectFirstUnreadId(global, chatId),

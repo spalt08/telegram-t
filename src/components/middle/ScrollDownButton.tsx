@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import { selectChat } from '../../modules/selectors';
-import { isChatChannel } from '../../modules/helpers';
+import { isChatChannel, getCanPostInChat } from '../../modules/helpers';
 import { formatIntegerCompact } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
 import { pick } from '../../util/iteratees';
@@ -18,7 +18,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  isChannel?: boolean;
+  isReadOnlyChannel?: boolean;
   unreadCount?: number;
 };
 
@@ -26,7 +26,7 @@ type DispatchProps = Pick<GlobalActions, 'focusLastMessage'>;
 
 const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   show,
-  isChannel,
+  isReadOnlyChannel,
   unreadCount,
   focusLastMessage,
 }) => {
@@ -41,7 +41,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
   const fabClassName = buildClassName(
     'ScrollDownButton',
     show && 'revealed',
-    isChannel && 'is-channel',
+    isReadOnlyChannel && 'bottom-padding',
   );
 
   return (
@@ -68,10 +68,10 @@ export default withGlobal<OwnProps>(
     }
 
     const chat = selectChat(global, openChatId);
-    const isChannel = chat && isChatChannel(chat);
+    const isReadOnlyChannel = chat && isChatChannel(chat) && !getCanPostInChat(chat);
 
     return {
-      isChannel,
+      isReadOnlyChannel,
       unreadCount: chat ? chat.unreadCount : undefined,
     };
   },

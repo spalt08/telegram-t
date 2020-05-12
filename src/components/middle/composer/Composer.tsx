@@ -11,12 +11,14 @@ import {
   ApiNewPoll,
   ApiMessage,
   ApiFormattedText,
+  ApiChat,
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
+
 import { IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
-import { selectChatMessage, selectIsChatWithBot } from '../../../modules/selectors';
-import { isChatPrivate } from '../../../modules/helpers';
+import { selectChatMessage, selectChat } from '../../../modules/selectors';
+import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
@@ -44,13 +46,16 @@ import WebPagePreview from './WebPagePreview';
 import './Composer.scss';
 
 type StateProps = {
-  canAttachPoll: boolean;
   editedMessage?: ApiMessage;
   chatId?: number;
+  chat?: ApiChat;
   draft?: ApiFormattedText;
 } & Pick<GlobalState, 'connectionState'>;
 
-type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage' | 'saveDraft' | 'clearDraft'>;
+type DispatchProps = Pick<GlobalActions, (
+  'sendMessage' | 'editMessage' | 'saveDraft' |
+  'clearDraft' | 'showError'
+)>;
 
 enum MainButtonState {
   Send = 'send',
@@ -64,23 +69,29 @@ const MAX_NESTING_PARENTS = 5;
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
 const Composer: FC<StateProps & DispatchProps> = ({
-  canAttachPoll,
   editedMessage,
   chatId,
   draft,
+  chat,
   connectionState,
   sendMessage,
   editMessage,
   saveDraft,
   clearDraft,
+  showError,
 }) => {
   const [html, setHtml] = useState<string>('');
+  const lastMessageSendTimeSeconds = useRef<number>();
 
   // Cache for frequently updated state
   const htmlRef = useRef<string>(html);
   useEffect(() => {
     htmlRef.current = html;
   }, [html]);
+
+  useEffect(() => {
+    lastMessageSendTimeSeconds.current = null;
+  }, [chatId]);
 
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
 
@@ -97,6 +108,9 @@ const Composer: FC<StateProps & DispatchProps> = ({
     recordButtonRef,
     startRecordTimeRef,
   } = useVoiceRecording();
+
+  const allowedAttachmentOptions = getAllowedAttachmentOptions(chat);
+  const slowMode = getChatSlowModeOptions(chat);
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
     const selection = window.getSelection()!;
@@ -174,17 +188,41 @@ const Composer: FC<StateProps & DispatchProps> = ({
       return;
     }
 
+    if (slowMode) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
+        && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
+      const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
+
+      if (
+        (secondsSinceLastMessage && secondsSinceLastMessage < slowMode.seconds)
+        || nextSendDateNotReached
+      ) {
+        const secondsRemaining = nextSendDateNotReached
+          ? slowMode.nextSendDate! - nowSeconds
+          : slowMode.seconds - secondsSinceLastMessage!;
+        showError({
+          error: {
+            message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
+          },
+        });
+        return;
+      }
+    }
+
     sendMessage({
       text,
       entities,
       attachment: currentAttachment,
     });
 
+    lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000);
+
     resetComposer();
     clearDraft({ chatId, localOnly: true });
   }, [
-    activeVoiceRecording, attachment, connectionState, chatId,
-    sendMessage, stopRecordingVoice, resetComposer, clearDraft,
+    activeVoiceRecording, attachment, connectionState, chatId, slowMode,
+    sendMessage, stopRecordingVoice, resetComposer, clearDraft, showError,
   ]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -224,6 +262,9 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }
   }, [mainButtonState, handleSend, startRecordingVoice, handleEditComplete]);
 
+  const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
+    && !allowedAttachmentOptions.canAttachMedia;
+
   return (
     <div className="Composer">
       <AttachmentModal
@@ -247,7 +288,9 @@ const Composer: FC<StateProps & DispatchProps> = ({
       )}
       <div id="message-compose">
         <ComposerEmbeddedMessage />
-        <WebPagePreview messageText={!attachment ? html : ''} />
+        {allowedAttachmentOptions.canAttachEmbedLinks && (
+          <WebPagePreview messageText={!attachment ? html : ''} />
+        )}
         <div className="message-input-wrapper">
           <ResponsiveHoverButton
             className={`${isSymbolMenuOpen ? 'activated' : ''}`}
@@ -275,20 +318,21 @@ const Composer: FC<StateProps & DispatchProps> = ({
               <i className="icon-attach" />
             </ResponsiveHoverButton>
           )}
-          {activeVoiceRecording && (
+          {activeVoiceRecording && currentRecordTime && (
             <span className="recording-state">
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
           <AttachMenu
             isOpen={isAttachMenuOpen}
-            canAttachPoll={canAttachPoll}
+            allowedAttachmentOptions={allowedAttachmentOptions}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             onClose={closeAttachMenu}
           />
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
+            allowedAttachmentOptions={allowedAttachmentOptions}
             onClose={closeSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
@@ -311,6 +355,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
         round
         color="secondary"
         className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
+        disabled={areVoiceMessagesNotAllowed}
+        ariaLabel={areVoiceMessagesNotAllowed ? 'Posting media content is not allowed in this group.' : undefined}
         onClick={mainButtonHandler}
       >
         <i className="icon-send" />
@@ -340,12 +386,14 @@ export default memo(withGlobal(
     const editedMessage = editingMessageId ? selectChatMessage(global, chatId!, editingMessageId) : undefined;
     const { connectionState, chats: { draftsById } } = global;
 
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+
     return {
-      canAttachPoll: !!chatId && (!isChatPrivate(chatId) || !!selectIsChatWithBot(global, chatId)),
       editedMessage,
       connectionState,
       chatId,
       draft: chatId ? draftsById[chatId] : undefined,
+      chat,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -353,5 +401,6 @@ export default memo(withGlobal(
     'editMessage',
     'saveDraft',
     'clearDraft',
+    'showError',
   ]),
 )(Composer));

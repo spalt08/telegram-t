@@ -35,7 +35,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
   } = payload || {};
   const chat = selectOpenChat(global);
 
-  if (!chat) {
+  if (!chat || chat.isRestricted) {
     return undefined;
   }
 

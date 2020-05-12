@@ -43,6 +43,14 @@
     width: var(--menu-width);
     overflow: hidden;
   }
+
+  .picker-disabled {
+    height: var(--menu-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+  }
 }
 
 .symbol-set {

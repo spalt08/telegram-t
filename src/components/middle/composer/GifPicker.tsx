@@ -19,6 +19,7 @@ import './GifPicker.scss';
 type OwnProps = {
   className: string;
   load: boolean;
+  canSendGifs: boolean;
   onGifSelect: (gif: ApiVideo) => void;
 };
 
@@ -35,6 +36,7 @@ const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
+  canSendGifs,
   savedGifs,
   onGifSelect,
   loadSavedGifs,
@@ -73,7 +75,9 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       className={buildClassName('GifPicker no-scroll', className)}
       onScroll={handleScroll}
     >
-      {!areLoaded ? (
+      {!canSendGifs ? (
+        <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
+      ) : !areLoaded ? (
         <Loading />
       ) : savedGifs ? (
         savedGifs.map((gif, index) => (

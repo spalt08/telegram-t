@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 
 import { selectChat } from '../../modules/selectors';
-import { isChatChannel } from '../../modules/helpers';
+import { getCanPostInChat, getMessageSendingRestrictionReason } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import usePrevious from '../../hooks/usePrevious';
@@ -19,29 +19,24 @@ import './MiddleColumn.scss';
 
 type StateProps = {
   openChatId?: number;
-  isChannel?: boolean;
+  canPost?: boolean;
+  messageSendingRestrictionReason?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
 
 const MiddleColumn: FC<StateProps & DispatchProps> = ({
   openChatId,
-  isChannel,
+  canPost,
+  messageSendingRestrictionReason,
   openChat,
 }) => {
   const [showFab, setShowFab] = useState(false);
   const prevChatId = usePrevious(openChatId, true);
-  const prevIsChannel = usePrevious(isChannel, true);
 
-  const isDesktop = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
-
-  const renderingChatId = isDesktop
+  const renderingChatId = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
     ? openChatId
     : openChatId || prevChatId;
-
-  const renderingIsChannel = isDesktop
-    ? isChannel
-    : isChannel !== undefined ? isChannel : prevIsChannel;
 
   useEffect(() => {
     return openChatId
@@ -57,7 +52,10 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         <div className="messages-layout">
           <MiddleHeader chatId={renderingChatId} />
           <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
-          {!renderingIsChannel && <Composer />}
+          {canPost && <Composer />}
+          {!canPost && messageSendingRestrictionReason && (
+            <div className="messaging-disabled">{messageSendingRestrictionReason}</div>
+          )}
           <ScrollDownButton show={showFab} />
         </div>
       )}
@@ -73,11 +71,11 @@ export default withGlobal(
     }
 
     const chat = selectChat(global, openChatId);
-    const isChannel = chat && isChatChannel(chat);
 
     return {
       openChatId,
-      isChannel,
+      canPost: chat && getCanPostInChat(chat),
+      messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),

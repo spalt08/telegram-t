@@ -144,6 +144,7 @@ export interface ApiMessageForwardInfo {
   origin: {
     senderUserId?: number;
     senderUsername?: string;
+    channelPostId?: number;
   };
 }
 

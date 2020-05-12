@@ -60,6 +60,7 @@ type StateProps = {
   hasMembersTab?: boolean;
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
+  isRestricted?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -95,6 +96,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   hasMembersTab,
   groupChatMembers,
   usersById,
+  isRestricted,
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
@@ -144,9 +146,11 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     function setMinHeight() {
       const container = containerRef.current!;
-      const transitionEl = container.querySelector<HTMLDivElement>('.Transition')!;
-      const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
-      transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+      const transitionEl = container.querySelector<HTMLDivElement>('.Transition');
+      const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
+      if (transitionEl && tabsEl) {
+        transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+      }
     }
 
     setMinHeight();
@@ -191,10 +195,10 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     if (!container) {
       return;
     }
-    const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
+    const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
     const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
 
-    if (chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop === 0) {
+    if (tabsEl && chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop === 0) {
       isScrollingProgrammatically = true;
       fastSmoothScroll(container, chatInfoEl, 'start', container.offsetHeight * 2);
       setTimeout(() => {
@@ -302,19 +306,21 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         <GroupChatInfo chatId={chatId} avatarSize="jumbo" showFullInfo />,
         <GroupExtra chatId={chatId} />,
       ]}
-      <div className="shared-media">
-        <Transition
-          name="slide"
-          activeKey={activeTab}
-          renderCount={tabTitles.length}
-          shouldRestoreHeight
-          onStart={handleTransitionStart}
-          onStop={handleTransitionStop}
-        >
-          {renderSharedMedia}
-        </Transition>
-        <TabList activeTab={activeTab} tabs={tabTitles} onSwitchTab={setActiveTab} />
-      </div>
+      {!isRestricted && (
+        <div className="shared-media">
+          <Transition
+            name="slide"
+            activeKey={activeTab}
+            renderCount={tabTitles.length}
+            shouldRestoreHeight
+            onStart={handleTransitionStart}
+            onStop={handleTransitionStop}
+          >
+            {renderSharedMedia}
+          </Transition>
+          <TabList activeTab={activeTab} tabs={tabTitles} onSwitchTab={setActiveTab} />
+        </div>
+      )}
     </InfiniteScroll>
   );
 };
@@ -345,6 +351,7 @@ export default withGlobal<OwnProps>(
         groupChatMembers,
         usersById,
       }),
+      isRestricted: chat && chat.isRestricted,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

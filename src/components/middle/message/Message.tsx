@@ -4,7 +4,12 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
+import {
+  ApiMessage,
+  ApiMessageOutgoingStatus,
+  ApiUser,
+  ApiChat,
+} from '../../../api/types';
 import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -28,6 +33,8 @@ import {
   isForwardedMessage,
   getMessageCustomShape,
   getMessageVideo,
+  isChatPrivate,
+  getChatTitle,
 } from '../../../modules/helpers';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -74,8 +81,8 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiUser;
   replyMessage?: ApiMessage;
-  replyMessageSender?: ApiUser;
-  originSender?: ApiUser;
+  replyMessageSender?: ApiUser | ApiChat;
+  originSender?: ApiUser | ApiChat;
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
   isFocused?: boolean;
@@ -87,16 +94,18 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'markMessagesRead' | 'sendPollVote'
+  'focusMessage' | 'openMediaViewer' |
+  'openUserInfo' | 'openChat' |
+  'cancelSendingMessage' | 'markMessagesRead' |
+  'sendPollVote'
 )>;
-
-const NBSP = '\u00A0';
 
 // This is the max scroll offset within existing viewport.
 const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
 const RELOCATED_FOCUS_OFFSET = 1200;
 const LONG_TAP_DURATION_MS = 250;
+const NBSP = '\u00A0';
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -122,6 +131,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   focusMessage,
   openMediaViewer,
   openUserInfo,
+  openChat,
   cancelSendingMessage,
   markMessagesRead,
   sendPollVote,
@@ -183,12 +193,17 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     hasReply, customShape, isLastInGroup,
   });
 
-  const handleSenderClick = useCallback((user?: ApiUser) => {
-    if (!user) {
+  const handleSenderClick = useCallback((chatOrUser?: ApiUser | ApiChat) => {
+    if (!chatOrUser) {
       return;
     }
-    openUserInfo({ id: user.id });
-  }, [openUserInfo]);
+
+    if (isChatPrivate(chatOrUser.id)) {
+      openUserInfo({ id: chatOrUser.id });
+    } else {
+      openChat({ id: chatOrUser.id });
+    }
+  }, [openUserInfo, openChat]);
 
   const handleReplyClick = useCallback((): void => {
     focusMessage({ chatId, messageId: message.replyToMessageId });
@@ -300,17 +315,23 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     sendPollVote({ chatId, messageId, options });
   }, [chatId, messageId, sendPollVote]);
 
-  function renderSenderName(user?: ApiUser) {
+  function renderSenderName(userOrChat?: ApiUser | ApiChat) {
     if (
       (!showSenderName && !message.forwardInfo)
-      || !user || photo || video || customShape
+      || !userOrChat || photo || video || customShape
     ) {
       return undefined;
     }
 
+    const senderTitle = (
+      isChatPrivate(userOrChat.id)
+        ? getUserFullName(userOrChat as ApiUser)
+        : getChatTitle(userOrChat as ApiChat)
+    );
+
     return (
-      <div className="message-title interactive" onClick={() => handleSenderClick(user)}>
-        {user ? getUserFullName(user) : NBSP}
+      <div className="message-title interactive" onClick={() => handleSenderClick(userOrChat)}>
+        {senderTitle || NBSP}
       </div>
     );
   }
@@ -480,17 +501,23 @@ export default memo(withGlobal<OwnProps>(
     const replyMessage = message.replyToMessageId
       ? selectChatMessage(global, chatId, message.replyToMessageId)
       : undefined;
-    const replyMessageSender = replyMessage && replyMessage.senderUserId
+    const replyMessageSender = replyMessage && (replyMessage.senderUserId
       ? selectUser(global, replyMessage.senderUserId)
-      : undefined;
+      : selectChat(global, replyMessage.chatId));
 
     let userId;
-    let originUserId;
+    let originSender;
     if (showSenderName || showAvatar) {
       userId = message.senderUserId;
     }
     if (message.forwardInfo) {
-      originUserId = message.forwardInfo.origin.senderUserId;
+      const originUserId = message.forwardInfo.origin.senderUserId;
+      const originChatId = message.forwardInfo.fromChatId;
+      if (originUserId) {
+        originSender = selectUser(global, originUserId);
+      } else if (originChatId) {
+        originSender = selectChat(global, originChatId);
+      }
     }
 
     const uploadProgress = selectUploadProgress(global, message);
@@ -510,7 +537,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),
-      ...(originUserId && { originSender: selectUser(global, originUserId) }),
+      originSender,
       replyMessage,
       replyMessageSender,
       ...(message.isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
@@ -528,6 +555,7 @@ export default memo(withGlobal<OwnProps>(
     'openMediaViewer',
     'cancelSendingMessage',
     'openUserInfo',
+    'openChat',
     'markMessagesRead',
     'sendPollVote',
   ]),

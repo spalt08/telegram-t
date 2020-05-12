@@ -120,8 +120,15 @@ function getGroupStatus(chat: ApiChat) {
   const chatTypeString = getChatTypeString(chat);
   const { membersCount } = chat;
 
+  if (chat.isRestricted) {
+    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
+  }
+
+  const memberTypeString = chatTypeString === 'Channel' ? 'subscriber' : 'member';
+  const pluralSuffix = membersCount !== 1 ? 's' : '';
+
   return membersCount
-    ? `${formatInteger(membersCount)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+    ? `${formatInteger(membersCount)} ${memberTypeString}${pluralSuffix}`
     : chatTypeString;
 }
 

@@ -8,7 +8,7 @@ export default () => {
   const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
   const startRecordTimeRef = useRef<number>();
-  const [currentRecordTime, setCurrentRecordTime] = useState();
+  const [currentRecordTime, setCurrentRecordTime] = useState<number | undefined>();
 
   const startRecordingVoice = useCallback(async () => {
     try {

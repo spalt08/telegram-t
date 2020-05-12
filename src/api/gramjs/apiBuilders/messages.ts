@@ -169,10 +169,15 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
 }
 
 function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessageForwardInfo {
+  const fromChatId = fwdFrom.channelId
+    ? getApiChatIdFromMtpPeer({ channelId: fwdFrom.channelId } as GramJs.PeerChannel)
+    : fwdFrom.fromId;
+
   return {
-    fromChatId: fwdFrom.fromId,
+    fromChatId,
     origin: {
       senderUserId: fwdFrom.fromId,
+      channelPostId: fwdFrom.channelPost,
       // TODO @gramjs Not supported?
       // senderUsername: fwdFrom.fromName,
     },

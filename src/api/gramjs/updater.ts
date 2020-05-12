@@ -23,6 +23,7 @@ import {
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import { buildMessageFromUpdateShortSent, isMessageWithMedia, buildChatPhotoForLocalDb } from './gramjsBuilders';
 import localDb from './localDb';
+import { omitVirtualClassFields } from './apiBuilders/helpers';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -326,11 +327,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     && update.peer instanceof GramJs.DialogPeer
   ) {
     onUpdate({
-      '@type': 'updateChat',
+      '@type': 'updateChatPinned',
       id: getApiChatIdFromMtpPeer(update.peer.peer),
-      chat: {
-        isPinned: update.pinned || false,
-      },
+      isPinned: update.pinned || false,
     });
   } else if (update instanceof GramJs.UpdatePinnedDialogs) {
     const ids = update.order
@@ -434,6 +433,14 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       });
     }
+  } else if (update instanceof GramJs.UpdateChatDefaultBannedRights) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer),
+      chat: {
+        defaultBannedRights: omitVirtualClassFields(update.defaultBannedRights),
+      },
+    });
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {

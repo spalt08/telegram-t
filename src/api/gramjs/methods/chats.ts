@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText,
+  OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText, ApiChatFullInfo,
 } from '../../types';
 
 import { invokeRequest } from './client';
@@ -14,7 +14,7 @@ import {
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildCollectionByKey, pick } from '../../../util/iteratees';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 import {
   buildInputEntity, buildInputPeer, buildMtpMessageEntity, getEntityTypeById,
@@ -201,8 +201,9 @@ export async function requestChatUpdate(chat: ApiChat) {
   }
 
   const dialog = result.dialogs[0];
+  const updatedChat = result.chats[0];
   const lastMessage = buildApiMessage(result.messages[0]);
-  if (!dialog || !(dialog instanceof GramJs.Dialog)) {
+  if (!dialog || !(dialog instanceof GramJs.Dialog) || !updatedChat) {
     return;
   }
 
@@ -210,9 +211,7 @@ export async function requestChatUpdate(chat: ApiChat) {
     '@type': 'updateChat',
     id,
     chat: {
-      lastReadOutboxMessageId: dialog.readOutboxMaxId,
-      lastReadInboxMessageId: dialog.readInboxMaxId,
-      ...pick(dialog, ['unreadCount', 'unreadMentionsCount']),
+      ...buildApiChatFromDialog(dialog, updatedChat),
       lastMessage,
     },
   });
@@ -246,7 +245,10 @@ export function clearDraft(chat: ApiChat) {
   }));
 }
 
-async function getFullChatInfo(chatId: number) {
+async function getFullChatInfo(chatId: number): Promise<{
+  fullInfo: ApiChatFullInfo;
+  users: ApiUser[];
+} | undefined> {
   const result = await invokeRequest(new GramJs.messages.GetFullChat({ chatId }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChatFull)) {
@@ -275,7 +277,10 @@ async function getFullChatInfo(chatId: number) {
   };
 }
 
-async function getFullChannelInfo(channel: GramJs.InputChannel) {
+async function getFullChannelInfo(channel: GramJs.InputChannel): Promise<{
+  fullInfo: ApiChatFullInfo;
+  users: ApiUser[];
+} | undefined> {
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({ channel }));
 
   if (!result || !(result.fullChat instanceof GramJs.ChannelFull)) {
@@ -286,6 +291,10 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
     about,
     pinnedMsgId,
     exportedInvite,
+    slowmodeSeconds,
+    slowmodeNextSendDate,
+    migratedFromChatId,
+    migratedFromMaxId,
   } = result.fullChat;
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -297,8 +306,16 @@ async function getFullChannelInfo(channel: GramJs.InputChannel) {
       about,
       pinnedMessageId: pinnedMsgId,
       inviteLink,
+      slowMode: slowmodeSeconds ? {
+        seconds: slowmodeSeconds,
+        nextSendDate: slowmodeNextSendDate,
+      } : undefined,
+      migratedFrom: migratedFromChatId ? {
+        chatId: getApiChatIdFromMtpPeer({ chatId: migratedFromChatId } as GramJs.TypePeer),
+        maxMessageId: migratedFromMaxId,
+      } : undefined,
     },
-    users: undefined,
+    users: [],
   };
 }
 
@@ -325,7 +342,7 @@ export async function markChatRead({
 }
 
 function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
-  const store: Record<string, GramJs.Chat | GramJs.User> = {};
+  const store: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {};
 
   result.chats.forEach((chat) => {
     store[`chat${chat.id}`] = chat;

@@ -1,6 +1,6 @@
 import React, { FC } from '../../lib/teact/teact';
 
-import { ApiUser, ApiMessage } from '../../api/types';
+import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
 
 import {
   getUserFullName,
@@ -8,6 +8,8 @@ import {
   getMessageMediaHash,
   isActionMessage,
   getMessageSummaryText,
+  isChatPrivate,
+  getChatTitle,
 } from '../../modules/helpers';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
@@ -21,7 +23,7 @@ import './EmbeddedMessage.scss';
 type OwnProps = {
   className?: string;
   message?: ApiMessage;
-  sender?: ApiUser;
+  sender?: ApiUser | ApiChat;
   title?: string;
   loadPictogram?: boolean;
   onClick: NoneToVoidFunction;
@@ -36,11 +38,17 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
   const fullClassName = buildClassName('EmbeddedMessage', className, !message && 'not-implemented');
 
+  const senderTitle = sender && (
+    isChatPrivate(sender.id)
+      ? getUserFullName(sender as ApiUser)
+      : getChatTitle(sender as ApiChat)
+  );
+
   return (
     <div className={fullClassName} onClick={message ? onClick : undefined}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="message-text">
-        <div className="message-title">{(sender && getUserFullName(sender)) || title || NBSP}</div>
+        <div className="message-title">{senderTitle || title || NBSP}</div>
         <p>
           {!message ? (
             NBSP

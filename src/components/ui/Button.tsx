@@ -71,10 +71,10 @@ const Button: FC<OwnProps> = ({
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (onMouseDown) {
+    if (!disabled && onMouseDown) {
       onMouseDown(e);
     }
-  }, [onMouseDown]);
+  }, [onMouseDown, disabled]);
 
   if (href) {
     return (
@@ -97,11 +97,11 @@ const Button: FC<OwnProps> = ({
       ref={elementRef as RefObject<HTMLButtonElement>}
       type={type}
       className={fullClassName}
-      onClick={onClick ? onClick as MouseEventHandler : undefined}
+      onClick={onClick && !disabled ? onClick as MouseEventHandler : undefined}
       onMouseDown={handleMouseDown}
-      onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
-      onMouseLeave={onMouseLeave ? onMouseLeave as MouseEventHandler : undefined}
-      onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
+      onMouseEnter={onMouseEnter && !disabled ? onMouseEnter as MouseEventHandler : undefined}
+      onMouseLeave={onMouseLeave && !disabled ? onMouseLeave as MouseEventHandler : undefined}
+      onFocus={onFocus && !disabled ? onFocus as OnFocusHandler : undefined}
       aria-label={ariaLabel}
       title={ariaLabel}
     >
@@ -111,7 +111,9 @@ const Button: FC<OwnProps> = ({
           <Spinner color="white" />
         </div>
       ) : children}
-      <RippleEffect />
+      {!disabled && (
+        <RippleEffect />
+      )}
     </button>
   );
 };

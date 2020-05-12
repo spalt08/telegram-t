@@ -6,7 +6,6 @@ import {
   updateChat,
   replaceChatListIds,
   updateChatListIds,
-  updateSelectedChatId,
 } from '../../reducers';
 import { selectChat, selectCommonBoxChatId } from '../../selectors';
 
@@ -27,7 +26,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateChatJoin': {
-      setGlobal(updateChatListIds(global, [update.id]));
+      let newGlobal = global;
+      newGlobal = updateChatListIds(newGlobal, [update.id]);
+      newGlobal = updateChat(newGlobal, update.id, { isRestricted: false });
+      setGlobal(newGlobal);
+
+      const chat = selectChat(newGlobal, update.id);
+      if (chat) {
+        actions.requestChatUpdate({ chatId: chat.id });
+      }
       break;
     }
 
@@ -37,10 +44,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       if (listIds) {
         let newGlobal = global;
         newGlobal = replaceChatListIds(newGlobal, listIds.filter((listId) => listId !== update.id));
-        const { selectedId } = newGlobal.chats;
-        if (selectedId === update.id) {
-          newGlobal = updateSelectedChatId(newGlobal, undefined);
-        }
+        newGlobal = updateChat(newGlobal, update.id, { isRestricted: true });
         setGlobal(newGlobal);
       }
 
@@ -150,6 +154,27 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
           orderedPinnedIds: ids,
         },
       };
+
+      setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateChatPinned': {
+      const { id, isPinned } = update;
+      let newGlobal = global;
+
+      newGlobal = updateChat(newGlobal, id, { isPinned });
+      const { orderedPinnedIds } = newGlobal.chats;
+      if (orderedPinnedIds) {
+        newGlobal = {
+          ...newGlobal,
+          chats: {
+            ...newGlobal.chats,
+            orderedPinnedIds: orderedPinnedIds.filter((pinnedId) => pinnedId !== id),
+          },
+        };
+      }
 
       setGlobal(newGlobal);
 

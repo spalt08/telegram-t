@@ -1,4 +1,9 @@
-import { ApiChat, ApiUser } from '../../api/types';
+import {
+  ApiChat,
+  ApiUser,
+  ApiChatBannedRights,
+  ApiChatAdminRights,
+} from '../../api/types';
 
 export function isChatPrivate(chatId: number) {
   return chatId > 0;
@@ -86,6 +91,82 @@ export function getChatAvatarHash(
 
 export function isChatSummaryOnly(chat: ApiChat) {
   return !chat.lastMessage;
+}
+
+export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
+  return chat.adminRights && chat.adminRights[key];
+}
+
+export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {
+  return (chat.currentUserBannedRights && chat.currentUserBannedRights[key])
+    || (chat.defaultBannedRights && chat.defaultBannedRights[key]);
+}
+
+export function getCanPostInChat(chat: ApiChat) {
+  if (chat.isRestricted) {
+    return false;
+  }
+
+  if (chat.isCreator) {
+    return true;
+  }
+
+  if (isChatPrivate(chat.id)) {
+    return true;
+  }
+
+  if (isChatChannel(chat)) {
+    return getHasAdminRight(chat, 'postMessages');
+  }
+
+  return !isUserRightBanned(chat, 'sendMessages');
+}
+
+export interface IAllowedAttachmentOptions {
+  canAttachMedia: boolean;
+  canAttachPolls: boolean;
+  canSendStickers: boolean;
+  canSendGifs: boolean;
+  canAttachEmbedLinks: boolean;
+}
+
+export function getAllowedAttachmentOptions(chat?: ApiChat): IAllowedAttachmentOptions {
+  if (!chat) {
+    return {
+      canAttachMedia: false,
+      canAttachPolls: false,
+      canSendStickers: false,
+      canSendGifs: false,
+      canAttachEmbedLinks: false,
+    };
+  }
+
+  return {
+    canAttachMedia: !isUserRightBanned(chat, 'sendMedia'),
+    canAttachPolls: !isChatPrivate(chat.id) && !isUserRightBanned(chat, 'sendPolls'),
+    canSendStickers: !isUserRightBanned(chat, 'sendStickers'),
+    canSendGifs: !isUserRightBanned(chat, 'sendGifs'),
+    canAttachEmbedLinks: !isUserRightBanned(chat, 'embedLinks'),
+  };
+}
+
+export function getMessageSendingRestrictionReason(chat: ApiChat) {
+  if (chat.currentUserBannedRights && chat.currentUserBannedRights.sendMessages) {
+    return 'You are not allowed to send messages in this chat.';
+  }
+  if (chat.defaultBannedRights && chat.defaultBannedRights.sendMessages) {
+    return 'Sending messages is not allowed in this chat.';
+  }
+
+  return undefined;
+}
+
+export function getChatSlowModeOptions(chat?: ApiChat) {
+  if (!chat || !chat.fullInfo) {
+    return undefined;
+  }
+
+  return chat.fullInfo.slowMode;
 }
 
 export function getChatOrder(chat: ApiChat) {
