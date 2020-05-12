@@ -201,17 +201,23 @@ export async function requestChatUpdate(chat: ApiChat) {
   }
 
   const dialog = result.dialogs[0];
-  const updatedChat = result.chats[0];
-  const lastMessage = buildApiMessage(result.messages[0]);
-  if (!dialog || !(dialog instanceof GramJs.Dialog) || !updatedChat) {
+  if (!dialog || !(dialog instanceof GramJs.Dialog)) {
     return;
   }
+
+  const peersByKey = preparePeers(result);
+  const peerEntity = peersByKey[getPeerKey(dialog.peer)];
+  if (!peerEntity) {
+    return;
+  }
+
+  const lastMessage = buildApiMessage(result.messages[0]);
 
   onUpdate({
     '@type': 'updateChat',
     id,
     chat: {
-      ...buildApiChatFromDialog(dialog, updatedChat),
+      ...buildApiChatFromDialog(dialog, peerEntity),
       lastMessage,
     },
   });
