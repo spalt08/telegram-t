@@ -87,7 +87,7 @@ export function selectIsMessageFocused(global: GlobalState, message: ApiMessage)
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
   const { lastReadOutboxMessageId } = selectChat(global, message.chatId) || {};
-  return isMessageLocal(message) || (lastReadOutboxMessageId && lastReadOutboxMessageId < message.id);
+  return isMessageLocal(message) || !lastReadOutboxMessageId || lastReadOutboxMessageId < message.id;
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
