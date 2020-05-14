@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from '../lib/teact/teact';
+import { useRef, useState } from '../lib/teact/teact';
 import buildClassName from '../util/buildClassName';
 
 const CLOSE_DURATION = 350;
@@ -14,27 +14,28 @@ export default (
   // СSS class should be added in a separate tick to turn on CSS transition.
   const [hasAsyncOpenClassName, setHasAsyncOpenClassName] = useState(false);
 
-  useEffect(() => {
-    setHasAsyncOpenClassName(isOpen);
-  }, [isOpen]);
-
   if (isOpen) {
     setIsClosed(false);
+    setHasAsyncOpenClassName(true);
 
     if (closeTimeoutRef.current) {
       window.clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
-  } else if (!isClosed && !closeTimeoutRef.current) {
-    closeTimeoutRef.current = window.setTimeout(() => {
-      setIsClosed(true);
+  } else {
+    setHasAsyncOpenClassName(false);
 
-      if (onCloseTransitionEnd) {
-        onCloseTransitionEnd();
-      }
+    if (!isClosed && !closeTimeoutRef.current) {
+      closeTimeoutRef.current = window.setTimeout(() => {
+        setIsClosed(true);
 
-      closeTimeoutRef.current = null;
-    }, CLOSE_DURATION);
+        if (onCloseTransitionEnd) {
+          onCloseTransitionEnd();
+        }
+
+        closeTimeoutRef.current = null;
+      }, CLOSE_DURATION);
+    }
   }
 
   const hasOpenClassName = hasAsyncOpenClassName || (isOpen && noOpenTransition);

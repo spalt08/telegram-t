@@ -34,6 +34,9 @@ addReducer('setIsUiReady', (global, actions, payload) => {
   };
 });
 
-addReducer('init', () => {
+addReducer('init', (global) => {
+  const { animationLevel } = global.settings.byKey;
+
+  document.body.classList.add(`animation-level-${animationLevel}`);
   document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
 });

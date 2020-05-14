@@ -30,6 +30,10 @@
     }
   }
 
+  body.animation-level-2 & {
+    transition-duration: .3s !important;
+  }
+
   &:not(.open),
   .closing {
     .SenderInfo {

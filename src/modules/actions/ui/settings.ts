@@ -3,14 +3,6 @@ import { ISettings } from '../../../types';
 
 import { ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
 
-addReducer('init', (global) => {
-  const { animationLevel } = global.settings.byKey;
-
-  if (animationLevel !== undefined) {
-    document.body.classList.add(`animation-level-${animationLevel}`);
-  }
-});
-
 addReducer('setSettingOption', (global, actions, payload?: Partial<ISettings>) => {
   return {
     ...global,
