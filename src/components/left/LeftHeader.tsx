@@ -93,8 +93,10 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeSignOutConfirmation, signOut]);
 
   const handleSearchFocus = useCallback(() => {
-    onSearchQuery('');
-  }, [onSearchQuery]);
+    if (!searchQuery) {
+      onSearchQuery('');
+    }
+  }, [searchQuery, onSearchQuery]);
 
   const handleSelectSaved = useCallback(() => {
     openChat({ id: currentUserId });
