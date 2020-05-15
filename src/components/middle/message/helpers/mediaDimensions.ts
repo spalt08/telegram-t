@@ -44,8 +44,8 @@ export function calculateMediaDimensions(message: ApiMessage, albumMediaParams?:
     stretchFactor = minMediaHeight / height;
   }
 
-  const finalWidth = width * stretchFactor;
-  const finalHeight = height * stretchFactor;
+  const finalWidth = Math.round(width * stretchFactor);
+  const finalHeight = Math.round(height * stretchFactor);
 
   return {
     width: finalWidth,

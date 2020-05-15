@@ -40,11 +40,9 @@ import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
-import {
-  calculateInlineImageDimensions, calculateVideoDimensions, ROUND_VIDEO_DIMENSIONS,
-} from '../../common/helpers/mediaDimensions';
+import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
-import { getMinMediaWidth } from './helpers/mediaDimensions';
+import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 
 import Avatar from '../../common/Avatar';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -435,18 +433,18 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   if (!isAlbum && (photo || video)) {
     let width: number | undefined;
     if (photo) {
-      width = calculateInlineImageDimensions(photo, isOwn, isForwarded).width;
+      width = calculateMediaDimensions(message).width;
     } else if (video) {
       if (video.isRound) {
         width = ROUND_VIDEO_DIMENSIONS;
       } else {
-        width = calculateVideoDimensions(video, isOwn, isForwarded).width;
+        width = calculateMediaDimensions(message).width;
       }
     }
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
-      const extraPadding = isForwarded ? 26 : 0;
+      const extraPadding = isForwarded ? 28 : 0;
       style = `width: ${calculatedWidth + extraPadding}px`;
     }
   }
