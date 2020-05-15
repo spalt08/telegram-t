@@ -8,12 +8,12 @@
     width: 0;
     line-height: 1;
     overflow: hidden;
-    animation: typing-animation 1s steps(4, start) infinite;
+    animation: typing-animation 1s steps(4, end) infinite;
   }
 
   .sender-name {
     &::after {
-      content: ' is ';
+      content: '\00a0is\00a0';
       color: var(--color-text-secondary);
     }
   }
