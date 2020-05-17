@@ -17,7 +17,7 @@ import {
 import { EDITABLE_INPUT_ID } from '../../../config';
 
 import { IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
-import { selectChatMessage, selectChat } from '../../../modules/selectors';
+import { selectChatMessage, selectChat, selectIsChatWithBot } from '../../../modules/selectors';
 import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
@@ -50,6 +50,7 @@ type StateProps = {
   chatId?: number;
   chat?: ApiChat;
   draft?: ApiFormattedText;
+  isChatWithBot?: boolean;
 } & Pick<GlobalState, 'connectionState'>;
 
 type DispatchProps = Pick<GlobalActions, (
@@ -74,6 +75,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
   draft,
   chat,
   connectionState,
+  isChatWithBot,
   sendMessage,
   editMessage,
   saveDraft,
@@ -109,7 +111,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
     startRecordTimeRef,
   } = useVoiceRecording();
 
-  const allowedAttachmentOptions = getAllowedAttachmentOptions(chat);
+  const allowedAttachmentOptions = getAllowedAttachmentOptions(chat, isChatWithBot);
   const slowMode = getChatSlowModeOptions(chat);
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
@@ -387,6 +389,7 @@ export default memo(withGlobal(
     const { connectionState, chats: { draftsById } } = global;
 
     const chat = chatId ? selectChat(global, chatId) : undefined;
+    const isChatWithBot = chatId ? selectIsChatWithBot(global, chatId) : undefined;
 
     return {
       editedMessage,
@@ -394,6 +397,7 @@ export default memo(withGlobal(
       chatId,
       draft: chatId ? draftsById[chatId] : undefined,
       chat,
+      isChatWithBot,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

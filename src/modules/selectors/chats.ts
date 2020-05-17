@@ -56,5 +56,5 @@ export function selectIsChatWithBot(global: GlobalState, chatId: number) {
   const userId = chat && getPrivateChatUserId(chat);
   const user = userId && selectUser(global, userId);
 
-  return user && isUserBot(user);
+  return user ? isUserBot(user) : false;
 }

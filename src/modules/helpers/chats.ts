@@ -130,7 +130,7 @@ export interface IAllowedAttachmentOptions {
   canAttachEmbedLinks: boolean;
 }
 
-export function getAllowedAttachmentOptions(chat?: ApiChat): IAllowedAttachmentOptions {
+export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot?: boolean): IAllowedAttachmentOptions {
   if (!chat) {
     return {
       canAttachMedia: false,
@@ -143,7 +143,7 @@ export function getAllowedAttachmentOptions(chat?: ApiChat): IAllowedAttachmentO
 
   return {
     canAttachMedia: !isUserRightBanned(chat, 'sendMedia'),
-    canAttachPolls: !isChatPrivate(chat.id) && !isUserRightBanned(chat, 'sendPolls'),
+    canAttachPolls: isChatWithBot || (!isChatPrivate(chat.id) && !isUserRightBanned(chat, 'sendPolls')),
     canSendStickers: !isUserRightBanned(chat, 'sendStickers'),
     canSendGifs: !isUserRightBanned(chat, 'sendGifs'),
     canAttachEmbedLinks: !isUserRightBanned(chat, 'embedLinks'),
