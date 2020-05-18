@@ -102,6 +102,23 @@
       margin-left: 1rem;
     }
 
+    @media (min-width: 1276px) and (max-width: 1500px) {
+      transition: opacity .15s ease;
+
+      .is-right-column-shown & {
+        opacity: 0;
+      }
+    }
+
+    @media (min-width: 1501px) {
+      transform: translate3d(0, 0, 0);
+      transition: transform .3s ease;
+
+      .is-right-column-shown & {
+        transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
+      }
+    }
+
     @media (max-width: 600px) {
       margin-top: 0.5rem;
       margin-left: 0;
@@ -184,6 +201,15 @@
     margin-left: auto;
     display: flex;
     align-items: center;
+
+    @media (min-width: 1276px) {
+      transform: translate3d(0, 0, 0);
+      transition: transform .3s ease;
+
+      .is-right-column-shown & {
+        transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
+      }
+    }
 
     .Button {
       margin-left: 0.25rem;

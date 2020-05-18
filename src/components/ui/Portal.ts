@@ -1,10 +1,10 @@
-import { FC, useRef, useEffect } from '../../lib/teact/teact';
+import { FC, useRef, useLayoutEffect } from '../../lib/teact/teact';
 import TeactDOM from '../../lib/teact/teact-dom';
 
 const Portal: FC<{ children: any }> = ({ children }) => {
   const elementRef = useRef(document.createElement('div'));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = document.querySelector<HTMLDivElement>('#portals');
     if (!container) {
       return undefined;

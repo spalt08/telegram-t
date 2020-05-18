@@ -85,6 +85,11 @@ $color-chat-hover: #f4f4f5;
   --border-radius-messages: 0.75rem;
   --border-radius-messages-small: 0.375rem;
   --messages-container-width: 45.5rem;
+  --right-column-width: 26.5rem;
+
+  @media (min-width: 1276px) and (max-width: 1680px) {
+    --right-column-width: 25vw;
+  }
 
   --z-ui-loader-mask: 2000;
   --z-modal: 1000;

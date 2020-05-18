@@ -23,11 +23,11 @@
         border-left: 1px solid var(--color-borders);
       }
 
-      @media (max-width: 1120px) {
+      @media (max-width: 1275px) {
         flex: 2;
       }
 
-      @media (max-width: 830px) {
+      @media (max-width: 925px) {
         min-width: 26.5rem;
       }
 
@@ -55,17 +55,12 @@
         right: 0;
         background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
         background-size: cover;
-        will-change: transform;
         z-index: -1;
       }
 
-      @media (max-width: 1120px) {
+      @media (max-width: 1275px) {
         flex: 3;
         border-right: none;
-      }
-
-      @media (max-width: 830px) {
-
       }
 
       @media (max-width: 600px) {

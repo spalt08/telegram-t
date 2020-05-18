@@ -159,4 +159,27 @@
   .message-date-header + .ActionMessage {
     margin-top: -0.5rem;
   }
+
+  @media (min-width: 1276px) {
+    width: calc(100% - var(--right-column-width));
+    transform: translate3d(0, 0, 0);
+
+    body:not(.transition-locked) & {
+      transition: transform .3s ease;
+    }
+
+    body.message-list-no-transform & {
+      transform: none;
+      left: 0;
+    }
+
+    .is-right-column-shown & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+
+      body.message-list-no-transform & {
+        transform: none;
+        left: calc(var(--right-column-width) / -2);
+      }
+    }
+  }
 }

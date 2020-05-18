@@ -38,6 +38,8 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
 
+const TRANSITION_LOCK_CLEAR_DELAY_MS = 50;
+
 const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
   message,
@@ -53,7 +55,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   pinMessage,
   openForwardMenu,
 }) => {
-  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+  const handleCloseAnimationEnd = useCallback(() => {
+    // This reverts MessageList back to `transform` based position after Context Menu has been fully closed
+    // `transiton-locked` class is removed with a slight delay to prevent content from jumping while properties change
+    document.body.classList.remove('message-list-no-transform');
+    setTimeout(() => {
+      document.body.classList.remove('transition-locked');
+    }, TRANSITION_LOCK_CLEAR_DELAY_MS);
+    onCloseAnimationEnd();
+  }, [onCloseAnimationEnd]);
+
+  const { transitionClassNames } = useShowTransition(isOpen, handleCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -97,6 +109,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return enableScrolling;
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('has-open-context-menu', isOpen);
+    if (isOpen) {
+      // This replaces `transform` based MessageList position with relative positioning to prevent
+      // issues with Context Menu backdrop.
+      // `transiton-locked` class prevents content from jumping when properties change
+      document.body.classList.add('message-list-no-transform', 'transition-locked');
+    }
+  }, [isOpen]);
 
   return (
     <div className={['ContextMenuContainer', transitionClassNames].join(' ')}>

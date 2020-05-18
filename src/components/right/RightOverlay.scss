@@ -10,12 +10,11 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 26.5rem;
+    width: var(--right-column-width);
     height: 100%;
-    transform: translate3d(26.5rem, 0, 0);
+    transform: translate3d(var(--right-column-width), 0, 0);
     transition: transform .2s ease;
     background: var(--color-background);
-    will-change: transform;
 
     &.open {
       transform: translate3d(0, 0, 0);

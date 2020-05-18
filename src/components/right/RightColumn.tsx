@@ -116,10 +116,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   const { transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
-  if (!isOverlaying && !isOpen) {
-    return undefined;
-  }
-
   function renderContent() {
     switch (contentKey) {
       case ColumnContent.Search:
@@ -139,8 +135,11 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }
 
-  function renderColumn() {
-    return (
+  return (
+    <div id="RightColumn-wrapper" className={transitionClassNames}>
+      {isOverlaying && (
+        <div className="overlay-backdrop" onClick={close} />
+      )}
       <div id="RightColumn">
         <RightHeader
           onClose={close}
@@ -152,19 +151,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           {renderContent}
         </Transition>
       </div>
-    );
-  }
-
-  if (isOverlaying) {
-    return (
-      <div id="RightColumnOverlay" className={transitionClassNames}>
-        <div className="overlay-backdrop" onClick={close} />
-        {renderColumn()}
-      </div>
-    );
-  }
-
-  return renderColumn();
+    </div>
+  );
 };
 
 export default withGlobal(

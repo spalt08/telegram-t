@@ -6,6 +6,7 @@ import { GlobalActions, GlobalState } from '../global/types';
 import '../modules/actions/all';
 import { pick } from '../util/iteratees';
 import buildClassName from '../util/buildClassName';
+import { selectIsRightColumnShown } from '../modules/selectors';
 
 import MediaViewer from './mediaViewer/MediaViewer.async';
 import LeftColumn from './left/LeftColumn';
@@ -15,7 +16,6 @@ import RightOverlay from './right/RightOverlay';
 import ErrorModalContainer from './ui/ErrorModalContainer';
 
 import './Main.scss';
-import { selectIsForwardMenuOpen, selectIsMediaViewerOpen, selectCurrentMessageSearch } from '../modules/selectors';
 
 type StateProps = {
   isRightColumnShown?: boolean;
@@ -51,24 +51,9 @@ const Main: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const {
-      chats,
-      users,
-      isChatInfoShown,
-    } = global;
-
-    const areChatsLoaded = Boolean(chats.listIds);
-    const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
-    const currentSearch = selectCurrentMessageSearch(global);
-    const isSearch = Boolean(currentSearch && currentSearch.currentType === 'text');
-    const isUserInfo = Boolean(users.selectedId && areChatsLoaded);
-    const isChatInfo = Boolean(chats.selectedId && isChatInfoShown && areChatsLoaded);
-
-    return {
-      ...pick(global, ['connectionState', 'isLeftColumnShown']),
-      isRightColumnShown: isChatInfo || isUserInfo || isForwarding || isSearch,
-    };
-  },
+  (global): StateProps => ({
+    ...pick(global, ['connectionState', 'isLeftColumnShown']),
+    isRightColumnShown: selectIsRightColumnShown(global),
+  }),
   (global, actions): DispatchProps => pick(actions, ['initApi']),
 )(Main);
