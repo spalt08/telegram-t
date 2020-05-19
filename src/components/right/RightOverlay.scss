@@ -4,7 +4,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: var(--z-modal);
+  z-index: var(--z-media-viewer);
 
   .overlay-main {
     position: absolute;
@@ -15,6 +15,7 @@
     transform: translate3d(var(--right-column-width), 0, 0);
     transition: transform .2s ease;
     background: var(--color-background);
+    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
 
     &.open {
       transform: translate3d(0, 0, 0);
