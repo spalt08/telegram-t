@@ -1,6 +1,8 @@
-import { MouseEvent as ReactMouseEvent, FocusEvent, RefObject } from 'react';
+import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 
-import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useRef, useCallback, useState,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -9,17 +11,14 @@ import RippleEffect from './RippleEffect';
 
 import './Button.scss';
 
-type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
-type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
-
 export type OwnProps = {
   ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
-  onClick?: Function;
-  onMouseDown?: Function;
-  onMouseEnter?: Function;
-  onMouseLeave?: Function;
-  onFocus?: Function;
+  onClick?: NoneToVoidFunction;
+  onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: NoneToVoidFunction;
+  onMouseLeave?: NoneToVoidFunction;
+  onFocus?: NoneToVoidFunction;
   children: any;
   size?: 'default' | 'smaller';
   color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white';
@@ -33,6 +32,9 @@ export type OwnProps = {
   disabled?: boolean;
   ripple?: boolean;
 };
+
+// Longest animation duration;
+const CLICKED_TIMEOUT = 400;
 
 const Button: FC<OwnProps> = ({
   ref,
@@ -60,6 +62,8 @@ const Button: FC<OwnProps> = ({
     elementRef = ref;
   }
 
+  const [isClicked, setIsClicked] = useState(false);
+
   const fullClassName = buildClassName(
     'Button',
     className,
@@ -70,7 +74,19 @@ const Button: FC<OwnProps> = ({
     isText && 'text',
     isLoading && 'loading',
     ripple && 'has-ripple',
+    isClicked && 'clicked',
   );
+
+  const handleClick = useCallback(() => {
+    if (!disabled && onClick) {
+      onClick();
+    }
+
+    setIsClicked(true);
+    setTimeout(() => {
+      setIsClicked(false);
+    }, CLICKED_TIMEOUT);
+  }, [disabled, onClick]);
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -102,11 +118,11 @@ const Button: FC<OwnProps> = ({
       ref={elementRef as RefObject<HTMLButtonElement>}
       type={type}
       className={fullClassName}
-      onClick={onClick && !disabled ? onClick as MouseEventHandler : undefined}
+      onClick={handleClick}
       onMouseDown={handleMouseDown}
-      onMouseEnter={onMouseEnter && !disabled ? onMouseEnter as MouseEventHandler : undefined}
-      onMouseLeave={onMouseLeave && !disabled ? onMouseLeave as MouseEventHandler : undefined}
-      onFocus={onFocus && !disabled ? onFocus as OnFocusHandler : undefined}
+      onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}
+      onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
+      onFocus={onFocus && !disabled ? onFocus : undefined}
       aria-label={ariaLabel}
       title={ariaLabel}
     >

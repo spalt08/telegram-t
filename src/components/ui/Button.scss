@@ -34,8 +34,10 @@
   transition: background-color .15s, color .15s;
   text-decoration: none !important;
 
-  &:not(.has-ripple):active {
-    transition: none !important;
+  &:not(.has-ripple) {
+    &:active, &.clicked {
+      transition: none !important;
+    }
   }
 
   &.disabled {

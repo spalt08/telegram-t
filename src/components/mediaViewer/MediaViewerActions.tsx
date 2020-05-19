@@ -8,8 +8,8 @@ type OwnProps = {
   blobUrl?: string;
   fileName?: string;
   isAvatar?: boolean;
-  onCloseMediaViewer: Function;
-  onForward: Function;
+  onCloseMediaViewer: NoneToVoidFunction;
+  onForward: NoneToVoidFunction;
 };
 
 const MediaViewerActions: FC<OwnProps> = ({

@@ -5,14 +5,14 @@ import { IS_TOUCH_ENV } from '../../util/environment';
 import Button, { OwnProps as ButtonProps } from './Button';
 
 type OwnProps = {
-  onActivate: Function;
+  onActivate: NoneToVoidFunction;
 } & Omit<ButtonProps, (
   'onClick' | 'onMouseDown' |
   'onMouseEnter' | 'onMouseLeave' |
   'onFocus'
 )>;
 
-const BUTTON_ACTIVATE_DELAY = 100;
+const BUTTON_ACTIVATE_DELAY = 200;
 let openTimeout: number;
 let isFirstTimeActivation = true;
 
@@ -22,7 +22,7 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
   const handleMouseEnter = useCallback(() => {
     isMouseInside.current = true;
 
-    // This is used to counter additional delay caused by asyncronous module loading
+    // This is used to counter additional delay caused by asynchronous module loading
     if (isFirstTimeActivation) {
       isFirstTimeActivation = false;
       onActivate();

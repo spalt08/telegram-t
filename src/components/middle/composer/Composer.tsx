@@ -15,7 +15,6 @@ import {
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-
 import { IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
 import { selectChatMessage, selectChat, selectIsChatWithBot } from '../../../modules/selectors';
 import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
