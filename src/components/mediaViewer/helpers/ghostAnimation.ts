@@ -271,6 +271,6 @@ function getNodes(message: ApiMessage, origin: MediaViewerOrigin) {
 
   return {
     container,
-    mediaEl: container.querySelector(mediaSelector) as HTMLImageElement | HTMLVideoElement,
+    mediaEl: container && container.querySelector(mediaSelector) as HTMLImageElement | HTMLVideoElement,
   };
 }

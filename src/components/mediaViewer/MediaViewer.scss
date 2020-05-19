@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   background: rgba(0, 0, 0, .9);
   color: #fff;
   z-index: var(--z-media-viewer);
@@ -71,7 +71,7 @@
     flex: 0 0 100%;
     z-index: 1;
     padding: 1.25rem 0 3.25rem;
-    height: calc(100vh - 3.75rem);
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
