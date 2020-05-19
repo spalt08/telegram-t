@@ -12,7 +12,7 @@ import searchWords from '../../util/searchWords';
 import { pick } from '../../util/iteratees';
 
 import Loading from '../ui/Loading';
-import Button from '../ui/Button';
+import FloatingActionButton from '../ui/FloatingActionButton';
 import Spinner from '../ui/Spinner';
 import Picker from './Picker';
 
@@ -77,18 +77,16 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
         onFilterChange={setFilter}
         onLoadMore={loadMoreChats}
       />
-      <Button
-        className={!isLoading && selectedIds && selectedIds.length ? 'revealed' : ''}
-        color="primary"
-        round
-        onClick={!isLoading && selectedIds && selectedIds.length ? forwardMessages : undefined}
+      <FloatingActionButton
+        show={Boolean(!isLoading && selectedIds && selectedIds.length)}
+        onClick={forwardMessages}
       >
         {isLoading ? (
           <Spinner color="white" />
         ) : (
           <i className="icon-send" />
         )}
-      </Button>
+      </FloatingActionButton>
     </div>
   );
 };

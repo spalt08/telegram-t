@@ -457,8 +457,10 @@ function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAc
   if (action instanceof GramJs.MessageActionChatCreate) {
     text = `%origin_user% created the group «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditTitle) {
+    // TODO: Add distinct message for Channels
     text = `%origin_user% changed group name to «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
+    // TODO: Add distinct message for Channels
     text = '%origin_user% updated group photo';
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
     text = 'Chat photo was deleted';

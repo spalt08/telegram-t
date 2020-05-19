@@ -3,7 +3,8 @@ import {
   OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText, ApiChatFullInfo,
 } from '../../types';
 
-import { invokeRequest } from './client';
+import { DEBUG } from '../../../config';
+import { invokeRequest, uploadFile } from './client';
 import {
   buildApiChatFromDialog,
   getPeerKey,
@@ -345,6 +346,101 @@ export async function markChatRead({
   );
 
   void requestChatUpdate(chat);
+}
+
+export async function createChannel({
+  title, about,
+}: {
+  title: string; about?: string;
+}): Promise<ApiChat | undefined> {
+  const result = await invokeRequest(new GramJs.channels.CreateChannel({
+    broadcast: true,
+    title,
+    about,
+  }), true);
+
+  // `createChannel` can return a lot of different update types according to docs,
+  // but currently channel creation returns only `Updates` type.
+  // Errors are added to catch unexpected cases in future testing
+  if (!(result instanceof GramJs.Updates)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Unexpected channel creation update', result);
+    }
+    return undefined;
+  }
+
+  const newChannel = result.chats[0];
+  if (!newChannel || !(newChannel instanceof GramJs.Channel)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Created channel not found', result);
+    }
+    return undefined;
+  }
+
+  return buildApiChatFromPreview(newChannel);
+}
+
+export async function editChannelPhoto({
+  channelId, accessHash, photo,
+}: {
+  channelId: number; accessHash: string; photo: File;
+}) {
+  const uploadedPhoto = await uploadFile(photo);
+  return invokeRequest(new GramJs.channels.EditPhoto({
+    channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
+    photo: new GramJs.InputChatUploadedPhoto({
+      file: uploadedPhoto,
+    }),
+  }), true);
+}
+
+export async function createGroupChat({
+  title, users,
+}: {
+  title: string; users: ApiUser[];
+}): Promise<ApiChat | undefined> {
+  const result = await invokeRequest(new GramJs.messages.CreateChat({
+    title,
+    users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
+  }), true);
+
+  // `createChat` can return a lot of different update types according to docs,
+  // but currently chat creation returns only `Updates` type.
+  // Errors are added to catch unexpected cases in future testing
+  if (!(result instanceof GramJs.Updates)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Unexpected chat creation update', result);
+    }
+    return undefined;
+  }
+
+  const newChat = result.chats[0];
+  if (!newChat || !(newChat instanceof GramJs.Chat)) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Created chat not found', result);
+    }
+    return undefined;
+  }
+
+  return buildApiChatFromPreview(newChat);
+}
+
+export async function editChatPhoto({
+  chatId, photo,
+}: {
+  chatId: number; photo: File;
+}) {
+  const uploadedPhoto = await uploadFile(photo);
+  return invokeRequest(new GramJs.messages.EditChatPhoto({
+    chatId: buildInputEntity(chatId) as number,
+    photo: new GramJs.InputChatUploadedPhoto({
+      file: uploadedPhoto,
+    }),
+  }), true);
 }
 
 function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {

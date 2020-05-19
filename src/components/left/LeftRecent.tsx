@@ -34,6 +34,8 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const topUsersRef = useRef<HTMLDivElement>();
 
+  // Due to the parent Transition, this component never gets unmounted,
+  // that's why we use throttled API call on every update.
   useEffect(() => {
     runThrottled(() => {
       loadTopUsers();

@@ -7,6 +7,9 @@ export { default as LeftRecent } from '../components/left/LeftRecent';
 export { default as LeftSearch } from '../components/left/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';
 export { default as ContactList } from '../components/left/ContactList';
+export { default as NewChannel } from '../components/left/newChat/NewChannel';
+export { default as NewGroupStep1 } from '../components/left/newChat/NewGroupStep1';
+export { default as NewGroupStep2 } from '../components/left/newChat/NewGroupStep2';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
 

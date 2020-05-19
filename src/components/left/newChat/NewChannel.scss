@@ -1,0 +1,21 @@
+.NewChannel {
+  height: 100%;
+  padding: 0 1.25rem 1.25rem;
+  position: relative;
+
+  .note, .error {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-top: -0.5625rem;
+    margin-left: 0.25rem;
+  }
+
+  .note {
+    color: var(--color-text-secondary);
+  }
+
+  .error {
+    margin-top: 1.5rem;
+    color: var(--color-error);
+  }
+}

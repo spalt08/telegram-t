@@ -30,6 +30,9 @@ export enum LeftColumnContent {
   GlobalSearch,
   Settings,
   Contacts,
+  NewChannel,
+  NewGroupStep1,
+  NewGroupStep2,
 }
 
 export enum MediaViewerOrigin {
@@ -38,4 +41,11 @@ export enum MediaViewerOrigin {
   ProfileAvatar,
   MiddleHeaderAvatar,
   Album,
+}
+
+export enum ChatCreationProgress {
+  Idle,
+  InProgress,
+  Complete,
+  Error,
 }

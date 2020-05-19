@@ -68,3 +68,10 @@ addReducer('editLastChatMessage', (global) => {
 
   return global;
 });
+
+addReducer('resetChatCreation', (global) => {
+  return {
+    ...global,
+    chatCreation: undefined,
+  };
+});

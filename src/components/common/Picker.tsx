@@ -22,7 +22,7 @@ type OwnProps = {
   notFoundText?: string;
   onSelectedIdsChange: (ids: number[]) => void;
   onFilterChange: (value: string) => void;
-  onLoadMore: () => void;
+  onLoadMore?: () => void;
 };
 
 const Picker: FC<OwnProps> = ({
@@ -73,6 +73,31 @@ const Picker: FC<OwnProps> = ({
     );
   }
 
+  function renderList() {
+    const content = (
+      <>
+        {itemIds.map(renderItem)}
+        {!itemIds.length && (
+          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+        )}
+      </>
+    );
+
+    if (onLoadMore) {
+      return (
+        <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
+          {content}
+        </InfiniteScroll>
+      );
+    }
+
+    return (
+      <div className="picker-list custom-scroll">
+        {content}
+      </div>
+    );
+  }
+
   return (
     <div className="Picker">
       <div className="picker-header">
@@ -84,12 +109,7 @@ const Picker: FC<OwnProps> = ({
           placeholder={filterPlaceholder || 'Select chat'}
         />
       </div>
-      <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
-        {itemIds.map(renderItem)}
-        {!itemIds.length && (
-          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-        )}
-      </InfiniteScroll>
+      {renderList()}
     </div>
   );
 };

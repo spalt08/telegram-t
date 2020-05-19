@@ -26,6 +26,7 @@ type OwnProps = {
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
   onSelectContacts: () => void;
+  onSelectNewGroup: () => void;
   onReset: () => void;
 };
 
@@ -46,6 +47,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onSearchQuery,
   onSelectSettings,
   onSelectContacts,
+  onSelectNewGroup,
   onReset,
   searchQuery,
   isLoading,
@@ -73,7 +75,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={hasMenu ? onTrigger : onReset}
+        onMouseDown={hasMenu ? onTrigger : () => onReset()}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
@@ -115,6 +117,12 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     switch (headerKey) {
       case LeftColumnContent.Settings:
         return <h3>Settings</h3>;
+      case LeftColumnContent.NewChannel:
+        return <h3>New Channel</h3>;
+      case LeftColumnContent.NewGroupStep1:
+        return <h3>Add Members</h3>;
+      case LeftColumnContent.NewGroupStep2:
+        return <h3>New Group</h3>;
       default:
         return (
           <SearchInput
@@ -133,7 +141,12 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <DropdownMenu
         trigger={MainButton}
       >
-        <MenuItem className="not-implemented" disabled icon="group">New Group</MenuItem>
+        <MenuItem
+          icon="group"
+          onClick={onSelectNewGroup}
+        >
+          New Group
+        </MenuItem>
         <MenuItem
           icon="user"
           onClick={onSelectContacts}

@@ -3,9 +3,9 @@ import React, { FC, useEffect, useState } from '../../lib/teact/teact';
 import { DEBUG } from '../../config';
 import { blobToFile, blobToDataUri } from '../../util/files';
 
-import Button from '../ui/Button';
-import Modal from '../ui/Modal';
-import Loading from '../ui/Loading';
+import Button from './Button';
+import Modal from './Modal';
+import Loading from './Loading';
 
 import './CropModal.scss';
 
@@ -65,8 +65,8 @@ async function initCropper(imgFile: File) {
 }
 
 type OwnProps = {
-  file: File;
-  onChange: Function;
+  file?: File;
+  onChange: (file: File) => void;
   onClose: () => void;
 };
 

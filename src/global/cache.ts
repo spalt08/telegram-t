@@ -90,6 +90,7 @@ function updateCache(global: GlobalState) {
     mediaViewer: {},
     webPagePreview: undefined,
     forwardMessages: {},
+    chatCreation: undefined,
     settings: reduceSettings(global),
     errors: [],
   };

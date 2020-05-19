@@ -33,6 +33,8 @@ const runThrottled = throttle((cb) => cb(), 60000, true);
 const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   filter, usersById, contactIds, loadContactList, openChat,
 }) => {
+  // Due to the parent Transition, this component never gets unmounted,
+  // that's why we use throttled API call on every update.
   useEffect(() => {
     runThrottled(() => {
       loadContactList();

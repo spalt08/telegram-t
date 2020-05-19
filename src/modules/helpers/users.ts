@@ -191,14 +191,28 @@ export function getSenderName(chatId: number, sender?: ApiUser) {
   return getUserFirstName(sender);
 }
 
-export function getSortedUserIds(userIds: number[], usersById: Record<number, ApiUser>) {
+export function getSortedUserIds(
+  userIds: number[],
+  usersById: Record<number, ApiUser>,
+  priorityIds?: number[],
+) {
   return orderBy(userIds, (id) => {
+    const now = Date.now() / 1000;
+
+    if (priorityIds && priorityIds.includes(id)) {
+      /*
+      ** Assuming that online status expiration date can't be as far as two days from now,
+      ** this should place priorityIds on top of the list.
+      **
+      ** We then subtract index of `id` in `priorityIds` to preserve selected order
+      */
+      return now + (48 * 60 * 60) - priorityIds.indexOf(id);
+    }
+
     const user = usersById[id];
     if (!user || !user.status) {
       return 0;
     }
-
-    const now = Date.now() / 1000;
 
     if (user.status.type === 'userStatusOnline') {
       return user.status.expires;

@@ -2,16 +2,23 @@ import {
   addReducer, getGlobal, setGlobal,
 } from '../../../lib/teact/teactn';
 
+import { ApiChat, ApiUser } from '../../../api/types';
+import { ChatCreationProgress } from '../../../types';
+
 import { CHAT_LIST_SLICE, SUPPORT_BOT_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
-  addUsers, updateChatListIds, updateChats, updateUsers, updateChat,
+  addUsers,
+  updateChatListIds,
+  updateChats,
+  updateUsers,
+  updateChat,
+  updateSelectedChatId,
 } from '../../reducers';
-import { selectChat, selectOpenChat } from '../../selectors';
+import { selectChat, selectOpenChat, selectUser } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly } from '../../helpers';
-import { ApiChat } from '../../../api/types';
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -144,6 +151,20 @@ addReducer('clearDraft', (global, actions, payload) => {
   };
 });
 
+addReducer('createChannel', (global, actions, payload) => {
+  const { title, about, photo } = payload!;
+  void createChannel(title, about, photo);
+});
+
+addReducer('createGroupChat', (global, actions, payload) => {
+  const { title, memberIds, photo } = payload!;
+  const members = (memberIds as number[])
+    .map((id: number) => selectUser(global, id))
+    .filter<ApiUser>(Boolean as any);
+
+  void createGroupChat(title, members, photo);
+});
+
 async function loadChats(offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,
@@ -182,4 +203,65 @@ async function loadFullChat(chat: ApiChat) {
   global = updateChat(global, chat.id, { fullInfo });
 
   setGlobal(global);
+}
+
+async function createChannel(title: string, about?: string, photo?: File) {
+  setGlobal({
+    ...getGlobal(),
+    chatCreation: {
+      progress: ChatCreationProgress.InProgress,
+    },
+  });
+
+  const createdChannel = await callApi('createChannel', { title, about });
+  if (!createdChannel) {
+    return;
+  }
+
+  const { id: channelId, accessHash } = createdChannel;
+
+  let global = updateChat(getGlobal(), channelId, createdChannel);
+  global = updateSelectedChatId(global, channelId);
+  setGlobal({
+    ...global,
+    chatCreation: {
+      ...global.chatCreation,
+      progress: createdChannel ? ChatCreationProgress.Complete : ChatCreationProgress.Error,
+    },
+  });
+
+  if (channelId && accessHash && photo) {
+    await callApi('editChannelPhoto', { channelId, accessHash, photo });
+  }
+}
+
+async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
+  setGlobal({
+    ...getGlobal(),
+    chatCreation: {
+      progress: ChatCreationProgress.InProgress,
+    },
+  });
+
+  const createdChat = await callApi('createGroupChat', { title, users });
+  if (!createdChat) {
+    return;
+  }
+
+  const { id: chatId } = createdChat;
+
+  let global = updateChat(getGlobal(), chatId, createdChat);
+  global = updateSelectedChatId(global, chatId);
+
+  setGlobal({
+    ...global,
+    chatCreation: {
+      ...global.chatCreation,
+      progress: createdChat ? ChatCreationProgress.Complete : ChatCreationProgress.Error,
+    },
+  });
+
+  if (chatId && photo) {
+    await callApi('editChatPhoto', { chatId, photo });
+  }
 }

@@ -10,7 +10,7 @@
     padding-top: 6.8rem;
   }
 
-  #logo, #monkey, #avatar {
+  #logo, #monkey, .AvatarEditable label {
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -49,59 +49,6 @@
       height: 100%;
       background-size: 100%;
       background: url('../../assets/monkey.svg') center;
-    }
-  }
-
-  #avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-primary);
-    border-radius: 50%;
-    color: white;
-    font-size: 3rem;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    outline: none !important;
-
-    input {
-      display: none;
-    }
-
-    img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    i {
-      transform: scale3d(1, 1, 1);
-      transition: transform .15s ease;
-      z-index: var(--z-register-add-avatar);
-    }
-
-    &:hover {
-      i {
-        transform: scale3d(1.2, 1.2, 1.2);
-      }
-    }
-
-    &.filled {
-      background-color: white;
-
-      &::after {
-        content: '';
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(black, 0.4);
-      }
     }
   }
 

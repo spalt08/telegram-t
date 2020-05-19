@@ -12,7 +12,12 @@ import {
   ApiError,
   ApiFormattedText,
 } from '../api/types';
-import { FocusDirection, ISettings, MediaViewerOrigin } from '../types';
+import {
+  FocusDirection,
+  ISettings,
+  MediaViewerOrigin,
+  ChatCreationProgress,
+} from '../types';
 
 export type GlobalState = {
   isChatInfoShown: boolean;
@@ -151,6 +156,11 @@ export type GlobalState = {
     inProgress?: boolean;
   };
 
+  chatCreation?: {
+    progress: ChatCreationProgress;
+    error?: string;
+  };
+
   settings: {
     byKey: ISettings;
     isAnimationLevelSettingViewed?: boolean;
@@ -183,6 +193,8 @@ export type ActionTypes = (
   'searchMessages' | 'markMessagesRead' |
   // users
   'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  // Channel / groups creation
+  'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
   'setSettingOption' | 'clearAnimationSettingAttention' |
   // misc
