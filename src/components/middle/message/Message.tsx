@@ -31,11 +31,11 @@ import {
   isOwnMessage,
   isReplyMessage,
   isForwardedMessage,
-  getMessageCustomShape,
   getMessageVideo,
   isChatPrivate,
   getChatTitle,
 } from '../../../modules/helpers';
+import { getMessageCustomShape } from '../../../modules/helpers/messageShape';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
