@@ -15,6 +15,7 @@ import {
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useShowTransition from '../../hooks/useShowTransition';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
+import usePrevious from '../../hooks/usePrevious';
 import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 
 import ForwardPicker from '../common/ForwardPicker.async';
@@ -60,6 +61,13 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isSearch = contentKey === ColumnContent.Search;
   const isForwarding = contentKey === ColumnContent.Forward;
   const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+
+  const previousContentKey = usePrevious(contentKey, true);
+  const renderedContentKey = contentKey !== undefined
+    ? contentKey
+    : previousContentKey !== null
+      ? previousContentKey
+      : undefined;
 
   useUpdateOnResize();
 
@@ -117,7 +125,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const { transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
   function renderContent() {
-    switch (contentKey) {
+    switch (renderedContentKey) {
       case ColumnContent.Search:
         return <RightSearch chatId={selectedChatId!} />;
       case ColumnContent.Forward:
@@ -147,7 +155,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isForwarding={isForwarding}
           profileState={profileState}
         />
-        <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
+        <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={renderedContentKey}>
           {renderContent}
         </Transition>
       </div>

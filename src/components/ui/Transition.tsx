@@ -61,7 +61,7 @@ const Transition: FC<OwnProps> = ({
     const container = containerRef.current!;
 
     const childElements = container.children;
-    if (childElements.length === 1) {
+    if (childElements.length === 1 && !activeKeyChanged) {
       childElements[0].classList.add('active');
       return;
     }
