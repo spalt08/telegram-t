@@ -103,7 +103,7 @@
     }
 
     @media (min-width: 1276px) and (max-width: 1500px) {
-      transition: opacity .15s ease;
+      transition: opacity var(--column-transition);
 
       .is-right-column-shown & {
         opacity: 0;
@@ -112,7 +112,7 @@
 
     @media (min-width: 1501px) {
       transform: translate3d(0, 0, 0);
-      transition: transform .3s ease;
+      transition: transform var(--column-transition);
 
       .is-right-column-shown & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
@@ -208,7 +208,7 @@
 
     @media (min-width: 1276px) {
       transform: translate3d(0, 0, 0);
-      transition: transform .3s ease;
+      transition: transform var(--column-transition);
 
       .is-right-column-shown & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);

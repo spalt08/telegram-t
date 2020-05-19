@@ -11,7 +11,7 @@
     width: calc(100% - var(--right-column-width));
 
     transform: translate3d(0, 0, 0);
-    transition: transform .3s ease;
+    transition: transform var(--column-transition);
 
     .is-right-column-shown & {
       transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
@@ -78,7 +78,7 @@
         animation: hide-icon .4s forwards ease-out;
       }
 
-      transition: box-shadow 200ms ease-out;
+      transition: box-shadow .2s ease-out;
     }
 
     &.record {

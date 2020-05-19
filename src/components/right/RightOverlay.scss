@@ -13,7 +13,7 @@
     width: var(--right-column-width);
     height: 100%;
     transform: translate3d(var(--right-column-width), 0, 0);
-    transition: transform .2s ease;
+    transition: transform var(--column-transition);
     background: var(--color-background);
     box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
 
