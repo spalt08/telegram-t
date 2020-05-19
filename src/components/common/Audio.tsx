@@ -173,6 +173,7 @@ const Audio: FC<OwnProps> = ({
     <div className={className}>
       <Button
         round
+        ripple
         size={inSharedMedia ? 'smaller' : 'default'}
         className={buttonClassNames.join(' ')}
         onClick={handleButtonClick}

@@ -174,7 +174,6 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
               ) : (
                 <GroupChatInfo chatId={id} />
               )}
-              <RippleEffect />
             </div>
           ))}
         </div>
@@ -189,7 +188,6 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
               ) : (
                 <GroupChatInfo chatId={id} showHandle />
               )}
-              <RippleEffect />
             </div>
           ))}
         </div>

@@ -69,6 +69,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
+        ripple={hasMenu}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}

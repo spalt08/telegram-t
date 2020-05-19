@@ -35,6 +35,7 @@ $color-text-secondary: #707579;
 $color-text-meta: #686c72;
 $color-borders: #dadce0;
 $color-chat-hover: #f4f4f5;
+$color-chat-active: #ededed;
 
 :root {
   --color-background: #{$color-white};
@@ -55,11 +56,13 @@ $color-chat-hover: #f4f4f5;
 
   --color-primary: #{$color-primary};
   --color-primary-shade: #{mix($color-primary, $color-black, 92%)};
+  --color-primary-shade-darker: #{mix($color-primary, $color-black, 84%)};
   --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
 
   --color-green: #{$color-green};
 
   --color-error: #{$color-error};
+  --color-error-shade: #{mix($color-error, $color-black, 92%)};
   --color-error-rgb: #{toRGB($color-error)};
 
   --color-warning: #{$color-warning};
@@ -79,7 +82,7 @@ $color-chat-hover: #f4f4f5;
   --color-gray: #{$color-gray};
 
   --color-chat-hover: #{$color-chat-hover};
-  --color-chat-active: #{$color-borders};
+  --color-chat-active: #{$color-chat-active};
 
   --border-radius-default: 0.75rem;
   --border-radius-messages: 0.75rem;

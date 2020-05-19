@@ -19,7 +19,14 @@ const MediaViewerActions: FC<OwnProps> = ({
     <div className="MediaViewerActions">
       {!isAvatar && (
         <>
-          <Button round size="smaller" color="translucent-white" ariaLabel="Delete" className="not-implemented">
+          <Button
+            round
+            ripple
+            size="smaller"
+            color="translucent-white"
+            ariaLabel="Delete"
+            className="not-implemented"
+          >
             <i className="icon-delete" />
           </Button>
           <Button
@@ -37,6 +44,7 @@ const MediaViewerActions: FC<OwnProps> = ({
         href={blobUrl}
         download={fileName}
         round
+        ripple
         size="smaller"
         color="translucent-white"
         ariaLabel="Download"

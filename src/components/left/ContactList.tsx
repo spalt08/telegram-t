@@ -73,7 +73,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
         <p className="no-results">No contacts matched your search.</p>
       )}
       {displayedIds.map((id) => (
-        <div key={id} className="chat-item-clickable" onClick={() => handleClick(id)}>
+        <div key={id} className="chat-item-clickable has-ripple" onClick={() => handleClick(id)}>
           <PrivateChatInfo userId={id} forceShowSelf />
           <RippleEffect />
         </div>

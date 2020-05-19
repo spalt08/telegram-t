@@ -13,7 +13,6 @@ import { pick } from '../../util/iteratees';
 import Avatar from '../common/Avatar';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
-import RippleEffect from '../ui/RippleEffect';
 
 export type OwnProps = {
   onReset: () => void;
@@ -82,7 +81,6 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
               <div className="top-peer-item" onClick={() => handleClick(user.id)}>
                 <Avatar user={user} />
                 <div className="top-peer-name">{getUserFirstName(user)}</div>
-                <RippleEffect />
               </div>
             ))}
           </div>
@@ -98,7 +96,6 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
               ) : (
                 <GroupChatInfo chatId={id} />
               )}
-              <RippleEffect />
             </div>
           ))}
         </div>

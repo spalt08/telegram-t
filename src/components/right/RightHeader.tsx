@@ -80,6 +80,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
               color="translucent"
               size="smaller"
               className="more-button not-implemented"
+              ripple
             >
               <i className="icon-more" />
             </Button>

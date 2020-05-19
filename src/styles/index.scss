@@ -170,6 +170,12 @@ div[role="button"] {
     background: var(--color-chat-hover);
   }
 
+  &:not(.has-ripple) {
+    &:active {
+      background: var(--color-chat-active);
+    }
+  }
+
   .ChatInfo {
     display: flex;
     align-items: center;

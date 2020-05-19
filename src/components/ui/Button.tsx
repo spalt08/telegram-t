@@ -31,6 +31,7 @@ export type OwnProps = {
   href?: string;
   download?: string;
   disabled?: boolean;
+  ripple?: boolean;
 };
 
 const Button: FC<OwnProps> = ({
@@ -52,6 +53,7 @@ const Button: FC<OwnProps> = ({
   href,
   download,
   disabled,
+  ripple,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
@@ -67,6 +69,7 @@ const Button: FC<OwnProps> = ({
     disabled && 'disabled',
     isText && 'text',
     isLoading && 'loading',
+    ripple && 'has-ripple',
   );
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
@@ -86,7 +89,9 @@ const Button: FC<OwnProps> = ({
         download={download}
       >
         {children}
-        <RippleEffect />
+        {!disabled && ripple && (
+          <RippleEffect />
+        )}
       </a>
     );
   }
@@ -111,7 +116,7 @@ const Button: FC<OwnProps> = ({
           <Spinner color="white" />
         </div>
       ) : children}
-      {!disabled && (
+      {!disabled && ripple && (
         <RippleEffect />
       )}
     </button>

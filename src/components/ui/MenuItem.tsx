@@ -1,5 +1,7 @@
 import React, { FC } from '../../lib/teact/teact';
 
+import buildClassName from '../../util/buildClassName';
+
 import RippleEffect from './RippleEffect';
 import AttentionIndicator from './AttentionIndicator';
 
@@ -14,6 +16,7 @@ type OwnProps = {
   onClick?: OnClickHandler;
   disabled?: boolean;
   attention?: boolean;
+  ripple?: boolean;
 };
 
 const MenuItem: FC<OwnProps> = (props) => {
@@ -24,6 +27,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     onClick,
     disabled,
     attention,
+    ripple,
   } = props;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -33,14 +37,20 @@ const MenuItem: FC<OwnProps> = (props) => {
     onClick(e);
   };
 
+  const fullClassName = buildClassName(
+    'MenuItem',
+    className,
+    ripple && 'has-ripple',
+  );
+
   return (
-    <div className={`MenuItem ${className || ''}`}>
+    <div className={fullClassName}>
       <button type="button" onClick={handleClick} disabled={disabled}>
         {icon && (
           <i className={`icon-${icon}`} />
         )}
         {children}
-        {!disabled && (
+        {!disabled && ripple && (
           <RippleEffect />
         )}
         {attention && <AttentionIndicator show={attention} />}

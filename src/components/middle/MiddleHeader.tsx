@@ -15,6 +15,7 @@ import {
   selectChatMessage,
   selectUser,
   selectAllowedMessagedActions,
+  selectIsRightColumnShown,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
@@ -47,6 +48,7 @@ type StateProps = {
   canUnpin?: boolean;
   typingStatus?: ApiTypingStatus;
   isLeftColumnShown?: boolean;
+  isRightColumnShown?: boolean;
   chatsById?: Record<number, ApiChat>;
 };
 
@@ -62,6 +64,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   canUnpin,
   typingStatus,
   isLeftColumnShown,
+  isRightColumnShown,
   chatsById,
   openChatWithInfo,
   openMessageTextSearch,
@@ -174,6 +177,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       )}
       <HeaderActions
+        isRightColumnShown={isRightColumnShown}
         onSearchClick={handleSearchClick}
       />
     </div>
@@ -196,6 +200,7 @@ export default withGlobal<OwnProps>(
     const state = {
       typingStatus,
       isLeftColumnShown,
+      isRightColumnShown: selectIsRightColumnShown(global),
       chatsById,
     };
 

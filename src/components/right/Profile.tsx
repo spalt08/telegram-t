@@ -27,7 +27,6 @@ import fastSmoothScroll from '../../util/fastSmoothScroll';
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
-import RippleEffect from '../ui/RippleEffect';
 import Loading from '../ui/Loading';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -276,7 +275,6 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
             ? memberIds.map((id) => (
               <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
                 <PrivateChatInfo userId={id} forceShowSelf />
-                <RippleEffect />
               </div>
             ))
             : <Loading />

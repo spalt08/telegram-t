@@ -114,7 +114,7 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
           onShowToggle={togglePasswordVisibility}
         />
         {canSubmit && (
-          <Button type="submit" isLoading={authIsLoading}>Next</Button>
+          <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
         )}
       </form>
     </div>

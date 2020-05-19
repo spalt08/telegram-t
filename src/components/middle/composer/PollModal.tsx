@@ -181,7 +181,14 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
           <i className="icon-close" />
         </Button>
         <div className="modal-title">New Poll</div>
-        <Button color="primary" size="smaller" className="modal-action-button" onClick={handleCreate}>Create</Button>
+        <Button
+          color="primary"
+          size="smaller"
+          className="modal-action-button"
+          onClick={handleCreate}
+        >
+          Create
+        </Button>
       </div>
     );
   }

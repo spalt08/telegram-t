@@ -33,6 +33,12 @@
     }
   }
 
+  &:not(.has-ripple) {
+    button:active {
+      background-color: var(--color-chat-active);
+    }
+  }
+
   .AttentionIndicator {
     top: 0.5rem;
     left: 2.5rem;

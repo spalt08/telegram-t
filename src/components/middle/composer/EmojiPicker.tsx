@@ -148,6 +148,7 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       <Button
         className={`symbol-set-button ${index === activeCategoryIndex ? 'activated' : ''}`}
         round
+        ripple
         color="translucent"
         onClick={() => selectCategory(index)}
         ariaLabel={category.name}

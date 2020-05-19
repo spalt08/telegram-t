@@ -115,7 +115,7 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
           autoComplete="family-name"
         />
         {isButtonShown && (
-          <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
+          <Button type="submit" ripple isLoading={authIsLoading}>Start Messaging</Button>
         )}
         <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
       </form>

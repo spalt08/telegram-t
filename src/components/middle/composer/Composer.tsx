@@ -355,6 +355,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       <Button
         ref={recordButtonRef}
         round
+        ripple
         color="secondary"
         className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
         disabled={areVoiceMessagesNotAllowed}

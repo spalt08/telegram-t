@@ -6,6 +6,16 @@
   }
 }
 
+@mixin no-ripple-styles() {
+  &:not(.has-ripple) {
+    &:not(.disabled):not(:disabled) {
+      &:active {
+        @content;
+      }
+    }
+  }
+}
+
 .Button {
   outline: none !important;
   display: block;
@@ -41,24 +51,6 @@
     }
   }
 
-  &.text {
-    background: none;
-
-    &.primary {
-      color: var(--color-primary);
-      background: none;
-
-      @include active-styles() {
-        background: rgba(var(--color-primary-shade-rgb), .08);
-      }
-    }
-
-    &.secondary {
-      background: none;
-      color: var(--color-text-secondary);
-    }
-  }
-
   &.primary {
     background: var(--color-primary);
     color: var(--color-white);
@@ -66,6 +58,10 @@
 
     @include active-styles() {
       background: var(--color-primary-shade);
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-primary-shade-darker);
     }
   }
 
@@ -78,6 +74,10 @@
       background: var(--color-primary);
       color: white;
     }
+
+    @include no-ripple-styles() {
+      background: var(--color-primary-shade);
+    }
   }
 
   &.gray {
@@ -88,6 +88,10 @@
     @include active-styles() {
       color: var(--color-primary);
     }
+
+    @include no-ripple-styles() {
+      background: var(--color-primary-shade);
+    }
   }
 
   &.danger {
@@ -96,8 +100,45 @@
     --ripple-color: rgba(var(--color-error-rgb), .16);
 
     @include active-styles() {
-      background: rgba(var(--color-error-rgb), 0.08);
-      color: var(--color-error);
+      background: var(--color-error);
+      color: var(--color-white);
+    }
+
+    @include no-ripple-styles() {
+      background: var(--color-error-shade);
+    }
+  }
+
+  &.text {
+    background: none;
+
+    &.primary {
+      color: var(--color-primary);
+      background: none;
+
+      @include active-styles() {
+        background: rgba(var(--color-primary-shade-rgb), .08);
+      }
+
+      @include no-ripple-styles() {
+        background: rgba(var(--color-primary-shade-rgb), .16);
+      }
+    }
+
+    &.secondary {
+      background: none;
+      color: var(--color-text-secondary);
+    }
+
+    &.danger {
+      @include active-styles() {
+        background: rgba(var(--color-error-rgb), .08);
+        color: var(--color-error);
+      }
+
+      @include no-ripple-styles() {
+        background: rgba(var(--color-error-rgb), .16);
+      }
     }
   }
 
@@ -110,6 +151,10 @@
     @include active-styles() {
       background-color: rgba(var(--color-text-secondary-rgb), 0.08);
       opacity: 1;
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.16);
     }
 
     &.activated {
@@ -126,6 +171,10 @@
     @include active-styles() {
       background-color: rgba(255, 255, 255, 0.08);
       color: white;
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(255, 255, 255, 0.16);
     }
   }
 

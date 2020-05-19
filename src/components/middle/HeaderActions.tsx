@@ -3,10 +3,11 @@ import React, { FC } from '../../lib/teact/teact';
 import Button from '../ui/Button';
 
 type OwnProps = {
+  isRightColumnShown?: boolean;
   onSearchClick: () => void;
 };
 
-const HeaderActions: FC<OwnProps> = ({ onSearchClick }) => {
+const HeaderActions: FC<OwnProps> = ({ isRightColumnShown, onSearchClick }) => {
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
   }
@@ -15,6 +16,7 @@ const HeaderActions: FC<OwnProps> = ({ onSearchClick }) => {
     <div className="HeaderActions" onClick={stopPropagation}>
       <Button
         round
+        ripple={isRightColumnShown}
         color="translucent"
         size="smaller"
         onClick={onSearchClick}
@@ -23,6 +25,7 @@ const HeaderActions: FC<OwnProps> = ({ onSearchClick }) => {
       </Button>
       <Button
         round
+        ripple
         color="translucent"
         size="smaller"
         className="not-implemented"

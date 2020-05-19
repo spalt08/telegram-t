@@ -148,7 +148,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
         />
         {canSubmit && (
           authState === 'authorizationStateWaitPhoneNumber' ? (
-            <Button type="submit" isLoading={authIsLoading}>Next</Button>
+            <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
           ) : (
             <Loading />
           )
