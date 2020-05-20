@@ -34,6 +34,7 @@ type StateProps = {
   canPin?: boolean;
   canDelete?: boolean;
   canEdit?: boolean;
+  canForward?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
@@ -50,6 +51,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canPin,
   canDelete,
   canEdit,
+  canForward,
   setChatReplyingTo,
   setChatEditing,
   pinMessage,
@@ -130,6 +132,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canDelete={canDelete}
         canPin={canPin}
         canEdit={canEdit}
+        canForward={canForward}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}
@@ -149,7 +152,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const {
-      canReply, canPin, canDelete, canEdit,
+      canReply, canPin, canDelete, canEdit, canForward,
     } = selectAllowedMessagedActions(global, message);
 
     return {
@@ -157,6 +160,7 @@ export default memo(withGlobal<OwnProps>(
       canPin,
       canDelete,
       canEdit,
+      canForward,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

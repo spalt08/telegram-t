@@ -11,6 +11,7 @@ import {
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 
 const WAVEFORM_LENGTH = 63;
 const WAVEFORM_MAX_VALUE = 255;
@@ -205,7 +206,7 @@ export function calculateResultHash(ids: number[]) {
   return hash;
 }
 
-export function isMessageWithMedia(message: GramJs.Message) {
+export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServiceNotification) {
   const { media } = message;
 
   if (!media) {
@@ -249,5 +250,22 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
     dcId,
     photoSmall: smallSize && smallSize.location,
     photoBig: largeSize && largeSize.location,
+  });
+}
+
+export function buildNotificationMessageForLocalDb(
+  update: GramJs.UpdateServiceNotification,
+  localId: number,
+  currentDate: number,
+  currentUserId: number,
+) {
+  return new GramJs.Message({
+    id: localId,
+    fromId: SERVICE_NOTIFICATIONS_USER_ID,
+    toId: new GramJs.PeerUser({ userId: currentUserId }),
+    date: update.inboxDate || (currentDate / 1000),
+    media: update.media,
+    message: update.message,
+    entities: update.entities,
   });
 }

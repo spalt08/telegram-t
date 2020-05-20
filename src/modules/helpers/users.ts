@@ -1,9 +1,9 @@
 import { ApiUser } from '../../api/types';
-import { formatFullDate, formatTime } from '../../util/dateFormat';
-import { isChatPrivate } from './chats';
-import { orderBy } from '../../util/iteratees';
 
-const SERVICE_NOTIFICATIONS_USER_ID = 777000;
+import { formatFullDate, formatTime } from '../../util/dateFormat';
+import { orderBy } from '../../util/iteratees';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { isChatPrivate } from './chats';
 
 export function getUserFirstName(user?: ApiUser) {
   if (!user) {

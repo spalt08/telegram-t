@@ -19,15 +19,16 @@ import {
   ApiFormattedText,
 } from '../../types';
 
-import { LOCAL_MESSAGE_ID_BASE } from '../../../config';
+import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
+import { reduceWaveform } from '../gramjsBuilders';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
-import { reduceWaveform } from '../gramjsBuilders';
 
 const LOCAL_VIDEO_TEMP_ID = 'temp';
+let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
   const chatId = resolveMessageApiChatId(mtpMessage);
@@ -64,6 +65,35 @@ export function buildApiMessageFromShortChat(mtpMessage: GramJs.UpdateShortChatM
   const chatId = getApiChatIdFromMtpPeer({ chatId: mtpMessage.chatId } as GramJs.TypePeer);
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
+}
+
+export function buildApiMessageFromNotification(
+  notification: GramJs.UpdateServiceNotification,
+  currentDate: number,
+): ApiMessage {
+  const localId = localMessageCounter++;
+  let content: ApiMessage['content'] = {};
+
+  if (notification.media) {
+    content = {
+      ...buildMessageMediaContent(notification.media),
+    };
+  }
+
+  if (notification.message && !content.sticker && !content.poll && !content.contact) {
+    content = {
+      ...content,
+      text: buildMessageTextContent(notification.message, notification.entities),
+    };
+  }
+
+  return {
+    id: localId,
+    chatId: SERVICE_NOTIFICATIONS_USER_ID,
+    date: notification.inboxDate || (currentDate / 1000),
+    content,
+    isOutgoing: false,
+  };
 }
 
 type UniversalMessage = (
@@ -512,8 +542,6 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
 
   return `${defaultBase}${String(document.id)}.${extension}`;
 }
-
-let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
 
 export function buildLocalMessage(
   chatId: number,

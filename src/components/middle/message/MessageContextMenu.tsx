@@ -22,6 +22,7 @@ type OwnProps = {
   canPin?: boolean;
   canDelete?: boolean;
   canEdit?: boolean;
+  canForward?: boolean;
   onReply: () => void;
   onEdit: () => void;
   onPin: () => void;
@@ -41,6 +42,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canEdit,
   canPin,
   canDelete,
+  canForward,
   onReply,
   onEdit,
   onPin,
@@ -110,7 +112,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
       {canPin && <MenuItem icon="pin" onClick={onPin}>Pin</MenuItem>}
-      <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>
+      {canForward && <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>}
       {canDelete && <MenuItem className="danger" icon="delete" onClick={onDelete}>Delete</MenuItem>}
     </Menu>
   );

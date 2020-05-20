@@ -1,6 +1,5 @@
 import { ApiMessage } from '../../api/types';
-
-import { LOCAL_MESSAGE_ID_BASE } from '../../config';
+import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = /(^|\s)(([a-z]{3,}?:\/\/)?([a-z0-9]+([-.@][a-z0-9]+)*\.[a-z]{2,}\.?(:[0-9]{1,5})?)([/#?][^\s]*)?)\b/;
@@ -116,6 +115,10 @@ export function isForwardedMessage(message: ApiMessage) {
 
 export function isActionMessage(message: ApiMessage) {
   return !!message.content.action;
+}
+
+export function isServiceNotificationMessage(message: ApiMessage) {
+  return message.chatId === SERVICE_NOTIFICATIONS_USER_ID && isMessageLocal(message);
 }
 
 export function getSendingState(message: ApiMessage) {

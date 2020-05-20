@@ -11,6 +11,7 @@ import {
   resolveMessageApiChatId,
   buildPoll,
   buildPollResults,
+  buildApiMessageFromNotification,
 } from './apiBuilders/messages';
 import {
   getApiChatIdFromMtpPeer,
@@ -21,9 +22,15 @@ import {
   buildApiChatFromPreview,
 } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
-import { buildMessageFromUpdateShortSent, isMessageWithMedia, buildChatPhotoForLocalDb } from './gramjsBuilders';
+import {
+  buildMessageFromUpdateShortSent,
+  isMessageWithMedia,
+  buildChatPhotoForLocalDb,
+  buildNotificationMessageForLocalDb,
+} from './gramjsBuilders';
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -57,6 +64,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     || update instanceof GramJs.UpdateNewChannelMessage
     || update instanceof GramJs.UpdateShortChatMessage
     || update instanceof GramJs.UpdateShortMessage
+    || update instanceof GramJs.UpdateServiceNotification
   ) {
     let message: ApiMessage | undefined;
 
@@ -64,6 +72,18 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       message = buildApiMessageFromShortChat(update);
     } else if (update instanceof GramJs.UpdateShortMessage) {
       message = buildApiMessageFromShort(update, currentUserId!);
+    } else if (update instanceof GramJs.UpdateServiceNotification) {
+      const currentDate = Date.now();
+      message = buildApiMessageFromNotification(update, currentDate);
+
+      if (isMessageWithMedia(update)) {
+        localDb.messages[SERVICE_NOTIFICATIONS_USER_ID] = buildNotificationMessageForLocalDb(
+          update,
+          message.id,
+          currentDate,
+          currentUserId!,
+        );
+      }
     } else {
       if (update.message instanceof GramJs.Message && isMessageWithMedia(update.message)) {
         const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;

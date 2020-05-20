@@ -15,6 +15,7 @@ import {
   getHasAdminRight,
   isChatBasicGroup,
   isCommonBoxChat,
+  isServiceNotificationMessage,
 } from '../helpers';
 
 const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
@@ -132,13 +133,14 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
   const isChatWithSelf = Boolean(isPrivate && selectIsChatWithSelf(global, chat!));
   const isBasicGroup = isChatBasicGroup(chat);
   const isChannel = isChatChannel(chat);
+  const isServiceNotification = isServiceNotificationMessage(message);
 
   const isOwnMessage = selectIsOwnMessage(global, message);
   const isMessageEditable = Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
     && Boolean(getMessageText(message))
     && !isForwardedMessage(message);
 
-  const canReply = getCanPostInChat(chat);
+  const canReply = isServiceNotification ? false : getCanPostInChat(chat);
 
   const canPin = isPrivate
     ? isChatWithSelf
@@ -152,7 +154,7 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
     || chat.isCreator
     || getHasAdminRight(chat, 'deleteMessages');
 
-  const canDeleteForAll = canDelete && (
+  const canDeleteForAll = canDelete && !isServiceNotification && (
     (isPrivate && !isChatWithSelf)
     || (isBasicGroup && (
       isOwnMessage || getHasAdminRight(chat, 'deleteMessages')
@@ -164,8 +166,15 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
     || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
   );
 
+  const canForward = !isServiceNotification;
+
   return {
-    canReply, canEdit, canPin, canDelete, canDeleteForAll,
+    canReply,
+    canEdit,
+    canPin,
+    canDelete,
+    canDeleteForAll,
+    canForward,
   };
 }
 

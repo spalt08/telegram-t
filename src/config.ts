@@ -27,6 +27,7 @@ export const DEFAULT_ANIMATION_LEVEL = 1;
 export const FULL_ANIMATION_LEVEL = 2;
 
 export const SUPPORT_BOT_ID = 470000;
+export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 
 export const DRAFT_DEBOUNCE = 10000; // 10s
 
