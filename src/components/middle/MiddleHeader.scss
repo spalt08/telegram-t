@@ -52,6 +52,15 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+
+    .title {
+      @media (min-width: 1440px) and (max-width: 1500px) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 16rem;
+      }
+    }
   }
 
   .Avatar {
@@ -102,7 +111,7 @@
       margin-left: 1rem;
     }
 
-    @media (min-width: 1276px) and (max-width: 1500px) {
+    @media (min-width: 1276px) and (max-width: 1439px) {
       transition: opacity var(--column-transition);
 
       .is-right-column-shown & {
@@ -110,7 +119,7 @@
       }
     }
 
-    @media (min-width: 1501px) {
+    @media (min-width: 1440px) {
       transform: translate3d(0, 0, 0);
       transition: transform var(--column-transition);
 
@@ -160,6 +169,10 @@
       overflow: hidden;
       margin-left: 0.4rem;
       max-width: 15rem;
+
+      @media (min-width: 1440px) and (max-width: 1500px) {
+        max-width: 14rem;
+      }
 
       .title {
         font-weight: 500;
