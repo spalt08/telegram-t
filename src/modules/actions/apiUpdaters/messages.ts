@@ -18,7 +18,7 @@ import {
   selectChatMessageByPollId,
   selectCommonBoxChatId,
 } from '../../selectors';
-import { getMessageContent, isMessageIdNewer } from '../../helpers';
+import { getMessageContent } from '../../helpers';
 
 const ANIMATION_DELAY = 350;
 
@@ -318,7 +318,7 @@ function updateChatLastMessage(
   if (currentLastMessage && !force) {
     const isSameOrNewer = (
       currentLastMessage.id === message.id || currentLastMessage.id === message.previousLocalId
-    ) || isMessageIdNewer(message.id, currentLastMessage.id);
+    ) || message.id > currentLastMessage.id;
 
     if (!isSameOrNewer) {
       return global;

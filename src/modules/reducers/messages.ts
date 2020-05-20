@@ -183,9 +183,8 @@ export function updateOutlyingIds(
   ]));
 }
 
-// Expected result: `[1, 2, ..., n, -1, -2, ..., -n]`
 function orderHistoryIds(listedIds: number[]) {
-  return listedIds.sort((a, b) => (a > 0 && b > 0 ? a - b : b - a));
+  return listedIds.sort((a, b) => a - b);
 }
 
 export function addViewportId(

@@ -37,3 +37,5 @@ export const MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN = 925; // px
 export const MOBILE_SCREEN_MAX_WIDTH = 600; // px
 
 export const AUTO_LOAD_MEDIA = true;
+
+export const LOCAL_MESSAGE_ID_BASE = 1e9;

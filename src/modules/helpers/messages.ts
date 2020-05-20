@@ -1,5 +1,7 @@
 import { ApiMessage } from '../../api/types';
 
+import { LOCAL_MESSAGE_ID_BASE } from '../../config';
+
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = /(^|\s)(([a-z]{3,}?:\/\/)?([a-z0-9]+([-.@][a-z0-9]+)*\.[a-z]{2,}\.?(:[0-9]{1,5})?)([/#?][^\s]*)?)\b/;
 
@@ -125,14 +127,9 @@ export function getSendingState(message: ApiMessage) {
 }
 
 export function isMessageLocal(message: ApiMessage) {
-  return message.id < 0;
+  return message.id >= LOCAL_MESSAGE_ID_BASE;
 }
 
 export function getMessageAction(message: ApiMessage) {
   return message.content.action;
-}
-
-// TODO @refactoring Use 1e9+ for local IDs instead of 0-
-export function isMessageIdNewer(a: number, b: number) {
-  return a > 0 && b > 0 ? a > b : a < b;
 }

@@ -5,7 +5,6 @@ import {
   replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
 } from '../../reducers';
 import { selectOpenChat, selectViewportIds } from '../../selectors';
-import { isMessageIdNewer } from '../../helpers';
 
 const FOCUS_DURATION = 2000;
 
@@ -74,7 +73,7 @@ addReducer('focusMessage', (global, actions, payload) => {
   newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (viewportIds && !shouldSwitchChat) {
-    const direction = isMessageIdNewer(messageId, viewportIds[0]) ? FocusDirection.Down : FocusDirection.Up;
+    const direction = messageId > viewportIds[0] ? FocusDirection.Down : FocusDirection.Up;
     newGlobal = updateFocusDirection(newGlobal, direction);
   }
 

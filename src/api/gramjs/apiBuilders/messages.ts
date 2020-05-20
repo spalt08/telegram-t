@@ -19,6 +19,7 @@ import {
   ApiFormattedText,
 } from '../../types';
 
+import { LOCAL_MESSAGE_ID_BASE } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
@@ -512,8 +513,7 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
   return `${defaultBase}${String(document.id)}.${extension}`;
 }
 
-// TODO @refactoring Use 1e9+ for local IDs instead of 0-
-let localMessageCounter = -1;
+let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
 
 export function buildLocalMessage(
   chatId: number,
@@ -526,7 +526,7 @@ export function buildLocalMessage(
   gif?: ApiVideo,
   poll?: ApiNewPoll,
 ): ApiMessage {
-  const localId = localMessageCounter--;
+  const localId = localMessageCounter++;
 
   return {
     id: localId,
@@ -556,7 +556,7 @@ export function buildForwardedMessage(
   currentUserId: number,
   message: ApiMessage,
 ): ApiMessage {
-  const localId = localMessageCounter--;
+  const localId = localMessageCounter++;
   const {
     content,
     chatId: fromChatId,
