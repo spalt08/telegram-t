@@ -31,7 +31,10 @@
   "forwardMessages": {},
   "settings": {
     "byKey": {
-      "animationLevel": 1
+      "animationLevel": 1,
+      "messageTextSize": 16,
+      "messageSendKeyCombo": "enter",
+      "language": "en"
     }
   },
   "errors": [],

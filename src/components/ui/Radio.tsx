@@ -10,6 +10,7 @@ type OwnProps = {
   id?: string;
   name: string;
   label: string;
+  subLabel?: string;
   value: string;
   checked: boolean;
   disabled?: boolean;
@@ -20,6 +21,7 @@ type OwnProps = {
 const Radio: FC<OwnProps> = ({
   id,
   label,
+  subLabel,
   value,
   name,
   checked,
@@ -44,7 +46,10 @@ const Radio: FC<OwnProps> = ({
         onChange={onChange}
         disabled={disabled}
       />
-      <span>{label}</span>
+      <div className="Radio-main">
+        <span className="label">{label}</span>
+        {subLabel && <span className="subLabel">{subLabel}</span>}
+      </div>
       {isLoading && <Spinner />}
     </label>
   );

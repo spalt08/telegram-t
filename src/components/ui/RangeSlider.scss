@@ -16,25 +16,40 @@
   --slider-color: var(--color-primary);
 
   margin-bottom: 1rem;
-  position: relative;
-  z-index: 1;
 
   &.disabled {
     pointer-events: none;
     --slider-color: var(--color-text-secondary);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    left: 0;
-    top: 0.3125rem;
-    height: 0.125rem;
-    background-color: var(--color-borders);
-    border-radius: 0.125rem;
-    opacity: 0.5;
-    z-index: -1;
+  .slider-top-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.625rem;
+
+    .value {
+      flex-shrink: 0;
+      margin-left: 1rem;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .slider-main {
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      left: 0;
+      top: 0.3125rem;
+      height: 0.125rem;
+      background-color: var(--color-borders);
+      border-radius: 0.125rem;
+      opacity: 0.5;
+      z-index: -1;
+    }
   }
 
   .slider-fill-track {

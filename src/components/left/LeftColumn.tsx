@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { LeftColumnContent } from '../../types';
+import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
@@ -43,6 +43,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   resetChatCreation,
 }) => {
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
+  const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
 
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
@@ -62,6 +63,29 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       return;
     }
 
+    if (content === LeftColumnContent.Settings) {
+      switch (settingsScreen) {
+        case SettingsScreens.EditProfile:
+        case SettingsScreens.General:
+        case SettingsScreens.Notifications:
+        case SettingsScreens.Privacy:
+        case SettingsScreens.Language:
+          setSettingsScreen(SettingsScreens.Main);
+          return;
+        case SettingsScreens.PrivacyPhoneNumber:
+        case SettingsScreens.PrivacyLastSeen:
+        case SettingsScreens.PrivacyProfilePhoto:
+        case SettingsScreens.PrivacyForwarding:
+        case SettingsScreens.PrivacyGroupChats:
+        case SettingsScreens.PrivacyActiveSessions:
+        case SettingsScreens.PrivacyBlockedUsers:
+          setSettingsScreen(SettingsScreens.Privacy);
+          return;
+        default:
+          break;
+      }
+    }
+
     setContent(LeftColumnContent.ChatList);
     setContactsFilter('');
     setNewGroupMemberIds([]);
@@ -70,7 +94,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     setTimeout(() => {
       setLastResetTime(Date.now());
     }, RESET_TRANSITION_DELAY_MS);
-  }, [content, setGlobalSearchQuery, resetChatCreation]);
+  }, [content, settingsScreen, setGlobalSearchQuery, resetChatCreation]);
 
   const handleSearchQuery = useCallback((query: string) => {
     if (content === LeftColumnContent.Contacts) {
@@ -158,7 +182,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
       case LeftColumnContent.GlobalSearch:
         return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
       case LeftColumnContent.Settings:
-        return <Settings />;
+        return (
+          <Settings
+            currentScreen={settingsScreen}
+            onScreenSelect={setSettingsScreen}
+          />
+        );
       case LeftColumnContent.Contacts:
         return <ContactList filter={contactsFilter} />;
       case LeftColumnContent.NewChannel:
@@ -198,6 +227,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     >
       <LeftHeader
         content={content}
+        settingsScreen={settingsScreen}
         contactsFilter={contactsFilter}
         onSearchQuery={handleSearchQuery}
         onSelectSettings={handleSelectSettings}

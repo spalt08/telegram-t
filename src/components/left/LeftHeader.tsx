@@ -4,7 +4,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { LeftColumnContent } from '../../types';
+import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { SUPPORT_BOT_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
@@ -22,6 +22,7 @@ import './LeftHeader.scss';
 
 type OwnProps = {
   content: LeftColumnContent;
+  settingsScreen: SettingsScreens;
   contactsFilter: string;
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
@@ -39,10 +40,11 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'signOut' | 'openChat'>;
 
-const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
+const SETTING_KEYS_OFFSET = 100;
 
 const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
+  settingsScreen,
   contactsFilter,
   onSearchQuery,
   onSelectSettings,
@@ -63,7 +65,13 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     LeftColumnContent.GlobalSearch,
     LeftColumnContent.Contacts,
   ].includes(content);
-  const headerKey = hasSearch ? 0 : content;
+  const isSettings = content === LeftColumnContent.Settings;
+
+  const headerKey = hasSearch
+    ? 0
+    : isSettings
+      ? content + settingsScreen / SETTING_KEYS_OFFSET
+      : content;
 
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);
 
@@ -75,12 +83,28 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={hasMenu ? onTrigger : () => onReset()}
+        onMouseDown={hasMenu ? onTrigger : undefined}
+        onClick={!hasMenu ? () => onReset() : undefined}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
     );
   }, [hasMenu, onReset]);
+
+  const SettingsMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        round
+        ripple
+        size="smaller"
+        color="translucent"
+        className={isOpen ? 'active' : ''}
+        onMouseDown={onTrigger}
+      >
+        <i className="icon-more" />
+      </Button>
+    );
+  }, []);
 
   const openSignOutConfirmation = useCallback(() => {
     setIsSignOutDialogOpen(true);
@@ -113,10 +137,56 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     || content === LeftColumnContent.GlobalSearch
     || content === LeftColumnContent.Contacts;
 
+  function renderSettingsHeaderContent() {
+    switch (settingsScreen) {
+      case SettingsScreens.EditProfile:
+        return <h3>Edit Profile</h3>;
+      case SettingsScreens.General:
+        return <h3>General</h3>;
+      case SettingsScreens.Notifications:
+        return <h3>Notifications</h3>;
+      case SettingsScreens.Privacy:
+        return <h3>Privacy and Security</h3>;
+      case SettingsScreens.Language:
+        return <h3>Language</h3>;
+
+      case SettingsScreens.PrivacyPhoneNumber:
+        return <h3>Phone Number</h3>;
+      case SettingsScreens.PrivacyLastSeen:
+        return <h3>Last Seen &amp; Online</h3>;
+      case SettingsScreens.PrivacyProfilePhoto:
+        return <h3>Profile Photo</h3>;
+      case SettingsScreens.PrivacyForwarding:
+        return <h3>Forwarding Messages</h3>;
+      case SettingsScreens.PrivacyGroupChats:
+        return <h3>Group Chats</h3>;
+
+      case SettingsScreens.PrivacyActiveSessions:
+        return <h3>Active Sessions</h3>;
+      case SettingsScreens.PrivacyBlockedUsers:
+        return <h3>Blocked Users</h3>;
+
+      default:
+        return (
+          <div className="settings-main-header">
+            <h3>Settings</h3>
+
+            <DropdownMenu
+              className="settings-more-menu"
+              trigger={SettingsMenuButton}
+              positionX="right"
+            >
+              <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
+            </DropdownMenu>
+          </div>
+        );
+    }
+  }
+
   function renderHeaderContent() {
-    switch (headerKey) {
+    switch (content) {
       case LeftColumnContent.Settings:
-        return <h3>Settings</h3>;
+        return renderSettingsHeaderContent();
       case LeftColumnContent.NewChannel:
         return <h3>New Channel</h3>;
       case LeftColumnContent.NewGroupStep1:
@@ -173,10 +243,9 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           Help
         </MenuItem>
-        <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
       </DropdownMenu>
       {hasMenu && <AttentionIndicator show={isSettingsAttentionNeeded} />}
-      <Transition name="slide-fade" activeKey={headerKey} renderCount={TRANSITION_RENDER_COUNT}>
+      <Transition name="slide-fade" activeKey={headerKey}>
         {renderHeaderContent}
       </Transition>
       <ConfirmDialog

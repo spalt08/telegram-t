@@ -2,7 +2,11 @@ import { addReducer } from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 
-import { DEFAULT_ANIMATION_LEVEL, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../config';
+import {
+  DEFAULT_ANIMATION_LEVEL,
+  DEFAULT_MESSAGE_TEXT_SIZE_PX,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+} from '../config';
 import { initCache, loadCache } from './cache';
 
 const INITIAL_STATE: GlobalState = {
@@ -60,6 +64,9 @@ const INITIAL_STATE: GlobalState = {
   settings: {
     byKey: {
       animationLevel: DEFAULT_ANIMATION_LEVEL,
+      messageTextSize: DEFAULT_MESSAGE_TEXT_SIZE_PX,
+      messageSendKeyCombo: 'enter',
+      language: 'en',
     },
   },
 

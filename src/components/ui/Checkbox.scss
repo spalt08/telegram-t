@@ -13,7 +13,7 @@
     opacity: 0;
   }
 
-  span {
+  .Checkbox-main {
     &::before, &::after {
       content: '';
       display: block;
@@ -38,9 +38,20 @@
       opacity: 0;
       transition: opacity .1s ease;
     }
+
+    .label {
+      display: block;
+    }
+
+    .subLabel {
+      display: block;
+      font-size: 0.875rem;
+      line-height: 1rem;
+      color: var(--color-text-secondary);
+    }
   }
 
-  input:checked ~ span {
+  input:checked ~ .Checkbox-main {
     &::before {
       border-color: var(--color-primary);
     }

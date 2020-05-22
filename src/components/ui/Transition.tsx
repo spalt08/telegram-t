@@ -3,13 +3,14 @@ import React, {
 } from '../../lib/teact/teact';
 
 import usePrevious from '../../hooks/usePrevious';
+import buildClassName from '../../util/buildClassName';
 
 import './Transition.scss';
 
 type ChildrenFn = () => any;
 type OwnProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade';
+  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
@@ -26,6 +27,7 @@ const ANIMATION_DURATION = {
   'slide-fade': 400,
   'zoom-fade': 150,
   'scroll-slide': 500,
+  'slide-layers': 250,
   fade: 150,
 };
 const END_DELAY = 50;
@@ -172,8 +174,14 @@ const Transition: FC<OwnProps> = ({
     contents = Object.keys(renders).map((key) => <div key={key}>{renders[Number(key)]()}</div>);
   }
 
+  const fullClassName = buildClassName(
+    'Transition',
+    className,
+    name,
+  );
+
   return (
-    <div ref={containerRef} id={id} className={[className, 'Transition', name].join(' ')}>
+    <div ref={containerRef} id={id} className={fullClassName}>
       {contents}
     </div>
   );

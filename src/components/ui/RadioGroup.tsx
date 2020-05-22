@@ -4,6 +4,7 @@ import Radio from './Radio';
 
 type IRadioOption = {
   label: string;
+  subLabel?: string;
   value: string;
 };
 
@@ -37,6 +38,7 @@ const RadioGroup: FC<OwnProps> = ({
         <Radio
           name={name}
           label={option.label}
+          subLabel={option.subLabel}
           value={option.value}
           checked={option.value === selected}
           disabled={disabled}

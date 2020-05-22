@@ -6,6 +6,7 @@ import './Checkbox.scss';
 type OwnProps = {
   id?: string;
   label: string;
+  subLabel?: string;
   checked: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
@@ -13,6 +14,7 @@ type OwnProps = {
 const Checkbox: FC<OwnProps> = ({
   id,
   label,
+  subLabel,
   checked,
   onChange,
 }) => {
@@ -24,7 +26,10 @@ const Checkbox: FC<OwnProps> = ({
         checked={checked}
         onChange={onChange}
       />
-      <span>{label}</span>
+      <div className="Checkbox-main">
+        <span className="label">{label}</span>
+        {subLabel && <span className="subLabel">{subLabel}</span>}
+      </div>
     </label>
   );
 };
