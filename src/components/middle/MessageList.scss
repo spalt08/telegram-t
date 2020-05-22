@@ -165,7 +165,7 @@
     transform: translate3d(0, 0, 0);
 
     body:not(.transition-locked) & {
-      transition: transform var(--column-transition);
+      transition: transform var(--layer-transition);
     }
 
     body.message-list-no-transform & {

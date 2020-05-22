@@ -33,7 +33,7 @@
     width: 26.5rem;
 
     transform: translate3d(-5rem, 0, 0);
-    transition: transform var(--column-transition);
+    transition: transform var(--layer-transition);
 
     &::after {
       content: '';
@@ -44,8 +44,8 @@
       right: 0;
       bottom: 0;
       background: black;
-      opacity: var(--column-blackout-opacity);
-      transition: opacity var(--column-transition);
+      opacity: var(--layer-blackout-opacity);
+      transition: opacity var(--layer-transition);
     }
 
     .is-left-column-shown & {
@@ -88,7 +88,7 @@
     right: 0;
 
     transform: translate3d(0, 0, 0);
-    transition: transform var(--column-transition);
+    transition: transform var(--layer-transition);
 
     .is-left-column-shown & {
       transform: translate3d(26.5rem, 0, 0);
