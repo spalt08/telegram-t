@@ -54,7 +54,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
 
-    if (areSomeLocal) {
+    if (areSomeLocal && newViewportIds.length >= MESSAGE_LIST_SLICE) {
       newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);
     }
 

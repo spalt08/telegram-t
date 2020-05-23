@@ -101,7 +101,7 @@ type DispatchProps = Pick<GlobalActions, (
 // This is the max scroll offset within existing viewport.
 const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
-const RELOCATED_FOCUS_OFFSET = 1200;
+const RELOCATED_FOCUS_OFFSET = 1500;
 const LONG_TAP_DURATION_MS = 250;
 const NBSP = '\u00A0';
 
