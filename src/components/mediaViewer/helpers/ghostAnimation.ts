@@ -114,7 +114,7 @@ export function animateClosing(message: ApiMessage, origin: MediaViewerOrigin) {
   let fromScaleY = fromHeight / toHeight;
 
   const shouldFadeOut = origin === MediaViewerOrigin.Album || (
-    origin === MediaViewerOrigin.Inline && !isMessageFullyVisible(container)
+    origin === MediaViewerOrigin.Inline && !isMessageImageFullyVisible(container, toImage)
   );
 
   if (origin === MediaViewerOrigin.SharedMedia) {
@@ -215,11 +215,12 @@ function isElementInViewport(el: HTMLElement) {
   return (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
 }
 
-function isMessageFullyVisible(el: HTMLElement) {
+function isMessageImageFullyVisible(messageEl: HTMLElement, imageEl: HTMLElement) {
   const container = document.querySelector<HTMLDivElement>('.MessageList')!;
+  const imgOffsetTop = messageEl.offsetTop + imageEl.parentElement!.parentElement!.offsetTop;
 
-  return el.offsetTop > container.scrollTop
-    && el.offsetTop + el.offsetHeight < container.scrollTop + container.offsetHeight;
+  return imgOffsetTop > container.scrollTop
+    && imgOffsetTop + imageEl.offsetHeight < container.scrollTop + container.offsetHeight;
 }
 
 function getTopOffset(hasFooter: boolean) {
