@@ -576,6 +576,9 @@ class TelegramClient {
         let size = null;
         if (args.sizeType) {
             size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null
+            if (!size && doc.mimeType.startsWith('video/')) {
+                return;
+            }
 
             if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
                 return this._downloadCachedPhotoSize(size)

@@ -1,5 +1,25 @@
 import { pause } from './schedulers';
 
+// Polyfill for Safari: `File` is not available in web worker
+if (typeof File === 'undefined') {
+  // eslint-disable-next-line no-global-assign, no-restricted-globals, func-names
+  self.File = class extends Blob {
+    name: string;
+
+    constructor(fileBits: BlobPart[], fileName: string, options?: FilePropertyBag) {
+      if (options) {
+        const { type, ...rest } = options;
+        super(fileBits, { type });
+        Object.assign(this, rest);
+      } else {
+        super(fileBits);
+      }
+
+      this.name = fileName;
+    }
+  } as typeof File;
+}
+
 export function blobToDataUri(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

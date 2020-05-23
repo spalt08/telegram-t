@@ -179,7 +179,7 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE;
+  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE || !video.thumbnail;
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {

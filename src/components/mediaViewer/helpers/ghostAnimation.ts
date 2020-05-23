@@ -55,7 +55,7 @@ export function animateOpening(
   const fromScaleX = fromWidth / toWidth;
   const fromScaleY = fromHeight / toHeight;
 
-  const ghost = createGhost(bestImageData);
+  const ghost = createGhost(bestImageData || fromImage);
   applyStyles(ghost, {
     top: `${toTop}px`,
     left: `${toLeft}px`,
