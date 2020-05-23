@@ -41,7 +41,9 @@ const ChatList: FC<StateProps & DispatchProps> = ({
 
   const prevOrderById = usePrevious(orderById);
   const orderDiffById = orderById && prevOrderById
-    ? mapValues(orderById, (order, id) => order - prevOrderById[id])
+    ? mapValues(orderById, (order, id) => {
+      return order - (prevOrderById[id] !== undefined ? prevOrderById[id] : Infinity);
+    })
     : {};
 
   return (
