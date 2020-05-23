@@ -455,6 +455,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       id={`message${messageId}`}
       className={containerClassName}
       data-message-id={messageId}
+      data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
     >
       {showAvatar && isLastInGroup && (
         <Avatar

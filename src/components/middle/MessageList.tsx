@@ -184,9 +184,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         allElements, visibleIndexes,
       } = findInViewport(container, listItemElements, undefined, undefined, true);
       const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
+      if (!lowerElement) {
+        return;
+      }
 
-      const maxId = lowerElement ? Number(lowerElement.dataset.messageId) : undefined;
-      if (maxId && maxId >= firstUnreadId) {
+      const maxId = Number(lowerElement.dataset.lastMessageId || lowerElement.dataset.messageId);
+      if (maxId >= firstUnreadId) {
         markChatRead({ maxId });
       }
     }
@@ -201,7 +204,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     let isUpdated = false;
 
     if (isNearTop) {
-      const nextAnchor = listItemElements[0];
+      // We avoid the very first item as it may be a partly-loaded album
+      const nextAnchor = listItemElements[1] || listItemElements[0];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
@@ -221,7 +225,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (!isViewportNewest && isNearBottom) {
-      const nextAnchor = listItemElements[listItemElements.length - 1];
+      const nextAnchor = listItemElements[listItemElements.length - 2] || listItemElements[listItemElements.length - 1];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
