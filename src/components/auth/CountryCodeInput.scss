@@ -1,9 +1,10 @@
 @import '../../styles/flags';
 
 .CountryCodeInput {
-  cursor: pointer;
 
   .input-group {
+    cursor: pointer;
+
     z-index: var(--z-country-code-input-group);
 
     .Spinner {

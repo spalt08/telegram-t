@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -7,7 +7,7 @@ import AttentionIndicator from './AttentionIndicator';
 
 import './MenuItem.scss';
 
-type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement>) => void;
 
 type OwnProps = {
   icon?: string;
@@ -30,31 +30,49 @@ const MenuItem: FC<OwnProps> = (props) => {
     ripple,
   } = props;
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
       return;
     }
+
     onClick(e);
-  };
+  }, [disabled, onClick]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode !== 13 && e.keyCode !== 32) {
+      return;
+    }
+
+    if (disabled || !onClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      return;
+    }
+
+    onClick(e);
+  }, [disabled, onClick]);
 
   const fullClassName = buildClassName(
     'MenuItem',
     className,
     ripple && 'has-ripple',
+    disabled && 'disabled',
   );
 
   return (
-    <div className={fullClassName}>
-      <button type="button" onClick={handleClick} disabled={disabled}>
-        {icon && (
-          <i className={`icon-${icon}`} />
-        )}
-        {children}
-        {!disabled && ripple && (
-          <RippleEffect />
-        )}
-        {attention && <AttentionIndicator show={attention} />}
-      </button>
+    <div role="button" tabIndex={0} className={fullClassName} onClick={handleClick} onKeyDown={handleKeyDown}>
+      {icon && (
+        <i className={`icon-${icon}`} />
+      )}
+      {children}
+      {!disabled && ripple && (
+        <RippleEffect />
+      )}
+      {attention && <AttentionIndicator show={attention} />}
     </div>
   );
 };
