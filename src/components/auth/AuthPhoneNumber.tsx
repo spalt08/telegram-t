@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback,
+  FC, useState, useEffect, useCallback, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -44,9 +44,11 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   clearAuthError,
   loadNearestCountry,
 }) => {
+  const phoneNumberRef = useRef<HTMLInputElement>();
   const [country, setCountry] = useState();
   const [phoneNumber, setPhoneNumber] = useState();
   const [isTouched, setIsTouched] = useState(false);
+  const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
 
   const fullNumber = getNumberWithCode(phoneNumber, country);
   const canSubmit = fullNumber && fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGTH;
@@ -84,6 +86,12 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     }
   }, [authPhoneNumber, phoneNumber, parseFullNumber]);
 
+  useLayoutEffect(() => {
+    if (phoneNumberRef.current && lastSelection) {
+      phoneNumberRef.current.setSelectionRange(...lastSelection);
+    }
+  }, [lastSelection]);
+
   function handleCountryChange(newCountry?: Country) {
     setCountry(newCountry);
   }
@@ -97,8 +105,15 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       monkeyPreloadPromise = preloadImage(monkeyPath);
     }
 
+    const { value, selectionStart, selectionEnd } = e.target;
+    setLastSelection(
+      selectionStart && selectionEnd && selectionEnd < value.length
+        ? [selectionStart, selectionEnd]
+        : undefined,
+    );
+
     setIsTouched(true);
-    parseFullNumber(e.target.value);
+    parseFullNumber(value);
   }
 
   function handleKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
@@ -133,6 +148,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           onChange={handleCountryChange}
         />
         <InputText
+          ref={phoneNumberRef}
           id="sign-in-phone-number"
           label="Phone Number"
           value={fullNumber}
