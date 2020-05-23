@@ -181,11 +181,10 @@ addReducer('cancelSendingMessage', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
   const message = selectChatMessage(global, chatId, messageId);
   const progressCallback = message && uploadProgressCallbacks[message.previousLocalId || message.id];
-  if (!progressCallback) {
-    return;
+  if (progressCallback) {
+    cancelApiProgress(progressCallback);
   }
 
-  cancelApiProgress(progressCallback);
   actions.apiUpdate({
     '@type': 'deleteMessages',
     ids: [messageId],
