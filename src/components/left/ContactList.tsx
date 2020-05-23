@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useCallback, useMemo,
+  FC, useEffect, useCallback, useMemo, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -84,7 +84,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: contactIds } = global.contactList || {};
     const { byId: usersById } = global.users;
@@ -95,4 +95,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadContactList', 'openChat']),
-)(ContactList);
+)(ContactList));

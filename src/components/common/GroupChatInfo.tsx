@@ -1,5 +1,7 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useCallback, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
@@ -132,7 +134,7 @@ function getGroupStatus(chat: ApiChat) {
     : chatTypeString;
 }
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
@@ -141,4 +143,4 @@ export default withGlobal<OwnProps>(
     return { lastSyncTime, chat, onlineCount };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'loadSuperGroupOnlines', 'openMediaViewer']),
-)(GroupChatInfo);
+)(GroupChatInfo));

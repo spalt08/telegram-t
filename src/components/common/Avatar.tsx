@@ -1,5 +1,5 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
 import {
@@ -84,4 +84,4 @@ const Avatar: FC<OwnProps> = ({
   );
 };
 
-export default Avatar;
+export default memo(Avatar);

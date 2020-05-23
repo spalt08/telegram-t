@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -109,11 +109,11 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { query: searchQuery } = selectCurrentMessageSearch(global) || {};
 
     return { searchQuery };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setMessageSearchQuery', 'searchMessages']),
-)(RightHeader);
+)(RightHeader));

@@ -1,4 +1,6 @@
-import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useRef, useCallback, memo,
+} from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 
@@ -55,4 +57,4 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
   );
 };
 
-export default ResponsiveHoverButton;
+export default memo(ResponsiveHoverButton);

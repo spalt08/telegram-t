@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useState, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -63,7 +65,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const { chats: { selectedId: openChatId, listIds } } = global;
     if (!listIds || !openChatId) {
@@ -79,4 +81,4 @@ export default withGlobal(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),
-)(MiddleColumn);
+)(MiddleColumn));

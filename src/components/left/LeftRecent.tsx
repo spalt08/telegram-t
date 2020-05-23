@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useCallback, useRef,
+  FC, useEffect, useCallback, useRef, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -106,7 +106,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { users: topUsers } = global.topPeers;
     const { recentlyFoundChatIds } = global.globalSearch;
@@ -122,4 +122,4 @@ export default withGlobal<OwnProps>(
     'openChat',
     'addRecentlyFoundChatId',
   ]),
-)(LeftRecent);
+)(LeftRecent));

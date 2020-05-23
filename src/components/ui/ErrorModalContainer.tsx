@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -48,7 +48,7 @@ function getErrorHeader(error: ApiError) {
   return 'Something went wrong';
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, ['errors']),
   (setGlobal, actions): DispatchProps => pick(actions, ['dismissError']),
-)(ErrorModalContainer);
+)(ErrorModalContainer));

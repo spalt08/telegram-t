@@ -1,5 +1,7 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useCallback, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiTypingStatus } from '../../api/types';
@@ -106,7 +108,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
@@ -118,4 +120,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
-)(PrivateChatInfo);
+)(PrivateChatInfo));

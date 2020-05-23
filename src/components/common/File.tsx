@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import useTransitionForMedia from '../../hooks/useTransitionForMedia';
@@ -117,4 +117,4 @@ const File: FC<OwnProps> = ({
   );
 };
 
-export default File;
+export default memo(File);

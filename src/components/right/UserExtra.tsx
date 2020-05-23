@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import React, { FC, useEffect, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
@@ -76,7 +76,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
@@ -84,4 +84,4 @@ export default withGlobal<OwnProps>(
     return { lastSyncTime, user };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser']),
-)(UserExtra);
+)(UserExtra));

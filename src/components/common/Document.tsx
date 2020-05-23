@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useCallback, useEffect, useState, memo,
 } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
@@ -75,4 +75,4 @@ const Document: FC<OwnProps> = ({
   );
 };
 
-export default Document;
+export default memo(Document);

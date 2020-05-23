@@ -1,5 +1,5 @@
 import React, {
-  FC, useState, useCallback, useEffect, useRef,
+  FC, useState, useCallback, useEffect, useRef, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -249,10 +249,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const { query } = global.globalSearch;
     return { searchQuery: query };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setGlobalSearchQuery', 'resetChatCreation']),
-)(LeftColumn);
+)(LeftColumn));

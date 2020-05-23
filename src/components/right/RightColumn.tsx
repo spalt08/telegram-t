@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useCallback, useEffect, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -163,7 +163,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const {
       chats,
@@ -202,4 +202,4 @@ export default withGlobal(
     'closeMessageTextSearch',
     'closeForwardMenu',
   ]),
-)(RightColumn);
+)(RightColumn));

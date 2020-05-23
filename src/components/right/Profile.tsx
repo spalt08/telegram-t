@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState,
+  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -323,7 +323,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId, userId }): StateProps => {
     const chat = selectChat(global, chatId);
     const chatMessages = selectChatMessages(global, userId || chatId);
@@ -358,4 +358,4 @@ export default withGlobal<OwnProps>(
     'openMediaViewer',
     'openUserInfo',
   ]),
-)(Profile);
+)(Profile));

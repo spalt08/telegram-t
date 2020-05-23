@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from '../lib/teact/teact';
+import React, { FC, useEffect, memo } from '../lib/teact/teact';
 import { withGlobal } from '../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../global/types';
@@ -50,10 +50,10 @@ const Main: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => ({
     ...pick(global, ['connectionState', 'isLeftColumnShown']),
     isRightColumnShown: selectIsRightColumnShown(global),
   }),
   (global, actions): DispatchProps => pick(actions, ['initApi']),
-)(Main);
+)(Main));

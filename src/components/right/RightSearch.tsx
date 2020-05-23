@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from '../../lib/teact/teact';
+import React, { FC, useMemo, memo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
@@ -115,7 +115,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const chat = selectOpenChat(global);
     const messagesById = chat && selectChatMessages(global, chat.id);
@@ -137,4 +137,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (global, actions): DispatchProps => pick(actions, ['searchMessages', 'focusMessage']),
-)(RightSearch);
+)(RightSearch));

@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
@@ -47,10 +47,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
 
     return { chat };
   },
-)(ChatExtra);
+)(ChatExtra));

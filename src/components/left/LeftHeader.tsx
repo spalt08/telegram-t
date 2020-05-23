@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo, useState,
+  FC, useCallback, useMemo, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -260,7 +260,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { query: searchQuery, fetchingStatus } = global.globalSearch;
     const { isAnimationLevelSettingViewed } = global.settings;
@@ -274,4 +274,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['signOut', 'openChat']),
-)(LeftHeader);
+)(LeftHeader));

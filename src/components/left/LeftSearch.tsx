@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo,
+  FC, useCallback, useMemo, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -202,7 +202,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { byId: chatsById } = global.chats;
     const { byId: usersById } = global.users;
@@ -246,4 +246,4 @@ export default withGlobal<OwnProps>(
     'focusMessage',
     'searchMessagesGlobal',
   ]),
-)(LeftSearch);
+)(LeftSearch));

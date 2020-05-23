@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useMemo } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useMemo, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -184,7 +186,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { isLeftColumnShown } = global;
     const { byId: chatsById } = global.chats;
@@ -234,4 +236,4 @@ export default withGlobal<OwnProps>(
     'focusMessage',
     'openChat',
   ]),
-)(MiddleHeader);
+)(MiddleHeader));

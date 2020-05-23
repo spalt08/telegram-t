@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage } from '../../api/types';
@@ -80,7 +80,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const { canDeleteForAll } = selectAllowedMessagedActions(global, message);
     const chat = selectChat(global, message.chatId);
@@ -99,4 +99,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['deleteMessages']),
-)(DeleteMessageModal);
+)(DeleteMessageModal));

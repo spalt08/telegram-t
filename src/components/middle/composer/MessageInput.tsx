@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useEffect, useRef,
+  FC, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -121,7 +121,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
 
@@ -135,4 +135,4 @@ export default withGlobal<OwnProps>(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['editLastChatMessage']),
-)(MessageInput);
+)(MessageInput));
