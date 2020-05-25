@@ -22,7 +22,7 @@ import {
 export type GlobalState = {
   isChatInfoShown: boolean;
   isLeftColumnShown: boolean;
-  isUiReady: boolean;
+  uiReadyState: 0 | 1 | 2;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
   lastSyncTime?: number;

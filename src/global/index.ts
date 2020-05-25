@@ -12,7 +12,7 @@ import { initCache, loadCache } from './cache';
 const INITIAL_STATE: GlobalState = {
   isChatInfoShown: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   isLeftColumnShown: true,
-  isUiReady: false,
+  uiReadyState: 0,
 
   authRememberMe: true,
 

@@ -37,6 +37,7 @@ type StateProps = {
   contentKey?: ColumnContent;
   selectedChatId?: number;
   selectedUserId?: number;
+  shouldPreload?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -49,6 +50,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   contentKey,
   selectedChatId,
   selectedUserId,
+  shouldPreload,
   toggleChatInfo,
   openUserInfo,
   closeMessageTextSearch,
@@ -67,7 +69,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     ? contentKey
     : previousContentKey !== null
       ? previousContentKey
-      : undefined;
+      : shouldPreload
+        ? ColumnContent.ChatInfo
+        : undefined;
 
   useUpdateOnResize();
 
@@ -108,7 +112,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     if (isOpen && isOverlaying) {
       close();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOverlaying]);
 
   // We need to clear `isSharedMedia` state, when changing between `ChatInfo` and `UserInfo` to prevent confusion
@@ -169,6 +173,7 @@ export default memo(withGlobal(
       chats,
       users,
       isChatInfoShown,
+      uiReadyState,
     } = global;
 
     const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
@@ -178,7 +183,9 @@ export default memo(withGlobal(
     const selectedUserId = users.selectedId;
     const areChatsLoaded = Boolean(chats.listIds);
     const isUserInfo = Boolean(selectedUserId && areChatsLoaded);
-    const isChatInfo = Boolean(selectedChatId && isChatInfoShown && areChatsLoaded);
+    const isChatShown = Boolean(selectedChatId && areChatsLoaded);
+    const isChatInfo = isChatShown && isChatInfoShown;
+    const shouldPreload = isChatShown && uiReadyState === 2;
 
     const contentKey = isForwarding ? (
       ColumnContent.Forward
@@ -194,6 +201,7 @@ export default memo(withGlobal(
       contentKey,
       selectedChatId,
       selectedUserId,
+      shouldPreload,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

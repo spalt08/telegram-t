@@ -76,7 +76,7 @@ function updateCache(global: GlobalState) {
     users: reduceUsers(global),
     chats: reduceChats(global),
     connectionState: undefined,
-    isUiReady: false,
+    uiReadyState: 0,
     lastSyncTime: undefined,
     messages: reduceMessages(global),
     focusedMessage: {},

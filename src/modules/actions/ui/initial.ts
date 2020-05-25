@@ -26,11 +26,11 @@ addReducer('clearAuthError', (global) => {
 });
 
 addReducer('setIsUiReady', (global, actions, payload) => {
-  const { isUiReady } = payload!;
+  const { uiReadyState } = payload!;
 
   return {
     ...global,
-    isUiReady,
+    uiReadyState,
   };
 });
 

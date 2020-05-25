@@ -25,11 +25,13 @@ type OwnProps = {
   children: any;
 };
 
-type StateProps = Pick<GlobalState, 'isUiReady'>;
+type StateProps = Pick<GlobalState, 'uiReadyState'>;
 
 type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 
-const MAX_PRELOAD_DELAY = 1500;
+const MAX_PRELOAD_DELAY = 1000;
+const SECOND_STATE_DELAY = 1000;
+const AVATARS_TO_PRELOAD = 17;
 
 function preloadAvatars() {
   const { listIds, byId } = getGlobal().chats;
@@ -37,7 +39,7 @@ function preloadAvatars() {
     return undefined;
   }
 
-  return Promise.all(listIds.map((chatId) => {
+  return Promise.all(listIds.slice(0, AVATARS_TO_PRELOAD).map((chatId) => {
     const chat = byId[chatId];
     if (!chat) {
       return undefined;
@@ -67,20 +69,30 @@ const preloadTasks = {
 };
 
 const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
-  page, children, isUiReady, setIsUiReady,
+  page, children, uiReadyState, setIsUiReady,
 }) => {
-  const { shouldRender, transitionClassNames } = useShowTransition(!isUiReady, undefined, true);
+  const { shouldRender, transitionClassNames } = useShowTransition(!uiReadyState, undefined, true);
 
   useEffect(() => {
+    let timeout: number;
+
     Promise.race([
       pause(MAX_PRELOAD_DELAY),
       preloadTasks[page](),
     ]).then(() => {
-      setIsUiReady({ isUiReady: true });
+      setIsUiReady({ uiReadyState: 1 });
+
+      timeout = window.setTimeout(() => {
+        setIsUiReady({ uiReadyState: 2 });
+      }, SECOND_STATE_DELAY);
     });
 
     return () => {
-      setIsUiReady({ isUiReady: false });
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      setIsUiReady({ uiReadyState: 0 });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,6 +117,6 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => pick(global, ['isUiReady']),
+  (global): StateProps => pick(global, ['uiReadyState']),
   (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
 )(UiLoader);
