@@ -35,10 +35,15 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 }) => {
   const [showFab, setShowFab] = useState(false);
   const prevChatId = usePrevious(openChatId, true);
+  const prevCanPost = usePrevious(canPost, true);
 
   const renderingChatId = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
     ? openChatId
     : openChatId || prevChatId;
+
+  const renderingCanPost = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
+    ? canPost
+    : canPost || prevCanPost;
 
   useEffect(() => {
     return openChatId
@@ -54,8 +59,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
         <div className="messages-layout">
           <MiddleHeader chatId={renderingChatId} />
           <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
-          {canPost && <Composer />}
-          {!canPost && messageSendingRestrictionReason && (
+          {renderingCanPost && <Composer />}
+          {!renderingCanPost && messageSendingRestrictionReason && (
             <div className="messaging-disabled">{messageSendingRestrictionReason}</div>
           )}
           <ScrollDownButton show={showFab} />

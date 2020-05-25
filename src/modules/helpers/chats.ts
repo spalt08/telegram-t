@@ -94,7 +94,7 @@ export function isChatSummaryOnly(chat: ApiChat) {
 }
 
 export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
-  return chat.adminRights && chat.adminRights[key];
+  return chat.adminRights ? chat.adminRights[key] : false;
 }
 
 export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {
