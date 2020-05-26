@@ -234,10 +234,14 @@ addReducer('loadWebPagePreview', (global, actions, payload) => {
 });
 
 addReducer('clearWebPagePreview', (global) => {
-  setGlobal({
+  if (!global.webPagePreview) {
+    return undefined;
+  }
+
+  return {
     ...global,
     webPagePreview: undefined,
-  });
+  };
 });
 
 addReducer('sendPollVote', (global, actions, payload) => {
