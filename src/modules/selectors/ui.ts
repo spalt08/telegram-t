@@ -13,6 +13,7 @@ export function selectIsRightColumnShown(global: GlobalState) {
     chats,
     users,
     isChatInfoShown,
+    isStatisticsShown,
   } = global;
 
   const areChatsLoaded = Boolean(chats.listIds);
@@ -22,5 +23,5 @@ export function selectIsRightColumnShown(global: GlobalState) {
   const isUserInfo = Boolean(users.selectedId && areChatsLoaded);
   const isChatInfo = Boolean(chats.selectedId && isChatInfoShown && areChatsLoaded);
 
-  return isChatInfo || isUserInfo || isForwarding || isSearch;
+  return isChatInfo || isUserInfo || isStatisticsShown || isForwarding || isSearch;
 }

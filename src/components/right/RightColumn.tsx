@@ -18,17 +18,20 @@ import useUpdateOnResize from '../../hooks/useUpdateOnResize';
 import usePrevious from '../../hooks/usePrevious';
 import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 
-import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
 import Profile, { ProfileState } from './Profile';
-import RightSearch from './RightSearch.async';
 import Transition from '../ui/Transition';
+import ForwardPicker from '../common/ForwardPicker.async';
+import RightSearch from './RightSearch.async';
+import Statistics from './Statistics.async';
 
 import './RightColumn.scss';
 
 enum ColumnContent {
   ChatInfo,
   UserInfo,
+  // eslint-disable-next-line no-shadow
+  Statistics,
   Search,
   Forward,
 }
@@ -41,7 +44,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
+  'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
 )>;
 
 const TRANSITION_RENDER_COUNT = 4;
@@ -52,6 +55,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   selectedUserId,
   shouldPreload,
   toggleChatInfo,
+  toggleStatistics,
   openUserInfo,
   closeMessageTextSearch,
   closeForwardMenu,
@@ -62,6 +66,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isOpen = contentKey !== undefined;
   const isSearch = contentKey === ColumnContent.Search;
   const isForwarding = contentKey === ColumnContent.Forward;
+  const isStatistics = contentKey === ColumnContent.Statistics;
   const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
   const previousContentKey = usePrevious(contentKey, true);
@@ -91,6 +96,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         }
         openUserInfo({ id: undefined });
         break;
+      case ColumnContent.Statistics:
+        toggleStatistics();
+        break;
       case ColumnContent.Search: {
         const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
         if (searchInput) {
@@ -103,7 +111,10 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         closeForwardMenu();
         break;
     }
-  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isScrolledDown]);
+  }, [
+    contentKey, isScrolledDown, toggleChatInfo, openUserInfo,
+    toggleStatistics, closeForwardMenu, closeMessageTextSearch,
+  ]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 
@@ -134,6 +145,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         return <RightSearch chatId={selectedChatId!} />;
       case ColumnContent.Forward:
         return <ForwardPicker />;
+      case ColumnContent.Statistics:
+        return <Statistics />;
       default:
         return (
           <Profile
@@ -157,6 +170,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           onClose={close}
           isSearch={isSearch}
           isForwarding={isForwarding}
+          isStatistics={isStatistics}
           profileState={profileState}
         />
         <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={renderedContentKey}>
@@ -173,6 +187,7 @@ export default memo(withGlobal(
       chats,
       users,
       isChatInfoShown,
+      isStatisticsShown,
       uiReadyState,
     } = global;
 
@@ -191,6 +206,8 @@ export default memo(withGlobal(
       ColumnContent.Forward
     ) : isSearch ? (
       ColumnContent.Search
+    ) : isStatisticsShown ? (
+      ColumnContent.Statistics
     ) : isUserInfo ? (
       ColumnContent.UserInfo
     ) : isChatInfo ? (
@@ -207,6 +224,7 @@ export default memo(withGlobal(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openUserInfo',
     'toggleChatInfo',
+    'toggleStatistics',
     'closeMessageTextSearch',
     'closeForwardMenu',
   ]),

@@ -1,4 +1,6 @@
-import React, { FC, useCallback, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, memo, useMemo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -10,6 +12,8 @@ import { selectCurrentMessageSearch } from '../../modules/selectors';
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
 import { ProfileState } from './Profile';
 
 import './RightHeader.scss';
@@ -18,6 +22,7 @@ type OwnProps = {
   onClose: () => void;
   isForwarding?: boolean;
   isSearch?: boolean;
+  isStatistics?: boolean;
   profileState?: ProfileState;
 };
 
@@ -25,13 +30,14 @@ type StateProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages'>;
+type DispatchProps = Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages' | 'toggleStatistics'>;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 enum HeaderContent {
   Profile,
   SharedMedia,
+  Statistics,
   MemberList,
   Search,
   Forward,
@@ -41,10 +47,12 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isForwarding,
   isSearch,
+  isStatistics,
   profileState,
   searchQuery,
   setMessageSearchQuery,
   searchMessages,
+  toggleStatistics,
 }) => {
   const handleSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
@@ -55,11 +63,28 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     HeaderContent.Forward
   ) : isSearch ? (
     HeaderContent.Search
+  ) : isStatistics ? (
+    HeaderContent.Statistics
   ) : profileState === ProfileState.SharedMedia ? (
     HeaderContent.SharedMedia
   ) : profileState === ProfileState.MemberList ? (
     HeaderContent.MemberList
   ) : HeaderContent.Profile;
+
+  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        round
+        ripple
+        size="smaller"
+        color="translucent"
+        className={isOpen ? 'active' : undefined}
+        onMouseDown={onTrigger}
+      >
+        <i className="icon-more" />
+      </Button>
+    );
+  }, []);
 
   function renderHeaderContent() {
     switch (contentKey) {
@@ -67,6 +92,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return <h3>Forward</h3>;
       case HeaderContent.Search:
         return <SearchInput value={searchQuery} onChange={handleSearchQueryChange} />;
+      case HeaderContent.Statistics:
+        return <h3>Statistics</h3>;
       case HeaderContent.SharedMedia:
         return <h3>Shared Media</h3>;
       case HeaderContent.MemberList:
@@ -75,15 +102,12 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         return (
           <>
             <h3>Info</h3>
-            <Button
-              round
-              color="translucent"
-              size="smaller"
-              className="more-button not-implemented"
-              ripple
+            <DropdownMenu
+              trigger={MenuButton}
+              positionX="right"
             >
-              <i className="icon-more" />
-            </Button>
+              <MenuItem icon="poll" onClick={toggleStatistics}>Statistics</MenuItem>
+            </DropdownMenu>
           </>
         );
     }
@@ -115,5 +139,9 @@ export default memo(withGlobal<OwnProps>(
 
     return { searchQuery };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setMessageSearchQuery', 'searchMessages']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setMessageSearchQuery',
+    'searchMessages',
+    'toggleStatistics',
+  ]),
 )(RightHeader));

@@ -19,3 +19,4 @@ export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu'
 export { default as AttachMenu } from '../components/middle/composer/AttachMenu';
 
 export { default as RightSearch } from '../components/right/RightSearch';
+export { default as Statistics } from '../components/right/Statistics';

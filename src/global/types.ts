@@ -21,6 +21,7 @@ import {
 
 export type GlobalState = {
   isChatInfoShown: boolean;
+  isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
   uiReadyState: 0 | 1 | 2;
   connectionState?: ApiUpdateConnectionStateType;
@@ -173,7 +174,7 @@ export type ActionTypes = (
   // system
   'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
   // ui
-  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
+  'toggleChatInfo' | 'toggleStatistics' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
   'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |

@@ -11,6 +11,13 @@ addReducer('toggleChatInfo', (global) => {
   };
 });
 
+addReducer('toggleStatistics', (global) => {
+  return {
+    ...global,
+    isStatisticsShown: !global.isStatisticsShown,
+  };
+});
+
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
 

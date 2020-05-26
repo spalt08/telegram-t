@@ -3,7 +3,6 @@
   align-items: center;
   height: 3.75rem;
   padding: 0.5rem .8125rem;
-  overflow: hidden;
 
   .close-button {
     flex-shrink: 0;
@@ -30,7 +29,7 @@
     margin-left: 1rem;
   }
 
-  .more-button {
+  .DropdownMenu {
     margin-left: auto;
   }
 }

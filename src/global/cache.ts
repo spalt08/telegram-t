@@ -72,6 +72,7 @@ function updateCache(global: GlobalState) {
   const reducedGlobal: GlobalState = {
     ...global,
     isChatInfoShown: reduceShowChatInfo(global),
+    isStatisticsShown: false,
     isLeftColumnShown: true,
     users: reduceUsers(global),
     chats: reduceChats(global),
