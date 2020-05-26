@@ -47,7 +47,7 @@ type DispatchProps = Pick<GlobalActions, (
   'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
 )>;
 
-const TRANSITION_RENDER_COUNT = 4;
+const TRANSITION_RENDER_COUNT = Object.keys(ColumnContent).length / 2;
 
 const RightColumn: FC<StateProps & DispatchProps> = ({
   contentKey,
