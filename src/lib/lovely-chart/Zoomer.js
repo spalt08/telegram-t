@@ -52,6 +52,8 @@ export function createZoomer(data, overviewData, colors, stateManager, container
   }
 
   function _replaceData(newRawData, labelIndex, zoomInLabel) {
+    tooltip.toggleLoading(false);
+
     const labelWidth = 1 / data.xLabels.length;
     const labelMiddle = labelIndex / (data.xLabels.length - 1);
     const filter = {};
@@ -129,7 +131,6 @@ export function createZoomer(data, overviewData, colors, stateManager, container
 
       _isZoomed = !_isZoomed;
       header.toggleIsZooming(false);
-      tooltip.toggleLoading(false);
     }, stateManager.hasAnimations() ? ZOOM_TIMEOUT : 0);
 
     setTimeout(() => {

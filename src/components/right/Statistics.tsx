@@ -27,17 +27,18 @@ const Statistics: FC = () => {
 
   useEffect(() => {
     (async () => {
-      const [, growth] = await Promise.all([
-        ensureILovelyChart(),
-        fetchJson('./data/growth.json'),
-      ]);
+      await ensureILovelyChart();
 
-      setIsReady(true);
+      if (!isReady) {
+        setIsReady(true);
+        return;
+      }
 
+      const growth = await fetchJson('./data/growth.json');
       LovelyChart.create(containerRef.current, growth);
 
       const notifications = await fetchJson('./data/notifications.json');
-      notifications.onZoom = (timestamp: number) => fetchDayData('data/followers_zoom', timestamp);
+      notifications.onZoom = (timestamp: number) => fetchDayData('data/notifications_zoom', timestamp);
       LovelyChart.create(containerRef.current, notifications);
 
       const interactions = await fetchJson('./data/interactions.json');
@@ -50,7 +51,7 @@ const Statistics: FC = () => {
       const languages = await fetchJson('./data/languages.json');
       LovelyChart.create(containerRef.current, languages);
     })();
-  }, []);
+  }, [isReady]);
 
   return (
     <div className={buildClassName('Statistics custom-scroll', isReady && 'ready')} ref={containerRef}>

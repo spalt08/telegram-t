@@ -25,7 +25,7 @@ export function createHeader(container, title, zoomOutCallback) {
     _zoomOutElement = toggleText(_titleElement, 'Zoom Out', 'lovely-chart--header-title lovely-chart--header-zoom-out-control');
     setTimeout(() => {
       addEventListener(_zoomOutElement, 'click', _onZoomOut);
-    }, 1000);
+    }, 500);
 
     setCaption(caption);
   }
