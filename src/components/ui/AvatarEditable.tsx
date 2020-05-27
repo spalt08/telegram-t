@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, { FC, useState, memo } from '../../lib/teact/teact';
 
 import CropModal from './CropModal';
 
@@ -65,4 +65,4 @@ const AvatarEditable: FC<OwnProps> = ({
   );
 };
 
-export default AvatarEditable;
+export default memo(AvatarEditable);

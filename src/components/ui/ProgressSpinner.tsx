@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useRef, memo,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -70,4 +72,4 @@ const ProgressSpinner: FC<{
   );
 };
 
-export default ProgressSpinner;
+export default memo(ProgressSpinner);

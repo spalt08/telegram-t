@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 import Radio from './Radio';
 
 type IRadioOption = {
@@ -50,4 +50,4 @@ const RadioGroup: FC<OwnProps> = ({
   );
 };
 
-export default RadioGroup;
+export default memo(RadioGroup);

@@ -1,6 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import Spinner from './Spinner';
+
 import './Loading.scss';
 
 type OwnProps = {
@@ -15,4 +16,4 @@ const Loading: FC<OwnProps> = ({ color = 'blue' }) => {
   );
 };
 
-export default Loading;
+export default memo(Loading);

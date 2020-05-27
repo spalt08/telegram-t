@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import './Checkbox.scss';
 
@@ -34,4 +34,4 @@ const Checkbox: FC<OwnProps> = ({
   );
 };
 
-export default Checkbox;
+export default memo(Checkbox);

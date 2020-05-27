@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useCallback, useMemo } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useMemo, memo,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -92,4 +94,4 @@ const RangeSlider: FC<OwnProps> = ({
   );
 };
 
-export default RangeSlider;
+export default memo(RangeSlider);

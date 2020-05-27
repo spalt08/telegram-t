@@ -1,5 +1,5 @@
 import React, {
-  FC, useEffect, useRef, useState,
+  FC, useEffect, useRef, useState, memo,
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';
@@ -133,4 +133,4 @@ const AnimatedSticker: FC<OwnProps> = ({
   );
 };
 
-export default AnimatedSticker;
+export default memo(AnimatedSticker);

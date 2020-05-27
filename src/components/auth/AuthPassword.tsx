@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback,
+  FC, useState, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -122,7 +122,7 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, ['authIsLoading', 'authError', 'authHint']),
   (setGlobal, actions): DispatchProps => pick(actions, ['setAuthPassword', 'clearAuthError']),
-)(AuthPassword);
+)(AuthPassword));

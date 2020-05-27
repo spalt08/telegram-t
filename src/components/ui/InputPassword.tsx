@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 type OwnProps = {
   id?: string;
@@ -60,4 +60,4 @@ const InputPassword: FC<OwnProps> = ({
   );
 };
 
-export default InputPassword;
+export default memo(InputPassword);

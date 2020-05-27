@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useRef, useEffect,
+  FC, useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
 
 import { isChatPrivate } from '../../modules/helpers';
@@ -121,4 +121,4 @@ const Picker: FC<OwnProps> = ({
   );
 };
 
-export default Picker;
+export default memo(Picker);

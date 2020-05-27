@@ -1,5 +1,7 @@
 import QrCreator from 'qr-creator';
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useRef, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
@@ -53,7 +55,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, ['connectionState', 'authQrCode']),
   (setGlobal, actions): DispatchProps => pick(actions, ['returnToAuthPhoneNumber']),
-)(AuthCode);
+)(AuthCode));

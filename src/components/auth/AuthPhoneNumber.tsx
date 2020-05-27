@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback, useLayoutEffect, useRef,
+  FC, useState, useEffect, useCallback, useLayoutEffect, useRef, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -190,7 +190,7 @@ function getNumberWithCode(phoneNumber: string = '', country?: Country) {
   return `${country.code} ${phoneNumber}`;
 }
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, [
     'connectionState',
     'authState',
@@ -208,4 +208,4 @@ export default withGlobal(
     'loadNearestCountry',
     'gotToAuthQrCode',
   ]),
-)(AuthPhoneNumber);
+)(AuthPhoneNumber));

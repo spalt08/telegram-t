@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo, useState,
+  FC, useCallback, useMemo, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -91,7 +91,7 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const {
       chats: {
@@ -114,4 +114,4 @@ export default withGlobal(
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatIds', 'forwardMessages', 'loadMoreChats']),
-)(ForwardPicker);
+)(ForwardPicker));

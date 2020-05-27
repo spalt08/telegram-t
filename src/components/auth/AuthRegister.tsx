@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, { FC, useState, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
@@ -80,7 +80,7 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, ['authIsLoading', 'authError']),
   (setGlobal, actions): DispatchProps => pick(actions, ['signUp', 'clearAuthError', 'uploadProfilePhoto']),
-)(AuthRegister);
+)(AuthRegister));

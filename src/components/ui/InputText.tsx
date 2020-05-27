@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, RefObject } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
@@ -61,4 +61,4 @@ const InputText: FC<OwnProps> = ({
   );
 };
 
-export default InputText;
+export default memo(InputText);

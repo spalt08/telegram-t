@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import React, { FC, useEffect, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions, GlobalState } from '../../global/types';
@@ -44,7 +44,7 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
   }
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => pick(global, ['authState']),
   (global, actions): DispatchProps => pick(actions, ['initApi']),
-)(Auth);
+)(Auth));

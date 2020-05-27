@@ -1,4 +1,6 @@
-import React, { FC, useLayoutEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useLayoutEffect, useRef, memo,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -60,4 +62,4 @@ const Tab: FC<OwnProps> = ({
   );
 };
 
-export default Tab;
+export default memo(Tab);

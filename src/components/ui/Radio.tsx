@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import Spinner from './Spinner';
@@ -55,4 +55,4 @@ const Radio: FC<OwnProps> = ({
   );
 };
 
-export default Radio;
+export default memo(Radio);

@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useState, memo,
+} from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
 import { blobToFile, blobToDataUri } from '../../util/files';
@@ -118,4 +120,4 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
   );
 };
 
-export default CropModal;
+export default memo(CropModal);
