@@ -35,6 +35,7 @@
   right: 0;
   bottom: 0;
   z-index: var(--z-modal);
+  overflow: hidden;
 
   @media (min-width: 1276px) {
     pointer-events: none;

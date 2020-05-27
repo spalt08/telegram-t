@@ -268,7 +268,7 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
 
 export function selectIsForwardMenuOpen(global: GlobalState) {
   const { forwardMessages } = global;
-  return Boolean(forwardMessages.fromChatId);
+  return Boolean(forwardMessages.isColumnShown);
 }
 
 export function selectCommonBoxChatId(global: GlobalState, messageId: number) {

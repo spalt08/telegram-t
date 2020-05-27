@@ -66,7 +66,7 @@
       z-index: -1;
 
       opacity: 0;
-      transition: opacity .5ms;
+      transition: opacity .5s;
 
       .no-right-column & {
         left: -17rem;

@@ -14,6 +14,7 @@ type OwnProps = {
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
+  shouldSkip?: boolean;
   id?: string;
   className?: string;
   onStart?: () => void;
@@ -38,6 +39,7 @@ const Transition: FC<OwnProps> = ({
   direction = 'auto',
   renderCount,
   shouldRestoreHeight,
+  shouldSkip,
   id,
   className,
   onStart,
@@ -49,7 +51,7 @@ const Transition: FC<OwnProps> = ({
   const prevActiveKey = usePrevious<any>(activeKey);
   const activateTimeoutRef = useRef<number>();
 
-  const activeKeyChanged = prevActiveKey !== null && activeKey !== prevActiveKey;
+  const activeKeyChanged = prevActiveKey !== null && prevActiveKey !== undefined && activeKey !== prevActiveKey;
 
   if (!renderCount && activeKeyChanged) {
     rendersRef.current = {
@@ -60,11 +62,17 @@ const Transition: FC<OwnProps> = ({
   rendersRef.current[activeKey] = children;
 
   useLayoutEffect(() => {
+    if (activateTimeoutRef.current) {
+      clearTimeout(activateTimeoutRef.current);
+      activateTimeoutRef.current = null;
+    }
+
     const container = containerRef.current!;
 
     const childElements = container.children;
     if (childElements.length === 1 && !activeKeyChanged) {
       childElements[0].classList.add('active');
+
       return;
     }
 
@@ -72,11 +80,6 @@ const Transition: FC<OwnProps> = ({
 
     if (!activeKeyChanged || !childNodes.length) {
       return;
-    }
-
-    if (activateTimeoutRef.current) {
-      clearTimeout(activateTimeoutRef.current);
-      activateTimeoutRef.current = null;
     }
 
     const isBackwards = (
@@ -91,6 +94,17 @@ const Transition: FC<OwnProps> = ({
     const keys = Object.keys(rendersRef.current).map(Number);
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
+
+    if (shouldSkip) {
+      childNodes.forEach((node, i) => {
+        if (node instanceof HTMLElement) {
+          node.classList.remove('from', 'through', 'to');
+          node.classList.toggle('active', i === activeIndex);
+        }
+      });
+
+      return;
+    }
 
     childNodes.forEach((node, i) => {
       if (node instanceof HTMLElement) {
@@ -148,7 +162,18 @@ const Transition: FC<OwnProps> = ({
         onStart();
       }
     });
-  }, [activeKey, activeKeyChanged, direction, name, onStart, onStop, prevActiveKey, renderCount, shouldRestoreHeight]);
+  }, [
+    activeKey,
+    prevActiveKey,
+    activeKeyChanged,
+    direction,
+    name,
+    onStart,
+    onStop,
+    renderCount,
+    shouldRestoreHeight,
+    shouldSkip,
+  ]);
 
   useLayoutEffect(() => {
     if (shouldRestoreHeight) {

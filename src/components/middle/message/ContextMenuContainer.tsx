@@ -102,8 +102,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [pinMessage, message, closeMenu]);
 
   const handleForward = useCallback(() => {
-    openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
     closeMenu();
+    openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
   }, [openForwardMenu, message, closeMenu]);
 
   useEffect(() => {

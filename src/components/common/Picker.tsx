@@ -25,6 +25,9 @@ type OwnProps = {
   onLoadMore?: () => void;
 };
 
+// Focus slows down animation, also it breaks transition layout in Chrome
+const FOCUS_DELAY_MS = 500;
+
 const Picker: FC<OwnProps> = ({
   itemIds,
   selectedIds,
@@ -38,8 +41,12 @@ const Picker: FC<OwnProps> = ({
   const inputRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
-    inputRef.current!.focus();
-  }, [inputRef]);
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        inputRef.current!.focus();
+      });
+    }, FOCUS_DELAY_MS);
+  }, []);
 
   const handleItemClick = useCallback((id: number) => {
     const newSelectedIds = [...selectedIds];

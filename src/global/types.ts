@@ -151,6 +151,7 @@ export type GlobalState = {
   webPagePreview?: ApiWebPage;
 
   forwardMessages: {
+    isColumnShown?: boolean;
     fromChatId?: number;
     messageIds?: number[];
     toChatIds?: number[];

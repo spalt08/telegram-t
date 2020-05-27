@@ -47,6 +47,7 @@ type DispatchProps = Pick<GlobalActions, (
   'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
 )>;
 
+const COLUMN_CLOSE_DELAY_MS = 300;
 const TRANSITION_RENDER_COUNT = Object.keys(ColumnContent).length / 2;
 
 const RightColumn: FC<StateProps & DispatchProps> = ({
@@ -68,6 +69,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isForwarding = contentKey === ColumnContent.Forward;
   const isStatistics = contentKey === ColumnContent.Statistics;
   const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+
+  const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
 
   const previousContentKey = usePrevious(contentKey, true);
   const renderedContentKey = contentKey !== undefined
@@ -117,6 +120,12 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   ]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShouldSkipTransition(!isOpen);
+    }, COLUMN_CLOSE_DELAY_MS);
+  }, [isOpen]);
 
   // Close Right Column when it transforms into overlayed state on screen resize
   useEffect(() => {
@@ -173,7 +182,12 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isStatistics={isStatistics}
           profileState={profileState}
         />
-        <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={renderedContentKey}>
+        <Transition
+          name="zoom-fade"
+          renderCount={TRANSITION_RENDER_COUNT}
+          activeKey={renderedContentKey}
+          shouldSkip={shouldSkipTransition}
+        >
           {renderContent}
         </Transition>
       </div>

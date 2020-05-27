@@ -162,7 +162,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }, [openMediaViewer]);
 
   const handleForward = useCallback(() => {
-    openForwardMenu({ fromChatId: chatId, messageIds: [messageId] });
+    openForwardMenu({ fromChatId: chatId, messageIds: [messageId], noDelay: true });
   }, [openForwardMenu, chatId, messageId]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(closeMediaViewer) : undefined), [closeMediaViewer, isOpen]);

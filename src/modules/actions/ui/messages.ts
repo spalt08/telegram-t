@@ -4,9 +4,10 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
   replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
 } from '../../reducers';
-import { selectOpenChat, selectViewportIds } from '../../selectors';
+import { selectOpenChat, selectViewportIds, selectIsRightColumnShown } from '../../selectors';
 
 const FOCUS_DURATION = 2000;
+const FORWARD_MENU_OPEN_DELAY_MS = 450;
 
 let blurTimeout: number;
 
@@ -84,15 +85,32 @@ addReducer('focusMessage', (global, actions, payload) => {
 });
 
 addReducer('openForwardMenu', (global, actions, payload) => {
-  const { fromChatId, messageIds } = payload!;
+  const { fromChatId, messageIds, noDelay } = payload!;
+
+  const shouldOpenInstantly = selectIsRightColumnShown(global) || noDelay;
 
   setGlobal({
     ...global,
     forwardMessages: {
       fromChatId,
       messageIds,
+      ...(shouldOpenInstantly && { isColumnShown: true }),
     },
   });
+
+  if (!shouldOpenInstantly) {
+    window.setTimeout(() => {
+      const newGlobal = getGlobal();
+
+      setGlobal({
+        ...newGlobal,
+        forwardMessages: {
+          ...newGlobal.forwardMessages,
+          isColumnShown: true,
+        },
+      });
+    }, FORWARD_MENU_OPEN_DELAY_MS);
+  }
 });
 
 addReducer('closeForwardMenu', (global) => {
