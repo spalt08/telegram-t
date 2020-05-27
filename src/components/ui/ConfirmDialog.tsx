@@ -28,7 +28,9 @@ const ConfirmDialog: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <p>{text}</p>
+      {text.split('\\n').map((textPart) => (
+        <p>{textPart}</p>
+      ))}
       <Button
         className="confirm-dialog-button"
         isText

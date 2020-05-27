@@ -2,6 +2,22 @@ import { addReducer } from '../../../lib/teact/teactn';
 
 import { IS_TOUCH_ENV } from '../../../util/environment';
 
+addReducer('init', (global) => {
+  const { animationLevel } = global.settings.byKey;
+
+  document.body.classList.add(`animation-level-${animationLevel}`);
+  document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
+});
+
+addReducer('setIsUiReady', (global, actions, payload) => {
+  const { uiReadyState } = payload!;
+
+  return {
+    ...global,
+    uiReadyState,
+  };
+});
+
 addReducer('setAuthPhoneNumber', (global, actions, payload) => {
   const { phoneNumber } = payload!;
 
@@ -23,20 +39,4 @@ addReducer('clearAuthError', (global) => {
     ...global,
     authError: undefined,
   };
-});
-
-addReducer('setIsUiReady', (global, actions, payload) => {
-  const { uiReadyState } = payload!;
-
-  return {
-    ...global,
-    uiReadyState,
-  };
-});
-
-addReducer('init', (global) => {
-  const { animationLevel } = global.settings.byKey;
-
-  document.body.classList.add(`animation-level-${animationLevel}`);
-  document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
 });

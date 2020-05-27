@@ -72,6 +72,7 @@
     "events": "^3.0.0",
     "lottie-web": "^5.5.10",
     "pako": "^1.0.10",
+    "qr-creator": "^1.0.0",
     "webp-hero-tt": "^0.0.0-dev.25tt",
     "websocket": "^1.0.30"
   }

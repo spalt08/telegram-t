@@ -96,3 +96,50 @@
     opacity: 1;
   }
 }
+
+#auth-qr-form {
+  .qr-container {
+    height: 280px;
+
+    opacity: 1;
+    transform: scale(1);
+    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity .3s;
+
+    &.pre-animate {
+      opacity: 0.5;
+      transform: scale(0.8);
+    }
+  }
+
+  h3 {
+    margin: 1.5rem 0 1rem 0;
+  }
+
+  ol {
+    list-style: none;
+    counter-reset: item;
+    padding: 0 2rem;
+
+    li {
+      counter-increment: item;
+      text-align: left;
+      margin: 0.75rem 0;
+      display: flex;
+
+      &::before {
+        content: counter(item);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 1.4rem;
+        height: 1.4rem;
+        padding: 0;
+        margin: 0 0.75rem 0 0;
+        background: var(--color-primary);
+        border-radius: 50%;
+        font-size: smaller;
+        color: white;
+      }
+    }
+  }
+}

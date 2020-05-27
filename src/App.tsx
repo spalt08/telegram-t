@@ -17,10 +17,11 @@ const App: FC<StateProps> = ({ authState, authIsSessionRemembered }) => {
 
   if (authState) {
     switch (authState) {
+      case 'authorizationStateWaitPhoneNumber':
       case 'authorizationStateWaitCode':
       case 'authorizationStateWaitPassword':
       case 'authorizationStateWaitRegistration':
-      case 'authorizationStateWaitPhoneNumber':
+      case 'authorizationStateWaitQrCode':
         return <Auth />;
       case 'authorizationStateClosed':
       case 'authorizationStateClosing':

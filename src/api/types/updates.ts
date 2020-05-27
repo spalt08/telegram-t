@@ -15,7 +15,8 @@ export type ApiUpdateAuthorizationStateType = (
   'authorizationStateWaitRegistration' |
   'authorizationStateReady' |
   'authorizationStateClosing' |
-  'authorizationStateClosed'
+  'authorizationStateClosed' |
+  'authorizationStateWaitQrCode'
 );
 
 export type ApiUpdateConnectionStateType = (
@@ -27,6 +28,8 @@ export type ApiUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState';
   authorizationState: ApiUpdateAuthorizationStateType;
   sessionId?: string;
+  hint?: string;
+  qrCode?: { token: string; expires: number };
 };
 
 export type ApiUpdateAuthorizationError = {
@@ -104,7 +107,7 @@ export type ApiUpdateNewMessage = {
   message: Partial<ApiMessage>;
 };
 
-export type ApiUpdateMessage= {
+export type ApiUpdateMessage = {
   '@type': 'updateMessage';
   chatId: number;
   id: number;
@@ -200,7 +203,7 @@ export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
-  ApiUpdateNewMessage | ApiUpdateMessage| ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserFullInfo |

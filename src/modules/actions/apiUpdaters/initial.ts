@@ -61,15 +61,24 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
     authIsLoading: false,
   });
 
-  if (global.authState === authState) {
-    return;
-  }
-
   switch (authState) {
     case 'authorizationStateLoggingOut':
       setGlobal({
         ...getGlobal(),
         isLoggingOut: true,
+      });
+      break;
+    case 'authorizationStateWaitPassword':
+      setGlobal({
+        ...getGlobal(),
+        authHint: update.hint,
+      });
+      break;
+    case 'authorizationStateWaitQrCode':
+      setGlobal({
+        ...getGlobal(),
+        authIsLoadingQrCode: false,
+        authQrCode: update.qrCode,
       });
       break;
     case 'authorizationStateReady': {

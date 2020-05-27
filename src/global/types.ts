@@ -33,10 +33,16 @@ export type GlobalState = {
   authState?: ApiUpdateAuthorizationStateType;
   authPhoneNumber?: string;
   authIsLoading?: boolean;
+  authIsLoadingQrCode?: boolean;
   authError?: string;
   authRememberMe?: boolean;
   authIsSessionRemembered?: boolean;
   authNearestCountry?: string;
+  authHint?: string;
+  authQrCode?: {
+    token: string;
+    expires: number;
+  };
 
   contactList?: {
     hash: number;
@@ -178,7 +184,7 @@ export type ActionTypes = (
   'toggleChatInfo' | 'toggleStatistics' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
+  'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'setChatEditing' | 'editLastChatMessage' |

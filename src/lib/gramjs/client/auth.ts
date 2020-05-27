@@ -1,13 +1,15 @@
 import { default as Api } from '../tl/api';
 import TelegramClient from './TelegramClient';
 import utils from '../Utils';
+import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
     phoneCode: () => Promise<string>;
-    password: () => Promise<string>;
+    password: (hint?: string) => Promise<string>;
     firstAndLastNames: () => Promise<[string, string?]>;
+    qrCode: (qrCode: { token: Buffer, expires: number }) => Promise<void>;
     onError: (err: Error) => void;
     forceSMS?: boolean;
 }
@@ -20,6 +22,8 @@ interface ApiCredentials {
     apiId: number,
     apiHash: string,
 }
+
+const QR_CODE_TIMEOUT = 30000;
 
 export async function authFlow(
     client: TelegramClient,
@@ -54,9 +58,19 @@ async function signInUser(
 
     while (1) {
         try {
-            phoneNumber = typeof authParams.phoneNumber === 'function'
-                ? await authParams.phoneNumber()
-                : authParams.phoneNumber;
+            if (typeof authParams.phoneNumber === 'function') {
+                try {
+                    phoneNumber = await authParams.phoneNumber();
+                } catch (err) {
+                    if (err.message === 'RESTART_AUTH_WITH_QR') {
+                        return signInUserWithQrCode(client, apiCredentials, authParams);
+                    }
+
+                    throw err;
+                }
+            } else {
+                phoneNumber = authParams.phoneNumber;
+            }
             phoneCodeHash = await sendCode(client, apiCredentials, phoneNumber, authParams.forceSMS);
 
             if (typeof phoneCodeHash !== 'string') {
@@ -74,7 +88,6 @@ async function signInUser(
     }
 
     let phoneCode;
-    let isPasswordRequired = false;
     let isRegistrationRequired = false;
     let termsOfService;
 
@@ -104,38 +117,14 @@ async function signInUser(
             if (result instanceof Api.auth.AuthorizationSignUpRequired) {
                 isRegistrationRequired = true;
                 termsOfService = result.termsOfService;
-            } else {
-                me = result.user;
+                break;
             }
 
-            break;
+            return result.user;
         } catch (err) {
             if (err.message === 'SESSION_PASSWORD_NEEDED') {
-                isPasswordRequired = true;
-                break;
+                return signInWithPassword(client, apiCredentials, authParams);
             } else {
-                authParams.onError(err);
-            }
-        }
-    }
-
-    if (isPasswordRequired) {
-        while (1) {
-            try {
-                const password = await authParams.password();
-                if (!password) {
-                    throw new Error('Password is empty');
-                }
-
-                const passwordSrpResult = await client.invoke(new Api.account.GetPassword());
-                const passwordSrpCheck = await computePasswordSrpCheck(passwordSrpResult, password);
-                const { user } = await client.invoke(new Api.auth.CheckPassword({
-                    password: passwordSrpCheck,
-                })) as Api.auth.Authorization;
-                me = user;
-
-                break;
-            } catch (err) {
                 authParams.onError(err);
             }
         }
@@ -161,15 +150,87 @@ async function signInUser(
                     await client.invoke(new Api.help.AcceptTermsOfService({ id: termsOfService.id }));
                 }
 
-                me = user;
-                break;
+                return user;
             } catch (err) {
                 authParams.onError(err);
             }
         }
     }
 
-    return me!;
+    authParams.onError(new Error('Auth failed'));
+    return signInUser(client, apiCredentials, authParams);
+}
+
+async function signInUserWithQrCode(
+    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
+): Promise<Api.TypeUser> {
+    const inputPromise = (async () => {
+        while (1) {
+            const result = await client.invoke(new Api.auth.ExportLoginToken({
+                apiId: Number(process.env.TELEGRAM_T_API_ID),
+                apiHash: process.env.TELEGRAM_T_API_HASH,
+                exceptIds: [],
+            }));
+
+            if (!(result instanceof Api.auth.LoginToken)) {
+                throw new Error('Unexpected');
+            }
+
+            const { token, expires } = result;
+
+            await Promise.race([
+                authParams.qrCode({ token, expires }),
+                sleep(QR_CODE_TIMEOUT),
+            ]);
+        }
+    })();
+
+    const updatePromise = new Promise((resolve) => {
+        client.addEventHandler((update: Api.TypeUpdate) => {
+            if (update instanceof Api.UpdateLoginToken) {
+                resolve();
+            }
+        }, { build: (update: object) => update });
+    });
+
+    try {
+        await Promise.race([updatePromise, inputPromise]);
+    } catch (err) {
+        if (err.message === 'RESTART_AUTH') {
+            return signInUser(client, apiCredentials, authParams);
+        }
+
+        throw err;
+    }
+
+    try {
+        const result2 = await client.invoke(new Api.auth.ExportLoginToken({
+            apiId: Number(process.env.TELEGRAM_T_API_ID),
+            apiHash: process.env.TELEGRAM_T_API_HASH,
+            exceptIds: [],
+        }));
+
+        if (result2 instanceof Api.auth.LoginTokenSuccess && result2.authorization instanceof Api.auth.Authorization) {
+            return result2.authorization.user;
+        } else if (result2 instanceof Api.auth.LoginTokenMigrateTo) {
+            // This was not tested. Probably a DC change is not needed.
+            await client._switchDC(result2.dcId);
+            const migratedResult = await client.invoke(new Api.auth.ImportLoginToken({
+                token: result2.token,
+            }));
+
+            if (migratedResult instanceof Api.auth.LoginTokenSuccess && migratedResult.authorization instanceof Api.auth.Authorization) {
+                return migratedResult.authorization.user;
+            }
+        }
+    } catch (err) {
+        if (err.message === 'SESSION_PASSWORD_NEEDED') {
+            return signInWithPassword(client, apiCredentials, authParams);
+        }
+    }
+
+    authParams.onError(new Error('QR auth failed'));
+    return signInUser(client, apiCredentials, authParams);
 }
 
 async function sendCode(
@@ -202,6 +263,31 @@ async function sendCode(
             throw err;
         }
     }
+}
+
+async function signInWithPassword(
+    client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
+): Promise<Api.TypeUser> {
+    while (1) {
+        try {
+            const passwordSrpResult = await client.invoke(new Api.account.GetPassword());
+            const password = await authParams.password(passwordSrpResult.hint);
+            if (!password) {
+                throw new Error('Password is empty');
+            }
+
+            const passwordSrpCheck = await computePasswordSrpCheck(passwordSrpResult, password);
+            const { user } = await client.invoke(new Api.auth.CheckPassword({
+                password: passwordSrpCheck,
+            })) as Api.auth.Authorization;
+
+            return user;
+        } catch (err) {
+            authParams.onError(err);
+        }
+    }
+
+    return undefined!; // Never reached (TypeScript fix)
 }
 
 async function signInBot(client: TelegramClient, apiCredentials: ApiCredentials, authParams: BotAuthParams) {

@@ -4,6 +4,7 @@ import React, { FC } from '../../lib/teact/teact';
 type OwnProps = {
   id?: string;
   value?: string;
+  hint?: string;
   error?: string;
   showPassword?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -11,9 +12,10 @@ type OwnProps = {
   onShowToggle?: () => void;
 };
 
-const InputText: FC<OwnProps> = ({
+const InputPassword: FC<OwnProps> = ({
   id,
   value,
+  hint,
   error,
   showPassword,
   onChange,
@@ -35,12 +37,12 @@ const InputText: FC<OwnProps> = ({
         type={showPassword ? 'text' : 'password'}
         id={id}
         value={value || ''}
-        placeholder="Password"
+        placeholder={hint ? `Hint: ${hint}` : 'Password'}
         autoComplete="current-password"
         onChange={onChange}
         onKeyPress={onKeyPress}
       />
-      <label>{error || 'Password'}</label>
+      <label>{error || (hint ? `Hint: ${hint}` : 'Password')}</label>
       <div
         className="toggle-password"
         onClick={onShowToggle}
@@ -58,4 +60,4 @@ const InputText: FC<OwnProps> = ({
   );
 };
 
-export default InputText;
+export default InputPassword;

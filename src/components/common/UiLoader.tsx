@@ -21,7 +21,7 @@ import telegramLogoPath from '../../assets/telegram-logo.svg';
 import monkeyPath from '../../assets/monkey.svg';
 
 type OwnProps = {
-  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber';
+  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
   children: any;
 };
 
@@ -66,6 +66,8 @@ const preloadTasks = {
   ]),
   authCode: () => preloadImage(monkeyPath),
   authPassword: () => preloadImage(monkeyPath),
+  // Used only for page transition.
+  authQrCode: () => Promise.resolve(),
 };
 
 const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({

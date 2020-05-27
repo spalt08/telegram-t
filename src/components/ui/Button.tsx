@@ -129,7 +129,7 @@ const Button: FC<OwnProps> = ({
       {isLoading ? (
         <div>
           <span>Please wait...</span>
-          <Spinner color="white" />
+          <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       ) : children}
       {!disabled && ripple && (

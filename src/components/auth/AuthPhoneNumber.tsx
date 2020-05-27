@@ -20,11 +20,11 @@ import Loading from '../ui/Loading';
 import monkeyPath from '../../assets/monkey.svg';
 
 type StateProps = Pick<GlobalState, (
-  'connectionState' |
-  'authState' | 'authPhoneNumber' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+  'connectionState' | 'authState' |
+  'authPhoneNumber' | 'authIsLoading' | 'authIsLoadingQrCode' | 'authError' | 'authRememberMe' | 'authNearestCountry'
 )>;
 type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'gotToAuthQrCode'
 )>;
 
 const MIN_NUMBER_LENGTH = 10;
@@ -36,13 +36,15 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   authState,
   authPhoneNumber,
   authIsLoading,
+  authIsLoadingQrCode,
   authError,
   authRememberMe,
   authNearestCountry,
   setAuthPhoneNumber,
   setAuthRememberMe,
-  clearAuthError,
   loadNearestCountry,
+  clearAuthError,
+  gotToAuthQrCode,
 }) => {
   const phoneNumberRef = useRef<HTMLInputElement>();
   const [country, setCountry] = useState();
@@ -132,6 +134,8 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     }
   }
 
+  const isAuthReady = authState === 'authorizationStateWaitPhoneNumber';
+
   return (
     <div id="auth-phone-number-form" className="auth-form">
       <div id="logo" />
@@ -163,11 +167,16 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           onChange={handleKeepSessionChange}
         />
         {canSubmit && (
-          authState === 'authorizationStateWaitPhoneNumber' ? (
+          isAuthReady ? (
             <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
           ) : (
             <Loading />
           )
+        )}
+        {isAuthReady && (
+          <Button isText ripple isLoading={authIsLoadingQrCode} onClick={gotToAuthQrCode}>
+            Log in by QR code
+          </Button>
         )}
       </form>
     </div>
@@ -187,6 +196,7 @@ export default withGlobal(
     'authState',
     'authPhoneNumber',
     'authIsLoading',
+    'authIsLoadingQrCode',
     'authError',
     'authRememberMe',
     'authNearestCountry',
@@ -196,5 +206,6 @@ export default withGlobal(
     'setAuthRememberMe',
     'clearAuthError',
     'loadNearestCountry',
+    'gotToAuthQrCode',
   ]),
 )(AuthPhoneNumber);

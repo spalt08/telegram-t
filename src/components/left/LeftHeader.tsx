@@ -251,7 +251,7 @@ const LeftHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
-        text="Are you sure you want to log out?"
+        text="Are you sure you want to log out?\nNote that you can seamlessly use Telegram on all your devices at once."
         confirmLabel="Log Out"
         confirmHandler={handleSignOutMessage}
         confirmIsDestructive

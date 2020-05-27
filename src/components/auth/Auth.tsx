@@ -11,6 +11,7 @@ import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthCode from './AuthCode.async';
 import AuthPassword from './AuthPassword.async';
 import AuthRegister from './AuthRegister.async';
+import AuthQrCode from './AuthQrCode.async';
 
 import './Auth.scss';
 
@@ -35,6 +36,8 @@ const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
       return <UiLoader page="authPassword" key="authPassword"><AuthPassword /></UiLoader>;
     case 'authorizationStateWaitRegistration':
       return <AuthRegister />;
+    case 'authorizationStateWaitQrCode':
+      return <UiLoader page="authQrCode" key="authQrCode"><AuthQrCode /></UiLoader>;
     case 'authorizationStateWaitPhoneNumber':
     default:
       return <UiLoader page="authPhoneNumber" key="authPhoneNumber"><AuthPhoneNumber /></UiLoader>;

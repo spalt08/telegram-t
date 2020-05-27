@@ -8,7 +8,7 @@ import { ApiMediaFormat, ApiOnProgress } from '../../types';
 import { DEBUG, DEBUG_GRAMJS } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
-  onAuthError, onAuthReady, onCurrentUserId,
+  onAuthError, onAuthReady, onCurrentUserId, onRequestQrCode,
 } from './auth';
 import { setUpdaterCurrentUserId, updater, handleError } from '../updater';
 import downloadMediaWithClient from './media';
@@ -43,6 +43,7 @@ export async function init(sessionId: string) {
       phoneCode: onRequestCode,
       password: onRequestPassword,
       firstAndLastNames: onRequestRegistration,
+      qrCode: onRequestQrCode,
       onError: onAuthError,
     });
 

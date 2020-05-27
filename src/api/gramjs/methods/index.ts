@@ -1,6 +1,6 @@
 import { destroy, downloadMedia } from './client';
 import {
-  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
+  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,
 } from './auth';
 import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
@@ -26,6 +26,7 @@ export default {
   provideAuthPassword,
   provideAuthRegistration,
   restartAuth,
+  restartAuthWithQr,
   fetchChats,
   fetchMessages,
   fetchMessage,

@@ -13,7 +13,7 @@ import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';
 
-type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
+type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authHint'>;
 type DispatchProps = Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>;
 
 const MIN_PASSWORD_LENGTH = 3;
@@ -23,7 +23,7 @@ const SEGMENT_UNCOVER_EYE = [0, 20];
 const SEGMENT_COVER_EYE = [20, 0];
 
 const AuthPassword: FC<StateProps & DispatchProps> = ({
-  authIsLoading, authError, setAuthPassword, clearAuthError,
+  authIsLoading, authError, authHint, setAuthPassword, clearAuthError,
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -109,6 +109,7 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
           id="sign-in-password"
           showPassword={showPassword}
           value={password}
+          hint={authHint}
           error={authError}
           onChange={onPasswordChange}
           onShowToggle={togglePasswordVisibility}
@@ -122,6 +123,6 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => pick(global, ['authIsLoading', 'authError']),
+  (global): StateProps => pick(global, ['authIsLoading', 'authError', 'authHint']),
   (setGlobal, actions): DispatchProps => pick(actions, ['setAuthPassword', 'clearAuthError']),
 )(AuthPassword);
