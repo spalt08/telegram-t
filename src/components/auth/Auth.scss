@@ -70,6 +70,10 @@
   .Button {
     margin-top: 2.75rem;
   }
+
+  .Button + .Button {
+    margin-top: 1rem;
+  }
 }
 
 #auth-code-form {
