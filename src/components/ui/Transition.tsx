@@ -62,11 +62,6 @@ const Transition: FC<OwnProps> = ({
   rendersRef.current[activeKey] = children;
 
   useLayoutEffect(() => {
-    if (activateTimeoutRef.current) {
-      clearTimeout(activateTimeoutRef.current);
-      activateTimeoutRef.current = null;
-    }
-
     const container = containerRef.current!;
 
     const childElements = container.children;
@@ -80,6 +75,11 @@ const Transition: FC<OwnProps> = ({
 
     if (!activeKeyChanged || !childNodes.length) {
       return;
+    }
+
+    if (activateTimeoutRef.current) {
+      clearTimeout(activateTimeoutRef.current);
+      activateTimeoutRef.current = null;
     }
 
     const isBackwards = (
