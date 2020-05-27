@@ -18,6 +18,8 @@ import './UiLoader.scss';
 // @ts-ignore
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 // @ts-ignore
+import authCaptionPath from '../../assets/auth-caption.png';
+// @ts-ignore
 import monkeyPath from '../../assets/monkey.svg';
 
 type OwnProps = {
@@ -61,13 +63,15 @@ const preloadTasks = {
     preloadAvatars(),
   ]),
   authPhoneNumber: () => Promise.all([
-    preloadFonts(),
+    preloadImage(authCaptionPath),
     preloadImage(telegramLogoPath),
   ]),
-  authCode: () => preloadImage(monkeyPath),
+  authCode: () => Promise.all([
+    preloadImage(monkeyPath),
+    preloadFonts(),
+  ]),
   authPassword: () => preloadImage(monkeyPath),
-  // Used only for page transition.
-  authQrCode: () => Promise.resolve(),
+  authQrCode: preloadFonts,
 };
 
 const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({

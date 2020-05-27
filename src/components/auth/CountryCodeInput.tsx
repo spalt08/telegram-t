@@ -128,7 +128,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
         {isLoading ? (
           <Spinner color="black" />
         ) : (
-          <i onClick={handleTrigger} className={`icon-down ${isOpen ? 'open' : ''}`} />
+          <i onClick={handleTrigger} className={buildClassName('css-icon-down', isOpen && 'open')} />
         )}
       </div>
     );

@@ -29,6 +29,14 @@
     background: url('../../assets/telegram-logo.svg') center;
   }
 
+  // Prevent loading additional 10 kB of Roboto font on initial load.
+  .caption-image {
+    margin-bottom: 0.5rem;
+    height: 48px;
+    background: url('../../assets/auth-caption.png') center center no-repeat;
+    background-size: 273px auto;
+  }
+
   #monkey {
     position: relative;
 

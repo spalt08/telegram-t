@@ -15,18 +15,23 @@
       --spinner-size: 1.5rem;
     }
 
-    .icon-down {
+    // Prevent loading additional 10 kB of icomoon font on initial load.
+    .css-icon-down {
       position: absolute;
-      top: 1rem;
-      right: 0.875rem;
-      font-size: 1.5rem;
-      color: var(--color-text-secondary);
-      transform: scaleY(1);
-      transition: color .2s ease, transform .2s ease;
+      top: 1.125rem;
+      right: 1rem;
+      width: .75rem;
+      height: .75rem;
+      border: 2px solid var(--color-text-secondary);
+      border-top: 0;
+      border-left: 0;
+      transform: scaleY(1) rotate(45deg);
+      transition: color .2s ease, transform .2s ease, top .2s ease;
 
       &.open {
-        color: var(--color-primary);
-        transform: scaleY(-1);
+        border-color: var(--color-primary);
+        transform: scaleY(-1) rotate(45deg);
+        top: 1.5rem;
       }
     }
   }

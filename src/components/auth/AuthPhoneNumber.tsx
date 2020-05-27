@@ -139,7 +139,7 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   return (
     <div id="auth-phone-number-form" className="auth-form">
       <div id="logo" />
-      <h2>Sign in to Telegram</h2>
+      <div className="caption-image" />
       <p className="note">
         Please confirm your country and
         <br />enter your phone number.
