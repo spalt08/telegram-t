@@ -7,6 +7,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../util/phoneNumber';
+import preloadFonts from '../../util/fonts';
 import { preloadImage } from '../../util/files';
 import { pick } from '../../util/iteratees';
 
@@ -29,7 +30,7 @@ type DispatchProps = Pick<GlobalActions, (
 
 const MIN_NUMBER_LENGTH = 10;
 
-let monkeyPreloadPromise: Promise<HTMLImageElement>;
+let isPreloadInitiated = false;
 
 const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   connectionState,
@@ -103,8 +104,11 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       clearAuthError();
     }
 
-    if (!monkeyPreloadPromise) {
-      monkeyPreloadPromise = preloadImage(monkeyPath);
+    // This is for further screens. We delay it until user input to speed up the initial loading.
+    if (!isPreloadInitiated) {
+      isPreloadInitiated = true;
+      preloadFonts();
+      preloadImage(monkeyPath);
     }
 
     const { value, selectionStart, selectionEnd } = e.target;
