@@ -18,6 +18,21 @@
     z-index: -1;
   }
 
+  @media screen and (min-width: 1276px) {
+    body.animation-level-2 &::before {
+      margin: -16rem -5rem -20rem 0;
+      overflow: hidden;
+      transform: scale(1);
+      transform-origin: left center;
+      transition: transform var(--layer-transition);
+    }
+
+    body.animation-level-2 .is-right-column-shown &::before {
+      transform: scale(0.67);
+    }
+  }
+
+
   .messages-layout {
     display: flex;
     flex-direction: column;
