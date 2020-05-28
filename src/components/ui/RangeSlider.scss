@@ -1,5 +1,6 @@
 @mixin thumb-styles() {
   background: var(--slider-color);
+  border: none;
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 50%;
@@ -68,6 +69,7 @@
     -webkit-appearance: none;
     display: block;
     width: 100%;
+    height: 0.75rem;
     margin-bottom: 0.5rem;
     background: transparent;
 

@@ -61,7 +61,9 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
           <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
           {renderingCanPost && <Composer />}
           {!renderingCanPost && messageSendingRestrictionReason && (
-            <div className="messaging-disabled">{messageSendingRestrictionReason}</div>
+            <div className="messaging-disabled">
+              <span>{messageSendingRestrictionReason}</span>
+            </div>
           )}
           <ScrollDownButton show={showFab} />
         </div>

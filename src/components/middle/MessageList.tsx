@@ -51,6 +51,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isReadOnlyChannel?: boolean;
   messageIds?: number[];
@@ -89,6 +90,7 @@ let isScrollTopJustUpdated = false;
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onFabToggle,
   chatId,
+  isChatLoaded,
   isChannelChat,
   isReadOnlyChannel,
   messageIds,
@@ -312,6 +314,11 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Initial message loading
   useEffect(() => {
+    // Some chats are loaded asynchronosly, so we need to check if the chat has been loaded before fetching history
+    if (!isChatLoaded) {
+      return;
+    }
+
     const container = containerRef.current!;
 
     if (!messageIds || (
@@ -319,7 +326,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     )) {
       loadMoreBoth();
     }
-  }, [chatId, messageIds, loadMoreBoth]);
+  }, [chatId, isChatLoaded, messageIds, loadMoreBoth]);
 
   useLayoutEffectWithPrevDeps(([
     prevChatId, prevMessageIds, prevIsViewportNewest, prevContainerHeight,
@@ -594,6 +601,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannelChat = isChatChannel(chat);
 
     return {
+      isChatLoaded: true,
       isRestricted,
       restrictionReason,
       isChannelChat,

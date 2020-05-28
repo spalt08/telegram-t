@@ -33,7 +33,20 @@
     padding: 1.25rem 1rem;
     background: var(--color-chat-hover);
     color: var(--color-text-secondary);
-    text-align: center;
     z-index: 10;
+
+    > span {
+      display: block;
+      text-align: center;
+
+      @media (min-width: 1276px) {
+        transition: transform var(--layer-transition);
+        transform: translateX(0);
+
+        .is-right-column-shown & {
+          transform: translateX(calc(var(--right-column-width) / -2));
+        }
+      }
+    }
   }
 }

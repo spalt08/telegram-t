@@ -97,7 +97,7 @@
     }
 
     @include no-ripple-styles() {
-      background: var(--color-primary-shade);
+      background: var(--color-chat-hover);
     }
   }
 

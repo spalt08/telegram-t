@@ -46,16 +46,18 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className={fabClassName}>
-      <Button
-        color="gray"
-        round
-        onClick={handleClick}
-      >
-        <i className="icon-down" />
-      </Button>
-      {Boolean(unreadCount) && (
-        <div className="unread-count">{formatIntegerCompact(unreadCount!)}</div>
-      )}
+      <div className="ScrollDownButton-inner">
+        <Button
+          color="gray"
+          round
+          onClick={handleClick}
+        >
+          <i className="icon-down" />
+        </Button>
+        {Boolean(unreadCount) && (
+          <div className="unread-count">{formatIntegerCompact(unreadCount!)}</div>
+        )}
+      </div>
     </div>
   );
 };
