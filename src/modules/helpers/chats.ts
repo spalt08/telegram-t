@@ -103,7 +103,7 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights)
 }
 
 export function getCanPostInChat(chat: ApiChat) {
-  if (chat.isRestricted) {
+  if (chat.isRestricted || chat.migratedTo) {
     return false;
   }
 

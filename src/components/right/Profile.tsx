@@ -330,7 +330,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
     const { byId: usersById } = global.users;
 
-    const hasMembersTab = !userId && chat && isChatBasicGroup(chat);
+    const hasMembersTab = !userId && chat && isChatBasicGroup(chat) && !chat.migratedTo;
     const groupChatMembers = chat && chat.fullInfo && chat.fullInfo.members;
 
     let resolvedUserId;
