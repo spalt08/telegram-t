@@ -54,7 +54,6 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           />
           <Button
             round
-            ripple
             size="smaller"
             color="translucent"
             ariaLabel="Unpin message"

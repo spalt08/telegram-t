@@ -12,6 +12,13 @@
     font-size: 13px !important;
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--color-borders);
+
+    opacity: 0;
+    transition: opacity .3s ease;
+
+    &.shown {
+      opacity: 1;
+    }
   }
 
   .lovely-chart--header {
