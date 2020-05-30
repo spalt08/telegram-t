@@ -39,6 +39,7 @@
 
   &.touched label,
   &.error label,
+  &.success label,
   .form-control:focus + label,
   .form-control.focus + label {
     opacity: 1;
@@ -56,6 +57,15 @@
 
   &.error label {
     color: var(--color-error) !important;
+  }
+
+  &.success label {
+    color: var(--color-text-green) !important;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
   }
 }
 
@@ -95,10 +105,20 @@
     }
   }
 
+  &:disabled {
+    background: none !important;
+  }
+
   .error & {
     border-color: var(--color-error);
     box-shadow: inset 0 0 0 1px var(--color-error);
     caret-color: var(--color-error);
+  }
+
+  .success & {
+    border-color: var(--color-text-green);
+    box-shadow: inset 0 0 0 1px var(--color-text-green);
+    caret-color: var(--color-text-green);
   }
 }
 

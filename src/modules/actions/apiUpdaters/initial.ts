@@ -7,9 +7,10 @@ import {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
-  ApiUpdateCurrentUserId,
+  ApiUpdateCurrentUser,
 } from '../../../api/types';
 import { DEBUG } from '../../../config';
+import { updateUser } from '../../reducers';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
@@ -30,8 +31,8 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       onUpdateConnectionState(update);
       break;
 
-    case 'updateCurrentUserId':
-      onUpdateCurrentUserId(update);
+    case 'updateCurrentUser':
+      onUpdateCurrentUser(update);
       break;
 
     case 'error':
@@ -119,11 +120,11 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
   }
 }
 
-function onUpdateCurrentUserId(update: ApiUpdateCurrentUserId) {
-  const { currentUserId } = update;
+function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
+  const { currentUser } = update;
 
   setGlobal({
-    ...getGlobal(),
-    currentUserId,
+    ...updateUser(getGlobal(), currentUser.id, currentUser),
+    currentUserId: currentUser.id,
   });
 }

@@ -169,7 +169,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global) => {
+  (global): StateProps => {
     const { isAnimationLevelSettingViewed, byKey } = global.settings;
 
     return {
@@ -181,5 +181,5 @@ export default memo(withGlobal<OwnProps>(
       ]),
     };
   },
-  (setGlobal, actions) => pick(actions, ['setSettingOption', 'clearAnimationSettingAttention']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setSettingOption', 'clearAnimationSettingAttention']),
 )(SettingsGeneral));

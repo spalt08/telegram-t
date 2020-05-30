@@ -172,6 +172,16 @@
 .settings-fab-wrapper {
   height: 100%;
   position: relative;
+
+  .FloatingActionButton {
+    right: 1.5rem;
+  }
+
+  &.has-scroll {
+    .FloatingActionButton {
+      right: 1.85rem;
+    }
+  }
 }
 
 .settings-edit-profile {

@@ -472,19 +472,21 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       },
     });
   } else if (update instanceof GramJs.UpdateUserName) {
+    const updatedUser = localDb.users[update.userId];
+    const user = updatedUser && updatedUser.mutualContact && !updatedUser.self
+      ? pick(update, ['username'])
+      : pick(update, ['firstName', 'lastName', 'username']);
+
     onUpdate({
       '@type': 'updateUser',
       id: update.userId,
-      user: pick(update, ['firstName', 'lastName', 'username']),
+      user,
     });
   } else if (update instanceof GramJs.UpdateUserPhoto) {
     const { userId, photo } = update;
     const avatar = buildAvatar(photo);
 
-    localDb.users[userId] = {
-      ...localDb.users[userId],
-      photo,
-    };
+    localDb.users[userId].photo = photo;
 
     onUpdate({
       '@type': 'updateUser',

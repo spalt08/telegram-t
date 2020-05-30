@@ -92,6 +92,7 @@ function updateCache(global: GlobalState) {
     webPagePreview: undefined,
     forwardMessages: {},
     chatCreation: undefined,
+    profileEdit: undefined,
     settings: reduceSettings(global),
     errors: [],
   };

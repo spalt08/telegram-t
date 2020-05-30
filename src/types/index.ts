@@ -68,3 +68,10 @@ export enum ChatCreationProgress {
   Complete,
   Error,
 }
+
+export enum ProfileEditProgress {
+  Idle,
+  InProgress,
+  Complete,
+  Error,
+}

@@ -7,11 +7,11 @@ import { ApiUser } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { getUserFullName } from '../../../modules/helpers';
-import { selectUser, selectUserByUserName } from '../../../modules/selectors';
+import { selectUser, selectUserByUsername } from '../../../modules/selectors';
 
 type OwnProps = {
   userId?: number;
-  userName?: string;
+  username?: string;
   children: any;
 };
 
@@ -48,14 +48,14 @@ const MentionLink: FC<OwnProps & StateProps & DispatchProps> = ({ user, children
 };
 
 export default withGlobal<OwnProps>(
-  (global, { userId, userName }): StateProps => {
+  (global, { userId, username }): StateProps => {
     if (userId) {
       return {
         user: selectUser(global, userId),
       };
-    } else if (userName) {
+    } else if (username) {
       return {
-        user: selectUserByUserName(global, userName.substring(1)),
+        user: selectUserByUsername(global, username.substring(1)),
       };
     }
 

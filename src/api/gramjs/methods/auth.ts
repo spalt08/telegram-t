@@ -1,5 +1,10 @@
 import { errors } from '../../../lib/gramjs';
-import { ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType, OnApiUpdate } from '../../types';
+import {
+  ApiUpdateAuthorizationState,
+  ApiUpdateAuthorizationStateType,
+  OnApiUpdate,
+  ApiUser,
+} from '../../types';
 
 import { DEBUG } from '../../../config';
 
@@ -106,10 +111,10 @@ export function onAuthReady(sessionId: string) {
   });
 }
 
-export function onCurrentUserId(currentUserId: number) {
+export function onCurrentUserUpdate(currentUser: ApiUser) {
   onUpdate({
-    '@type': 'updateCurrentUserId',
-    currentUserId,
+    '@type': 'updateCurrentUser',
+    currentUser,
   });
 }
 

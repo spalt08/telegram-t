@@ -1,6 +1,19 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
+export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
+  const { about, commonChatsCount, pinnedMsgId } = mtpUserFull;
+
+  return {
+    ...(buildApiUser(mtpUserFull.user) as ApiUser),
+    fullInfo: {
+      bio: about,
+      commonChatsCount,
+      pinnedMessageId: pinnedMsgId,
+    },
+  };
+}
+
 export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   if (!(mtpUser instanceof GramJs.User)) {
     return undefined;

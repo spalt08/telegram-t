@@ -8,10 +8,12 @@ import { ApiMediaFormat, ApiOnProgress } from '../../types';
 import { DEBUG, DEBUG_GRAMJS } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
-  onAuthError, onAuthReady, onCurrentUserId, onRequestQrCode,
+  onAuthError, onAuthReady, onCurrentUserUpdate, onRequestQrCode,
 } from './auth';
 import { setUpdaterCurrentUserId, updater, handleError } from '../updater';
 import downloadMediaWithClient from './media';
+import { buildApiUserFromFull } from '../apiBuilders/users';
+import localDb from '../localDb';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -55,7 +57,7 @@ export async function init(sessionId: string) {
     }
 
     onAuthReady(newSessionId);
-    void loadCurrentUser();
+    void fetchCurrentUser();
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -134,15 +136,18 @@ export function uploadFile(file: File, onProgress?: ApiOnProgress) {
   return client.uploadFile({ file, onProgress });
 }
 
-async function loadCurrentUser() {
-  const users = await invokeRequest(new GramJs.users.GetUsers({
-    id: [new GramJs.InputUserSelf()],
+export async function fetchCurrentUser() {
+  const userFull = await invokeRequest(new GramJs.users.GetFullUser({
+    id: new GramJs.InputUserSelf(),
   }));
 
-  if (!users || !users.length) {
+  if (!userFull || !(userFull.user instanceof GramJs.User)) {
     return;
   }
 
-  setUpdaterCurrentUserId(users[0].id);
-  onCurrentUserId(users[0].id);
+  localDb.users[userFull.user.id] = userFull.user;
+  const currentUser = buildApiUserFromFull(userFull);
+
+  setUpdaterCurrentUserId(currentUser.id);
+  onCurrentUserUpdate(currentUser);
 }

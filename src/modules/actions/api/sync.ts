@@ -30,6 +30,9 @@ async function sync() {
     lastSyncTime: Date.now(),
   };
   setGlobal(global);
+
+  // Full info of current user can be erased during sync, so we fetch it again afterwards.
+  await callApi('fetchCurrentUser');
 }
 
 async function loadAndReplaceChats() {
@@ -46,10 +49,12 @@ async function loadAndReplaceChats() {
   const { recentlyFoundChatIds } = global.globalSearch;
   const { userIds: contactIds } = global.contactList || {};
   const { selectedId: selectedChatId } = global.chats;
+  const { currentUserId } = global;
 
   const savedPrivateChatIds = [
     ...(recentlyFoundChatIds || []),
     ...(contactIds || []),
+    ...(currentUserId ? [currentUserId] : []),
   ];
 
   const savedUsers = savedPrivateChatIds

@@ -44,6 +44,6 @@ const SettingsLanguage: FC<StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal(
-  (global) => pick(global.settings.byKey, ['language']),
-  (setGlobal, actions) => pick(actions, ['setSettingOption']),
+  (global): StateProps => pick(global.settings.byKey, ['language']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setSettingOption']),
 )(SettingsLanguage));

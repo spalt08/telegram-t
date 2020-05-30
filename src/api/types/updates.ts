@@ -42,9 +42,9 @@ export type ApiUpdateConnectionState = {
   connectionState: ApiUpdateConnectionStateType;
 };
 
-export type ApiUpdateCurrentUserId = {
-  '@type': 'updateCurrentUserId';
-  currentUserId: number;
+export type ApiUpdateCurrentUser = {
+  '@type': 'updateCurrentUser';
+  currentUser: ApiUser;
 };
 
 export type ApiUpdateChat = {
@@ -200,7 +200,7 @@ export type ApiUpdateResetContacts = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
+  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |

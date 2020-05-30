@@ -62,5 +62,9 @@
         background-color: rgba(black, 0.4);
       }
     }
+
+    &.disabled {
+      pointer-events: none;
+    }
   }
 }

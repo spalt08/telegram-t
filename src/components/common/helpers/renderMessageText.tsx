@@ -166,7 +166,7 @@ function processEntity(
       );
     case ApiMessageEntityTypes.Mention:
       return (
-        <MentionLink userName={entityText}>
+        <MentionLink username={entityText}>
           {addLineBreaks(entityContent)}
         </MentionLink>
       );

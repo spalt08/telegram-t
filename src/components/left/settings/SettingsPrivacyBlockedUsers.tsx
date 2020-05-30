@@ -71,7 +71,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps> = ({
 
 
 export default memo(withGlobal(
-  (global) => {
+  (global): StateProps => {
     const { byId: usersById } = global.users;
 
     return {

@@ -72,7 +72,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global) => {
+  (global): StateProps => {
     const { currentUserId } = global;
     const { isAnimationLevelSettingViewed } = global.settings;
 

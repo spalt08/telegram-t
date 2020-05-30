@@ -36,10 +36,10 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
 
   if (!isSavedMessages && !isDeleted) {
-    if (chat) {
-      imageHash = getChatAvatarHash(chat);
-    } else if (user) {
+    if (user) {
       imageHash = getChatAvatarHash(user);
+    } else if (chat) {
+      imageHash = getChatAvatarHash(chat);
     }
   }
 
@@ -55,8 +55,8 @@ const Avatar: FC<OwnProps> = ({
   } else if (shouldRenderFullMedia) {
     content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
-    const userName = getUserFullName(user);
-    content = userName ? getFirstLetters(userName).slice(0, 2) : undefined;
+    const userFullName = getUserFullName(user);
+    content = userFullName ? getFirstLetters(userFullName).slice(0, 2) : undefined;
   } else if (chat) {
     const title = getChatTitle(chat);
     content = title && getFirstLetters(title).slice(0, isChatPrivate(chat.id) ? 2 : 1);

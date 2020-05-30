@@ -1,23 +1,30 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState, memo } from '../../lib/teact/teact';
+import React, { FC, useState, useEffect, memo } from '../../lib/teact/teact';
 
 import CropModal from './CropModal';
 
 import './AvatarEditable.scss';
+import buildClassName from '../../util/buildClassName';
 
 interface OwnProps {
   title?: string;
+  disabled?: boolean;
   currentAvatarBlobUrl?: string;
   onChange: (file: File) => void;
 }
 
 const AvatarEditable: FC<OwnProps> = ({
   title = 'Change your profile picture',
+  disabled,
   currentAvatarBlobUrl,
   onChange,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [croppedBlobUrl, setCroppedBlobUrl] = useState<string | undefined>(currentAvatarBlobUrl);
+
+  useEffect(() => {
+    setCroppedBlobUrl(currentAvatarBlobUrl);
+  }, [currentAvatarBlobUrl]);
 
   function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
     const target = event.target as HTMLInputElement;
@@ -44,10 +51,15 @@ const AvatarEditable: FC<OwnProps> = ({
     setSelectedFile(undefined);
   }
 
+  const labelClassName = buildClassName(
+    croppedBlobUrl && 'filled',
+    disabled && 'disabled',
+  );
+
   return (
     <div className="AvatarEditable">
       <label
-        className={croppedBlobUrl ? 'filled' : ''}
+        className={labelClassName}
         role="button"
         tabIndex={0}
         title={title}

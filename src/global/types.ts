@@ -17,6 +17,7 @@ import {
   ISettings,
   MediaViewerOrigin,
   ChatCreationProgress,
+  ProfileEditProgress,
 } from '../types';
 
 export type GlobalState = {
@@ -169,6 +170,11 @@ export type GlobalState = {
     error?: string;
   };
 
+  profileEdit?: {
+    progress: ProfileEditProgress;
+    isUsernameAvailable?: boolean;
+  };
+
   settings: {
     byKey: ISettings;
     isAnimationLevelSettingViewed?: boolean;
@@ -200,7 +206,8 @@ export type ActionTypes = (
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
   'searchMessages' | 'markMessagesRead' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' | 'loadCurrentUser' |
+  'updateProfile' | 'checkUsername' |
   // Channel / groups creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
