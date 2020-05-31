@@ -69,6 +69,13 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+
+      .emoji.emoji-small {
+        width: 1.125rem;
+        height: 1.125rem;
+        background-size: 1.125rem;
+        vertical-align: -2px;
+      }
     }
 
     &-remove {

@@ -11,6 +11,7 @@ import {
   isChatPrivate,
   getChatTitle,
 } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';
@@ -48,14 +49,14 @@ const EmbeddedMessage: FC<OwnProps> = ({
     <div className={fullClassName} onClick={message ? onClick : undefined}>
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
       <div className="message-text">
-        <div className="message-title">{senderTitle || title || NBSP}</div>
+        <div className="message-title">{renderText(senderTitle || title || NBSP)}</div>
         <p>
           {!message ? (
             NBSP
           ) : isActionMessage(message) ? (
             <ActionMessage message={message} isEmbedded />
           ) : (
-            getMessageSummaryText(message, true)
+            renderText(getMessageSummaryText(message, true))
           )}
         </p>
       </div>

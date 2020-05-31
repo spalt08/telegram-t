@@ -257,6 +257,14 @@
       margin-top: 0.75rem;
     }
   }
+
+  .emoji {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0 1px -5px;
+    vertical-align: 0;
+    pointer-events: none;
+  }
 }
 
 #caption-input-text {

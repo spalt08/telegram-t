@@ -6,6 +6,7 @@ import { GlobalActions, GlobalState } from '../../global/types';
 
 import { selectUser } from '../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
+import renderText from '../common/helpers/renderText';
 import { pick } from '../../util/iteratees';
 
 type OwnProps = {
@@ -49,7 +50,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{bio}</p>
+            <p className="title">{renderText(bio)}</p>
             <p className="subtitle">Bio</p>
           </div>
         </div>
@@ -58,7 +59,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="item">
           <i className="icon-username" />
           <div>
-            <p className="title">{username}</p>
+            <p className="title">{renderText(username)}</p>
             <p className="subtitle">Username</p>
           </div>
         </div>

@@ -43,6 +43,7 @@ import { renderMessageText } from '../../common/helpers/renderMessageText';
 import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
 
 import Avatar from '../../common/Avatar';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -329,7 +330,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return (
       <div className="message-title interactive" onClick={() => handleSenderClick(userOrChat)}>
-        {senderTitle || NBSP}
+        {renderText(senderTitle || NBSP)}
       </div>
     );
   }

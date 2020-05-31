@@ -10,6 +10,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
 
 import Avatar from './Avatar';
@@ -44,6 +45,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   openMediaViewer,
 }) => {
   const { id: userId, isSelf } = user || {};
+  const fullName = getUserFullName(user);
 
   useEffect(() => {
     // `Saved Messages` is the only private chat that supports pinned messages.
@@ -98,7 +100,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           <div className="title">Saved Messages</div>
         ) : (
           <div className="title">
-            {getUserFullName(user)}
+            {fullName && renderText(fullName)}
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}

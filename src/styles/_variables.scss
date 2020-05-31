@@ -36,6 +36,7 @@ $color-text-meta: #686c72;
 $color-borders: #dadce0;
 $color-chat-hover: #f4f4f5;
 $color-chat-active: #ededed;
+$color-selection: #3993fb;
 
 :root {
   --color-background: #{$color-white};
@@ -83,6 +84,9 @@ $color-chat-active: #ededed;
 
   --color-chat-hover: #{$color-chat-hover};
   --color-chat-active: #{$color-chat-active};
+
+  --color-selection-highlight: #{$color-selection};
+  --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, .7);
 
   --border-radius-default: 0.75rem;
   --border-radius-messages: 0.75rem;

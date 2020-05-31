@@ -1,6 +1,6 @@
-import React, {
-  FC, memo, useCallback,
-} from '../../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
+
+import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
 
 import './EmojiButton.scss';
 
@@ -20,7 +20,7 @@ const EmojiButton: FC<OwnProps> = ({ emoji, onClick }) => {
       onClick={handleClick}
       title={emoji.colons}
     >
-      {emoji.native}
+      {IS_EMOJI_SUPPORTED ? emoji.native : <img src={`/img-apple-64/${emoji.image}.png`} alt="" loading="lazy" />}
     </div>
   );
 };

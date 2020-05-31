@@ -1,8 +1,11 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from '../../../lib/teact/teact';
 import { ApiMessageEntity, ApiMessageEntityTypes, ApiMessage } from '../../../api/types';
+
 import { DEBUG } from '../../../config';
 import { getMessageText } from '../../../modules/helpers';
+import renderText from './renderText';
+
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../../middle/message/SafeLink';
 
@@ -20,7 +23,7 @@ export function renderMessageText(message: ApiMessage) {
     return undefined;
   }
   if (!entities) {
-    return addLineBreaks(text);
+    return renderMessagePart(text);
   }
 
   let deleteLineBreakAfterPre = false;
@@ -39,7 +42,7 @@ export function renderMessageText(message: ApiMessage) {
         deleteLineBreakAfterPre = false;
       }
       if (!nestedEntity && textBefore) {
-        result.push(...addLineBreaks(textBefore));
+        result.push(...renderMessagePart(textBefore) as TextPart[]);
       }
     }
 
@@ -88,7 +91,7 @@ export function renderMessageText(message: ApiMessage) {
       textAfter = textAfter.substring(1);
     }
     if (textAfter) {
-      result.push(...addLineBreaks(textAfter));
+      result.push(...renderMessagePart(textAfter) as TextPart[]);
     }
   }
 
@@ -105,14 +108,14 @@ function processEntity(
     : nestedEntityText;
 
   if (!entityText) {
-    return addLineBreaks(entityContent);
+    return renderMessagePart(entityContent);
   }
 
   switch (entity.type) {
     case ApiMessageEntityTypes.Bold:
-      return <strong>{addLineBreaks(entityContent)}</strong>;
+      return <strong>{renderMessagePart(entityContent)}</strong>;
     case ApiMessageEntityTypes.Blockquote:
-      return <blockquote>{addLineBreaks(entityContent)}</blockquote>;
+      return <blockquote>{renderMessagePart(entityContent)}</blockquote>;
     // TODO @not-implemented
     case ApiMessageEntityTypes.BotCommand:
       return (
@@ -121,7 +124,7 @@ function processEntity(
           href={`tg://bot_command?command=${getBotCommand(entityText)}&bot=`}
           className="text-entity-link not-implemented"
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </a>
       );
     case ApiMessageEntityTypes.Cashtag:
@@ -130,11 +133,11 @@ function processEntity(
           onClick={(event) => searchCurrentChat(event, entityText)}
           className="text-entity-link not-implemented"
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </a>
       );
     case ApiMessageEntityTypes.Code:
-      return <code className="text-entity-code">{addLineBreaks(entityContent)}</code>;
+      return <code className="text-entity-code">{renderMessagePart(entityContent)}</code>;
     case ApiMessageEntityTypes.Email:
       return (
         <a
@@ -144,7 +147,7 @@ function processEntity(
           rel="noopener noreferrer"
           className="text-entity-link"
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </a>
       );
     case ApiMessageEntityTypes.Hashtag:
@@ -153,21 +156,21 @@ function processEntity(
           onClick={(event) => searchCurrentChat(event, entityText)}
           className="text-entity-link not-implemented"
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </a>
       );
     case ApiMessageEntityTypes.Italic:
-      return <em>{addLineBreaks(entityContent)}</em>;
+      return <em>{renderMessagePart(entityContent)}</em>;
     case ApiMessageEntityTypes.MentionName:
       return (
         <MentionLink userId={entity.userId}>
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </MentionLink>
       );
     case ApiMessageEntityTypes.Mention:
       return (
         <MentionLink username={entityText}>
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </MentionLink>
       );
     case ApiMessageEntityTypes.Phone:
@@ -177,13 +180,13 @@ function processEntity(
           onClick={stopPropagation}
           className="text-entity-link"
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </a>
       );
     case ApiMessageEntityTypes.Pre:
-      return <pre className="text-entity-pre">{addLineBreaks(entityContent)}</pre>;
+      return <pre className="text-entity-pre">{renderMessagePart(entityContent)}</pre>;
     case ApiMessageEntityTypes.Strike:
-      return <del>{addLineBreaks(entityContent)}</del>;
+      return <del>{renderMessagePart(entityContent)}</del>;
     case ApiMessageEntityTypes.TextUrl:
     case ApiMessageEntityTypes.Url:
       return (
@@ -191,35 +194,18 @@ function processEntity(
           url={getLinkUrl(entityText, entity)}
           text={entityText}
         >
-          {addLineBreaks(entityContent)}
+          {renderMessagePart(entityContent)}
         </SafeLink>
       );
     case ApiMessageEntityTypes.Underline:
-      return <ins>{addLineBreaks(entityContent)}</ins>;
+      return <ins>{renderMessagePart(entityContent)}</ins>;
     default:
-      return addLineBreaks(entityContent);
+      return renderMessagePart(entityContent);
   }
 }
 
-function addLineBreaks(part: TextPart): TextPart[] {
-  if (typeof part !== 'string') {
-    return [part];
-  }
-
-  return part
-    .split(/\r\n|\r|\n/g)
-    .reduce((parts: TextPart[], line: string, i, source) => {
-      // This adds non-breaking space if line was indented with spaces, to preserve the indentation
-      const trimmedLine = line.trimLeft();
-      const indentLength = line.length - trimmedLine.length;
-      parts.push(String.fromCharCode(160).repeat(indentLength) + trimmedLine);
-
-      if (i !== source.length - 1) {
-        parts.push(<br />);
-      }
-
-      return parts;
-    }, []);
+function renderMessagePart(str: TextPart) {
+  return renderText(str, ['hq_emoji', 'br']);
 }
 
 function stopPropagation(event: any) {

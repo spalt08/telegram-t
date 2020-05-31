@@ -7,6 +7,10 @@ declare namespace React {
     // Optimization for DOM nodes reordering. Requires `teactFastList` for parent
     teactOrderKey?: number;
   }
+
+  interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
+    loading?: 'auto' | 'eager' | 'lazy';
+  }
 }
 
 type AnyLiteral = Record<string, any>;
@@ -32,6 +36,7 @@ type Emoji = {
   id: string;
   colons: string;
   native: string;
+  image: string;
   skin?: number;
 };
 

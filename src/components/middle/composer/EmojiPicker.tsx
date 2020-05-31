@@ -6,6 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../../global/types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { EmojiRawData, EmojiData, uncompressEmoji } from '../../../util/emoji';
 import { throttle } from '../../../util/schedulers';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
@@ -26,13 +27,9 @@ type OwnProps = {
 type StateProps = Pick<GlobalState, 'recentEmojis'>;
 type DispatchProps = Pick<GlobalActions, 'addRecentEmoji'>;
 
-type EmojiData = typeof import('../../../../public/emojiData.json');
-let emojiDataPromise: Promise<EmojiData>;
+let emojiDataPromise: Promise<EmojiRawData>;
+let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
-
-type NimbleEmojiIndexLib = typeof import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index');
-let emojiIndexPromise: Promise<NimbleEmojiIndexLib>;
-let EmojiIndex: NimbleEmojiIndexLib['default'];
 
 type EmojiCategoryData = { id: string; name: string; emojis: string[] };
 
@@ -52,23 +49,15 @@ const OPEN_ANIMATION_DELAY = 200;
 // Only a few categories are above this height.
 const SMOOTH_SCROLL_DISTANCE = 800;
 
+
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
-    emojiDataPromise = import('../../../../public/emojiData.json') as unknown as Promise<EmojiData>;
-    emojiData = await emojiDataPromise;
+    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiRawData>;
+    emojiRawData = await emojiDataPromise;
+    emojiData = uncompressEmoji(emojiRawData);
   }
 
   return emojiDataPromise;
-}
-
-async function ensureEmojiIndex() {
-  if (!emojiIndexPromise) {
-    // eslint-disable-next-line max-len
-    emojiIndexPromise = import('emoji-mart/dist-es/utils/emoji-index/nimble-emoji-index') as unknown as Promise<NimbleEmojiIndexLib>;
-    EmojiIndex = (await emojiIndexPromise).default;
-  }
-
-  return emojiIndexPromise;
 }
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
@@ -103,17 +92,14 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       const exec = () => {
         setCategories(emojiData.categories);
 
-        const index = new EmojiIndex(emojiData);
-        setEmojis(index.emojis as AllEmojis);
+        setEmojis(emojiData.emojis as AllEmojis);
       };
 
-      if (emojiData && EmojiIndex) {
+      if (emojiData) {
         exec();
       } else {
-        Promise.all([
-          ensureEmojiData(),
-          ensureEmojiIndex(),
-        ]).then(exec);
+        ensureEmojiData()
+          .then(exec);
       }
     }, OPEN_ANIMATION_DELAY);
   }, []);
@@ -162,6 +148,10 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     className,
   );
 
+  function preventEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    e.preventDefault();
+  }
+
   if (!emojis) {
     return (
       <div className={containerClassName}>
@@ -176,6 +166,7 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={containerRef}
         className="EmojiPicker-main no-scroll"
         onScroll={handleScroll}
+        onMouseDown={preventEvent}
       >
         {allCategories.map((category) => (
           <EmojiCategory

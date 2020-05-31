@@ -6,6 +6,7 @@ import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { getUserFullName, isChatChannel, isChatPrivate } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
+import renderText from '../common/helpers/renderText';
 import {
   selectChat,
   selectChatMessage,
@@ -50,6 +51,8 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     return undefined;
   }
 
+  const senderTitle = isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser);
+
   return (
     <div className="SenderInfo" onClick={openSenderInfo}>
       {isChannelChatMessage ? (
@@ -59,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       <div className="meta">
         <div className="title">
-          {isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser)}
+          {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date">
           {isAvatar ? 'Profile photo' : formatMediaDateTime(message!.date * 1000)}

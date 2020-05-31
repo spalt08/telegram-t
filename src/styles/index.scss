@@ -19,7 +19,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-size: 16px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "Emoji One", "Twemoji",  sans-serif;
   color: var(--color-text);
   overflow: hidden;
 }
@@ -109,6 +109,22 @@ body.scrollable {
   }
 }
 
+.emoji-small {
+  background: no-repeat;
+  background-size: 1.25rem;
+  color: transparent;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 1px;
+  overflow: hidden;
+
+  &::selection {
+    background-color: var(--color-selection-highlight-emoji);
+    color: transparent;
+  }
+}
+
 div[role="button"] {
   outline: none !important;
   cursor: pointer;
@@ -194,12 +210,17 @@ div[role="button"] {
       font-weight: 500;
       font-size: 1rem;
       line-height: 1.3125;
+      white-space: pre-wrap;
 
       .VerifiedIcon {
         width: 1.25rem;
         height: 1.25rem;
         margin-left: 0.25rem;
         margin-top: 0.05rem;
+      }
+
+      .emoji {
+        background-position: 0 0;
       }
     }
 

@@ -15,7 +15,7 @@ import {
   getSenderName,
   getMessageSummaryText,
 } from '../../modules/helpers';
-import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
+import renderText from '../common/helpers/renderText';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -135,14 +135,14 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <Avatar chat={chat} isSavedMessages={chat.id === currentUserId} />
         <div className="info">
           <div className="title">
-            <h3>{getChatTitle(chat, user)}</h3>
+            <h3>{renderText(getChatTitle(chat, user))}</h3>
             <LastMessageMeta message={message} />
           </div>
           <p className="subtitle">
             {senderName && (
-              <span className="sender-name">{senderName}</span>
+              <span className="sender-name">{renderText(senderName)}</span>
             )}
-            {renderTextWithHighlight(text, searchQuery!)}
+            {renderText(text, ['emoji', 'highlight'], { query: searchQuery })}
           </p>
         </div>
         <RippleEffect />

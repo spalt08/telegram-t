@@ -6,6 +6,7 @@ import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime } from '../../util/dateFormat';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -105,7 +106,7 @@ const File: FC<OwnProps> = ({
         {onClick && <i className={buildClassName('icon-download', shouldSpinnerRender && 'hidden')} />}
       </div>
       <div className="file-info">
-        <div className="file-title">{name}</div>
+        <div className="file-title">{renderText(name)}</div>
         <div className="file-subtitle">
           <span>
             {isTransferring && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}

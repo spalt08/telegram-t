@@ -4,6 +4,8 @@ import React, {
 
 import { ApiPoll, PollAnswer } from '../../../api/types';
 
+import renderText from '../../common/helpers/renderText';
+
 import RadioGroup from '../../ui/RadioGroup';
 
 import './Poll.scss';
@@ -51,7 +53,7 @@ const Poll: FC<OwnProps> = ({ messageId, poll, onSendVote }) => {
         <div className="poll-answer-share">{getPercentage(result.voters, totalVoters)}%</div>
         <div className="poll-answer-right">
           <div className="poll-answer-text">
-            {answer.text}
+            {renderText(answer.text)}
             {result.chosen && <span className="poll-chosen-answer">(your choice)</span>}
           </div>
           <div
@@ -66,7 +68,7 @@ const Poll: FC<OwnProps> = ({ messageId, poll, onSendVote }) => {
 
   return (
     <div className="Poll">
-      <div className="poll-question">{summary.question}</div>
+      <div className="poll-question">{renderText(summary.question)}</div>
       <div className="poll-type">{getPollTypeString(summary)}</div>
       {canVote && (
         <div className="poll-answers">

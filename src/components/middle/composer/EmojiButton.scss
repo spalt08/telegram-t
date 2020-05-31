@@ -19,4 +19,9 @@
   &:hover {
     background-color: rgba(var(--color-text-secondary-rgb), 0.08);
   }
+
+  & > img {
+    width: 2rem;
+    height: 2rem;
+  }
 }

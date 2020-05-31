@@ -10,6 +10,7 @@ import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgre
 import useShowTransition from '../../hooks/useShowTransition';
 import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -212,7 +213,7 @@ function renderAudio(
 
   return (
     <div className="content">
-      <p className="title">{title || fileName}</p>
+      <p className="title">{renderText(title || fileName)}</p>
       {showSeekline && (
         <div
           className="seekline"
@@ -237,7 +238,7 @@ function renderAudio(
       {!showSeekline && (
         <div className="meta">
           {performer && (
-            <span className="performer">{performer}</span>
+            <span className="performer">{renderText(performer)}</span>
           )}
           {date && <span className="date">{formatMediaDateTime(date * 1000)}</span>}
         </div>

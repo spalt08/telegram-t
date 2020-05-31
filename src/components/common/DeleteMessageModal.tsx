@@ -12,6 +12,7 @@ import {
   isChatBasicGroup,
   isChatSuperGroup,
 } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
 
 import Modal from '../ui/Modal';
@@ -69,7 +70,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       {canDeleteForAll && (
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          Delete for {contactFirstName ? `me and ${contactFirstName}` : 'Everyone'}
+          Delete for {contactFirstName ? 'me and ' : 'Everyone'}
+          {contactFirstName && renderText(contactFirstName)}
         </Button>
       )}
       <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>

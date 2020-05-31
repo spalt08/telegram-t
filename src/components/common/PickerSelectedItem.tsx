@@ -5,6 +5,7 @@ import { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../modules/selectors';
 import { getChatTitle, getPrivateChatUserId, getUserFirstName } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 
 import Avatar from './Avatar';
 
@@ -40,7 +41,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         isSavedMessages={privateChatUser && privateChatUser.isSelf}
       />
       <div className="picker-selected-item-name">
-        {name}
+        {name && renderText(name)}
       </div>
       <div className="picker-selected-item-remove">
         <i className="icon-close" />

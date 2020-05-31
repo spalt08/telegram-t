@@ -16,11 +16,11 @@ import {
   isChatChannel,
   getUserFullName,
 } from '../../modules/helpers';
-import LastMessageMeta from '../left/LastMessageMeta';
+import renderText from '../common/helpers/renderText';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
 
+import LastMessageMeta from '../left/LastMessageMeta';
 import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Avatar from '../common/Avatar';
@@ -79,15 +79,17 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       return undefined;
     }
 
+    const title = chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user);
+
     return (
       <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
         <Avatar chat={chat && isChatChannel(chat) ? chat : undefined} user={user} />
         <div className="info">
           <div className="title">
-            <h3>{chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
+            <h3>{title && renderText(title)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{renderTextWithHighlight(text, query!)}</p>
+          <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { query })}</p>
         </div>
         <RippleEffect />
       </div>

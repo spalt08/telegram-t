@@ -23,7 +23,7 @@
       bottom: .625rem;
     }
 
-    img {
+    img:not(.emoji) {
       margin-left: .5rem;
     }
   }
@@ -67,6 +67,12 @@
         display: none;
       }
     }
+
+    .emoji {
+      width: 1.125rem !important;
+      height: 1.125rem !important;
+      vertical-align: -4px !important;
+    }
   }
 
   .embedded-action-message {
@@ -74,7 +80,7 @@
     opacity: 0.75;
   }
 
-  img {
+  img:not(.emoji) {
     width: 2rem;
     height: 2rem;
     object-fit: cover;
@@ -97,7 +103,7 @@
       bottom: .3125rem;
     }
 
-    img {
+    img:not(.emoji) {
       margin-left: .125rem;
     }
 

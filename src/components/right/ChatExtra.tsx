@@ -5,6 +5,7 @@ import { ApiChat } from '../../api/types';
 
 import { selectChat } from '../../modules/selectors';
 import { getChatDescription, getChatLink } from '../../modules/helpers';
+import renderText from '../common/helpers/renderText';
 
 type OwnProps = {
   chatId: number;
@@ -29,7 +30,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{description}</p>
+            <p className="title">{renderText(description)}</p>
             <p className="subtitle">About</p>
           </div>
         </div>

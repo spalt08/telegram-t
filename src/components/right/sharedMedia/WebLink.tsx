@@ -4,6 +4,7 @@ import { ApiMessage, ApiWebPage } from '../../../api/types';
 
 import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
 import Media from './Media';
 
@@ -68,8 +69,10 @@ const WebLink: FC<OwnProps> = ({ message }) => {
       {photo && (
         <Media message={message} onClick={handleMediaClick} />
       )}
-      <p className="site-title">{title || siteName || displayUrl}</p>
-      {truncatedDescription && <p className="site-description">{description}</p>}
+      <p className="site-title">{renderText(title || siteName || displayUrl)}</p>
+      {truncatedDescription && (
+        <p className="site-description">{renderText(truncatedDescription)}</p>
+      )}
       <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
         {url.replace('mailto:', '') || displayUrl}
       </a>

@@ -192,6 +192,14 @@
       font-size: 0.75rem;
       overflow: hidden;
       text-overflow: ellipsis;
+
+      .emoji-small {
+        width: 1rem;
+        height: 1rem;
+        background-size: 1rem;
+        margin-right: 1px;
+        vertical-align: -3px;
+      }
     }
   }
 }

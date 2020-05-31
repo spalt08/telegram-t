@@ -7,6 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { ApiUser } from '../../api/types';
 
 import { getUserFirstName, isChatPrivate } from '../../modules/helpers';
+import renderText from '../common/helpers/renderText';
 import { throttle } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
 
@@ -82,7 +83,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
             {topUsers.map((user) => (
               <div className="top-peer-item" onClick={() => handleClick(user.id)}>
                 <Avatar user={user} />
-                <div className="top-peer-name">{getUserFirstName(user)}</div>
+                <div className="top-peer-name">{renderText(getUserFirstName(user)!)}</div>
               </div>
             ))}
           </div>

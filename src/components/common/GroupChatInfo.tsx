@@ -17,6 +17,7 @@ import {
 import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
 import { pick } from '../../util/iteratees';
 import { DEBUG } from '../../config';
 
@@ -109,7 +110,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       <Avatar key={chat.id} size={avatarSize} chat={chat} onClick={handleAvatarViewerOpen} />
       <div>
         <div className="title">
-          {getChatTitle(chat)}
+          {renderText(getChatTitle(chat))}
           {chat.isVerified && <VerifiedIcon />}
         </div>
         {renderStatusOrTyping()}

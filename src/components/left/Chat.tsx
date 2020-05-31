@@ -21,6 +21,7 @@ import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
 } from '../../modules/selectors';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
+import renderText from '../common/helpers/renderText';
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import { pick } from '../../util/iteratees';
@@ -127,7 +128,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       return (
         <p className="last-message">
           <span className="draft">Draft</span>
-          {draft.text}
+          {renderText(draft.text)}
         </p>
       );
     }
@@ -139,13 +140,13 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     if (isAction) {
       return (
         <p className="last-message">
-          {renderActionMessageText(
+          {renderText(renderActionMessageText(
             lastMessage,
             lastMessageSender,
             actionTargetUser,
             actionTargetMessage,
             { plain: true },
-          )}
+          ) as string)}
         </p>
       );
     }
@@ -155,9 +156,9 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     return (
       <p className="last-message">
         {senderName && (
-          <span className="sender-name">{senderName}</span>
+          <span className="sender-name">{renderText(senderName)}</span>
         )}
-        {getMessageSummaryText(lastMessage)}
+        {renderText(getMessageSummaryText(lastMessage))}
       </p>
     );
   }
@@ -178,7 +179,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       />
       <div className="info">
         <div className="title">
-          <h3>{getChatTitle(chat, privateChatUser)}</h3>
+          <h3>{renderText(getChatTitle(chat, privateChatUser))}</h3>
           {chat.isVerified && <VerifiedIcon />}
           {chat.isMuted && <i className="icon-muted-chat" />}
           {chat.lastMessage && (

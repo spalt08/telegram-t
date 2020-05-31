@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { countryList } from '../../util/phoneNumber';
-import { getPlatform } from '../../util/environment';
+import { PLATFORM_ENV } from '../../util/environment';
 import searchWords from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
 
@@ -21,7 +21,7 @@ type OwnProps = {
 };
 
 const DROPDOWN_HIDING_DURATION = 100;
-const BASE_FLAG_CLASS = getPlatform() === 'Windows'
+const BASE_FLAG_CLASS = PLATFORM_ENV === 'Windows'
   ? 'country-flag sprite'
   : 'country-flag';
 

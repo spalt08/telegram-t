@@ -15,13 +15,15 @@ import {
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
+import { IS_EMOJI_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
 import { selectChatMessage, selectChat, selectIsChatWithBot } from '../../../modules/selectors';
 import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
+import renderText from '../../common/helpers/renderText';
+import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
 import { pick } from '../../../util/iteratees';
 
 import useOverlay from '../../../hooks/useOverlay';
@@ -115,20 +117,29 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const insertTextAndUpdateCursor = useCallback((text: string) => {
     const selection = window.getSelection()!;
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+      .join('')
+      .replace(/\u200b+/g, '\u200b');
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
       if (isSelectionInsideInput(selectionRange)) {
-        // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
-        document.execCommand('insertText', false, text);
+        if (IS_EMOJI_SUPPORTED) {
+          // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
+          document.execCommand('insertText', false, text);
+        } else {
+          insertHtmlInSelection(newHtml);
+          messageInput.dispatchEvent(new Event('input'));
+        }
+
         return;
       }
 
-      setHtml(`${htmlRef.current!}${text}`);
+      setHtml(`${htmlRef.current!}${newHtml}`);
 
       // If selection is outside of input, set cursor at the end of input
       requestAnimationFrame(() => {
-        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
         focusEditableElement(messageInput);
       });
     }

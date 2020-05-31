@@ -15,10 +15,10 @@
   --deleting-translate-x: -50%;
 
   @media (pointer: coarse) {
-    user-select: none;
-    touch-callout: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    user-select: none;
+    touch-callout: none;
   }
 
   > .Avatar, > .message-content {

@@ -7,6 +7,7 @@ import { ApiUser, ApiMessage } from '../../api/types';
 
 import { selectUser, selectChatMessage, selectIsMessageFocused } from '../../modules/selectors';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
+import renderText from '../common/helpers/renderText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import buildClassName from '../../util/buildClassName';
 
@@ -57,7 +58,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   );
 
   if (isEmbedded) {
-    return <span className="embedded-action-message">{content}</span>;
+    return <span className="embedded-action-message">{renderText(content as string)}</span>;
   }
 
   return (

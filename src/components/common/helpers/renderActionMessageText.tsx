@@ -3,6 +3,7 @@ import React from '../../../lib/teact/teact';
 import { ApiMessage, ApiUser } from '../../../api/types';
 import { getMessageContent, getMessageSummaryText, getUserFullName } from '../../../modules/helpers';
 import { TextPart } from './renderMessageText';
+import renderText from './renderText';
 
 import UserLink from '../UserLink';
 import MessageLink from '../MessageLink';
@@ -100,14 +101,14 @@ function renderMessageContent(message: ApiMessage, options: ActionMessageTextOpt
     return (
       <span>
         &laquo;
-        <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
+        <MessageLink className="action-link" message={message}>{renderText(messageText)}</MessageLink>
         &raquo;
       </span>
     );
   }
 
   return (
-    <MessageLink className="action-link" message={message}>{messageText}</MessageLink>
+    <MessageLink className="action-link" message={message}>{renderText(messageText)}</MessageLink>
   );
 }
 
@@ -115,7 +116,8 @@ function renderUserContent(sender: ApiUser, plain?: boolean): string | TextPart 
   if (plain) {
     return getUserFullName(sender);
   }
-  return <UserLink className="action-link" sender={sender}>{getUserFullName(sender)}</UserLink>;
+
+  return <UserLink className="action-link" sender={sender}>{sender && renderText(getUserFullName(sender)!)}</UserLink>;
 }
 
 function processPlaceholder(text: string, placeholder: string, replaceValue?: TextPart): TextPart[] {

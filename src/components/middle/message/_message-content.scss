@@ -153,6 +153,20 @@
       margin-bottom: -0.4375rem;
     }
   }
+
+  &:not(.custom-shape) .emoji {
+    display: inline-block;
+    width: 1.25rem;
+    background-size: 1.25rem;
+    color: transparent;
+    margin-right: 1px;
+    vertical-align: text-bottom;
+
+    &::selection {
+      background-color: var(--color-selection-highlight-emoji);
+      color: transparent;
+    }
+  }
 }
 
 .message-content.media {
