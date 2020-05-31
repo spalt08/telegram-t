@@ -183,10 +183,9 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           profileState={profileState}
         />
         <Transition
-          name="zoom-fade"
+          name={shouldSkipTransition ? 'none' : 'zoom-fade'}
           renderCount={TRANSITION_RENDER_COUNT}
           activeKey={renderedContentKey}
-          shouldSkip={shouldSkipTransition}
         >
           {renderContent}
         </Transition>

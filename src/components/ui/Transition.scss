@@ -82,37 +82,41 @@
   }
 
   /*
-   * slow-slide
+   * mv-slide
    */
 
-  &.slow-slide {
-    > .to {
-      transform: translateX(100%);
+  &.mv-slide {
+    > * > div {
+      animation-fill-mode: forwards !important;
+    }
+
+    > .to > div {
+      transform: translateX(100vw);
     }
 
     &.animating {
-      > .from {
-        animation: slide-out .45s var(--easeOutSine);
+      > .from > div {
+        animation: mv-slide-out .4s ease;
       }
 
-      > .to {
-        animation: slide-in .45s var(--easeOutSine);
+      > .to > div {
+        animation: mv-slide-in .4s ease;
       }
     }
   }
 
-  &.slow-slide.backwards {
-    > .to {
-      transform: translateX(-100%);
+  &.mv-slide.backwards {
+    > .to > div {
+      transform: translateX(-100vw);
     }
 
     &.animating {
-      > .from {
-        animation: slide-in-backwards .45s var(--easeOutSine);
+      > .from > div {
+        animation: mv-slide-in-backwards .4s ease;
       }
 
-      > .to {
-        animation: slide-out-backwards .45s var(--easeOutSine);
+      > .to > div {
+        animation: mv-slide-out-backwards .4s ease;
       }
     }
   }
@@ -135,11 +139,11 @@
 
     &.animating {
       > .from {
-        animation: fade-out-opacity .35s ease-out, slide-fade-out-move .4s;
+        animation: fade-out-opacity .4s ease-out, slide-fade-out-move .4s;
       }
 
       > .to {
-        animation: fade-in-opacity .35s var(--easeInSine), slide-fade-in-move .4s;
+        animation: fade-in-opacity .4s var(--easeInSine), slide-fade-in-move .4s;
       }
     }
   }
@@ -157,11 +161,11 @@
 
     &.animating {
       > .from {
-        animation: fade-in-backwards-opacity .35s ease-out, slide-fade-in-backwards-move .4s;
+        animation: fade-in-backwards-opacity .4s ease-out, slide-fade-in-backwards-move .4s;
       }
 
       > .to {
-        animation: fade-out-backwards-opacity .35s var(--easeOutSine), slide-fade-out-backwards-move .4s;
+        animation: fade-out-backwards-opacity .4s var(--easeOutSine), slide-fade-out-backwards-move .4s;
       }
     }
   }
@@ -353,6 +357,45 @@
 @keyframes slide-out-backwards {
   0% {
     transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/*
+ * mv-slide
+ */
+@keyframes mv-slide-in {
+  0% {
+    transform: translateX(100vw);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes mv-slide-out {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100vw);
+  }
+}
+
+@keyframes mv-slide-in-backwards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+@keyframes mv-slide-out-backwards {
+  0% {
+    transform: translateX(-100vw);
   }
   100% {
     transform: translateX(0);

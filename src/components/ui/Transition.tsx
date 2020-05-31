@@ -10,11 +10,10 @@ import './Transition.scss';
 type ChildrenFn = () => any;
 type OwnProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
+  name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
-  shouldSkip?: boolean;
   id?: string;
   className?: string;
   onStart?: () => void;
@@ -24,7 +23,7 @@ type OwnProps = {
 
 const ANIMATION_DURATION = {
   slide: 350,
-  'slow-slide': 450,
+  'mv-slide': 400,
   'slide-fade': 400,
   'zoom-fade': 150,
   'scroll-slide': 500,
@@ -39,7 +38,6 @@ const Transition: FC<OwnProps> = ({
   direction = 'auto',
   renderCount,
   shouldRestoreHeight,
-  shouldSkip,
   id,
   className,
   onStart,
@@ -95,7 +93,7 @@ const Transition: FC<OwnProps> = ({
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
-    if (shouldSkip) {
+    if (name === 'none') {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           node.classList.remove('from', 'through', 'to');
@@ -172,7 +170,6 @@ const Transition: FC<OwnProps> = ({
     onStop,
     renderCount,
     shouldRestoreHeight,
-    shouldSkip,
   ]);
 
   useLayoutEffect(() => {

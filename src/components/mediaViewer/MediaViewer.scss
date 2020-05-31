@@ -38,10 +38,7 @@
   .closing {
     .SenderInfo {
       pointer-events: none;
-      .Avatar,
-      .meta {
-        transition: none;
-      }
+      transition: none;
     }
   }
 
@@ -68,15 +65,16 @@
   }
 
   .media-viewer-content {
-    flex: 0 0 100%;
+    position: relative;
     z-index: 1;
     padding: 1.25rem 0 3.25rem;
     height: 100%;
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
 
     &.has-footer {
+      min-width: 600px;
       padding-top: 4.25rem;
       padding-bottom: 7rem;
 
@@ -105,11 +103,8 @@
     }
 
     img {
-      display: block;
       max-width: 100vw;
       max-height: calc(100vh - 8.25rem);
-      height: auto;
-      margin: auto;
       object-fit: contain;
     }
 

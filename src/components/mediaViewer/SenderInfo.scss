@@ -4,19 +4,12 @@
   color: white;
   cursor: pointer;
 
-  .Avatar,
-  .meta {
-    opacity: .5;
-    transition: .15s opacity;
-  }
+  opacity: .5;
+  transition: .15s opacity;
 
   &:hover {
-    .Avatar,
-    .meta {
-      opacity: 1;
-    }
+    opacity: 1;
   }
-
 
   .Avatar {
     margin-right: 1rem;

@@ -25,7 +25,6 @@ export const GLOBAL_SEARCH_SLICE = 20;
 export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
 export const DEFAULT_ANIMATION_LEVEL = 1;
 export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
-export const FULL_ANIMATION_LEVEL = 2;
 
 export const SUPPORT_BOT_ID = 470000;
 export const SERVICE_NOTIFICATIONS_USER_ID = 777000;

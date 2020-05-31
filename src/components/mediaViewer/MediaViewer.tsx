@@ -35,7 +35,6 @@ import usePrevious from '../../hooks/usePrevious';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import { animateOpening, animateClosing } from './helpers/ghostAnimation';
-import { FULL_ANIMATION_LEVEL } from '../../config';
 import { pick } from '../../util/iteratees';
 
 import Spinner from '../ui/Spinner';
@@ -56,7 +55,7 @@ type StateProps = {
   avatarOwner?: ApiChat | ApiUser;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
-  animationLevel?: 0 | 1 | 2;
+  animationLevel: 0 | 1 | 2;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'>;
@@ -78,7 +77,6 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
   const isVideo = message ? Boolean(getMessageVideo(message)) : false;
   const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
-  const isRichAnimations = animationLevel === FULL_ANIMATION_LEVEL;
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const fileName = avatarOwner
     ? `avatar${avatarOwner.id}.jpg`
@@ -119,6 +117,10 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   )!) : undefined;
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
 
+  const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
+  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
+  const isGhostAnimation = animationLevel === 2;
+
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
     if (typeof mql.addEventListener === 'function') {
@@ -137,16 +139,16 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isRichAnimations && isOpen && !prevMessage && !prevAvatarOwner) {
+    if (isGhostAnimation && isOpen && !prevMessage && !prevAvatarOwner) {
       const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
       animateOpening(message!, hasFooter, origin!, bestImageData!);
     }
 
-    if (isRichAnimations && !isOpen && (prevMessage || prevAvatarOwner)) {
+    if (isGhostAnimation && !isOpen && (prevMessage || prevAvatarOwner)) {
       animateClosing(prevMessage!, prevOrigin!);
     }
-  }, [isRichAnimations, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner, bestImageData]);
+  }, [isGhostAnimation, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner, bestImageData]);
 
   const getMessageId = (fromId: number, direction: number): number => {
     let index = messageIds.indexOf(fromId);
@@ -276,7 +278,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       {() => (
         <>
           <div className="media-viewer-head" onClick={stopEvent}>
-            <Transition activeKey={messageId} direction={isFromSharedMedia ? 'inverse' : 'auto'} name="slide-fade">
+            <Transition activeKey={selectedMediaMessageIndex} name={headerAnimation}>
               {renderSenderInfo}
             </Transition>
             <MediaViewerActions
@@ -287,7 +289,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               isAvatar={Boolean(avatarOwner)}
             />
           </div>
-          <Transition activeKey={selectedMediaMessageIndex} name={isRichAnimations ? 'slow-slide' : 'slide-fade'}>
+          <Transition activeKey={selectedMediaMessageIndex} name={slideAnimation}>
             {renderSlide}
           </Transition>
           {!isFirst && (
@@ -319,7 +321,7 @@ function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
         src={blobUrl}
         alt=""
         // @ts-ignore teact feature
-        style={imageSize ? `width: ${imageSize!.width}px; height: ${imageSize!.height}px;` : ''}
+        style={imageSize ? `width: ${imageSize!.width}px` : ''}
       />
     )
     : <Spinner color="white" />;
