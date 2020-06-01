@@ -156,6 +156,20 @@ addReducer('createChannel', (global, actions, payload) => {
   void createChannel(title, about, photo);
 });
 
+addReducer('joinChannel', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const { id: channelId, accessHash } = chat;
+
+  if (channelId && accessHash) {
+    void callApi('joinChannel', { channelId, accessHash });
+  }
+});
+
 addReducer('createGroupChat', (global, actions, payload) => {
   const { title, memberIds, photo } = payload!;
   const members = (memberIds as number[])

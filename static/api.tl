@@ -897,5 +897,6 @@ channels.getChannels#a7f6bbb id:Vector<InputChannel> = messages.Chats;
 channels.getFullChannel#8736a09 channel:InputChannel = messages.ChatFull;
 channels.createChannel#3d5fb10f flags:# broadcast:flags.0?true megagroup:flags.1?true title:string about:string geo_point:flags.2?InputGeoPoint address:flags.2?string = Updates;
 channels.editPhoto#f12e57c9 channel:InputChannel photo:InputChatPhoto = Updates;
+channels.joinChannel#24b524c5 channel:InputChannel = Updates;
 channels.readMessageContents#eab5dc38 channel:InputChannel id:Vector<int> = Bool;
 // LAYER 112

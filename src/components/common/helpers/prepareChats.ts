@@ -8,7 +8,7 @@ export default function prepareChats(chats: Record<number, ApiChat>, listIds: nu
       return false;
     }
 
-    return !chat.isRestricted;
+    return !chat.isRestricted && !chat.hasLeft;
   };
 
   const listedChats = listIds.map((id) => chats[id]).filter(chatFilter);

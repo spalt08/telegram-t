@@ -229,6 +229,10 @@
 
     .Button {
       margin-left: 0.25rem;
+
+      &.tiny {
+        margin-right: .625rem;
+      }
     }
 
     .toggle-right-pane-button {

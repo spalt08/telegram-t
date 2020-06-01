@@ -82,6 +82,7 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
 }
 
 function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
+  hasLeft?: boolean;
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
 } {
@@ -98,11 +99,13 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
     };
   } else if (peerEntity instanceof GramJs.Chat) {
     return {
-      isRestricted: peerEntity.kicked || peerEntity.left,
+      hasLeft: peerEntity.left,
+      isRestricted: peerEntity.kicked,
     };
   } else if (peerEntity instanceof GramJs.Channel) {
     return {
-      isRestricted: peerEntity.left || peerEntity.restricted,
+      hasLeft: peerEntity.left,
+      isRestricted: peerEntity.restricted,
       restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
     };
   }

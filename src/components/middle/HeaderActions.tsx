@@ -3,14 +3,23 @@ import React, { FC, useRef, useEffect } from '../../lib/teact/teact';
 import Button from '../ui/Button';
 
 type OwnProps = {
+  isChannel?: boolean;
+  canSubscribe?: boolean;
   isRightColumnShown?: boolean;
   onSearchClick: () => void;
+  onSubscribeChannel: () => void;
 };
 
 let transitionTimeout: number;
 const TRANSITION_DELAY_MS = 200;
 
-const HeaderActions: FC<OwnProps> = ({ isRightColumnShown, onSearchClick }) => {
+const HeaderActions: FC<OwnProps> = ({
+  isChannel,
+  canSubscribe,
+  isRightColumnShown,
+  onSearchClick,
+  onSubscribeChannel,
+}) => {
   const containerRef = useRef<HTMLDivElement>();
 
   // This disables pointer-events on HeaderActions while right column is opening/closing
@@ -41,6 +50,16 @@ const HeaderActions: FC<OwnProps> = ({ isRightColumnShown, onSearchClick }) => {
       className="HeaderActions"
       onClick={stopPropagation}
     >
+      {canSubscribe && (
+        <Button
+          size="tiny"
+          ripple
+          fluid
+          onClick={onSubscribeChannel}
+        >
+          {isChannel ? 'Subscribe' : 'Join Group'}
+        </Button>
+      )}
       <Button
         round
         ripple={isRightColumnShown}

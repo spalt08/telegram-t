@@ -58,6 +58,17 @@
     }
   }
 
+  &.fluid {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    width: auto;
+
+    &.tiny {
+      padding-left: 1.375rem;
+      padding-right: 1.375rem;
+    }
+  }
+
   &.primary {
     background: var(--color-primary);
     color: var(--color-white);
@@ -192,6 +203,14 @@
     &.round {
       width: 2.75rem;
     }
+  }
+
+  &.tiny {
+    height: 2.25rem;
+    padding: .4375rem;
+    border-radius: var(--border-radius-default-tiny);
+    font-size: .875rem;
+    font-weight: 500;
   }
 
   &.loading {

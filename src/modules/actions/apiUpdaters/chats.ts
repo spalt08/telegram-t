@@ -28,7 +28,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'updateChatJoin': {
       let newGlobal = global;
       newGlobal = updateChatListIds(newGlobal, [update.id]);
-      newGlobal = updateChat(newGlobal, update.id, { isRestricted: false });
+      newGlobal = updateChat(newGlobal, update.id, { hasLeft: undefined });
       setGlobal(newGlobal);
 
       const chat = selectChat(newGlobal, update.id);
@@ -44,7 +44,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       if (listIds) {
         let newGlobal = global;
         newGlobal = replaceChatListIds(newGlobal, listIds.filter((listId) => listId !== update.id));
-        newGlobal = updateChat(newGlobal, update.id, { isRestricted: true });
+        newGlobal = updateChat(newGlobal, update.id, { hasLeft: true });
         setGlobal(newGlobal);
       }
 

@@ -20,10 +20,11 @@ export type OwnProps = {
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   children: any;
-  size?: 'default' | 'smaller';
+  size?: 'default' | 'smaller' | 'tiny';
   color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white';
   className?: string;
   round?: boolean;
+  fluid?: boolean;
   isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
@@ -49,6 +50,7 @@ const Button: FC<OwnProps> = ({
   color = 'primary',
   className,
   round,
+  fluid,
   isText,
   isLoading,
   ariaLabel,
@@ -70,6 +72,7 @@ const Button: FC<OwnProps> = ({
     size,
     color,
     round && 'round',
+    fluid && 'fluid',
     disabled && 'disabled',
     isText && 'text',
     isLoading && 'loading',

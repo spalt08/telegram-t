@@ -11,7 +11,12 @@ import {
   ApiTypingStatus,
 } from '../../api/types';
 
-import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
+import {
+  getPrivateChatUserId,
+  isChatChannel,
+  isChatPrivate,
+  isChatSuperGroup,
+} from '../../modules/helpers';
 import {
   selectChat,
   selectChatMessage,
@@ -51,12 +56,14 @@ type StateProps = {
   typingStatus?: ApiTypingStatus;
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
+  isChannel?: boolean;
+  canSubscribeToChat?: boolean;
   chatsById?: Record<number, ApiChat>;
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'openChatWithInfo' | 'openMessageTextSearch' |
-  'pinMessage' | 'focusMessage' | 'openChat'
+  'pinMessage' | 'focusMessage' | 'openChat' | 'joinChannel'
 )>;
 
 const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
@@ -67,12 +74,15 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   typingStatus,
   isLeftColumnShown,
   isRightColumnShown,
+  isChannel,
+  canSubscribeToChat,
   chatsById,
   openChatWithInfo,
   openMessageTextSearch,
   pinMessage,
   focusMessage,
   openChat,
+  joinChannel,
 }) => {
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
@@ -115,6 +125,12 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       openChat({ id: undefined });
     }
   }, [openChat, chatId, isLeftColumnShown]);
+
+  const handleChannelSubscribeClick = useCallback(() => {
+    if (canSubscribeToChat) {
+      joinChannel({ chatId });
+    }
+  }, [joinChannel, chatId]);
 
   const unreadCount = useMemo(() => {
     if (!shouldShowRevealButton || !chatsById) {
@@ -171,7 +187,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
       </div>
 
-      {pinnedMessage && (
+      {pinnedMessage && !canSubscribeToChat && (
         <HeaderPinnedMessage
           message={pinnedMessage}
           onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
@@ -179,8 +195,11 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       )}
       <HeaderActions
+        isChannel={isChannel}
+        canSubscribe={canSubscribeToChat}
         isRightColumnShown={isRightColumnShown}
         onSearchClick={handleSearchClick}
+        onSubscribeChannel={handleChannelSubscribeClick}
       />
     </div>
   );
@@ -198,11 +217,14 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const { typingStatus } = chat || {};
+    const isChannel = chat && isChatChannel(chat);
 
     const state = {
       typingStatus,
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),
+      isChannel,
+      canSubscribeToChat: chat && (isChannel || isChatSuperGroup(chat)) && chat.hasLeft,
       chatsById,
     };
 
@@ -235,5 +257,6 @@ export default memo(withGlobal<OwnProps>(
     'pinMessage',
     'focusMessage',
     'openChat',
+    'joinChannel',
   ]),
 )(MiddleHeader));

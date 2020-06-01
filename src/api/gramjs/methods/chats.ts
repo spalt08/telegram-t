@@ -396,6 +396,16 @@ export async function editChannelPhoto({
   }), true);
 }
 
+export async function joinChannel({
+  channelId, accessHash,
+}: {
+  channelId: number; accessHash: string;
+}) {
+  return invokeRequest(new GramJs.channels.JoinChannel({
+    channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
+  }), true);
+}
+
 export async function createGroupChat({
   title, users,
 }: {
