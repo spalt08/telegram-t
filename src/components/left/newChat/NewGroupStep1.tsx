@@ -13,13 +13,13 @@ import { getSortedUserIds, getUserFullName } from '../../../modules/helpers';
 
 import Picker from '../../common/Picker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
-
-import './NewGroup.scss';
+import Button from '../../ui/Button';
 
 export type OwnProps = {
   selectedMemberIds: number[];
   onSelectedMemberIdsChange: (ids: number[]) => void;
   onNextStep: () => void;
+  onReset: () => void;
 };
 
 type StateProps = {
@@ -35,6 +35,7 @@ const NewGroupStep1: FC<OwnProps & StateProps & DispatchProps> = ({
   selectedMemberIds,
   onSelectedMemberIdsChange,
   onNextStep,
+  onReset,
   usersById,
   contactIds,
   loadContactList,
@@ -74,21 +75,34 @@ const NewGroupStep1: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="NewGroup step-1">
-      <Picker
-        itemIds={displayedIds}
-        selectedIds={selectedMemberIds}
-        filterValue={filter}
-        filterPlaceholder="Add People..."
-        onSelectedIdsChange={onSelectedMemberIdsChange}
-        onFilterChange={setFilter}
-      />
+      <div className="LeftHeader">
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          onClick={onReset}
+        >
+          <i className="icon-back" />
+        </Button>
+        <h3>Add Members</h3>
+      </div>
+      <div className="NewGroup-inner step-1">
+        <Picker
+          itemIds={displayedIds}
+          selectedIds={selectedMemberIds}
+          filterValue={filter}
+          filterPlaceholder="Add People..."
+          onSelectedIdsChange={onSelectedMemberIdsChange}
+          onFilterChange={setFilter}
+        />
 
-      <FloatingActionButton
-        show={Boolean(selectedMemberIds.length)}
-        onClick={handleNextStep}
-      >
-        <i className="icon-next" />
-      </FloatingActionButton>
+        <FloatingActionButton
+          show={Boolean(selectedMemberIds.length)}
+          onClick={handleNextStep}
+        >
+          <i className="icon-next" />
+        </FloatingActionButton>
+      </div>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { FC } from '../../lib/teact/teact';
 
 import { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 import { formatPastTimeShort } from '../../util/dateFormat';
-import MessageOutgoingStatus from '../common/MessageOutgoingStatus';
+import MessageOutgoingStatus from './MessageOutgoingStatus';
 import './LastMessageMeta.scss';
 
 type OwnProps = {

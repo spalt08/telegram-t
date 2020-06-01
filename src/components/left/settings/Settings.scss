@@ -1,5 +1,29 @@
 #Settings {
   height: 100%;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.settings-main-header {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-more-menu {
+  .bubble {
+    width: auto;
+
+    .MenuItem button {
+      padding-left: 1rem !important;
+      padding-right: 2rem !important;
+    }
+  }
 }
 
 .settings-content {

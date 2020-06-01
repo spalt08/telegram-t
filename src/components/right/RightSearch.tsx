@@ -20,9 +20,9 @@ import renderText from '../common/helpers/renderText';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-import LastMessageMeta from '../left/LastMessageMeta';
 import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import LastMessageMeta from '../common/LastMessageMeta';
 import Avatar from '../common/Avatar';
 
 import './RightSearch.scss';

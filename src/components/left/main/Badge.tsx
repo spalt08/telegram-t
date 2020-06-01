@@ -1,7 +1,7 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC } from '../../../lib/teact/teact';
 
-import { ApiChat } from '../../api/types';
-import { formatIntegerCompact } from '../../util/textFormat';
+import { ApiChat } from '../../../api/types';
+import { formatIntegerCompact } from '../../../util/textFormat';
 
 import './Badge.scss';
 

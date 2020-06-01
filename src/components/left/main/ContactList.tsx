@@ -1,19 +1,19 @@
 import React, {
   FC, useEffect, useCallback, useMemo, memo,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
-import { ApiUser } from '../../api/types';
+import { GlobalActions } from '../../../global/types';
+import { ApiUser } from '../../../api/types';
 
-import { throttle } from '../../util/schedulers';
-import searchWords from '../../util/searchWords';
-import { pick } from '../../util/iteratees';
-import { getUserFullName, getSortedUserIds } from '../../modules/helpers';
+import { throttle } from '../../../util/schedulers';
+import searchWords from '../../../util/searchWords';
+import { pick } from '../../../util/iteratees';
+import { getUserFullName, getSortedUserIds } from '../../../modules/helpers';
 
-import PrivateChatInfo from '../common/PrivateChatInfo';
-import RippleEffect from '../ui/RippleEffect';
-import Loading from '../ui/Loading';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
+import RippleEffect from '../../ui/RippleEffect';
+import Loading from '../../ui/Loading';
 
 import './ContactList.scss';
 

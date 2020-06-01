@@ -1,5 +1,5 @@
 import React, {
-  FC, useState, useCallback, useEffect, useRef, memo,
+  FC, useState, useCallback, useEffect, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -8,20 +8,12 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
-import { IS_TOUCH_ENV } from '../../util/environment';
 
 import Transition from '../ui/Transition';
-import LeftHeader from './LeftHeader';
-import ConnectionState from './ConnectionState';
-import ChatList from './ChatList';
-import LeftRecent from './LeftRecent.async';
-import LeftSearch from './LeftSearch.async';
+import LeftMain from './main/LeftMain';
 import Settings from './settings/Settings.async';
-import ContactList from './ContactList.async';
 import NewChannel from './newChat/NewChannel.async';
-import NewGroupStep1 from './newChat/NewGroupStep1.async';
-import NewGroupStep2 from './newChat/NewGroupStep2.async';
-import NewChatButton from './NewChatButton';
+import NewGroup from './newChat/NewGroup.async';
 
 import './LeftColumn.scss';
 
@@ -31,11 +23,18 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery' | 'resetChatCreation'>;
 
-const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
+enum ContentType {
+  Main,
+  // eslint-disable-next-line no-shadow
+  Settings,
+  Contacts,
+  // eslint-disable-next-line no-shadow
+  NewGroup,
+  // eslint-disable-next-line no-shadow
+  NewChannel
+}
 
 const RESET_TRANSITION_DELAY_MS = 250;
-const BUTTON_CLOSE_DELAY_MS = 250;
-let closeTimeout: number;
 
 const LeftColumn: FC<StateProps & DispatchProps> = ({
   searchQuery,
@@ -46,13 +45,22 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
 
-  const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
-  const [newGroupMemberIds, setNewGroupMemberIds] = useState<number[]>([]);
-
-  const isMouseInside = useRef(false);
-
   // Used to reset child components in background.
   const [lastResetTime, setLastResetTime] = useState<number>(0);
+
+  let contentType: ContentType = ContentType.Main;
+  switch (content) {
+    case LeftColumnContent.Settings:
+      contentType = ContentType.Settings;
+      break;
+    case LeftColumnContent.NewChannel:
+      contentType = ContentType.NewChannel;
+      break;
+    case LeftColumnContent.NewGroupStep1:
+    case LeftColumnContent.NewGroupStep2:
+      contentType = ContentType.NewGroup;
+      break;
+  }
 
   const handleReset = useCallback((forceReturnToChatList?: boolean) => {
     if (
@@ -88,7 +96,6 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
 
     setContent(LeftColumnContent.ChatList);
     setContactsFilter('');
-    setNewGroupMemberIds([]);
     setGlobalSearchQuery({ query: '' });
     resetChatCreation();
     setTimeout(() => {
@@ -109,143 +116,57 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [content, setGlobalSearchQuery, searchQuery]);
 
-  const handleSelectSettings = useCallback(() => {
-    setContent(LeftColumnContent.Settings);
-  }, []);
-
-  const handleSelectContacts = useCallback(() => {
-    setContent(LeftColumnContent.Contacts);
-  }, []);
-
-  const handleSelectNewChannel = useCallback(() => {
-    setContent(LeftColumnContent.NewChannel);
-  }, []);
-
-  const handleSelectNewGroup = useCallback(() => {
-    setContent(LeftColumnContent.NewGroupStep1);
-  }, []);
-
-  const handleNewGroupNextStep = useCallback(() => {
-    setContent(LeftColumnContent.NewGroupStep2);
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    if (content !== LeftColumnContent.ChatList) {
-      return;
-    }
-    isMouseInside.current = true;
-    setIsNewChatButtonShown(true);
-  }, [content]);
-
-  const handleMouseLeave = useCallback(() => {
-    isMouseInside.current = false;
-
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-    }
-
-    closeTimeout = window.setTimeout(() => {
-      if (!isMouseInside.current) {
-        setIsNewChatButtonShown(false);
-      }
-    }, BUTTON_CLOSE_DELAY_MS);
-  }, []);
-
   useEffect(
     () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(() => handleReset()) : undefined),
     [content, handleReset],
   );
 
-  useEffect(() => {
-    let autoCloseTimeout: number;
-    if (content !== LeftColumnContent.ChatList) {
-      autoCloseTimeout = window.setTimeout(() => {
-        setIsNewChatButtonShown(false);
-      }, BUTTON_CLOSE_DELAY_MS);
-    } else if (isMouseInside.current) {
-      setIsNewChatButtonShown(true);
-    }
-
-    return () => {
-      if (autoCloseTimeout) {
-        clearTimeout(autoCloseTimeout);
-      }
-    };
-  }, [content]);
-
-  function renderContent() {
-    switch (content) {
-      case LeftColumnContent.ChatList:
-        return <ChatList />;
-      case LeftColumnContent.RecentChats:
-        return <LeftRecent onReset={handleReset} />;
-      case LeftColumnContent.GlobalSearch:
-        return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
-      case LeftColumnContent.Settings:
-        return (
-          <Settings
-            currentScreen={settingsScreen}
-            onScreenSelect={setSettingsScreen}
-          />
-        );
-      case LeftColumnContent.Contacts:
-        return <ContactList filter={contactsFilter} />;
-      case LeftColumnContent.NewChannel:
-        return (
-          <NewChannel
-            key={lastResetTime}
-            onReset={handleReset}
-          />
-        );
-      case LeftColumnContent.NewGroupStep1:
-        return (
-          <NewGroupStep1
-            key={lastResetTime}
-            selectedMemberIds={newGroupMemberIds}
-            onSelectedMemberIdsChange={setNewGroupMemberIds}
-            onNextStep={handleNewGroupNextStep}
-          />
-        );
-      case LeftColumnContent.NewGroupStep2:
-        return (
-          <NewGroupStep2
-            key={lastResetTime}
-            memberIds={newGroupMemberIds}
-            onReset={handleReset}
-          />
-        );
-      default:
-        return undefined;
-    }
-  }
-
   return (
-    <div
+    <Transition
       id="LeftColumn"
-      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      name="zoom-fade"
+      activeKey={contentType}
     >
-      <LeftHeader
-        content={content}
-        settingsScreen={settingsScreen}
-        contactsFilter={contactsFilter}
-        onSearchQuery={handleSearchQuery}
-        onSelectSettings={handleSelectSettings}
-        onSelectContacts={handleSelectContacts}
-        onSelectNewGroup={handleSelectNewGroup}
-        onReset={handleReset}
-      />
-      <ConnectionState />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
-        {renderContent}
-      </Transition>
-      <NewChatButton
-        isShown={isNewChatButtonShown}
-        onNewPrivateChat={handleSelectContacts}
-        onNewChannel={handleSelectNewChannel}
-        onNewGroup={handleSelectNewGroup}
-      />
-    </div>
+      {() => {
+        switch (contentType) {
+          case ContentType.Settings:
+            return (
+              <Settings
+                currentScreen={settingsScreen}
+                onScreenSelect={setSettingsScreen}
+                onReset={handleReset}
+              />
+            );
+          case ContentType.NewChannel:
+            return (
+              <NewChannel
+                key={lastResetTime}
+                onReset={handleReset}
+              />
+            );
+          case ContentType.NewGroup:
+            return (
+              <NewGroup
+                key={lastResetTime}
+                content={content}
+                onContentChange={setContent}
+                onReset={handleReset}
+              />
+            );
+          default:
+            return (
+              <LeftMain
+                content={content}
+                searchQuery={searchQuery}
+                contactsFilter={contactsFilter}
+                onContentChange={setContent}
+                onSearchQuery={handleSearchQuery}
+                onReset={handleReset}
+              />
+            );
+        }
+      }}
+    </Transition>
   );
 };
 

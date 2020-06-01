@@ -1,9 +1,9 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC } from '../../../lib/teact/teact';
+import { Bundles } from '../../../util/moduleLoader';
 import { OwnProps } from './LeftSearch';
-import { Bundles } from '../../util/moduleLoader';
 
-import useModuleLoader from '../../hooks/useModuleLoader';
-import Loading from '../ui/Loading';
+import useModuleLoader from '../../../hooks/useModuleLoader';
+import Loading from '../../ui/Loading';
 
 const LeftSearchAsync: FC<OwnProps> = (props) => {
   const LeftSearch = useModuleLoader(Bundles.Extra, 'LeftSearch');

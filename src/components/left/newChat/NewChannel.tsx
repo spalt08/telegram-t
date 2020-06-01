@@ -12,6 +12,7 @@ import InputText from '../../ui/InputText';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import Spinner from '../../ui/Spinner';
 import AvatarEditable from '../../ui/AvatarEditable';
+import Button from '../../ui/Button';
 
 import './NewChannel.scss';
 
@@ -72,25 +73,38 @@ const NewChannel: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="NewChannel">
-      <AvatarEditable
-        onChange={setPhoto}
-        title="Set Channel photo"
-      />
-      <InputText
-        value={title}
-        onChange={handleTitleChange}
-        label="Channel title"
-        error={error === CHAT_TITLE_EMPTY ? error : undefined}
-      />
-      <InputText
-        value={about}
-        onChange={handleDescriptionChange}
-        label="Description (optional)"
-      />
-      <p className="note">You can provide an optional description for your channel.</p>
-      {creationError && (
-        <p className="error">{creationError}</p>
-      )}
+      <div className="LeftHeader">
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          onClick={onReset}
+        >
+          <i className="icon-back" />
+        </Button>
+        <h3>New Channel</h3>
+      </div>
+      <div className="NewChannel-inner">
+        <AvatarEditable
+          onChange={setPhoto}
+          title="Set Channel photo"
+        />
+        <InputText
+          value={title}
+          onChange={handleTitleChange}
+          label="Channel title"
+          error={error === CHAT_TITLE_EMPTY ? error : undefined}
+        />
+        <InputText
+          value={about}
+          onChange={handleDescriptionChange}
+          label="Description (optional)"
+        />
+        <p className="note">You can provide an optional description for your channel.</p>
+        {creationError && (
+          <p className="error">{creationError}</p>
+        )}
+      </div>
 
       <FloatingActionButton
         show={title.length !== 0}

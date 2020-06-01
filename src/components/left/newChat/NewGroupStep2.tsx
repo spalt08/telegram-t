@@ -12,8 +12,7 @@ import InputText from '../../ui/InputText';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import Spinner from '../../ui/Spinner';
 import AvatarEditable from '../../ui/AvatarEditable';
-
-import './NewGroup.scss';
+import Button from '../../ui/Button';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 export type OwnProps = {
@@ -79,30 +78,43 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
   const renderedError = creationError || (error !== CHAT_TITLE_EMPTY ? error : undefined);
 
   return (
-    <div className="NewGroup step-2">
-      <AvatarEditable
-        onChange={setPhoto}
-        title="Set Group photo"
-      />
-      <InputText
-        value={title}
-        onChange={handleTitleChange}
-        label="Group title"
-        error={error === CHAT_TITLE_EMPTY ? error : undefined}
-      />
+    <div className="NewGroup">
+      <div className="LeftHeader">
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          onClick={onReset}
+        >
+          <i className="icon-back" />
+        </Button>
+        <h3>New Group</h3>
+      </div>
+      <div className="NewGroup-inner step-2">
+        <AvatarEditable
+          onChange={setPhoto}
+          title="Set Group photo"
+        />
+        <InputText
+          value={title}
+          onChange={handleTitleChange}
+          label="Group title"
+          error={error === CHAT_TITLE_EMPTY ? error : undefined}
+        />
 
-      {renderedError && (
-        <p className="error">{renderedError}</p>
-      )}
+        {renderedError && (
+          <p className="error">{renderedError}</p>
+        )}
 
-      <h3 className="group-members-heading">{memberIds.length} members</h3>
+        <h3 className="group-members-heading">{memberIds.length} members</h3>
 
-      <div className="group-members-list custom-scroll">
-        {memberIds.map((id) => (
-          <div className="chat-item-clickable">
-            <PrivateChatInfo userId={id} />
-          </div>
-        ))}
+        <div className="group-members-list custom-scroll">
+          {memberIds.map((id) => (
+            <div className="chat-item-clickable">
+              <PrivateChatInfo userId={id} />
+            </div>
+          ))}
+        </div>
       </div>
 
       <FloatingActionButton

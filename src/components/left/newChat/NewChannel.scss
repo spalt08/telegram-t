@@ -1,7 +1,13 @@
 .NewChannel {
   height: 100%;
-  padding: 0 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: relative;
+
+  &-inner {
+    padding: 0 1.25rem 1.25rem;
+  }
 
   .note, .error {
     font-size: 0.875rem;

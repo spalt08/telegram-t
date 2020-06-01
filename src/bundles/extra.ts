@@ -3,11 +3,12 @@ export { default as DeleteMessageModal } from '../components/common/DeleteMessag
 
 export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
 
-export { default as LeftRecent } from '../components/left/LeftRecent';
-export { default as LeftSearch } from '../components/left/LeftSearch';
+export { default as LeftRecent } from '../components/left/main/LeftRecent';
+export { default as LeftSearch } from '../components/left/main/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';
-export { default as ContactList } from '../components/left/ContactList';
+export { default as ContactList } from '../components/left/main/ContactList';
 export { default as NewChannel } from '../components/left/newChat/NewChannel';
+export { default as NewGroup } from '../components/left/newChat/NewGroup';
 export { default as NewGroupStep1 } from '../components/left/newChat/NewGroupStep1';
 export { default as NewGroupStep2 } from '../components/left/newChat/NewGroupStep2';
 

@@ -1,16 +1,16 @@
-import React, { FC, memo, useMemo } from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+import React, { FC, memo, useMemo } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
-import { ApiChat } from '../../api/types';
+import { GlobalActions } from '../../../global/types';
+import { ApiChat } from '../../../api/types';
 
-import usePrevious from '../../hooks/usePrevious';
-import { mapValues, pick } from '../../util/iteratees';
-import { getChatOrder } from '../../modules/helpers';
-import prepareChats from '../common/helpers/prepareChats';
+import usePrevious from '../../../hooks/usePrevious';
+import { mapValues, pick } from '../../../util/iteratees';
+import { getChatOrder } from '../../../modules/helpers';
+import prepareChats from '../../common/helpers/prepareChats';
 
-import InfiniteScroll from '../ui/InfiniteScroll';
-import Loading from '../ui/Loading';
+import InfiniteScroll from '../../ui/InfiniteScroll';
+import Loading from '../../ui/Loading';
 import Chat from './Chat';
 
 import './ChatList.scss';

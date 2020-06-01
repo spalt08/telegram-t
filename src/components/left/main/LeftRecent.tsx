@@ -1,19 +1,19 @@
 import React, {
   FC, useEffect, useCallback, useRef, memo,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
-import { ApiUser } from '../../api/types';
+import { GlobalActions } from '../../../global/types';
+import { ApiUser } from '../../../api/types';
 
-import { getUserFirstName, isChatPrivate } from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
-import { throttle } from '../../util/schedulers';
-import { pick } from '../../util/iteratees';
+import { getUserFirstName, isChatPrivate } from '../../../modules/helpers';
+import renderText from '../../common/helpers/renderText';
+import { throttle } from '../../../util/schedulers';
+import { pick } from '../../../util/iteratees';
 
-import Avatar from '../common/Avatar';
-import PrivateChatInfo from '../common/PrivateChatInfo';
-import GroupChatInfo from '../common/GroupChatInfo';
+import Avatar from '../../common/Avatar';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
+import GroupChatInfo from '../../common/GroupChatInfo';
 
 export type OwnProps = {
   onReset: () => void;

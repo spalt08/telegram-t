@@ -1,29 +1,29 @@
 import React, {
   FC, useCallback, useMemo, memo,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
-import { ApiUser, ApiChat, ApiMessage } from '../../api/types';
-import { GlobalActions } from '../../global/types';
+import { ApiUser, ApiChat, ApiMessage } from '../../../api/types';
+import { GlobalActions } from '../../../global/types';
 
-import searchWords from '../../util/searchWords';
-import { unique, pick } from '../../util/iteratees';
+import searchWords from '../../../util/searchWords';
+import { unique, pick } from '../../../util/iteratees';
 import {
   getUserFullName,
   isChatPrivate,
   getChatTitle,
   getSenderName,
   getMessageSummaryText,
-} from '../../modules/helpers';
-import renderText from '../common/helpers/renderText';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+} from '../../../modules/helpers';
+import renderText from '../../common/helpers/renderText';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
-import GroupChatInfo from '../common/GroupChatInfo';
-import PrivateChatInfo from '../common/PrivateChatInfo';
-import Avatar from '../common/Avatar';
-import RippleEffect from '../ui/RippleEffect';
-import InfiniteScroll from '../ui/InfiniteScroll';
-import LastMessageMeta from './LastMessageMeta';
+import GroupChatInfo from '../../common/GroupChatInfo';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Avatar from '../../common/Avatar';
+import LastMessageMeta from '../../common/LastMessageMeta';
+import RippleEffect from '../../ui/RippleEffect';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 
 export type OwnProps = {
   searchQuery?: string;

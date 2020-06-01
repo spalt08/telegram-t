@@ -1,12 +1,12 @@
 import React, {
   FC, memo, useCallback, useLayoutEffect, useRef,
-} from '../../lib/teact/teact';
-import { withGlobal } from '../../lib/teact/teactn';
+} from '../../../lib/teact/teact';
+import { withGlobal } from '../../../lib/teact/teactn';
 
-import { GlobalActions } from '../../global/types';
+import { GlobalActions } from '../../../global/types';
 import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText,
-} from '../../api/types';
+} from '../../../api/types';
 
 import {
   getChatTitle,
@@ -16,22 +16,22 @@ import {
   getPrivateChatUserId,
   getMessageAction,
   getSenderName,
-} from '../../modules/helpers';
+} from '../../../modules/helpers';
 import {
   selectChat, selectUser, selectChatMessage, selectOutgoingStatus,
-} from '../../modules/selectors';
-import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
-import renderText from '../common/helpers/renderText';
-import { fastRaf } from '../../util/schedulers';
-import buildClassName from '../../util/buildClassName';
-import { pick } from '../../util/iteratees';
-import useEnsureMessage from '../../hooks/useEnsureMessage';
+} from '../../../modules/selectors';
+import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
+import renderText from '../../common/helpers/renderText';
+import { fastRaf } from '../../../util/schedulers';
+import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
+import useEnsureMessage from '../../../hooks/useEnsureMessage';
 
-import Avatar from '../common/Avatar';
-import RippleEffect from '../ui/RippleEffect';
-import VerifiedIcon from '../common/VerifiedIcon';
-import TypingStatus from '../common/TypingStatus';
-import LastMessageMeta from './LastMessageMeta';
+import RippleEffect from '../../ui/RippleEffect';
+import Avatar from '../../common/Avatar';
+import VerifiedIcon from '../../common/VerifiedIcon';
+import TypingStatus from '../../common/TypingStatus';
+import LastMessageMeta from '../../common/LastMessageMeta';
 import Badge from './Badge';
 
 import './Chat.scss';
