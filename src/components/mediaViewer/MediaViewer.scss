@@ -74,9 +74,11 @@
     align-items: center;
 
     &.has-footer {
-      min-width: 600px;
       padding-top: 4.25rem;
       padding-bottom: 7rem;
+      @media (min-width: 600px) {
+        min-width: 600px;
+      }
 
       @media (max-height: 640px) {
         padding-top: 2.25rem;
