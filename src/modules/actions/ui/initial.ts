@@ -1,6 +1,6 @@
 import { addReducer } from '../../../lib/teact/teactn';
 
-import { IS_EMOJI_SUPPORTED, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 addReducer('init', (global) => {
   const { animationLevel } = global.settings.byKey;

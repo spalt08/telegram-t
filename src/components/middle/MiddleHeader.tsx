@@ -130,7 +130,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     if (canSubscribeToChat) {
       joinChannel({ chatId });
     }
-  }, [joinChannel, chatId]);
+  }, [canSubscribeToChat, joinChannel, chatId]);
 
   const unreadCount = useMemo(() => {
     if (!shouldShowRevealButton || !chatsById) {

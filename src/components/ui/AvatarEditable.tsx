@@ -1,5 +1,7 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState, useEffect, memo } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, memo,
+} from '../../lib/teact/teact';
 
 import CropModal from './CropModal';
 
