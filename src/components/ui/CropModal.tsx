@@ -44,14 +44,14 @@ async function initCropper(imgFile: File) {
     const { offsetWidth, offsetHeight } = cropContainer;
 
     cropper = new Croppie(cropContainer, {
-      enableZoom: false,
+      enableZoom: true,
       boundary: {
         width: offsetWidth,
         height: offsetHeight,
       },
       viewport: {
-        width: offsetWidth * 0.9,
-        height: offsetHeight * 0.9,
+        width: offsetWidth - 16,
+        height: offsetHeight - 16,
         type: 'circle',
       },
     });
