@@ -127,7 +127,11 @@ export function getMessageMediaHash(
           return undefined;
         }
 
-        return canMessagePlayVideoInline(video) ? base : `${base}?size=m`;
+        if (canMessagePlayVideoInline(video)) {
+          return base;
+        }
+
+        return `${base}?size=m`;
       case 'pictogram':
         return `${base}?size=m`;
       case 'viewerPreview':
@@ -179,7 +183,7 @@ export function hasMessageLocalBlobUrl(message: ApiMessage) {
 }
 
 export function canMessagePlayVideoInline(video: ApiVideo): boolean {
-  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE || !video.thumbnail;
+  return video.isGif || video.isRound || video.size <= MAX_INLINE_VIDEO_SIZE;
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {

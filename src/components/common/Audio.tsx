@@ -1,16 +1,19 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
+import {
+  ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
+} from '../../api/types';
 
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
-import { isOwnMessage, getMessageMediaHash, getMediaTransferState } from '../../modules/helpers';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
-import useShowTransition from '../../hooks/useShowTransition';
+import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
+import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useShowTransition from '../../hooks/useShowTransition';
+import useBuffering from '../../hooks/useBuffering';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -58,12 +61,13 @@ const Audio: FC<OwnProps> = ({
 
   const {
     mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !isActive);
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !isActive, ApiMediaFormat.Progressive);
+  const { isBuffered, handleBuffering } = useBuffering();
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !mediaData);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isBuffered);
   const {
-    shouldRender: shouldSpinnerRender,
+    shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring);
 
@@ -105,6 +109,7 @@ const Audio: FC<OwnProps> = ({
         audioEl.addEventListener('ended', () => {
           setPlayState(PlayState.Paused);
         });
+        audioEl.addEventListener('playing', handleBuffering);
         audioRef.current = audioEl;
       }
 
@@ -118,7 +123,7 @@ const Audio: FC<OwnProps> = ({
         audioRef.current.pause();
       }
     }
-  }, [mediaData, isActive, isMediaUnread, onReadMedia]);
+  }, [mediaData, isActive, isMediaUnread, onReadMedia, handleBuffering]);
 
   useEffect(() => {
     return () => {
@@ -162,7 +167,7 @@ const Audio: FC<OwnProps> = ({
   );
 
   const buttonClassNames = ['toggle-play'];
-  if (shouldSpinnerRender) {
+  if (shouldRenderSpinner) {
     buttonClassNames.push('loading');
   } else if (isActive) {
     buttonClassNames.push('pause');
@@ -182,7 +187,7 @@ const Audio: FC<OwnProps> = ({
         <i className="icon-play" />
         <i className="icon-pause" />
       </Button>
-      {shouldSpinnerRender && (
+      {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner
             progress={transferProgress}

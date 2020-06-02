@@ -128,7 +128,10 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   }
 }
 
-export function downloadMedia(args: { url: string; mediaFormat: ApiMediaFormat }, onProgress?: ApiOnProgress) {
+export function downloadMedia(
+  args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number },
+  onProgress?: ApiOnProgress,
+) {
   return downloadMediaWithClient(args, client, isConnected, onProgress);
 }
 

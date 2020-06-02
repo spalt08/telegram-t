@@ -177,6 +177,14 @@
 
     &.interactive {
       cursor: pointer;
+
+      &:hover .message-media-play-button {
+        opacity: 1;
+      }
+
+      &.dark {
+        background: #232323;
+      }
     }
   }
 
@@ -252,6 +260,9 @@
     border-radius: 50%;
     background: rgba(black, 0.25);
     padding: 0.5rem;
+
+    opacity: .7;
+    transition: opacity .15s;
 
     i {
       font-size: 2.5rem;

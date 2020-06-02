@@ -16,6 +16,7 @@ import {
   selectFirstUnreadId,
   selectFocusedMessageId,
   selectChat,
+  selectIsMediaViewerOpen,
 } from '../../modules/selectors';
 import {
   getMessageOriginalId,
@@ -61,6 +62,7 @@ type StateProps = {
   isFocusing?: boolean;
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
+  isMediaViewerOpen?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -104,6 +106,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   markChatRead,
   markMessagesRead,
   setChatScrollOffset,
+  isMediaViewerOpen,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const scrollOffsetRef = useRef<number>();
@@ -424,7 +427,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     return messageIds ? (
       // @ts-ignore
       <div className="messages-container" teactFastList>
-        {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
+        {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate, isMediaViewerOpen)}
       </div>
     ) : (
       <Loading color="white" />
@@ -442,6 +445,7 @@ function renderMessages(
   messageGroups: MessageDateGroup[],
   viewportMessageIds: number[],
   isPrivate: boolean,
+  isMediaViewerOpen?: boolean,
 ) {
   const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
@@ -492,7 +496,7 @@ function renderMessages(
             && dateGroupIndex === dateGroupsArray.length - 1
           ),
         };
-        const loadAndPlayMedia = (
+        const loadAndPlayMedia = !isMediaViewerOpen && (
           viewportMessageIds.includes(message.id)
           || (!!message.previousLocalId && viewportMessageIds.includes(message.previousLocalId))
         );
@@ -611,6 +615,7 @@ export default memo(withGlobal<OwnProps>(
       firstUnreadId: selectFirstUnreadId(global, chatId),
       isViewportNewest: selectIsViewportNewest(global, chatId),
       isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
+      isMediaViewerOpen: selectIsMediaViewerOpen(global),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

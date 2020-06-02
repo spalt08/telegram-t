@@ -6,7 +6,6 @@ import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
 
 type RequestStates = {
-  promise: Promise<ThenArg<MethodResponse<keyof Methods>>>; // Re-wrap because of `postMessage`
   resolve: Function;
   reject: Function;
   callback: AnyToVoidFunction;
@@ -74,7 +73,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
         }
       }
     } else if (data.type === 'methodCallback') {
-      if (requestStates[data.messageId]) {
+      if (requestStates[data.messageId] && requestStates[data.messageId].callback) {
         requestStates[data.messageId].callback(...data.callbackArgs);
       }
     } else if (data.type === 'unhandledError') {
@@ -91,11 +90,13 @@ function makeRequest(message: OriginRequest) {
   };
 
   requestStates[messageId] = {} as RequestStates;
-  requestStates[messageId].promise = new Promise((resolve, reject) => {
+
+  // Re-wrap type because of `postMessage`
+  const promise: Promise<ThenArg<MethodResponse<keyof Methods>>> = new Promise((resolve, reject) => {
     Object.assign(requestStates[messageId], { resolve, reject });
   });
 
-  requestStates[messageId].promise.then(
+  promise.then(
     () => {
       delete requestStates[messageId];
     },
@@ -110,5 +111,5 @@ function makeRequest(message: OriginRequest) {
 
   worker.postMessage(payload);
 
-  return requestStates[messageId].promise;
+  return promise;
 }

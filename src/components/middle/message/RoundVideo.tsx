@@ -15,11 +15,13 @@ import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadPro
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
+import useBuffering from '../../../hooks/useBuffering';
 import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
 import './RoundVideo.scss';
+import buildClassName from '../../../util/buildClassName';
 
 type OwnProps = {
   message: ApiMessage;
@@ -37,17 +39,25 @@ const RoundVideo: FC<OwnProps> = ({
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
 
+  const video = message.content.video!;
+  const isProgressive = video.supportsStreaming;
+
   const [isDownloadAllowed, setIsDownloadAllowed] = useState(AUTO_LOAD_MEDIA);
-  const shouldDownload = isDownloadAllowed && loadAndPlay;
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
-    getMessageMediaHash(message, 'inline'), !shouldDownload, undefined, lastSyncTime,
+  const shouldDownload = Boolean(isDownloadAllowed && loadAndPlay && lastSyncTime);
+  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
+    getMessageMediaHash(message, 'inline'),
+    !shouldDownload,
+    isProgressive ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+    lastSyncTime,
   );
-  const isTransferring = isDownloadAllowed && !mediaData;
+
+  const { isBuffered, handleBuffering } = useBuffering();
+  const isTransferring = isDownloadAllowed && !isBuffered;
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasDownloadDisabled);
+  } = useShowTransition(isTransferring || (isProgressive && !isBuffered), undefined, wasDownloadDisabled);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
 
   const [isActivated, setIsActivated] = useState<boolean>(false);
@@ -115,8 +125,6 @@ const RoundVideo: FC<OwnProps> = ({
     });
   }, []);
 
-  const video = message.content.video!;
-
   return (
     <div
       className="RoundVideo media-inner"
@@ -134,22 +142,26 @@ const RoundVideo: FC<OwnProps> = ({
         </div>
       )}
       {mediaData && (
-        // eslint-disable-next-line jsx-a11y/media-has-caption
-        <video
-          className={`full-media ${transitionClassNames}`}
-          width={ROUND_VIDEO_DIMENSIONS}
-          height={ROUND_VIDEO_DIMENSIONS}
-          autoPlay={!isActivated}
-          muted={!isActivated}
-          loop={!isActivated}
-          playsinline
-          poster={thumbDataUri}
-          ref={playerRef}
-          onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
-          onEnded={isActivated ? handleEnded : undefined}
-        >
-          <source src={mediaData} />
-        </video>
+        <div className="video-wrapper">
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            ref={playerRef}
+            className={buildClassName('full-media', isTransferring && 'blur', transitionClassNames)}
+            width={ROUND_VIDEO_DIMENSIONS}
+            height={ROUND_VIDEO_DIMENSIONS}
+            autoPlay={!isActivated}
+            muted={!isActivated}
+            loop={!isActivated}
+            playsInline
+            poster={thumbDataUri}
+            onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
+            onEnded={isActivated ? handleEnded : undefined}
+            onProgress={handleBuffering}
+            onPlay={handleBuffering}
+          >
+            <source src={mediaData} />
+          </video>
+        </div>
       )}
       <div className="progress" ref={playingProgressRef} />
       {shouldSpinnerRender && (

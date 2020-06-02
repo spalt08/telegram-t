@@ -23,6 +23,7 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 // Chunk sizes for upload.getFile must be multiples of the smallest size
 const MIN_CHUNK_SIZE = 4096
 const DEFAULT_CHUNK_SIZE = 64 // kb
+const ONE_MB = 1024 * 1024;
 // All types
 const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's']
 
@@ -310,6 +311,8 @@ class TelegramClient {
      * @param [args[partSizeKb] {number}]
      * @param [args[fileSize] {number}]
      * @param [args[progressCallback] {Function}]
+     * @param [args[start] {number}]
+     * @param [args[end] {number}]
      * @param [args[dcId] {number}]
      * @returns {Promise<Buffer>}
      */
@@ -325,7 +328,7 @@ class TelegramClient {
                 partSizeKb = utils.getAppropriatedPartSize(fileSize)
             }
         }
-        const partSize = parseInt(partSizeKb * 1024)
+        let partSize = parseInt(partSizeKb * 1024)
         if (partSize % MIN_CHUNK_SIZE !== 0) {
             throw new Error('The part size must be evenly divisible by 4096')
         }
@@ -358,15 +361,24 @@ class TelegramClient {
         }
 
         try {
-            let offset = 0
+            let offset = args.start || 0
+            let limit = partSize
+
             // eslint-disable-next-line no-constant-condition
             while (true) {
+                let precise = false;
+                if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
+                    limit = ONE_MB - offset % ONE_MB
+                    precise = true
+                }
+
                 let result
                 try {
                     result = await sender.send(new requests.upload.GetFile({
                         location: inputLocation,
-                        offset: offset,
-                        limit: partSize,
+                        offset,
+                        limit,
+                        precise
                     }))
                     if (result instanceof constructors.upload.FileCdnRedirect) {
                         throw new Error('not implemented')
@@ -399,7 +411,7 @@ class TelegramClient {
                 }
 
                 // Last chunk.
-                if (result.bytes.length < partSize) {
+                if (result.bytes.length < partSize || (args.end && (offset + result.bytes.length) > args.end)) {
                     return fileWriter.getValue()
                 }
             }
@@ -408,10 +420,7 @@ class TelegramClient {
         }
     }
 
-    async downloadMedia(messageOrMedia, args = {
-        sizeType: null,
-        progressCallback: null,
-    }) {
+    async downloadMedia(messageOrMedia, args) {
         let date
         let media
         if (messageOrMedia instanceof constructors.Message) {
@@ -595,6 +604,8 @@ class TelegramClient {
             {
                 fileSize: size ? size.size : doc.size,
                 progressCallback: args.progressCallback,
+                start: args.start,
+                end: args.end,
                 dcId: doc.dcId,
             },
         )

@@ -265,13 +265,14 @@ function getNodes(message: ApiMessage, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.Inline:
     default:
       containerSelector = `#message${message.id}`;
-      mediaSelector = '.message-content .full-media';
+      mediaSelector = '.message-content .full-media, .message-content img';
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
+  const mediaEls = container && container.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector);
 
   return {
     container,
-    mediaEl: container && container.querySelector(mediaSelector) as HTMLImageElement | HTMLVideoElement,
+    mediaEl: mediaEls && mediaEls[mediaEls.length - 1],
   };
 }

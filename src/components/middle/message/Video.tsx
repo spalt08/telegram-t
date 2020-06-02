@@ -5,14 +5,14 @@ import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 import { AUTO_LOAD_MEDIA } from '../../../config';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
-import { calculateVideoDimensions, AlbumMediaParameters } from '../../common/helpers/mediaDimensions';
+import { AlbumMediaParameters, calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
+  canMessagePlayVideoInline,
+  getMediaTransferState,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   isForwardedMessage,
   isOwnMessage,
-  canMessagePlayVideoInline,
-  getMediaTransferState,
 } from '../../../modules/helpers';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -20,6 +20,7 @@ import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import useBuffering from '../../../hooks/useBuffering';
 
 type OwnProps = {
   id?: string;
@@ -45,26 +46,32 @@ const Video: FC<OwnProps> = ({
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
   const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const canPlayInline = Boolean(localBlobUrl) || canMessagePlayVideoInline(video);
+  const isProgressive = canPlayInline && video.supportsStreaming;
 
   const [isDownloadAllowed, setIsDownloadAllowed] = useState(AUTO_LOAD_MEDIA);
-  const shouldDownload = isDownloadAllowed && loadAndPlay;
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress<ApiMediaFormat.BlobUrl>(
-    getMessageMediaHash(message, 'inline'), !shouldDownload, undefined, lastSyncTime,
+  const shouldDownload = Boolean(isDownloadAllowed && loadAndPlay && lastSyncTime);
+  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
+    getMessageMediaHash(message, 'inline'),
+    !shouldDownload,
+    isProgressive ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+    lastSyncTime,
   );
+
   const fullMediaData = localBlobUrl || mediaData;
+  const isInline = Boolean(canPlayInline && loadAndPlay && fullMediaData);
+  const isHqPreview = mediaData && !canPlayInline;
+
+  const { isBuffered, handleBuffering } = useBuffering();
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !fullMediaData);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && (isInline && !isBuffered));
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasDownloadDisabled);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(fullMediaData, 'slow');
-
-  const canPlayInline = Boolean(localBlobUrl) || canMessagePlayVideoInline(video);
-  const isInline = canPlayInline && loadAndPlay && fullMediaData;
-  const isHqPreview = mediaData && !canPlayInline;
 
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
@@ -75,14 +82,14 @@ const Video: FC<OwnProps> = ({
       if (onCancelUpload) {
         onCancelUpload();
       }
-    } else if (!fullMediaData) {
+    } else if (isInline && !fullMediaData) {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
     } else if (onClick) {
       onClick();
     }
-  }, [fullMediaData, isUploading, onCancelUpload, onClick]);
+  }, [fullMediaData, isInline, isUploading, onCancelUpload, onClick]);
 
-  const className = buildClassName('media-inner', !isUploading && 'interactive');
+  const className = buildClassName('media-inner dark', !isUploading && 'interactive');
 
   return (
     <div
@@ -101,14 +108,16 @@ const Video: FC<OwnProps> = ({
       )}
       {isInline && (
         <video
-          className={`full-media ${transitionClassNames}`}
+          className={buildClassName('full-media', isTransferring && 'blur', transitionClassNames)}
           width={width}
           height={height}
           autoPlay
           muted
           loop
-          playsinline
+          playsInline
           poster={thumbDataUri}
+          onProgress={handleBuffering}
+          onPlay={handleBuffering}
         >
           <source src={fullMediaData} />
         </video>
@@ -122,7 +131,7 @@ const Video: FC<OwnProps> = ({
           alt=""
         />
       )}
-      {isHqPreview && !shouldRenderSpinner && (
+      {!isInline && !shouldRenderSpinner && (
         <div className="media-loading open shown">
           <div className="message-media-play-button">
             <i className="icon-large-play" />

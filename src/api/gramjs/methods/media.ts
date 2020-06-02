@@ -2,7 +2,7 @@ import { inflate } from 'pako/dist/pako_inflate';
 
 import { Api as GramJs, TelegramClient } from '../../../lib/gramjs';
 import {
-  ApiOnProgress, ApiMediaFormat, ApiParsedMedia, ApiPreparedMedia,
+  ApiMediaFormat, ApiOnProgress, ApiParsedMedia, ApiPreparedMedia,
 } from '../../types';
 
 import { MEDIA_CACHE_DISABLED, MEDIA_CACHE_MAX_BYTES, MEDIA_CACHE_NAME } from '../../../config';
@@ -14,12 +14,16 @@ import * as cacheApi from '../../../util/cacheApi';
 type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
 
 export default async function downloadMedia(
-  { url, mediaFormat }: { url: string; mediaFormat: ApiMediaFormat },
+  {
+    url, mediaFormat, start, end,
+  }: {
+    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number;
+  },
   client: TelegramClient,
   isConnected: boolean,
   onProgress?: ApiOnProgress,
 ) {
-  const { data, mimeType } = await download(url, client, isConnected, onProgress) || {};
+  const { data, mimeType, fullSize } = await download(url, client, isConnected, onProgress, start, end) || {};
   if (!data) {
     return undefined;
   }
@@ -29,17 +33,21 @@ export default async function downloadMedia(
     return undefined;
   }
 
-  const canCache = mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= MEDIA_CACHE_MAX_BYTES;
+  const canCache = mediaFormat !== ApiMediaFormat.Progressive && (
+    mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= MEDIA_CACHE_MAX_BYTES
+  );
   if (!MEDIA_CACHE_DISABLED && canCache) {
     void cacheApi.save(MEDIA_CACHE_NAME, url, parsed);
   }
 
   const prepared = prepareMedia(parsed);
 
-  return { prepared, mimeType };
+  return { prepared, mimeType, fullSize };
 }
 
-async function download(url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress) {
+async function download(
+  url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress, start?: number, end?: number,
+) {
   const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
@@ -89,8 +97,11 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
-    const data = await client.downloadMedia(entity, { sizeType, progressCallback: onProgress });
+    const data = await client.downloadMedia(entity, {
+      sizeType, start, end, progressCallback: onProgress,
+    });
     let mimeType;
+    let fullSize;
 
     if (entityType === 'sticker' && sizeType) {
       mimeType = 'image/webp';
@@ -98,11 +109,15 @@ async function download(url: string, client: TelegramClient, isConnected: boolea
       mimeType = 'image/jpeg';
     } else if (entity instanceof GramJs.Message) {
       mimeType = getMessageMediaMimeType(entity);
+      if (entity.media instanceof GramJs.MessageMediaDocument && entity.media.document instanceof GramJs.Document) {
+        fullSize = entity.media.document.size;
+      }
     } else {
       mimeType = (entity as GramJs.Document).mimeType;
+      fullSize = (entity as GramJs.Document).size;
     }
 
-    return { mimeType, data };
+    return { mimeType, data, fullSize };
   } else {
     const data = await client.downloadProfilePhoto(entity, sizeType === 'big');
     const mimeType = 'image/jpeg';

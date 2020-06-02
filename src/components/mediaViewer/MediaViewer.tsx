@@ -1,20 +1,21 @@
 import React, {
-  FC, useEffect, memo, useCallback, useMemo, useState,
+  FC, memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, ApiChat, ApiUser } from '../../api/types';
+import {
+  ApiChat, ApiMediaFormat, ApiMessage, ApiUser,
+} from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  calculateMediaViewerDimensions, MEDIA_VIEWER_MEDIA_QUERY, AVATAR_FULL_DIMENSIONS,
+  AVATAR_FULL_DIMENSIONS,
+  calculateMediaViewerDimensions,
+  MEDIA_VIEWER_MEDIA_QUERY,
 } from '../common/helpers/mediaDimensions';
 import {
-  selectChat,
-  selectChatMessage,
-  selectChatMessages,
-  selectUser,
+  selectChat, selectChatMessage, selectChatMessages, selectUser,
 } from '../../modules/selectors';
 import {
   getChatAvatarHash,
@@ -34,7 +35,7 @@ import useMedia from '../../hooks/useMedia';
 import usePrevious from '../../hooks/usePrevious';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
-import { animateOpening, animateClosing } from './helpers/ghostAnimation';
+import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import { pick } from '../../util/iteratees';
 
 import Spinner from '../ui/Spinner';
@@ -44,7 +45,6 @@ import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
 import VideoPlayer from './VideoPlayer';
-import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewer.scss';
 
@@ -106,12 +106,13 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPictogram = useMedia(message && isFromSharedMedia && getMessageMediaHash(message, 'pictogram'));
   const blobUrlPreview = useMedia(getMediaHash());
-  // TODO Fix race condition for progress callbacks of different slides
-  const {
-    mediaData: blobUrlFull,
-    downloadProgress,
-  } = useMediaWithDownloadProgress(getMediaHash(true));
-  const bestImageData = (!isVideo && blobUrlFull) || blobUrlPreview || blobUrlPictogram || thumbDataUri;
+  const { mediaData: fullMediaData, downloadProgress } = useMediaWithDownloadProgress(
+    getMediaHash(true),
+    undefined,
+    isVideo ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+  );
+
+  const bestImageData = (!isVideo && fullMediaData) || blobUrlPreview || blobUrlPictogram || thumbDataUri;
   const photoDimensions = isPhoto ? getPhotoFullDimensions((
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
@@ -230,7 +231,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     if (avatarOwner) {
       return (
         <div key={chatId} className="media-viewer-content">
-          {renderPhoto(blobUrlFull || blobUrlPreview, calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false))}
+          {renderPhoto(fullMediaData || blobUrlPreview, calculateMediaViewerDimensions(AVATAR_FULL_DIMENSIONS, false))}
         </div>
       );
     } else if (message) {
@@ -240,15 +241,16 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       return (
         <div key={messageId} className={`media-viewer-content ${hasFooter ? 'has-footer' : ''}`}>
           {isPhoto && renderPhoto(
-            blobUrlFull || blobUrlPreview || blobUrlPictogram,
+            fullMediaData || blobUrlPreview || blobUrlPictogram,
             message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
           )}
           {isVideo && renderVideo(
-            blobUrlFull,
+            fullMediaData,
             blobUrlPreview || thumbDataUri,
             downloadProgress,
             message && calculateMediaViewerDimensions(videoDimensions!, hasFooter),
             isGif,
+            isOpen,
           )}
           {textParts && <MediaViewerFooter text={textParts} />}
         </div>
@@ -282,7 +284,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               {renderSenderInfo}
             </Transition>
             <MediaViewerActions
-              blobUrl={blobUrlFull || blobUrlPreview}
+              blobUrl={fullMediaData || blobUrlPreview}
               fileName={fileName}
               onCloseMediaViewer={closeMediaViewer}
               onForward={handleForward}
@@ -328,27 +330,24 @@ function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
 }
 
 function renderVideo(
-  blobUrl?: string, posterData?: string, downloadProgress?: number, posterSize?: IDimensions, isGif?: boolean,
+  fullMediaData?: string,
+  posterData?: string,
+  downloadProgress?: number,
+  posterSize?: IDimensions,
+  isGif?: boolean,
+  isOpen?: boolean,
 ) {
-  if (blobUrl) {
-    return <VideoPlayer key={blobUrl} url={blobUrl} isGif={isGif} />;
-  } else {
-    if (posterData && posterSize) {
-      return (
-        <div className="thumbnail">
-          <img
-            src={posterData}
-            alt=""
-            width={posterSize.width}
-            height={posterSize.height}
-          />
-          <ProgressSpinner progress={downloadProgress} />
-        </div>
-      );
-    }
-
-    return <Spinner color="white" />;
-  }
+  return (
+    <VideoPlayer
+      key={fullMediaData}
+      url={fullMediaData}
+      isGif={isGif}
+      posterData={posterData}
+      posterSize={posterSize}
+      downloadProgress={downloadProgress}
+      isMediaViewerOpen={isOpen}
+    />
+  );
 }
 
 export default memo(withGlobal(
