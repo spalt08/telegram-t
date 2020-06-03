@@ -125,6 +125,8 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
     getDispatch().sync();
+  } else if (connectionState === 'connectionStateBroken') {
+    getDispatch().signOut();
   }
 }
 

@@ -1,5 +1,5 @@
 import { Api as GramJs, connection } from '../../lib/gramjs';
-import { ApiMessage, OnApiUpdate } from '../types';
+import { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
 
 import { pick } from '../../util/iteratees';
 import {
@@ -43,15 +43,26 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function setUpdaterCurrentUserId(_currentUserId:number) {
+export function setUpdaterCurrentUserId(_currentUserId: number) {
   currentUserId = _currentUserId;
 }
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   if (update instanceof connection.UpdateConnectionState) {
-    const connectionState = update.state === connection.UpdateConnectionState.states.disconnected
-      ? 'connectionStateConnecting'
-      : 'connectionStateReady';
+    let connectionState: ApiUpdateConnectionStateType;
+
+    switch (update.state) {
+      case connection.UpdateConnectionState.states.disconnected:
+        connectionState = 'connectionStateConnecting';
+        break;
+      case connection.UpdateConnectionState.states.broken:
+        connectionState = 'connectionStateBroken';
+        break;
+      case connection.UpdateConnectionState.states.connected:
+      default:
+        connectionState = 'connectionStateReady';
+        break;
+    }
 
     onUpdate({
       '@type': 'updateConnectionState',

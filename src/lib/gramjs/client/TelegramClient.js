@@ -152,7 +152,7 @@ class TelegramClient {
             connectTimeout: this._timeout,
             authKeyCallback: this._authKeyCallback.bind(this),
             updateCallback: this._handleUpdate.bind(this),
-
+            isMainSender: true,
         })
 
         const connection = new this._connection(this.session.serverAddress
@@ -252,6 +252,10 @@ class TelegramClient {
     // endregion
     // export region
 
+    removeSender(dcId) {
+        delete this._borrowedSenderPromises[dcId];
+    }
+
     async _borrowExportedSender(dcId, retries = 5) {
         let sender = this._borrowedSenderPromises[dcId]
         if (!sender) {
@@ -272,6 +276,8 @@ class TelegramClient {
                 autoReconnect: this._autoReconnect,
                 connectTimeout: this._timeout,
                 authKeyCallback: this._authKeyCallback.bind(this),
+                isMainSender: dcId===this.session.dcId,
+                senderCallback: this.removeSender.bind(this),
             })
         for (let i = 0; i < retries; i++) {
             try {
@@ -721,10 +727,7 @@ class TelegramClient {
     }
 
     _handleUpdate(update) {
-        if (update === 1) {
-            this._dispatchUpdate({ update: new UpdateConnectionState(update) })
-            return
-        } else if (update === -1) {
+        if ([-1, 0, 1].includes(update)){
             this._dispatchUpdate({ update: new UpdateConnectionState(update) })
             return
         }

@@ -26,7 +26,7 @@ export async function uploadFile(
     const { file, onProgress } = fileParams;
     const { name, size } = file;
 
-    const fileId = generateRandomBigInt();
+    const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);
     const isLarge = size > LARGE_FILE_THRESHOLD;
 
     const partSize = getAppropriatedPartSize(size) * KB_TO_BYTES;
