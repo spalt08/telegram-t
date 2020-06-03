@@ -5,8 +5,7 @@ import React, {
 import { IDimensions } from '../../modules/helpers';
 
 import useShowTransition from '../../hooks/useShowTransition';
-import useFlag from '../../hooks/useFlag';
-import useOnChange from '../../hooks/useOnChange';
+import useBuffering from '../../hooks/useBuffering';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -19,6 +18,7 @@ type OwnProps = {
   posterSize?: IDimensions;
   downloadProgress?: number;
   isMediaViewerOpen?: boolean;
+  onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
 const VideoPlayer: FC<OwnProps> = ({
@@ -28,14 +28,15 @@ const VideoPlayer: FC<OwnProps> = ({
   posterSize,
   downloadProgress,
   isMediaViewerOpen,
+  onClose,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
 
-  const [isPlaying, setPlaying, setPaused] = useFlag();
+  const { isBuffered, bufferingHandlers } = useBuffering();
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!isPlaying, undefined, undefined, 'slow');
+  } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
 
   useLayoutEffect(() => {
     if (!isMediaViewerOpen) {
@@ -43,34 +44,33 @@ const VideoPlayer: FC<OwnProps> = ({
     }
   }, [isMediaViewerOpen]);
 
-  useOnChange(setPaused, [url]);
-
   const stopEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (isPlaying && !isGif) {
-      e.stopPropagation();
-    }
-  }, [isGif, isPlaying]);
+    e.stopPropagation();
+  }, []);
 
   return (
-    <div className="VideoPlayer" onClick={stopEvent}>
+    <div className="VideoPlayer" onClick={!isGif ? stopEvent : undefined}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         autoPlay
         playsInline
-        controls={isPlaying && !isGif}
+        controls={!isGif}
         loop={isGif}
+        // This is to force auto playing on mobiles
+        muted={isGif}
         id="media-viewer-video"
         poster={posterData}
         width={posterSize && posterSize.width}
         height={posterSize && posterSize.height}
-        onPlaying={setPlaying}
-        onPause={setPaused}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...bufferingHandlers}
       >
         <source src={url} />
       </video>
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>
-          <ProgressSpinner progress={isPlaying ? 1 : downloadProgress} />
+          {!isBuffered && <div className="buffering">Buffering...</div>}
+          <ProgressSpinner progress={isBuffered ? 1 : downloadProgress} onClick={onClose} />
         </div>
       )}
     </div>

@@ -147,6 +147,13 @@
       background-image: url("../../assets/media_navigation_next.svg");
       background-position: calc(100% - 1.25rem) calc(50% - 2rem);
     }
+
+    &.inline {
+      top: calc(50% - 3rem);
+      bottom: unset;
+      height: 6rem;
+      background-position-y: center;
+    }
   }
 }
 

@@ -16,12 +16,12 @@ import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadPro
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
-import useFlag from '../../../hooks/useFlag';
+import useBuffering from '../../../hooks/useBuffering';
+import buildClassName from '../../../util/buildClassName';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
 import './RoundVideo.scss';
-import buildClassName from '../../../util/buildClassName';
 
 type OwnProps = {
   message: ApiMessage;
@@ -51,13 +51,13 @@ const RoundVideo: FC<OwnProps> = ({
     lastSyncTime,
   );
 
-  const [isPlaying, setPlaying, setPaused] = useFlag();
-  const isTransferring = isDownloadAllowed && !isPlaying;
+  const { isBuffered, bufferingHandlers } = useBuffering();
+  const isTransferring = isDownloadAllowed && !isBuffered;
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring || (isProgressive && !isPlaying), undefined, wasDownloadDisabled);
+  } = useShowTransition(isTransferring || (isProgressive && !isBuffered), undefined, wasDownloadDisabled);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
 
   const [isActivated, setIsActivated] = useState<boolean>(false);
@@ -156,8 +156,8 @@ const RoundVideo: FC<OwnProps> = ({
             poster={thumbDataUri}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
             onEnded={isActivated ? handleEnded : undefined}
-            onPlaying={setPlaying}
-            onPause={setPaused}
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...bufferingHandlers}
           >
             <source src={mediaData} />
           </video>

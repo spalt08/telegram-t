@@ -18,7 +18,7 @@ import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadPro
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
-import useFlag from '../../../hooks/useFlag';
+import useBuffering from '../../../hooks/useBuffering';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -63,11 +63,11 @@ const Video: FC<OwnProps> = ({
   const isInline = Boolean(canPlayInline && loadAndPlay && fullMediaData);
   const isHqPreview = mediaData && !canPlayInline;
 
-  const [isPlaying, setPlaying, setPaused] = useFlag();
+  const { isBuffered, bufferingHandlers } = useBuffering();
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     message,
     uploadProgress || downloadProgress,
-    shouldDownload && (canPlayInline && !isPlaying),
+    shouldDownload && (canPlayInline && !isBuffered),
   );
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
@@ -119,8 +119,8 @@ const Video: FC<OwnProps> = ({
           loop
           playsInline
           poster={thumbDataUri}
-          onPlaying={setPlaying}
-          onPause={setPaused}
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...bufferingHandlers}
         >
           <source src={fullMediaData} />
         </video>
@@ -152,7 +152,7 @@ const Video: FC<OwnProps> = ({
       {isTransferring && !isProgressive ? (
         <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
       ) : isTransferring && isProgressive ? (
-        <span className="message-upload-progress">Buffering...</span>
+        <span className="message-upload-progress">...</span>
       ) : (
         <div className="message-media-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</div>
       )}

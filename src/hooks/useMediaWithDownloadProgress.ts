@@ -6,7 +6,7 @@ import { IS_PROGRESSIVE_SUPPORTED } from '../util/environment';
 import * as mediaLoader from '../util/mediaLoader';
 import useForceUpdate from './useForceUpdate';
 
-const PROGRESSIVE_PROGRESS = 0.9;
+const PROGRESSIVE_PROGRESS = 0.75;
 const PROGRESSIVE_TIMEOUT = 1500;
 
 export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(

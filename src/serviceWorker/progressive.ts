@@ -1,6 +1,7 @@
 import { pause } from '../util/schedulers';
 import generateIdFor from '../util/generateIdFor';
-import { DEBUG } from '../config';
+import { DEBUG, MEDIA_CACHE_MAX_BYTES, MEDIA_PROGRESSIVE_CACHE_NAME } from '../config';
+import { save } from '../util/cacheApi';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -23,11 +24,6 @@ const requestStates: Record<string, RequestStates> = {};
 
 export async function respondForProgressive(e: FetchEvent) {
   const { url } = e.request;
-
-  if (!url.includes('/progressive/')) {
-    return fetch(e.request);
-  }
-
   const range = e.request.headers.get('range');
   const bytes = /^bytes=(\d+)-(\d+)?$/g.exec(range || '')!;
   const start = Number(bytes[1]);
@@ -37,7 +33,29 @@ export async function respondForProgressive(e: FetchEvent) {
     end = start + DEFAULT_PART_SIZE - 1;
   }
 
-  const partInfo = await requestPart(e, { url, start, end });
+  const cacheKey = `${url}?start=${start}&end=${end}`;
+  const [cachedArrayBuffer, cachedHeaders] = await fetchFromCache(cacheKey);
+
+  console.log('FETCH PROGRESSIVE', cacheKey, 'CACHED:', Boolean(cachedArrayBuffer));
+
+  if (cachedArrayBuffer) {
+    return new Response(cachedArrayBuffer, {
+      status: 206,
+      statusText: 'Partial Content',
+      headers: cachedHeaders,
+    });
+  }
+
+  let partInfo;
+  try {
+    partInfo = await requestPart(e, { url, start, end });
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('FETCH PROGRESSIVE', err);
+    }
+  }
+
   if (!partInfo) {
     return new Response('', {
       status: 500,
@@ -49,16 +67,22 @@ export async function respondForProgressive(e: FetchEvent) {
 
   const partSize = Math.min(end - start + 1, arrayBuffer.byteLength);
   end = start + partSize - 1;
+  const arrayBufferPart = arrayBuffer.slice(0, partSize);
+  const headers = [
+    ['Content-Range', `bytes ${start}-${end}/${fullSize}`],
+    ['Accept-Ranges', 'bytes'],
+    ['Content-Length', String(partSize)],
+    ['Content-Type', mimeType],
+  ];
 
-  return new Response(arrayBuffer.slice(0, partSize), {
+  if (fullSize <= MEDIA_CACHE_MAX_BYTES) {
+    saveToCache(cacheKey, arrayBufferPart, headers);
+  }
+
+  return new Response(arrayBufferPart, {
     status: 206,
     statusText: 'Partial Content',
-    headers: [
-      ['Content-Range', `bytes ${start}-${end}/${fullSize}`],
-      ['Accept-Ranges', 'bytes'],
-      ['Content-Length', String(partSize)],
-      ['Content-Type', mimeType],
-    ],
+    headers,
   });
 }
 
@@ -73,6 +97,25 @@ self.addEventListener('message', (e) => {
     requestStates[messageId].resolve(result);
   }
 });
+
+// We can not cache 206 responses: https://github.com/GoogleChrome/workbox/issues/1644#issuecomment-638741359
+async function fetchFromCache(cacheKey: string) {
+  const cache = await self.caches.open(MEDIA_PROGRESSIVE_CACHE_NAME);
+
+  return Promise.all([
+    cache.match(`${cacheKey}&type=arrayBuffer`).then((r) => (r ? r.arrayBuffer() : undefined)),
+    cache.match(`${cacheKey}&type=headers`).then((r) => (r ? r.json() : undefined)),
+  ]);
+}
+
+async function saveToCache(cacheKey: string, arrayBuffer: ArrayBuffer, headers: HeadersInit) {
+  const cache = await self.caches.open(MEDIA_PROGRESSIVE_CACHE_NAME);
+
+  return Promise.all([
+    cache.put(new Request(`${cacheKey}&type=arrayBuffer`), new Response(arrayBuffer)),
+    cache.put(new Request(`${cacheKey}&type=headers`), new Response(JSON.stringify(headers))),
+  ]);
+}
 
 async function requestPart(
   e: FetchEvent,
@@ -92,12 +135,7 @@ async function requestPart(
   requestStates[messageId] = {} as RequestStates;
 
   const promise = Promise.race([
-    pause(PART_TIMEOUT).then(() => {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.error('Progressive part timeout');
-      }
-    }) as Promise<undefined>,
+    pause(PART_TIMEOUT).then(() => Promise.reject(new Error('ERROR_PART_TIMEOUT'))),
     new Promise<PartInfo>((resolve, reject) => {
       Object.assign(requestStates[messageId], { resolve, reject });
     }),

@@ -244,13 +244,17 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
             fullMediaData || blobUrlPreview || blobUrlPictogram,
             message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
           )}
-          {isVideo && renderVideo(
-            fullMediaData,
-            blobUrlPreview || thumbDataUri,
-            downloadProgress,
-            message && calculateMediaViewerDimensions(videoDimensions!, hasFooter),
-            isGif,
-            isOpen,
+          {isVideo && (
+            <VideoPlayer
+              key={fullMediaData}
+              url={fullMediaData}
+              isGif={isGif}
+              posterData={blobUrlPreview || thumbDataUri}
+              posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter)}
+              downloadProgress={downloadProgress}
+              isMediaViewerOpen={isOpen}
+              onClose={handleClose}
+            />
           )}
           {textParts && <MediaViewerFooter text={textParts} />}
         </div>
@@ -297,7 +301,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           {!isFirst && (
             <button
               type="button"
-              className="navigation prev"
+              className={`navigation prev ${isVideo && !isGif && 'inline'}`}
               aria-label="Previous"
               onClick={selectPreviousMedia}
             />
@@ -305,7 +309,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
           {!isLast && (
             <button
               type="button"
-              className="navigation next"
+              className={`navigation next ${isVideo && !isGif && 'inline'}`}
               aria-label="Next"
               onClick={selectNextMedia}
             />
@@ -327,27 +331,6 @@ function renderPhoto(blobUrl?: string, imageSize?: IDimensions) {
       />
     )
     : <Spinner color="white" />;
-}
-
-function renderVideo(
-  fullMediaData?: string,
-  posterData?: string,
-  downloadProgress?: number,
-  posterSize?: IDimensions,
-  isGif?: boolean,
-  isOpen?: boolean,
-) {
-  return (
-    <VideoPlayer
-      key={fullMediaData}
-      url={fullMediaData}
-      isGif={isGif}
-      posterData={posterData}
-      posterSize={posterSize}
-      downloadProgress={downloadProgress}
-      isMediaViewerOpen={isOpen}
-    />
-  );
 }
 
 export default memo(withGlobal(

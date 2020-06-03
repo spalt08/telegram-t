@@ -14,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
-import useFlag from '../../hooks/useFlag';
+import useBuffering from '../../hooks/useBuffering';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -67,10 +67,10 @@ const Audio: FC<OwnProps> = ({
   const {
     mediaData, downloadProgress,
   } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !shouldDownload, ApiMediaFormat.Progressive);
-  const [isPlaying, setPlaying, setPaused] = useFlag();
+  const { isBuffered, bufferingHandlers } = useBuffering();
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isPlaying);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isBuffered);
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
@@ -201,8 +201,8 @@ const Audio: FC<OwnProps> = ({
         src={mediaData}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
-        onPlaying={setPlaying}
-        onPause={setPaused}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...bufferingHandlers}
       />
     </div>
   );

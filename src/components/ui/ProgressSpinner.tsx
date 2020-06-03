@@ -15,7 +15,7 @@ const ProgressSpinner: FC<{
   progress?: number;
   size?: 's' | 'm' | 'l';
   transparent?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }> = ({
   progress = 0,
   size = 'l',
