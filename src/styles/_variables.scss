@@ -73,8 +73,10 @@ $color-selection: #3993fb;
   --color-links: #{$color-links};
   --color-links-hover: #{darken($color-links, 8%)};
 
-  --color-code: #{mix($color-links, $color-text-secondary, 50%)};
-  --color-code-own: #{mix($color-text-green, $color-text-secondary, 50%)};
+  --color-code: #{mix($color-links, $color-text-meta, 50%)};
+  --color-code-bg: #{rgba($color-text-secondary, .1)};
+  --color-code-own: #{mix($color-text-green, $color-text-meta, 50%)};
+  --color-code-own-bg: #{rgba($color-text-secondary, .1)};
 
   --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
   --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
