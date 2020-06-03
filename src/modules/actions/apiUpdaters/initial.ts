@@ -56,6 +56,8 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
   const global = getGlobal();
   const authState = update.authorizationState;
 
+  const wasAuthReady = global.authState === 'authorizationStateReady';
+
   setGlobal({
     ...global,
     authState,
@@ -83,19 +85,16 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
       });
       break;
     case 'authorizationStateReady': {
-      const newGlobal = getGlobal();
-
-      if (newGlobal.authState === 'authorizationStateReady') {
+      if (wasAuthReady) {
         break;
       }
+
+      const newGlobal = getGlobal();
 
       setGlobal({
         ...newGlobal,
         isLoggingOut: false,
-        // First login
-        ...(newGlobal.connectionState === 'connectionStateReady' && {
-          lastSyncTime: Date.now(),
-        }),
+        lastSyncTime: Date.now(),
       });
 
       const { sessionId } = update;

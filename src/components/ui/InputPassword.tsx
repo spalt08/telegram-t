@@ -37,12 +37,12 @@ const InputPassword: FC<OwnProps> = ({
         type={showPassword ? 'text' : 'password'}
         id={id}
         value={value || ''}
-        placeholder={hint ? `Hint: ${hint}` : 'Password'}
+        placeholder={hint || 'Password'}
         autoComplete="current-password"
         onChange={onChange}
         onKeyPress={onKeyPress}
       />
-      <label>{error || (hint ? `Hint: ${hint}` : 'Password')}</label>
+      <label>{error || hint || 'Password'}</label>
       <div
         className="toggle-password"
         onClick={onShowToggle}
