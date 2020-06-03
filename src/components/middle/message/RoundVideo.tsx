@@ -9,14 +9,14 @@ import React, {
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
 import { AUTO_LOAD_MEDIA } from '../../../config';
+import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modules/helpers';
 import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
-import useBuffering from '../../../hooks/useBuffering';
-import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
+import useFlag from '../../../hooks/useFlag';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -51,13 +51,13 @@ const RoundVideo: FC<OwnProps> = ({
     lastSyncTime,
   );
 
-  const { isBuffered, handleBuffering } = useBuffering();
-  const isTransferring = isDownloadAllowed && !isBuffered;
+  const [isPlaying, setPlaying, setPaused] = useFlag();
+  const isTransferring = isDownloadAllowed && !isPlaying;
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring || (isProgressive && !isBuffered), undefined, wasDownloadDisabled);
+  } = useShowTransition(isTransferring || (isProgressive && !isPlaying), undefined, wasDownloadDisabled);
   const { shouldRenderThumb, transitionClassNames } = useTransitionForMedia(mediaData, 'slow');
 
   const [isActivated, setIsActivated] = useState<boolean>(false);
@@ -156,8 +156,8 @@ const RoundVideo: FC<OwnProps> = ({
             poster={thumbDataUri}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
             onEnded={isActivated ? handleEnded : undefined}
-            onProgress={handleBuffering}
-            onPlay={handleBuffering}
+            onPlaying={setPlaying}
+            onPause={setPaused}
           >
             <source src={mediaData} />
           </video>

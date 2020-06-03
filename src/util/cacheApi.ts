@@ -8,6 +8,10 @@ export enum Type {
 }
 
 export async function fetch(cacheName: string, key: string, type: Type) {
+  if (!cacheApi) {
+    return undefined;
+  }
+
   const request = new Request(key);
   const cache = await cacheApi.open(cacheName);
   const cached = await cache.match(request);
@@ -28,6 +32,10 @@ export async function fetch(cacheName: string, key: string, type: Type) {
 }
 
 export async function save(cacheName: string, key: string, data: AnyLiteral | Blob | string) {
+  if (!cacheApi) {
+    return undefined;
+  }
+
   const cacheData = typeof data === 'string' || data instanceof Blob ? data : JSON.stringify(data);
   const request = new Request(key);
   const response = new Response(cacheData);

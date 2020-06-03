@@ -18,9 +18,9 @@ import useMediaWithDownloadProgress from '../../../hooks/useMediaWithDownloadPro
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
+import useFlag from '../../../hooks/useFlag';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
-import useBuffering from '../../../hooks/useBuffering';
 
 type OwnProps = {
   id?: string;
@@ -51,6 +51,7 @@ const Video: FC<OwnProps> = ({
 
   const [isDownloadAllowed, setIsDownloadAllowed] = useState(AUTO_LOAD_MEDIA);
   const shouldDownload = Boolean(isDownloadAllowed && loadAndPlay && lastSyncTime);
+
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
     !shouldDownload,
@@ -62,10 +63,12 @@ const Video: FC<OwnProps> = ({
   const isInline = Boolean(canPlayInline && loadAndPlay && fullMediaData);
   const isHqPreview = mediaData && !canPlayInline;
 
-  const { isBuffered, handleBuffering } = useBuffering();
-  const {
-    isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && (isInline && !isBuffered));
+  const [isPlaying, setPlaying, setPaused] = useFlag();
+  const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
+    message,
+    uploadProgress || downloadProgress,
+    shouldDownload && (canPlayInline && !isPlaying),
+  );
   const wasDownloadDisabled = usePrevious(isDownloadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
@@ -116,8 +119,8 @@ const Video: FC<OwnProps> = ({
           loop
           playsInline
           poster={thumbDataUri}
-          onProgress={handleBuffering}
-          onPlay={handleBuffering}
+          onPlaying={setPlaying}
+          onPause={setPaused}
         >
           <source src={fullMediaData} />
         </video>
@@ -146,8 +149,10 @@ const Video: FC<OwnProps> = ({
       {!fullMediaData && !isDownloadAllowed && (
         <i className="icon-download" />
       )}
-      {isTransferring ? (
+      {isTransferring && !isProgressive ? (
         <span className="message-upload-progress">{Math.round(transferProgress * 100)}%</span>
+      ) : isTransferring && isProgressive ? (
+        <span className="message-upload-progress">Buffering...</span>
       ) : (
         <div className="message-media-duration">{video.isGif ? 'GIF' : formatMediaDuration(video.duration)}</div>
       )}

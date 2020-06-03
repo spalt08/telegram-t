@@ -26,7 +26,7 @@ import renderText from '../../common/helpers/renderText';
 import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
 import { pick } from '../../../util/iteratees';
 
-import useOverlay from '../../../hooks/useOverlay';
+import useFlag from '../../../hooks/useFlag';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
 import useDraft from './hooks/useDraft';
@@ -98,10 +98,10 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
 
-  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useOverlay();
-  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useOverlay();
-  const [isPollModalOpen, openPollModal, closePollModal] = useOverlay();
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useOverlay();
+  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
+  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
+  const [isPollModalOpen, openPollModal, closePollModal] = useFlag();
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
 
   const {
     startRecordingVoice,

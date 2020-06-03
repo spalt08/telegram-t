@@ -36,7 +36,7 @@ export default async function downloadMedia(
   const canCache = mediaFormat !== ApiMediaFormat.Progressive && (
     mediaFormat !== ApiMediaFormat.BlobUrl || (parsed as Blob).size <= MEDIA_CACHE_MAX_BYTES
   );
-  if (!MEDIA_CACHE_DISABLED && canCache) {
+  if (!MEDIA_CACHE_DISABLED && cacheApi && canCache) {
     void cacheApi.save(MEDIA_CACHE_NAME, url, parsed);
   }
 

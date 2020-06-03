@@ -6,6 +6,7 @@ import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
 } from '../../api/types';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
 import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
@@ -13,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
-import useBuffering from '../../hooks/useBuffering';
+import useFlag from '../../hooks/useFlag';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -26,6 +27,7 @@ type OwnProps = {
   uploadProgress?: number;
   inSharedMedia?: boolean;
   date?: number;
+  lastSyncTime?: number;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
 };
@@ -47,6 +49,7 @@ const Audio: FC<OwnProps> = ({
   uploadProgress,
   inSharedMedia,
   date,
+  lastSyncTime,
   onReadMedia,
   onCancelUpload,
 }) => {
@@ -58,14 +61,16 @@ const Audio: FC<OwnProps> = ({
   const isActive = playState === PlayState.Playing;
   const [playProgress, setPlayProgress] = useState<number>(0);
   const isSeeking = useRef<boolean>(false);
+  // We need to preload on mobiles to enable playing by click.
+  const shouldDownload = (isActive || IS_TOUCH_ENV) && lastSyncTime;
 
   const {
     mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !isActive, ApiMediaFormat.Progressive);
-  const { isBuffered, handleBuffering } = useBuffering();
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !shouldDownload, ApiMediaFormat.Progressive);
+  const [isPlaying, setPlaying, setPaused] = useFlag();
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isBuffered);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isPlaying);
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
@@ -84,9 +89,11 @@ const Audio: FC<OwnProps> = ({
       switch (state) {
         case PlayState.Paused:
         case PlayState.Idle:
+          audioRef.current!.play();
           return PlayState.Playing;
         case PlayState.Playing:
         default:
+          audioRef.current!.pause();
           return PlayState.Paused;
       }
     });
@@ -94,43 +101,31 @@ const Audio: FC<OwnProps> = ({
 
   useEffect(() => {
     const audioEl = audioRef.current;
-    if (audioEl) {
+    if (audioEl && audioEl.duration) {
       setPlayProgress(audioEl.currentTime / audioEl.duration);
     }
   }, [playProgress]);
 
   useEffect(() => {
-    if (mediaData) {
-      if (!audioRef.current) {
-        const audioEl = new window.Audio(mediaData);
-        audioEl.addEventListener('timeupdate', () => {
-          setPlayProgress(audioEl.currentTime / audioEl.duration);
-        });
-        audioEl.addEventListener('ended', () => {
-          setPlayState(PlayState.Paused);
-        });
-        audioEl.addEventListener('playing', handleBuffering);
-        audioRef.current = audioEl;
-      }
-
-      if (isActive) {
-        audioRef.current.play();
-
-        if (onReadMedia && isMediaUnread) {
-          onReadMedia();
-        }
-      } else {
-        audioRef.current.pause();
-      }
+    if (isActive && onReadMedia && isMediaUnread) {
+      onReadMedia();
     }
-  }, [mediaData, isActive, isMediaUnread, onReadMedia, handleBuffering]);
+  }, [isActive, isMediaUnread, onReadMedia]);
 
   useEffect(() => {
+    const audioEl = audioRef.current!;
+
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioEl.pause();
     };
+  }, []);
+
+  const handleTimeUpdate = useCallback(() => {
+    setPlayProgress(audioRef.current!.currentTime / audioRef.current!.duration);
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setPlayState(PlayState.Paused);
   }, []);
 
   const handleSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -200,6 +195,15 @@ const Audio: FC<OwnProps> = ({
       {audio
         ? renderAudio(audio, isActive, playProgress, seekHandlers, date)
         : renderVoice(voice!, renderedWaveform, isMediaUnread)}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio
+        ref={audioRef}
+        src={mediaData}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleEnded}
+        onPlaying={setPlaying}
+        onPause={setPaused}
+      />
     </div>
   );
 };

@@ -34,6 +34,8 @@ import {
   getMessageVideo,
   isChatPrivate,
   getChatTitle,
+  getMessageAudio,
+  getMessageVoice,
 } from '../../../modules/helpers';
 import { getMessageCustomShape } from '../../../modules/helpers/messageShape';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
@@ -399,6 +401,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
+            lastSyncTime={lastSyncTime}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
           />
@@ -533,6 +536,7 @@ export default memo(withGlobal<OwnProps>(
     const isSelectedToForward = messageIds && messageIds.includes(message.id);
 
     const isVideo = Boolean(getMessageVideo(message));
+    const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
     return {
@@ -547,7 +551,8 @@ export default memo(withGlobal<OwnProps>(
       isSelectedToForward,
       isChatWithSelf,
       // Heavy inline videos are never cached and should be re-fetched after connection.
-      ...(isVideo && { lastSyncTime }),
+      // Audio on mobiles are also started automatically on page load.
+      ...((isVideo || isAudio) && { lastSyncTime }),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

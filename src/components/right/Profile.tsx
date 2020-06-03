@@ -60,6 +60,7 @@ type StateProps = {
   groupChatMembers?: ApiChatMember[];
   usersById?: Record<number, ApiUser>;
   isRestricted?: boolean;
+  lastSyncTime?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -96,6 +97,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   groupChatMembers,
   usersById,
   isRestricted,
+  lastSyncTime,
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
@@ -268,6 +270,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               inSharedMedia
               message={chatMessages![id]}
               date={chatMessages![id].date}
+              lastSyncTime={lastSyncTime}
             />
           ))
         ) : mediaType === 'members' ? (
@@ -350,6 +353,7 @@ export default memo(withGlobal<OwnProps>(
         usersById,
       }),
       isRestricted: chat && chat.isRestricted,
+      lastSyncTime: global.lastSyncTime,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

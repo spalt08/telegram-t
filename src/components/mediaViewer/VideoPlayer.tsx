@@ -5,7 +5,8 @@ import React, {
 import { IDimensions } from '../../modules/helpers';
 
 import useShowTransition from '../../hooks/useShowTransition';
-import useBuffering from '../../hooks/useBuffering';
+import useFlag from '../../hooks/useFlag';
+import useOnChange from '../../hooks/useOnChange';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -30,11 +31,11 @@ const VideoPlayer: FC<OwnProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
 
-  const { isBuffered, handleBuffering } = useBuffering(url);
+  const [isPlaying, setPlaying, setPaused] = useFlag();
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
+  } = useShowTransition(!isPlaying, undefined, undefined, 'slow');
 
   useLayoutEffect(() => {
     if (!isMediaViewerOpen) {
@@ -42,11 +43,13 @@ const VideoPlayer: FC<OwnProps> = ({
     }
   }, [isMediaViewerOpen]);
 
+  useOnChange(setPaused, [url]);
+
   const stopEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (isBuffered && !isGif) {
+    if (isPlaying && !isGif) {
       e.stopPropagation();
     }
-  }, [isGif, isBuffered]);
+  }, [isGif, isPlaying]);
 
   return (
     <div className="VideoPlayer" onClick={stopEvent}>
@@ -54,20 +57,20 @@ const VideoPlayer: FC<OwnProps> = ({
       <video
         autoPlay
         playsInline
-        controls={isBuffered && !isGif}
+        controls={isPlaying && !isGif}
         loop={isGif}
         id="media-viewer-video"
         poster={posterData}
         width={posterSize && posterSize.width}
         height={posterSize && posterSize.height}
-        onProgress={handleBuffering}
-        onPlay={handleBuffering}
+        onPlaying={setPlaying}
+        onPause={setPaused}
       >
         <source src={url} />
       </video>
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>
-          <ProgressSpinner progress={isBuffered ? 1 : downloadProgress} />
+          <ProgressSpinner progress={isPlaying ? 1 : downloadProgress} />
         </div>
       )}
     </div>
