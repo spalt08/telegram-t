@@ -1,3 +1,4 @@
+import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -10,6 +11,7 @@ import webpHero from '../../../util/webpHero';
 import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
+import Button from '../../ui/Button';
 
 import './StickerButton.scss';
 
@@ -19,10 +21,11 @@ type OwnProps = {
   title?: string;
   className?: string;
   onClick: (sticker: ApiSticker) => void;
+  onUnfaveClick?: (sticker: ApiSticker) => void;
 };
 
 const StickerButton: FC<OwnProps> = ({
-  sticker, load, title, className, onClick,
+  sticker, load, title, className, onClick, onUnfaveClick,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
@@ -83,6 +86,15 @@ const StickerButton: FC<OwnProps> = ({
     [onClick, sticker, localMediaHash],
   );
 
+  const handleUnfaveClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (onUnfaveClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      onUnfaveClick(sticker);
+    }
+  }, [onUnfaveClick, sticker]);
+
   const fullClassName = buildClassName(
     'StickerButton',
     stickerSelector,
@@ -109,6 +121,17 @@ const StickerButton: FC<OwnProps> = ({
           play
           onLoad={handleAnimationLoad}
         />
+      )}
+      {onUnfaveClick && (
+        <Button
+          className="sticker-unfave-button"
+          color="dark"
+          ariaLabel="Remove from Favorites"
+          round
+          onClick={handleUnfaveClick}
+        >
+          <i className="icon-close" />
+        </Button>
       )}
     </div>
   );

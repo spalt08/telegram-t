@@ -1,13 +1,16 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiSticker, ApiVideo } from '../../types';
+import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet } from '../apiBuilders/stickers';
-import { buildInputStickerSet } from '../gramjsBuilders';
+import { buildInputStickerSet, buildInputDocument } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
 
-export function init() {
+let onUpdate: OnApiUpdate;
+
+export function init(_onUpdate: OnApiUpdate) {
+  onUpdate = _onUpdate;
 }
 
 export async function fetchStickerSets({ hash }: { hash: number }) {
@@ -46,6 +49,51 @@ export async function fetchRecentStickers({ hash }: { hash: number }) {
     hash: result.hash,
     stickers,
   };
+}
+
+export async function fetchFavoriteStickers({ hash }: { hash: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetFavedStickers({ hash }));
+
+  if (!result || result instanceof GramJs.messages.FavedStickersNotModified) {
+    return undefined;
+  }
+
+  const stickers: ApiSticker[] = [];
+
+  result.stickers.forEach((document) => {
+    if (document instanceof GramJs.Document) {
+      const sticker = buildStickerFromDocument(document);
+      if (sticker) {
+        stickers.push(sticker);
+        localDb.documents[String(document.id)] = document;
+      }
+    }
+  });
+
+  return {
+    hash: result.hash,
+    stickers,
+  };
+}
+
+export async function faveSticker({
+  sticker,
+  unfave,
+}: {
+  sticker: ApiSticker;
+  unfave?: boolean;
+}) {
+  const request = new GramJs.messages.FaveSticker({
+    id: buildInputDocument(sticker),
+    unfave,
+  });
+
+  const result = await invokeRequest(request);
+  if (result) {
+    onUpdate({
+      '@type': 'updateFavoriteStickers',
+    });
+  }
 }
 
 export async function fetchStickers({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {

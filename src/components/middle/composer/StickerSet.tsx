@@ -10,13 +10,14 @@ type OwnProps = {
   set: StickerSetOrRecent;
   load: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
+  onStickerUnfave: (sticker: ApiSticker) => void;
 } & Pick<GlobalActions, 'loadStickers'>;
 
 const STICKER_ROW_SIZE = 5;
 const STICKER_SIZE = 80; // px
 
 const StickerSet: FC<OwnProps> = ({
-  set, load, loadStickers, onStickerSelect,
+  set, load, loadStickers, onStickerSelect, onStickerUnfave,
 }) => {
   const areLoaded = Boolean(set.stickers.length);
   const stickerSetHeight = Math.ceil(set.count / STICKER_ROW_SIZE) * STICKER_SIZE;
@@ -45,6 +46,7 @@ const StickerSet: FC<OwnProps> = ({
             sticker={sticker}
             load={load}
             onClick={onStickerSelect}
+            onUnfaveClick={set.id === 'favorite' ? onStickerUnfave : undefined}
           />
         ))}
       </div>

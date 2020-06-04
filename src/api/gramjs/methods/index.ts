@@ -17,7 +17,7 @@ import {
   fetchTopUsers, fetchContactList, fetchUsers,
 } from './users';
 import {
-  fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
+  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, faveSticker, fetchStickers, fetchSavedGifs,
 } from './stickers';
 
 export default {
@@ -73,6 +73,8 @@ export default {
   fetchUsers,
   fetchStickerSets,
   fetchRecentStickers,
+  fetchFavoriteStickers,
+  faveSticker,
   fetchStickers,
   fetchSavedGifs,
 };

@@ -1,5 +1,10 @@
 import { GlobalState } from '../../global/types';
-import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
+import {
+  ApiMessage,
+  ApiMessageOutgoingStatus,
+  ApiUser,
+  ApiSticker,
+} from '../../api/types';
 
 import { selectChat, selectIsChatWithSelf } from './chats';
 import { selectUser } from './users';
@@ -168,6 +173,11 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
 
   const canForward = !isServiceNotification;
 
+  const hasSticker = Boolean(message.content.sticker);
+  const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
+  const canFaveSticker = hasSticker && !hasFavoriteSticker;
+  const canUnfaveSticker = hasFavoriteSticker;
+
   return {
     canReply,
     canEdit,
@@ -175,6 +185,8 @@ export function selectAllowedMessagedActions(global: GlobalState, message: ApiMe
     canDelete,
     canDeleteForAll,
     canForward,
+    canFaveSticker,
+    canUnfaveSticker,
   };
 }
 
@@ -284,4 +296,9 @@ export function selectCommonBoxChatId(global: GlobalState, messageId: number) {
     const chat = selectChat(global, Number(chatId));
     return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
   }));
+}
+
+export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
+  const { stickers } = global.stickers.favorite;
+  return stickers && stickers.some(({ id }) => id === sticker.id);
 }

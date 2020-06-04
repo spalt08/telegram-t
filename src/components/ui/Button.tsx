@@ -14,14 +14,14 @@ import './Button.scss';
 export type OwnProps = {
   ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
-  onClick?: NoneToVoidFunction;
+  onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   onMouseEnter?: NoneToVoidFunction;
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   children: any;
   size?: 'default' | 'smaller' | 'tiny';
-  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white';
+  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'dark';
   className?: string;
   round?: boolean;
   fluid?: boolean;
@@ -80,9 +80,9 @@ const Button: FC<OwnProps> = ({
     isClicked && 'clicked',
   );
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (!disabled && onClick) {
-      onClick();
+      onClick(e);
     }
 
     setIsClicked(true);

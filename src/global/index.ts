@@ -45,6 +45,9 @@ const INITIAL_STATE: GlobalState = {
     recent: {
       stickers: [],
     },
+    favorite: {
+      stickers: [],
+    },
   },
 
   savedGifs: {},

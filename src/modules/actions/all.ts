@@ -20,3 +20,4 @@ import './apiUpdaters/initial';
 import './apiUpdaters/chats';
 import './apiUpdaters/messages';
 import './apiUpdaters/users';
+import './apiUpdaters/misc';

@@ -35,9 +35,14 @@ type StateProps = {
   canDelete?: boolean;
   canEdit?: boolean;
   canForward?: boolean;
+  canFaveSticker?: boolean;
+  canUnfaveSticker?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu' |
+  'faveSticker' | 'unfaveSticker'
+)>;
 
 const TRANSITION_LOCK_CLEAR_DELAY_MS = 50;
 
@@ -52,10 +57,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canDelete,
   canEdit,
   canForward,
+  canFaveSticker,
+  canUnfaveSticker,
   setChatReplyingTo,
   setChatEditing,
   pinMessage,
   openForwardMenu,
+  faveSticker,
+  unfaveSticker,
 }) => {
   const handleCloseAnimationEnd = useCallback(() => {
     // This reverts MessageList back to `transform` based position after Context Menu has been fully closed
@@ -99,12 +108,22 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const handlePin = useCallback(() => {
     pinMessage({ messageId: message.id });
     closeMenu();
-  }, [pinMessage, message, closeMenu]);
+  }, [pinMessage, message.id, closeMenu]);
 
   const handleForward = useCallback(() => {
     closeMenu();
     openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
   }, [openForwardMenu, message, closeMenu]);
+
+  const handleFaveSticker = useCallback(() => {
+    closeMenu();
+    faveSticker({ sticker: message.content.sticker });
+  }, [closeMenu, message.content.sticker, faveSticker]);
+
+  const handleUnfaveSticker = useCallback(() => {
+    closeMenu();
+    unfaveSticker({ sticker: message.content.sticker });
+  }, [closeMenu, message.content.sticker, unfaveSticker]);
 
   useEffect(() => {
     disableScrolling();
@@ -133,11 +152,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canPin={canPin}
         canEdit={canEdit}
         canForward={canForward}
+        canFaveSticker={canFaveSticker}
+        canUnfaveSticker={canUnfaveSticker}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}
         onForward={handleForward}
         onDelete={handleDelete}
+        onFaveSticker={handleFaveSticker}
+        onUnfaveSticker={handleUnfaveSticker}
         onClose={closeMenu}
       />
       <DeleteMessageModal
@@ -152,7 +175,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const {
-      canReply, canPin, canDelete, canEdit, canForward,
+      canReply,
+      canPin,
+      canDelete,
+      canEdit,
+      canForward,
+      canFaveSticker,
+      canUnfaveSticker,
     } = selectAllowedMessagedActions(global, message);
 
     return {
@@ -161,6 +190,8 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canEdit,
       canForward,
+      canFaveSticker,
+      canUnfaveSticker,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
@@ -168,5 +199,7 @@ export default memo(withGlobal<OwnProps>(
     'setChatEditing',
     'pinMessage',
     'openForwardMenu',
+    'faveSticker',
+    'unfaveSticker',
   ]),
 )(ContextMenuContainer));

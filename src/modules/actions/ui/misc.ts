@@ -51,12 +51,12 @@ addReducer('addRecentEmoji', (global, action, payload) => {
 
 addReducer('addRecentSticker', (global, action, payload) => {
   const { sticker } = payload!;
-  const { all, recent } = global.stickers;
+  const { recent } = global.stickers;
   if (!recent) {
     return {
       ...global,
       stickers: {
-        all,
+        ...global.stickers,
         recent: {
           hash: 0,
           stickers: [sticker],
@@ -71,7 +71,7 @@ addReducer('addRecentSticker', (global, action, payload) => {
   return {
     ...global,
     stickers: {
-      all,
+      ...global.stickers,
       recent: {
         ...recent,
         stickers: newStickers,

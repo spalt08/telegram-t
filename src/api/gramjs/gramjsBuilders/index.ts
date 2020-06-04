@@ -83,18 +83,26 @@ export function buildInputStickerSet(id: string, accessHash: string) {
   });
 }
 
-export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+export function buildInputDocument(media: ApiSticker | ApiVideo) {
   const document = localDb.documents[media.id];
 
   if (!document) {
     return undefined;
   }
 
-  const inputDocument = new GramJs.InputDocument(pick(document, [
+  return new GramJs.InputDocument(pick(document, [
     'id',
     'accessHash',
     'fileReference',
   ]));
+}
+
+export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+  const inputDocument = buildInputDocument(media);
+
+  if (!inputDocument) {
+    return undefined;
+  }
 
   return new GramJs.InputMediaDocument({ id: inputDocument });
 }

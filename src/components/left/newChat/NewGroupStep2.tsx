@@ -84,7 +84,7 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
           round
           size="smaller"
           color="translucent"
-          onClick={onReset}
+          onClick={() => onReset()}
         >
           <i className="icon-back" />
         </Button>

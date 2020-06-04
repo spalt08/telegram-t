@@ -205,6 +205,10 @@ export type ApiUpdateResetContacts = {
   '@type': 'updateResetContactList';
 };
 
+export type ApiUpdateFavoriteStickers = {
+  '@type': 'updateFavoriteStickers';
+};
+
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
@@ -214,7 +218,7 @@ export type ApiUpdate = (
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |
-  ApiUpdateError | ApiUpdateResetContacts
+  ApiUpdateError | ApiUpdateResetContacts | ApiUpdateFavoriteStickers
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -31,6 +31,7 @@ import {
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { addMessageToLocalDb } from './helpers';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -97,8 +98,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       }
     } else {
       if (update.message instanceof GramJs.Message && isMessageWithMedia(update.message)) {
-        const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;
-        localDb.messages[messageFullId] = update.message;
+        addMessageToLocalDb(update.message);
       }
 
       message = buildApiMessage(update.message)!;
@@ -524,6 +524,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     // Misc
   } else if (update instanceof GramJs.UpdateContactsReset) {
     onUpdate({ '@type': 'updateResetContactList' });
+  } else if (update instanceof GramJs.UpdateFavedStickers) {
+    onUpdate({ '@type': 'updateFavoriteStickers' });
   }
 }
 

@@ -38,17 +38,6 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'error':
       actions.showError({ error: update.error });
       break;
-
-    // TODO Move to another module
-    case 'updateResetContactList':
-      setGlobal({
-        ...getGlobal(),
-        contactList: {
-          hash: 0,
-          userIds: [],
-        },
-      });
-      break;
   }
 });
 

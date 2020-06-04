@@ -101,6 +101,10 @@ export type GlobalState = {
       hash?: number;
       stickers: ApiSticker[];
     };
+    favorite: {
+      hash?: number;
+      stickers: ApiSticker[];
+    };
   };
 
   savedGifs: {
@@ -185,7 +189,7 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system
-  'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
+  'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' | 'afterSync' |
   // ui
   'toggleChatInfo' | 'toggleStatistics' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
@@ -216,8 +220,8 @@ export type ActionTypes = (
   'setSettingOption' | 'clearAnimationSettingAttention' |
   // misc
   'openMediaViewer' |
-  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |
-  'loadWebPagePreview' | 'clearWebPagePreview' |
+  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
+  'loadWebPagePreview' | 'clearWebPagePreview' | 'faveSticker' | 'unfaveSticker' |
   'saveDraft' | 'clearDraft' | 'loadChatDrafts'
 );
 

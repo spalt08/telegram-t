@@ -876,6 +876,8 @@ messages.saveDraft#bc39e14b flags:# no_webpage:flags.1?true reply_to_msg_id:flag
 messages.getRecentStickers#5ea192c9 flags:# attached:flags.0?true hash:int = messages.RecentStickers;
 messages.getWebPage#32ca8f91 url:string hash:int = WebPage;
 messages.uploadMedia#519bc2b1 peer:InputPeer media:InputMedia = MessageMedia;
+messages.getFavedStickers#21ce0b0e hash:int = messages.FavedStickers;
+messages.faveSticker#b9ffc55b id:InputDocument unfave:Bool = Bool;
 messages.updatePinnedMessage#d2aaf7ec flags:# silent:flags.0?true peer:InputPeer id:int = Updates;
 messages.sendVote#10ea6184 peer:InputPeer msg_id:int options:Vector<bytes> = Updates;
 messages.getOnlines#6e2be050 peer:InputPeer = ChatOnlines;

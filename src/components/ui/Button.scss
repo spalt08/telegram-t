@@ -196,6 +196,21 @@
     }
   }
 
+  &.dark {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    --ripple-color: rgba(255, 255, 255, 0.08);
+
+    @include active-styles() {
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+    }
+
+    @include no-ripple-styles() {
+      background-color: rgba(0, 0, 0, 0.95);
+    }
+  }
+
   &.smaller {
     height: 2.75rem;
     padding: 0.3125rem;

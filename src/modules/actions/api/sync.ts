@@ -16,11 +16,17 @@ import { isChatPrivate } from '../../helpers';
 
 const TOP_MESSAGES_LIMIT = MESSAGE_LIST_SLICE * 2;
 
-addReducer('sync', () => {
-  void sync();
+addReducer('sync', (global, actions) => {
+  const { afterSync } = actions;
+  void sync(afterSync);
 });
 
-async function sync() {
+addReducer('afterSync', (global, actions) => {
+  // Until favorite stickers aren't loaded, adding and removing Favorite Stickers is not possible
+  actions.loadFavoriteStickers();
+});
+
+async function sync(afterSyncCallback: () => void) {
   let global = await loadAndReplaceChats();
   setGlobal(await loadAndReplaceMessages(global));
 
@@ -33,6 +39,8 @@ async function sync() {
 
   // Full info of current user can be erased during sync, so we fetch it again afterwards.
   await callApi('fetchCurrentUser');
+
+  afterSyncCallback();
 }
 
 async function loadAndReplaceChats() {

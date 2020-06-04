@@ -17,7 +17,6 @@ import { invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
   buildLocalMessage,
-  resolveMessageApiChatId,
   buildWebPage,
   buildForwardedMessage,
 } from '../apiBuilders/messages';
@@ -36,6 +35,7 @@ import {
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
+import { addMessageToLocalDb } from '../helpers';
 
 let onUpdate: OnApiUpdate;
 
@@ -105,8 +105,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   }
 
   if (mtpMessage instanceof GramJs.Message) {
-    const messageFullId = `${resolveMessageApiChatId(mtpMessage)}-${mtpMessage.id}`;
-    localDb.messages[messageFullId] = mtpMessage;
+    addMessageToLocalDb(mtpMessage);
   }
 
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
@@ -571,8 +570,7 @@ function updateLocalDb(
 
   result.messages.forEach((message) => {
     if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
-      const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
-      localDb.messages[messageFullId] = message;
+      addMessageToLocalDb(message);
     }
   });
 }

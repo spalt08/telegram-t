@@ -70,6 +70,10 @@ const MAX_NESTING_PARENTS = 5;
 // When voice recording is active, composer placeholder will hide to prevent overlapping
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
+const removeSymbol = () => {
+  document.execCommand('delete', false);
+};
+
 const Composer: FC<StateProps & DispatchProps> = ({
   editedMessage,
   chatId,
@@ -349,6 +353,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
+            onRemoveSymbol={removeSymbol}
           />
         </div>
       </div>

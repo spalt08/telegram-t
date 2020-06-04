@@ -23,7 +23,7 @@
   }
 
   .is-touch-env & {
-    .Menu .backdrop {
+    .Menu > .backdrop {
       position: absolute;
       left: -100vw;
       right: -100vw;

@@ -2,7 +2,7 @@
   position: relative;
 
   .is-pointer-env & {
-    .backdrop {
+    > .backdrop {
       position: absolute;
       top: -1rem;
       left: auto;

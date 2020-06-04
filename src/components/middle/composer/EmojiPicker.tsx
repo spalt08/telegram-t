@@ -162,6 +162,9 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className={containerClassName}>
+      <div className="EmojiPicker-header">
+        {allCategories.map(renderCategoryButton)}
+      </div>
       <div
         ref={containerRef}
         className="EmojiPicker-main no-scroll"
@@ -175,9 +178,6 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             onEmojiSelect={handleEmojiSelect}
           />
         ))}
-      </div>
-      <div className="EmojiPicker-footer">
-        {allCategories.map(renderCategoryButton)}
       </div>
     </div>
   );

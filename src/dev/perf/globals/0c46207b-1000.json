@@ -17,6 +17,9 @@
     },
     "recent": {
       "stickers": []
+    },
+    "favorite": {
+      "stickers": []
     }
   },
   "savedGifs": {
