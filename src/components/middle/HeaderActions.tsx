@@ -1,8 +1,21 @@
-import React, { FC, useRef, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC,
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+} from '../../lib/teact/teact';
 
 import Button from '../ui/Button';
+import HeaderMenuContainer from './HeaderMenuContainer.async';
+
+type IAnchorPosition = {
+  x: number;
+  y: number;
+};
 
 type OwnProps = {
+  chatId: number;
   isChannel?: boolean;
   canSubscribe?: boolean;
   isRightColumnShown?: boolean;
@@ -14,6 +27,7 @@ let transitionTimeout: number;
 const TRANSITION_DELAY_MS = 200;
 
 const HeaderActions: FC<OwnProps> = ({
+  chatId,
   isChannel,
   canSubscribe,
   isRightColumnShown,
@@ -21,6 +35,9 @@ const HeaderActions: FC<OwnProps> = ({
   onSubscribeChannel,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
+  const menuButtonRef = useRef<HTMLButtonElement>();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
   // This disables pointer-events on HeaderActions while right column is opening/closing
   // to prevent unwanted hover-effects
@@ -39,6 +56,20 @@ const HeaderActions: FC<OwnProps> = ({
       container.classList.remove('pointer-disabled');
     }, TRANSITION_DELAY_MS);
   }, [isRightColumnShown]);
+
+  const handleHeaderMenuOpen = useCallback(() => {
+    setIsMenuOpen(true);
+    const rect = menuButtonRef.current!.getBoundingClientRect();
+    setMenuPosition({ x: rect.right, y: rect.bottom });
+  }, []);
+
+  const handleHeaderMenuClose = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleHeaderMenuHide = useCallback(() => {
+    setMenuPosition(undefined);
+  }, []);
 
   function stopPropagation(e: React.MouseEvent<any, MouseEvent>) {
     e.stopPropagation();
@@ -69,16 +100,27 @@ const HeaderActions: FC<OwnProps> = ({
       >
         <i className="icon-search" />
       </Button>
-      <Button
-        round
-        ripple
-        color="translucent"
-        size="smaller"
-        className="not-implemented"
-        onClick={() => { }}
-      >
-        <i className="icon-more" />
-      </Button>
+      {!canSubscribe && (
+        <Button
+          round
+          ripple
+          size="smaller"
+          color="translucent"
+          ref={menuButtonRef}
+          onClick={handleHeaderMenuOpen}
+        >
+          <i className="icon-more" />
+        </Button>
+      )}
+      {menuPosition && (
+        <HeaderMenuContainer
+          chatId={chatId}
+          isOpen={isMenuOpen}
+          anchor={menuPosition}
+          onClose={handleHeaderMenuClose}
+          onCloseAnimationEnd={handleHeaderMenuHide}
+        />
+      )}
     </div>
   );
 };

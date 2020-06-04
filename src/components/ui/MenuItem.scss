@@ -38,4 +38,16 @@
     top: 0.5rem;
     left: 2.5rem;
   }
+
+
+  &.danger {
+    color: var(--color-error);
+    button {
+      color: var(--color-error);
+      i {
+        opacity: 1;
+      }
+    }
+  }
+
 }

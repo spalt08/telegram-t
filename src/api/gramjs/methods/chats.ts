@@ -18,8 +18,13 @@ import { buildApiUser } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import localDb from '../localDb';
 import {
-  buildInputEntity, buildInputPeer, buildMtpMessageEntity, getEntityTypeById,
+  buildInputEntity,
+  buildInputPeer,
+  buildMtpMessageEntity,
+  getEntityTypeById,
 } from '../gramjsBuilders';
+
+const MAX_INT_32 = 2 ** 31 - 1;
 
 let onUpdate: OnApiUpdate;
 
@@ -348,6 +353,21 @@ export async function markChatRead({
   void requestChatUpdate(chat);
 }
 
+export async function updateChatMutedState({
+  chat, isMuted,
+}: {
+  chat: ApiChat; isMuted: boolean;
+}) {
+  await invokeRequest(new GramJs.account.UpdateNotifySettings({
+    peer: new GramJs.InputNotifyPeer({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+    }),
+    settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : undefined }),
+  }));
+
+  void requestChatUpdate(chat);
+}
+
 export async function createChannel({
   title, about,
 }: {
@@ -396,12 +416,32 @@ export async function editChannelPhoto({
   }), true);
 }
 
-export async function joinChannel({
+export function joinChannel({
   channelId, accessHash,
 }: {
   channelId: number; accessHash: string;
 }) {
   return invokeRequest(new GramJs.channels.JoinChannel({
+    channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
+  }), true);
+}
+
+export function leaveChannel({
+  channelId, accessHash,
+}: {
+  channelId: number; accessHash: string;
+}) {
+  return invokeRequest(new GramJs.channels.LeaveChannel({
+    channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
+  }), true);
+}
+
+export function deleteChannel({
+  channelId, accessHash,
+}: {
+  channelId: number; accessHash: string;
+}) {
+  return invokeRequest(new GramJs.channels.DeleteChannel({
     channel: buildInputEntity(channelId, accessHash) as GramJs.InputChannel,
   }), true);
 }

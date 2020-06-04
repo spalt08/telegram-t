@@ -163,6 +163,11 @@ export type ApiUpdateDeleteMessages = {
   chatId?: number;
 };
 
+export type ApiUpdateDeleteHistory = {
+  '@type': 'deleteHistory';
+  chatId: number;
+};
+
 export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: number;
@@ -205,7 +210,7 @@ export type ApiUpdate = (
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
-  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
+  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |

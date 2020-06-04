@@ -4,11 +4,11 @@ import {
 } from './auth';
 import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
-  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf, markChatRead,
-  createChannel, editChannelPhoto, joinChannel, createGroupChat, editChatPhoto,
+  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf, markChatRead, updateChatMutedState,
+  createChannel, editChannelPhoto, joinChannel, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
 } from './chats';
 import {
-  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead,
+  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, deleteHistory, markMessagesRead,
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
 } from './messages';
 import {
@@ -35,10 +35,14 @@ export default {
   sendMessage,
   pinMessage,
   deleteMessages,
+  deleteHistory,
   markChatRead,
+  updateChatMutedState,
   createChannel,
   editChannelPhoto,
   joinChannel,
+  leaveChannel,
+  deleteChannel,
   createGroupChat,
   editChatPhoto,
   markMessagesRead,

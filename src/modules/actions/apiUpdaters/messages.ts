@@ -8,7 +8,7 @@ import {
   updateListedIds,
   addViewportId,
 } from '../../reducers';
-import { GlobalState } from '../../../global/types';
+import { GlobalActions, GlobalState } from '../../../global/types';
 import {
   selectChat,
   selectChatMessage,
@@ -102,60 +102,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     case 'deleteMessages': {
       const { ids, chatId } = update;
 
-      let newGlobal = global;
+      deleteMessages(chatId, ids, actions, global);
+      break;
+    }
 
-      // Channel update.
-      if (chatId) {
-        ids.forEach((id) => {
-          newGlobal = updateChatMessage(newGlobal, chatId, id, {
-            isDeleting: true,
-          });
+    case 'deleteHistory': {
+      const { chatId } = update;
+      const ids = Object.keys(global.messages.byChatId[chatId].byId).map(Number);
 
-          const newLastMessage = findLastMessage(newGlobal, chatId);
-          if (newLastMessage) {
-            newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
-          }
-        });
-
-        setGlobal(newGlobal);
-
-        actions.requestChatUpdate({ chatId });
-
-        setTimeout(() => {
-          setGlobal(deleteChatMessages(getGlobal(), chatId, ids));
-        }, ANIMATION_DELAY);
-
-        return;
-      }
-
-      const commonBoxChatIds: number[] = [];
-
-      ids.forEach((id) => {
-        const commonBoxChatId = selectCommonBoxChatId(newGlobal, id);
-        if (commonBoxChatId) {
-          commonBoxChatIds.push(commonBoxChatId);
-
-          newGlobal = updateChatMessage(newGlobal, commonBoxChatId, id, {
-            isDeleting: true,
-          });
-
-          const newLastMessage = findLastMessage(newGlobal, commonBoxChatId);
-          if (newLastMessage) {
-            newGlobal = updateChatLastMessage(newGlobal, commonBoxChatId, newLastMessage, true);
-          }
-
-          setTimeout(() => {
-            setGlobal(deleteChatMessages(getGlobal(), commonBoxChatId, [id]));
-          }, ANIMATION_DELAY);
-        }
-      });
-
-      setGlobal(newGlobal);
-
-      commonBoxChatIds.forEach((commonBoxChatId) => {
-        actions.requestChatUpdate({ chatId: commonBoxChatId });
-      });
-
+      deleteMessages(chatId, ids, actions, global);
       break;
     }
 
@@ -345,4 +300,58 @@ function findLastMessage(global: GlobalState, chatId: number) {
   }
 
   return undefined;
+}
+
+function deleteMessages(chatId: number|undefined, ids: number[], actions: GlobalActions, newGlobal: GlobalState) {
+  // Channel update.
+  if (chatId) {
+    ids.forEach((id) => {
+      newGlobal = updateChatMessage(newGlobal, chatId, id, {
+        isDeleting: true,
+      });
+
+      const newLastMessage = findLastMessage(newGlobal, chatId);
+      if (newLastMessage) {
+        newGlobal = updateChatLastMessage(newGlobal, chatId, newLastMessage, true);
+      }
+    });
+
+    setGlobal(newGlobal);
+
+    actions.requestChatUpdate({ chatId });
+
+    setTimeout(() => {
+      setGlobal(deleteChatMessages(getGlobal(), chatId, ids));
+    }, ANIMATION_DELAY);
+
+    return;
+  }
+
+  const commonBoxChatIds: number[] = [];
+
+  ids.forEach((id) => {
+    const commonBoxChatId = selectCommonBoxChatId(newGlobal, id);
+    if (commonBoxChatId) {
+      commonBoxChatIds.push(commonBoxChatId);
+
+      newGlobal = updateChatMessage(newGlobal, commonBoxChatId, id, {
+        isDeleting: true,
+      });
+
+      const newLastMessage = findLastMessage(newGlobal, commonBoxChatId);
+      if (newLastMessage) {
+        newGlobal = updateChatLastMessage(newGlobal, commonBoxChatId, newLastMessage, true);
+      }
+
+      setTimeout(() => {
+        setGlobal(deleteChatMessages(getGlobal(), commonBoxChatId, [id]));
+      }, ANIMATION_DELAY);
+    }
+  });
+
+  setGlobal(newGlobal);
+
+  commonBoxChatIds.forEach((commonBoxChatId) => {
+    actions.requestChatUpdate({ chatId: commonBoxChatId });
+  });
 }

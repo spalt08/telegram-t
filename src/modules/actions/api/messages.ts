@@ -217,6 +217,17 @@ addReducer('deleteMessages', (global, actions, payload) => {
   }
 });
 
+addReducer('deleteHistory', (global, actions, payload) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
+
+  const { maxId, shouldDeleteForAll } = payload!;
+
+  void callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+});
+
 addReducer('markMessagesRead', (global, actions, payload) => {
   const chat = selectOpenChat(global);
   if (!chat) {

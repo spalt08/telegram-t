@@ -14,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import './Avatar.scss';
 
 type OwnProps = {
-  size?: 'small' | 'medium' | 'large' | 'jumbo';
+  size?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;

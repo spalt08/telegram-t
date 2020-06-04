@@ -195,6 +195,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       )}
       <HeaderActions
+        chatId={chatId}
         isChannel={isChannel}
         canSubscribe={canSubscribeToChat}
         isRightColumnShown={isRightColumnShown}

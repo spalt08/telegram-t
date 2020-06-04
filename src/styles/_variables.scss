@@ -102,6 +102,9 @@ $color-selection: #3993fb;
   }
 
   --z-ui-loader-mask: 2000;
+  --z-right-column: 900;
+  --z-header-menu: 990;
+  --z-header-menu-backdrop: 980;
   --z-modal: 1000;
   --z-media-viewer: 1500;
   --z-animation-fade: 50;
@@ -109,6 +112,7 @@ $color-selection: #3993fb;
   --z-menu-backdrop: 20;
   --z-message-highlighted: 12;
   --z-message-context-menu: 11;
+  --z-message-middle-header: 10;
   --z-message-date-header: 10;
   --z-country-code-input-group: 10;
   --z-register-add-avatar: 5;

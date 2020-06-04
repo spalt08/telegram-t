@@ -99,6 +99,16 @@ addReducer('markChatRead', (global, actions, payload) => {
   void callApi('markChatRead', { chat, maxId });
 });
 
+addReducer('updateChatMutedState', (global, actions, payload) => {
+  const { chatId, isMuted } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  void callApi('updateChatMutedState', { chat, isMuted });
+});
+
 addReducer('saveDraft', (global, actions, payload) => {
   const { chatId, draft } = payload!;
   const chat = selectChat(global, chatId);
@@ -167,6 +177,34 @@ addReducer('joinChannel', (global, actions, payload) => {
 
   if (channelId && accessHash) {
     void callApi('joinChannel', { channelId, accessHash });
+  }
+});
+
+addReducer('leaveChannel', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const { id: channelId, accessHash } = chat;
+
+  if (channelId && accessHash) {
+    void callApi('leaveChannel', { channelId, accessHash });
+  }
+});
+
+addReducer('deleteChannel', (global, actions, payload) => {
+  const { chatId } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const { id: channelId, accessHash } = chat;
+
+  if (channelId && accessHash) {
+    void callApi('deleteChannel', { channelId, accessHash });
   }
 });
 

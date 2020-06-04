@@ -300,6 +300,36 @@ export async function deleteMessages({
   });
 }
 
+export async function deleteHistory({
+  chat, shouldDeleteForAll, maxId,
+}: {
+  chat: ApiChat; shouldDeleteForAll?: boolean; maxId: number;
+}) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+  const result = await invokeRequest(
+    isChannel
+      ? new GramJs.channels.DeleteHistory({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        maxId,
+      })
+      : new GramJs.messages.DeleteHistory({
+        peer: buildInputPeer(chat.id, chat.accessHash),
+        ...(shouldDeleteForAll && { revoke: true }),
+        ...(!shouldDeleteForAll && { just_clear: true }),
+        maxId,
+      }),
+  );
+
+  if (!result) {
+    return;
+  }
+
+  onUpdate({
+    '@type': 'deleteHistory',
+    chatId: chat.id,
+  });
+}
+
 export async function markMessagesRead({
   chat, messageIds,
 }: {

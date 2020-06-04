@@ -13,6 +13,7 @@ export { default as NewGroupStep1 } from '../components/left/newChat/NewGroupSte
 export { default as NewGroupStep2 } from '../components/left/newChat/NewGroupStep2';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
+export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';

@@ -832,6 +832,7 @@ account.updateProfile#78515775 flags:# first_name:flags.0?string last_name:flags
 auth.exportLoginToken#b1b41517 api_id:int api_hash:string except_ids:Vector<int> = auth.LoginToken;
 account.checkUsername#2714d86c username:string = Bool;
 account.updateUsername#3e0bdd7c username:string = User;
+account.updateNotifySettings#84be5b93 peer:InputNotifyPeer settings:InputPeerNotifySettings = Bool;
 account.getAuthorizations#e320c158 = account.Authorizations;
 account.resetAuthorization#df77f3bc hash:long = Bool;
 account.getPassword#548a30f5 = account.Password;
@@ -850,6 +851,7 @@ messages.getDialogs#a0ee3b73 flags:# exclude_pinned:flags.0?true folder_id:flags
 messages.getHistory#dcbb8260 peer:InputPeer offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:int = messages.Messages;
 messages.search#8614ef68 flags:# peer:InputPeer q:string from_id:flags.0?InputUser filter:MessagesFilter min_date:int max_date:int offset_id:int add_offset:int limit:int max_id:int min_id:int hash:int = messages.Messages;
 messages.readHistory#e306d3a peer:InputPeer max_id:int = messages.AffectedMessages;
+messages.deleteHistory#1c015b09 flags:# just_clear:flags.0?true revoke:flags.1?true peer:InputPeer max_id:int = messages.AffectedHistory;
 messages.deleteMessages#e58e95d2 flags:# revoke:flags.0?true id:Vector<int> = messages.AffectedMessages;
 messages.receivedMessages#5a954c0 max_id:int = Vector<ReceivedNotifyMessage>;
 messages.setTyping#a3825e50 peer:InputPeer action:SendMessageAction = Bool;
@@ -898,5 +900,7 @@ channels.getFullChannel#8736a09 channel:InputChannel = messages.ChatFull;
 channels.createChannel#3d5fb10f flags:# broadcast:flags.0?true megagroup:flags.1?true title:string about:string geo_point:flags.2?InputGeoPoint address:flags.2?string = Updates;
 channels.editPhoto#f12e57c9 channel:InputChannel photo:InputChatPhoto = Updates;
 channels.joinChannel#24b524c5 channel:InputChannel = Updates;
+channels.leaveChannel#f836aa95 channel:InputChannel = Updates;
+channels.deleteChannel#c0111fe3 channel:InputChannel = Updates;
 channels.readMessageContents#eab5dc38 channel:InputChannel id:Vector<int> = Bool;
 // LAYER 112
