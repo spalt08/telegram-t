@@ -25,7 +25,7 @@ const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) =
       {typingUserName && (
         <span className="sender-name">{renderText(typingUserName)}</span>
       )}
-      {typingStatus.action}
+      <span className="action">{typingStatus.action}</span>
     </p>
   );
 };

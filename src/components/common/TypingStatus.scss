@@ -2,25 +2,30 @@
   display: flex;
   align-items: baseline;
 
-  &::after {
-    display: inline-block;
-    content: '...';
-    width: 0;
-    line-height: 1;
-    overflow: hidden;
-    animation: typing-animation 1s steps(4, end) infinite;
-  }
-
   .sender-name {
     &::after {
       content: '\00a0is\00a0';
       color: var(--color-text-secondary);
     }
   }
+
+  .action {
+    z-index: 1;
+    background: white;
+  }
+
+  &::after {
+    display: inline-block;
+    content: '...';
+    width: 1rem;
+    line-height: 1;
+    overflow: hidden;
+    animation: typing-animation 1s steps(4, start) infinite;
+  }
 }
 
 @keyframes typing-animation {
-  to {
-    width: 1rem;
+  from {
+    transform: translateX(-1rem);
   }
 }
