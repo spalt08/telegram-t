@@ -9,18 +9,15 @@
     }
   }
 
-  .action {
-    z-index: 1;
-    background: white;
-  }
-
-  &::after {
-    display: inline-block;
-    content: '...';
+  .ellipsis {
+    display: flex;
     width: 1rem;
-    line-height: 1;
     overflow: hidden;
-    animation: typing-animation 1s steps(4, start) infinite;
+
+    &::after {
+      content: '...';
+      animation: typing-animation 1s steps(4, start) infinite;
+    }
   }
 }
 
