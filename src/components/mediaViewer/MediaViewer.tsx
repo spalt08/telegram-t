@@ -60,6 +60,8 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'>;
 
+const ANIMATION_DURATION = 350;
+
 const MediaViewer: FC<StateProps & DispatchProps> = ({
   chatId,
   messageId,
@@ -81,6 +83,10 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const fileName = avatarOwner
     ? `avatar${avatarOwner.id}.jpg`
     : message && getMessageMediaFilename(message);
+
+  const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
+  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
+  const isGhostAnimation = animationLevel === 2;
 
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
@@ -105,11 +111,15 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPictogram = useMedia(message && isFromSharedMedia && getMessageMediaHash(message, 'pictogram'));
-  const blobUrlPreview = useMedia(getMediaHash());
+  const blobUrlPreview = useMedia(
+    getMediaHash(), undefined, ApiMediaFormat.BlobUrl, isGhostAnimation && ANIMATION_DURATION,
+  );
   const { mediaData: fullMediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMediaHash(true),
     undefined,
     isVideo ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+    undefined,
+    isGhostAnimation && ANIMATION_DURATION,
   );
 
   const bestImageData = (!isVideo && fullMediaData) || blobUrlPreview || blobUrlPictogram || thumbDataUri;
@@ -117,10 +127,6 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
-
-  const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
-  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
-  const isGhostAnimation = animationLevel === 2;
 
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);

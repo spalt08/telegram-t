@@ -10,15 +10,25 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   noLoad = false,
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
   mediaFormat: T = ApiMediaFormat.BlobUrl,
+  delay?: number | false,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     if (!noLoad && mediaHash && !mediaData) {
-      mediaLoader.fetch(mediaHash, mediaFormat).then(forceUpdate);
+      const startedAt = Date.now();
+
+      mediaLoader.fetch(mediaHash, mediaFormat).then(() => {
+        const spentTime = Date.now() - startedAt;
+        if (!delay || spentTime >= delay) {
+          forceUpdate();
+        } else {
+          setTimeout(forceUpdate, delay - spentTime);
+        }
+      });
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, forceUpdate]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, forceUpdate, delay]);
 
   return mediaData;
 };

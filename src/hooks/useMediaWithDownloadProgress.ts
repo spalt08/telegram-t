@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from '../lib/teact/teact';
+import {
+  useCallback, useEffect, useRef, useState,
+} from '../lib/teact/teact';
 
 import { ApiMediaFormat } from '../api/types';
 
@@ -15,22 +17,40 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   // @ts-ignore (workaround for "could be instantiated with a different subtype" issue)
   mediaFormat: T = ApiMediaFormat.BlobUrl,
   cacheBuster?: number,
+  delay?: number | false,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
   const isProgressive = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
   const forceUpdate = useForceUpdate();
   const [downloadProgress, setDownloadProgress] = useState(mediaData && !isProgressive ? 1 : 0);
-  const isDownloadingRef = useRef(false);
+  const startedAtRef = useRef<number | undefined>();
+
+  const handleProgress = useCallback((progress: number) => {
+    if (delay && (Date.now() - startedAtRef.current! < delay)) {
+      setDownloadProgress(progress);
+    }
+  }, [delay]);
 
   useEffect(() => {
     if (!noLoad && mediaHash) {
       if (!mediaData) {
-        isDownloadingRef.current = true;
         setDownloadProgress(0);
-        mediaLoader.cancelProgress(setDownloadProgress);
-        mediaLoader.fetch(mediaHash, mediaFormat, setDownloadProgress).then(() => {
-          isDownloadingRef.current = false;
-          forceUpdate();
+
+        if (startedAtRef.current) {
+          mediaLoader.cancelProgress(handleProgress);
+        }
+
+        startedAtRef.current = Date.now();
+
+        mediaLoader.fetch(mediaHash, mediaFormat, handleProgress).then(() => {
+          const spentTime = Date.now() - startedAtRef.current!;
+          startedAtRef.current = undefined;
+
+          if (!delay || spentTime >= delay) {
+            forceUpdate();
+          } else {
+            setTimeout(forceUpdate, delay - spentTime);
+          }
         });
       } else if (isProgressive) {
         setTimeout(() => {
@@ -38,14 +58,14 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
         }, PROGRESSIVE_TIMEOUT);
       }
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isProgressive]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isProgressive, delay, handleProgress]);
 
   useEffect(() => {
-    if (noLoad && isDownloadingRef.current) {
-      mediaLoader.cancelProgress(setDownloadProgress);
+    if (noLoad && startedAtRef.current) {
+      mediaLoader.cancelProgress(handleProgress);
       setDownloadProgress(0);
     }
-  }, [noLoad]);
+  }, [handleProgress, noLoad]);
 
   return { mediaData, downloadProgress };
 };
