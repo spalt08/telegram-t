@@ -14,7 +14,6 @@ import {
   selectIsMediaViewerOpen,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useShowTransition from '../../hooks/useShowTransition';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
 import usePrevious from '../../hooks/usePrevious';
 
@@ -146,8 +145,6 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     }
   }, [contentKey, selectedChatId]);
 
-  const { transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
-
   function renderContent() {
     switch (renderedContentKey) {
       case ColumnContent.Search:
@@ -170,7 +167,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   }
 
   return (
-    <div id="RightColumn-wrapper" className={transitionClassNames}>
+    <div id="RightColumn-wrapper">
       {isOverlaying && (
         <div className="overlay-backdrop" onClick={close} />
       )}

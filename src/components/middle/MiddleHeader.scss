@@ -117,7 +117,7 @@
     @media (min-width: 1276px) and (max-width: 1439px) {
       transition: opacity var(--layer-transition);
 
-      .is-right-column-shown & {
+      body.is-right-column-shown & {
         opacity: 0;
       }
     }
@@ -126,7 +126,7 @@
       transform: translate3d(0, 0, 0);
       transition: transform var(--layer-transition);
 
-      .is-right-column-shown & {
+      body.is-right-column-shown & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
       }
     }
@@ -222,7 +222,7 @@
       transform: translate3d(0, 0, 0);
       transition: transform var(--layer-transition);
 
-      .is-right-column-shown & {
+      body.is-right-column-shown & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
       }
     }

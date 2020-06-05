@@ -13,7 +13,7 @@
     transform: translate3d(0, 0, 0);
     transition: transform var(--layer-transition);
 
-    .is-right-column-shown & {
+    body.is-right-column-shown & {
       transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
     }
   }
@@ -40,7 +40,7 @@
         --shadow-color: #97af8e;
       }
 
-      body.animation-level-2 .is-right-column-shown & {
+      body.animation-level-2.is-right-column-shown & {
         --shadow-color: #84a686;
       }
 
@@ -49,7 +49,7 @@
           --shadow-color: #91a67f;
         }
 
-        body.animation-level-2 .is-right-column-shown & {
+        body.animation-level-2.is-right-column-shown & {
           --shadow-color: #759b72;
         }
       }

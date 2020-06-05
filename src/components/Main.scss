@@ -106,7 +106,7 @@
       transform: translate3d(100vw, 0, 0);
     }
 
-    .is-right-column-shown & {
+    body.is-right-column-shown & {
       transform: translate3d(-20vw, 0, 0);
     }
   }

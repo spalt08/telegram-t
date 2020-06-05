@@ -27,7 +27,7 @@
       transition: transform var(--layer-transition);
     }
 
-    body.animation-level-2 .is-right-column-shown &::before {
+    body.animation-level-2.is-right-column-shown &::before {
       transform: scale(0.67);
     }
   }
@@ -58,7 +58,7 @@
         transition: transform var(--layer-transition);
         transform: translateX(0);
 
-        .is-right-column-shown & {
+        body.is-right-column-shown & {
           transform: translateX(calc(var(--right-column-width) / -2));
         }
       }

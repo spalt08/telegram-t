@@ -40,11 +40,11 @@ const Main: FC<StateProps & DispatchProps> = ({
 
   const className = buildClassName(
     isLeftColumnShown && 'is-left-column-shown',
-    isRightColumnShown && 'is-right-column-shown',
   );
 
-  // Add `body` class while animating right column
+  // Add `body` classes when toggling right column
   useEffect(() => {
+    document.body.classList.toggle('is-right-column-shown', isRightColumnShown);
     document.body.classList.add('animating-right-column');
 
     if (timeout) {

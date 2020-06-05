@@ -43,6 +43,8 @@
   bottom: 0;
   z-index: var(--z-right-column);
   overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 
   @media (min-width: 1276px) {
     pointer-events: none;
@@ -63,12 +65,13 @@
     }
   }
 
-  &:not(.shown) {
-    visibility: hidden;
-    pointer-events: none;
+  body.is-right-column-shown &, body.animating-right-column & {
+    visibility: visible;
   }
 
-  &.open {
+  body.is-right-column-shown & {
+    pointer-events: none;
+
     @media (max-width: 600px) {
       .overlay-backdrop {
         opacity: var(--layer-blackout-opacity);

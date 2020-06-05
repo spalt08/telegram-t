@@ -175,13 +175,13 @@
       left: 0;
     }
 
-    .is-right-column-shown & {
+    body.is-right-column-shown & {
       transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
 
-      body.message-list-no-transform & {
-        transform: none;
-        left: calc(var(--right-column-width) / -2);
-      }
+    body.message-list-no-transform.is-right-column-shown & {
+      transform: none;
+      left: calc(var(--right-column-width) / -2);
     }
   }
 }
