@@ -49,7 +49,7 @@ function buildApiUserType(user: GramJs.User): ApiUserType {
   return 'userTypeRegular';
 }
 
-export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus | undefined {
+export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus {
   if (!mtpStatus || mtpStatus instanceof GramJs.UserStatusEmpty) {
     return { type: 'userStatusEmpty' };
   } else if (mtpStatus instanceof GramJs.UserStatusOnline) {

@@ -5,7 +5,7 @@ import {
   ApiChatMember,
 } from './chats';
 import { ApiMessage, ApiPoll } from './messages';
-import { ApiUser, ApiUserFullInfo } from './users';
+import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
@@ -174,6 +174,12 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
+export type ApiUpdateUserStatus = {
+  '@type': 'updateUserStatus';
+  userId: number;
+  status: ApiUserStatus;
+};
+
 export type ApiUpdateUserFullInfo = {
   '@type': 'updateUserFullInfo';
   id: number;
@@ -216,7 +222,7 @@ export type ApiUpdate = (
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateUser | ApiUpdateUserFullInfo |
+  ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateFavoriteStickers
 );

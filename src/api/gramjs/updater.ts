@@ -475,12 +475,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {
+    const { userId, status } = update;
     onUpdate({
-      '@type': 'updateUser',
-      id: update.userId,
-      user: {
-        status: buildApiUserStatus(update.status),
-      },
+      '@type': 'updateUserStatus',
+      userId,
+      status: buildApiUserStatus(status),
     });
   } else if (update instanceof GramJs.UpdateUserName) {
     const updatedUser = localDb.users[update.userId];
