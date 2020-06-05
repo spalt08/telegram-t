@@ -10,8 +10,11 @@
   border-left: 1px solid var(--color-borders);
   z-index: var(--z-right-column);
 
-  > .Transition {
-    height: calc(100% - 3.75rem);
+  // @optimization
+  &:not(:hover) {
+    .Picker .chat-item-clickable:nth-child(n + 16) {
+      display: none !important;
+    }
   }
 
   @media (min-width: 1276px) {
@@ -25,6 +28,10 @@
   @media (max-width: 600px) {
     width: 100vw;
     transform: translate3d(110vw, 0, 0);
+  }
+
+  > .Transition {
+    height: calc(100% - 3.75rem);
   }
 }
 

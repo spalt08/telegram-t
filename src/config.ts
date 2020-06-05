@@ -41,3 +41,5 @@ export const MOBILE_SCREEN_MAX_WIDTH = 600; // px
 export const AUTO_LOAD_MEDIA = true;
 
 export const LOCAL_MESSAGE_ID_BASE = 1e9;
+
+export const ANIMATION_END_DELAY = 100;

@@ -8,6 +8,7 @@ import {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText,
 } from '../../../api/types';
 
+import { ANIMATION_END_DELAY } from '../../../config';
 import {
   getChatTitle,
   getMessageSummaryText,
@@ -105,7 +106,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         element.style.opacity = '';
         element.style.transform = '';
       });
-    }, ANIMATION_DURATION + 50);
+    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
   }, [orderDiff]);
 
   const handleClick = useCallback(() => {

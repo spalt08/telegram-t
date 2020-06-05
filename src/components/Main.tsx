@@ -8,6 +8,7 @@ import { pick } from '../util/iteratees';
 import buildClassName from '../util/buildClassName';
 import { selectIsRightColumnShown } from '../modules/selectors';
 
+import { ANIMATION_END_DELAY } from '../config';
 import MediaViewer from './mediaViewer/MediaViewer.async';
 import LeftColumn from './left/LeftColumn';
 import MiddleColumn from './middle/MiddleColumn';
@@ -21,6 +22,10 @@ type StateProps = {
   isRightColumnShown?: boolean;
 } & Pick<GlobalState, 'connectionState' | 'isLeftColumnShown'>;
 type DispatchProps = Pick<GlobalActions, 'initApi'>;
+
+const ANIMATION_DURATION = 350;
+
+let timeout: number | undefined;
 
 const Main: FC<StateProps & DispatchProps> = ({
   connectionState, isLeftColumnShown, isRightColumnShown, initApi,
@@ -37,6 +42,21 @@ const Main: FC<StateProps & DispatchProps> = ({
     isLeftColumnShown && 'is-left-column-shown',
     isRightColumnShown && 'is-right-column-shown',
   );
+
+  // Add `body` class while animating right column
+  useEffect(() => {
+    document.body.classList.add('animating-right-column');
+
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = undefined;
+    }
+
+    timeout = window.setTimeout(() => {
+      document.body.classList.remove('animating-right-column');
+      timeout = undefined;
+    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
+  }, [isRightColumnShown]);
 
   return (
     <div id="Main" className={className}>

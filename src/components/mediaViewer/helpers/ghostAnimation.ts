@@ -1,6 +1,7 @@
 import { ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
+import { ANIMATION_END_DELAY } from '../../../config';
 import { getMessageContent, getPhotoFullDimensions, getVideoDimensions } from '../../../modules/helpers';
 import {
   AVATAR_FULL_DIMENSIONS,
@@ -77,7 +78,7 @@ export function animateOpening(
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 100);
+      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     });
   });
 }
@@ -164,7 +165,7 @@ export function animateClosing(message: ApiMessage, origin: MediaViewerOrigin) {
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 100);
+      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     });
   });
 }

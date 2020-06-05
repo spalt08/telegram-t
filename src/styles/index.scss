@@ -1,6 +1,6 @@
 @import 'reboot';
 @import 'variables';
-@import 'utils';
+@import 'mixins';
 @import 'spacing';
 @import 'forms';
 @import 'icons';
@@ -78,6 +78,13 @@ body.scrollable {
   -webkit-overflow-scrolling: touch;
   // Fix scroll lock on iOS
   pointer-events: auto;
+
+  // @optimization
+  @include while-transition() {
+    overflow: hidden;
+    margin-right: 5px;
+    transition: none;
+  }
 
   &::-webkit-scrollbar-thumb {
     background-color: rgba(90, 90, 90, 0);

@@ -1,6 +1,13 @@
 #LeftColumn {
   overflow: hidden;
 
+  // @optimization
+  &:not(:hover) {
+    .chat-item-clickable:nth-child(n + 16) {
+      display: none;
+    }
+  }
+
   > .Transition {
     height: 100%;
   }

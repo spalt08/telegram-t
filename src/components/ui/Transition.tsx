@@ -2,6 +2,7 @@ import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
 
@@ -30,7 +31,6 @@ const ANIMATION_DURATION = {
   'slide-layers': 250,
   fade: 150,
 };
-const END_DELAY = 50;
 
 const Transition: FC<OwnProps> = ({
   activeKey,
@@ -154,7 +154,7 @@ const Transition: FC<OwnProps> = ({
             onStop();
           }
         });
-      }, ANIMATION_DURATION[name] + END_DELAY);
+      }, ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
 
       if (onStart) {
         onStart();

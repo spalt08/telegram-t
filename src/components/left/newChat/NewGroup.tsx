@@ -16,6 +16,8 @@ export type OwnProps = {
   onReset: () => void;
 };
 
+const RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
+
 const NewGroup: FC<OwnProps> = ({
   content,
   onContentChange,
@@ -28,7 +30,7 @@ const NewGroup: FC<OwnProps> = ({
   }, [onContentChange]);
 
   return (
-    <Transition id="NewGroup" name="slide-layers" activeKey={content}>
+    <Transition id="NewGroup" name="slide-layers" renderCount={RENDER_COUNT} activeKey={content}>
       {() => {
         switch (content) {
           case LeftColumnContent.NewGroupStep1:

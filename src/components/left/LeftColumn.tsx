@@ -34,6 +34,7 @@ enum ContentType {
   NewChannel
 }
 
+const RENDER_COUNT = Object.keys(ContentType).length / 2;
 const RESET_TRANSITION_DELAY_MS = 250;
 
 const LeftColumn: FC<StateProps & DispatchProps> = ({
@@ -124,7 +125,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   return (
     <Transition
       id="LeftColumn"
-      name="zoom-fade"
+      name="slide-layers"
+      renderCount={RENDER_COUNT}
       activeKey={contentType}
     >
       {() => {
@@ -146,8 +148,8 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
             );
           case ContentType.NewGroup:
             return (
+              // @optimization No `key` here to re-use previously rendered subtree
               <NewGroup
-                key={lastResetTime}
                 content={content}
                 onContentChange={setContent}
                 onReset={handleReset}

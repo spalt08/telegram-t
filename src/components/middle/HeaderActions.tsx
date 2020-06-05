@@ -1,7 +1,6 @@
 import React, {
   FC,
   useRef,
-  useEffect,
   useCallback,
   useState,
 } from '../../lib/teact/teact';
@@ -23,9 +22,6 @@ type OwnProps = {
   onSubscribeChannel: () => void;
 };
 
-let transitionTimeout: number;
-const TRANSITION_DELAY_MS = 200;
-
 const HeaderActions: FC<OwnProps> = ({
   chatId,
   isChannel,
@@ -38,24 +34,6 @@ const HeaderActions: FC<OwnProps> = ({
   const menuButtonRef = useRef<HTMLButtonElement>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
-
-  // This disables pointer-events on HeaderActions while right column is opening/closing
-  // to prevent unwanted hover-effects
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    if (transitionTimeout) {
-      clearTimeout(transitionTimeout);
-    }
-
-    container.classList.add('pointer-disabled');
-    transitionTimeout = window.setTimeout(() => {
-      container.classList.remove('pointer-disabled');
-    }, TRANSITION_DELAY_MS);
-  }, [isRightColumnShown]);
 
   const handleHeaderMenuOpen = useCallback(() => {
     setIsMenuOpen(true);

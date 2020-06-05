@@ -1,3 +1,5 @@
+@import '../../styles/mixins';
+
 @mixin active-styles() {
   &:not(.disabled):not(:disabled) {
     &:hover, &:active, &.active, &:focus {
@@ -34,10 +36,9 @@
   transition: background-color .15s, color .15s;
   text-decoration: none !important;
 
-  &:not(.has-ripple) {
-    &:active, &.clicked {
-      transition: none !important;
-    }
+  // @optimization
+  &:active, &.clicked {
+    transition: none !important;
   }
 
   &.disabled {

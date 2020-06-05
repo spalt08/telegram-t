@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import {
@@ -16,7 +17,6 @@ import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps
 import useShowTransition from '../../hooks/useShowTransition';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
 import usePrevious from '../../hooks/usePrevious';
-import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 
 import RightHeader from './RightHeader';
 import Profile, { ProfileState } from './Profile';
