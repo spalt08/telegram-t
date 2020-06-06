@@ -9,6 +9,7 @@ import {
 } from '../../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import {
   getChatTitle,
   getMessageSummaryText,
@@ -116,6 +117,12 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: chatId });
   }, [selected, focusLastMessage, openChat, chatId]);
 
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button === 0) {
+      handleClick();
+    }
+  }, [handleClick]);
+
   if (!chat) {
     return undefined;
   }
@@ -170,8 +177,11 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     selected && 'selected',
   );
 
+  const clickListener = IS_TOUCH_ENV ? { onClick: handleClick } : { onMouseDown: handleMouseDown };
+
   return (
-    <div ref={ref} className={className} onClick={handleClick}>
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <div ref={ref} className={className} {...clickListener}>
       <Avatar
         chat={chat}
         user={privateChatUser}

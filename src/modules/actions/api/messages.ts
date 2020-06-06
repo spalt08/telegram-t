@@ -30,16 +30,15 @@ const uploadProgressCallbacks: Record<string, ApiOnProgress> = {};
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
+    chatId = global.chats.selectedId,
     direction,
     shouldRelocate = false,
   } = payload || {};
-  const chat = selectOpenChat(global);
-
+  const chat = selectChat(global, chatId);
   if (!chat || chat.isRestricted) {
     return undefined;
   }
 
-  const chatId = chat.id;
   const viewportIds = selectViewportIds(global, chatId);
   const listedIds = selectListedIds(global, chatId);
   const outlyingIds = selectOutlyingIds(global, chatId);
