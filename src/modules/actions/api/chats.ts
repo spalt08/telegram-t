@@ -29,14 +29,17 @@ addReducer('openChat', (global, actions, payload) => {
   const { currentUserId } = global;
   const chat = selectChat(global, id);
 
-  // Currently, there is no way to load Channel or User only with their ID.
-  // Furthermore, outside of `Saved Messages` and `Help` links,
-  // it is unlikely for user to open a chat that isn't already loaded
+  // TODO Support non-user chats
   if (!chat) {
     if (id === SUPPORT_BOT_ID) {
-      void callApi('fetchSupportChat');
+      void callApi('fetchChat', { type: 'support' });
     } else if (id === currentUserId) {
-      void callApi('fetchChatWithSelf');
+      void callApi('fetchChat', { type: 'self' });
+    } else {
+      const user = selectUser(global, id);
+      if (user) {
+        void callApi('fetchChat', { type: 'user', user });
+      }
     }
   } else if (isChatSummaryOnly(chat)) {
     actions.requestChatUpdate({ chatId: id });

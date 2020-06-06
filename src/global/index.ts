@@ -5,13 +5,12 @@ import { GlobalState } from './types';
 import {
   DEFAULT_ANIMATION_LEVEL,
   DEFAULT_MESSAGE_TEXT_SIZE_PX,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
 } from '../config';
 import { initCache, loadCache } from './cache';
 
 const INITIAL_STATE: GlobalState = {
-  isChatInfoShown: window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   isLeftColumnShown: true,
+  isChatInfoShown: false,
   uiReadyState: 0,
 
   authRememberMe: true,

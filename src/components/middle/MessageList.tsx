@@ -421,11 +421,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       );
     }
 
-    return messageIds ? (
+    return messageIds && messageGroups ? (
       // @ts-ignore
       <div className="messages-container" teactFastList>
         {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
       </div>
+    ) : messageIds ? (
+      <div className="empty"><span>No messages here yet</span></div>
     ) : (
       <Loading color="white" />
     );

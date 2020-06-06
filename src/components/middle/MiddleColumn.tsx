@@ -83,7 +83,7 @@ export default memo(withGlobal(
 
     return {
       openChatId,
-      canPost: chat && getCanPostInChat(chat),
+      canPost: !chat || getCanPostInChat(chat),
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
     };
   },

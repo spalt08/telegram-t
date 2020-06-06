@@ -3,18 +3,12 @@ import { addReducer } from '../../../lib/teact/teactn';
 import { GlobalState } from '../../../global/types';
 
 import { updateSelectedUserId } from '../../reducers';
-import { selectOpenChat } from '../../selectors';
 
 addReducer('openUserInfo', (global, actions, payload) => {
   const { id } = payload!;
-  const selectedChat = selectOpenChat(global);
 
-  if (selectedChat && selectedChat.id === id) {
-    actions.openChatWithInfo({ id });
-    return undefined;
-  }
-
-  return updateSelectedUserId(global, id);
+  // Should be reverted to Right Column User Info after contest.
+  actions.openChat({ id });
 });
 
 const clearSelectedUserId = (global: GlobalState) => updateSelectedUserId(global, undefined);

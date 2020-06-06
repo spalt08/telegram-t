@@ -143,45 +143,36 @@ export async function searchChats({ query, limit }: { query: string; limit?: num
   };
 }
 
-export async function fetchSupportChat() {
-  const result = await invokeRequest(new GramJs.help.GetSupport());
+export async function fetchChat({
+  type, user,
+}: {
+  type: 'user' | 'self' | 'support'; user?: ApiUser;
+}) {
+  let mtpUser: GramJs.User | undefined;
 
-  if (!result) {
-    return;
+  if (type === 'self' || type === 'user') {
+    const result = await invokeRequest(new GramJs.users.GetUsers({
+      id: [
+        type === 'user' && user
+          ? buildInputEntity(user.id, user.accessHash) as GramJs.InputUser
+          : new GramJs.InputUserSelf(),
+      ],
+    }));
+    if (!result || !result.length) {
+      return;
+    }
+
+    [mtpUser] = result;
+  } else if (type === 'support') {
+    const result = await invokeRequest(new GramJs.help.GetSupport());
+    if (!result || !result.user) {
+      return;
+    }
+
+    mtpUser = result.user;
   }
 
-  const { user } = result;
-  if (user instanceof GramJs.User) {
-    localDb.users[user.id] = user;
-  }
-
-  const chat = buildApiChatFromPreview(user);
-  if (!chat) {
-    return;
-  }
-
-  onUpdate({
-    '@type': 'updateChat',
-    id: chat.id,
-    chat,
-  });
-}
-
-export async function fetchChatWithSelf() {
-  const result = await invokeRequest(new GramJs.users.GetUsers({
-    id: [new GramJs.InputUserSelf()],
-  }));
-
-  if (!result || !result.length) {
-    return;
-  }
-
-  const user = result[0];
-  if (user instanceof GramJs.User) {
-    localDb.users[user.id] = user;
-  }
-
-  const chat = buildApiChatFromPreview(user);
+  const chat = buildApiChatFromPreview(mtpUser!);
   if (!chat) {
     return;
   }
