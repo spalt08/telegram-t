@@ -20,6 +20,7 @@
     ],
     "no-console": "error",
     "semi": "error",
+    "react-hooks/exhaustive-deps": "error",
     "arrow-body-style": "off",
     "no-else-return": "off",
     "no-plusplus": "off",

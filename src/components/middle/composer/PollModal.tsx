@@ -136,7 +136,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     }
 
     onSend(payload);
-  }, [isOpen, question, options, onSend, isQuizMode, correctOption, solution, addNewOption]);
+  }, [isOpen, question, options, isQuizMode, correctOption, isMultipleAnswers, onSend, addNewOption, solution]);
 
   const updateOption = useCallback((index: number, text: string) => {
     const newOptions = [...options];
