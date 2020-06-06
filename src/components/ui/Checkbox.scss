@@ -7,6 +7,11 @@
   line-height: 1.5rem;
   cursor: pointer;
 
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
   input {
     position: absolute;
     z-index: var(--z-below);

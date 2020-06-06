@@ -1,6 +1,7 @@
 import { ChangeEvent } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
+import buildClassName from '../../util/buildClassName';
 import './Checkbox.scss';
 
 type OwnProps = {
@@ -8,6 +9,7 @@ type OwnProps = {
   label: string;
   subLabel?: string;
   checked: boolean;
+  disabled?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -16,14 +18,21 @@ const Checkbox: FC<OwnProps> = ({
   label,
   subLabel,
   checked,
+  disabled,
   onChange,
 }) => {
+  const className = buildClassName(
+    'Checkbox',
+    disabled && 'disabled',
+  );
+
   return (
-    <label className="Checkbox">
+    <label className={className}>
       <input
         type="checkbox"
         id={id}
         checked={checked}
+        disabled={disabled}
         onChange={onChange}
       />
       <div className="Checkbox-main">

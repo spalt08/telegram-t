@@ -115,6 +115,7 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
     question: summary.question,
     answers: summary.answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
     quiz: summary.quiz,
+    multipleChoice: summary.multipleChoice,
   });
 
   if (!quiz) {

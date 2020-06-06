@@ -4,7 +4,9 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { ApiNewPoll } from '../../../api/types';
+
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import parseMessageInput from './helpers/parseMessageInput';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -13,7 +15,6 @@ import Checkbox from '../../ui/Checkbox';
 import RadioGroup from '../../ui/RadioGroup';
 
 import './PollModal.scss';
-import parseMessageInput from './helpers/parseMessageInput';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -30,6 +31,8 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
   const [question, setQuestion] = useState<string>('');
   const [options, setOptions] = useState<string[]>(['']);
+  const [isAnonimous, setIsAnonimous] = useState(true);
+  const [isMultipleAnswers, setIsMultipleAnswers] = useState(false);
   const [isQuizMode, setIsQuizMode] = useState(false);
   const [solution, setSolution] = useState<string>();
   const [correctOption, setCorrectOption] = useState<string>();
@@ -46,6 +49,10 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     if (!isOpen) {
       setQuestion('');
       setOptions(['']);
+      setIsAnonimous(true);
+      setIsMultipleAnswers(false);
+      setIsQuizMode(false);
+      setSolution('');
       setHasErrors(false);
     }
   }, [isOpen]);
@@ -97,6 +104,11 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       return;
     }
 
+    if (isQuizMode && !correctOption) {
+      setHasErrors(true);
+      return;
+    }
+
     const answers = optionsTrimmed
       .map((text, index) => ({
         text: text.trim(),
@@ -108,6 +120,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       summary: {
         question: questionTrimmed,
         answers,
+        ...(isMultipleAnswers && { multipleChoice: isMultipleAnswers }),
         ...(isQuizMode && { quiz: isQuizMode }),
       },
     };
@@ -147,6 +160,14 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       optionsListRef.current.classList.toggle('overflown', optionsListRef.current.scrollHeight > MAX_LIST_HEIGHT);
     });
   }, [options]);
+
+  const handleIsAnonimousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsAnonimous(e.target.checked);
+  }, []);
+
+  const handleMultipleAnswersChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsMultipleAnswers(e.target.checked);
+  }, []);
 
   const handleQuizModeChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsQuizMode(e.target.checked);
@@ -250,8 +271,20 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
       <div className="quiz-mode">
         <Checkbox
+          label="Anonimous Voting"
+          checked={isAnonimous}
+          onChange={handleIsAnonimousChange}
+        />
+        <Checkbox
+          label="Multiple Answers"
+          checked={isMultipleAnswers}
+          disabled={isQuizMode}
+          onChange={handleMultipleAnswersChange}
+        />
+        <Checkbox
           label="Quiz Mode"
           checked={isQuizMode}
+          disabled={isMultipleAnswers}
           onChange={handleQuizModeChange}
         />
         {isQuizMode && (
