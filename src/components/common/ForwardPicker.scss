@@ -1,21 +1,18 @@
+@import '../../styles/mixins';
+
 .ForwardPicker {
   height: 100%;
   position: relative;
 
-  #RightOverlay & {
-    height: calc(100% - 60px);
+  // @optimization
+  @include while-transition() {
+    .picker-list-item:nth-child(n + 16) {
+      display: none;
+    }
   }
 
-  > .Button {
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    transform: translateY(5rem);
-    transition: transform .25s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    &.revealed {
-      transform: translateY(0);
-    }
+  #RightOverlay & {
+    height: calc(100% - 60px);
   }
 
   > .Loading {

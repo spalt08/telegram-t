@@ -1,33 +1,37 @@
 import { ApiMessage } from '../../../api/types';
+import { MediaViewerOrigin } from '../../../types';
 
+import { ANIMATION_END_DELAY } from '../../../config';
+import { getMessageContent, getPhotoFullDimensions, getVideoDimensions } from '../../../modules/helpers';
 import {
-  getMessageContent,
-  getPhotoFullDimensions,
-  getVideoDimensions,
-} from '../../../modules/helpers';
-import {
-  REM,
-  MEDIA_VIEWER_MEDIA_QUERY,
+  AVATAR_FULL_DIMENSIONS,
   calculateDimensions,
   getMediaViewerAvailableDimensions,
+  MEDIA_VIEWER_MEDIA_QUERY,
+  REM,
 } from '../../common/helpers/mediaDimensions';
 
 import windowSize from '../../../util/windowSize';
 
 const ANIMATION_DURATION = 200;
 
-export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSharedMedia?: boolean) {
-  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
-  // TODO Support opening from album.
-  if (!container) {
+export function animateOpening(
+  message: ApiMessage, hasFooter: boolean, origin: MediaViewerOrigin, bestImageData: string,
+) {
+  const { mediaEl: fromImage } = getNodes(message, origin)!;
+  if (!fromImage) {
     return;
   }
 
-  const fromImage = container.querySelector<HTMLImageElement>('img.full-media, video')!;
-
   const { width: windowWidth } = windowSize.get();
-  const { photo, video, webPage } = getMessageContent(message);
-  const mediaSize = video ? getVideoDimensions(video) : getPhotoFullDimensions((photo || webPage!.photo)!);
+
+  let mediaSize;
+  if (message) {
+    const { photo, video, webPage } = getMessageContent(message);
+    mediaSize = video ? getVideoDimensions(video) : getPhotoFullDimensions((photo || webPage!.photo)!);
+  } else {
+    mediaSize = AVATAR_FULL_DIMENSIONS;
+  }
   const { width: availableWidth, height: availableHeight } = getMediaViewerAvailableDimensions(hasFooter);
   const { width: toWidth, height: toHeight } = calculateDimensions(
     availableWidth, availableHeight, mediaSize!.width, mediaSize!.height,
@@ -39,7 +43,7 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
     top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
   } = fromImage.getBoundingClientRect();
 
-  if (isFromSharedMedia) {
+  if (origin === MediaViewerOrigin.SharedMedia) {
     const uncovered = uncover(toWidth, toHeight, fromTop, fromLeft, fromWidth, fromHeight);
     fromTop = uncovered.top;
     fromLeft = uncovered.left;
@@ -52,7 +56,7 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
   const fromScaleX = fromWidth / toWidth;
   const fromScaleY = fromHeight / toHeight;
 
-  const ghost = createGhost(fromImage);
+  const ghost = createGhost(bestImageData || fromImage);
   applyStyles(ghost, {
     top: `${toTop}px`,
     left: `${toLeft}px`,
@@ -74,18 +78,17 @@ export function animateOpening(message: ApiMessage, hasFooter: boolean, isFromSh
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 50);
+      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     });
   });
 }
 
-export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) {
-  const container = document.getElementById(isFromSharedMedia ? `shared-media${message.id}` : `message${message.id}`)!;
-  if (!container) {
+export function animateClosing(message: ApiMessage, origin: MediaViewerOrigin) {
+  const { container, mediaEl: toImage } = getNodes(message, origin);
+  if (!toImage) {
     return;
   }
 
-  const toImage = container.querySelector<HTMLImageElement>('img.full-media, img.thumbnail, video');
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
     '.active .media-viewer-content img, .active .media-viewer-content video',
   );
@@ -110,11 +113,12 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
   const fromTranslateY = (fromTop + fromHeight / 2) - (toTop + toHeight / 2);
   let fromScaleX = fromWidth / toWidth;
   let fromScaleY = fromHeight / toHeight;
-  const shouldFadeOut = !isFromSharedMedia && (
-    !isMessageFullyVisible(container) || container.classList.contains('is-album')
+
+  const shouldFadeOut = origin === MediaViewerOrigin.Album || (
+    origin === MediaViewerOrigin.Inline && !isMessageImageFullyVisible(container, toImage)
   );
 
-  if (isFromSharedMedia) {
+  if (origin === MediaViewerOrigin.SharedMedia) {
     if (fromScaleX > fromScaleY) {
       fromScaleX = fromScaleY;
     } else if (fromScaleY > fromScaleX) {
@@ -141,10 +145,19 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
         ghost.style.opacity = '0';
       }
 
-      if (isFromSharedMedia) {
-        (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
-      } else {
-        ghost.classList.add('rounded-corners');
+      switch (origin) {
+        case MediaViewerOrigin.Inline:
+          ghost.classList.add('rounded-corners');
+          break;
+
+        case MediaViewerOrigin.SharedMedia:
+          (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
+          break;
+
+        case MediaViewerOrigin.MiddleHeaderAvatar:
+        case MediaViewerOrigin.ProfileAvatar:
+          ghost.classList.add('circle');
+          break;
       }
 
       setTimeout(() => {
@@ -152,20 +165,26 @@ export function animateClosing(message: ApiMessage, isFromSharedMedia: boolean) 
           document.body.removeChild(ghost);
           document.body.classList.remove('ghost-animating');
         });
-      }, ANIMATION_DURATION + 50);
+      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     });
   });
 }
 
-function createGhost<T extends HTMLImageElement | HTMLVideoElement>(element: T) {
+function createGhost(source: string | HTMLImageElement | HTMLVideoElement) {
   const ghost = document.createElement('div');
   ghost.classList.add('ghost');
 
-  const clonedElement = element.cloneNode() as T;
-  ['id', 'style', 'width', 'height', 'class'].forEach(((value) => {
-    clonedElement.removeAttribute(value);
-  }));
-  ghost.appendChild(clonedElement);
+  const img = new Image();
+
+  if (typeof source === 'string') {
+    img.src = source;
+  } else if (source instanceof HTMLVideoElement) {
+    img.src = source.poster;
+  } else {
+    img.src = source.src;
+  }
+
+  ghost.appendChild(img);
 
   return ghost;
 }
@@ -197,11 +216,12 @@ function isElementInViewport(el: HTMLElement) {
   return (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
 }
 
-function isMessageFullyVisible(el: HTMLElement) {
+function isMessageImageFullyVisible(messageEl: HTMLElement, imageEl: HTMLElement) {
   const container = document.querySelector<HTMLDivElement>('.MessageList')!;
+  const imgOffsetTop = messageEl.offsetTop + imageEl.parentElement!.parentElement!.offsetTop;
 
-  return el.offsetTop > container.scrollTop
-    && el.offsetTop + el.offsetHeight < container.scrollTop + container.offsetHeight;
+  return imgOffsetTop > container.scrollTop
+    && imgOffsetTop + imageEl.offsetHeight < container.scrollTop + container.offsetHeight;
 }
 
 function getTopOffset(hasFooter: boolean) {
@@ -216,4 +236,44 @@ function getTopOffset(hasFooter: boolean) {
 
 function applyStyles(element: HTMLElement, styles: Record<string, string>) {
   Object.assign(element.style, styles);
+}
+
+function getNodes(message: ApiMessage, origin: MediaViewerOrigin) {
+  let containerSelector;
+  let mediaSelector;
+
+  switch (origin) {
+    case MediaViewerOrigin.Album:
+      containerSelector = `#album-media-${message.id}`;
+      mediaSelector = '.full-media';
+      break;
+
+    case MediaViewerOrigin.SharedMedia:
+      containerSelector = `#shared-media${message.id}`;
+      mediaSelector = '.full-media';
+      break;
+
+    case MediaViewerOrigin.MiddleHeaderAvatar:
+      containerSelector = '.MiddleHeader .ChatInfo .Avatar';
+      mediaSelector = 'img.avatar-media';
+      break;
+
+    case MediaViewerOrigin.ProfileAvatar:
+      containerSelector = '#RightColumn .active .Profile > .ChatInfo .Avatar';
+      mediaSelector = 'img.avatar-media';
+      break;
+
+    case MediaViewerOrigin.Inline:
+    default:
+      containerSelector = `#message${message.id}`;
+      mediaSelector = '.message-content .full-media, .message-content img';
+  }
+
+  const container = document.querySelector<HTMLElement>(containerSelector)!;
+  const mediaEls = container && container.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector);
+
+  return {
+    container,
+    mediaEl: mediaEls && mediaEls[mediaEls.length - 1],
+  };
 }

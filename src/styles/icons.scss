@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'icomoon';
-  src: url('../assets/fonts/icomoon.woff2?8tkig7') format('woff2'),
-    url('../assets/fonts/icomoon.woff?8tkig7') format('woff');
+  src: url('../assets/fonts/icomoon.woff2?7tsg0v') format('woff2'),
+    url('../assets/fonts/icomoon.woff?7tsg0v') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -22,67 +22,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* TODO: Remove unused icons */
-
-.icon-full-screen:before {
-  content: "\e928";
+.icon-folder:before {
+  content: "\e913";
 }
-.icon-menu:before {
-  content: "\e933";
-}
-.icon-more:before {
-  content: "\e936";
-}
-.icon-search:before {
-  content: "\e949";
-}
-.icon-small-screen:before {
-  content: "\e94f";
-}
-.icon-add:before {
-  content: "\e903";
-}
-.icon-check:before {
-  content: "\e914";
-}
-.icon-close:before {
-  content: "\e919";
-}
-.icon-back:before {
-  content: "\e90d";
-}
-.icon-next:before {
-  content: "\e93c";
-}
-.icon-down:before {
-  content: "\e920";
-}
-.icon-up:before {
-  content: "\e958";
-}
-.icon-checkbox-empty:before {
-  content: "\e917";
-}
-.icon-checkbox:before {
+.icon-bots:before {
   content: "\e915";
 }
-.icon-checkbox-block:before {
+.icon-calendar:before {
   content: "\e916";
 }
-.icon-checkbox-on:before {
+.icon-cloud-download:before {
+  content: "\e917";
+}
+.icon-colorize:before {
   content: "\e918";
 }
-.icon-radio-off:before {
-  content: "\e944";
+.icon-forward:before {
+  content: "\e927";
 }
-.icon-radio-on:before {
-  content: "\e945";
-}
-.icon-delete-filled:before {
-  content: "\e91c";
-}
-.icon-delete:before {
-  content: "\e91d";
+.icon-reply:before {
+  content: "\e947";
 }
 .icon-help:before {
   content: "\e92a";
@@ -90,41 +49,20 @@
 .icon-info:before {
   content: "\e92b";
 }
+.icon-info-filled:before {
+  content: "\e91b";
+}
+.icon-delete-filled:before {
+  content: "\e91c";
+}
+.icon-delete:before {
+  content: "\e91d";
+}
 .icon-edit:before {
   content: "\e923";
 }
 .icon-new-chat-filled:before {
   content: "\e939";
-}
-.icon-eye-closed:before {
-  content: "\e925";
-}
-.icon-eye:before {
-  content: "\e924";
-}
-.icon-loader:before {
-  content: "\e95b";
-}
-.icon-right-pane:before {
-  content: "\e95c";
-}
-.icon-muted-chat:before {
-  content: "\e95d";
-}
-.icon-avatar-archived-chats:before {
-  content: "\e90a";
-}
-.icon-avatar-deleted-account:before {
-  content: "\e90b";
-}
-.icon-avatar-saved-messages:before {
-  content: "\e90c";
-}
-.icon-pinned-chat:before {
-  content: "\e942";
-}
-.icon-channelviews:before {
-  content: "\e912";
 }
 .icon-send:before {
   content: "\e94a";
@@ -132,26 +70,20 @@
 .icon-send-outline:before {
   content: "\e94b";
 }
-.icon-message-delivered:before {
-  content: "\e900";
+.icon-add-user-filled:before {
+  content: "\e904";
 }
-.icon-message-read:before {
-  content: "\e901";
+.icon-add-user:before {
+  content: "\e905";
 }
-.icon-message-sending:before {
-  content: "\e94c";
+.icon-delete-user:before {
+  content: "\e91e";
 }
-.icon-message-sending-error:before {
-  content: "\e94d";
+.icon-microphone:before {
+  content: "\e935";
 }
-.icon-chats-placeholder:before {
-  content: "\e913";
-}
-.icon-poll:before {
-  content: "\e938";
-}
-.icon-revote:before {
-  content: "\e93a";
+.icon-microphone-alt:before {
+  content: "\e93b";
 }
 .icon-large-pause:before {
   content: "\e92e";
@@ -165,11 +97,11 @@
 .icon-play:before {
   content: "\e943";
 }
-.icon-microphone:before {
-  content: "\e935";
+.icon-poll:before {
+  content: "\e938";
 }
-.icon-microphone-alt:before {
-  content: "\e93b";
+.icon-revote:before {
+  content: "\e93a";
 }
 .icon-photo:before {
   content: "\e940";
@@ -188,9 +120,6 @@
 }
 .icon-saved-messages:before {
   content: "\e948";
-}
-.icon-archive:before {
-  content: "\e908";
 }
 .icon-settings:before {
   content: "\e94e";
@@ -213,41 +142,111 @@
 .icon-user:before {
   content: "\e959";
 }
+.icon-non-contacts:before {
+  content: "\e928";
+}
 .icon-active-sessions:before {
   content: "\e902";
-}
-.icon-add-user-filled:before {
-  content: "\e904";
-}
-.icon-add-user:before {
-  content: "\e905";
 }
 .icon-admin:before {
   content: "\e906";
 }
-.icon-animals:before {
-  content: "\e907";
-}
-.icon-car:before {
-  content: "\e910";
-}
-.icon-data:before {
-  content: "\e91b";
-}
-.icon-delete-user:before {
-  content: "\e91e";
-}
 .icon-download:before {
   content: "\e921";
+}
+.icon-location:before {
+  content: "\e930";
+}
+.icon-stop:before {
+  content: "\e952";
+}
+.icon-username:before {
+  content: "\e95a";
+}
+.icon-archive:before {
+  content: "\e908";
+}
+.icon-unarchive:before {
+  content: "\e953";
+}
+.icon-readchats:before {
+  content: "\e933";
+}
+.icon-unread:before {
+  content: "\e957";
+}
+.icon-message:before {
+  content: "\e934";
+}
+.icon-lock:before {
+  content: "\e931";
+}
+.icon-unlock:before {
+  content: "\e954";
+}
+.icon-mute:before {
+  content: "\e937";
+}
+.icon-unmute:before {
+  content: "\e955";
+}
+.icon-pin:before {
+  content: "\e941";
+}
+.icon-unpin:before {
+  content: "\e956";
+}
+.icon-channelviews:before {
+  content: "\e912";
+}
+.icon-message-delivered:before {
+  content: "\e900";
+}
+.icon-message-read:before {
+  content: "\e901";
+}
+.icon-message-sending:before {
+  content: "\e94c";
+}
+.icon-message-sending-error:before {
+  content: "\e94d";
+}
+.icon-favorite:before {
+  content: "\e93e";
+}
+.icon-keyboard:before {
+  content: "\e944";
+}
+.icon-delete-left:before {
+  content: "\e945";
+
+  // This compensates a slight offset this icon get after conversion from SVG
+  position: relative;
+  left: -1px;
+}
+.icon-recent:before {
+  content: "\e946";
+}
+.icon-gifs:before {
+  content: "\e94f";
+}
+.icon-stickers:before {
+  content: "\e95b";
+}
+.icon-smile:before {
+  content: "\e950";
+}
+.icon-animals:before {
+  content: "\e907";
 }
 .icon-eats:before {
   content: "\e922";
 }
-.icon-flag:before {
-  content: "\e926";
+.icon-sport:before {
+  content: "\e951";
 }
-.icon-forward:before {
-  content: "\e927";
+.icon-car:before {
+  content: "\e910";
 }
 .icon-lamp:before {
   content: "\e92c";
@@ -255,54 +254,57 @@
 .icon-language:before {
   content: "\e92d";
 }
-.icon-location:before {
-  content: "\e930";
+.icon-flag:before {
+  content: "\e926";
 }
-.icon-lock:before {
-  content: "\e931";
+.icon-more:before {
+  content: "\e936";
 }
-.icon-message:before {
-  content: "\e934";
+.icon-search:before {
+  content: "\e949";
 }
-.icon-mute:before {
-  content: "\e937";
+.icon-remove:before {
+  content: "\e95c";
 }
-.icon-permissions:before {
-  content: "\e93e";
+.icon-add:before {
+  content: "\e903";
 }
-.icon-pin:before {
-  content: "\e941";
+.icon-check:before {
+  content: "\e914";
 }
-.icon-recent:before {
-  content: "\e946";
+.icon-close:before {
+  content: "\e919";
 }
-.icon-reply:before {
-  content: "\e947";
+.icon-back:before {
+  content: "\e90d";
 }
-.icon-smile:before {
-  content: "\e950";
+.icon-next:before {
+  content: "\e93c";
 }
-.icon-sport:before {
-  content: "\e951";
+.icon-down:before {
+  content: "\e920";
 }
-.icon-stop:before {
-  content: "\e952";
+.icon-up:before {
+  content: "\e958";
 }
-.icon-unarchive:before {
-  content: "\e953";
+.icon-eye-closed:before {
+  content: "\e925";
 }
-.icon-unlock:before {
-  content: "\e954";
+.icon-eye:before {
+  content: "\e924";
 }
-.icon-unmute:before {
-  content: "\e955";
+.icon-muted-chat:before {
+  content: "\e95d";
 }
-.icon-unpin:before {
-  content: "\e956";
+.icon-avatar-archived-chats:before {
+  content: "\e90a";
 }
-.icon-unread:before {
-  content: "\e957";
+.icon-avatar-deleted-account:before {
+  content: "\e90b";
 }
-.icon-username:before {
-  content: "\e95a";
+.icon-avatar-saved-messages:before {
+  content: "\e90c";
+}
+.icon-pinned-chat:before {
+  content: "\e942";
 }

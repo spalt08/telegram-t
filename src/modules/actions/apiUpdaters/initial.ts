@@ -7,9 +7,10 @@ import {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
-  ApiUpdateCurrentUserId,
+  ApiUpdateCurrentUser,
 } from '../../../api/types';
 import { DEBUG } from '../../../config';
+import { updateUser } from '../../reducers';
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   if (DEBUG) {
@@ -30,40 +31,27 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       onUpdateConnectionState(update);
       break;
 
-    case 'updateCurrentUserId':
-      onUpdateCurrentUserId(update);
+    case 'updateCurrentUser':
+      onUpdateCurrentUser(update);
       break;
 
     case 'error':
       actions.showError({ error: update.error });
-      break;
-
-    // TODO Move to another module
-    case 'updateResetContactList':
-      setGlobal({
-        ...getGlobal(),
-        contactList: {
-          hash: 0,
-          userIds: [],
-        },
-      });
       break;
   }
 });
 
 function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
   const global = getGlobal();
-  const authState = update.authorization_state['@type'];
+  const authState = update.authorizationState;
+
+  const wasAuthReady = global.authState === 'authorizationStateReady';
 
   setGlobal({
     ...global,
     authState,
     authIsLoading: false,
   });
-
-  if (global.authState === authState) {
-    return;
-  }
 
   switch (authState) {
     case 'authorizationStateLoggingOut':
@@ -72,15 +60,35 @@ function onUpdateAuthorizationState(update: ApiUpdateAuthorizationState) {
         isLoggingOut: true,
       });
       break;
-    case 'authorizationStateReady': {
+    case 'authorizationStateWaitPassword':
       setGlobal({
         ...getGlobal(),
+        authHint: update.hint,
+      });
+      break;
+    case 'authorizationStateWaitQrCode':
+      setGlobal({
+        ...getGlobal(),
+        authIsLoadingQrCode: false,
+        authQrCode: update.qrCode,
+      });
+      break;
+    case 'authorizationStateReady': {
+      if (wasAuthReady) {
+        break;
+      }
+
+      const newGlobal = getGlobal();
+
+      setGlobal({
+        ...newGlobal,
         isLoggingOut: false,
+        lastSyncTime: Date.now(),
       });
 
-      const { session_id } = update;
-      if (session_id && getGlobal().authRememberMe) {
-        getDispatch().saveSession({ sessionId: session_id });
+      const { sessionId } = update;
+      if (sessionId && getGlobal().authRememberMe) {
+        getDispatch().saveSession({ sessionId });
       }
 
       break;
@@ -96,7 +104,7 @@ function onUpdateAuthorizationError(update: ApiUpdateAuthorizationError) {
 }
 
 function onUpdateConnectionState(update: ApiUpdateConnectionState) {
-  const connectionState = update.connection_state['@type'];
+  const { connectionState } = update;
   const global = getGlobal();
 
   setGlobal({
@@ -106,14 +114,16 @@ function onUpdateConnectionState(update: ApiUpdateConnectionState) {
 
   if (connectionState === 'connectionStateReady' && global.authState === 'authorizationStateReady') {
     getDispatch().sync();
+  } else if (connectionState === 'connectionStateBroken') {
+    getDispatch().signOut();
   }
 }
 
-function onUpdateCurrentUserId(update: ApiUpdateCurrentUserId) {
-  const currentUserId = update.current_user_id;
+function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {
+  const { currentUser } = update;
 
   setGlobal({
-    ...getGlobal(),
-    currentUserId,
+    ...updateUser(getGlobal(), currentUser.id, currentUser),
+    currentUserId: currentUser.id,
   });
 }

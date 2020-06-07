@@ -22,11 +22,16 @@ type OwnProps = {
   canPin?: boolean;
   canDelete?: boolean;
   canEdit?: boolean;
+  canForward?: boolean;
+  canFaveSticker?: boolean;
+  canUnfaveSticker?: boolean;
   onReply: () => void;
   onEdit: () => void;
   onPin: () => void;
   onForward: () => void;
   onDelete: () => void;
+  onFaveSticker: () => void;
+  onUnfaveSticker: () => void;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
 };
@@ -41,16 +46,21 @@ const MessageContextMenu: FC<OwnProps> = ({
   canEdit,
   canPin,
   canDelete,
+  canForward,
+  canFaveSticker,
+  canUnfaveSticker,
   onReply,
   onEdit,
   onPin,
   onForward,
   onDelete,
+  onFaveSticker,
+  onUnfaveSticker,
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const [positionX, setPositionX] = useState('right');
-  const [positionY, setPositionY] = useState('bottom');
+  const [positionX, setPositionX] = useState<'right' | 'left'>('right');
+  const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
   const [style, setStyle] = useState('');
   const copyOptions = getMessageCopyOptions(message, onClose);
 
@@ -72,9 +82,12 @@ const MessageContextMenu: FC<OwnProps> = ({
       if (x + menuRect.width + SCROLLBAR_WIDTH < rootRect.width + rootRect.left) {
         setPositionX('left');
         x += 3;
-      } else {
+      } else if (x - menuRect.width > 0) {
         setPositionX('right');
         x -= 3;
+      } else {
+        setPositionX('left');
+        x = 16;
       }
 
       if (y + menuRect.height + SCROLLBAR_WIDTH < rootRect.height + rootRect.top) {
@@ -103,11 +116,13 @@ const MessageContextMenu: FC<OwnProps> = ({
     >
       {canReply && <MenuItem icon="reply" onClick={onReply}>Reply</MenuItem>}
       {canEdit && <MenuItem icon="edit" onClick={onEdit}>Edit</MenuItem>}
+      {canFaveSticker && <MenuItem icon="favorite" onClick={onFaveSticker}>Add to Favorites</MenuItem>}
+      {canUnfaveSticker && <MenuItem icon="favorite" onClick={onUnfaveSticker}>Remove from Favorites</MenuItem>}
       {copyOptions.map((options) => (
         <MenuItem key={options.label} icon="copy" onClick={options.handler}>{options.label}</MenuItem>
       ))}
       {canPin && <MenuItem icon="pin" onClick={onPin}>Pin</MenuItem>}
-      <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>
+      {canForward && <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>}
       {canDelete && <MenuItem className="danger" icon="delete" onClick={onDelete}>Delete</MenuItem>}
     </Menu>
   );

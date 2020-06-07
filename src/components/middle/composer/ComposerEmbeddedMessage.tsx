@@ -8,6 +8,7 @@ import { ApiMessage, ApiUser } from '../../../api/types';
 
 import { selectChatMessage, selectUser } from '../../../modules/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { pick } from '../../../util/iteratees';
 
 import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -47,11 +48,11 @@ const ComposerEmbeddedMessage: FC<StateProps & DispatchProps> = ({
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
   const handleMessageClick = useCallback((): void => {
-    focusMessage({ chatId: message!.chat_id, messageId: message!.id });
+    focusMessage({ chatId: message!.chatId, messageId: message!.id });
   }, [focusMessage, message]);
 
   if (!isShown) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -80,8 +81,8 @@ export default memo(withGlobal(
     const message = replyingTo || editing
       ? selectChatMessage(global, selectedChatId!, (replyingTo || editing)!)
       : undefined;
-    const sender = replyingTo && message && message.sender_user_id
-      ? selectUser(global, message.sender_user_id)
+    const sender = replyingTo && message && message.senderUserId
+      ? selectUser(global, message.senderUserId)
       : undefined;
 
     return {
@@ -92,8 +93,9 @@ export default memo(withGlobal(
       sender,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setChatReplyingTo, setChatEditing, focusMessage } = actions;
-    return { setChatReplyingTo, setChatEditing, focusMessage };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setChatReplyingTo',
+    'setChatEditing',
+    'focusMessage',
+  ]),
 )(ComposerEmbeddedMessage));

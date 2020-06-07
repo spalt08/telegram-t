@@ -1,9 +1,11 @@
 import { useRef } from '../lib/teact/teact';
 
-export default <T extends any>(next: T) => {
+export default <T extends any>(next: T, updateOnlyWhenTruthy?: boolean) => {
   const ref = useRef<T>();
   const { current } = ref;
-  ref.current = next;
+  if (!updateOnlyWhenTruthy || next !== undefined) {
+    ref.current = next;
+  }
 
   return current;
 };

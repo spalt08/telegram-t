@@ -2,14 +2,16 @@ import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
+import buildClassName from '../../util/buildClassName';
 
 import './Transition.scss';
 
 type ChildrenFn = () => any;
 type OwnProps = {
   activeKey: any;
-  name: 'slide' | 'slow-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade';
+  name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
@@ -22,13 +24,13 @@ type OwnProps = {
 
 const ANIMATION_DURATION = {
   slide: 350,
-  'slow-slide': 450,
+  'mv-slide': 400,
   'slide-fade': 400,
   'zoom-fade': 150,
   'scroll-slide': 500,
+  'slide-layers': 250,
   fade: 150,
 };
-const END_DELAY = 50;
 
 const Transition: FC<OwnProps> = ({
   activeKey,
@@ -47,7 +49,7 @@ const Transition: FC<OwnProps> = ({
   const prevActiveKey = usePrevious<any>(activeKey);
   const activateTimeoutRef = useRef<number>();
 
-  const activeKeyChanged = prevActiveKey !== null && activeKey !== prevActiveKey;
+  const activeKeyChanged = prevActiveKey !== null && prevActiveKey !== undefined && activeKey !== prevActiveKey;
 
   if (!renderCount && activeKeyChanged) {
     rendersRef.current = {
@@ -61,8 +63,9 @@ const Transition: FC<OwnProps> = ({
     const container = containerRef.current!;
 
     const childElements = container.children;
-    if (childElements.length === 1) {
+    if (childElements.length === 1 && !activeKeyChanged) {
       childElements[0].classList.add('active');
+
       return;
     }
 
@@ -89,6 +92,17 @@ const Transition: FC<OwnProps> = ({
     const keys = Object.keys(rendersRef.current).map(Number);
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
+
+    if (name === 'none') {
+      childNodes.forEach((node, i) => {
+        if (node instanceof HTMLElement) {
+          node.classList.remove('from', 'through', 'to');
+          node.classList.toggle('active', i === activeIndex);
+        }
+      });
+
+      return;
+    }
 
     childNodes.forEach((node, i) => {
       if (node instanceof HTMLElement) {
@@ -140,13 +154,23 @@ const Transition: FC<OwnProps> = ({
             onStop();
           }
         });
-      }, ANIMATION_DURATION[name] + END_DELAY);
+      }, ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
 
       if (onStart) {
         onStart();
       }
     });
-  }, [activeKey, activeKeyChanged, direction, name, onStart, onStop, prevActiveKey, renderCount, shouldRestoreHeight]);
+  }, [
+    activeKey,
+    prevActiveKey,
+    activeKeyChanged,
+    direction,
+    name,
+    onStart,
+    onStop,
+    renderCount,
+    shouldRestoreHeight,
+  ]);
 
   useLayoutEffect(() => {
     if (shouldRestoreHeight) {
@@ -172,8 +196,14 @@ const Transition: FC<OwnProps> = ({
     contents = Object.keys(renders).map((key) => <div key={key}>{renders[Number(key)]()}</div>);
   }
 
+  const fullClassName = buildClassName(
+    'Transition',
+    className,
+    name,
+  );
+
   return (
-    <div ref={containerRef} id={id} className={[className, 'Transition', name].join(' ')}>
+    <div ref={containerRef} id={id} className={fullClassName}>
       {contents}
     </div>
   );

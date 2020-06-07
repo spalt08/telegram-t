@@ -11,32 +11,51 @@ import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
+import { pick } from '../../util/iteratees';
 
 import './UiLoader.scss';
 
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved, import/order
 import telegramLogoPath from 'url:../../assets/telegram-logo.svg';
-
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved, import/order
+import authCaptionPath from 'url:../../assets/auth-caption.png';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved, import/order
 import monkeyPath from 'url:../../assets/monkey.svg';
 
 type OwnProps = {
-  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber';
+  page: 'main' | 'authCode' | 'authPassword' | 'authPhoneNumber' | 'authQrCode';
   children: any;
 };
 
-type StateProps = Pick<GlobalState, 'isUiReady'>;
+type StateProps = Pick<GlobalState, 'uiReadyState'>;
 
 type DispatchProps = Pick<GlobalActions, 'setIsUiReady'>;
 
-const MAX_PRELOAD_DELAY = 1500;
+const MAX_PRELOAD_DELAY = 1000;
+const SECOND_STATE_DELAY = 1000;
+const AVATARS_TO_PRELOAD = 17;
 
 function preloadAvatars() {
-  return Promise.all(Object.values(getGlobal().chats.byId).map((chat) => {
+  const { listIds, byId } = getGlobal().chats;
+  if (!listIds) {
+    return undefined;
+  }
+
+  return Promise.all(listIds.slice(0, AVATARS_TO_PRELOAD).map((chatId) => {
+    const chat = byId[chatId];
+    if (!chat) {
+      return undefined;
+    }
+
     const avatarHash = getChatAvatarHash(chat);
-    return avatarHash ? mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri) : null;
+    if (!avatarHash) {
+      return undefined;
+    }
+
+    return mediaLoader.fetch(avatarHash, ApiMediaFormat.DataUri);
   }));
 }
 
@@ -47,28 +66,42 @@ const preloadTasks = {
     preloadAvatars(),
   ]),
   authPhoneNumber: () => Promise.all([
-    preloadFonts(),
+    preloadImage(authCaptionPath),
     preloadImage(telegramLogoPath),
   ]),
-  authCode: () => preloadImage(monkeyPath),
+  authCode: () => Promise.all([
+    preloadImage(monkeyPath),
+    preloadFonts(),
+  ]),
   authPassword: () => preloadImage(monkeyPath),
+  authQrCode: preloadFonts,
 };
 
 const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
-  page, children, isUiReady, setIsUiReady,
+  page, children, uiReadyState, setIsUiReady,
 }) => {
-  const { shouldRender, transitionClassNames } = useShowTransition(!isUiReady, undefined, true);
+  const { shouldRender, transitionClassNames } = useShowTransition(!uiReadyState, undefined, true);
 
   useEffect(() => {
+    let timeout: number;
+
     Promise.race([
       pause(MAX_PRELOAD_DELAY),
       preloadTasks[page](),
     ]).then(() => {
-      setIsUiReady({ isUiReady: true });
+      setIsUiReady({ uiReadyState: 1 });
+
+      timeout = window.setTimeout(() => {
+        setIsUiReady({ uiReadyState: 2 });
+      }, SECOND_STATE_DELAY);
     });
 
     return () => {
-      setIsUiReady({ isUiReady: false });
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      setIsUiReady({ uiReadyState: 0 });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -93,12 +126,6 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { isUiReady } = global;
-    return { isUiReady };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setIsUiReady } = actions;
-    return { setIsUiReady };
-  },
+  (global): StateProps => pick(global, ['uiReadyState']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setIsUiReady']),
 )(UiLoader);

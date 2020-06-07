@@ -5,6 +5,7 @@ import { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../modules/selectors';
 import { getChatTitle, getPrivateChatUserId, getUserFirstName } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 
 import Avatar from './Avatar';
 
@@ -24,10 +25,10 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   privateChatUser,
 }) => {
   if (!chat) {
-    return null;
+    return undefined;
   }
 
-  const name = privateChatUser && !privateChatUser.is_self
+  const name = privateChatUser && !privateChatUser.isSelf
     ? getUserFirstName(privateChatUser)
     : getChatTitle(chat, privateChatUser);
 
@@ -37,10 +38,10 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         chat={chat}
         user={privateChatUser}
         size="small"
-        isSavedMessages={privateChatUser && privateChatUser.is_self}
+        isSavedMessages={privateChatUser && privateChatUser.isSelf}
       />
       <div className="picker-selected-item-name">
-        {name}
+        {name && renderText(name)}
       </div>
       <div className="picker-selected-item-remove">
         <i className="icon-close" />

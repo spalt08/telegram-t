@@ -93,6 +93,10 @@
   .modal-content {
     flex-grow: 1;
     padding: 1rem;
+
+    strong {
+      word-break: break-word;
+    }
   }
 
   .confirm-dialog-button {
@@ -100,5 +104,6 @@
     height: auto;
     margin-left: auto;
     text-align: right;
+    font-weight: 500;
   }
 }

@@ -1,6 +1,7 @@
 import { Api as GramJs, connection } from '../../lib/gramjs';
-import { ApiMessage, OnApiUpdate } from '../types';
+import { ApiMessage, ApiUpdateConnectionStateType, OnApiUpdate } from '../types';
 
+import { pick } from '../../util/iteratees';
 import {
   buildApiMessage,
   buildApiMessageFromShort,
@@ -10,6 +11,7 @@ import {
   resolveMessageApiChatId,
   buildPoll,
   buildPollResults,
+  buildApiMessageFromNotification,
 } from './apiBuilders/messages';
 import {
   getApiChatIdFromMtpPeer,
@@ -20,8 +22,16 @@ import {
   buildApiChatFromPreview,
 } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
-import { buildMessageFromUpdateShortSent, isMessageWithMedia, buildChatPhotoForLocalDb } from './gramjsBuilders';
+import {
+  buildMessageFromUpdateShortSent,
+  isMessageWithMedia,
+  buildChatPhotoForLocalDb,
+  buildNotificationMessageForLocalDb,
+} from './gramjsBuilders';
 import localDb from './localDb';
+import { omitVirtualClassFields } from './apiBuilders/helpers';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { addMessageToLocalDb } from './helpers';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -34,21 +44,30 @@ export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function setUpdaterCurrentUserId(_currentUserId:number) {
+export function setUpdaterCurrentUserId(_currentUserId: number) {
   currentUserId = _currentUserId;
 }
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   if (update instanceof connection.UpdateConnectionState) {
-    const connectionState = update.state === connection.UpdateConnectionState.states.disconnected
-      ? 'connectionStateConnecting'
-      : 'connectionStateReady';
+    let connectionState: ApiUpdateConnectionStateType;
+
+    switch (update.state) {
+      case connection.UpdateConnectionState.states.disconnected:
+        connectionState = 'connectionStateConnecting';
+        break;
+      case connection.UpdateConnectionState.states.broken:
+        connectionState = 'connectionStateBroken';
+        break;
+      case connection.UpdateConnectionState.states.connected:
+      default:
+        connectionState = 'connectionStateReady';
+        break;
+    }
 
     onUpdate({
       '@type': 'updateConnectionState',
-      connection_state: {
-        '@type': connectionState,
-      },
+      connectionState,
     });
 
     // Messages
@@ -57,6 +76,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     || update instanceof GramJs.UpdateNewChannelMessage
     || update instanceof GramJs.UpdateShortChatMessage
     || update instanceof GramJs.UpdateShortMessage
+    || update instanceof GramJs.UpdateServiceNotification
   ) {
     let message: ApiMessage | undefined;
 
@@ -64,10 +84,21 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       message = buildApiMessageFromShortChat(update);
     } else if (update instanceof GramJs.UpdateShortMessage) {
       message = buildApiMessageFromShort(update, currentUserId!);
+    } else if (update instanceof GramJs.UpdateServiceNotification) {
+      const currentDate = Date.now();
+      message = buildApiMessageFromNotification(update, currentDate);
+
+      if (isMessageWithMedia(update)) {
+        localDb.messages[SERVICE_NOTIFICATIONS_USER_ID] = buildNotificationMessageForLocalDb(
+          update,
+          message.id,
+          currentDate,
+          currentUserId!,
+        );
+      }
     } else {
       if (update.message instanceof GramJs.Message && isMessageWithMedia(update.message)) {
-        const messageFullId = `${resolveMessageApiChatId(update.message)}-${update.message.id}`;
-        localDb.messages[messageFullId] = update.message;
+        addMessageToLocalDb(update.message);
       }
 
       message = buildApiMessage(update.message)!;
@@ -95,7 +126,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'newMessage',
       id: message.id,
-      chat_id: message.chat_id,
+      chatId: message.chatId,
       message,
     });
 
@@ -107,7 +138,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       if (action instanceof GramJs.MessageActionChatEditTitle) {
         onUpdate({
           '@type': 'updateChat',
-          id: message.chat_id,
+          id: message.chatId,
           chat: {
             title: action.title,
           },
@@ -122,7 +153,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         if (avatar) {
           onUpdate({
             '@type': 'updateChat',
-            id: message.chat_id,
+            id: message.chatId,
             chat: { avatar },
           });
         }
@@ -132,18 +163,27 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
 
         onUpdate({
           '@type': 'updateChat',
-          id: message.chat_id,
+          id: message.chatId,
           chat: { avatar: undefined },
         });
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
         // eslint-disable-next-line no-underscore-dangle
-        const deletedUser = update._entities && update._entities.find((e): e is GramJs.User => (
-          e instanceof GramJs.User && e.id === action.userId
-        ));
-        if (deletedUser && deletedUser.self) {
+        if (update._entities && update._entities.some((e): e is GramJs.User => (
+          e instanceof GramJs.User && !!e.self && e.id === action.userId
+        ))) {
           onUpdate({
             '@type': 'updateChatLeave',
-            id: message.chat_id,
+            id: message.chatId,
+          });
+        }
+      } else if (action instanceof GramJs.MessageActionChatAddUser) {
+        // eslint-disable-next-line no-underscore-dangle
+        if (update._entities && update._entities.some((e): e is GramJs.User => (
+          e instanceof GramJs.User && !!e.self && action.users.includes(e.id)
+        ))) {
+          onUpdate({
+            '@type': 'updateChatJoin',
+            id: message.chatId,
           });
         }
       }
@@ -162,7 +202,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateMessage',
       id: message.id,
-      chat_id: message.chat_id,
+      chatId: message.chatId,
       message,
     });
   } else if (
@@ -173,7 +213,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'deleteMessages',
       ids: update.messages,
       ...((update instanceof GramJs.UpdateDeleteChannelMessages) && {
-        chat_id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
+        chatId: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       }),
     });
   } else if ((
@@ -204,15 +244,15 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         };
       }
 
-      const mtpMessage = buildMessageFromUpdateShortSent(update.id, localMessage.chat_id, update);
-      const messageFullId = `${localMessage.chat_id}-${update.id}`;
+      const mtpMessage = buildMessageFromUpdateShortSent(update.id, localMessage.chatId, update);
+      const messageFullId = `${localMessage.chatId}-${update.id}`;
       localDb.messages[messageFullId] = mtpMessage;
     }
 
     onUpdate({
       '@type': 'updateMessageSendSucceeded',
-      chat_id: localMessage.chat_id,
-      local_id: localMessage.id,
+      chatId: localMessage.chatId,
+      localId: localMessage.id,
       message: {
         ...localMessage,
         ...(newContent && {
@@ -222,7 +262,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
           },
         }),
         id: update.id,
-        sending_state: undefined,
+        sendingState: undefined,
         ...('date' in update && { date: update.date }),
       },
     });
@@ -231,6 +271,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateCommonBoxMessages',
       ids: update.messages,
       messageUpdate: {
+        hasUnreadMention: false,
         isMediaUnread: false,
       },
     });
@@ -240,6 +281,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       channelId: update.channelId,
       ids: update.messages,
       messageUpdate: {
+        hasUnreadMention: false,
         isMediaUnread: false,
       },
     });
@@ -271,7 +313,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if (update instanceof GramJs.UpdateChannelMessageViews) {
     onUpdate({
       '@type': 'updateMessage',
-      chat_id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
+      chatId: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       id: update.id,
       message: { views: update.views },
     });
@@ -282,8 +324,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChatInbox',
       id: getApiChatIdFromMtpPeer(update.peer),
       chat: {
-        last_read_inbox_message_id: update.maxId,
-        unread_count: update.stillUnreadCount,
+        lastReadInboxMessageId: update.maxId,
+        unreadCount: update.stillUnreadCount,
       },
     });
   } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
@@ -291,7 +333,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer(update.peer),
       chat: {
-        last_read_outbox_message_id: update.maxId,
+        lastReadOutboxMessageId: update.maxId,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelInbox) {
@@ -299,8 +341,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       chat: {
-        last_read_inbox_message_id: update.maxId,
-        unread_count: update.stillUnreadCount,
+        lastReadInboxMessageId: update.maxId,
+        unreadCount: update.stillUnreadCount,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelOutbox) {
@@ -308,7 +350,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       chat: {
-        last_read_outbox_message_id: update.maxId,
+        lastReadOutboxMessageId: update.maxId,
       },
     });
   } else if (
@@ -316,11 +358,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     && update.peer instanceof GramJs.DialogPeer
   ) {
     onUpdate({
-      '@type': 'updateChat',
+      '@type': 'updateChatPinned',
       id: getApiChatIdFromMtpPeer(update.peer.peer),
-      chat: {
-        is_pinned: update.pinned || false,
-      },
+      isPinned: update.pinned || false,
     });
   } else if (update instanceof GramJs.UpdatePinnedDialogs) {
     const ids = update.order
@@ -342,12 +382,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       replacedMembers,
     });
   } else if (update instanceof GramJs.UpdateChatParticipantAdd) {
-    const { userId, inviterId, date } = update;
-    const addedMember = buildChatMember({
-      userId,
-      inviterId,
-      date,
-    } as GramJs.ChatParticipant);
+    const addedMember = buildChatMember(
+      pick(update, ['userId', 'inviterId', 'date']) as GramJs.ChatParticipant,
+    );
 
     onUpdate({
       '@type': 'updateChatMembers',
@@ -373,8 +410,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateChatFullInfo',
       id,
-      full_info: {
-        pinned_message_id: update.id,
+      fullInfo: {
+        pinnedMessageId: update.id,
       },
     });
   } else if (
@@ -387,7 +424,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChat',
       id: getApiChatIdFromMtpPeer(update.peer.peer),
       chat: {
-        is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
+        isMuted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
       },
     });
   } else if (
@@ -409,55 +446,57 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       const channel = _entities.find((e): e is GramJs.Channel => (e instanceof GramJs.Channel));
       const isForbidden = _entities.some((e) => e instanceof GramJs.ChannelForbidden);
       const isVisible = !(isForbidden || (channel && channel.left));
-      const chat = channel && buildApiChatFromPreview(channel);
+      // When `chatUpdate` is built from a preview,
+      // it can have an incorrect type of `channel` for supergroup chats.
+      // Since chat entitiy can't change its type anyway, we can safely ignore it.
+      const chat = channel && buildApiChatFromPreview(channel, true);
 
-      if (!chat) {
-        return;
+      if (chat) {
+        onUpdate({
+          '@type': 'updateChat',
+          id: chat.id,
+          chat,
+        });
       }
 
       onUpdate({
-        '@type': 'updateChat',
-        id: chat.id,
-        chat,
-      });
-
-      onUpdate({
         '@type': isVisible ? 'updateChatJoin' : 'updateChatLeave',
-        id: chat.id,
+        id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       });
     }
+  } else if (update instanceof GramJs.UpdateChatDefaultBannedRights) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer),
+      chat: {
+        defaultBannedRights: omitVirtualClassFields(update.defaultBannedRights),
+      },
+    });
 
     // Users
   } else if (update instanceof GramJs.UpdateUserStatus) {
+    const { userId, status } = update;
     onUpdate({
-      '@type': 'updateUser',
-      id: update.userId,
-      user: {
-        status: buildApiUserStatus(update.status),
-      },
+      '@type': 'updateUserStatus',
+      userId,
+      status: buildApiUserStatus(status),
     });
   } else if (update instanceof GramJs.UpdateUserName) {
-    const {
-      userId, firstName, lastName, username,
-    } = update;
+    const updatedUser = localDb.users[update.userId];
+    const user = updatedUser && updatedUser.mutualContact && !updatedUser.self
+      ? pick(update, ['username'])
+      : pick(update, ['firstName', 'lastName', 'username']);
 
     onUpdate({
       '@type': 'updateUser',
-      id: userId,
-      user: {
-        first_name: firstName,
-        last_name: lastName,
-        username,
-      },
+      id: update.userId,
+      user,
     });
   } else if (update instanceof GramJs.UpdateUserPhoto) {
     const { userId, photo } = update;
     const avatar = buildAvatar(photo);
 
-    localDb.users[userId] = {
-      ...localDb.users[userId],
-      photo,
-    };
+    localDb.users[userId].photo = photo;
 
     onUpdate({
       '@type': 'updateUser',
@@ -470,28 +509,28 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateUser',
       id: userId,
-      user: { phone_number: phone },
+      user: { phoneNumber: phone },
     });
   } else if (update instanceof GramJs.UpdateUserPinnedMessage) {
     onUpdate({
       '@type': 'updateUserFullInfo',
       id: update.userId,
-      full_info: {
-        pinned_message_id: update.id,
+      fullInfo: {
+        pinnedMessageId: update.id,
       },
     });
 
     // Misc
   } else if (update instanceof GramJs.UpdateContactsReset) {
     onUpdate({ '@type': 'updateResetContactList' });
+  } else if (update instanceof GramJs.UpdateFavedStickers) {
+    onUpdate({ '@type': 'updateFavoriteStickers' });
   }
 }
 
 export function handleError(err: Error) {
-  const { message } = err;
-
   onUpdate({
     '@type': 'error',
-    error: { message },
+    error: pick(err, ['message']),
   });
 }

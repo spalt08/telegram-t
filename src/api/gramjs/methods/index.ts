@@ -1,20 +1,23 @@
-import { destroy, downloadMedia } from './client';
+import { destroy, downloadMedia, fetchCurrentUser } from './client';
 import {
-  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth,
+  provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,
 } from './auth';
 import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
-  saveDraft, clearDraft, fetchSupportChat, fetchChatWithSelf,
+  saveDraft, clearDraft, fetchChat, markChatRead, updateChatMutedState,
+  createChannel, editChannelPhoto, joinChannel, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
 } from './chats';
 import {
-  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, markMessagesRead, readMessageContents,
+  fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, deleteHistory, markMessagesRead,
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
 } from './messages';
 import {
-  fetchFullUser, fetchNearestCountry, uploadProfilePhoto, fetchTopUsers, fetchContactList, fetchUsers,
+  fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
+  updateProfile, updateProfilePhoto, checkUsername, updateUsername,
+  fetchTopUsers, fetchContactList, fetchUsers,
 } from './users';
 import {
-  fetchStickerSets, fetchRecentStickers, fetchStickers, fetchSavedGifs,
+  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, faveSticker, fetchStickers, fetchSavedGifs,
 } from './stickers';
 
 export default {
@@ -25,14 +28,24 @@ export default {
   provideAuthPassword,
   provideAuthRegistration,
   restartAuth,
+  restartAuthWithQr,
   fetchChats,
   fetchMessages,
   fetchMessage,
   sendMessage,
   pinMessage,
   deleteMessages,
+  deleteHistory,
+  markChatRead,
+  updateChatMutedState,
+  createChannel,
+  editChannelPhoto,
+  joinChannel,
+  leaveChannel,
+  deleteChannel,
+  createGroupChat,
+  editChatPhoto,
   markMessagesRead,
-  readMessageContents,
   searchMessages,
   searchMessagesGlobal,
   fetchWebPagePreview,
@@ -42,19 +55,25 @@ export default {
   fetchFullChat,
   fetchSuperGroupOnlines,
   searchChats,
-  fetchSupportChat,
-  fetchChatWithSelf,
+  fetchChat,
   requestChatUpdate,
   saveDraft,
   clearDraft,
   fetchFullUser,
   fetchNearestCountry,
   uploadProfilePhoto,
+  updateProfile,
+  updateProfilePhoto,
+  checkUsername,
+  updateUsername,
+  fetchCurrentUser,
   fetchTopUsers,
   fetchContactList,
   fetchUsers,
   fetchStickerSets,
   fetchRecentStickers,
+  fetchFavoriteStickers,
+  faveSticker,
   fetchStickers,
   fetchSavedGifs,
 };

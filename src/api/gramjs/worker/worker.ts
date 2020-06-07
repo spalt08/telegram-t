@@ -1,9 +1,11 @@
-import { ApiUpdate } from '../../types';
+import { ApiOnProgress, ApiUpdate } from '../../types';
 import { OriginMessageEvent, WorkerMessageData } from './types';
-import { initApi, callApi } from '../provider';
+import { initApi, callApi, cancelApiProgress } from '../provider';
 import { DEBUG } from '../../../config';
 
 handleErrors();
+
+const callbackState: Record<string, ApiOnProgress> = {};
 
 onmessage = async (message: OriginMessageEvent) => {
   const { data } = message;
@@ -17,13 +19,15 @@ onmessage = async (message: OriginMessageEvent) => {
       const { messageId, name, args } = data;
       try {
         if (messageId) {
-          args.push(((...callbackArgs: any[]) => {
+          callbackState[messageId] = (...callbackArgs: any[]) => {
             sendToOrigin({
               type: 'methodCallback',
               messageId,
               callbackArgs,
             });
-          }) as never);
+          };
+
+          args.push(callbackState[messageId] as never);
         }
 
         const response = await callApi(name, ...args);
@@ -49,6 +53,18 @@ onmessage = async (message: OriginMessageEvent) => {
           });
         }
       }
+
+      if (messageId) {
+        delete callbackState[messageId];
+      }
+
+      break;
+    }
+    case 'cancelProgress': {
+      if (callbackState[data.messageId]) {
+        cancelApiProgress(callbackState[data.messageId]);
+      }
+
       break;
     }
   }

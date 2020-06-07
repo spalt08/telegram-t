@@ -1,11 +1,16 @@
-import React, { FC, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useState, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
 import { selectChat } from '../../modules/selectors';
-import { isChatChannel } from '../../modules/helpers';
+import { getCanPostInChat, getMessageSendingRestrictionReason } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
+import usePrevious from '../../hooks/usePrevious';
+import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN } from '../../config';
 
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
@@ -16,17 +21,29 @@ import './MiddleColumn.scss';
 
 type StateProps = {
   openChatId?: number;
-  isChannel?: boolean;
+  canPost?: boolean;
+  messageSendingRestrictionReason?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
 
 const MiddleColumn: FC<StateProps & DispatchProps> = ({
   openChatId,
-  isChannel,
+  canPost,
+  messageSendingRestrictionReason,
   openChat,
 }) => {
   const [showFab, setShowFab] = useState(false);
+  const prevChatId = usePrevious(openChatId, true);
+  const prevCanPost = usePrevious(canPost, true);
+
+  const renderingChatId = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
+    ? openChatId
+    : openChatId || prevChatId;
+
+  const renderingCanPost = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
+    ? canPost
+    : canPost || prevCanPost;
 
   useEffect(() => {
     return openChatId
@@ -38,11 +55,16 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="MiddleColumn">
-      {openChatId && (
+      {renderingChatId && (
         <div className="messages-layout">
-          <MiddleHeader chatId={openChatId} />
-          <MessageList key={openChatId} onFabToggle={setShowFab} />
-          {!isChannel && <Composer />}
+          <MiddleHeader chatId={renderingChatId} />
+          <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
+          {renderingCanPost && <Composer />}
+          {!renderingCanPost && messageSendingRestrictionReason && (
+            <div className="messaging-disabled">
+              <span>{messageSendingRestrictionReason}</span>
+            </div>
+          )}
           <ScrollDownButton show={showFab} />
         </div>
       )}
@@ -50,7 +72,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const { chats: { selectedId: openChatId, listIds } } = global;
     if (!listIds || !openChatId) {
@@ -58,15 +80,12 @@ export default withGlobal(
     }
 
     const chat = selectChat(global, openChatId);
-    const isChannel = chat && isChatChannel(chat);
 
     return {
       openChatId,
-      isChannel,
+      canPost: !chat || getCanPostInChat(chat),
+      messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openChat } = actions;
-    return { openChat };
-  },
-)(MiddleColumn);
+  (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),
+)(MiddleColumn));

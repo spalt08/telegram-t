@@ -1,38 +1,156 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiChat, ApiChatMember } from '../../types';
+import {
+  ApiChat,
+  ApiChatMember,
+  ApiChatAdminRights,
+  ApiChatBannedRights,
+  ApiRestrictionReason,
+} from '../../types';
+import { pick } from '../../../util/iteratees';
 import { isPeerChat, isPeerUser } from './peers';
+import { omitVirtualClassFields } from './helpers';
+
+type PeerEntityApiChatFields = Omit<ApiChat, (
+  'id' | 'type' | 'title' |
+  'lastReadOutboxMessageId' | 'lastReadInboxMessageId' |
+  'unreadCount' | 'unreadMentionsCount' |
+  'isPinned' | 'isMuted'
+)>;
+
+function buildApiChatFieldsFromPeerEntity(
+  peerEntity: GramJs.TypeUser | GramJs.TypeChat,
+): PeerEntityApiChatFields {
+  const avatar = ('photo' in peerEntity) && buildAvatar(peerEntity.photo);
+
+  return {
+    ...(
+      (peerEntity instanceof GramJs.Channel || peerEntity instanceof GramJs.User)
+      && { username: peerEntity.username }
+    ),
+    ...(('verified' in peerEntity) && { isVerified: peerEntity.verified }),
+    ...(('accessHash' in peerEntity) && peerEntity.accessHash && { accessHash: peerEntity.accessHash.toString() }),
+    ...(avatar && { avatar }),
+    ...((peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel) && {
+      membersCount: peerEntity.participantsCount,
+      joinDate: peerEntity.date,
+    }),
+    ...buildApiChatPermissions(peerEntity),
+    ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),
+    ...buildApiChatRestrictions(peerEntity),
+    ...buildApiChatMigrationInfo(peerEntity),
+  };
+}
 
 export function buildApiChatFromDialog(
   dialog: GramJs.Dialog,
-  peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel,
+  peerEntity: GramJs.TypeUser | GramJs.TypeChat,
 ): ApiChat {
-  const avatar = peerEntity.photo && buildAvatar(peerEntity.photo);
   const { silent, muteUntil } = dialog.notifySettings;
 
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
-    type: {
-      '@type': getApiChatTypeFromPeerEntity(peerEntity),
-    },
+    type: getApiChatTypeFromPeerEntity(peerEntity),
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
-    last_read_outbox_message_id: dialog.readOutboxMaxId,
-    last_read_inbox_message_id: dialog.readInboxMaxId,
-    unread_count: dialog.unreadCount,
-    unread_mention_count: dialog.unreadMentionsCount,
-    ...(!(peerEntity instanceof GramJs.Chat) && { username: peerEntity.username }),
-    is_pinned: dialog.pinned,
-    ...(('verified' in peerEntity) && { is_verified: peerEntity.verified }),
-    is_muted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
-    ...(('accessHash' in peerEntity) && peerEntity.accessHash && { access_hash: peerEntity.accessHash.toString() }),
-    ...(avatar && { avatar }),
-    ...(!(peerEntity instanceof GramJs.User) && {
-      members_count: peerEntity.participantsCount,
-      joinDate: peerEntity.date,
-    }),
+    lastReadOutboxMessageId: dialog.readOutboxMaxId,
+    lastReadInboxMessageId: dialog.readInboxMaxId,
+    ...pick(dialog, [
+      'unreadCount',
+      'unreadMentionsCount',
+    ]),
+    isPinned: dialog.pinned,
+    isMuted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
+    ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
 }
 
-export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUser): ApiChat | undefined {
+function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
+  adminRights?: ApiChatAdminRights;
+  currentUserBannedRights?: ApiChatBannedRights;
+  defaultBannedRights?: ApiChatBannedRights;
+} {
+  if (!(peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel)) {
+    return {};
+  }
+
+  return {
+    adminRights: omitVirtualClassFields(peerEntity.adminRights),
+    currentUserBannedRights: peerEntity instanceof GramJs.Channel
+      ? omitVirtualClassFields(peerEntity.bannedRights)
+      : undefined,
+    defaultBannedRights: omitVirtualClassFields(peerEntity.defaultBannedRights),
+  };
+}
+
+function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
+  hasLeft?: boolean;
+  isRestricted?: boolean;
+  restrictionReason?: ApiRestrictionReason;
+} {
+  if (peerEntity instanceof GramJs.ChatForbidden || peerEntity instanceof GramJs.ChannelForbidden) {
+    return {
+      isRestricted: true,
+    };
+  }
+
+  if (peerEntity instanceof GramJs.User) {
+    return {
+      isRestricted: peerEntity.restricted,
+      restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
+    };
+  } else if (peerEntity instanceof GramJs.Chat) {
+    return {
+      hasLeft: peerEntity.left,
+      isRestricted: peerEntity.kicked,
+    };
+  } else if (peerEntity instanceof GramJs.Channel) {
+    return {
+      hasLeft: peerEntity.left,
+      isRestricted: peerEntity.restricted,
+      restrictionReason: buildApiChatRestrictionReason(peerEntity.restrictionReason),
+    };
+  }
+  return {};
+}
+
+function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
+  migratedTo?: {
+    chatId: number;
+    accessHash?: string;
+  };
+} {
+  if (
+    peerEntity instanceof GramJs.Chat
+    && peerEntity.migratedTo
+    && !(peerEntity.migratedTo instanceof GramJs.InputChannelEmpty)
+  ) {
+    return {
+      migratedTo: {
+        chatId: getApiChatIdFromMtpPeer(peerEntity.migratedTo),
+        ...(peerEntity.migratedTo instanceof GramJs.InputChannel && {
+          accessHash: peerEntity.migratedTo.accessHash.toString(),
+        }),
+      },
+    };
+  }
+
+  return {};
+}
+
+function buildApiChatRestrictionReason(
+  restrictionReasons?: GramJs.RestrictionReason[],
+): ApiRestrictionReason | undefined {
+  if (!restrictionReasons) {
+    return undefined;
+  }
+
+  const targetReason = restrictionReasons.find(({ platform }) => platform === 'all');
+  return targetReason ? pick(targetReason, ['reason', 'text']) : undefined;
+}
+
+export function buildApiChatFromPreview(
+  preview: GramJs.TypeChat | GramJs.TypeUser,
+  omitType?: boolean,
+): ApiChat | undefined {
   if (
     !(preview instanceof GramJs.Chat)
     && !(preview instanceof GramJs.Channel)
@@ -41,23 +159,18 @@ export function buildApiChatFromPreview(preview: GramJs.TypeChat | GramJs.TypeUs
     return undefined;
   }
 
-  const avatar = preview.photo && buildAvatar(preview.photo);
-
-  return {
+  const chat: ApiChat = {
     id: preview instanceof GramJs.User ? preview.id : -preview.id,
-    type: {
-      '@type': getApiChatTypeFromPeerEntity(preview),
-    },
+    type: getApiChatTypeFromPeerEntity(preview),
     title: preview instanceof GramJs.User ? getUserName(preview) : preview.title,
-    ...(!(preview instanceof GramJs.Chat) && { username: preview.username }),
-    ...(('accessHash' in preview) && preview.accessHash && { access_hash: preview.accessHash.toString() }),
-    ...(avatar && { avatar }),
-    ...(('verified' in preview) && { is_verified: preview.verified }),
-    ...(!(preview instanceof GramJs.User) && {
-      members_count: preview.participantsCount,
-      joinDate: preview.date,
-    }),
+    ...buildApiChatFieldsFromPeerEntity(preview),
   };
+
+  if (omitType) {
+    delete chat.type;
+  }
+
+  return chat;
 }
 
 export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {
@@ -70,10 +183,14 @@ export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {
   }
 }
 
-export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.User | GramJs.Chat | GramJs.Channel) {
-  if (peerEntity instanceof GramJs.User) {
+export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJs.TypeUser) {
+  if (peerEntity instanceof GramJs.User || peerEntity instanceof GramJs.UserEmpty) {
     return 'chatTypePrivate';
-  } else if (peerEntity instanceof GramJs.Chat) {
+  } else if (
+    peerEntity instanceof GramJs.Chat
+    || peerEntity instanceof GramJs.ChatForbidden
+    || peerEntity instanceof GramJs.ChatEmpty
+  ) {
     return 'chatTypeBasicGroup';
   } else {
     return peerEntity.megagroup ? 'chatTypeSuperGroup' : 'chatTypeChannel';
@@ -115,10 +232,9 @@ export function buildAvatar(photo: any) {
 
 export function buildChatMember(member: GramJs.TypeChatParticipant): ApiChatMember {
   return {
-    '@type': 'chatMember',
-    user_id: member.userId,
-    inviter_id: 'inviterId' in member ? member.inviterId : undefined,
-    joined_date: 'date' in member ? member.date : undefined,
+    userId: member.userId,
+    inviterId: 'inviterId' in member ? member.inviterId : undefined,
+    joinedDate: 'date' in member ? member.date : undefined,
   };
 }
 

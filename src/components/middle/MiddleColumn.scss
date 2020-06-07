@@ -15,9 +15,23 @@
     right: 0;
     background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
     background-size: cover;
-    will-change: transform;
     z-index: -1;
   }
+
+  @media screen and (min-width: 1276px) {
+    body.animation-level-2 &::before {
+      margin: -16rem -5rem -20rem 0;
+      overflow: hidden;
+      transform: scale(1);
+      transform-origin: left center;
+      transition: transform var(--layer-transition);
+    }
+
+    body.animation-level-2.is-right-column-shown &::before {
+      transform: scale(0.67);
+    }
+  }
+
 
   .messages-layout {
     display: flex;
@@ -27,5 +41,27 @@
     height: 100%;
     position: relative;
     overflow: hidden;
+  }
+
+  .messaging-disabled {
+    width: 100%;
+    padding: 1.25rem 1rem;
+    background: var(--color-chat-hover);
+    color: var(--color-text-secondary);
+    z-index: 10;
+
+    > span {
+      display: block;
+      text-align: center;
+
+      @media (min-width: 1276px) {
+        transition: transform var(--layer-transition);
+        transform: translateX(0);
+
+        body.is-right-column-shown & {
+          transform: translateX(calc(var(--right-column-width) / -2));
+        }
+      }
+    }
   }
 }

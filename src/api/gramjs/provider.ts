@@ -1,4 +1,4 @@
-import { OnApiUpdate } from '../types';
+import { ApiOnProgress, OnApiUpdate } from '../types';
 import { Methods, MethodArgs, MethodResponse } from './methods/types';
 
 import { init as initUpdater } from './updater';
@@ -7,6 +7,7 @@ import { init as initChats } from './methods/chats';
 import { init as initMessages } from './methods/messages';
 import { init as initUsers } from './methods/users';
 import { init as initClient } from './methods/client';
+import { init as initStickers } from './methods/stickers';
 import methods from './methods';
 
 export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
@@ -15,6 +16,7 @@ export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   initChats(onUpdate);
   initMessages(onUpdate);
   initUsers(onUpdate);
+  initStickers(onUpdate);
 
   await initClient(sessionId);
 }
@@ -22,4 +24,8 @@ export async function initApi(onUpdate: OnApiUpdate, sessionId = '') {
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
   // @ts-ignore
   return methods[fnName](...args) as MethodResponse<T>;
+}
+
+export function cancelApiProgress(progressCallback: ApiOnProgress) {
+  progressCallback.isCanceled = true;
 }

@@ -1,5 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
+import { ApiSticker } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import {
   updateStickerSets,
@@ -16,6 +17,11 @@ addReducer('loadRecentStickers', (global) => {
   void loadRecentStickers(hash);
 });
 
+addReducer('loadFavoriteStickers', (global) => {
+  const { hash } = global.stickers.favorite || {};
+  void loadFavoriteStickers(hash);
+});
+
 addReducer('loadStickers', (global, actions, payload) => {
   const { stickerSetId } = payload!;
   const set = global.stickers.all.byId[stickerSetId];
@@ -28,6 +34,22 @@ addReducer('loadStickers', (global, actions, payload) => {
 addReducer('loadSavedGifs', (global) => {
   const { hash } = global.savedGifs || {};
   void loadSavedGifs(hash);
+});
+
+addReducer('faveSticker', (global, actions, payload) => {
+  const { sticker } = payload!;
+
+  if (sticker) {
+    void callApi('faveSticker', { sticker });
+  }
+});
+
+addReducer('unfaveSticker', (global, actions, payload) => {
+  const { sticker } = payload!;
+
+  if (sticker) {
+    void unfaveSticker(sticker);
+  }
 });
 
 async function loadStickerSets(hash = 0) {
@@ -54,8 +76,25 @@ async function loadRecentStickers(hash = 0) {
   setGlobal({
     ...global,
     stickers: {
-      all: global.stickers.all,
+      ...global.stickers,
       recent: recentStickers,
+    },
+  });
+}
+
+async function loadFavoriteStickers(hash = 0) {
+  const favoriteStickers = await callApi('fetchFavoriteStickers', { hash });
+  if (!favoriteStickers) {
+    return;
+  }
+
+  const global = getGlobal();
+
+  setGlobal({
+    ...global,
+    stickers: {
+      ...global.stickers,
+      favorite: favoriteStickers,
     },
   });
 }
@@ -73,6 +112,25 @@ async function loadStickers(stickerSetId: string, accessHash: string) {
     set,
     stickers,
   ));
+}
+
+function unfaveSticker(sticker: ApiSticker) {
+  const global = getGlobal();
+
+  // Remove sticker preemptively to get instant feedback when user removes sticker
+  // from favorites while in Sticker Picker
+  setGlobal({
+    ...global,
+    stickers: {
+      ...global.stickers,
+      favorite: {
+        ...global.stickers.favorite,
+        stickers: global.stickers.favorite.stickers.filter(({ id }) => id !== sticker.id),
+      },
+    },
+  });
+
+  void callApi('faveSticker', { sticker, unfave: true });
 }
 
 async function loadSavedGifs(hash = 0) {

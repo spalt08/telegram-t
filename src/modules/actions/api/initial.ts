@@ -86,6 +86,16 @@ addReducer('returnToAuthPhoneNumber', (global) => {
   };
 });
 
+addReducer('gotToAuthQrCode', (global) => {
+  void callApi('restartAuthWithQr');
+
+  return {
+    ...global,
+    authIsLoadingQrCode: true,
+    authError: undefined,
+  };
+});
+
 addReducer('saveSession', (global, actions, payload) => {
   const { sessionId } = payload!;
   localStorage.setItem(GRAMJS_SESSION_ID_KEY, sessionId);
@@ -103,17 +113,16 @@ async function signOut() {
 }
 
 addReducer('loadNearestCountry', (global) => {
-  const { connectionState } = global;
-
-  if (connectionState === 'connectionStateReady') {
-    void loadNearestCountry();
+  if (global.connectionState !== 'connectionStateReady') {
+    return;
   }
-});
 
-async function loadNearestCountry() {
-  const authNearestCountry = await callApi('fetchNearestCountry');
-  setGlobal({
-    ...getGlobal(),
-    authNearestCountry,
-  });
-}
+  (async () => {
+    const authNearestCountry = await callApi('fetchNearestCountry');
+
+    setGlobal({
+      ...getGlobal(),
+      authNearestCountry,
+    });
+  })();
+});

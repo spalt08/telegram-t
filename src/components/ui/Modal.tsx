@@ -6,6 +6,7 @@ import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
 
 import Button from './Button';
+import Portal from './Portal';
 
 import './Modal.scss';
 
@@ -44,7 +45,7 @@ const Modal: FC<OwnProps> = (props) => {
   }, [isOpen]);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   function renderHeader() {
@@ -53,7 +54,7 @@ const Modal: FC<OwnProps> = (props) => {
     }
 
     if (!title) {
-      return null;
+      return undefined;
     }
 
     return (
@@ -82,22 +83,24 @@ const Modal: FC<OwnProps> = (props) => {
   );
 
   return (
-    <div
-      ref={modalRef}
-      className={fullClassName}
-      tabIndex={-1}
-      role="dialog"
-    >
-      <div className="modal-container">
-        <div className="modal-backdrop" onClick={onClose} />
-        <div className="modal-dialog">
-          {renderHeader()}
-          <div className="modal-content">
-            {children}
+    <Portal>
+      <div
+        ref={modalRef}
+        className={fullClassName}
+        tabIndex={-1}
+        role="dialog"
+      >
+        <div className="modal-container">
+          <div className="modal-backdrop" onClick={onClose} />
+          <div className="modal-dialog">
+            {renderHeader()}
+            <div className="modal-content">
+              {children}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

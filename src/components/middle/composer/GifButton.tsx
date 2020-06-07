@@ -94,7 +94,7 @@ const GifButton: FC<OwnProps> = ({
             autoPlay
             loop
             muted
-            playsinline
+            playsInline
             preload="none"
             poster={previewData}
           >

@@ -29,7 +29,7 @@ const Contact: FC<OwnProps & StateProps> = ({ contact, user }) => {
     <div className="Contact not-implemented">
       <Avatar size="large" user={user} />
       <div className="contact-info">
-        <div className="contact-name">{`${firstName} ${lastName}`}</div>
+        <div className="contact-name">{firstName} {lastName}</div>
         <div className="contact-phone">{formatPhoneNumberWithCode(phoneNumber)}</div>
       </div>
     </div>

@@ -1,27 +1,32 @@
-import { ApiChat, ApiUser } from '../../api/types';
+import {
+  ApiChat,
+  ApiUser,
+  ApiChatBannedRights,
+  ApiChatAdminRights,
+} from '../../api/types';
 
 export function isChatPrivate(chatId: number) {
   return chatId > 0;
 }
 
 export function isChatBasicGroup(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeBasicGroup';
+  return chat.type === 'chatTypeBasicGroup';
 }
 
 export function isChatSuperGroup(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeSuperGroup';
+  return chat.type === 'chatTypeSuperGroup';
 }
 
 export function isChatChannel(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypeChannel';
+  return chat.type === 'chatTypeChannel';
 }
 
 export function isCommonBoxChat(chat: ApiChat) {
-  return chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeBasicGroup';
+  return chat.type === 'chatTypePrivate' || chat.type === 'chatTypeBasicGroup';
 }
 
 export function getChatTypeString(chat: ApiChat) {
-  switch (chat.type['@type']) {
+  switch (chat.type) {
     case 'chatTypePrivate':
       return 'Private Chat';
     case 'chatTypeBasicGroup':
@@ -35,32 +40,32 @@ export function getChatTypeString(chat: ApiChat) {
 }
 
 export function getPrivateChatUserId(chat: ApiChat) {
-  if (chat.type['@type'] !== 'chatTypePrivate' && chat.type['@type'] !== 'chatTypeSecret') {
+  if (chat.type !== 'chatTypePrivate' && chat.type !== 'chatTypeSecret') {
     return undefined;
   }
   return chat.id;
 }
 
 export function getChatTitle(chat: ApiChat, user?: ApiUser) {
-  if (user && chat.id === user.id && user.is_self) {
+  if (user && chat.id === user.id && user.isSelf) {
     return 'Saved Messages';
   }
   return chat.title || 'Deleted account';
 }
 
 export function getChatDescription(chat: ApiChat) {
-  if (!chat.full_info) {
+  if (!chat.fullInfo) {
     return undefined;
   }
-  return chat.full_info.about;
+  return chat.fullInfo.about;
 }
 
 export function getChatLink(chat: ApiChat) {
   const { username } = chat;
-  const { invite_link } = chat.full_info || {};
+  const { inviteLink } = chat.fullInfo || {};
 
-  if (invite_link && invite_link.length) {
-    return invite_link;
+  if (inviteLink && inviteLink.length) {
+    return inviteLink;
   }
 
   return username ? `t.me/${username}` : '';
@@ -85,5 +90,85 @@ export function getChatAvatarHash(
 }
 
 export function isChatSummaryOnly(chat: ApiChat) {
-  return !chat.last_message;
+  return !chat.lastMessage;
+}
+
+export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
+  return chat.adminRights ? chat.adminRights[key] : false;
+}
+
+export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {
+  return (chat.currentUserBannedRights && chat.currentUserBannedRights[key])
+    || (chat.defaultBannedRights && chat.defaultBannedRights[key]);
+}
+
+export function getCanPostInChat(chat: ApiChat) {
+  if (chat.isRestricted || chat.migratedTo) {
+    return false;
+  }
+
+  if (chat.isCreator) {
+    return true;
+  }
+
+  if (isChatPrivate(chat.id)) {
+    return true;
+  }
+
+  if (isChatChannel(chat)) {
+    return getHasAdminRight(chat, 'postMessages');
+  }
+
+  return !isUserRightBanned(chat, 'sendMessages');
+}
+
+export interface IAllowedAttachmentOptions {
+  canAttachMedia: boolean;
+  canAttachPolls: boolean;
+  canSendStickers: boolean;
+  canSendGifs: boolean;
+  canAttachEmbedLinks: boolean;
+}
+
+export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot?: boolean): IAllowedAttachmentOptions {
+  if (!chat) {
+    return {
+      canAttachMedia: false,
+      canAttachPolls: false,
+      canSendStickers: false,
+      canSendGifs: false,
+      canAttachEmbedLinks: false,
+    };
+  }
+
+  return {
+    canAttachMedia: !isUserRightBanned(chat, 'sendMedia'),
+    canAttachPolls: isChatWithBot || (!isChatPrivate(chat.id) && !isUserRightBanned(chat, 'sendPolls')),
+    canSendStickers: !isUserRightBanned(chat, 'sendStickers'),
+    canSendGifs: !isUserRightBanned(chat, 'sendGifs'),
+    canAttachEmbedLinks: !isUserRightBanned(chat, 'embedLinks'),
+  };
+}
+
+export function getMessageSendingRestrictionReason(chat: ApiChat) {
+  if (chat.currentUserBannedRights && chat.currentUserBannedRights.sendMessages) {
+    return 'You are not allowed to send messages in this chat.';
+  }
+  if (chat.defaultBannedRights && chat.defaultBannedRights.sendMessages) {
+    return 'Sending messages is not allowed in this chat.';
+  }
+
+  return undefined;
+}
+
+export function getChatSlowModeOptions(chat?: ApiChat) {
+  if (!chat || !chat.fullInfo) {
+    return undefined;
+  }
+
+  return chat.fullInfo.slowMode;
+}
+
+export function getChatOrder(chat: ApiChat) {
+  return Math.max(chat.joinDate || 0, chat.lastMessage ? chat.lastMessage.date : 0);
 }

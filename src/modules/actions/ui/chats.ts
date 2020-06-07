@@ -19,7 +19,7 @@ addReducer('openChatWithInfo', (global, actions, payload) => {
   global = updateSelectedChatId(global, id);
   global = {
     ...global,
-    showChatInfo: true,
+    isChatInfoShown: true,
   };
 
   return global;
@@ -67,4 +67,11 @@ addReducer('editLastChatMessage', (global) => {
   }
 
   return global;
+});
+
+addReducer('resetChatCreation', (global) => {
+  return {
+    ...global,
+    chatCreation: undefined,
+  };
 });

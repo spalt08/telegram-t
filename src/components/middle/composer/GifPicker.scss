@@ -8,8 +8,8 @@
   overflow-y: auto;
   padding: 0.25rem;
 
-  .Loading {
+  .Loading, .picker-disabled {
     grid-column: 1 / -1;
-    height: 22.5rem;
+    height: var(--menu-height);
   }
 }

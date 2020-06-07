@@ -1,5 +1,7 @@
 import { ChangeEvent, FormEvent, RefObject } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
+
+import buildClassName from '../../util/buildClassName';
 
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
@@ -7,7 +9,11 @@ type OwnProps = {
   value?: string;
   label?: string;
   error?: string;
+  success?: string;
+  disabled?: boolean;
   placeholder?: string;
+  autoComplete?: string;
+  inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -20,19 +26,22 @@ const InputText: FC<OwnProps> = ({
   value,
   label,
   error,
+  success,
+  disabled,
   placeholder,
+  autoComplete,
+  inputMode,
   onChange,
   onInput,
   onKeyPress,
   onBlur,
 }) => {
-  let className = 'input-group';
-  if (value) {
-    className += ' touched';
-  }
-  if (error) {
-    className += ' error';
-  }
+  const className = buildClassName(
+    'input-group',
+    value && 'touched',
+    error ? 'error' : success && 'success',
+    disabled && 'disabled',
+  );
 
   return (
     <div className={className}>
@@ -42,17 +51,20 @@ const InputText: FC<OwnProps> = ({
         type="text"
         id={id}
         value={value || ''}
+        placeholder={placeholder || label}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        disabled={disabled}
         onChange={onChange}
         onInput={onInput}
         onKeyPress={onKeyPress}
         onBlur={onBlur}
-        placeholder={placeholder || label}
       />
-      {(error || label) && (
-        <label>{error || label}</label>
+      {(error || success || label) && (
+        <label>{error || success || label}</label>
       )}
     </div>
   );
 };
 
-export default InputText;
+export default memo(InputText);

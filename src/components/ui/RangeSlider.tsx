@@ -1,12 +1,16 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useMemo, memo,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
 import './RangeSlider.scss';
 
 type OwnProps = {
-  options: string[];
+  options?: string[];
+  range?: { min: number; max: number; step?: number };
+  label?: string;
   value: number;
   disabled?: boolean;
   onChange: (value: number) => void;
@@ -14,6 +18,8 @@ type OwnProps = {
 
 const RangeSlider: FC<OwnProps> = ({
   options,
+  range,
+  label,
   value,
   disabled,
   onChange,
@@ -27,32 +33,65 @@ const RangeSlider: FC<OwnProps> = ({
     disabled && 'disabled',
   );
 
-  const trackWidth = (value / (options.length - 1)) * 100;
+  const trackWidth = useMemo(() => {
+    if (options) {
+      return (value / (options.length - 1)) * 100;
+    } else if (range) {
+      const possibleValuesLength = (range.max - range.min) / (range.step || 1);
+      return ((value - range.min) / possibleValuesLength) * 100;
+    }
+    return 0;
+  }, [value, options, range]);
+
+  const [min, max, step] = useMemo(() => {
+    if (options) {
+      return [0, options.length - 1, 1];
+    } else if (range) {
+      return [range.min, range.max, range.step || 1];
+    }
+
+    return [0, 0, 0];
+  }, [range, options]);
 
   return (
     <div className={className}>
-      <div
-        className="slider-fill-track"
-        // @ts-ignore
-        style={`width: ${trackWidth}%`}
-      />
-      <input
-        min={0}
-        max={options.length - 1}
-        value={value}
-        step={1}
-        type="range"
-        onChange={handleChange}
-      />
-      <div className="slider-options">
-        {options.map((option, index) => (
-          <div className={buildClassName('slider-option', index === value && 'active')} onClick={() => onChange(index)}>
-            {option}
+      {label && (
+        <div className="slider-top-row">
+          <span className="label">{label}</span>
+          {range && (
+            <span className="value">{value}</span>
+          )}
+        </div>
+      )}
+      <div className="slider-main">
+        <div
+          className="slider-fill-track"
+          // @ts-ignore
+          style={`width: ${trackWidth}%`}
+        />
+        <input
+          min={min}
+          max={max}
+          value={value}
+          step={step}
+          type="range"
+          onChange={handleChange}
+        />
+        {options && (
+          <div className="slider-options">
+            {options.map((option, index) => (
+              <div
+                className={buildClassName('slider-option', index === value && 'active')}
+                onClick={() => onChange(index)}
+              >
+                {option}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
 };
 
-export default RangeSlider;
+export default memo(RangeSlider);

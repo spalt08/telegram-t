@@ -19,7 +19,26 @@ export interface IAlbum {
 }
 
 export interface ISettings extends Record<string, any> {
+  messageTextSize: number;
   animationLevel: 0 | 1 | 2;
+  messageSendKeyCombo: 'enter' | 'ctrl-enter';
+  language: 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'es' | 'uk';
+}
+
+export enum SettingsScreens {
+  Main,
+  EditProfile,
+  General,
+  Notifications,
+  Privacy,
+  Language,
+  PrivacyPhoneNumber,
+  PrivacyLastSeen,
+  PrivacyProfilePhoto,
+  PrivacyForwarding,
+  PrivacyGroupChats,
+  PrivacyActiveSessions,
+  PrivacyBlockedUsers,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
@@ -30,4 +49,29 @@ export enum LeftColumnContent {
   GlobalSearch,
   Settings,
   Contacts,
+  NewChannel,
+  NewGroupStep1,
+  NewGroupStep2,
+}
+
+export enum MediaViewerOrigin {
+  Inline,
+  SharedMedia,
+  ProfileAvatar,
+  MiddleHeaderAvatar,
+  Album,
+}
+
+export enum ChatCreationProgress {
+  Idle,
+  InProgress,
+  Complete,
+  Error,
+}
+
+export enum ProfileEditProgress {
+  Idle,
+  InProgress,
+  Complete,
+  Error,
 }

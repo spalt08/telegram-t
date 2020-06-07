@@ -1,4 +1,5 @@
 import { ApiMessageEntityTypes, ApiMessageEntity, ApiFormattedText } from '../../../../api/types';
+import renderText from '../../../common/helpers/renderText';
 
 export default function getMessageTextAsHtml(formattedText?: ApiFormattedText) {
   const { text, entities } = formattedText || {};
@@ -6,7 +7,7 @@ export default function getMessageTextAsHtml(formattedText?: ApiFormattedText) {
     return '';
   }
   if (!entities) {
-    return addLineBreaks(text);
+    return renderText(text, ['emoji_html', 'br_html']).join('');
   }
 
   const result: string[] = [];
@@ -25,7 +26,7 @@ export default function getMessageTextAsHtml(formattedText?: ApiFormattedText) {
         deleteLineBreakAfterPre = false;
       }
       if (!nestedEntity && textBefore) {
-        result.push(addLineBreaks(textBefore));
+        result.push(textBefore);
       }
     }
 
@@ -74,11 +75,11 @@ export default function getMessageTextAsHtml(formattedText?: ApiFormattedText) {
       textAfter = textAfter.substring(1);
     }
     if (textAfter) {
-      result.push(addLineBreaks(textAfter));
+      result.push(textAfter);
     }
   }
 
-  return result.join('');
+  return renderText(result.join(''), ['emoji_html', 'br_html']).join('');
 }
 
 function processEntity(
@@ -90,35 +91,18 @@ function processEntity(
 
   switch (entity.type) {
     case ApiMessageEntityTypes.Bold:
-      return `<b>${addLineBreaks(entityText)}</b>`;
+      return `<b>${entityText}</b>`;
     case ApiMessageEntityTypes.Italic:
-      return `<i>${addLineBreaks(entityText)}</i>`;
+      return `<i>${entityText}</i>`;
     case ApiMessageEntityTypes.Underline:
-      return `<u>${addLineBreaks(entityText)}</u>`;
+      return `<u>${entityText}</u>`;
     case ApiMessageEntityTypes.Code:
-      return `\`${addLineBreaks(entityText)}\``;
+      return `\`${entityText}\``;
     case ApiMessageEntityTypes.Pre:
-      return `\`\`\`<br/>${addLineBreaks(entityText)}<br/>\`\`\``;
+      return `\`\`\`<br/>${entityText}<br/>\`\`\``;
     case ApiMessageEntityTypes.Strike:
-      return `~~${addLineBreaks(entityText)}~~`;
+      return `~~${entityText}~~`;
     default:
-      return addLineBreaks(entityText);
+      return entityText;
   }
-}
-
-function addLineBreaks(text: string): string {
-  return text
-    .split(/\r\n|\r|\n/g)
-    .reduce((result: string, line: string, i, source) => {
-      // This adds non-breaking space if line was indented with spaces, to preserve the indentation
-      const trimmedLine = line.trimLeft();
-      const indentLength = line.length - trimmedLine.length;
-      result += String.fromCharCode(160).repeat(indentLength) + trimmedLine;
-
-      if (i !== source.length - 1) {
-        result += '<br />';
-      }
-
-      return result;
-    }, '');
 }

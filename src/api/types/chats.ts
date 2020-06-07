@@ -6,29 +6,40 @@ type ApiChatType = 'chatTypePrivate' | 'chatTypeSecret' |
 
 export interface ApiChat {
   id: number;
-  type: {
-    '@type': ApiChatType;
-  };
+  type: ApiChatType;
   title?: string;
-  last_message?: ApiMessage;
-  last_read_outbox_message_id?: number;
-  last_read_inbox_message_id?: number;
-  unread_count?: number;
-  unread_mention_count?: number;
-  is_pinned?: boolean;
-  is_verified?: boolean;
-  is_muted?: boolean;
-  access_hash?: string;
+  lastMessage?: ApiMessage;
+  lastReadOutboxMessageId?: number;
+  lastReadInboxMessageId?: number;
+  unreadCount?: number;
+  unreadMentionsCount?: number;
+  isPinned?: boolean;
+  isVerified?: boolean;
+  isMuted?: boolean;
+  accessHash?: string;
   avatar?: {
     hash: string;
   };
   username?: string;
-  members_count?: number;
+  membersCount?: number;
   joinDate?: number;
+  adminRights?: ApiChatAdminRights;
+  currentUserBannedRights?: ApiChatBannedRights;
+  defaultBannedRights?: ApiChatBannedRights;
+  isCreator?: boolean;
+  isRestricted?: boolean;
+  hasLeft?: boolean;
+  restrictionReason?: ApiRestrictionReason;
+
+  migratedTo?: {
+    chatId: number;
+    accessHash?: string;
+  };
+
   // Obtained from GetFullChat / GetFullChannel
-  full_info?: ApiChatFullInfo;
+  fullInfo?: ApiChatFullInfo;
   // Obtained from GetOnlines
-  online_count?: number;
+  onlineCount?: number;
   // Obtained with UpdateUserTyping or UpdateChatUserTyping updates
   typingStatus?: ApiTypingStatus;
 }
@@ -42,20 +53,51 @@ export interface ApiTypingStatus {
 export interface ApiChatFullInfo {
   about?: string;
   members?: ApiChatMember[];
-  pinned_message_id?: number;
-  invite_link?: string;
+  pinnedMessageId?: number;
+  inviteLink?: string;
+  slowMode?: {
+    seconds: number;
+    nextSendDate?: number;
+  };
+  migratedFrom?: {
+    chatId: number;
+    maxMessageId?: number;
+  };
 }
 
 export interface ApiChatMember {
-  '@type': 'chatMember';
-  user_id: number;
-  inviter_id?: number;
-  joined_date?: number;
+  userId: number;
+  inviterId?: number;
+  joinedDate?: number;
 }
 
-export interface ApiPrivateChat extends ApiChat {
-  type: {
-    '@type': 'chatTypePrivate' | 'chatTypeSecret';
-    user_id: number;
-  };
+export interface ApiChatAdminRights {
+  changeInfo?: boolean;
+  postMessages?: boolean;
+  editMessages?: boolean;
+  deleteMessages?: boolean;
+  banUsers?: boolean;
+  inviteUsers?: boolean;
+  pinMessages?: boolean;
+  addAdmins?: boolean;
+}
+
+export interface ApiChatBannedRights {
+  viewMessages?: boolean;
+  sendMessages?: boolean;
+  sendMedia?: boolean;
+  sendStickers?: boolean;
+  sendGifs?: boolean;
+  sendGames?: boolean;
+  sendInline?: boolean;
+  embedLinks?: boolean;
+  sendPolls?: boolean;
+  changeInfo?: boolean;
+  inviteUsers?: boolean;
+  pinMessages?: boolean;
+}
+
+export interface ApiRestrictionReason {
+  reason: string;
+  text: string;
 }

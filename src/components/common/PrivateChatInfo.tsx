@@ -1,11 +1,17 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useCallback, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
+import { MediaViewerOrigin } from '../../types';
+
 import { selectUser } from '../../modules/selectors';
 import { getUserFullName, getUserStatus, isUserOnline } from '../../modules/helpers';
+import renderText from './helpers/renderText';
+import { pick } from '../../util/iteratees';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
@@ -38,30 +44,34 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   loadFullUser,
   openMediaViewer,
 }) => {
-  const { id: userId, is_self } = user || {};
+  const { id: userId, isSelf } = user || {};
+  const fullName = getUserFullName(user);
 
   useEffect(() => {
     // `Saved Messages` is the only private chat that supports pinned messages.
     // We need to call for `loadFullUser` to get pinned message ID.
-    if (showFullInfo && lastSyncTime && userId && is_self) {
+    if (showFullInfo && lastSyncTime && userId && isSelf) {
       loadFullUser({ userId });
     }
-  }, [is_self, userId, loadFullUser, lastSyncTime, showFullInfo]);
+  }, [isSelf, userId, loadFullUser, lastSyncTime, showFullInfo]);
 
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (user && hasPhoto) {
       e.stopPropagation();
-      openMediaViewer({ avatarOwnerId: user.id });
+      openMediaViewer({
+        avatarOwnerId: user.id,
+        origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
+      });
     }
-  }, [user, openMediaViewer]);
+  }, [user, avatarSize, openMediaViewer]);
 
   if (!user) {
-    return null;
+    return undefined;
   }
 
   function renderStatusOrTyping() {
     if (!user) {
-      return null;
+      return undefined;
     }
 
     if (typingStatus) {
@@ -90,8 +100,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
           <div className="title">Saved Messages</div>
         ) : (
           <div className="title">
-            {getUserFullName(user)}
-            {user && user.is_verified && <VerifiedIcon />}
+            {fullName && renderText(fullName)}
+            {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}
         {!isSavedMessages && renderStatusOrTyping()}
@@ -100,7 +110,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
@@ -108,11 +118,8 @@ export default withGlobal<OwnProps>(
     return {
       lastSyncTime,
       user,
-      isSavedMessages: !forceShowSelf && user && user.is_self,
+      isSavedMessages: !forceShowSelf && user && user.isSelf,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullUser, openMediaViewer } = actions;
-    return { loadFullUser, openMediaViewer };
-  },
-)(PrivateChatInfo);
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser', 'openMediaViewer']),
+)(PrivateChatInfo));

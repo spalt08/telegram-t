@@ -3,6 +3,8 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { openSystemFileDialog } from '../../../util/systemFileDialog';
+import { IAllowedAttachmentOptions } from '../../../modules/helpers';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -11,17 +13,17 @@ import './AttachMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  isPrivateChat: boolean;
+  allowedAttachmentOptions: IAllowedAttachmentOptions;
   onFileSelect: (file: File, isQuick: boolean) => void;
   onPollCreate: () => void;
   onClose: () => void;
 };
 
 const MENU_CLOSE_TIMEOUT = 250;
-let closeTimeout: NodeJS.Timeout | null = null;
+let closeTimeout: number;
 
 const AttachMenu: FC<OwnProps> = ({
-  isOpen, isPrivateChat, onFileSelect, onPollCreate, onClose,
+  isOpen, allowedAttachmentOptions, onFileSelect, onPollCreate, onClose,
 }) => {
   const isMouseInside = useRef(false);
 
@@ -29,8 +31,8 @@ const AttachMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    if (isOpen) {
-      closeTimeout = setTimeout(() => {
+    if (isOpen && !IS_TOUCH_ENV) {
+      closeTimeout = window.setTimeout(() => {
         if (!isMouseInside.current) {
           onClose();
         }
@@ -47,7 +49,7 @@ const AttachMenu: FC<OwnProps> = ({
     if (closeTimeout) {
       clearTimeout(closeTimeout);
     }
-    closeTimeout = setTimeout(() => {
+    closeTimeout = window.setTimeout(() => {
       if (!isMouseInside.current) {
         onClose();
       }
@@ -73,6 +75,8 @@ const AttachMenu: FC<OwnProps> = ({
     openSystemFileDialog('*', (e) => handleFileSelect(e, false));
   };
 
+  const { canAttachMedia, canAttachPolls } = allowedAttachmentOptions;
+
   return (
     <Menu
       isOpen={isOpen}
@@ -82,13 +86,24 @@ const AttachMenu: FC<OwnProps> = ({
       onClose={onClose}
       className="AttachMenu"
       onCloseAnimationEnd={onClose}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      noCloseOnBackdrop
+      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
-      <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
-      <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
-      {!isPrivateChat && (
+      {/*
+       ** Using ternary operator here causes some attributes from first clause
+       ** transferring to the fragment content in the second clause
+       */}
+      {!canAttachMedia && (
+        <MenuItem className="media-disabled" disabled>Posting media content is not allowed in this group.</MenuItem>
+      )}
+      {canAttachMedia && (
+        <>
+          <MenuItem icon="photo" onClick={handleQuickSelect}>Photo or Video</MenuItem>
+          <MenuItem icon="document" onClick={handleDocumentSelect}>Document</MenuItem>
+        </>
+      )}
+      {canAttachPolls && (
         <MenuItem icon="poll" onClick={onPollCreate}>Poll</MenuItem>
       )}
     </Menu>

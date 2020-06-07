@@ -23,8 +23,9 @@ const DEFAULT_IPV6_IP = '[2001:67c:4e8:f002::a]'
 // Chunk sizes for upload.getFile must be multiples of the smallest size
 const MIN_CHUNK_SIZE = 4096
 const DEFAULT_CHUNK_SIZE = 64 // kb
+const ONE_MB = 1024 * 1024;
 // All types
-const sizeTypes = ['w', 'y', 'x', 'm', 's']
+const sizeTypes = ['w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's']
 
 
 class TelegramClient {
@@ -151,7 +152,7 @@ class TelegramClient {
             connectTimeout: this._timeout,
             authKeyCallback: this._authKeyCallback.bind(this),
             updateCallback: this._handleUpdate.bind(this),
-
+            isMainSender: true,
         })
 
         const connection = new this._connection(this.session.serverAddress
@@ -251,6 +252,10 @@ class TelegramClient {
     // endregion
     // export region
 
+    removeSender(dcId) {
+        delete this._borrowedSenderPromises[dcId];
+    }
+
     async _borrowExportedSender(dcId, retries = 5) {
         let sender = this._borrowedSenderPromises[dcId]
         if (!sender) {
@@ -271,6 +276,8 @@ class TelegramClient {
                 autoReconnect: this._autoReconnect,
                 connectTimeout: this._timeout,
                 authKeyCallback: this._authKeyCallback.bind(this),
+                isMainSender: dcId===this.session.dcId,
+                senderCallback: this.removeSender.bind(this),
             })
         for (let i = 0; i < retries; i++) {
             try {
@@ -310,6 +317,8 @@ class TelegramClient {
      * @param [args[partSizeKb] {number}]
      * @param [args[fileSize] {number}]
      * @param [args[progressCallback] {Function}]
+     * @param [args[start] {number}]
+     * @param [args[end] {number}]
      * @param [args[dcId] {number}]
      * @returns {Promise<Buffer>}
      */
@@ -325,7 +334,7 @@ class TelegramClient {
                 partSizeKb = utils.getAppropriatedPartSize(fileSize)
             }
         }
-        const partSize = parseInt(partSizeKb * 1024)
+        let partSize = parseInt(partSizeKb * 1024)
         if (partSize % MIN_CHUNK_SIZE !== 0) {
             throw new Error('The part size must be evenly divisible by 4096')
         }
@@ -358,15 +367,24 @@ class TelegramClient {
         }
 
         try {
-            let offset = 0
+            let offset = args.start || 0
+            let limit = partSize
+
             // eslint-disable-next-line no-constant-condition
             while (true) {
+                let precise = false;
+                if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
+                    limit = ONE_MB - offset % ONE_MB
+                    precise = true
+                }
+
                 let result
                 try {
                     result = await sender.send(new requests.upload.GetFile({
                         location: inputLocation,
-                        offset: offset,
-                        limit: partSize,
+                        offset,
+                        limit,
+                        precise
                     }))
                     if (result instanceof constructors.upload.FileCdnRedirect) {
                         throw new Error('not implemented')
@@ -389,13 +407,17 @@ class TelegramClient {
                     fileWriter.write(result.bytes)
 
                     if (args.progressCallback) {
+                        if (args.progressCallback.isCanceled) {
+                            throw new Error('USER_CANCELED')
+                        }
+
                         const progress = fileWriter.getValue().length / fileSize
                         args.progressCallback(progress)
                     }
                 }
 
                 // Last chunk.
-                if (result.bytes.length < partSize) {
+                if (result.bytes.length < partSize || (args.end && (offset + result.bytes.length) > args.end)) {
                     return fileWriter.getValue()
                 }
             }
@@ -404,10 +426,7 @@ class TelegramClient {
         }
     }
 
-    async downloadMedia(messageOrMedia, args = {
-        sizeType: null,
-        progressCallback: null,
-    }) {
+    async downloadMedia(messageOrMedia, args) {
         let date
         let media
         if (messageOrMedia instanceof constructors.Message) {
@@ -572,6 +591,9 @@ class TelegramClient {
         let size = null;
         if (args.sizeType) {
             size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null
+            if (!size && doc.mimeType.startsWith('video/')) {
+                return;
+            }
 
             if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
                 return this._downloadCachedPhotoSize(size)
@@ -588,6 +610,8 @@ class TelegramClient {
             {
                 fileSize: size ? size.size : doc.size,
                 progressCallback: args.progressCallback,
+                start: args.start,
+                end: args.end,
                 dcId: doc.dcId,
             },
         )
@@ -703,10 +727,7 @@ class TelegramClient {
     }
 
     _handleUpdate(update) {
-        if (update === 1) {
-            this._dispatchUpdate({ update: new UpdateConnectionState(update) })
-            return
-        } else if (update === -1) {
+        if ([-1, 0, 1].includes(update)){
             this._dispatchUpdate({ update: new UpdateConnectionState(update) })
             return
         }
@@ -923,7 +944,7 @@ class TelegramClient {
             return utils.getInputPeer(await this._getEntityFromString(peer))
         }
         // If we're a bot and the user has messaged us privately users.getUsers
-        // will work with access_hash = 0. Similar for channels.getChannels.
+        // will work with accessHash = 0. Similar for channels.getChannels.
         // If we're not a bot but the user is in our contacts, it seems to work
         // regardless. These are the only two special-cased requests.
         peer = utils.getPeer(peer)

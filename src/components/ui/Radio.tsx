@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import Spinner from './Spinner';
@@ -10,6 +10,7 @@ type OwnProps = {
   id?: string;
   name: string;
   label: string;
+  subLabel?: string;
   value: string;
   checked: boolean;
   disabled?: boolean;
@@ -20,6 +21,7 @@ type OwnProps = {
 const Radio: FC<OwnProps> = ({
   id,
   label,
+  subLabel,
   value,
   name,
   checked,
@@ -44,10 +46,13 @@ const Radio: FC<OwnProps> = ({
         onChange={onChange}
         disabled={disabled}
       />
-      <span>{label}</span>
+      <div className="Radio-main">
+        <span className="label">{label}</span>
+        {subLabel && <span className="subLabel">{subLabel}</span>}
+      </div>
       {isLoading && <Spinner />}
     </label>
   );
 };
 
-export default Radio;
+export default memo(Radio);

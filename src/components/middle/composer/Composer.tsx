@@ -11,25 +11,31 @@ import {
   ApiNewPoll,
   ApiMessage,
   ApiFormattedText,
+  ApiChat,
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-
-import { selectChatMessage } from '../../../modules/selectors';
-import { isChatPrivate } from '../../../modules/helpers';
+import { IS_EMOJI_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
+import { selectChatMessage, selectChat, selectIsChatWithBot } from '../../../modules/selectors';
+import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
+import renderText from '../../common/helpers/renderText';
+import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
+import { pick } from '../../../util/iteratees';
 
-import useOverlay from '../../../hooks/useOverlay';
+import useFlag from '../../../hooks/useFlag';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
 import useDraft from './hooks/useDraft';
 import useEditing from './hooks/useEditing';
+import usePrevious from '../../../hooks/usePrevious';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
+import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
 import MessageInput from './MessageInput';
@@ -39,16 +45,19 @@ import PollModal from './PollModal.async';
 import WebPagePreview from './WebPagePreview';
 
 import './Composer.scss';
-import usePrevious from '../../../hooks/usePrevious';
 
 type StateProps = {
-  isPrivateChat: boolean;
   editedMessage?: ApiMessage;
   chatId?: number;
+  chat?: ApiChat;
   draft?: ApiFormattedText;
+  isChatWithBot?: boolean;
 } & Pick<GlobalState, 'connectionState'>;
 
-type DispatchProps = Pick<GlobalActions, 'sendMessage' | 'editMessage' | 'saveDraft' | 'clearDraft'>;
+type DispatchProps = Pick<GlobalActions, (
+  'sendMessage' | 'editMessage' | 'saveDraft' |
+  'clearDraft' | 'showError'
+)>;
 
 enum MainButtonState {
   Send = 'send',
@@ -58,19 +67,28 @@ enum MainButtonState {
 
 const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 const MAX_NESTING_PARENTS = 5;
+// When voice recording is active, composer placeholder will hide to prevent overlapping
+const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
+
+const removeSymbol = () => {
+  document.execCommand('delete', false);
+};
 
 const Composer: FC<StateProps & DispatchProps> = ({
-  isPrivateChat,
   editedMessage,
   chatId,
   draft,
+  chat,
   connectionState,
+  isChatWithBot,
   sendMessage,
   editMessage,
   saveDraft,
   clearDraft,
+  showError,
 }) => {
   const [html, setHtml] = useState<string>('');
+  const lastMessageSendTimeSeconds = useRef<number>();
 
   // Cache for frequently updated state
   const htmlRef = useRef<string>(html);
@@ -78,15 +96,18 @@ const Composer: FC<StateProps & DispatchProps> = ({
     htmlRef.current = html;
   }, [html]);
 
+  useEffect(() => {
+    lastMessageSendTimeSeconds.current = null;
+  }, [chatId]);
+
   const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
 
-  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useOverlay();
-  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useOverlay();
-  const [isPollModalOpen, openPollModal, closePollModal] = useOverlay();
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useOverlay();
+  const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
+  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
+  const [isPollModalOpen, openPollModal, closePollModal] = useFlag();
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
 
   const {
-    isVoiceRecordingSupported,
     startRecordingVoice,
     stopRecordingVoice,
     activeVoiceRecording,
@@ -95,22 +116,34 @@ const Composer: FC<StateProps & DispatchProps> = ({
     startRecordTimeRef,
   } = useVoiceRecording();
 
+  const allowedAttachmentOptions = getAllowedAttachmentOptions(chat, isChatWithBot);
+  const slowMode = getChatSlowModeOptions(chat);
+
   const insertTextAndUpdateCursor = useCallback((text: string) => {
     const selection = window.getSelection()!;
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+      .join('')
+      .replace(/\u200b+/g, '\u200b');
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
       if (isSelectionInsideInput(selectionRange)) {
-        // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
-        document.execCommand('insertText', false, text);
+        if (IS_EMOJI_SUPPORTED) {
+          // Insertion will trigger `onChange` in MessageInput, so no need to setHtml in state
+          document.execCommand('insertText', false, text);
+        } else {
+          insertHtmlInSelection(newHtml);
+          messageInput.dispatchEvent(new Event('input'));
+        }
+
         return;
       }
 
-      setHtml(`${htmlRef.current!}${text}`);
+      setHtml(`${htmlRef.current!}${newHtml}`);
 
       // If selection is outside of input, set cursor at the end of input
       requestAnimationFrame(() => {
-        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
         focusEditableElement(messageInput);
       });
     }
@@ -171,17 +204,41 @@ const Composer: FC<StateProps & DispatchProps> = ({
       return;
     }
 
+    if (slowMode) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
+        && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
+      const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
+
+      if (
+        (secondsSinceLastMessage && secondsSinceLastMessage < slowMode.seconds)
+        || nextSendDateNotReached
+      ) {
+        const secondsRemaining = nextSendDateNotReached
+          ? slowMode.nextSendDate! - nowSeconds
+          : slowMode.seconds - secondsSinceLastMessage!;
+        showError({
+          error: {
+            message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
+          },
+        });
+        return;
+      }
+    }
+
     sendMessage({
       text,
       entities,
       attachment: currentAttachment,
     });
 
+    lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000);
+
     resetComposer();
     clearDraft({ chatId, localOnly: true });
   }, [
-    activeVoiceRecording, attachment, connectionState, chatId,
-    sendMessage, stopRecordingVoice, resetComposer, clearDraft,
+    activeVoiceRecording, attachment, connectionState, chatId, slowMode,
+    sendMessage, stopRecordingVoice, resetComposer, clearDraft, showError,
   ]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
@@ -194,14 +251,14 @@ const Composer: FC<StateProps & DispatchProps> = ({
     closeSymbolMenu();
   }, [closeSymbolMenu, sendMessage]);
 
-  const handlePollSend = useCallback((pollSummary: ApiNewPoll) => {
-    sendMessage({ pollSummary });
+  const handlePollSend = useCallback((poll: ApiNewPoll) => {
+    sendMessage({ poll });
     closePollModal();
   }, [closePollModal, sendMessage]);
 
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
-    : !isVoiceRecordingSupported || activeVoiceRecording || (html && !attachment)
+    : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
       ? MainButtonState.Send
       : MainButtonState.Record;
 
@@ -220,6 +277,9 @@ const Composer: FC<StateProps & DispatchProps> = ({
         break;
     }
   }, [mainButtonState, handleSend, startRecordingVoice, handleEditComplete]);
+
+  const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
+    && !allowedAttachmentOptions.canAttachMedia;
 
   return (
     <div className="Composer">
@@ -244,53 +304,56 @@ const Composer: FC<StateProps & DispatchProps> = ({
       )}
       <div id="message-compose">
         <ComposerEmbeddedMessage />
-        <WebPagePreview messageText={!attachment ? html : ''} />
+        {allowedAttachmentOptions.canAttachEmbedLinks && (
+          <WebPagePreview messageText={!attachment ? html : ''} />
+        )}
         <div className="message-input-wrapper">
-          <Button
+          <ResponsiveHoverButton
             className={`${isSymbolMenuOpen ? 'activated' : ''}`}
             round
             color="translucent"
-            onMouseEnter={openSymbolMenu}
+            onActivate={openSymbolMenu}
           >
             <i className="icon-smile" />
-          </Button>
+          </ResponsiveHoverButton>
           <MessageInput
             id="message-input-text"
             html={!attachment ? html : ''}
-            placeholder="Message"
+            placeholder={window.innerWidth < SCREEN_WIDTH_TO_HIDE_PLACEHOLDER && !activeVoiceRecording ? 'Message' : ''}
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
           />
           {!activeVoiceRecording && !editedMessage && (
-            <Button
+            <ResponsiveHoverButton
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
               color="translucent"
-              onMouseEnter={openAttachMenu}
-              onFocus={openAttachMenu}
+              onActivate={openAttachMenu}
             >
               <i className="icon-attach" />
-            </Button>
+            </ResponsiveHoverButton>
           )}
-          {activeVoiceRecording && (
+          {activeVoiceRecording && currentRecordTime && (
             <span className="recording-state">
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
           <AttachMenu
             isOpen={isAttachMenuOpen}
-            isPrivateChat={isPrivateChat}
+            allowedAttachmentOptions={allowedAttachmentOptions}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             onClose={closeAttachMenu}
           />
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
+            allowedAttachmentOptions={allowedAttachmentOptions}
             onClose={closeSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
+            onRemoveSymbol={removeSymbol}
           />
         </div>
       </div>
@@ -307,8 +370,11 @@ const Composer: FC<StateProps & DispatchProps> = ({
       <Button
         ref={recordButtonRef}
         round
+        ripple
         color="secondary"
         className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
+        disabled={areVoiceMessagesNotAllowed}
+        ariaLabel={areVoiceMessagesNotAllowed ? 'Posting media content is not allowed in this group.' : undefined}
         onClick={mainButtonHandler}
       >
         <i className="icon-send" />
@@ -338,20 +404,23 @@ export default memo(withGlobal(
     const editedMessage = editingMessageId ? selectChatMessage(global, chatId!, editingMessageId) : undefined;
     const { connectionState, chats: { draftsById } } = global;
 
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+    const isChatWithBot = chatId ? selectIsChatWithBot(global, chatId) : undefined;
+
     return {
-      isPrivateChat: !!chatId && isChatPrivate(chatId),
       editedMessage,
       connectionState,
       chatId,
       draft: chatId ? draftsById[chatId] : undefined,
+      chat,
+      isChatWithBot,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      sendMessage, editMessage, saveDraft, clearDraft,
-    } = actions;
-    return {
-      sendMessage, editMessage, saveDraft, clearDraft,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'sendMessage',
+    'editMessage',
+    'saveDraft',
+    'clearDraft',
+    'showError',
+  ]),
 )(Composer));

@@ -8,11 +8,36 @@
     user-select: none;
   }
 
-  &-footer {
+  &-header {
     height: 3rem;
-    border-top: 1px solid var(--color-borders);
+    border-bottom: 1px solid var(--color-borders);
     display: flex;
     align-items: center;
     justify-content: space-around;
+    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+
+    @media (max-width: 600px) {
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: block;
+      white-space: nowrap;
+      padding: 0.4375rem 0;
+
+      scrollbar-width: none;
+      scrollbar-color: rgba(0, 0, 0, 0);
+
+      &::-webkit-scrollbar {
+        height: 0;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0);
+      }
+
+      .symbol-set-button {
+        display: inline-flex;
+        vertical-align: middle;
+      }
+    }
   }
 }

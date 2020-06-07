@@ -1,0 +1,78 @@
+.ListItem {
+  position: relative;
+
+  button {
+    width: 100%;
+    background: none;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+    line-height: 1.5rem;
+    white-space: nowrap;
+    color: var(--color-text);
+    --ripple-color: rgba(0, 0, 0, .08);
+
+    &:not([disabled]) {
+      cursor: pointer;
+
+      &:hover, &:focus {
+        background-color: var(--color-chat-hover);
+      }
+    }
+
+    &[disabled] {
+      opacity: 0.5;
+    }
+
+    i {
+      font-size: 1.5rem;
+      margin-right: 2rem;
+      opacity: 0.5;
+    }
+  }
+
+  &:not(.has-ripple) {
+    button:active {
+      background-color: var(--color-chat-active);
+      transition: none !important;
+    }
+  }
+
+  &.has-menu-open > button {
+    background-color: var(--color-chat-hover);
+  }
+
+  &.narrow {
+    margin-bottom: 0.75rem;
+
+    button {
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  &.inactive {
+    pointer-events: none;
+  }
+
+  .AttentionIndicator {
+    top: 0.5rem;
+    left: 2.5rem;
+  }
+
+  &-context-menu {
+    position: absolute;
+
+    .bubble {
+      width: auto;
+
+      .MenuItem button {
+        padding-left: 1rem !important;
+        padding-right: 2rem !important;
+      }
+    }
+  }
+}

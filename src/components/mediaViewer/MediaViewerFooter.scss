@@ -1,9 +1,8 @@
 .MediaViewerFooter {
   position: absolute;
   bottom: 0;
-  left: 1.25rem;
-  right: 1.25rem;
   padding: 1rem 0;
+  width: 100%;
 
   @media (max-height: 640px) {
     padding: .5rem 0 0;

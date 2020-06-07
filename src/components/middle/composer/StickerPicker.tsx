@@ -13,6 +13,7 @@ import { getFirstLetters } from '../../../util/textFormat';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -24,39 +25,46 @@ import './StickerPicker.scss';
 type OwnProps = {
   className: string;
   load: boolean;
+  canSendStickers: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
 };
 
 type StateProps = {
   recentStickers: ApiSticker[];
+  favoriteStickers: ApiSticker[];
   stickerSets: Record<string, ApiStickerSet>;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'loadStickerSets' | 'loadRecentStickers' | 'addRecentSticker' | 'loadStickers'
+  'loadStickerSets' | 'loadRecentStickers' | 'loadFavoriteStickers' |
+  'addRecentSticker' | 'loadStickers' | 'unfaveSticker'
 )>;
 
 const SMOOTH_SCROLL_DISTANCE = 500;
 // For some reason, parallel `scrollIntoView` executions are conflicting.
-const FOOTER_SCROLL_DELAY = 500;
-const FOOTER_BUTTON_WIDTH = 60; // px. Includes margins
+const HEADER_SCROLL_DELAY = 500;
+const HEADER_BUTTON_WIDTH = 60; // px. Includes margins
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
 const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
+  canSendStickers,
   recentStickers,
+  favoriteStickers,
   stickerSets,
   onStickerSelect,
   loadStickerSets,
   loadRecentStickers,
+  loadFavoriteStickers,
   loadStickers,
   addRecentSticker,
+  unfaveSticker,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
-  const footerRef = useRef<HTMLDivElement>();
-  const [activeSetIndex, setActiveSetIndex] = useState();
+  const headerRef = useRef<HTMLDivElement>();
+  const [activeSetIndex, setActiveSetIndex] = useState<number>();
   const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
   const areLoaded = Boolean(Object.keys(stickerSets).length);
@@ -68,6 +76,15 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
     const themeSets: StickerSetOrRecent[] = Object.values(stickerSets);
 
+    if (favoriteStickers.length) {
+      themeSets.unshift({
+        id: 'favorite',
+        title: 'Favorites',
+        stickers: favoriteStickers,
+        count: favoriteStickers.length,
+      });
+    }
+
     if (recentStickers.length) {
       themeSets.unshift({
         id: 'recent',
@@ -78,7 +95,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return themeSets;
-  }, [areLoaded, recentStickers, stickerSets]);
+  }, [areLoaded, recentStickers, favoriteStickers, stickerSets]);
 
   const updateVisibleSetIndexes = useCallback(() => {
     const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
@@ -90,8 +107,9 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     if (load) {
       loadStickerSets();
       loadRecentStickers();
+      loadFavoriteStickers();
     }
-  }, [load, loadStickerSets, loadRecentStickers]);
+  }, [load, loadStickerSets, loadRecentStickers, loadFavoriteStickers]);
 
   useEffect(() => {
     if (!areLoaded) {
@@ -100,40 +118,44 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
     updateVisibleSetIndexes();
 
-    const footer = footerRef.current!;
+    const header = headerRef.current!;
 
-    function scrollFooter(e: WheelEvent) {
-      footer.scrollLeft += e.deltaY / 4;
+    function scrollHeader(e: WheelEvent) {
+      header.scrollLeft += e.deltaY / 4;
     }
 
-    footer.addEventListener('wheel', scrollFooter, { passive: true });
+    header.addEventListener('wheel', scrollHeader, { passive: true });
 
     return () => {
-      footer.removeEventListener('wheel', scrollFooter);
+      header.removeEventListener('wheel', scrollHeader);
     };
   }, [areLoaded, updateVisibleSetIndexes]);
 
-  // Scroll footer when active set updates
+  // Scroll header when active set updates
   useEffect(() => {
     if (!areLoaded) {
       return;
     }
 
     setTimeout(() => {
-      const footer = footerRef.current!;
-      const newLeft = activeSetIndex * FOOTER_BUTTON_WIDTH - footer.offsetWidth / 2 + FOOTER_BUTTON_WIDTH / 2;
+      const header = headerRef.current!;
+      const newLeft = activeSetIndex * HEADER_BUTTON_WIDTH - header.offsetWidth / 2 + HEADER_BUTTON_WIDTH / 2;
 
-      footer.scrollTo({
+      header.scrollTo({
         left: newLeft,
         behavior: 'smooth',
       });
-    }, FOOTER_SCROLL_DELAY);
+    }, HEADER_SCROLL_DELAY);
   }, [areLoaded, activeSetIndex]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     onStickerSelect(sticker);
     addRecentSticker({ sticker });
   }, [addRecentSticker, onStickerSelect]);
+
+  const handleStickerUnfave = useCallback((sticker: ApiSticker) => {
+    unfaveSticker({ sticker });
+  }, [unfaveSticker]);
 
   const selectSet = useCallback((index: number) => {
     setActiveSetIndex(index);
@@ -153,7 +175,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       index === activeSetIndex && 'activated',
     );
 
-    if (!stickerSetCover || set.id === 'recent') {
+    if (!stickerSetCover || set.id === 'recent' || set.id === 'favorite') {
       return (
         <Button
           className={buttonClassName}
@@ -164,6 +186,8 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           {set.id === 'recent' ? (
             <i className="icon-recent" />
+          ) : set.id === 'favorite' ? (
+            <i className="icon-favorite" />
           ) : (
             <span className="sticker-set-initial">{getFirstLetters(set.title).slice(0, 2)}</span>
           )}
@@ -184,16 +208,26 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', className);
 
-  if (!areLoaded) {
+  if (!areLoaded || !canSendStickers) {
     return (
       <div className={fullClassName}>
-        <Loading />
+        {!canSendStickers ? (
+          <div className="picker-disabled">Sending stickers is not allowed in this chat.</div>
+        ) : (
+          <Loading />
+        )}
       </div>
     );
   }
 
   return (
     <div className={fullClassName}>
+      <div
+        ref={headerRef}
+        className="StickerPicker-header"
+      >
+        {allSets.map(renderSetButton)}
+      </div>
       <div
         ref={containerRef}
         className="StickerPicker-main no-scroll"
@@ -205,14 +239,9 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             load={visibleSetIndexes.includes(index)}
             loadStickers={loadStickers}
             onStickerSelect={handleStickerSelect}
+            onStickerUnfave={handleStickerUnfave}
           />
         ))}
-      </div>
-      <div
-        ref={footerRef}
-        className="StickerPicker-footer"
-      >
-        {allSets.map(renderSetButton)}
       </div>
     </div>
   );
@@ -220,25 +249,20 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { all, recent } = global.stickers;
+    const { all, recent, favorite } = global.stickers;
 
     return {
       recentStickers: recent.stickers,
+      favoriteStickers: favorite.stickers,
       stickerSets: all.byId,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      loadStickerSets,
-      loadRecentStickers,
-      loadStickers,
-      addRecentSticker,
-    } = actions;
-    return {
-      loadStickerSets,
-      loadRecentStickers,
-      loadStickers,
-      addRecentSticker,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadStickerSets',
+    'loadRecentStickers',
+    'loadFavoriteStickers',
+    'loadStickers',
+    'addRecentSticker',
+    'unfaveSticker',
+  ]),
 )(StickerPicker));

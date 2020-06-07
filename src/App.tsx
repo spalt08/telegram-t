@@ -2,10 +2,13 @@ import { FC } from './lib/teact/teact';
 import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalState } from './global/types';
+
+import { pick } from './util/iteratees';
+
 import Auth from './components/auth/Auth';
 import UiLoader from './components/common/UiLoader';
 import Main from './components/Main.async';
-// import Test from './pages/test/Test';
+// import Test from './components/test/TestPortal';
 
 type StateProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
 
@@ -14,10 +17,11 @@ const App: FC<StateProps> = ({ authState, authIsSessionRemembered }) => {
 
   if (authState) {
     switch (authState) {
+      case 'authorizationStateWaitPhoneNumber':
       case 'authorizationStateWaitCode':
       case 'authorizationStateWaitPassword':
       case 'authorizationStateWaitRegistration':
-      case 'authorizationStateWaitPhoneNumber':
+      case 'authorizationStateWaitQrCode':
         return <Auth />;
       case 'authorizationStateClosed':
       case 'authorizationStateClosing':
@@ -39,8 +43,5 @@ function renderMain() {
 }
 
 export default withGlobal(
-  (global): StateProps => {
-    const { authState, authIsSessionRemembered } = global;
-    return { authState, authIsSessionRemembered };
-  },
+  (global): StateProps => pick(global, ['authState', 'authIsSessionRemembered']),
 )(App);

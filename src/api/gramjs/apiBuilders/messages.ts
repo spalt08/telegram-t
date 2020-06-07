@@ -19,13 +19,16 @@ import {
   ApiFormattedText,
 } from '../../types';
 
+import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { pick } from '../../../util/iteratees';
+import { reduceWaveform } from '../gramjsBuilders';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
 import { buildStickerFromDocument } from './stickers';
 import { buildApiThumbnailFromStripped } from './common';
-import { reduceWaveform } from '../gramjsBuilders';
 
 const LOCAL_VIDEO_TEMP_ID = 'temp';
+let localMessageCounter = LOCAL_MESSAGE_ID_BASE;
 
 export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | undefined {
   const chatId = resolveMessageApiChatId(mtpMessage);
@@ -64,6 +67,35 @@ export function buildApiMessageFromShortChat(mtpMessage: GramJs.UpdateShortChatM
   return buildApiMessageWithChatId(chatId, mtpMessage);
 }
 
+export function buildApiMessageFromNotification(
+  notification: GramJs.UpdateServiceNotification,
+  currentDate: number,
+): ApiMessage {
+  const localId = localMessageCounter++;
+  let content: ApiMessage['content'] = {};
+
+  if (notification.media) {
+    content = {
+      ...buildMessageMediaContent(notification.media),
+    };
+  }
+
+  if (notification.message && !content.sticker && !content.poll && !content.contact) {
+    content = {
+      ...content,
+      text: buildMessageTextContent(notification.message, notification.entities),
+    };
+  }
+
+  return {
+    id: localId,
+    chatId: SERVICE_NOTIFICATIONS_USER_ID,
+    date: notification.inboxDate || (currentDate / 1000),
+    content,
+    isOutgoing: false,
+  };
+}
+
 type UniversalMessage = (
   Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
@@ -100,18 +132,18 @@ export function buildApiMessageWithChatId(chatId: number, mtpMessage: UniversalM
 
   return {
     id: mtpMessage.id,
-    chat_id: chatId,
-    is_outgoing: Boolean(mtpMessage.out) || (isChatWithSelf && !mtpMessage.fwdFrom),
+    chatId,
+    isOutgoing: Boolean(mtpMessage.out) || (isChatWithSelf && !mtpMessage.fwdFrom),
     content,
     date: mtpMessage.date,
-    sender_user_id: mtpMessage.fromId,
-    reply_to_message_id: mtpMessage.replyToMsgId,
-    ...(mtpMessage.fwdFrom && { forward_info: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
+    senderUserId: mtpMessage.fromId,
+    replyToMessageId: mtpMessage.replyToMsgId,
+    ...(mtpMessage.fwdFrom && { forwardInfo: buildApiMessageForwardInfo(mtpMessage.fwdFrom) }),
     views: mtpMessage.views,
     ...(isEdited && { isEdited }),
     ...(isMediaUnread && { isMediaUnread }),
+    ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
     ...(mtpMessage.groupedId && { groupedId: mtpMessage.groupedId.toString() }),
-    ...(mtpMessage.mentioned && { hasMention: true }),
   };
 }
 
@@ -120,7 +152,6 @@ export function buildMessageTextContent(
   entities?: GramJs.TypeMessageEntity[],
 ): ApiFormattedText {
   return {
-    '@type': 'formattedText' as const,
     text: message,
     ...(entities && { entities: entities.map(buildApiMessageEntity) }),
   };
@@ -169,14 +200,17 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
 }
 
 function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader): ApiMessageForwardInfo {
+  const fromChatId = fwdFrom.channelId
+    ? getApiChatIdFromMtpPeer({ channelId: fwdFrom.channelId } as GramJs.PeerChannel)
+    : fwdFrom.fromId;
+
   return {
-    '@type': 'messageForwardInfo',
-    from_chat_id: fwdFrom.fromId,
+    fromChatId,
     origin: {
-      '@type': 'messageForwardOriginUser',
-      sender_user_id: fwdFrom.fromId,
+      senderUserId: fwdFrom.fromId,
+      channelPostId: fwdFrom.channelPost,
       // TODO @gramjs Not supported?
-      // sender_user_name: fwdFrom.fromName,
+      // senderUsername: fwdFrom.fromName,
     },
   };
 }
@@ -285,16 +319,10 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     return undefined;
   }
 
-  const { size, mimeType } = media.document;
-  const { duration, performer, title } = audioAttribute;
-
   return {
-    size,
-    mimeType,
     fileName: getFilenameFromDocument(media.document, 'audio'),
-    duration,
-    performer,
-    title,
+    ...pick(media.document, ['size', 'mimeType']),
+    ...pick(audioAttribute, ['duration', 'performer', 'title']),
   };
 }
 
@@ -353,19 +381,12 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | undefined {
     return undefined;
   }
 
-  const {
-    firstName,
-    lastName,
-    phoneNumber,
-    userId,
-  } = media;
-
-  return {
-    firstName,
-    lastName,
-    phoneNumber,
-    userId,
-  };
+  return pick(media, [
+    'firstName',
+    'lastName',
+    'phoneNumber',
+    'userId',
+  ]);
 }
 
 function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
@@ -377,9 +398,7 @@ function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined
 }
 
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
-  const {
-    id, closed, publicVoters, multipleChoice, quiz, question, answers: rawAnswers,
-  } = poll;
+  const { id, answers: rawAnswers } = poll;
   const answers = rawAnswers.map((answer) => ({
     text: answer.text,
     option: String.fromCharCode(...answer.option),
@@ -388,11 +407,13 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
   return {
     id: id.toString(),
     summary: {
-      closed,
-      publicVoters,
-      multipleChoice,
-      quiz,
-      question,
+      ...pick(poll, [
+        'closed',
+        'publicVoters',
+        'multipleChoice',
+        'quiz',
+        'question',
+      ]),
       answers,
     },
     results: buildPollResults(pollResults),
@@ -428,24 +449,17 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     return undefined;
   }
 
-  const {
-    id,
-    url,
-    displayUrl,
-    siteName,
-    title,
-    description,
-    photo,
-    document,
-  } = media.webpage;
+  const { id, photo, document } = media.webpage;
 
   return {
     id: Number(id),
-    url,
-    displayUrl,
-    siteName,
-    title,
-    description,
+    ...pick(media.webpage, [
+      'url',
+      'displayUrl',
+      'siteName',
+      'title',
+      'description',
+    ]),
     photo: photo && photo instanceof GramJs.Photo
       ? {
         thumbnail: buildApiThumbnailFromStripped(photo.sizes),
@@ -474,8 +488,10 @@ function buildAction(action: GramJs.TypeMessageAction, senderId?: number): ApiAc
   if (action instanceof GramJs.MessageActionChatCreate) {
     text = `%origin_user% created the group «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditTitle) {
+    // TODO: Add distinct message for Channels
     text = `%origin_user% changed group name to «${action.title}»`;
   } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
+    // TODO: Add distinct message for Channels
     text = '%origin_user% updated group photo';
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
     text = 'Chat photo was deleted';
@@ -527,9 +543,6 @@ function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file'
   return `${defaultBase}${String(document.id)}.${extension}`;
 }
 
-// TODO @refactoring Use 1e9+ for local IDs instead of 0-
-let localMessageCounter = -1;
-
 export function buildLocalMessage(
   chatId: number,
   currentUserId: number,
@@ -539,17 +552,16 @@ export function buildLocalMessage(
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
-  pollSummary?: ApiNewPoll,
+  poll?: ApiNewPoll,
 ): ApiMessage {
-  const localId = localMessageCounter--;
+  const localId = localMessageCounter++;
 
   return {
     id: localId,
-    chat_id: chatId,
+    chatId,
     content: {
       ...(text && {
         text: {
-          '@type': 'formattedText',
           text,
           entities,
         },
@@ -557,15 +569,13 @@ export function buildLocalMessage(
       ...(attachment && buildUploadingMedia(attachment)),
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
-      ...(pollSummary && buildNewPoll(pollSummary, localId)),
+      ...(poll && buildNewPoll(poll, localId)),
     },
     date: Math.round(Date.now() / 1000),
-    is_outgoing: true,
-    sender_user_id: currentUserId,
-    sending_state: {
-      '@type': 'messageSendingStatePending',
-    },
-    ...(replyingTo && { reply_to_message_id: replyingTo }),
+    isOutgoing: true,
+    senderUserId: currentUserId,
+    sendingState: 'messageSendingStatePending',
+    ...(replyingTo && { replyToMessageId: replyingTo }),
   };
 }
 
@@ -574,33 +584,29 @@ export function buildForwardedMessage(
   currentUserId: number,
   message: ApiMessage,
 ): ApiMessage {
-  const localId = localMessageCounter--;
+  const localId = localMessageCounter++;
   const {
     content,
-    chat_id: from_chat_id,
-    id: from_message_id,
-    sender_user_id,
+    chatId: fromChatId,
+    id: fromMessageId,
+    senderUserId,
   } = message;
 
   return {
     id: localId,
-    chat_id: toChatId,
+    chatId: toChatId,
     content,
     date: Math.round(Date.now() / 1000),
-    is_outgoing: true,
-    sender_user_id: currentUserId,
-    sending_state: {
-      '@type': 'messageSendingStatePending',
-    },
+    isOutgoing: true,
+    senderUserId: currentUserId,
+    sendingState: 'messageSendingStatePending',
     // Forward info doesn't get added when users forwards his own messages
-    ...(sender_user_id !== currentUserId && {
-      forward_info: {
-        '@type': 'messageForwardInfo',
-        from_chat_id,
-        from_message_id,
+    ...(senderUserId !== currentUserId && {
+      forwardInfo: {
+        fromChatId,
+        fromMessageId,
         origin: {
-          '@type': 'messageForwardOriginUser',
-          sender_user_id,
+          senderUserId,
         },
       },
     }),
@@ -672,15 +678,11 @@ function buildUploadingMedia(
   }
 }
 
-function buildNewPoll(pollSummary: ApiNewPoll, localId: number) {
-  const { question, answers } = pollSummary;
+function buildNewPoll(poll: ApiNewPoll, localId: number) {
   return {
     poll: {
       id: localId.toString(),
-      summary: {
-        question,
-        answers,
-      },
+      summary: pick(poll.summary, ['question', 'answers']),
       results: {},
     },
   };

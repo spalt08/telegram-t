@@ -1,18 +1,26 @@
 import { GlobalState } from '../../global/types';
-import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../api/types';
+import {
+  ApiMessage,
+  ApiMessageOutgoingStatus,
+  ApiUser,
+  ApiSticker,
+} from '../../api/types';
 
 import { selectChat, selectIsChatWithSelf } from './chats';
 import { selectUser } from './users';
 import {
-  getMessageKey,
   getMessageText,
   getSendingState,
-  isChatBasicGroup,
   isChatChannel,
   isMessageLocal,
   isChatPrivate,
-  isChatSuperGroup,
   isForwardedMessage,
+  getCanPostInChat,
+  isUserRightBanned,
+  getHasAdminRight,
+  isChatBasicGroup,
+  isCommonBoxChat,
+  isServiceNotificationMessage,
 } from '../helpers';
 
 const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
@@ -42,10 +50,10 @@ export function selectViewportIds(global: GlobalState, chatId: number) {
 }
 
 export function selectIsViewportNewest(global: GlobalState, chatId: number) {
-  const { last_message } = selectChat(global, chatId) || {};
+  const { lastMessage } = selectChat(global, chatId) || {};
   const viewportIds = selectViewportIds(global, chatId);
 
-  return last_message && viewportIds ? viewportIds[viewportIds.length - 1] >= last_message.id : false;
+  return lastMessage && viewportIds ? viewportIds[viewportIds.length - 1] >= lastMessage.id : false;
 }
 
 export function selectChatMessage(global: GlobalState, chatId: number, messageId: number) {
@@ -80,12 +88,12 @@ export function selectFocusedMessageId(global: GlobalState, chatId: number) {
 export function selectIsMessageFocused(global: GlobalState, message: ApiMessage) {
   const { messageId, chatId: focusedChatId } = global.focusedMessage || {};
 
-  return focusedChatId === message.chat_id && (messageId === message.id || messageId === message.prev_local_id);
+  return focusedChatId === message.chatId && (messageId === message.id || messageId === message.previousLocalId);
 }
 
 export function selectIsMessageUnread(global: GlobalState, message: ApiMessage) {
-  const { last_read_outbox_message_id } = selectChat(global, message.chat_id) || {};
-  return isMessageLocal(message) || (last_read_outbox_message_id && last_read_outbox_message_id < message.id);
+  const { lastReadOutboxMessageId } = selectChat(global, message.chatId) || {};
+  return isMessageLocal(message) || !lastReadOutboxMessageId || lastReadOutboxMessageId < message.id;
 }
 
 export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): ApiMessageOutgoingStatus {
@@ -96,7 +104,7 @@ export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): 
   const sendingState = getSendingState(message);
 
   if (sendingState === 'succeeded') {
-    const chat = selectChat(global, message.chat_id);
+    const chat = selectChat(global, message.chatId);
     if (chat && selectIsChatWithSelf(global, chat)) {
       return 'read';
     }
@@ -106,56 +114,84 @@ export function selectOutgoingStatus(global: GlobalState, message: ApiMessage): 
 }
 
 export function selectSender(global: GlobalState, message: ApiMessage): ApiUser | undefined {
-  if (message.sender_user_id) {
-    return selectUser(global, message.sender_user_id);
+  if (message.senderUserId) {
+    return selectUser(global, message.senderUserId);
   }
 
-  const { forward_info } = message;
-  const senderId = forward_info && forward_info.origin.sender_user_id;
+  const { forwardInfo } = message;
+  const senderId = forwardInfo && forwardInfo.origin.senderUserId;
 
   return senderId ? selectUser(global, senderId) : undefined;
 }
 
 export function selectIsOwnMessage(global: GlobalState, message: ApiMessage): boolean {
-  return message.sender_user_id === global.currentUserId;
+  return message.senderUserId === global.currentUserId;
 }
 
 export function selectAllowedMessagedActions(global: GlobalState, message: ApiMessage) {
-  const chat = selectChat(global, message.chat_id);
-  if (!chat) {
+  const chat = selectChat(global, message.chatId);
+  if (!chat || chat.isRestricted) {
     return {};
   }
 
   const isPrivate = isChatPrivate(chat.id);
-  const isChatWithSelf = isPrivate && selectIsChatWithSelf(global, chat!);
+  const isChatWithSelf = Boolean(isPrivate && selectIsChatWithSelf(global, chat!));
   const isBasicGroup = isChatBasicGroup(chat);
-  const isSuperGroup = isChatSuperGroup(chat);
   const isChannel = isChatChannel(chat);
+  const isServiceNotification = isServiceNotificationMessage(message);
 
   const isOwnMessage = selectIsOwnMessage(global, message);
-  const isAdminOrOwner = !isPrivate && false; // TODO Implement.
-  const isSuperGroupOrChannelAdmin = (isSuperGroup || isChannel) && isAdminOrOwner;
-
-  const canReply = !isChannel;
-  const canPin = Boolean(isChatWithSelf || isBasicGroup || isSuperGroupOrChannelAdmin);
-  const canDelete = isPrivate || isBasicGroup || isSuperGroupOrChannelAdmin || isOwnMessage;
-  const canDeleteForAll = canDelete
-    ? Boolean((isPrivate && !isChatWithSelf) || isBasicGroup || isSuperGroupOrChannelAdmin)
-    : false;
-
-  const canEdit = isOwnMessage
-    && Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
+  const isMessageEditable = Date.now() - message.date * 1000 < MESSAGE_EDIT_ALLOWED_TIME_MS
     && Boolean(getMessageText(message))
     && !isForwardedMessage(message);
 
+  const canReply = isServiceNotification ? false : getCanPostInChat(chat);
+
+  const canPin = isPrivate
+    ? isChatWithSelf
+    : chat.isCreator
+      || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
+      || getHasAdminRight(chat, 'pinMessages');
+
+  const canDelete = isPrivate
+    || isOwnMessage
+    || isBasicGroup
+    || chat.isCreator
+    || getHasAdminRight(chat, 'deleteMessages');
+
+  const canDeleteForAll = canDelete && !isServiceNotification && (
+    (isPrivate && !isChatWithSelf)
+    || (isBasicGroup && (
+      isOwnMessage || getHasAdminRight(chat, 'deleteMessages')
+    ))
+  );
+
+  const canEdit = isMessageEditable && (
+    isOwnMessage
+    || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
+  );
+
+  const canForward = !isServiceNotification;
+
+  const hasSticker = Boolean(message.content.sticker);
+  const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
+  const canFaveSticker = hasSticker && !hasFavoriteSticker;
+  const canUnfaveSticker = hasFavoriteSticker;
+
   return {
-    canReply, canEdit, canPin, canDelete, canDeleteForAll,
+    canReply,
+    canEdit,
+    canPin,
+    canDelete,
+    canDeleteForAll,
+    canForward,
+    canFaveSticker,
+    canUnfaveSticker,
   };
 }
 
 export function selectUploadProgress(global: GlobalState, message: ApiMessage) {
-  const messageKey = getMessageKey(message.chat_id, message.prev_local_id || message.id);
-  const fileTransfer = global.fileUploads.byMessageKey[messageKey];
+  const fileTransfer = global.fileUploads.byMessageLocalId[message.previousLocalId || message.id];
 
   return fileTransfer ? fileTransfer.progress : undefined;
 }
@@ -165,23 +201,28 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
   if (!chat) {
     return undefined;
   }
-  const { last_message, last_read_inbox_message_id } = chat;
+  const { lastMessage, lastReadInboxMessageId } = chat;
 
   // Edge case #1
-  if (last_message && (last_read_inbox_message_id === undefined || last_message.id < last_read_inbox_message_id)) {
-    return last_message.id;
+  if (lastMessage && (lastReadInboxMessageId === undefined || lastMessage.id < lastReadInboxMessageId)) {
+    return lastMessage.id;
   }
 
-  if (last_read_inbox_message_id === undefined) {
+  if (lastReadInboxMessageId === undefined) {
     return undefined;
   }
 
-  // Edge case #2
-  const listedIds = selectListedIds(global, chatId);
-  if (listedIds && listedIds.length) {
-    const closestId = listedIds.find((id, i) => (
-      id === last_read_inbox_message_id
-      || (id < last_read_inbox_message_id && listedIds[i + 1] > last_read_inbox_message_id)
+  const byId = selectChatMessages(global, chatId);
+  if (byId && byId[lastReadInboxMessageId]) {
+    return lastReadInboxMessageId;
+  }
+
+  // Edge case #2.1
+  const outlyingIds = selectOutlyingIds(global, chatId);
+  if (outlyingIds && outlyingIds.length) {
+    const closestId = outlyingIds.find((id, i) => (
+      id === lastReadInboxMessageId
+      || (id < lastReadInboxMessageId && outlyingIds[i + 1] > lastReadInboxMessageId)
     ));
 
     if (closestId) {
@@ -189,27 +230,75 @@ export function selectRealLastReadId(global: GlobalState, chatId: number) {
     }
   }
 
-  return last_read_inbox_message_id;
+  // Edge case #2.2
+  const listedIds = selectListedIds(global, chatId);
+  if (listedIds && listedIds.length) {
+    const closestId = listedIds.find((id, i) => (
+      id === lastReadInboxMessageId
+      || (id < lastReadInboxMessageId && listedIds[i + 1] > lastReadInboxMessageId)
+    ));
+
+    if (closestId) {
+      return closestId;
+    }
+  }
+
+  return lastReadInboxMessageId;
 }
 
 export function selectFirstUnreadId(global: GlobalState, chatId: number) {
   const chat = selectChat(global, chatId);
-  if (!chat || !chat.unread_count) {
+  if (!chat || !chat.unreadCount) {
     return undefined;
   }
 
   const lastReadId = selectRealLastReadId(global, chatId);
-  const listedIds = selectListedIds(global, chatId);
   const byId = selectChatMessages(global, chatId);
 
-  if (!chat.unread_count || lastReadId === undefined || !listedIds || !byId) {
+  if (!chat.unreadCount || lastReadId === undefined || !byId) {
     return undefined;
   }
 
-  return listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].is_outgoing);
+  const outlyingIds = selectOutlyingIds(global, chatId);
+  if (outlyingIds) {
+    const found = outlyingIds.find((id) => id > lastReadId && byId[id] && !byId[id].isOutgoing);
+    if (found) {
+      return found;
+    }
+  }
+
+  const listedIds = selectListedIds(global, chatId);
+  if (listedIds) {
+    const found = listedIds.find((id) => id > lastReadId && byId[id] && !byId[id].isOutgoing);
+    if (found) {
+      return found;
+    }
+  }
+
+  return undefined;
 }
 
 export function selectIsForwardMenuOpen(global: GlobalState) {
   const { forwardMessages } = global;
-  return Boolean(forwardMessages.fromChatId);
+  return Boolean(forwardMessages.isColumnShown);
+}
+
+export function selectCommonBoxChatId(global: GlobalState, messageId: number) {
+  const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
+    isCommonBoxChat(chat) && chat.lastMessage && chat.lastMessage.id === messageId
+  ));
+  if (fromLastMessage) {
+    return fromLastMessage.id;
+  }
+
+  const { byChatId } = global.messages;
+  return Number(Object.keys(byChatId).find((chatId) => {
+    const chat = selectChat(global, Number(chatId));
+    return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
+  }));
+}
+
+export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
+  const { stickers } = global.stickers.favorite;
+  return stickers && stickers.some(({ id }) => id === sticker.id);
 }

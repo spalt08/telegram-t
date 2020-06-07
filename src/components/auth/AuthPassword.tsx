@@ -1,17 +1,19 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback,
+  FC, useState, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
 import getMonkeyAnimationData from '../common/helpers/monkeys';
+
 import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
 import AnimatedSticker from '../common/AnimatedSticker';
 
-type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
+type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authHint'>;
 type DispatchProps = Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>;
 
 const MIN_PASSWORD_LENGTH = 3;
@@ -21,13 +23,13 @@ const SEGMENT_UNCOVER_EYE = [0, 20];
 const SEGMENT_COVER_EYE = [20, 0];
 
 const AuthPassword: FC<StateProps & DispatchProps> = ({
-  authIsLoading, authError, setAuthPassword, clearAuthError,
+  authIsLoading, authError, authHint, setAuthPassword, clearAuthError,
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [closeMonkeyData, setCloseMonkeyData] = useState(undefined);
-  const [peekMonkeyData, setPeekMonkeyData] = useState(undefined);
+  const [closeMonkeyData, setCloseMonkeyData] = useState();
+  const [peekMonkeyData, setPeekMonkeyData] = useState();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
 
@@ -106,26 +108,21 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
         <InputPassword
           id="sign-in-password"
           showPassword={showPassword}
+          value={password}
+          hint={authHint}
+          error={authError}
           onChange={onPasswordChange}
           onShowToggle={togglePasswordVisibility}
-          value={password}
-          error={authError}
         />
         {canSubmit && (
-          <Button type="submit" isLoading={authIsLoading}>Next</Button>
+          <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
         )}
       </form>
     </div>
   );
 };
 
-export default withGlobal(
-  (global): StateProps => {
-    const { authIsLoading, authError } = global;
-    return { authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setAuthPassword, clearAuthError } = actions;
-    return { setAuthPassword, clearAuthError };
-  },
-)(AuthPassword);
+export default memo(withGlobal(
+  (global): StateProps => pick(global, ['authIsLoading', 'authError', 'authHint']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthPassword', 'clearAuthError']),
+)(AuthPassword));

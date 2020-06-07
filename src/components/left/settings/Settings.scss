@@ -1,70 +1,217 @@
 #Settings {
   height: 100%;
 
-  .settings-content {
-    height: calc(100% - 3.75rem);
-    overflow-y: auto;
+  > div {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.settings-main-header {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-more-menu {
+  .bubble {
+    width: auto;
 
     .MenuItem button {
-      border-radius: var(--border-radius-default);
+      padding-left: 1rem !important;
+      padding-right: 2rem !important;
+    }
+  }
+}
+
+.settings-content {
+  height: 100%;
+  overflow-y: auto;
+
+  .ListItem > button {
+    border-radius: var(--border-radius-default);
+  }
+}
+
+.settings-main-menu {
+  padding: 0 0.5rem 1rem;
+}
+
+.settings-current-user {
+  margin-bottom: 1.125rem;
+  text-align: center;
+
+  .Avatar {
+    margin: 0 auto 1.5rem;
+  }
+
+  .name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    margin: 0;
+
+    .VerifiedIcon {
+      margin-left: 0.25rem;
+      margin-top: 0.1rem;
     }
   }
 
-  .settings-main-menu {
-    padding: 0 0.5rem 1rem;
+  .phone {
+    font-size: 0.875rem;
+    color: #868e96;
+    margin: 0;
+  }
+}
+
+.settings-item {
+  border-top: 1px solid var(--color-borders);
+  padding: 1.5rem 1.5rem 1rem;
+
+  &-header {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    position: relative;
+
+    .AttentionIndicator {
+      top: 0.3125rem;
+      left: -1rem;
+    }
   }
 
-  .settings-current-user {
-    margin-bottom: 1.125rem;
-    text-align: center;
+  &-description {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
+  }
 
-    .Avatar {
-      margin: 0 auto 1.5rem;
+  &-description-larger {
+    font-size: 1rem;
+    line-height: 1.3125rem;
+    color: var(--color-text-secondary);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .ListItem {
+    margin: 0 -1rem 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
     }
 
-    .name {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 500;
-      font-size: 1.5rem;
-      line-height: 2rem;
-      margin: 0;
+    .multiline-menu-item {
+      white-space: initial;
 
-      .VerifiedIcon {
-        margin-left: 0.25rem;
-        margin-top: 0.1rem;
+      .title, .subtitle {
+        display: block;
+        text-align: left;
+      }
+
+      .title {
+        line-height: 1.25rem;
+      }
+
+      .subtitle {
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        color: var(--color-text-secondary);
+
+        & + .subtitle {
+          margin-top: -0.25rem;
+        }
+
+        &.black {
+          color: var(--color-text);
+        }
       }
     }
 
-    .phone {
-      font-size: 0.875rem;
-      color: #868e96;
-      margin: 0;
-    }
-  }
+    &.destructive {
+      button {
+        color: var(--color-error);
 
-  .settings-item {
-    border-top: 1px solid var(--color-borders);
-    padding: 1rem 1.5rem;
-
-    &-header {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
-      position: relative;
-
-      .AttentionIndicator {
-        top: 0.3125rem;
-        left: -1rem;
+        i {
+          opacity: 1;
+        }
       }
     }
 
-    &-description {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      margin-top: -0.5rem;
-      margin-bottom: 1.5rem;
+    &.blocked-list-item {
+      margin-bottom: 0.5rem;
+
+      button {
+        align-items: center;
+        text-align: left;
+        padding: 0.5rem;
+      }
+
+      .Avatar {
+        width: 3rem;
+        height: 3rem;
+        margin-right: 1rem;
+      }
+
+      .contact-name {
+        font-size: 1rem;
+        line-height: 1rem;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+      }
+
+      .contact-phone {
+        font-size: 0.875rem;
+        line-height: 1rem;
+        color: var(--color-text-secondary);
+      }
     }
   }
+
+  .RangeSlider {
+    margin-bottom: 1.0625rem;
+  }
+
+  .Checkbox, .radio-group {
+    margin: 0 -1rem 0.5rem;
+  }
+
+  .radio-group {
+    .Radio:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .Radio + .Radio, .Checkbox + .Checkbox {
+    margin-top: 2rem;
+  }
+}
+
+.settings-fab-wrapper {
+  height: 100%;
+  position: relative;
+
+  .FloatingActionButton {
+    right: 1.5rem;
+  }
+
+  &.has-scroll {
+    .FloatingActionButton {
+      right: 1.85rem;
+    }
+  }
+}
+
+.settings-edit-profile {
+  padding: 0 1.5rem;
+}
+
+.username-link {
+  color: var(--color-links);
 }

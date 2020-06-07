@@ -1,12 +1,14 @@
 import { ChangeEvent } from 'react';
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, { FC, useState, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
+
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
-import CropModal from './CropModal';
+import AvatarEditable from '../ui/AvatarEditable';
 
 type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
 type DispatchProps = Pick<GlobalActions, 'signUp' | 'clearAuthError' | 'uploadProfilePhoto'>;
@@ -15,22 +17,9 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, signUp, clearAuthError, uploadProfilePhoto,
 }) => {
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [selectedFile, setSelectedFile] = useState();
-  const [croppedFile, setCroppedFile] = useState();
-  const [croppedBlobUrl, setCroppedBlobUrl] = useState();
+  const [croppedFile, setCroppedFile] = useState<File | undefined>();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-
-  function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
-    const target = event.target as HTMLInputElement;
-
-    if (!target || !target.files || !target.files[0]) {
-      return;
-    }
-
-    setSelectedFile(target.files[0]);
-    target.value = '';
-  }
 
   function handleFirstNameChange(event: ChangeEvent<HTMLInputElement>) {
     if (authError) {
@@ -49,20 +38,6 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
     setLastName(target.value);
   }
 
-  function handleAvatarCrop(croppedImg: File) {
-    setSelectedFile(undefined);
-    setCroppedFile(croppedImg);
-
-    if (croppedBlobUrl) {
-      URL.revokeObjectURL(croppedBlobUrl);
-    }
-    setCroppedBlobUrl(URL.createObjectURL(croppedImg));
-  }
-
-  function handleModalClose() {
-    setSelectedFile(undefined);
-  }
-
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -76,22 +51,7 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
   return (
     <div id="auth-registration-form" className="auth-form">
       <form action="" method="post" onSubmit={handleSubmit}>
-        <label
-          id="avatar"
-          className={croppedBlobUrl ? 'filled' : ''}
-          role="button"
-          tabIndex={0}
-          title="Change your profile picture"
-        >
-          <input
-            type="file"
-            id="registration-avatar"
-            onChange={handleSelectFile}
-            accept="image/png, image/jpeg"
-          />
-          <i className="icon-camera-add" />
-          {croppedBlobUrl && <img src={croppedBlobUrl} alt="Avatar" />}
-        </label>
+        <AvatarEditable onChange={setCroppedFile} />
         <h2>Your Name</h2>
         <p className="note">
           Enter your name and add
@@ -103,29 +63,24 @@ const AuthRegister: FC<StateProps & DispatchProps> = ({
           onChange={handleFirstNameChange}
           value={firstName}
           error={authError}
+          autoComplete="given-name"
         />
         <InputText
           id="registration-last-name"
           label="Last Name (optional)"
           onChange={handleLastNameChange}
           value={lastName}
+          autoComplete="family-name"
         />
         {isButtonShown && (
-          <Button type="submit" isLoading={authIsLoading}>Start Messaging</Button>
+          <Button type="submit" ripple isLoading={authIsLoading}>Start Messaging</Button>
         )}
-        <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
       </form>
     </div>
   );
 };
 
-export default withGlobal(
-  (global): StateProps => {
-    const { authIsLoading, authError } = global;
-    return { authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { signUp, clearAuthError, uploadProfilePhoto } = actions;
-    return { signUp, clearAuthError, uploadProfilePhoto };
-  },
-)(AuthRegister);
+export default memo(withGlobal(
+  (global): StateProps => pick(global, ['authIsLoading', 'authError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['signUp', 'clearAuthError', 'uploadProfilePhoto']),
+)(AuthRegister));

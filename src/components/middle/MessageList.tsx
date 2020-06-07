@@ -1,20 +1,21 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage } from '../../api/types';
+import { ApiMessage, ApiRestrictionReason } from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import { LoadMoreDirection } from '../../types';
 
 import { MESSAGE_LIST_SENSITIVE_AREA, MESSAGE_LIST_SLICE } from '../../config';
+import { IS_TOUCH_ENV } from '../../util/environment';
 import {
   selectChatMessages,
   selectViewportIds,
   selectIsViewportNewest,
   selectFirstUnreadId,
-  selectOpenChat,
   selectFocusedMessageId,
+  selectChat,
 } from '../../modules/selectors';
 import {
   getMessageOriginalId,
@@ -22,9 +23,15 @@ import {
   isChatChannel,
   isChatPrivate,
   isOwnMessage,
+  getCanPostInChat,
 } from '../../modules/helpers';
-import { areSortedArraysEqual, flatten, orderBy } from '../../util/iteratees';
-import { debounce, throttle } from '../../util/schedulers';
+import {
+  areSortedArraysEqual,
+  flatten,
+  orderBy,
+  pick,
+} from '../../util/iteratees';
+import { debounce, fastRaf, throttle } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
@@ -39,26 +46,35 @@ import ActionMessage from './ActionMessage';
 import './MessageList.scss';
 
 type OwnProps = {
+  chatId: number;
   onFabToggle: (show: boolean) => void;
 };
 
 type StateProps = {
-  chatId?: number;
+  isChatLoaded?: boolean;
   isChannelChat?: boolean;
+  isReadOnlyChannel?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
   isViewportNewest?: boolean;
   isFocusing?: boolean;
+  isRestricted?: boolean;
+  restrictionReason?: ApiRestrictionReason;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadViewportMessages' | 'markMessagesRead' | 'setChatScrollOffset'>;
+type DispatchProps = Pick<GlobalActions, (
+  'loadViewportMessages' | 'markChatRead' | 'markMessagesRead' | 'setChatScrollOffset'
+)>;
 
 const SCROLL_TO_LAST_THRESHOLD_PX = 100;
 const VIEWPORT_MEDIA_MARGIN = 500;
 const INDICATOR_TOP_MARGIN = 10;
 const SCROLL_THROTTLE = 1000;
 const FOCUSING_DURATION = 1000;
+
+// TODO Check if this workaround is only required for iOS 13+
+const SCROLL_DEBOUNCE_ARGS = IS_TOUCH_ENV ? [700, false, true] : [1000, true, false];
 
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, false);
 const scrollToLastMessage = throttle((container: Element) => {
@@ -69,27 +85,32 @@ let currentAnchorId: string | undefined;
 let currentAnchorTop: number;
 let listItemElements: NodeListOf<HTMLDivElement>;
 let memoFirstUnreadId: number | undefined;
-let scrollTimeout: NodeJS.Timeout | null = null;
+let isScrollTopJustUpdated = false;
 
 const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   onFabToggle,
   chatId,
+  isChatLoaded,
   isChannelChat,
+  isReadOnlyChannel,
   messageIds,
   messagesById,
   firstUnreadId,
   isViewportNewest,
   isFocusing,
+  isRestricted,
+  restrictionReason,
   loadViewportMessages,
+  markChatRead,
   markMessagesRead,
   setChatScrollOffset,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const scrollOffsetRef = useRef<number>();
 
-  const [viewportMessageIds, setViewportMessageIds] = useState([]);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [containerHeight, setContainerHeight] = useState();
+  const [viewportMessageIds, setViewportMessageIds] = useState<number[]>([]);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [containerHeight, setContainerHeight] = useState<number | undefined>();
 
   useOnChange(() => {
     currentAnchorId = undefined;
@@ -113,8 +134,10 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [loadMoreBackwards, loadMoreForwards, loadMoreBoth] = useMemo(
     () => [
-      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
-      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+      // @ts-ignore
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), ...SCROLL_DEBOUNCE_ARGS),
+      // @ts-ignore
+      debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), ...SCROLL_DEBOUNCE_ARGS),
       debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Both }), 1000, true, false),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,18 +173,29 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       setViewportMessageIds(newViewportMessageIds);
     }
 
+    const {
+      allElements: mentionMessageEls, visibleIndexes: visibleMentionIndexes,
+    } = findInViewport(container, '.Message.has-unread-mention', VIEWPORT_MEDIA_MARGIN);
+    const readMessageIds = visibleMentionIndexes.map((i) => Number(mentionMessageEls[i].dataset.messageId));
+    if (readMessageIds.length) {
+      markMessagesRead({ messageIds: readMessageIds });
+    }
+
     if (firstUnreadId) {
       const {
         allElements, visibleIndexes,
       } = findInViewport(container, listItemElements, undefined, undefined, true);
       const lowerElement = allElements[visibleIndexes[visibleIndexes.length - 1]];
+      if (!lowerElement) {
+        return;
+      }
 
-      const maxId = lowerElement ? Number(lowerElement.dataset.messageId) : undefined;
-      if (maxId && maxId >= firstUnreadId) {
-        markMessagesRead({ maxId });
+      const maxId = Number(lowerElement.dataset.lastMessageId || lowerElement.dataset.messageId);
+      if (maxId >= firstUnreadId) {
+        markChatRead({ maxId });
       }
     }
-  }, [firstUnreadId, markMessagesRead, viewportMessageIds]);
+  }, [firstUnreadId, markChatRead, markMessagesRead, viewportMessageIds]);
 
   const processInfiniteScroll = useCallback(() => {
     const container = containerRef.current!;
@@ -172,7 +206,8 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     let isUpdated = false;
 
     if (isNearTop) {
-      const nextAnchor = listItemElements[0];
+      // We avoid the very first item as it may be a partly-loaded album
+      const nextAnchor = listItemElements[1] || listItemElements[0];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
@@ -192,7 +227,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     if (!isViewportNewest && isNearBottom) {
-      const nextAnchor = listItemElements[listItemElements.length - 1];
+      const nextAnchor = listItemElements[listItemElements.length - 2] || listItemElements[listItemElements.length - 1];
       if (nextAnchor) {
         const nextAnchorTop = nextAnchor.getBoundingClientRect().top;
         const newAnchorTop = currentAnchor && currentAnchor !== nextAnchor
@@ -223,15 +258,13 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [isViewportNewest, loadMoreBackwards, loadMoreForwards]);
 
   const handleScroll = useCallback(() => {
-    const container = containerRef.current!;
-    const newScrollOffset = container.scrollHeight - container.scrollTop;
-
-    if (newScrollOffset === scrollOffsetRef.current) {
+    if (isScrollTopJustUpdated) {
+      isScrollTopJustUpdated = false;
       return;
     }
 
-    scrollOffsetRef.current = newScrollOffset;
-    setIsScrolling(true);
+    const container = containerRef.current!;
+    scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
 
     if (!isFocusing) {
       processInfiniteScroll();
@@ -244,24 +277,27 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         return;
       }
 
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-      scrollTimeout = setTimeout(() => setIsScrolling(false), SCROLL_THROTTLE + 100);
+      setIsScrolled(true);
+      updateStickyDateOnScroll(container);
 
-      requestAnimationFrame(() => {
+      fastRaf(() => {
         updateFabVisibility();
         updateViewportMessages();
-        determineStuckDate(container);
       });
 
       setChatScrollOffset({ chatId, scrollOffset: scrollOffsetRef.current });
     });
-  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateViewportMessages, updateFabVisibility]);
+  }, [isFocusing, processInfiniteScroll, setChatScrollOffset, chatId, updateFabVisibility, updateViewportMessages]);
+
+  useLayoutEffect(() => {
+    if (isScrolled) {
+      updateStickyDateOnScroll(containerRef.current!, true);
+    }
+  }, [isScrolled]);
 
   // Container resize observer.
   useEffect(() => {
-    if (!('ResizeObserver' in window)) {
+    if (!('ResizeObserver' in window) || process.env.NODE_ENV === 'perf') {
       return undefined;
     }
 
@@ -278,14 +314,19 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Initial message loading
   useEffect(() => {
+    // Some chats are loaded asynchronosly, so we need to check if the chat has been loaded before fetching history
+    if (!isChatLoaded) {
+      return;
+    }
+
     const container = containerRef.current!;
 
     if (!messageIds || (
-      container.scrollHeight <= container.clientHeight && messageIds.length < MESSAGE_LIST_SLICE * 2
+      messageIds.length < MESSAGE_LIST_SLICE && container.scrollHeight <= container.clientHeight
     )) {
       loadMoreBoth();
     }
-  }, [chatId, messageIds, loadMoreBoth]);
+  }, [chatId, isChatLoaded, messageIds, loadMoreBoth]);
 
   useLayoutEffectWithPrevDeps(([
     prevChatId, prevMessageIds, prevIsViewportNewest, prevContainerHeight,
@@ -342,12 +383,12 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
       }
 
       container.scrollTop = newScrollTop;
-      determineStuckDate(container, true);
+      isScrollTopJustUpdated = true;
     }
 
     scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
     updateFabVisibility();
-    requestAnimationFrame(updateViewportMessages);
+    fastRaf(updateViewportMessages);
 
     if (process.env.NODE_ENV === 'perf') {
       // eslint-disable-next-line no-console
@@ -366,20 +407,35 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
   const className = buildClassName(
     'MessageList custom-scroll',
     isPrivate && 'no-avatars',
-    isChannelChat && 'is-channel no-avatars bottom-padding',
-    isScrolling && 'is-scrolling',
+    isChannelChat && 'no-avatars',
+    isReadOnlyChannel && 'bottom-padding',
+    isScrolled && 'scrolled',
   );
+
+  function renderContent() {
+    if (!messageIds && isRestricted) {
+      return (
+        <div className="chat-restricted">
+          <p>{restrictionReason ? restrictionReason.text : 'This is a private chat'}</p>
+        </div>
+      );
+    }
+
+    return messageIds && messageGroups ? (
+      // @ts-ignore
+      <div className="messages-container" teactFastList>
+        {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
+      </div>
+    ) : messageIds ? (
+      <div className="empty"><span>No messages here yet</span></div>
+    ) : (
+      <Loading color="white" />
+    );
+  }
 
   return (
     <div ref={containerRef} id="MessageList" className={className} onScroll={handleScroll}>
-      {messageIds ? (
-        // @ts-ignore
-        <div className="messages-container" teactChildrenKeyOrder="asc">
-          {messageGroups && renderMessages(messageGroups, viewportMessageIds, isPrivate)}
-        </div>
-      ) : (
-        <Loading color="white" />
-      )}
+      {renderContent()}
     </div>
   );
 };
@@ -406,7 +462,9 @@ function renderMessages(
         if (message.id === memoFirstUnreadId) {
           return (
             <>
-              <div className="unread-divider"><span>Unread messages</span></div>
+              <div className="unread-divider" key="unread-divider">
+                <span>Unread messages</span>
+              </div>
               {renderedMessage}
             </>
           );
@@ -422,7 +480,7 @@ function renderMessages(
         const message = isAlbum(messageOrAlbum) ? messageOrAlbum.messages[0] : messageOrAlbum;
         const album = isAlbum(messageOrAlbum) ? messageOrAlbum : undefined;
 
-        if (message.prev_local_id && currentAnchorId === `message${message.prev_local_id}`) {
+        if (message.previousLocalId && currentAnchorId === `message${message.previousLocalId}`) {
           currentAnchorId = `message${message.id}`;
         }
 
@@ -438,7 +496,7 @@ function renderMessages(
         };
         const loadAndPlayMedia = (
           viewportMessageIds.includes(message.id)
-          || (!!message.prev_local_id && viewportMessageIds.includes(message.prev_local_id))
+          || (!!message.previousLocalId && viewportMessageIds.includes(message.previousLocalId))
         );
 
         const renderedMessage = (
@@ -458,7 +516,9 @@ function renderMessages(
         if (message.id === memoFirstUnreadId) {
           return (
             <>
-              <div className="unread-divider"><span>Unread messages</span></div>
+              <div className="unread-divider" key="unread-divider">
+                <span>Unread messages</span>
+              </div>
               {renderedMessage}
             </>
           );
@@ -469,9 +529,12 @@ function renderMessages(
     });
 
     return (
-      // @ts-ignore
-      <div className="message-date-group" key={dateGroup.datetime} teactChildrenKeyOrder="asc">
-        <div className="message-date-header" key={-Infinity}>
+      <div
+        className="message-date-group"
+        key={dateGroup.datetime}
+        teactFastList
+      >
+        <div className="message-date-header" key="date-header">
           <span>{formatHumanDate(dateGroup.datetime)}</span>
         </div>
         {flatten(senderGroups)}
@@ -482,29 +545,69 @@ function renderMessages(
   return flatten(dateGroups);
 }
 
-function determineStuckDate(container: HTMLElement, forceHide = false) {
+let scrollEndTimeout: number | undefined;
+
+function updateStickyDateOnScroll(container: HTMLElement, forceHide = false) {
+  if (!scrollEndTimeout) {
+    const currentInvisible = container.querySelector<HTMLDivElement>('.message-date-header.invisible');
+    if (currentInvisible) {
+      currentInvisible.classList.remove('invisible');
+    }
+
+    const stuckDateEl = findStuckDate(container);
+    if (!stuckDateEl) {
+      return;
+    }
+
+    stuckDateEl.classList.add('invisible');
+
+    if (forceHide) {
+      stuckDateEl.classList.add('no-transition');
+    }
+
+    fastRaf(() => {
+      stuckDateEl.classList.remove('invisible', 'no-transition');
+    });
+  } else {
+    clearTimeout(scrollEndTimeout);
+  }
+
+  scrollEndTimeout = window.setTimeout(() => {
+    const stuckDateEl = findStuckDate(container);
+    if (stuckDateEl) {
+      stuckDateEl.classList.add('invisible');
+    }
+    scrollEndTimeout = undefined;
+  }, SCROLL_THROTTLE + 100);
+}
+
+function findStuckDate(container: HTMLElement) {
   const allElements = container.querySelectorAll<HTMLDivElement>('.message-date-header');
   const containerTop = container.scrollTop;
 
-  Array.from(allElements).forEach((el) => {
-    const isStuck = el.offsetTop - containerTop === INDICATOR_TOP_MARGIN;
-    el.classList.toggle('stuck', isStuck);
-    el.classList.toggle('hidden', isStuck && forceHide);
+  return Array.from(allElements).find((el) => {
+    const { offsetTop, offsetHeight } = el;
+    const top = offsetTop - containerTop;
+    return -offsetHeight <= top && top <= INDICATOR_TOP_MARGIN;
   });
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const chat = selectOpenChat(global);
+  (global, { chatId }): StateProps => {
+    const chat = selectChat(global, chatId);
     if (!chat) {
       return {};
     }
 
-    const chatId = chat.id;
+    const { isRestricted, restrictionReason } = chat;
+    const isChannelChat = isChatChannel(chat);
 
     return {
-      chatId,
-      isChannelChat: isChatChannel(chat),
+      isChatLoaded: true,
+      isRestricted,
+      restrictionReason,
+      isChannelChat,
+      isReadOnlyChannel: isChannelChat && !getCanPostInChat(chat),
       messageIds: selectViewportIds(global, chatId),
       messagesById: selectChatMessages(global, chatId),
       firstUnreadId: selectFirstUnreadId(global, chatId),
@@ -512,13 +615,10 @@ export default memo(withGlobal<OwnProps>(
       isFocusing: Boolean(selectFocusedMessageId(global, chatId)),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      loadViewportMessages, markMessagesRead, setChatScrollOffset,
-    } = actions;
-
-    return {
-      loadViewportMessages, markMessagesRead, setChatScrollOffset,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'loadViewportMessages',
+    'markChatRead',
+    'markMessagesRead',
+    'setChatScrollOffset',
+  ]),
 )(MessageList));

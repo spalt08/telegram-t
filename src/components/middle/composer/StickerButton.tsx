@@ -1,3 +1,4 @@
+import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -6,9 +7,11 @@ import { ApiMediaFormat, ApiSticker } from '../../../api/types';
 
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
+import webpHero from '../../../util/webpHero';
 import buildClassName from '../../../util/buildClassName';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
+import Button from '../../ui/Button';
 
 import './StickerButton.scss';
 
@@ -18,15 +21,17 @@ type OwnProps = {
   title?: string;
   className?: string;
   onClick: (sticker: ApiSticker) => void;
+  onUnfaveClick?: (sticker: ApiSticker) => void;
 };
 
 const StickerButton: FC<OwnProps> = ({
-  sticker, load, title, className, onClick,
+  sticker, load, title, className, onClick, onUnfaveClick,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
-  const isAnimated = sticker.is_animated;
+  const { isAnimated } = sticker;
   const localMediaHash = `sticker${sticker.id}`;
+  const stickerSelector = `sticker-button-${sticker.id}`;
 
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`, !load, ApiMediaFormat.BlobUrl);
   const { transitionClassNames } = useTransitionForMedia(previewBlobUrl, 'slow');
@@ -35,6 +40,7 @@ const StickerButton: FC<OwnProps> = ({
   const lottieData = useMedia(localMediaHash, !shouldPlay, ApiMediaFormat.Lottie);
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
+  const canAnimatedPlay = isAnimationLoaded && shouldPlay;
 
   const play = isAnimated ? () => {
     setShouldPlay(true);
@@ -64,6 +70,14 @@ const StickerButton: FC<OwnProps> = ({
     };
   }, [shouldPlay, stop]);
 
+  useEffect(() => {
+    if (!canAnimatedPlay && previewBlobUrl) {
+      webpHero({
+        selectors: `.${stickerSelector}`,
+      });
+    }
+  }, [canAnimatedPlay, previewBlobUrl, stickerSelector]);
+
   const handleClick = useCallback(
     () => onClick({
       ...sticker,
@@ -72,13 +86,23 @@ const StickerButton: FC<OwnProps> = ({
     [onClick, sticker, localMediaHash],
   );
 
+  const handleUnfaveClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (onUnfaveClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      onUnfaveClick(sticker);
+    }
+  }, [onUnfaveClick, sticker]);
+
   const fullClassName = buildClassName(
     'StickerButton',
+    stickerSelector,
     className,
     transitionClassNames,
   );
 
-  const style = isAnimationLoaded && shouldPlay ? '' : `background-image: url(${previewBlobUrl})`;
+  const style = canAnimatedPlay ? '' : `background-image: url(${previewBlobUrl})`;
 
   return (
     <div
@@ -97,6 +121,17 @@ const StickerButton: FC<OwnProps> = ({
           play
           onLoad={handleAnimationLoad}
         />
+      )}
+      {onUnfaveClick && (
+        <Button
+          className="sticker-unfave-button"
+          color="dark"
+          ariaLabel="Remove from Favorites"
+          round
+          onClick={handleUnfaveClick}
+        >
+          <i className="icon-close" />
+        </Button>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import buildClassName from '../../util/buildClassName';
@@ -13,7 +13,7 @@ const AttentionIndicator: FC<OwnProps> = ({ show }) => {
   const { shouldRender, transitionClassNames } = useShowTransition(show, undefined, undefined, false);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   const className = buildClassName(
@@ -26,4 +26,4 @@ const AttentionIndicator: FC<OwnProps> = ({ show }) => {
   );
 };
 
-export default AttentionIndicator;
+export default memo(AttentionIndicator);

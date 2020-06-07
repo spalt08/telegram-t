@@ -4,8 +4,9 @@ import { ApiMessage, ApiWebPage } from '../../../api/types';
 
 import { getMessageSummaryText, getMessageWebPage, matchLinkInMessageText } from '../../../modules/helpers';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
-import Photo from '../../middle/message/Photo';
+import Media from './Media';
 
 import './WebLink.scss';
 
@@ -39,7 +40,7 @@ const WebLink: FC<OwnProps> = ({ message }) => {
   }, [linkData]);
 
   if (!linkData) {
-    return null;
+    return undefined;
   }
 
   const {
@@ -66,15 +67,12 @@ const WebLink: FC<OwnProps> = ({ message }) => {
       data-initial={(siteName || displayUrl)[0]}
     >
       {photo && (
-        <Photo
-          message={message}
-          load
-          onClick={handleMediaClick}
-          size="pictogram"
-        />
+        <Media message={message} onClick={handleMediaClick} />
       )}
-      <p className="site-title">{title || siteName || displayUrl}</p>
-      {truncatedDescription && <p className="site-description">{description}</p>}
+      <p className="site-title">{renderText(title || siteName || displayUrl)}</p>
+      {truncatedDescription && (
+        <p className="site-description">{renderText(truncatedDescription)}</p>
+      )}
       <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
         {url.replace('mailto:', '') || displayUrl}
       </a>

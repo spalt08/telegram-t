@@ -1,11 +1,11 @@
-import { OnApiUpdate } from '../../types';
+import { ApiOnProgress, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import { WorkerMessageEvent, OriginMessageData, ThenArg } from './types';
+import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
 
+import { DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
 
 type RequestStates = {
-  promise: Promise<ThenArg<MethodResponse<keyof Methods>>>;
   resolve: Function;
   reject: Function;
   callback: AnyToVoidFunction;
@@ -20,18 +20,44 @@ export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
     subscribeToWorker(onUpdate);
   }
 
-  return sendToWorker({
+  return makeRequest({
     type: 'initApi',
     args: [sessionId],
   });
 }
 
-export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {
-  return sendToWorker({
+export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
+  if (!worker) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('API is not initialized');
+    }
+
+    return undefined;
+  }
+
+  return makeRequest({
     type: 'callMethod',
     name: fnName,
     args,
   }) as MethodResponse<T>;
+}
+
+export function cancelApiProgress(progressCallback: ApiOnProgress) {
+  progressCallback.isCanceled = true;
+
+  const callbackMessageId = Object.keys(requestStates).find((messageId) => {
+    return requestStates[messageId].callback === progressCallback;
+  });
+
+  if (!callbackMessageId) {
+    return;
+  }
+
+  worker.postMessage({
+    type: 'cancelProgress',
+    messageId: callbackMessageId,
+  });
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
@@ -47,7 +73,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
         }
       }
     } else if (data.type === 'methodCallback') {
-      if (requestStates[data.messageId]) {
+      if (requestStates[data.messageId] && requestStates[data.messageId].callback) {
         requestStates[data.messageId].callback(...data.callbackArgs);
       }
     } else if (data.type === 'unhandledError') {
@@ -56,19 +82,21 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
   });
 }
 
-function sendToWorker(message: OriginMessageData) {
+function makeRequest(message: OriginRequest) {
   const messageId = generateIdFor(requestStates);
-  const payload = {
+  const payload: OriginRequest = {
     messageId,
     ...message,
   };
 
   requestStates[messageId] = {} as RequestStates;
-  requestStates[messageId].promise = new Promise((resolve, reject) => {
+
+  // Re-wrap type because of `postMessage`
+  const promise: Promise<ThenArg<MethodResponse<keyof Methods>>> = new Promise((resolve, reject) => {
     Object.assign(requestStates[messageId], { resolve, reject });
   });
 
-  requestStates[messageId].promise.then(
+  promise.then(
     () => {
       delete requestStates[messageId];
     },
@@ -83,5 +111,5 @@ function sendToWorker(message: OriginMessageData) {
 
   worker.postMessage(payload);
 
-  return requestStates[messageId].promise;
+  return promise;
 }

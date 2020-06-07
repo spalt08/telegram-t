@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useRef, useEffect,
+  FC, useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
 
 import { isChatPrivate } from '../../modules/helpers';
@@ -22,8 +22,11 @@ type OwnProps = {
   notFoundText?: string;
   onSelectedIdsChange: (ids: number[]) => void;
   onFilterChange: (value: string) => void;
-  onLoadMore: () => void;
+  onLoadMore?: () => void;
 };
+
+// Focus slows down animation, also it breaks transition layout in Chrome
+const FOCUS_DELAY_MS = 500;
 
 const Picker: FC<OwnProps> = ({
   itemIds,
@@ -38,8 +41,12 @@ const Picker: FC<OwnProps> = ({
   const inputRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
-    inputRef.current!.focus();
-  }, [inputRef]);
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        inputRef.current!.focus();
+      });
+    }, FOCUS_DELAY_MS);
+  }, []);
 
   const handleItemClick = useCallback((id: number) => {
     const newSelectedIds = [...selectedIds];
@@ -58,7 +65,7 @@ const Picker: FC<OwnProps> = ({
 
   function renderItem(id: number) {
     return (
-      <div key={id} className="chat-item-clickable picker-list-item" onClick={() => handleItemClick(id)}>
+      <div key={id} className="chat-item-clickable has-ripple picker-list-item" onClick={() => handleItemClick(id)}>
         <Checkbox
           label=""
           checked={selectedIds.includes(id)}
@@ -69,6 +76,31 @@ const Picker: FC<OwnProps> = ({
           <GroupChatInfo chatId={id} />
         )}
         <RippleEffect />
+      </div>
+    );
+  }
+
+  function renderList() {
+    const content = (
+      <>
+        {itemIds.map(renderItem)}
+        {!itemIds.length && (
+          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+        )}
+      </>
+    );
+
+    if (onLoadMore) {
+      return (
+        <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
+          {content}
+        </InfiniteScroll>
+      );
+    }
+
+    return (
+      <div className="picker-list custom-scroll">
+        {content}
       </div>
     );
   }
@@ -84,14 +116,9 @@ const Picker: FC<OwnProps> = ({
           placeholder={filterPlaceholder || 'Select chat'}
         />
       </div>
-      <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
-        {itemIds.map(renderItem)}
-        {!itemIds.length && (
-          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-        )}
-      </InfiniteScroll>
+      {renderList()}
     </div>
   );
 };
 
-export default Picker;
+export default memo(Picker);

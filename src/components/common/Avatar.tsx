@@ -1,5 +1,5 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../lib/teact/teact';
 
 import { ApiUser, ApiChat, ApiMediaFormat } from '../../api/types';
 import {
@@ -14,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import './Avatar.scss';
 
 type OwnProps = {
-  size?: 'small' | 'medium' | 'large' | 'jumbo';
+  size?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   showOnlineStatus?: boolean;
   chat?: ApiChat;
   user?: ApiUser;
@@ -36,27 +36,27 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
 
   if (!isSavedMessages && !isDeleted) {
-    if (chat) {
-      imageHash = getChatAvatarHash(chat);
-    } else if (user) {
+    if (user) {
       imageHash = getChatAvatarHash(user);
+    } else if (chat) {
+      imageHash = getChatAvatarHash(chat);
     }
   }
 
   const dataUri = useMedia(imageHash, false, ApiMediaFormat.DataUri);
   const { shouldRenderFullMedia, transitionClassNames } = useTransitionForMedia(dataUri, 'slow');
 
-  let content: string | null = '';
+  let content: string | undefined = '';
 
   if (isSavedMessages) {
     content = <i className="icon-avatar-saved-messages" />;
   } else if (isDeleted) {
     content = <i className="icon-avatar-deleted-account" />;
   } else if (shouldRenderFullMedia) {
-    content = <img src={dataUri} className={transitionClassNames} alt="" decoding="async" />;
+    content = <img src={dataUri} className={`${transitionClassNames} avatar-media`} alt="" decoding="async" />;
   } else if (user) {
-    const userName = getUserFullName(user);
-    content = userName ? getFirstLetters(userName).slice(0, 2) : null;
+    const userFullName = getUserFullName(user);
+    content = userFullName ? getFirstLetters(userFullName).slice(0, 2) : undefined;
   } else if (chat) {
     const title = getChatTitle(chat);
     content = title && getFirstLetters(title).slice(0, isChatPrivate(chat.id) ? 2 : 1);
@@ -84,4 +84,4 @@ const Avatar: FC<OwnProps> = ({
   );
 };
 
-export default Avatar;
+export default memo(Avatar);

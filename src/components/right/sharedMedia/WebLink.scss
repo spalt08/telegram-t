@@ -27,31 +27,19 @@
     font-size: 1.5rem;
   }
 
-  .media-inner {
+  .Media {
     position: absolute;
     left: 0;
     top: 0;
     width: 3rem;
     height: 3rem;
     cursor: pointer;
-
-    &, & img, &.small-image img {
-      border-radius: var(--border-radius-messages-small) !important;
-    }
-
-    img {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    padding-bottom: unset !important;
+    border-radius: var(--border-radius-messages-small) !important;
   }
 
   .site-name,
   .site-description,
-  .site-link,
   .site-title {
     word-break: break-word;
   }

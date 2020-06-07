@@ -1,4 +1,5 @@
 import { ApiMessageEntity, ApiMessageEntityTypes, ApiFormattedText } from '../../../../api/types';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
 
 const ENTITY_CLASS_BY_NODE_NAME: Record<string, string> = {
   B: ApiMessageEntityTypes.Bold,
@@ -20,7 +21,7 @@ const MAX_MESSAGE_LENGTH = 4096;
 export default function parseMessageInput(html: string): ApiFormattedText {
   const fragment = document.createElement('div');
   fragment.innerHTML = parseMarkdown(html);
-  const text = fragment.innerText.trim().slice(0, MAX_MESSAGE_LENGTH);
+  const text = fragment.innerText.trim().replace(/\u200b+/g, '').slice(0, MAX_MESSAGE_LENGTH);
   let textIndex = 0;
   let recursionDeepness = 0;
   const entities: ApiMessageEntity[] = [];
@@ -47,7 +48,6 @@ export default function parseMessageInput(html: string): ApiFormattedText {
   });
 
   return {
-    '@type': 'formattedText',
     text,
     entities: entities.length ? entities : undefined,
   };
@@ -56,6 +56,10 @@ export default function parseMessageInput(html: string): ApiFormattedText {
 function parseMarkdown(html: string) {
   let parsedHtml = html.slice(0);
 
+  if (!IS_EMOJI_SUPPORTED) {
+    // Emojis
+    parsedHtml = parsedHtml.replace(/<img[^>]+alt="([^"]+)"[^>]*>/gm, '$1');
+  }
   // Strip redundant <span> tags
   parsedHtml = parsedHtml.replace(/<\/?span([^>]*)?>/g, '');
 
@@ -67,7 +71,8 @@ function parseMarkdown(html: string) {
 
   // Strip redundant <div> tags
   parsedHtml = parsedHtml.replace(/<\/div>(\s*)<div>/g, '\n');
-  parsedHtml = parsedHtml.replace(/<\/?div>/g, '');
+  parsedHtml = parsedHtml.replace(/<div>/g, '\n');
+  parsedHtml = parsedHtml.replace(/<\/div>/g, '');
 
   // Pre
   parsedHtml = parsedHtml.replace(/^`{3}(.*[\n\r][^]*?^)`{3}/gm, '<pre>$1</pre>');

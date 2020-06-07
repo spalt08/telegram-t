@@ -1,6 +1,5 @@
 import { ApiMessage } from '../../api/types';
-
-import parseEmojiOnlyString from '../../components/common/helpers/parseEmojiOnlyString';
+import { LOCAL_MESSAGE_ID_BASE, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 
 const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram';
 const RE_LINK = /(^|\s)(([a-z]{3,}?:\/\/)?([a-z0-9]+([-.@][a-z0-9]+)*\.[a-z]{2,}\.?(:[0-9]{1,5})?)([/#?][^\s]*)?)\b/;
@@ -10,7 +9,7 @@ export function getMessageKey(chatId: number, messageId: number) {
 }
 
 export function getMessageOriginalId(message: ApiMessage) {
-  return message.prev_local_id || message.id;
+  return message.previousLocalId || message.id;
 }
 
 export function getMessageSummaryText(message: ApiMessage, hasPictogram = false) {
@@ -88,23 +87,6 @@ export function getMessageText(message: ApiMessage) {
   return CONTENT_NOT_SUPPORTED;
 }
 
-export function getMessageCustomShape(message: ApiMessage): boolean | number {
-  const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact,
-  } = message.content;
-
-  if (sticker || (video && video.isRound)) {
-    return true;
-  }
-
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact) {
-    return false;
-  }
-
-  // This is a "dual-intent" method used to limit calls of `parseEmojiOnlyString`.
-  return parseEmojiOnlyString(text.text) || false;
-}
-
 export function matchLinkInMessageText(message: ApiMessage) {
   const { text } = message.content;
   const match = text && text.text.match(RE_LINK);
@@ -120,38 +102,37 @@ export function matchLinkInMessageText(message: ApiMessage) {
 }
 
 export function isOwnMessage(message: ApiMessage) {
-  return message.is_outgoing;
+  return message.isOutgoing;
 }
 
 export function isReplyMessage(message: ApiMessage) {
-  return Boolean(message.reply_to_message_id);
+  return Boolean(message.replyToMessageId);
 }
 
 export function isForwardedMessage(message: ApiMessage) {
-  return Boolean(message.forward_info);
+  return Boolean(message.forwardInfo);
 }
 
 export function isActionMessage(message: ApiMessage) {
   return !!message.content.action;
 }
 
+export function isServiceNotificationMessage(message: ApiMessage) {
+  return message.chatId === SERVICE_NOTIFICATIONS_USER_ID && isMessageLocal(message);
+}
+
 export function getSendingState(message: ApiMessage) {
-  if (!message.sending_state) {
+  if (!message.sendingState) {
     return 'succeeded';
   }
 
-  return message.sending_state['@type'] === 'messageSendingStateFailed' ? 'failed' : 'pending';
+  return message.sendingState === 'messageSendingStateFailed' ? 'failed' : 'pending';
 }
 
 export function isMessageLocal(message: ApiMessage) {
-  return message.id < 0;
+  return message.id >= LOCAL_MESSAGE_ID_BASE;
 }
 
 export function getMessageAction(message: ApiMessage) {
   return message.content.action;
-}
-
-// TODO @refactoring Use 1e9+ for local IDs instead of 0-
-export function isMessageIdNewer(a: number, b: number) {
-  return a > 0 && b > 0 ? a > b : a < b;
 }

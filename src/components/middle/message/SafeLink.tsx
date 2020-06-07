@@ -1,6 +1,7 @@
 import React, { FC } from '../../../lib/teact/teact';
 import { DEBUG } from '../../../config';
 import convertPunycode from '../../../lib/punycode';
+import renderText from '../../common/helpers/renderText';
 
 type OwnProps = {
   url?: string;
@@ -10,7 +11,7 @@ type OwnProps = {
 
 const SafeLink: FC<OwnProps> = ({ url, text, children }) => {
   if (!url) {
-    return null;
+    return undefined;
   }
 
   const classNames = ['text-entity-link'];
@@ -27,7 +28,7 @@ const SafeLink: FC<OwnProps> = ({ url, text, children }) => {
       rel="noopener noreferrer"
       className={classNames.join(' ')}
     >
-      {children || text}
+      {children || renderText(text)}
     </a>
   );
 };

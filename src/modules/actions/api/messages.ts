@@ -1,10 +1,10 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiMessage } from '../../../api/types';
+import { ApiChat, ApiMessage, ApiOnProgress } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { MESSAGE_LIST_SLICE } from '../../../config';
-import { callApi } from '../../../api/gramjs';
+import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import { areSortedArraysIntersecting, buildCollectionByKey } from '../../../util/iteratees';
 import {
   addUsers,
@@ -25,20 +25,20 @@ import {
   selectRealLastReadId,
   selectChatMessage,
 } from '../../selectors';
-import { getMessageKey } from '../../helpers';
+
+const uploadProgressCallbacks: Record<string, ApiOnProgress> = {};
 
 addReducer('loadViewportMessages', (global, actions, payload) => {
   const {
+    chatId = global.chats.selectedId,
     direction,
     shouldRelocate = false,
   } = payload || {};
-  const chat = selectOpenChat(global);
-
-  if (!chat) {
+  const chat = selectChat(global, chatId);
+  if (!chat || chat.isRestricted) {
     return undefined;
   }
 
-  const chatId = chat.id;
   const viewportIds = selectViewportIds(global, chatId);
   const listedIds = selectListedIds(global, chatId);
   const outlyingIds = selectOutlyingIds(global, chatId);
@@ -53,7 +53,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
 
-    if (areSomeLocal) {
+    if (areSomeLocal && newViewportIds.length >= MESSAGE_LIST_SLICE) {
       newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);
     }
 
@@ -119,28 +119,44 @@ addReducer('sendMessage', (global, actions, payload) => {
   }
 
   const {
-    text, entities, attachment, sticker, gif, pollSummary,
+    text, entities, attachment, sticker, gif, poll,
   } = payload!;
   const replyingTo = global.chats.replyingToById[chat.id];
 
-  void callApi('sendMessage', {
-    chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
-  }, (messageLocalId: number, progress: number) => {
-    const messageKey = getMessageKey(chat.id, messageLocalId);
+  const progressCallback = attachment ? (progress: number, messageLocalId: number) => {
+    if (!uploadProgressCallbacks[messageLocalId]) {
+      uploadProgressCallbacks[messageLocalId] = progressCallback!;
+    }
+
     const newGlobal = getGlobal();
 
     setGlobal({
       ...newGlobal,
       fileUploads: {
-        byMessageKey: {
-          ...newGlobal.fileUploads.byMessageKey,
-          [messageKey]: { progress },
+        byMessageLocalId: {
+          ...newGlobal.fileUploads.byMessageLocalId,
+          [messageLocalId]: { progress },
         },
       },
     });
-  });
+  } : undefined;
 
-  actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
+  (async () => {
+    await callApi('sendMessage', {
+      chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
+    }, progressCallback);
+
+    if (progressCallback) {
+      const callbackKey = Object.keys(uploadProgressCallbacks).find((key) => (
+        uploadProgressCallbacks[key] === progressCallback
+      ));
+      if (callbackKey) {
+        delete uploadProgressCallbacks[callbackKey];
+      }
+    }
+
+    actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
+  })();
 });
 
 addReducer('editMessage', (global, actions, payload) => {
@@ -160,8 +176,19 @@ addReducer('editMessage', (global, actions, payload) => {
   actions.setChatEditing({ chatId: chat.id, messageId: undefined });
 });
 
-addReducer('cancelSendingMessage', () => {
-  // const { chatId, messageId } = payload!;
+addReducer('cancelSendingMessage', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+  const message = selectChatMessage(global, chatId, messageId);
+  const progressCallback = message && uploadProgressCallbacks[message.previousLocalId || message.id];
+  if (progressCallback) {
+    cancelApiProgress(progressCallback);
+  }
+
+  actions.apiUpdate({
+    '@type': 'deleteMessages',
+    ids: [messageId],
+    chatId,
+  });
 });
 
 addReducer('pinMessage', (global, actions, payload) => {
@@ -189,21 +216,26 @@ addReducer('deleteMessages', (global, actions, payload) => {
   }
 });
 
+addReducer('deleteHistory', (global, actions, payload) => {
+  const chat = selectOpenChat(global);
+  if (!chat) {
+    return;
+  }
+
+  const { maxId, shouldDeleteForAll } = payload!;
+
+  void callApi('deleteHistory', { chat, shouldDeleteForAll, maxId });
+});
+
 addReducer('markMessagesRead', (global, actions, payload) => {
   const chat = selectOpenChat(global);
   if (!chat) {
     return;
   }
 
-  const { maxId } = payload || {};
+  const { messageIds } = payload!;
 
-  void callApi('markMessagesRead', { chat, maxId });
-});
-
-addReducer('readMessageContents', (global, actions, payload) => {
-  const { messageId } = payload!;
-
-  void callApi('readMessageContents', { messageId });
+  void callApi('markMessagesRead', { chat, messageIds });
 });
 
 addReducer('loadWebPagePreview', (global, actions, payload) => {
@@ -212,10 +244,14 @@ addReducer('loadWebPagePreview', (global, actions, payload) => {
 });
 
 addReducer('clearWebPagePreview', (global) => {
-  setGlobal({
+  if (!global.webPagePreview) {
+    return undefined;
+  }
+
+  return {
     ...global,
     webPagePreview: undefined,
-  });
+  };
 });
 
 addReducer('sendPollVote', (global, actions, payload) => {

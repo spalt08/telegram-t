@@ -1,14 +1,18 @@
-import { RefObject } from 'react';
+import { ChangeEvent, RefObject } from 'react';
 import React, {
-  FC, memo, useCallback, useEffect, useRef, useState,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 
 import { ApiNewPoll } from '../../../api/types';
+
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import parseMessageInput from './helpers/parseMessageInput';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import InputText from '../../ui/InputText';
+import Checkbox from '../../ui/Checkbox';
+import RadioGroup from '../../ui/RadioGroup';
 
 import './PollModal.scss';
 
@@ -23,8 +27,15 @@ const MAX_LIST_HEIGHT = 320;
 const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   const questionInputRef = useRef<HTMLInputElement>();
   const optionsListRef = useRef<HTMLDivElement>();
+  const solutionRef = useRef<HTMLDivElement>();
+
   const [question, setQuestion] = useState<string>('');
   const [options, setOptions] = useState<string[]>(['']);
+  const [isAnonimous, setIsAnonimous] = useState(true);
+  const [isMultipleAnswers, setIsMultipleAnswers] = useState(false);
+  const [isQuizMode, setIsQuizMode] = useState(false);
+  const [solution, setSolution] = useState<string>();
+  const [correctOption, setCorrectOption] = useState<string>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
   const focusInput = useCallback((ref: RefObject<HTMLInputElement>) => {
@@ -38,11 +49,23 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     if (!isOpen) {
       setQuestion('');
       setOptions(['']);
+      setIsAnonimous(true);
+      setIsMultipleAnswers(false);
+      setIsQuizMode(false);
+      setSolution('');
       setHasErrors(false);
     }
   }, [isOpen]);
 
   useEffect(() => focusInput(questionInputRef), [focusInput, isOpen]);
+
+  useLayoutEffect(() => {
+    const solutionEl = solutionRef.current;
+
+    if (solutionEl && solution !== solutionEl.innerHTML) {
+      solutionEl.innerHTML = solution;
+    }
+  }, [solution]);
 
   const addNewOption = useCallback((newOptions: string[] = []) => {
     setOptions([...newOptions, '']);
@@ -81,17 +104,39 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       return;
     }
 
+    if (isQuizMode && !correctOption) {
+      setHasErrors(true);
+      return;
+    }
+
     const answers = optionsTrimmed
       .map((text, index) => ({
         text: text.trim(),
-        option: index.toString(),
+        option: String(index),
+        ...(String(index) === correctOption && { correct: true }),
       }));
 
-    onSend({
-      question: questionTrimmed,
-      answers,
-    });
-  }, [isOpen, question, options, onSend, addNewOption]);
+    const payload: ApiNewPoll = {
+      summary: {
+        question: questionTrimmed,
+        answers,
+        ...(isMultipleAnswers && { multipleChoice: isMultipleAnswers }),
+        ...(isQuizMode && { quiz: isQuizMode }),
+      },
+    };
+
+    if (isQuizMode) {
+      const { text, entities } = (solution && parseMessageInput(solution)) || {};
+
+      payload.quiz = {
+        correctAnswers: [correctOption],
+        solution: text,
+        solutionEntities: entities,
+      };
+    }
+
+    onSend(payload);
+  }, [isOpen, question, options, isQuizMode, correctOption, isMultipleAnswers, onSend, addNewOption, solution]);
 
   const updateOption = useCallback((index: number, text: string) => {
     const newOptions = [...options];
@@ -115,6 +160,18 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       optionsListRef.current.classList.toggle('overflown', optionsListRef.current.scrollHeight > MAX_LIST_HEIGHT);
     });
   }, [options]);
+
+  const handleIsAnonimousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsAnonimous(e.target.checked);
+  }, []);
+
+  const handleMultipleAnswersChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsMultipleAnswers(e.target.checked);
+  }, []);
+
+  const handleQuizModeChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsQuizMode(e.target.checked);
+  }, []);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13) {
@@ -145,9 +202,46 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
           <i className="icon-close" />
         </Button>
         <div className="modal-title">New Poll</div>
-        <Button color="primary" size="smaller" className="modal-action-button" onClick={handleCreate}>Create</Button>
+        <Button
+          color="primary"
+          size="smaller"
+          className="modal-action-button"
+          onClick={handleCreate}
+        >
+          Create
+        </Button>
       </div>
     );
+  }
+
+  function renderOptions() {
+    return options.map((option, index) => (
+      <div className="option-wrapper">
+        <InputText
+          label={index !== options.length - 1 ? `Option ${index + 1}` : 'Add an Option'}
+          error={getOptionsError(index)}
+          value={option}
+          onChange={(e) => updateOption(index, e.currentTarget.value)}
+          onKeyPress={handleKeyPress}
+        />
+        {index !== options.length - 1 && (
+          <Button
+            className="option-remove-button"
+            round
+            color="translucent"
+            size="smaller"
+            ariaLabel="Remove option"
+            onClick={() => removeOption(index)}
+          >
+            <i className="icon-close" />
+          </Button>
+        )}
+      </div>
+    ));
+  }
+
+  function renderRadioOptions() {
+    return renderOptions().map((label, index) => ({ value: String(index), label }));
   }
 
   return (
@@ -165,29 +259,48 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       <div className="options-list custom-scroll" ref={optionsListRef}>
         <h3 className="options-header">Options</h3>
 
-        {options.map((option, index) => (
-          <div className="option-wrapper">
-            <InputText
-              label={index !== options.length - 1 ? `Option ${index + 1}` : 'Add an Option'}
-              error={getOptionsError(index)}
-              value={option}
-              onChange={(e) => updateOption(index, e.currentTarget.value)}
-              onKeyPress={handleKeyPress}
+        {isQuizMode ? (
+          <RadioGroup name="correctOption" options={renderRadioOptions()} onChange={setCorrectOption} />
+        ) : (
+          renderOptions()
+        )}
+
+      </div>
+
+      <div className="options-divider" />
+
+      <div className="quiz-mode">
+        <Checkbox
+          label="Anonimous Voting"
+          checked={isAnonimous}
+          onChange={handleIsAnonimousChange}
+        />
+        <Checkbox
+          label="Multiple Answers"
+          checked={isMultipleAnswers}
+          disabled={isQuizMode}
+          onChange={handleMultipleAnswersChange}
+        />
+        <Checkbox
+          label="Quiz Mode"
+          checked={isQuizMode}
+          disabled={isMultipleAnswers}
+          onChange={handleQuizModeChange}
+        />
+        {isQuizMode && (
+          <>
+            <h3 className="options-header">Solution</h3>
+            <div
+              ref={solutionRef}
+              className="form-control"
+              contentEditable
+              onChange={(e) => setSolution(e.currentTarget.innerHTML)}
             />
-            {index !== options.length - 1 && (
-              <Button
-                className="option-remove-button"
-                round
-                color="translucent"
-                size="smaller"
-                ariaLabel="Remove option"
-                onClick={() => removeOption(index)}
-              >
-                <i className="icon-close" />
-              </Button>
-            )}
-          </div>
-        ))}
+            <div className="note">
+              Users will see this comment after choosing a wrong answer, good for educational purposes.
+            </div>
+          </>
+        )}
       </div>
     </Modal>
   );

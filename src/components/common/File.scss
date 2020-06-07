@@ -121,11 +121,14 @@
 
   .file-title {
     font-size: 1rem;
-    line-height: 1rem;
-    padding-bottom: .25rem;
+    line-height: 1.5rem;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    .emoji {
+      vertical-align: -4px;
+    }
   }
 
   .file-subtitle {
@@ -161,7 +164,7 @@
     }
 
     .file-info {
-      margin-top: .125rem;
+      margin-top: -.125rem;
     }
 
     .file-title {

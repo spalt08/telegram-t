@@ -1,5 +1,10 @@
 import { errors } from '../../../lib/gramjs';
-import { ApiUpdateAuthorizationState, ApiUpdateAuthorizationStateType, OnApiUpdate } from '../../types';
+import {
+  ApiUpdateAuthorizationState,
+  ApiUpdateAuthorizationStateType,
+  OnApiUpdate,
+  ApiUser,
+} from '../../types';
 
 import { DEBUG } from '../../../config';
 
@@ -9,18 +14,12 @@ const ApiErrors: { [k: string]: string } = {
   PASSWORD_HASH_INVALID: 'Invalid Password',
 };
 
-const authPromiseResolvers: {
-  resolvePhoneNumber: null | Function;
-  resolveCode: null | Function;
-  rejectCode: null | Function;
-  resolvePassword: null | Function;
-  resolveRegistration: null | Function;
+const authController: {
+  resolve: null | Function;
+  reject: null | Function;
 } = {
-  resolvePhoneNumber: null,
-  resolveCode: null,
-  rejectCode: null,
-  resolvePassword: null,
-  resolveRegistration: null,
+  resolve: null,
+  reject: null,
 };
 
 let onUpdate: OnApiUpdate;
@@ -30,35 +29,53 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 export function onRequestPhoneNumber() {
-  onUpdate(buildAuthState('authorizationStateWaitPhoneNumber'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitPhoneNumber'));
 
-  return new Promise<string>((resolve) => {
-    authPromiseResolvers.resolvePhoneNumber = resolve;
+  return new Promise<string>((resolve, reject) => {
+    authController.resolve = resolve;
+    authController.reject = reject;
   });
 }
 
 export function onRequestCode() {
-  onUpdate(buildAuthState('authorizationStateWaitCode'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitCode'));
 
   return new Promise<string>((resolve, reject) => {
-    authPromiseResolvers.resolveCode = resolve;
-    authPromiseResolvers.rejectCode = reject;
+    authController.resolve = resolve;
+    authController.reject = reject;
   });
 }
 
-export function onRequestPassword() {
-  onUpdate(buildAuthState('authorizationStateWaitPassword'));
+export function onRequestPassword(hint?: string) {
+  onUpdate({
+    ...buildAuthStateUpdate('authorizationStateWaitPassword'),
+    hint,
+  });
 
   return new Promise<string>((resolve) => {
-    authPromiseResolvers.resolvePassword = resolve;
+    authController.resolve = resolve;
   });
 }
 
 export function onRequestRegistration() {
-  onUpdate(buildAuthState('authorizationStateWaitRegistration'));
+  onUpdate(buildAuthStateUpdate('authorizationStateWaitRegistration'));
 
   return new Promise<[string, string?]>((resolve) => {
-    authPromiseResolvers.resolveRegistration = resolve;
+    authController.resolve = resolve;
+  });
+}
+
+export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
+  onUpdate({
+    ...buildAuthStateUpdate('authorizationStateWaitQrCode'),
+    qrCode: {
+      token: btoa(String.fromCharCode(...qrCode.token)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+      expires: qrCode.expires,
+    },
+  });
+
+  return new Promise<void>((resolve, reject) => {
+    authController.reject = reject;
   });
 }
 
@@ -89,65 +106,71 @@ export function onAuthError(err: Error) {
 
 export function onAuthReady(sessionId: string) {
   onUpdate({
-    ...buildAuthState('authorizationStateReady'),
-    session_id: sessionId,
+    ...buildAuthStateUpdate('authorizationStateReady'),
+    sessionId,
   });
 }
 
-export function onCurrentUserId(currentUserId: number) {
+export function onCurrentUserUpdate(currentUser: ApiUser) {
   onUpdate({
-    '@type': 'updateCurrentUserId',
-    current_user_id: currentUserId,
+    '@type': 'updateCurrentUser',
+    currentUser,
   });
 }
 
-export function buildAuthState(authState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
+export function buildAuthStateUpdate(authorizationState: ApiUpdateAuthorizationStateType): ApiUpdateAuthorizationState {
   return {
     '@type': 'updateAuthorizationState',
-    authorization_state: {
-      '@type': authState,
-    },
+    authorizationState,
   };
 }
 
 export function provideAuthPhoneNumber(phoneNumber: string) {
-  if (!authPromiseResolvers.resolvePhoneNumber) {
+  if (!authController.resolve) {
     return;
   }
 
-  authPromiseResolvers.resolvePhoneNumber(phoneNumber);
+  authController.resolve(phoneNumber);
 }
 
 export function provideAuthCode(code: string) {
-  if (!authPromiseResolvers.resolveCode) {
+  if (!authController.resolve) {
     return;
   }
 
-  authPromiseResolvers.resolveCode(code);
+  authController.resolve(code);
 }
 
 export function provideAuthPassword(password: string) {
-  if (!authPromiseResolvers.resolvePassword) {
+  if (!authController.resolve) {
     return;
   }
 
-  authPromiseResolvers.resolvePassword(password);
+  authController.resolve(password);
 }
 
 export function provideAuthRegistration(registration: { firstName: string; lastName: string }) {
   const { firstName, lastName } = registration;
 
-  if (!authPromiseResolvers.resolveRegistration) {
+  if (!authController.resolve) {
     return;
   }
 
-  authPromiseResolvers.resolveRegistration([firstName, lastName]);
+  authController.resolve([firstName, lastName]);
 }
 
 export function restartAuth() {
-  if (!authPromiseResolvers.rejectCode) {
+  if (!authController.reject) {
     return;
   }
 
-  authPromiseResolvers.rejectCode(new Error('RESTART_AUTH'));
+  authController.reject(new Error('RESTART_AUTH'));
+}
+
+export function restartAuthWithQr() {
+  if (!authController.reject) {
+    return;
+  }
+
+  authController.reject(new Error('RESTART_AUTH_WITH_QR'));
 }

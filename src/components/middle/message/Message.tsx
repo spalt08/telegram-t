@@ -1,12 +1,18 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef, useState,
+  FC, memo, useCallback, useLayoutEffect, useRef, useState, useEffect,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
-import { ApiMessage, ApiMessageOutgoingStatus, ApiUser } from '../../../api/types';
-import { FocusDirection, IAlbum } from '../../../types';
+import {
+  ApiMessage,
+  ApiMessageOutgoingStatus,
+  ApiUser,
+  ApiChat,
+} from '../../../api/types';
+import { FocusDirection, IAlbum, MediaViewerOrigin } from '../../../types';
 
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { pick } from '../../../util/iteratees';
 import {
   selectChat,
@@ -25,18 +31,21 @@ import {
   isOwnMessage,
   isReplyMessage,
   isForwardedMessage,
-  getMessageCustomShape,
   getMessageVideo,
+  isChatPrivate,
+  getChatTitle,
+  getMessageAudio,
+  getMessageVoice,
 } from '../../../modules/helpers';
+import { getMessageCustomShape } from '../../../modules/helpers/messageShape';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import { renderMessageText } from '../../common/helpers/renderMessageText';
-import {
-  calculateInlineImageDimensions, calculateVideoDimensions, ROUND_VIDEO_DIMENSIONS,
-} from '../../common/helpers/mediaDimensions';
+import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
-import { getMinMediaWidth } from './helpers/mediaDimensions';
+import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
 
 import Avatar from '../../common/Avatar';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -44,6 +53,7 @@ import Document from '../../common/Document';
 import Audio from '../../common/Audio';
 import MessageMeta from './MessageMeta';
 import ContextMenuContainer from './ContextMenuContainer.async';
+import { IAnchorPosition } from './ContextMenuContainer';
 import Sticker from './Sticker';
 import Photo from './Photo';
 import Video from './Video';
@@ -72,8 +82,8 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiUser;
   replyMessage?: ApiMessage;
-  replyMessageSender?: ApiUser;
-  originSender?: ApiUser;
+  replyMessageSender?: ApiUser | ApiChat;
+  originSender?: ApiUser | ApiChat;
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
   isFocused?: boolean;
@@ -85,15 +95,18 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' | 'openUserInfo' | 'cancelSendingMessage' | 'readMessageContents' | 'sendPollVote'
+  'focusMessage' | 'openMediaViewer' |
+  'openUserInfo' | 'openChat' |
+  'cancelSendingMessage' | 'markMessagesRead' |
+  'sendPollVote'
 )>;
-
-const NBSP = '\u00A0';
 
 // This is the max scroll offset within existing viewport.
 const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
-const RELOCATED_FOCUS_OFFSET = 1200;
+const RELOCATED_FOCUS_OFFSET = 1500;
+const LONG_TAP_DURATION_MS = 250;
+const NBSP = '\u00A0';
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -119,17 +132,18 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   focusMessage,
   openMediaViewer,
   openUserInfo,
+  openChat,
   cancelSendingMessage,
-  readMessageContents,
+  markMessagesRead,
   sendPollVote,
 }) => {
   const elementRef = useRef<HTMLDivElement>();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
-  const { chat_id: chatId, id: messageId } = message;
+  const { chatId, id: messageId } = message;
 
-  useEnsureMessage(chatId, message.reply_to_message_id, replyMessage);
+  useEnsureMessage(chatId, message.replyToMessageId, replyMessage);
 
   useLayoutEffect(() => {
     const messagesContainer = window.document.getElementById('MessageList');
@@ -157,7 +171,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     || hasMessageLocalBlobUrl(message)
     || (replyMessage && getMessageMediaHash(replyMessage, 'pictogram'))
   );
-  const isContextMenuShown = contextMenuPosition !== null;
+  const isContextMenuShown = contextMenuPosition !== undefined;
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -171,40 +185,46 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isContextMenuShown && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
     isSelectedToForward && 'is-forwarding',
-    message.is_deleting && 'is-deleting',
+    message.isDeleting && 'is-deleting',
     isAlbum && 'is-album',
+    message.hasUnreadMention && 'has-unread-mention',
   );
   const customShape = getMessageCustomShape(message);
   const contentClassName = buildContentClassName(message, {
-    hasReply, customShape, isLastInGroup, isAlbum,
+    hasReply, customShape, isLastInGroup,
   });
 
-  const handleSenderClick = useCallback((user?: ApiUser) => {
-    if (!user) {
+  const handleSenderClick = useCallback((chatOrUser?: ApiUser | ApiChat) => {
+    if (!chatOrUser) {
       return;
     }
-    openUserInfo({ id: user.id });
-  }, [openUserInfo]);
+
+    if (isChatPrivate(chatOrUser.id)) {
+      openUserInfo({ id: chatOrUser.id });
+    } else {
+      openChat({ id: chatOrUser.id });
+    }
+  }, [openUserInfo, openChat]);
 
   const handleReplyClick = useCallback((): void => {
-    focusMessage({ chatId, messageId: message.reply_to_message_id });
-  }, [focusMessage, chatId, message.reply_to_message_id]);
+    focusMessage({ chatId, messageId: message.replyToMessageId });
+  }, [focusMessage, chatId, message.replyToMessageId]);
 
   const handleMediaClick = useCallback((): void => {
-    openMediaViewer({ chatId, messageId });
+    openMediaViewer({ chatId, messageId, origin: MediaViewerOrigin.Inline });
   }, [chatId, messageId, openMediaViewer]);
 
   const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
-    openMediaViewer({ chatId, messageId: albumMessageId });
+    openMediaViewer({ chatId, messageId: albumMessageId, origin: MediaViewerOrigin.Album });
   }, [chatId, openMediaViewer]);
 
   const handleReadMedia = useCallback((): void => {
-    readMessageContents({ messageId });
-  }, [messageId, readMessageContents]);
+    markMessagesRead({ messageIds: [messageId] });
+  }, [messageId, markMessagesRead]);
 
   const handleCancelUpload = useCallback(() => {
-    cancelSendingMessage({ chatId: message.chat_id, messageId: message.id });
-  }, [cancelSendingMessage, message.chat_id, message.id]);
+    cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
+  }, [cancelSendingMessage, message.chatId, message.id]);
 
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (e.button === 2) {
@@ -229,24 +249,90 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   }, []);
 
   const handleContextMenuHide = useCallback(() => {
-    setContextMenuPosition(null);
+    setContextMenuPosition(undefined);
   }, []);
+
+  // Support context menu on touch-devices
+  useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      return undefined;
+    }
+
+    const messageEl = elementRef.current;
+    if (!messageEl) {
+      return undefined;
+    }
+
+    let timer: number;
+
+    const clearLongPressTimer = () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+
+    const emulateContextMenuEvent = (originalEvent: TouchEvent) => {
+      clearLongPressTimer();
+
+      const { clientX, clientY } = originalEvent.touches[0];
+
+      if (contextMenuPosition) {
+        return;
+      }
+
+      // temporarily intercept and clear the next click
+      messageEl.addEventListener('touchend', function cancelClickOnce(e) {
+        messageEl.removeEventListener('touchend', cancelClickOnce, true);
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        e.stopPropagation();
+      }, true);
+
+      setIsContextMenuOpen(true);
+      setContextMenuPosition({ x: clientX, y: clientY });
+    };
+
+    const startLongPressTimer = (e: TouchEvent) => {
+      clearLongPressTimer();
+      timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);
+    };
+
+    // @peft Consider event delegation
+    messageEl.addEventListener('touchstart', startLongPressTimer, true);
+    messageEl.addEventListener('touchcancel', clearLongPressTimer, true);
+    messageEl.addEventListener('touchend', clearLongPressTimer, true);
+    messageEl.addEventListener('touchmove', clearLongPressTimer, true);
+
+    return () => {
+      clearLongPressTimer();
+      messageEl.removeEventListener('touchstart', startLongPressTimer, true);
+      messageEl.removeEventListener('touchcancel', clearLongPressTimer, true);
+      messageEl.removeEventListener('touchend', clearLongPressTimer, true);
+      messageEl.removeEventListener('touchmove', clearLongPressTimer, true);
+    };
+  }, [contextMenuPosition]);
 
   const handleVoteSend = useCallback((options: string[]) => {
     sendPollVote({ chatId, messageId, options });
   }, [chatId, messageId, sendPollVote]);
 
-  function renderSenderName(user?: ApiUser) {
+  function renderSenderName(userOrChat?: ApiUser | ApiChat) {
     if (
-      (!showSenderName && !message.forward_info)
-      || !user || photo || video || customShape
+      (!showSenderName && !message.forwardInfo)
+      || !userOrChat || photo || video || customShape
     ) {
-      return null;
+      return undefined;
     }
 
+    const senderTitle = (
+      isChatPrivate(userOrChat.id)
+        ? getUserFullName(userOrChat as ApiUser)
+        : getChatTitle(userOrChat as ApiChat)
+    );
+
     return (
-      <div className="message-title interactive" onClick={() => handleSenderClick(user)}>
-        {user ? getUserFullName(user) : NBSP}
+      <div className="message-title interactive" onClick={() => handleSenderClick(userOrChat)}>
+        {renderText(senderTitle || NBSP)}
       </div>
     );
   }
@@ -279,6 +365,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Album
             album={album}
             loadAndPlay={loadAndPlayMedia}
+            hasCustomAppendix={isLastInGroup && !text}
             onMediaClick={handleAlbumMediaClick}
           />
         )}
@@ -314,6 +401,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             message={message}
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
+            lastSyncTime={lastSyncTime}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
           />
@@ -347,16 +435,20 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
 
   let style = '';
   if (!isAlbum && (photo || video)) {
-    const { width } = photo
-      ? calculateInlineImageDimensions(photo, isOwn, isForwarded)
-      : (video && (video.isRound
-        ? { width: ROUND_VIDEO_DIMENSIONS }
-        : calculateVideoDimensions(video, isOwn, isForwarded))
-      ) || {};
+    let width: number | undefined;
+    if (photo) {
+      width = calculateMediaDimensions(message).width;
+    } else if (video) {
+      if (video.isRound) {
+        width = ROUND_VIDEO_DIMENSIONS;
+      } else {
+        width = calculateMediaDimensions(message).width;
+      }
+    }
 
     if (width) {
       const calculatedWidth = Math.max(getMinMediaWidth(Boolean(text)), width);
-      const extraPadding = isForwarded ? 26 : 0;
+      const extraPadding = isForwarded ? 28 : 0;
       style = `width: ${calculatedWidth + extraPadding}px`;
     }
   }
@@ -367,13 +459,13 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
       id={`message${messageId}`}
       className={containerClassName}
       data-message-id={messageId}
+      data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
     >
-      {showAvatar && (
+      {showAvatar && isLastInGroup && (
         <Avatar
           size="small"
           user={sender}
           onClick={() => handleSenderClick(sender)}
-          className={!isLastInGroup ? 'hidden' : ''}
         />
       )}
       <div
@@ -383,13 +475,13 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
       >
-        {message.forward_info && !customShape && (
+        {message.forwardInfo && !customShape && (
           <div className="message-title">Forwarded message</div>
         )}
         {renderContent()}
         <MessageMeta message={message} outgoingStatus={outgoingStatus} />
       </div>
-      {Boolean(contextMenuPosition) && (
+      {contextMenuPosition && (
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuPosition}
@@ -407,22 +499,28 @@ export default memo(withGlobal<OwnProps>(
     const {
       message, album, showSenderName, showAvatar,
     } = ownProps;
-    const chatId = message.chat_id;
+    const { chatId } = message;
 
-    const replyMessage = message.reply_to_message_id
-      ? selectChatMessage(global, chatId, message.reply_to_message_id)
+    const replyMessage = message.replyToMessageId
+      ? selectChatMessage(global, chatId, message.replyToMessageId)
       : undefined;
-    const replyMessageSender = replyMessage && replyMessage.sender_user_id
-      ? selectUser(global, replyMessage.sender_user_id)
-      : undefined;
+    const replyMessageSender = replyMessage && (replyMessage.senderUserId
+      ? selectUser(global, replyMessage.senderUserId)
+      : selectChat(global, replyMessage.chatId));
 
     let userId;
-    let originUserId;
+    let originSender;
     if (showSenderName || showAvatar) {
-      userId = message.sender_user_id;
+      userId = message.senderUserId;
     }
-    if (message.forward_info) {
-      originUserId = message.forward_info.origin.sender_user_id;
+    if (message.forwardInfo) {
+      const originUserId = message.forwardInfo.origin.senderUserId;
+      const originChatId = message.forwardInfo.fromChatId;
+      if (originUserId) {
+        originSender = selectUser(global, originUserId);
+      } else if (originChatId) {
+        originSender = selectChat(global, originChatId);
+      }
     }
 
     const uploadProgress = selectUploadProgress(global, message);
@@ -438,31 +536,32 @@ export default memo(withGlobal<OwnProps>(
     const isSelectedToForward = messageIds && messageIds.includes(message.id);
 
     const isVideo = Boolean(getMessageVideo(message));
+    const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
     return {
       ...(userId && { sender: selectUser(global, userId) }),
-      ...(originUserId && { originSender: selectUser(global, originUserId) }),
+      originSender,
       replyMessage,
       replyMessageSender,
-      ...(message.is_outgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
+      ...(message.isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message) }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       isFocused,
       ...(isFocused && { focusDirection, noFocusHighlight }),
       isSelectedToForward,
       isChatWithSelf,
       // Heavy inline videos are never cached and should be re-fetched after connection.
-      ...(isVideo && { lastSyncTime }),
+      // Audio on mobiles are also started automatically on page load.
+      ...((isVideo || isAudio) && { lastSyncTime }),
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    return pick(actions, [
-      'focusMessage',
-      'openMediaViewer',
-      'cancelSendingMessage',
-      'openUserInfo',
-      'readMessageContents',
-      'sendPollVote',
-    ]);
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'focusMessage',
+    'openMediaViewer',
+    'cancelSendingMessage',
+    'openUserInfo',
+    'openChat',
+    'markMessagesRead',
+    'sendPollVote',
+  ]),
 )(Message));

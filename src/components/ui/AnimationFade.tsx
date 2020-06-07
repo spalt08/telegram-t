@@ -16,7 +16,7 @@ type OwnProps = {
 const AnimationFade: FC<OwnProps> = ({
   isOpen, id, className, onClick, children,
 }) => {
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, 'slow');
+  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
   const prevIsOpen = usePrevious(isOpen);
   const prevChildren = usePrevious(children);
   const fromChildrenRef = useRef<ChildrenFn>();

@@ -1,9 +1,11 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat } from '../../api/types';
+
 import { selectChat } from '../../modules/selectors';
 import { getChatDescription, getChatLink } from '../../modules/helpers';
+import renderText from '../common/helpers/renderText';
 
 type OwnProps = {
   chatId: number;
@@ -14,8 +16,8 @@ type StateProps = {
 };
 
 const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
-  if (!chat) {
-    return null;
+  if (!chat || chat.isRestricted) {
+    return undefined;
   }
 
   const description = getChatDescription(chat);
@@ -28,7 +30,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{description}</p>
+            <p className="title">{renderText(description)}</p>
             <p className="subtitle">About</p>
           </div>
         </div>
@@ -37,7 +39,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
         <div className="item">
           <i className="icon-username" />
           <div>
-            <a className="title" href={url}>{link}</a>
+            <a className="title" href={url} target="_blank" rel="noopener noreferrer">{link}</a>
             <p className="subtitle">Link</p>
           </div>
         </div>
@@ -46,10 +48,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({ chat }) => {
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
 
     return { chat };
   },
-)(ChatExtra);
+)(ChatExtra));

@@ -1,11 +1,15 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback,
+  FC, useState, useEffect, useCallback, useLayoutEffect, useRef, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalState, GlobalActions } from '../../global/types';
+
 import { formatPhoneNumber, getCountryFromPhoneNumber, getCountryById } from '../../util/phoneNumber';
+import preloadFonts from '../../util/fonts';
+import { preloadImage } from '../../util/files';
+import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -13,40 +17,42 @@ import CountryCodeInput from './CountryCodeInput';
 import Checkbox from '../ui/Checkbox';
 import Loading from '../ui/Loading';
 
-import { preloadImage } from '../../util/files';
-
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved, import/order
 import monkeyPath from 'url:../../assets/monkey.svg';
 
 type StateProps = Pick<GlobalState, (
-  'connectionState' |
-  'authState' | 'authPhoneNumber' | 'authIsLoading' | 'authError' | 'authRememberMe' | 'authNearestCountry'
+  'connectionState' | 'authState' |
+  'authPhoneNumber' | 'authIsLoading' | 'authIsLoadingQrCode' | 'authError' | 'authRememberMe' | 'authNearestCountry'
 )>;
 type DispatchProps = Pick<GlobalActions, (
-  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError'
+  'setAuthPhoneNumber' | 'setAuthRememberMe' | 'loadNearestCountry' | 'clearAuthError' | 'gotToAuthQrCode'
 )>;
 
 const MIN_NUMBER_LENGTH = 10;
 
-let monkeyPreloadPromise: Promise<HTMLImageElement>;
+let isPreloadInitiated = false;
 
 const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   connectionState,
   authState,
   authPhoneNumber,
   authIsLoading,
+  authIsLoadingQrCode,
   authError,
   authRememberMe,
   authNearestCountry,
   setAuthPhoneNumber,
   setAuthRememberMe,
-  clearAuthError,
   loadNearestCountry,
+  clearAuthError,
+  gotToAuthQrCode,
 }) => {
-  const [country, setCountry] = useState(undefined);
-  const [phoneNumber, setPhoneNumber] = useState(undefined);
+  const phoneNumberRef = useRef<HTMLInputElement>();
+  const [country, setCountry] = useState();
+  const [phoneNumber, setPhoneNumber] = useState();
   const [isTouched, setIsTouched] = useState(false);
+  const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
 
   const fullNumber = getNumberWithCode(phoneNumber, country);
   const canSubmit = fullNumber && fullNumber.replace(/[^\d]+/g, '').length >= MIN_NUMBER_LENGTH;
@@ -84,6 +90,12 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     }
   }, [authPhoneNumber, phoneNumber, parseFullNumber]);
 
+  useLayoutEffect(() => {
+    if (phoneNumberRef.current && lastSelection) {
+      phoneNumberRef.current.setSelectionRange(...lastSelection);
+    }
+  }, [lastSelection]);
+
   function handleCountryChange(newCountry?: Country) {
     setCountry(newCountry);
   }
@@ -93,12 +105,22 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
       clearAuthError();
     }
 
-    if (!monkeyPreloadPromise) {
-      monkeyPreloadPromise = preloadImage(monkeyPath);
+    // This is for further screens. We delay it until user input to speed up the initial loading.
+    if (!isPreloadInitiated) {
+      isPreloadInitiated = true;
+      preloadFonts();
+      preloadImage(monkeyPath);
     }
 
+    const { value, selectionStart, selectionEnd } = e.target;
+    setLastSelection(
+      selectionStart && selectionEnd && selectionEnd < value.length
+        ? [selectionStart, selectionEnd]
+        : undefined,
+    );
+
     setIsTouched(true);
-    parseFullNumber(e.target.value);
+    parseFullNumber(value);
   }
 
   function handleKeepSessionChange(e: ChangeEvent<HTMLInputElement>) {
@@ -117,10 +139,12 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
     }
   }
 
+  const isAuthReady = authState === 'authorizationStateWaitPhoneNumber';
+
   return (
     <div id="auth-phone-number-form" className="auth-form">
       <div id="logo" />
-      <h2>Sign in to Telegram</h2>
+      <div className="caption-image" />
       <p className="note">
         Please confirm your country and
         <br />enter your phone number.
@@ -133,11 +157,13 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           onChange={handleCountryChange}
         />
         <InputText
+          ref={phoneNumberRef}
           id="sign-in-phone-number"
           label="Phone Number"
-          onChange={handlePhoneNumberChange}
           value={fullNumber}
           error={authError}
+          inputMode="tel"
+          onChange={handlePhoneNumberChange}
         />
         <Checkbox
           id="sign-in-keep-session"
@@ -146,11 +172,16 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
           onChange={handleKeepSessionChange}
         />
         {canSubmit && (
-          authState === 'authorizationStateWaitPhoneNumber' ? (
-            <Button type="submit" isLoading={authIsLoading}>Next</Button>
+          isAuthReady ? (
+            <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
           ) : (
             <Loading />
           )
+        )}
+        {isAuthReady && (
+          <Button isText ripple isLoading={authIsLoadingQrCode} onClick={gotToAuthQrCode}>
+            Log in by QR code
+          </Button>
         )}
       </form>
     </div>
@@ -164,21 +195,22 @@ function getNumberWithCode(phoneNumber: string = '', country?: Country) {
   return `${country.code} ${phoneNumber}`;
 }
 
-export default withGlobal(
-  (global): StateProps => {
-    const {
-      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
-    } = global;
-    return {
-      connectionState, authState, authPhoneNumber, authIsLoading, authError, authRememberMe, authNearestCountry,
-    };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
-    } = actions;
-    return {
-      setAuthPhoneNumber, setAuthRememberMe, clearAuthError, loadNearestCountry,
-    };
-  },
-)(AuthPhoneNumber);
+export default memo(withGlobal(
+  (global): StateProps => pick(global, [
+    'connectionState',
+    'authState',
+    'authPhoneNumber',
+    'authIsLoading',
+    'authIsLoadingQrCode',
+    'authError',
+    'authRememberMe',
+    'authNearestCountry',
+  ]),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setAuthPhoneNumber',
+    'setAuthRememberMe',
+    'clearAuthError',
+    'loadNearestCountry',
+    'gotToAuthQrCode',
+  ]),
+)(AuthPhoneNumber));

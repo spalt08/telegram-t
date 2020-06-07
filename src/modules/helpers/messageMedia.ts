@@ -101,7 +101,7 @@ export function getMessageMediaHash(
     return undefined;
   }
 
-  const base = getMessageKey(message.chat_id, message.id);
+  const base = getMessageKey(message.chatId, message.id);
 
   if (photo || webPagePhoto) {
     switch (target) {
@@ -127,7 +127,11 @@ export function getMessageMediaHash(
           return undefined;
         }
 
-        return canMessagePlayVideoInline(video) ? base : `${base}?size=m`;
+        if (canMessagePlayVideoInline(video)) {
+          return base;
+        }
+
+        return `${base}?size=m`;
       case 'pictogram':
         return `${base}?size=m`;
       case 'viewerPreview':
@@ -223,12 +227,11 @@ export function getVideoDimensions(video: ApiVideo): IDimensions | undefined {
 
 export function getMediaTransferState(message: ApiMessage, progress?: number, isDownloadNeeded = false) {
   const isUploading = isMessageLocal(message);
-  const isDownloading = !isUploading && isDownloadNeeded;
-  const isTransferring = isUploading || isDownloading;
+  const isTransferring = isUploading || isDownloadNeeded;
   const transferProgress = Number(progress);
 
   return {
-    isUploading, isDownloading, isTransferring, transferProgress,
+    isUploading, isTransferring, transferProgress,
   };
 }
 
@@ -255,6 +258,9 @@ export function getMessageContentIds(
     case 'audio':
       validator = getMessageAudio;
       break;
+
+    default:
+      return [] as Array<number>;
   }
 
   return Object.keys(messages)

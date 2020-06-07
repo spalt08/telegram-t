@@ -1,29 +1,36 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useCallback, useEffect, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
 import {
   selectCurrentMessageSearch,
   selectIsForwardMenuOpen,
   selectIsMediaViewerOpen,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useUpdateOnResize from '../../hooks/useUpdateOnResize';
+import usePrevious from '../../hooks/usePrevious';
 
-import ForwardPicker from '../common/ForwardPicker.async';
 import RightHeader from './RightHeader';
-import Profile from './Profile';
-import RightSearch from './RightSearch.async';
+import Profile, { ProfileState } from './Profile';
 import Transition from '../ui/Transition';
+import ForwardPicker from '../common/ForwardPicker.async';
+import RightSearch from './RightSearch.async';
+import Statistics from './Statistics.async';
 
 import './RightColumn.scss';
 
 enum ColumnContent {
   ChatInfo,
   UserInfo,
+  // eslint-disable-next-line no-shadow
+  Statistics,
   Search,
   Forward,
 }
@@ -32,59 +39,100 @@ type StateProps = {
   contentKey?: ColumnContent;
   selectedChatId?: number;
   selectedUserId?: number;
+  shouldPreload?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
+  'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
 )>;
 
-const TRANSITION_RENDER_COUNT = 4;
+const COLUMN_CLOSE_DELAY_MS = 300;
+const TRANSITION_RENDER_COUNT = Object.keys(ColumnContent).length / 2;
 
 const RightColumn: FC<StateProps & DispatchProps> = ({
   contentKey,
   selectedChatId,
   selectedUserId,
+  shouldPreload,
   toggleChatInfo,
+  toggleStatistics,
   openUserInfo,
   closeMessageTextSearch,
   closeForwardMenu,
 }) => {
-  const [isSharedMedia, setIsSharedMedia] = useState(false);
+  const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
+  const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
   const isSearch = contentKey === ColumnContent.Search;
   const isForwarding = contentKey === ColumnContent.Forward;
+  const isStatistics = contentKey === ColumnContent.Statistics;
+  const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+
+  const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
+
+  const previousContentKey = usePrevious(contentKey, true);
+  const renderedContentKey = contentKey !== undefined
+    ? contentKey
+    : previousContentKey !== null
+      ? previousContentKey
+      : shouldPreload
+        ? ColumnContent.ChatInfo
+        : undefined;
+
+  useUpdateOnResize();
 
   const close = useCallback(() => {
     switch (contentKey) {
       case ColumnContent.ChatInfo:
-        if (isSharedMedia) {
-          setIsSharedMedia(false);
+        if (isScrolledDown) {
+          setProfileState(ProfileState.Profile);
           break;
         }
         toggleChatInfo();
         break;
       case ColumnContent.UserInfo:
-        if (isSharedMedia) {
-          setIsSharedMedia(false);
+        if (isScrolledDown) {
+          setProfileState(ProfileState.Profile);
           break;
         }
         openUserInfo({ id: undefined });
         break;
-      case ColumnContent.Search:
+      case ColumnContent.Statistics:
+        toggleStatistics();
+        break;
+      case ColumnContent.Search: {
+        const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.blur();
+        }
         closeMessageTextSearch();
         break;
+      }
       case ColumnContent.Forward:
         closeForwardMenu();
         break;
     }
-  }, [closeForwardMenu, closeMessageTextSearch, contentKey, openUserInfo, toggleChatInfo, isSharedMedia]);
-
-  const handleSharedMediaToggle = useCallback((show: boolean) => {
-    setIsSharedMedia(show);
-  }, []);
+  }, [
+    contentKey, isScrolledDown, toggleChatInfo, openUserInfo,
+    toggleStatistics, closeForwardMenu, closeMessageTextSearch,
+  ]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShouldSkipTransition(!isOpen);
+    }, COLUMN_CLOSE_DELAY_MS);
+  }, [isOpen]);
+
+  // Close Right Column when it transforms into overlayed state on screen resize
+  useEffect(() => {
+    if (isOpen && isOverlaying) {
+      close();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverlaying]);
 
   // We need to clear `isSharedMedia` state, when changing between `ChatInfo` and `UserInfo` to prevent confusion
   useLayoutEffectWithPrevDeps(([prevContentKey, prevSelectedChatId]) => {
@@ -93,54 +141,64 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
       || (prevContentKey === ColumnContent.UserInfo && contentKey === ColumnContent.ChatInfo)
       || (prevSelectedChatId !== selectedChatId)
     ) {
-      setIsSharedMedia(false);
+      setProfileState(ProfileState.Profile);
     }
   }, [contentKey, selectedChatId]);
 
-  if (!isOpen) {
-    return null;
-  }
-
   function renderContent() {
-    switch (contentKey) {
+    switch (renderedContentKey) {
       case ColumnContent.Search:
         return <RightSearch chatId={selectedChatId!} />;
       case ColumnContent.Forward:
         return <ForwardPicker />;
+      case ColumnContent.Statistics:
+        return <Statistics />;
       default:
         return (
           <Profile
             key={selectedUserId || selectedChatId!}
             chatId={selectedChatId!}
             userId={selectedUserId}
-            isSharedMedia={isSharedMedia}
-            onSharedMediaToggle={handleSharedMediaToggle}
+            profileState={profileState}
+            onProfileStateChange={setProfileState}
           />
         );
     }
   }
 
   return (
-    <div id="RightColumn">
-      <RightHeader
-        onClose={close}
-        isSearch={isSearch}
-        isForwarding={isForwarding}
-        isSharedMedia={isSharedMedia}
-      />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={contentKey}>
-        {renderContent}
-      </Transition>
+    <div id="RightColumn-wrapper">
+      {isOverlaying && (
+        <div className="overlay-backdrop" onClick={close} />
+      )}
+      <div id="RightColumn">
+        <RightHeader
+          onClose={close}
+          isSearch={isSearch}
+          isForwarding={isForwarding}
+          isStatistics={isStatistics}
+          profileState={profileState}
+        />
+        <Transition
+          name={shouldSkipTransition ? 'none' : 'zoom-fade'}
+          renderCount={TRANSITION_RENDER_COUNT}
+          activeKey={renderedContentKey}
+        >
+          {renderContent}
+        </Transition>
+      </div>
     </div>
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const {
       chats,
       users,
-      showChatInfo,
+      isChatInfoShown,
+      isStatisticsShown,
+      uiReadyState,
     } = global;
 
     const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
@@ -150,12 +208,16 @@ export default withGlobal(
     const selectedUserId = users.selectedId;
     const areChatsLoaded = Boolean(chats.listIds);
     const isUserInfo = Boolean(selectedUserId && areChatsLoaded);
-    const isChatInfo = Boolean(selectedChatId && showChatInfo && areChatsLoaded);
+    const isChatShown = Boolean(selectedChatId && areChatsLoaded);
+    const isChatInfo = isChatShown && isChatInfoShown;
+    const shouldPreload = isChatShown && uiReadyState === 2;
 
     const contentKey = isForwarding ? (
       ColumnContent.Forward
     ) : isSearch ? (
       ColumnContent.Search
+    ) : isStatisticsShown ? (
+      ColumnContent.Statistics
     ) : isUserInfo ? (
       ColumnContent.UserInfo
     ) : isChatInfo ? (
@@ -166,14 +228,14 @@ export default withGlobal(
       contentKey,
       selectedChatId,
       selectedUserId,
+      shouldPreload,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      openUserInfo, toggleChatInfo, closeMessageTextSearch, closeForwardMenu,
-    } = actions;
-    return {
-      openUserInfo, toggleChatInfo, closeMessageTextSearch, closeForwardMenu,
-    };
-  },
-)(RightColumn);
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openUserInfo',
+    'toggleChatInfo',
+    'toggleStatistics',
+    'closeMessageTextSearch',
+    'closeForwardMenu',
+  ]),
+)(RightColumn));

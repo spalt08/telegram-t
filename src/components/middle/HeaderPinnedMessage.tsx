@@ -4,6 +4,7 @@ import { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageMediaThumbDataUri, getMessageSummaryText } from '../../modules/helpers';
+import renderText from '../common/helpers/renderText';
 import useMedia from '../../hooks/useMedia';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -68,7 +69,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
         {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
         <div className="message-text">
           <div className="title">Pinned message</div>
-          <p>{text}</p>
+          <p>{renderText(text)}</p>
         </div>
 
         <RippleEffect />

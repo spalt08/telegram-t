@@ -19,3 +19,21 @@ export function getPlatform() {
 
   return os;
 }
+
+export const PLATFORM_ENV = getPlatform();
+export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
+export const IS_VOICE_RECORDING_SUPPORTED = navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices;
+export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentElement.style;
+export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && ['Mac OS', 'iOS'].includes(PLATFORM_ENV);
+export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
+export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
+
+let isWebpSupportedCache: boolean | undefined;
+
+export function isWebpSupported() {
+  if (isWebpSupportedCache === undefined) {
+    isWebpSupportedCache = document.createElement('canvas').toDataURL('image/webp').startsWith('data:image/webp');
+  }
+
+  return isWebpSupportedCache;
+}

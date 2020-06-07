@@ -1,7 +1,8 @@
-import React, { FC, useMemo } from '../../lib/teact/teact';
+import React, { FC, useMemo, memo } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../lib/teact/teactn';
 
 import { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+import { GlobalActions } from '../../global/types';
 
 import {
   selectUser,
@@ -15,14 +16,13 @@ import {
   isChatChannel,
   getUserFullName,
 } from '../../modules/helpers';
-import LastMessageMeta from '../left/LastMessageMeta';
-import { GlobalActions } from '../../global/types';
-import { orderBy } from '../../util/iteratees';
+import renderText from '../common/helpers/renderText';
+import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import renderTextWithHighlight from '../common/helpers/renderTextWithHighlight';
 
 import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import LastMessageMeta from '../common/LastMessageMeta';
 import Avatar from '../common/Avatar';
 
 import './RightSearch.scss';
@@ -61,7 +61,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
       return {
         message,
-        user: message.sender_user_id ? selectUser(getGlobal(), message.sender_user_id) : undefined,
+        user: message.senderUserId ? selectUser(getGlobal(), message.senderUserId) : undefined,
         onClick: () => focusMessage({ chatId, messageId: id }),
       };
     });
@@ -76,18 +76,20 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   }) => {
     const text = getMessageText(message);
     if (!text) {
-      return null;
+      return undefined;
     }
+
+    const title = chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user);
 
     return (
       <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
         <Avatar chat={chat && isChatChannel(chat) ? chat : undefined} user={user} />
         <div className="info">
           <div className="title">
-            <h3>{chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user)}</h3>
+            <h3>{title && renderText(title)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{renderTextWithHighlight(text, query!)}</p>
+          <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { query })}</p>
         </div>
         <RippleEffect />
       </div>
@@ -115,7 +117,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const chat = selectOpenChat(global);
     const messagesById = chat && selectChatMessages(global, chat.id);
@@ -136,8 +138,5 @@ export default withGlobal<OwnProps>(
       foundIds,
     };
   },
-  (global, actions): DispatchProps => {
-    const { searchMessages, focusMessage } = actions;
-    return { searchMessages, focusMessage };
-  },
-)(RightSearch);
+  (global, actions): DispatchProps => pick(actions, ['searchMessages', 'focusMessage']),
+)(RightSearch));

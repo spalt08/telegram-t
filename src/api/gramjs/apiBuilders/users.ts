@@ -1,6 +1,19 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiUser, ApiUserStatus, ApiUserType } from '../../types';
 
+export function buildApiUserFromFull(mtpUserFull: GramJs.UserFull): ApiUser {
+  const { about, commonChatsCount, pinnedMsgId } = mtpUserFull;
+
+  return {
+    ...(buildApiUser(mtpUserFull.user) as ApiUser),
+    fullInfo: {
+      bio: about,
+      commonChatsCount,
+      pinnedMessageId: pinnedMsgId,
+    },
+  };
+}
+
 export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   if (!(mtpUser instanceof GramJs.User)) {
     return undefined;
@@ -12,42 +25,42 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
 
   return {
     id: mtpUser.id,
-    is_self: mtpUser.self || false,
-    is_verified: mtpUser.verified || false,
+    isSelf: mtpUser.self || false,
+    isVerified: mtpUser.verified || false,
     type: buildApiUserType(mtpUser),
-    first_name: mtpUser.firstName,
-    last_name: mtpUser.lastName,
+    firstName: mtpUser.firstName,
+    lastName: mtpUser.lastName,
     username: mtpUser.username || '',
-    phone_number: mtpUser.phone || '',
+    phoneNumber: mtpUser.phone || '',
     status: buildApiUserStatus(mtpUser.status),
-    ...(mtpUser.accessHash && { access_hash: mtpUser.accessHash.toString() }),
+    ...(mtpUser.accessHash && { accessHash: mtpUser.accessHash.toString() }),
     avatar,
   };
 }
 
 function buildApiUserType(user: GramJs.User): ApiUserType {
   if (user.bot) {
-    return { '@type': 'userTypeBot' };
+    return 'userTypeBot';
   }
   if (user.deleted) {
-    return { '@type': 'userTypeDeleted' };
+    return 'userTypeDeleted';
   }
 
-  return { '@type': 'userTypeRegular' };
+  return 'userTypeRegular';
 }
 
-export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus | undefined {
+export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserStatus {
   if (!mtpStatus || mtpStatus instanceof GramJs.UserStatusEmpty) {
-    return { '@type': 'userStatusEmpty' };
+    return { type: 'userStatusEmpty' };
   } else if (mtpStatus instanceof GramJs.UserStatusOnline) {
-    return { '@type': 'userStatusOnline', expires: mtpStatus.expires };
+    return { type: 'userStatusOnline', expires: mtpStatus.expires };
   } else if (mtpStatus instanceof GramJs.UserStatusOffline) {
-    return { '@type': 'userStatusOffline', was_online: mtpStatus.wasOnline };
+    return { type: 'userStatusOffline', wasOnline: mtpStatus.wasOnline };
   } else if (mtpStatus instanceof GramJs.UserStatusRecently) {
-    return { '@type': 'userStatusRecently' };
+    return { type: 'userStatusRecently' };
   } else if (mtpStatus instanceof GramJs.UserStatusLastWeek) {
-    return { '@type': 'userStatusLastWeek' };
+    return { type: 'userStatusLastWeek' };
   } else {
-    return { '@type': 'userStatusLastMonth' };
+    return { type: 'userStatusLastMonth' };
   }
 }

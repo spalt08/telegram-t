@@ -1,12 +1,25 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
-import React, { FC, useEffect, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useCallback, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiChat, ApiTypingStatus } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
-import { getChatTypeString, getChatTitle, isChatSuperGroup } from '../../modules/helpers';
+import { MediaViewerOrigin } from '../../types';
+
+import {
+  getChatTypeString,
+  getChatTitle,
+  isChatSuperGroup,
+  isChatBasicGroup,
+} from '../../modules/helpers';
 import { selectChat, selectChatOnlineCount } from '../../modules/selectors';
 import { formatInteger } from '../../util/textFormat';
+import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
+import { pick } from '../../util/iteratees';
+import { DEBUG } from '../../config';
 
 import Avatar from './Avatar';
 import VerifiedIcon from './VerifiedIcon';
@@ -55,17 +68,20 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasPhoto: boolean) => {
     if (chat && hasPhoto) {
       e.stopPropagation();
-      openMediaViewer({ avatarOwnerId: chat.id });
+      openMediaViewer({
+        avatarOwnerId: chat.id,
+        origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
+      });
     }
-  }, [chat, openMediaViewer]);
+  }, [chat, avatarSize, openMediaViewer]);
 
   if (!chat) {
-    return null;
+    return undefined;
   }
 
   function renderStatusOrTyping() {
     if (!chat) {
-      return null;
+      return undefined;
     }
 
     if (typingStatus) {
@@ -84,13 +100,18 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     );
   }
 
+  const className = buildClassName(
+    'ChatInfo',
+    DEBUG && isChatBasicGroup(chat) && 'legacy-group-chat',
+  );
+
   return (
-    <div className="ChatInfo">
+    <div className={className}>
       <Avatar key={chat.id} size={avatarSize} chat={chat} onClick={handleAvatarViewerOpen} />
       <div>
         <div className="title">
-          {getChatTitle(chat)}
-          {chat.is_verified && <VerifiedIcon />}
+          {renderText(getChatTitle(chat))}
+          {chat.isVerified && <VerifiedIcon />}
         </div>
         {renderStatusOrTyping()}
       </div>
@@ -100,14 +121,21 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
 
 function getGroupStatus(chat: ApiChat) {
   const chatTypeString = getChatTypeString(chat);
-  const { members_count } = chat;
+  const { membersCount } = chat;
 
-  return members_count
-    ? `${formatInteger(members_count)} ${chatTypeString === 'Channel' ? 'subscribers' : 'members'}`
+  if (chat.isRestricted) {
+    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
+  }
+
+  const memberTypeString = chatTypeString === 'Channel' ? 'subscriber' : 'member';
+  const pluralSuffix = membersCount !== 1 ? 's' : '';
+
+  return membersCount
+    ? `${formatInteger(membersCount)} ${memberTypeString}${pluralSuffix}`
     : chatTypeString;
 }
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
@@ -115,8 +143,5 @@ export default withGlobal<OwnProps>(
 
     return { lastSyncTime, chat, onlineCount };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullChat, loadSuperGroupOnlines, openMediaViewer } = actions;
-    return { loadFullChat, loadSuperGroupOnlines, openMediaViewer };
-  },
-)(GroupChatInfo);
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullChat', 'loadSuperGroupOnlines', 'openMediaViewer']),
+)(GroupChatInfo));

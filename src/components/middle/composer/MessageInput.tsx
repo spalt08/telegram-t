@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import React, {
-  FC, useEffect, useLayoutEffect, useRef,
+  FC, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -9,6 +9,10 @@ import { GlobalActions } from '../../../global/types';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
+import { pick } from '../../../util/iteratees';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
+import { EDITABLE_INPUT_ID } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 
 type OwnProps = {
   id: string;
@@ -42,11 +46,14 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const inputRef = useRef<HTMLDivElement>();
 
-  useLayoutEffect(() => {
+  useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
     }
-    updateInputHeight();
+
+    if (prevHtml !== undefined && prevHtml !== html) {
+      updateInputHeight();
+    }
   }, [html]);
 
   function focusInput() {
@@ -60,11 +67,8 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   function updateInputHeight() {
     const input = inputRef.current!;
 
-    if (input.scrollHeight !== input.offsetHeight) {
-      input.style.height = 'auto';
-      input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
-    }
-
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, MAX_INPUT_HEIGHT)}px`;
     input.classList.toggle('overflown', input.scrollHeight > MAX_INPUT_HEIGHT);
   }
 
@@ -80,7 +84,11 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  useEffect(focusInput, [selectedChatId, replyingTo, shouldSetFocus]);
+  useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      focusInput();
+    }
+  }, [selectedChatId, replyingTo, shouldSetFocus]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
@@ -101,7 +109,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     <div id={id}>
       <div
         ref={inputRef}
-        id="editable-message-text"
+        id={EDITABLE_INPUT_ID}
         className={buildClassName('form-control custom-scroll', html.length > 0 && 'touched')}
         contentEditable
         onClick={focusInput}
@@ -113,7 +121,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
 
@@ -126,8 +134,5 @@ export default withGlobal<OwnProps>(
       replyingTo: replyingToById[selectedChatId],
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { editLastChatMessage } = actions;
-    return { editLastChatMessage };
-  },
-)(MessageInput);
+  (setGlobal, actions): DispatchProps => pick(actions, ['editLastChatMessage']),
+)(MessageInput));

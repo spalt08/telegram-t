@@ -4,7 +4,12 @@ import { GlobalState } from './types';
 
 import { throttle } from '../util/schedulers';
 import {
-  DEBUG, GLOBAL_STATE_CACHE_DISABLED, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY,
+  DEBUG,
+  GLOBAL_STATE_CACHE_DISABLED,
+  GLOBAL_STATE_CACHE_KEY,
+  GRAMJS_SESSION_ID_KEY,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
 import { filterKeys } from '../util/iteratees';
 
@@ -66,17 +71,17 @@ function updateCache(global: GlobalState) {
 
   const reducedGlobal: GlobalState = {
     ...global,
-    chats: {
-      ...global.chats,
-      replyingToById: {},
-      editingById: {},
-    },
+    isChatInfoShown: reduceShowChatInfo(global),
+    isStatisticsShown: false,
+    isLeftColumnShown: true,
+    users: reduceUsers(global),
+    chats: reduceChats(global),
     connectionState: undefined,
-    isUiReady: false,
+    uiReadyState: 0,
     lastSyncTime: undefined,
     messages: reduceMessages(global),
     focusedMessage: {},
-    fileUploads: { byMessageKey: {} },
+    fileUploads: { byMessageLocalId: {} },
     stickers: reduceStickers(global),
     savedGifs: reduceSavedGifs(global),
     globalSearch: {
@@ -86,6 +91,8 @@ function updateCache(global: GlobalState) {
     mediaViewer: {},
     webPagePreview: undefined,
     forwardMessages: {},
+    chatCreation: undefined,
+    profileEdit: undefined,
     settings: reduceSettings(global),
     errors: [],
   };
@@ -94,7 +101,31 @@ function updateCache(global: GlobalState) {
   localStorage.setItem(GLOBAL_STATE_CACHE_KEY, json);
 }
 
-function reduceMessages(global: GlobalState) {
+function reduceShowChatInfo(global: GlobalState): boolean {
+  return window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+    ? global.isChatInfoShown
+    : false;
+}
+
+function reduceUsers(global: GlobalState): GlobalState['users'] {
+  return window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
+    ? global.users
+    : {
+      ...global.users,
+      selectedId: undefined,
+    };
+}
+
+function reduceChats(global: GlobalState): GlobalState['chats'] {
+  return {
+    ...global.chats,
+    replyingToById: {},
+    editingById: {},
+    ...(window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH && { selectedId: undefined }),
+  };
+}
+
+function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
   const savedIds = [
@@ -121,7 +152,7 @@ function reduceMessages(global: GlobalState) {
 }
 
 // Remove `hash` so we can request all MTP entities on next load.
-function reduceStickers(global: GlobalState) {
+function reduceStickers(global: GlobalState): GlobalState['stickers'] {
   return {
     all: {
       byId: global.stickers.all.byId,
@@ -129,17 +160,21 @@ function reduceStickers(global: GlobalState) {
     recent: {
       stickers: global.stickers.recent.stickers,
     },
+    favorite: {
+      hash: 0,
+      stickers: [],
+    },
   };
 }
 
 // Remove `hash` so we can request all MTP entities on next load.
-function reduceSavedGifs(global: GlobalState) {
+function reduceSavedGifs(global: GlobalState): GlobalState['savedGifs'] {
   return {
     gifs: global.savedGifs.gifs,
   };
 }
 
-function reduceSettings(global: GlobalState) {
+function reduceSettings(global: GlobalState): GlobalState['settings'] {
   const { byKey } = global.settings;
 
   return {

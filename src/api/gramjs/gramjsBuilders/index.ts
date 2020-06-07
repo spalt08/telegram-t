@@ -10,6 +10,8 @@ import {
   ApiMessageEntityTypes,
 } from '../../types';
 import localDb from '../localDb';
+import { pick } from '../../../util/iteratees';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 
 const WAVEFORM_LENGTH = 63;
 const WAVEFORM_MAX_VALUE = 255;
@@ -81,34 +83,55 @@ export function buildInputStickerSet(id: string, accessHash: string) {
   });
 }
 
-export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+export function buildInputDocument(media: ApiSticker | ApiVideo) {
   const document = localDb.documents[media.id];
 
   if (!document) {
     return undefined;
   }
 
-  const { id, accessHash, fileReference } = document;
+  return new GramJs.InputDocument(pick(document, [
+    'id',
+    'accessHash',
+    'fileReference',
+  ]));
+}
 
-  const inputDocument = new GramJs.InputDocument({
-    id,
-    accessHash,
-    fileReference,
-  });
+export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+  const inputDocument = buildInputDocument(media);
+
+  if (!inputDocument) {
+    return undefined;
+  }
 
   return new GramJs.InputMediaDocument({ id: inputDocument });
 }
 
-export function buildInputPoll(pollSummary: ApiNewPoll, randomId: BigInt.BigInteger) {
-  const { question, answers } = pollSummary;
+export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteger) {
+  const { summary, quiz } = pollParams;
 
   const poll = new GramJs.Poll({
     id: randomId,
-    question,
-    answers: answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
+    question: summary.question,
+    answers: summary.answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
+    quiz: summary.quiz,
+    multipleChoice: summary.multipleChoice,
   });
 
-  return new GramJs.InputMediaPoll({ poll });
+  if (!quiz) {
+    return new GramJs.InputMediaPoll({ poll });
+  }
+
+  const correctAnswers = quiz.correctAnswers.map((key) => Buffer.from(key));
+  const { solution } = quiz;
+  const solutionEntities = quiz.solutionEntities ? quiz.solutionEntities.map(buildMtpMessageEntity) : [];
+
+  return new GramJs.InputMediaPoll({
+    poll,
+    correctAnswers,
+    solution,
+    solutionEntities,
+  });
 }
 
 export function generateRandomBigInt() {
@@ -192,7 +215,7 @@ export function calculateResultHash(ids: number[]) {
   return hash;
 }
 
-export function isMessageWithMedia(message: GramJs.Message) {
+export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServiceNotification) {
   const { media } = message;
 
   if (!media) {
@@ -236,5 +259,22 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
     dcId,
     photoSmall: smallSize && smallSize.location,
     photoBig: largeSize && largeSize.location,
+  });
+}
+
+export function buildNotificationMessageForLocalDb(
+  update: GramJs.UpdateServiceNotification,
+  localId: number,
+  currentDate: number,
+  currentUserId: number,
+) {
+  return new GramJs.Message({
+    id: localId,
+    fromId: SERVICE_NOTIFICATIONS_USER_ID,
+    toId: new GramJs.PeerUser({ userId: currentUserId }),
+    date: update.inboxDate || (currentDate / 1000),
+    media: update.media,
+    message: update.message,
+    entities: update.entities,
   });
 }

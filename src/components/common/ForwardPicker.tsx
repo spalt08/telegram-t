@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useMemo, useState,
+  FC, useCallback, useMemo, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -9,11 +9,12 @@ import { ApiChat } from '../../api/types';
 import { isChatChannel, getChatTitle } from '../../modules/helpers';
 import prepareChats from './helpers/prepareChats';
 import searchWords from '../../util/searchWords';
+import { pick } from '../../util/iteratees';
 
-import Picker from './Picker';
 import Loading from '../ui/Loading';
-import Button from '../ui/Button';
+import FloatingActionButton from '../ui/FloatingActionButton';
 import Spinner from '../ui/Spinner';
+import Picker from './Picker';
 
 import './ForwardPicker.scss';
 
@@ -76,23 +77,21 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
         onFilterChange={setFilter}
         onLoadMore={loadMoreChats}
       />
-      <Button
-        className={!isLoading && selectedIds && selectedIds.length ? 'revealed' : ''}
-        color="primary"
-        round
-        onClick={!isLoading && selectedIds && selectedIds.length ? forwardMessages : undefined}
+      <FloatingActionButton
+        show={Boolean(!isLoading && selectedIds && selectedIds.length)}
+        onClick={forwardMessages}
       >
         {isLoading ? (
           <Spinner color="white" />
         ) : (
           <i className="icon-send" />
         )}
-      </Button>
+      </FloatingActionButton>
     </div>
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const {
       chats: {
@@ -114,9 +113,5 @@ export default withGlobal(
       isLoading,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setForwardChatIds, forwardMessages, loadMoreChats } = actions;
-
-    return { setForwardChatIds, forwardMessages, loadMoreChats };
-  },
-)(ForwardPicker);
+  (setGlobal, actions): DispatchProps => pick(actions, ['setForwardChatIds', 'forwardMessages', 'loadMoreChats']),
+)(ForwardPicker));

@@ -3,12 +3,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import {
-  ApiUser,
-  ApiMessage,
-} from '../../api/types';
+import { ApiUser, ApiMessage } from '../../api/types';
+
 import { selectUser, selectChatMessage, selectIsMessageFocused } from '../../modules/selectors';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
+import renderText from '../common/helpers/renderText';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import buildClassName from '../../util/buildClassName';
 
@@ -31,7 +30,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>();
 
-  useEnsureMessage(message.chat_id, message.reply_to_message_id, actionTargetMessage);
+  useEnsureMessage(message.chatId, message.replyToMessageId, actionTargetMessage);
 
   useEffect(() => {
     const messagesContainer = document.getElementById('MessageList');
@@ -48,7 +47,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         block: 'center',
       });
     }
-  }, [isFocused, message.chat_id]);
+  }, [isFocused, message.chatId]);
 
   const content = renderActionMessageText(
     message,
@@ -59,7 +58,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   );
 
   if (isEmbedded) {
-    return <span className="embedded-action-message">{content}</span>;
+    return <span className="embedded-action-message">{renderText(content as string)}</span>;
   }
 
   return (
@@ -76,11 +75,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
-    const userId = message.sender_user_id;
+    const userId = message.senderUserId;
     const { targetUserId: actionTargetUserId } = message.content.action || {};
-    const actionTargetMessageId = message.reply_to_message_id;
+    const actionTargetMessageId = message.replyToMessageId;
     const actionTargetMessage = actionTargetMessageId
-      ? selectChatMessage(global, message.chat_id, actionTargetMessageId)
+      ? selectChatMessage(global, message.chatId, actionTargetMessageId)
       : undefined;
 
     return {

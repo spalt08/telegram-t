@@ -4,9 +4,14 @@ export * from './messages';
 export * from './updates';
 export * from './media';
 
-export type ApiOnProgress = (
-  progress: number, // Float between 0 and 1.
-) => void;
+export interface ApiOnProgress {
+  (
+    progress: number, // Float between 0 and 1.
+    ...args: any[]
+  ): void;
+
+  isCanceled?: boolean;
+}
 
 export interface ApiAttachment {
   blobUrl: string;

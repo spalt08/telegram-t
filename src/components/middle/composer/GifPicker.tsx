@@ -9,6 +9,7 @@ import { ApiVideo } from '../../../api/types';
 import findInViewport from '../../../util/findInViewport';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
+import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
 import GifButton from './GifButton';
@@ -18,6 +19,7 @@ import './GifPicker.scss';
 type OwnProps = {
   className: string;
   load: boolean;
+  canSendGifs: boolean;
   onGifSelect: (gif: ApiVideo) => void;
 };
 
@@ -34,6 +36,7 @@ const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className,
   load,
+  canSendGifs,
   savedGifs,
   onGifSelect,
   loadSavedGifs,
@@ -72,7 +75,9 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       className={buildClassName('GifPicker no-scroll', className)}
       onScroll={handleScroll}
     >
-      {!areLoaded ? (
+      {!canSendGifs ? (
+        <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
+      ) : !areLoaded ? (
         <Loading />
       ) : savedGifs ? (
         savedGifs.map((gif, index) => (
@@ -83,7 +88,7 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             load={visibleIndexes.includes(index)}
           />
         ))
-      ) : null}
+      ) : undefined}
     </div>
   );
 };
@@ -96,8 +101,5 @@ export default memo(withGlobal<OwnProps>(
       savedGifs,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadSavedGifs } = actions;
-    return { loadSavedGifs };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadSavedGifs']),
 )(GifPicker));

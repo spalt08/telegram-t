@@ -2,7 +2,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiUser, ApiChat } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
-import { buildInputEntity, calculateResultHash, buildInputPeer } from '../gramjsBuilders';
+import {
+  buildInputEntity,
+  calculateResultHash,
+  buildInputPeer,
+} from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -36,10 +40,10 @@ export async function fetchFullUser({
     '@type': 'updateUser',
     id,
     user: {
-      full_info: {
+      fullInfo: {
         bio: about,
-        common_chats_count: commonChatsCount,
-        pinned_message_id: pinnedMsgId,
+        commonChatsCount,
+        pinnedMessageId: pinnedMsgId,
       },
     },
   });
@@ -51,10 +55,43 @@ export async function fetchNearestCountry() {
   return dcInfo ? dcInfo.country : undefined;
 }
 
+export function updateProfile({
+  firstName,
+  lastName,
+  about,
+}: {
+  firstName?: string;
+  lastName?: string;
+  about?: string;
+}) {
+  // This endpoint handles empty strings with an unexpected error, so we replace them with `undefined`
+  return invokeRequest(new GramJs.account.UpdateProfile({
+    firstName: firstName || undefined,
+    lastName: lastName || undefined,
+    about: about || undefined,
+  }));
+}
+
+export function checkUsername(username: string) {
+  return invokeRequest(new GramJs.account.CheckUsername({ username }));
+}
+
+export function updateUsername(username: string) {
+  return invokeRequest(new GramJs.account.UpdateUsername({ username }));
+}
+
+export async function updateProfilePhoto(file: File) {
+  const inputFile = await uploadFile(file);
+  return invokeRequest(new GramJs.photos.UploadProfilePhoto({
+    file: inputFile,
+  }));
+}
+
 export async function uploadProfilePhoto(file: File) {
   const inputFile = await uploadFile(file);
-  const request = new GramJs.photos.UploadProfilePhoto({ file: inputFile });
-  await invokeRequest(request);
+  await invokeRequest(new GramJs.photos.UploadProfilePhoto({
+    file: inputFile,
+  }));
 }
 
 export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
@@ -66,7 +103,7 @@ export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {
     return undefined;
   }
 
-  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.is_self) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user) => !!user && !user.isSelf) as ApiUser[];
 
   return {
     hash: calculateResultHash(users.map(({ id }) => id)),
@@ -92,13 +129,13 @@ export async function fetchContactList({ hash = 0 }: { hash?: number }) {
       ...result.contacts.map(({ userId }) => userId),
     ]),
     users: result.users.map(buildApiUser).filter<ApiUser>(Boolean as any),
-    chats: result.users.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any),
+    chats: result.users.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any),
   };
 }
 
 export async function fetchUsers({ users } : { users: ApiUser[] }) {
   const result = await invokeRequest(new GramJs.users.GetUsers({
-    id: users.map(({ id, access_hash }) => buildInputPeer(id, access_hash)),
+    id: users.map(({ id, accessHash }) => buildInputPeer(id, accessHash)),
   }));
   if (!result || !result.length) {
     return undefined;

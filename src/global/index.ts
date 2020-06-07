@@ -2,12 +2,16 @@ import { addReducer } from '../lib/teact/teactn';
 
 import { GlobalState } from './types';
 
-import { DEFAULT_ANIMATION_LEVEL } from '../config';
+import {
+  DEFAULT_ANIMATION_LEVEL,
+  DEFAULT_MESSAGE_TEXT_SIZE_PX,
+} from '../config';
 import { initCache, loadCache } from './cache';
 
 const INITIAL_STATE: GlobalState = {
-  showChatInfo: true,
-  isUiReady: false,
+  isLeftColumnShown: true,
+  isChatInfoShown: false,
+  uiReadyState: 0,
 
   authRememberMe: true,
 
@@ -28,7 +32,7 @@ const INITIAL_STATE: GlobalState = {
   },
 
   fileUploads: {
-    byMessageKey: {},
+    byMessageLocalId: {},
   },
 
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],
@@ -38,6 +42,9 @@ const INITIAL_STATE: GlobalState = {
       byId: {},
     },
     recent: {
+      stickers: [],
+    },
+    favorite: {
       stickers: [],
     },
   },
@@ -59,6 +66,9 @@ const INITIAL_STATE: GlobalState = {
   settings: {
     byKey: {
       animationLevel: DEFAULT_ANIMATION_LEVEL,
+      messageTextSize: DEFAULT_MESSAGE_TEXT_SIZE_PX,
+      messageSendKeyCombo: 'enter',
+      language: 'en',
     },
   },
 

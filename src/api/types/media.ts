@@ -4,6 +4,7 @@ export enum ApiMediaFormat {
   DataUri,
   BlobUrl,
   Lottie,
+  Progressive,
 }
 
 export type ApiParsedMedia = string | Blob | AnyLiteral;

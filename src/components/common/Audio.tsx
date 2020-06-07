@@ -1,15 +1,20 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
+  FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
+import {
+  ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
+} from '../../api/types';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
-import { isOwnMessage, getMessageMediaHash, getMediaTransferState } from '../../modules/helpers';
-import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
-import useShowTransition from '../../hooks/useShowTransition';
+import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
+import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
+import useShowTransition from '../../hooks/useShowTransition';
+import useBuffering from '../../hooks/useBuffering';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -22,6 +27,7 @@ type OwnProps = {
   uploadProgress?: number;
   inSharedMedia?: boolean;
   date?: number;
+  lastSyncTime?: number;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
 };
@@ -33,8 +39,8 @@ enum PlayState {
 }
 
 interface ISeekMethods {
-  handleStartSeek: (event: React.MouseEvent<HTMLElement>) => void;
-  handleSeek: (event: React.MouseEvent<HTMLElement>) => void;
+  handleStartSeek: (e: React.MouseEvent<HTMLElement>) => void;
+  handleSeek: (e: React.MouseEvent<HTMLElement>) => void;
   handleStopSeek: () => void;
 }
 
@@ -43,91 +49,100 @@ const Audio: FC<OwnProps> = ({
   uploadProgress,
   inSharedMedia,
   date,
+  lastSyncTime,
   onReadMedia,
   onCancelUpload,
 }) => {
+  const audioRef = useRef<HTMLAudioElement>();
+
   const { content: { audio, voice }, isMediaUnread } = message;
 
-  const audioRef = useRef<HTMLAudioElement>();
   const [playState, setPlayState] = useState<PlayState>(PlayState.Idle);
   const isActive = playState === PlayState.Playing;
+  const [playProgress, setPlayProgress] = useState<number>(0);
   const isSeeking = useRef<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+  // We need to preload on mobiles to enable playing by click.
+  const shouldDownload = (isActive || IS_TOUCH_ENV) && lastSyncTime;
+
   const {
     mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !isActive);
-
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !shouldDownload, ApiMediaFormat.Progressive);
+  const { isBuffered, bufferingHandlers } = useBuffering();
   const {
-    isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !mediaData);
+    isUploading, isTransferring, transferProgress,
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isBuffered);
   const {
-    shouldRender: shouldSpinnerRender,
+    shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring && isActive);
+  } = useShowTransition(isTransferring);
 
-  const togglePlay = useCallback(() => {
-    setPlayState((state) => (state === PlayState.Playing ? PlayState.Paused : PlayState.Playing));
-  }, []);
+  const handleButtonClick = useCallback(() => {
+    if (isUploading) {
+      if (onCancelUpload) {
+        onCancelUpload();
+      }
+
+      return;
+    }
+
+    setPlayState((state) => {
+      switch (state) {
+        case PlayState.Paused:
+        case PlayState.Idle:
+          audioRef.current!.play();
+          return PlayState.Playing;
+        case PlayState.Playing:
+        default:
+          audioRef.current!.pause();
+          return PlayState.Paused;
+      }
+    });
+  }, [isUploading, onCancelUpload]);
 
   useEffect(() => {
     const audioEl = audioRef.current;
-    if (audioEl) {
-      setProgress(audioEl.currentTime / audioEl.duration);
+    if (audioEl && audioEl.duration) {
+      setPlayProgress(audioEl.currentTime / audioEl.duration);
     }
-  }, [progress]);
+  }, [playProgress]);
 
   useEffect(() => {
-    if (mediaData) {
-      if (!audioRef.current) {
-        const audioEl = new window.Audio(mediaData);
-        audioEl.addEventListener('timeupdate', () => {
-          setProgress(audioEl.currentTime / audioEl.duration);
-        });
-        audioEl.addEventListener('ended', () => {
-          setPlayState(PlayState.Paused);
-        });
-        audioRef.current = audioEl;
-      }
-
-      if (isActive) {
-        audioRef.current.play();
-
-        if (onReadMedia && isMediaUnread) {
-          onReadMedia();
-        }
-      } else {
-        audioRef.current.pause();
-      }
+    if (isActive && onReadMedia && isMediaUnread) {
+      onReadMedia();
     }
-  }, [mediaData, isActive, isMediaUnread, onReadMedia]);
+  }, [isActive, isMediaUnread, onReadMedia]);
 
   useEffect(() => {
+    const audioEl = audioRef.current!;
+
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioEl.pause();
     };
   }, []);
 
-  const seek = (event: React.MouseEvent<HTMLElement>) => {
+  const handleTimeUpdate = useCallback(() => {
+    setPlayProgress(audioRef.current!.currentTime / audioRef.current!.duration);
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setPlayState(PlayState.Paused);
+  }, []);
+
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const audioEl = audioRef.current;
     if (audioEl && isSeeking.current) {
-      const seekBar = event.currentTarget.closest('.seekline,.waveform');
+      const seekBar = e.currentTarget.closest('.seekline,.waveform');
       if (seekBar) {
         const { width, left } = seekBar.getBoundingClientRect();
-        audioEl.currentTime = (audioEl.duration * ((event.clientX - left) / width));
+        audioEl.currentTime = (audioEl.duration * ((e.clientX - left) / width));
       }
     }
-  };
+  }, []);
 
-  const handleStartSeek = useCallback((event: React.MouseEvent<HTMLElement>) => {
+  const handleStartSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
     isSeeking.current = true;
-    seek(event);
-  }, []);
-
-  const handleSeek = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    seek(event);
-  }, []);
+    handleSeek(e);
+  }, [handleSeek]);
 
   const handleStopSeek = useCallback(() => {
     isSeeking.current = false;
@@ -136,8 +151,8 @@ const Audio: FC<OwnProps> = ({
   const seekHandlers = { handleStartSeek, handleSeek, handleStopSeek };
   const isOwn = isOwnMessage(message);
   const renderedWaveform = useMemo(
-    () => voice && renderWaveform(voice, progress, isOwn, seekHandlers),
-    [voice, progress, isOwn, seekHandlers],
+    () => voice && renderWaveform(voice, playProgress, isOwn, seekHandlers),
+    [voice, playProgress, isOwn, seekHandlers],
   );
 
   const className = buildClassName(
@@ -147,7 +162,7 @@ const Audio: FC<OwnProps> = ({
   );
 
   const buttonClassNames = ['toggle-play'];
-  if (shouldSpinnerRender) {
+  if (shouldRenderSpinner) {
     buttonClassNames.push('loading');
   } else if (isActive) {
     buttonClassNames.push('pause');
@@ -159,26 +174,36 @@ const Audio: FC<OwnProps> = ({
     <div className={className}>
       <Button
         round
+        ripple
         size={inSharedMedia ? 'smaller' : 'default'}
         className={buttonClassNames.join(' ')}
-        onClick={togglePlay}
+        onClick={handleButtonClick}
       >
         <i className="icon-play" />
         <i className="icon-pause" />
       </Button>
-      {shouldSpinnerRender && (
+      {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner
             progress={transferProgress}
             transparent
             size={inSharedMedia ? 'm' : 'l'}
-            onClick={onCancelUpload}
+            onClick={handleButtonClick}
           />
         </div>
       )}
       {audio
-        ? renderAudio(audio, isActive, progress, seekHandlers, date)
+        ? renderAudio(audio, isActive, playProgress, seekHandlers, date)
         : renderVoice(voice!, renderedWaveform, isMediaUnread)}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio
+        ref={audioRef}
+        src={mediaData}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleEnded}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...bufferingHandlers}
+      />
     </div>
   );
 };
@@ -186,18 +211,18 @@ const Audio: FC<OwnProps> = ({
 function renderAudio(
   audio: ApiAudio,
   isActive: boolean,
-  progress: number,
+  playProgress: number,
   { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
   date?: number,
 ) {
   const {
     title, performer, duration, fileName,
   } = audio;
-  const showSeekline = isActive || (progress > 0 && progress < 1);
+  const showSeekline = isActive || (playProgress > 0 && playProgress < 1);
 
   return (
     <div className="content">
-      <p className="title">{title || fileName}</p>
+      <p className="title">{renderText(title || fileName)}</p>
       {showSeekline && (
         <div
           className="seekline"
@@ -208,13 +233,13 @@ function renderAudio(
           <span className="seekline-progress">
             <i
               // @ts-ignore
-              style={`transform: translateX(${progress * 100}%)`}
+              style={`transform: translateX(${playProgress * 100}%)`}
             />
           </span>
           <span className="seekline-thumb">
             <i
               // @ts-ignore
-              style={`transform: translateX(${progress * 100}%)`}
+              style={`transform: translateX(${playProgress * 100}%)`}
             />
           </span>
         </div>
@@ -222,13 +247,13 @@ function renderAudio(
       {!showSeekline && (
         <div className="meta">
           {performer && (
-            <span className="performer">{performer}</span>
+            <span className="performer">{renderText(performer)}</span>
           )}
           {date && <span className="date">{formatMediaDateTime(date * 1000)}</span>}
         </div>
       )}
       <p className="duration">
-        {progress > 0 ? `${formatMediaDuration(duration * progress)} / ` : null}
+        {playProgress > 0 ? `${formatMediaDuration(duration * playProgress)} / ` : undefined}
         {formatMediaDuration(duration)}
       </p>
     </div>
@@ -248,12 +273,12 @@ function renderVoice(voice: ApiVoice, renderedWaveform: any, isMediaUnread?: boo
 }
 
 function renderWaveform(
-  voice: ApiVoice, progress = 0, isOwn = false, { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
+  voice: ApiVoice, playProgress = 0, isOwn = false, { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
 ) {
   const { waveform, duration } = voice;
 
   if (!waveform) {
-    return null;
+    return undefined;
   }
 
   const reducedLengthHalf = duration < 10 && Math.round(((0.5 + 0.5 * (duration / 10)) * 63) / 2);
@@ -268,7 +293,7 @@ function renderWaveform(
   const width = spikes.length * spikeStep - spikeWidth;
   const height = 23;
 
-  const src = renderWaveformToDataUri(spikes, progress, {
+  const src = renderWaveformToDataUri(spikes, playProgress, {
     width,
     height,
     spikeWidth,

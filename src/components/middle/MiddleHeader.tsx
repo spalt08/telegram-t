@@ -1,4 +1,6 @@
-import React, { FC, useCallback } from '../../lib/teact/teact';
+import React, {
+  FC, useCallback, useMemo, memo,
+} from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
@@ -8,20 +10,40 @@ import {
   ApiUser,
   ApiTypingStatus,
 } from '../../api/types';
-import { getPrivateChatUserId, isChatPrivate } from '../../modules/helpers';
+
 import {
-  selectChat, selectChatMessage, selectUser, selectAllowedMessagedActions,
+  getPrivateChatUserId,
+  isChatChannel,
+  isChatPrivate,
+  isChatSuperGroup,
+} from '../../modules/helpers';
+import {
+  selectChat,
+  selectChatMessage,
+  selectUser,
+  selectAllowedMessagedActions,
+  selectIsRightColumnShown,
 } from '../../modules/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
+import useUpdateOnResize from '../../hooks/useUpdateOnResize';
+import { pick } from '../../util/iteratees';
+import { formatIntegerCompact } from '../../util/textFormat';
+import {
+  MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
+  MOBILE_SCREEN_MAX_WIDTH,
+  EDITABLE_INPUT_ID,
+} from '../../config';
+
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
+import Button from '../ui/Button';
 import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
 
 import './MiddleHeader.scss';
 
 // Chrome breaks layout when focusing input during transition
-const SEARCH_FOCUS_DELAY_MS = 200;
+const SEARCH_FOCUS_DELAY_MS = 400;
 
 type OwnProps = {
   chatId: number;
@@ -32,9 +54,17 @@ type StateProps = {
   pinnedMessage?: ApiMessage;
   canUnpin?: boolean;
   typingStatus?: ApiTypingStatus;
+  isLeftColumnShown?: boolean;
+  isRightColumnShown?: boolean;
+  isChannel?: boolean;
+  canSubscribeToChat?: boolean;
+  chatsById?: Record<number, ApiChat>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChatWithInfo' | 'openMessageTextSearch' | 'pinMessage' | 'focusMessage'>;
+type DispatchProps = Pick<GlobalActions, (
+  'openChatWithInfo' | 'openMessageTextSearch' |
+  'pinMessage' | 'focusMessage' | 'openChat' | 'joinChannel'
+)>;
 
 const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
@@ -42,12 +72,23 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   pinnedMessage,
   canUnpin,
   typingStatus,
+  isLeftColumnShown,
+  isRightColumnShown,
+  isChannel,
+  canSubscribeToChat,
+  chatsById,
   openChatWithInfo,
   openMessageTextSearch,
   pinMessage,
   focusMessage,
+  openChat,
+  joinChannel,
 }) => {
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
+
+  useUpdateOnResize();
+
+  const shouldShowRevealButton = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
 
   const handleHeaderClick = useCallback(() => {
     openChatWithInfo({ id: chatId });
@@ -69,13 +110,76 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handlePinnedMessageClick = useCallback((): void => {
     if (pinnedMessage) {
-      focusMessage({ chatId: pinnedMessage.chat_id, messageId: pinnedMessage.id });
+      focusMessage({ chatId: pinnedMessage.chatId, messageId: pinnedMessage.id });
     }
   }, [focusMessage, pinnedMessage]);
 
+  const handleChatListRevealClick = useCallback(() => {
+    if (isLeftColumnShown) {
+      openChat({ id: chatId });
+    } else {
+      const messageInput = document.getElementById(EDITABLE_INPUT_ID);
+      if (messageInput) {
+        messageInput.blur();
+      }
+      openChat({ id: undefined });
+    }
+  }, [openChat, chatId, isLeftColumnShown]);
+
+  const handleChannelSubscribeClick = useCallback(() => {
+    if (canSubscribeToChat) {
+      joinChannel({ chatId });
+    }
+  }, [canSubscribeToChat, joinChannel, chatId]);
+
+  const unreadCount = useMemo(() => {
+    if (!shouldShowRevealButton || !chatsById) {
+      return undefined;
+    }
+
+    let isActive = false;
+
+    const totalCount = Object.values(chatsById).reduce((total, chat) => {
+      const count = chat.unreadCount || 0;
+      if (count && (!chat.isMuted || chat.unreadMentionsCount)) {
+        isActive = true;
+      }
+
+      return total + count;
+    }, 0);
+
+    if (!totalCount) {
+      return undefined;
+    }
+
+    return {
+      isActive,
+      totalCount,
+    };
+  }, [shouldShowRevealButton, chatsById]);
+
+  const isChatListButtonInBackState = window.innerWidth < MOBILE_SCREEN_MAX_WIDTH || !isLeftColumnShown;
+
   return (
     <div className="MiddleHeader">
-      <div onClick={handleHeaderClick}>
+      {shouldShowRevealButton && (
+        <div className="chat-list-reveal-button">
+          <Button
+            round
+            size="smaller"
+            color="translucent"
+            onClick={handleChatListRevealClick}
+          >
+            <div className={`animated-close-icon ${isChatListButtonInBackState ? 'state-back' : ''}`} />
+          </Button>
+          {unreadCount && (
+            <div className={`unread-count ${unreadCount.isActive ? 'active' : ''}`}>
+              {formatIntegerCompact(unreadCount.totalCount)}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="chat-info-wrapper" onClick={handleHeaderClick}>
         {isChatPrivate(chatId) ? (
           <PrivateChatInfo userId={chatId} typingStatus={typingStatus} showFullInfo />
         ) : (
@@ -83,7 +187,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
       </div>
 
-      {pinnedMessage && (
+      {pinnedMessage && !canSubscribeToChat && (
         <HeaderPinnedMessage
           message={pinnedMessage}
           onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
@@ -91,14 +195,21 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       )}
       <HeaderActions
+        chatId={chatId}
+        isChannel={isChannel}
+        canSubscribe={canSubscribeToChat}
+        isRightColumnShown={isRightColumnShown}
         onSearchClick={handleSearchClick}
+        onSubscribeChannel={handleChannelSubscribeClick}
       />
     </div>
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
+    const { isLeftColumnShown } = global;
+    const { byId: chatsById } = global.chats;
     const chat = selectChat(global, chatId);
     let target: ApiChat | ApiUser | undefined = chat;
     if (isChatPrivate(chatId)) {
@@ -106,42 +217,47 @@ export default withGlobal<OwnProps>(
       target = id ? selectUser(global, id) : undefined;
     }
 
-    if (chat && target && target.full_info) {
-      const { typingStatus } = chat;
-      const { pinned_message_id: pinnedMessageId } = target.full_info;
+    const { typingStatus } = chat || {};
+    const isChannel = chat && isChatChannel(chat);
+
+    const state = {
+      typingStatus,
+      isLeftColumnShown,
+      isRightColumnShown: selectIsRightColumnShown(global),
+      isChannel,
+      canSubscribeToChat: chat && (isChannel || isChatSuperGroup(chat)) && chat.hasLeft,
+      chatsById,
+    };
+
+    if (chat && target && target.fullInfo) {
+      const { pinnedMessageId } = target.fullInfo;
       const pinnedMessage = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
 
       if (pinnedMessage) {
         const { canPin } = selectAllowedMessagedActions(global, pinnedMessage);
 
         return {
+          ...state,
           pinnedMessageId,
           pinnedMessage,
           canUnpin: canPin,
-          typingStatus,
         };
       } else {
         return {
+          ...state,
           pinnedMessageId,
-          typingStatus,
         };
       }
     }
 
-    return {};
+    return state;
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      openChatWithInfo,
-      openMessageTextSearch,
-      pinMessage,
-      focusMessage,
-    } = actions;
-    return {
-      openChatWithInfo,
-      openMessageTextSearch,
-      pinMessage,
-      focusMessage,
-    };
-  },
-)(MiddleHeader);
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openChatWithInfo',
+    'openMessageTextSearch',
+    'pinMessage',
+    'focusMessage',
+    'openChat',
+    'joinChannel',
+  ]),
+)(MiddleHeader));

@@ -1,5 +1,8 @@
 import React, {
-  FC, useCallback, useState,
+  FC,
+  useCallback,
+  useState,
+  useEffect,
 } from '../../../lib/teact/teact';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
@@ -9,6 +12,7 @@ import { getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../modul
 import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
+import webpHero from '../../../util/webpHero';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 
@@ -26,7 +30,7 @@ const Sticker: FC<OwnProps> = ({
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 
   const sticker = message.content.sticker!;
-  const isAnimated = sticker.is_animated;
+  const { isAnimated } = sticker;
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaData = useMedia(
@@ -39,6 +43,22 @@ const Sticker: FC<OwnProps> = ({
     shouldRenderThumb, shouldRenderFullMedia, transitionClassNames,
   } = useTransitionForMedia(isAnimated ? isAnimationLoaded : isMediaLoaded, 'fast', isAnimated);
 
+  useEffect(() => {
+    if (shouldRenderThumb) {
+      webpHero({
+        selectors: `#sticker-thumb-${message.id}`,
+      });
+    }
+  }, [shouldRenderThumb, message.id]);
+
+  useEffect(() => {
+    if (!isAnimated && shouldRenderFullMedia) {
+      webpHero({
+        selectors: `#sticker-${message.id}`,
+      });
+    }
+  }, [isAnimated, shouldRenderFullMedia, message.id]);
+
   const { width, height } = getStickerDimensions(sticker);
   const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
 
@@ -46,6 +66,7 @@ const Sticker: FC<OwnProps> = ({
     <div className="media-inner">
       {shouldRenderThumb && (
         <img
+          id={`sticker-thumb-${message.id}`}
           src={thumbDataUri}
           width={width}
           height={height}
@@ -55,6 +76,7 @@ const Sticker: FC<OwnProps> = ({
       )}
       {!isAnimated && shouldRenderFullMedia && (
         <img
+          id={`sticker-${message.id}`}
           src={mediaData as string}
           width={width}
           height={height}

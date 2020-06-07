@@ -1,21 +1,19 @@
 import React, {
-  FC, useState, useCallback, useEffect,
+  FC, useState, useCallback, useEffect, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { LeftColumnContent } from '../../types';
+import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { pick } from '../../util/iteratees';
 
 import Transition from '../ui/Transition';
-import LeftHeader from './LeftHeader';
-import ConnectionState from './ConnectionState';
-import ChatList from './ChatList';
-import LeftRecent from './LeftRecent.async';
-import LeftSearch from './LeftSearch.async';
+import LeftMain from './main/LeftMain';
 import Settings from './settings/Settings.async';
-import ContactList from './ContactList.async';
+import NewChannel from './newChat/NewChannel.async';
+import NewGroup from './newChat/NewGroup.async';
 
 import './LeftColumn.scss';
 
@@ -23,19 +21,88 @@ type StateProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery'>;
+type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery' | 'resetChatCreation'>;
 
-const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
+enum ContentType {
+  Main,
+  // eslint-disable-next-line no-shadow
+  Settings,
+  Contacts,
+  // eslint-disable-next-line no-shadow
+  NewGroup,
+  // eslint-disable-next-line no-shadow
+  NewChannel
+}
 
-const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSearchQuery }) => {
+const RENDER_COUNT = Object.keys(ContentType).length / 2;
+const RESET_TRANSITION_DELAY_MS = 250;
+
+const LeftColumn: FC<StateProps & DispatchProps> = ({
+  searchQuery,
+  setGlobalSearchQuery,
+  resetChatCreation,
+}) => {
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
+  const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
 
-  const handleReset = useCallback(() => {
+  // Used to reset child components in background.
+  const [lastResetTime, setLastResetTime] = useState<number>(0);
+
+  let contentType: ContentType = ContentType.Main;
+  switch (content) {
+    case LeftColumnContent.Settings:
+      contentType = ContentType.Settings;
+      break;
+    case LeftColumnContent.NewChannel:
+      contentType = ContentType.NewChannel;
+      break;
+    case LeftColumnContent.NewGroupStep1:
+    case LeftColumnContent.NewGroupStep2:
+      contentType = ContentType.NewGroup;
+      break;
+  }
+
+  const handleReset = useCallback((forceReturnToChatList?: boolean) => {
+    if (
+      content === LeftColumnContent.NewGroupStep2
+      && !forceReturnToChatList
+    ) {
+      setContent(LeftColumnContent.NewGroupStep1);
+      return;
+    }
+
+    if (content === LeftColumnContent.Settings) {
+      switch (settingsScreen) {
+        case SettingsScreens.EditProfile:
+        case SettingsScreens.General:
+        case SettingsScreens.Notifications:
+        case SettingsScreens.Privacy:
+        case SettingsScreens.Language:
+          setSettingsScreen(SettingsScreens.Main);
+          return;
+        case SettingsScreens.PrivacyPhoneNumber:
+        case SettingsScreens.PrivacyLastSeen:
+        case SettingsScreens.PrivacyProfilePhoto:
+        case SettingsScreens.PrivacyForwarding:
+        case SettingsScreens.PrivacyGroupChats:
+        case SettingsScreens.PrivacyActiveSessions:
+        case SettingsScreens.PrivacyBlockedUsers:
+          setSettingsScreen(SettingsScreens.Privacy);
+          return;
+        default:
+          break;
+      }
+    }
+
     setContent(LeftColumnContent.ChatList);
     setContactsFilter('');
     setGlobalSearchQuery({ query: '' });
-  }, [setGlobalSearchQuery]);
+    resetChatCreation();
+    setTimeout(() => {
+      setLastResetTime(Date.now());
+    }, RESET_TRANSITION_DELAY_MS);
+  }, [content, settingsScreen, setGlobalSearchQuery, resetChatCreation]);
 
   const handleSearchQuery = useCallback((query: string) => {
     if (content === LeftColumnContent.Contacts) {
@@ -50,62 +117,65 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({ searchQuery, setGlobalSear
     }
   }, [content, setGlobalSearchQuery, searchQuery]);
 
-  const handleSelectSettings = useCallback(() => {
-    setContent(LeftColumnContent.Settings);
-  }, []);
-
-  const handleSelectContacts = useCallback(() => {
-    setContent(LeftColumnContent.Contacts);
-  }, []);
-
   useEffect(
-    () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(handleReset) : undefined),
+    () => (content !== LeftColumnContent.ChatList ? captureEscKeyListener(() => handleReset()) : undefined),
     [content, handleReset],
   );
 
-  function renderContent() {
-    switch (content) {
-      case LeftColumnContent.ChatList:
-        return <ChatList />;
-      case LeftColumnContent.RecentChats:
-        return <LeftRecent onReset={handleReset} />;
-      case LeftColumnContent.GlobalSearch:
-        return <LeftSearch searchQuery={searchQuery} onReset={handleReset} />;
-      case LeftColumnContent.Settings:
-        return <Settings />;
-      case LeftColumnContent.Contacts:
-        return <ContactList filter={contactsFilter} />;
-      default:
-        return null;
-    }
-  }
-
   return (
-    <div id="LeftColumn">
-      <LeftHeader
-        content={content}
-        contactsFilter={contactsFilter}
-        onSearchQuery={handleSearchQuery}
-        onSelectSettings={handleSelectSettings}
-        onSelectContacts={handleSelectContacts}
-        onReset={handleReset}
-      />
-      <ConnectionState />
-      <Transition name="zoom-fade" renderCount={TRANSITION_RENDER_COUNT} activeKey={content}>
-        {renderContent}
-      </Transition>
-    </div>
+    <Transition
+      id="LeftColumn"
+      name="slide-layers"
+      renderCount={RENDER_COUNT}
+      activeKey={contentType}
+    >
+      {() => {
+        switch (contentType) {
+          case ContentType.Settings:
+            return (
+              <Settings
+                currentScreen={settingsScreen}
+                onScreenSelect={setSettingsScreen}
+                onReset={handleReset}
+              />
+            );
+          case ContentType.NewChannel:
+            return (
+              <NewChannel
+                key={lastResetTime}
+                onReset={handleReset}
+              />
+            );
+          case ContentType.NewGroup:
+            return (
+              // @optimization No `key` here to re-use previously rendered subtree
+              <NewGroup
+                content={content}
+                onContentChange={setContent}
+                onReset={handleReset}
+              />
+            );
+          default:
+            return (
+              <LeftMain
+                content={content}
+                searchQuery={searchQuery}
+                contactsFilter={contactsFilter}
+                onContentChange={setContent}
+                onSearchQuery={handleSearchQuery}
+                onReset={handleReset}
+              />
+            );
+        }
+      }}
+    </Transition>
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const { query } = global.globalSearch;
-
     return { searchQuery: query };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setGlobalSearchQuery } = actions;
-    return { setGlobalSearchQuery };
-  },
-)(LeftColumn);
+  (setGlobal, actions): DispatchProps => pick(actions, ['setGlobalSearchQuery', 'resetChatCreation']),
+)(LeftColumn));

@@ -14,12 +14,14 @@ import './Album.scss';
 type OwnProps = {
   album: IAlbum;
   loadAndPlay?: boolean;
+  hasCustomAppendix?: boolean;
   onMediaClick: (messageId: number) => void;
 };
 
 const Album: FC<OwnProps> = ({
   album,
   loadAndPlay,
+  hasCustomAppendix,
   onMediaClick,
 }) => {
   const albumMediaParams = useMemo(() => {
@@ -96,15 +98,18 @@ const Album: FC<OwnProps> = ({
     if (photo) {
       return (
         <Photo
+          id={`album-media-${message.id}`}
           message={message}
           load={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
+          shouldAffectAppendix={hasCustomAppendix && index === mediaCount - 1}
           onClick={() => onMediaClick(message.id)}
         />
       );
     } else if (video) {
       return (
         <Video
+          id={`album-media-${message.id}`}
           message={message}
           loadAndPlay={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
@@ -113,7 +118,7 @@ const Album: FC<OwnProps> = ({
       );
     }
 
-    return null;
+    return undefined;
   }
 
   const className = buildClassName(

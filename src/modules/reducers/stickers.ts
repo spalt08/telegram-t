@@ -24,11 +24,11 @@ export function updateStickerSets(global: GlobalState, hash: number, sets: ApiSt
   return {
     ...global,
     stickers: {
+      ...global.stickers,
       all: {
         hash,
         byId: updatedSets,
       },
-      recent: global.stickers.recent,
     },
   };
 }
@@ -40,6 +40,7 @@ export function updateStickerSet(global: GlobalState, set: ApiStickerSet, sticke
   return {
     ...global,
     stickers: {
+      ...global.stickers,
       all: {
         ...allStickers,
         byId: {
@@ -51,7 +52,6 @@ export function updateStickerSet(global: GlobalState, set: ApiStickerSet, sticke
           },
         },
       },
-      recent: global.stickers.recent,
     },
   };
 }

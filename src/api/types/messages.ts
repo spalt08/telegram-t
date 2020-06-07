@@ -19,7 +19,7 @@ export interface ApiPhoto {
 export interface ApiSticker {
   id: string;
   emoji: string;
-  is_animated: boolean;
+  isAnimated: boolean;
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
@@ -113,7 +113,14 @@ export interface ApiPoll {
   };
 }
 
-export type ApiNewPoll = ApiPoll['summary'];
+export type ApiNewPoll = {
+  summary: ApiPoll['summary'];
+  quiz?: {
+    correctAnswers: string[];
+    solution?: string;
+    solutionEntities?: ApiMessageEntity[];
+  };
+};
 
 export interface ApiAction {
   text: string;
@@ -132,13 +139,12 @@ export interface ApiWebPage {
 }
 
 export interface ApiMessageForwardInfo {
-  '@type': 'messageForwardInfo';
-  from_chat_id?: number;
-  from_message_id?: number;
+  fromChatId?: number;
+  fromMessageId?: number;
   origin: {
-    '@type': 'messageForwardOriginUser';
-    sender_user_id?: number;
-    sender_user_name?: string;
+    senderUserId?: number;
+    senderUsername?: string;
+    channelPostId?: number;
   };
 }
 
@@ -171,14 +177,13 @@ export enum ApiMessageEntityTypes {
 }
 
 export interface ApiFormattedText {
-  '@type': 'formattedText';
   text: string;
   entities?: ApiMessageEntity[];
 }
 
 export interface ApiMessage {
   id: number;
-  chat_id: number;
+  chatId: number;
   content: {
     text?: ApiFormattedText;
     photo?: ApiPhoto;
@@ -193,22 +198,20 @@ export interface ApiMessage {
     voice?: ApiVoice;
   };
   date: number;
-  is_outgoing: boolean;
-  sender_user_id?: number;
-  reply_to_message_id?: number;
-  sending_state?: {
-    '@type': 'messageSendingStatePending' | 'messageSendingStateFailed';
-  };
-  forward_info?: ApiMessageForwardInfo;
-  is_deleting?: boolean;
-  prev_local_id?: number;
+  isOutgoing: boolean;
+  senderUserId?: number;
+  replyToMessageId?: number;
+  sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
+  forwardInfo?: ApiMessageForwardInfo;
+  isDeleting?: boolean;
+  previousLocalId?: number;
   views?: number;
   isEdited?: boolean;
   isMediaUnread?: boolean;
   groupedId?: string;
-  hasMention?: true;
+  hasUnreadMention?: boolean;
 }
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
-export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio';
+export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'members';

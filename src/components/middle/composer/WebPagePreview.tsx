@@ -5,6 +5,7 @@ import { GlobalActions, GlobalState } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
 
 import { throttle } from '../../../util/schedulers';
+import { pick } from '../../../util/iteratees';
 import parseMessageInput from './helpers/parseMessageInput';
 
 import WebPage from '../message/WebPage';
@@ -40,7 +41,7 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [clearWebPagePreview, loadWebPagePreview, messageText, hasPreview]);
 
   if (!webPagePreview || !messageText.length) {
-    return null;
+    return undefined;
   }
 
   // TODO Refactor so the `WebPage` can be used without message
@@ -59,12 +60,6 @@ const WebPagePreview: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { webPagePreview } = global;
-    return { webPagePreview };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { loadWebPagePreview, clearWebPagePreview } = actions;
-    return { loadWebPagePreview, clearWebPagePreview };
-  },
+  (global): StateProps => pick(global, ['webPagePreview']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadWebPagePreview', 'clearWebPagePreview']),
 )(WebPagePreview));

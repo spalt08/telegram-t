@@ -1,16 +1,19 @@
 import React, { FC, useCallback } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { getUserFullName, isChatChannel, isChatPrivate } from '../../modules/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
+import renderText from '../common/helpers/renderText';
 import {
   selectChat,
   selectChatMessage,
   selectSender,
   selectUser,
 } from '../../modules/selectors';
+import { pick } from '../../util/iteratees';
 
 import Avatar from '../common/Avatar';
 
@@ -45,8 +48,10 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [sender, openMediaViewer, isChannelChatMessage, openChatWithInfo, openUserInfo]);
 
   if (!sender || (!message && !isAvatar)) {
-    return null;
+    return undefined;
   }
+
+  const senderTitle = isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser);
 
   return (
     <div className="SenderInfo" onClick={openSenderInfo}>
@@ -57,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       )}
       <div className="meta">
         <div className="title">
-          {isChannelChatMessage ? (sender as ApiChat).title : getUserFullName(sender as ApiUser)}
+          {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date">
           {isAvatar ? 'Profile photo' : formatMediaDateTime(message!.date * 1000)}
@@ -104,8 +109,5 @@ export default withGlobal<OwnProps>(
       message,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { openMediaViewer, openUserInfo, openChatWithInfo } = actions;
-    return { openMediaViewer, openUserInfo, openChatWithInfo };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, ['openMediaViewer', 'openUserInfo', 'openChatWithInfo']),
 )(SenderInfo);

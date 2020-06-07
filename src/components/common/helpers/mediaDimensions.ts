@@ -1,6 +1,7 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
 import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
 import windowSize from '../../../util/windowSize';
+import { MOBILE_SCREEN_MAX_WIDTH } from '../../../config';
 
 export type AlbumMediaParameters = {
   mediaCount: number;
@@ -13,6 +14,16 @@ export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
 export const ROUND_VIDEO_DIMENSIONS = 200;
+export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
+
+function getMaxMessageWidthRem(fromOwnMessage: boolean) {
+  const regularMaxWidth = fromOwnMessage ? 30 : 29;
+  if (window.innerWidth > MOBILE_SCREEN_MAX_WIDTH) {
+    return regularMaxWidth;
+  }
+
+  return Math.min(regularMaxWidth, Math.floor(window.innerWidth * 0.75) / REM);
+}
 
 function getAvailableWidth(
   fromOwnMessage: boolean,
@@ -25,8 +36,8 @@ function getAvailableWidth(
   if (columnCount && !isFullWidth) {
     extraPaddingRem += 0.125 * (columnCount - 1);
   }
-  const maxMessageWidthRem = fromOwnMessage ? 30 : 29;
-  const availableWidthRem = (maxMessageWidthRem - extraPaddingRem) / (columnCount && !isFullWidth ? columnCount : 1);
+  const availableWidthRem = (getMaxMessageWidthRem(fromOwnMessage) - extraPaddingRem)
+    / (columnCount && !isFullWidth ? columnCount : 1);
 
   return availableWidthRem * REM;
 }
@@ -50,7 +61,7 @@ function calculateDimensionsForMessageMedia({
   isWebPagePhoto,
   isGif,
   albumMediaParams,
-} : {
+}: {
   width: number;
   height: number;
   fromOwnMessage: boolean;
@@ -75,7 +86,7 @@ export function getMediaViewerAvailableDimensions(withFooter: boolean): IDimensi
   }
 
   return {
-    width: Math.min(windowWidth - 3 * REM, windowWidth * 0.76),
+    width: windowWidth,
     height: windowHeight - occupiedHeightRem * REM,
   };
 }

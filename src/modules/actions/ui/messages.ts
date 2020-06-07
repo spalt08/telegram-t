@@ -4,18 +4,16 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
   replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
 } from '../../reducers';
-import {
-  selectFirstUnreadId, selectOpenChat, selectRealLastReadId, selectViewportIds,
-} from '../../selectors';
-import { isMessageIdNewer } from '../../helpers';
+import { selectOpenChat, selectViewportIds, selectIsRightColumnShown } from '../../selectors';
 
 const FOCUS_DURATION = 2000;
+const FORWARD_MENU_OPEN_DELAY_MS = 450;
 
 let blurTimeout: number;
 
 addReducer('openMediaViewer', (global, actions, payload) => {
   const {
-    chatId, messageId, avatarOwnerId, isFromSharedMedia = false,
+    chatId, messageId, avatarOwnerId, origin,
   } = payload!;
 
   return {
@@ -24,25 +22,23 @@ addReducer('openMediaViewer', (global, actions, payload) => {
       chatId,
       messageId,
       avatarOwnerId,
-      isFromSharedMedia,
+      origin,
     },
     forwardMessages: {},
   };
 });
 
-addReducer('focusTopMessage', (global, actions) => {
+addReducer('focusLastMessage', (global, actions) => {
   const selectedChat = selectOpenChat(global);
   if (!selectedChat) {
     return;
   }
 
   const chatId = selectedChat.id;
-  const messageId = selectedChat.unread_count
-    ? selectFirstUnreadId(global, chatId) || selectRealLastReadId(global, chatId)
-    : selectedChat.last_message && selectedChat.last_message.id;
+  const messageId = selectedChat.lastMessage && selectedChat.lastMessage.id;
 
   if (messageId) {
-    actions.focusMessage({ chatId, messageId });
+    actions.focusMessage({ chatId, messageId, noHighlight: true });
   }
 });
 
@@ -78,7 +74,7 @@ addReducer('focusMessage', (global, actions, payload) => {
   newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
 
   if (viewportIds && !shouldSwitchChat) {
-    const direction = isMessageIdNewer(messageId, viewportIds[0]) ? FocusDirection.Down : FocusDirection.Up;
+    const direction = messageId > viewportIds[0] ? FocusDirection.Down : FocusDirection.Up;
     newGlobal = updateFocusDirection(newGlobal, direction);
   }
 
@@ -89,15 +85,32 @@ addReducer('focusMessage', (global, actions, payload) => {
 });
 
 addReducer('openForwardMenu', (global, actions, payload) => {
-  const { fromChatId, messageIds } = payload!;
+  const { fromChatId, messageIds, noDelay } = payload!;
+
+  const shouldOpenInstantly = selectIsRightColumnShown(global) || noDelay;
 
   setGlobal({
     ...global,
     forwardMessages: {
       fromChatId,
       messageIds,
+      ...(shouldOpenInstantly && { isColumnShown: true }),
     },
   });
+
+  if (!shouldOpenInstantly) {
+    window.setTimeout(() => {
+      const newGlobal = getGlobal();
+
+      setGlobal({
+        ...newGlobal,
+        forwardMessages: {
+          ...newGlobal.forwardMessages,
+          isColumnShown: true,
+        },
+      });
+    }, FORWARD_MENU_OPEN_DELAY_MS);
+  }
 });
 
 addReducer('closeForwardMenu', (global) => {

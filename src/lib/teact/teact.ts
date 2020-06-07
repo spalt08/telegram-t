@@ -352,7 +352,7 @@ export function setTarget($element: VirtualElement, target: Node) {
   }
 }
 
-export function useState<T = any, I = T>(initial?: I): [T, StateHookSetter<T>] {
+export function useState<T>(initial?: T): [T, StateHookSetter<T>] {
   const { cursor, byCursor } = renderingInstance.hooks.state;
 
   if (byCursor[cursor] === undefined) {

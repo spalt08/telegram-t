@@ -50,7 +50,7 @@ const AttachmentModal: FC<OwnProps> = ({
 
   function renderHeader() {
     if (!renderingAttachment) {
-      return null;
+      return undefined;
     }
 
     return (
@@ -59,13 +59,20 @@ const AttachmentModal: FC<OwnProps> = ({
           <i className="icon-close" />
         </Button>
         <div className="modal-title">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
-        <Button color="primary" size="smaller" className="modal-action-button" onClick={sendAttachment}>Send</Button>
+        <Button
+          color="primary"
+          size="smaller"
+          className="modal-action-button"
+          onClick={sendAttachment}
+        >
+          Send
+        </Button>
       </div>
     );
   }
 
   if (!renderingAttachment) {
-    return null;
+    return undefined;
   }
 
   return (

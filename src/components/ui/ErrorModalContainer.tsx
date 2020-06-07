@@ -1,10 +1,11 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 import { ApiError } from '../../api/types';
 
 import getReadableErrorText from '../../util/getReadableErrorText';
+import { pick } from '../../util/iteratees';
 
 import Modal from './Modal';
 import Button from './Button';
@@ -19,7 +20,7 @@ type DispatchProps = Pick<GlobalActions, 'dismissError'>;
 
 const ErrorModalContainer: FC<StateProps & DispatchProps> = ({ errors, dismissError }) => {
   if (!errors.length) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -47,13 +48,7 @@ function getErrorHeader(error: ApiError) {
   return 'Something went wrong';
 }
 
-export default withGlobal(
-  (global): StateProps => {
-    const { errors } = global;
-    return { errors };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { dismissError } = actions;
-    return { dismissError };
-  },
-)(ErrorModalContainer);
+export default memo(withGlobal(
+  (global): StateProps => pick(global, ['errors']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['dismissError']),
+)(ErrorModalContainer));

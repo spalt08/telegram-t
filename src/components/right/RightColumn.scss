@@ -1,7 +1,113 @@
 #RightColumn {
-  overflow: hidden;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--right-column-width);
+  height: 100%;
+  transform: translate3d(var(--right-column-width), 0, 0);
+  transition: transform var(--layer-transition);
+  background: var(--color-background);
+  border-left: 1px solid var(--color-borders);
+  z-index: var(--z-right-column);
+
+  // @optimization
+  &:not(:hover) {
+    .Picker .chat-item-clickable:nth-child(n + 16) {
+      display: none !important;
+    }
+  }
+
+  @media (min-width: 1276px) {
+    pointer-events: all;
+  }
+
+  @media (max-width: 1275px) {
+    box-shadow: 0 .25rem .5rem .1rem rgba(114, 114, 114, 0.25);
+  }
+
+  @media (max-width: 600px) {
+    width: 100vw;
+    transform: translate3d(110vw, 0, 0);
+  }
 
   > .Transition {
     height: calc(100% - 3.75rem);
+  }
+}
+
+#RightColumn-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-right-column);
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+
+  @media (min-width: 1276px) {
+    pointer-events: none;
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: black;
+    opacity: 0;
+
+    @media (max-width: 600px) {
+      transition: opacity var(--layer-transition);
+    }
+  }
+
+  body.is-right-column-shown &, body.animating-right-column & {
+    visibility: visible;
+  }
+
+  body.is-right-column-shown & {
+    pointer-events: none;
+
+    @media (max-width: 600px) {
+      .overlay-backdrop {
+        opacity: var(--layer-blackout-opacity);
+      }
+    }
+
+    #RightColumn {
+      transform: translate3d(0, 0, 0);
+
+      &::after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: -1px;
+        right: -1px;
+        top: 0;
+        bottom: 0;
+        background: black;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity var(--layer-transition);
+
+        body.animation-level-0 &, body.animation-level-1 & {
+          display: none;
+        }
+      }
+
+      body.has-open-context-menu & {
+        &, * {
+          pointer-events: none !important;
+        }
+
+        &::after {
+          opacity: 0.25;
+        }
+      }
+    }
   }
 }

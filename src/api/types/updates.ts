@@ -5,7 +5,7 @@ import {
   ApiChatMember,
 } from './chats';
 import { ApiMessage, ApiPoll } from './messages';
-import { ApiUser, ApiUserFullInfo } from './users';
+import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
   'authorizationStateLoggingOut' |
@@ -15,20 +15,22 @@ export type ApiUpdateAuthorizationStateType = (
   'authorizationStateWaitRegistration' |
   'authorizationStateReady' |
   'authorizationStateClosing' |
-  'authorizationStateClosed'
+  'authorizationStateClosed' |
+  'authorizationStateWaitQrCode'
 );
 
 export type ApiUpdateConnectionStateType = (
   'connectionStateConnecting' |
-  'connectionStateReady'
+  'connectionStateReady' |
+  'connectionStateBroken'
 );
 
 export type ApiUpdateAuthorizationState = {
   '@type': 'updateAuthorizationState';
-  authorization_state: {
-    '@type': ApiUpdateAuthorizationStateType;
-  };
-  session_id?: string;
+  authorizationState: ApiUpdateAuthorizationStateType;
+  sessionId?: string;
+  hint?: string;
+  qrCode?: { token: string; expires: number };
 };
 
 export type ApiUpdateAuthorizationError = {
@@ -38,14 +40,12 @@ export type ApiUpdateAuthorizationError = {
 
 export type ApiUpdateConnectionState = {
   '@type': 'updateConnectionState';
-  connection_state: {
-    '@type': ApiUpdateConnectionStateType;
-  };
+  connectionState: ApiUpdateConnectionStateType;
 };
 
-export type ApiUpdateCurrentUserId = {
-  '@type': 'updateCurrentUserId';
-  current_user_id: number;
+export type ApiUpdateCurrentUser = {
+  '@type': 'updateCurrentUser';
+  currentUser: ApiUser;
 };
 
 export type ApiUpdateChat = {
@@ -79,7 +79,7 @@ export type ApiUpdateChatTypingStatus = {
 export type ApiUpdateChatFullInfo = {
   '@type': 'updateChatFullInfo';
   id: number;
-  full_info: Partial<ApiChatFullInfo>;
+  fullInfo: Partial<ApiChatFullInfo>;
 };
 
 export type ApiUpdateChatMembers = {
@@ -95,32 +95,38 @@ export type ApiUpdatePinnedChatIds = {
   ids: number[];
 };
 
+export type ApiUpdateChatPinned = {
+  '@type': 'updateChatPinned';
+  id: number;
+  isPinned: boolean;
+};
+
 export type ApiUpdateNewMessage = {
   '@type': 'newMessage';
-  chat_id: number;
+  chatId: number;
   id: number;
   message: Partial<ApiMessage>;
 };
 
-export type ApiUpdateMessage= {
+export type ApiUpdateMessage = {
   '@type': 'updateMessage';
-  chat_id: number;
+  chatId: number;
   id: number;
   message: Partial<ApiMessage>;
 };
 
 export type ApiUpdateMessageSendSucceeded = {
   '@type': 'updateMessageSendSucceeded';
-  chat_id: number;
-  local_id: number;
+  chatId: number;
+  localId: number;
   message: ApiMessage;
 };
 
 export type ApiUpdateMessageSendFailed = {
   '@type': 'updateMessageSendFailed';
-  chat_id: number;
-  local_id: number;
-  sending_state: {
+  chatId: number;
+  localId: number;
+  sendingState: {
     '@type': 'messageSendingStateFailed';
   };
 };
@@ -154,7 +160,12 @@ export type ApiUpdateMessagePollVote = {
 export type ApiUpdateDeleteMessages = {
   '@type': 'deleteMessages';
   ids: number[];
-  chat_id?: number;
+  chatId?: number;
+};
+
+export type ApiUpdateDeleteHistory = {
+  '@type': 'deleteHistory';
+  chatId: number;
 };
 
 export type ApiUpdateUser = {
@@ -163,22 +174,28 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
+export type ApiUpdateUserStatus = {
+  '@type': 'updateUserStatus';
+  userId: number;
+  status: ApiUserStatus;
+};
+
 export type ApiUpdateUserFullInfo = {
   '@type': 'updateUserFullInfo';
   id: number;
-  full_info: Partial<ApiUserFullInfo>;
+  fullInfo: Partial<ApiUserFullInfo>;
 };
 
 export type ApiUpdateAvatar = {
   '@type': 'updateAvatar';
-  chat_id: number;
-  data_uri: string;
+  chatId: number;
+  dataUri: string;
 };
 
 export type ApiUpdateMessageImage = {
   '@type': 'updateMessageImage';
-  message_id: number;
-  data_uri: string;
+  messageId: number;
+  dataUri: string;
 };
 
 export type ApiError = {
@@ -194,16 +211,20 @@ export type ApiUpdateResetContacts = {
   '@type': 'updateResetContactList';
 };
 
+export type ApiUpdateFavoriteStickers = {
+  '@type': 'updateFavoriteStickers';
+};
+
 export type ApiUpdate = (
-  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUserId |
+  ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave |
-  ApiUpdateNewMessage | ApiUpdateMessage| ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
-  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote |
+  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
+  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
-  ApiUpdateUser | ApiUpdateUserFullInfo |
+  ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |
-  ApiUpdateError | ApiUpdateResetContacts
+  ApiUpdateError | ApiUpdateResetContacts | ApiUpdateFavoriteStickers
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -88,9 +88,9 @@ class MemorySession extends Session {
             p = utils.getInputPeer(e, false)
             markedId = utils.getPeerId(p)
         } catch (e) {
-            // Note: `get_input_peer` already checks for non-zero `access_hash`.
+            // Note: `get_input_peer` already checks for non-zero `accessHash`.
             // See issues #354 and #392. It also checks that the entity
-            // is not `min`, because its `access_hash` cannot be used
+            // is not `min`, because its `accessHash` cannot be used
             // anywhere (since layer 102, there are two access hashes).
             return
         }

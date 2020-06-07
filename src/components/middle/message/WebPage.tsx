@@ -4,6 +4,7 @@ import { ApiMessage } from '../../../api/types';
 
 import { getMessageWebPage } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
 
 import Photo from './Photo';
 
@@ -43,7 +44,7 @@ const WebPage: FC<OwnProps> = ({
   }, [webPage, isSquarePhoto, onMediaClick]);
 
   if (!webPage) {
-    return null;
+    return undefined;
   }
 
   const {
@@ -84,8 +85,10 @@ const WebPage: FC<OwnProps> = ({
         <a href={url} target="_blank" rel="noopener noreferrer" className="site-name">
           {siteName || displayUrl}
         </a>
-        <p className="site-title">{title}</p>
-        {truncatedDescription && <p className="site-description">{description}</p>}
+        <p className="site-title">{title && renderText(title)}</p>
+        {truncatedDescription && (
+          <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
+        )}
       </div>
     </div>
   );

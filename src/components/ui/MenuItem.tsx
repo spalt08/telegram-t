@@ -1,11 +1,13 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useCallback } from '../../lib/teact/teact';
+
+import buildClassName from '../../util/buildClassName';
 
 import RippleEffect from './RippleEffect';
 import AttentionIndicator from './AttentionIndicator';
 
 import './MenuItem.scss';
 
-type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement>) => void;
 
 type OwnProps = {
   icon?: string;
@@ -14,6 +16,7 @@ type OwnProps = {
   onClick?: OnClickHandler;
   disabled?: boolean;
   attention?: boolean;
+  ripple?: boolean;
 };
 
 const MenuItem: FC<OwnProps> = (props) => {
@@ -24,25 +27,52 @@ const MenuItem: FC<OwnProps> = (props) => {
     onClick,
     disabled,
     attention,
+    ripple,
   } = props;
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
       return;
     }
+
     onClick(e);
-  };
+  }, [disabled, onClick]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode !== 13 && e.keyCode !== 32) {
+      return;
+    }
+
+    if (disabled || !onClick) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      return;
+    }
+
+    onClick(e);
+  }, [disabled, onClick]);
+
+  const fullClassName = buildClassName(
+    'MenuItem',
+    className,
+    ripple && 'has-ripple',
+    disabled && 'disabled',
+  );
 
   return (
-    <div className={`MenuItem ${className || ''}`}>
-      <button type="button" onClick={handleClick} disabled={disabled}>
-        {icon && (
-          <i className={`icon-${icon}`} />
-        )}
-        {children}
+    <div role="button" tabIndex={0} className={fullClassName} onClick={handleClick} onKeyDown={handleKeyDown}>
+      {icon && (
+        <i className={`icon-${icon}`} />
+      )}
+      {children}
+      {!disabled && ripple && (
         <RippleEffect />
-        {attention && <AttentionIndicator show={attention} />}
-      </button>
+      )}
+      {attention && <AttentionIndicator show={attention} />}
     </div>
   );
 };

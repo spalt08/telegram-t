@@ -1,48 +1,81 @@
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, {
+  FC, memo, useCallback, useLayoutEffect, useRef,
+} from '../../lib/teact/teact';
+
+import { IDimensions } from '../../modules/helpers';
+
+import useShowTransition from '../../hooks/useShowTransition';
+import useBuffering from '../../hooks/useBuffering';
+
+import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './VideoPlayer.scss';
 
 type OwnProps = {
-  url: string;
+  url?: string;
   isGif?: boolean;
+  posterData?: string;
+  posterSize?: IDimensions;
+  downloadProgress?: number;
+  isMediaViewerOpen?: boolean;
+  onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
-const VideoPlayer: FC<OwnProps> = ({ url, isGif }) => {
-  const [hasSize, setHasSize] = useState(false);
+const VideoPlayer: FC<OwnProps> = ({
+  url,
+  isGif,
+  posterData,
+  posterSize,
+  downloadProgress,
+  isMediaViewerOpen,
+  onClose,
+}) => {
+  const videoRef = useRef<HTMLVideoElement>();
 
-  function handleLoadedMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {
-    const videoEl = e.currentTarget;
+  const { isBuffered, bufferingHandlers } = useBuffering();
+  const {
+    shouldRender: shouldRenderSpinner,
+    transitionClassNames: spinnerClassNames,
+  } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
 
-    if (videoEl.videoWidth > 0) {
-      setHasSize(true);
+  useLayoutEffect(() => {
+    if (!isMediaViewerOpen) {
+      videoRef.current!.pause();
     }
-  }
+  }, [isMediaViewerOpen]);
 
-  function stopEvent(e: React.MouseEvent<HTMLDivElement>) {
-    if (!isGif) {
-      e.stopPropagation();
-    }
-  }
-
-  const style = hasSize ? '' : 'opacity: 0';
+  const stopEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  }, []);
 
   return (
-    <div className="VideoPlayer" onClick={stopEvent}>
+    <div className="VideoPlayer" onClick={!isGif ? stopEvent : undefined}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         autoPlay
+        playsInline
         controls={!isGif}
         loop={isGif}
-        // @ts-ignore
-        style={style}
+        // This is to force auto playing on mobiles
+        muted={isGif}
         id="media-viewer-video"
-        onLoadedMetadata={handleLoadedMetadata}
+        poster={posterData}
+        width={posterSize && posterSize.width}
+        height={posterSize && posterSize.height}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...bufferingHandlers}
       >
         <source src={url} />
       </video>
+      {shouldRenderSpinner && (
+        <div className={['spinner-container', spinnerClassNames].join(' ')}>
+          {!isBuffered && <div className="buffering">Buffering...</div>}
+          <ProgressSpinner progress={isBuffered ? 1 : downloadProgress} onClick={onClose} />
+        </div>
+      )}
     </div>
   );
 };
 
 
-export default VideoPlayer;
+export default memo(VideoPlayer);

@@ -1,4 +1,6 @@
-import React, { FC, useRef, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useRef, useEffect, memo,
+} from '../../lib/teact/teact';
 
 import Loading from './Loading';
 
@@ -54,4 +56,4 @@ const SearchInput: FC<OwnProps> = ({
   );
 };
 
-export default SearchInput;
+export default memo(SearchInput);

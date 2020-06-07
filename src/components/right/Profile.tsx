@@ -1,20 +1,33 @@
 import React, {
-  FC, useCallback, useEffect, useMemo, useRef, useState,
+  FC, useCallback, useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
-import { ApiMessage } from '../../api/types';
+import {
+  ApiMessage,
+  ApiMessageSearchType,
+  ApiChatMember,
+  ApiUser,
+} from '../../api/types';
 import { GlobalActions } from '../../global/types';
+import { MediaViewerOrigin } from '../../types';
 
 import { SHARED_MEDIA_SLICE } from '../../config';
-import { getMessageContentIds, isChatPrivate } from '../../modules/helpers';
-import { selectChatMessages } from '../../modules/selectors';
+import {
+  getMessageContentIds,
+  isChatPrivate,
+  getSortedUserIds,
+  isChatBasicGroup,
+} from '../../modules/helpers';
+import { selectChatMessages, selectChat } from '../../modules/selectors';
 import { throttle } from '../../util/schedulers';
+import { pick } from '../../util/iteratees';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
+import Loading from '../ui/Loading';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Document from '../common/Document';
@@ -26,20 +39,33 @@ import WebLink from './sharedMedia/WebLink';
 
 import './Profile.scss';
 
+export enum ProfileState {
+  Profile,
+  SharedMedia,
+  MemberList,
+}
+
 type OwnProps = {
   chatId: number;
   userId?: number;
-  isSharedMedia: boolean;
-  onSharedMediaToggle: (isSharedMedia: boolean) => void;
+  profileState: ProfileState;
+  onProfileStateChange: (state: ProfileState) => void;
 };
 
 type StateProps = {
   resolvedUserId?: number;
   chatMessages?: Record<number, ApiMessage>;
   isSearchTypeEmpty?: boolean;
+  hasMembersTab?: boolean;
+  groupChatMembers?: ApiChatMember[];
+  usersById?: Record<number, ApiUser>;
+  isRestricted?: boolean;
+  lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer' | 'openUserInfo'
+)>;
 
 const TAB_TITLES = [
   'Media',
@@ -62,24 +88,54 @@ let isScrollingProgrammatically = false;
 
 const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
-  isSharedMedia,
-  onSharedMediaToggle,
+  profileState,
+  onProfileStateChange,
   resolvedUserId,
   chatMessages,
   isSearchTypeEmpty,
+  hasMembersTab,
+  groupChatMembers,
+  usersById,
+  isRestricted,
+  lastSyncTime,
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
+  openUserInfo,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const [activeTab, setActiveTab] = useState(0);
 
-  const mediaType = MEDIA_TYPES[activeTab];
+  const tabTitles = useMemo(() => ([
+    ...(hasMembersTab ? ['Members'] : []),
+    ...TAB_TITLES,
+  ].slice(0, 4)), [hasMembersTab]);
+
+  const mediaTypes = useMemo(() => ([
+    ...(hasMembersTab ? ['members'] : []),
+    ...MEDIA_TYPES,
+  ].slice(0, 4)) as ApiMessageSearchType[], [hasMembersTab]);
+
+  const mediaType = mediaTypes[activeTab];
 
   const messageIds = useMemo(
     () => (mediaType && chatMessages ? getMessageContentIds(chatMessages, mediaType).reverse() : []),
     [chatMessages, mediaType],
   );
+
+  const memberIds = useMemo(() => {
+    if (!groupChatMembers || !usersById) {
+      return [];
+    }
+
+    return getSortedUserIds(groupChatMembers.map(({ userId }) => userId), usersById);
+  }, [groupChatMembers, usersById]);
+
+  const handleLoadMore = useCallback((loadMoreOptions) => {
+    if (mediaType !== 'members') {
+      searchMessages(loadMoreOptions);
+    }
+  }, [searchMessages, mediaType]);
 
   useEffect(() => {
     if (mediaType) {
@@ -91,9 +147,11 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   useEffect(() => {
     function setMinHeight() {
       const container = containerRef.current!;
-      const transitionEl = container.querySelector<HTMLDivElement>('.Transition')!;
-      const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
-      transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+      const transitionEl = container.querySelector<HTMLDivElement>('.Transition');
+      const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
+      if (transitionEl && tabsEl) {
+        transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+      }
     }
 
     setMinHeight();
@@ -117,20 +175,31 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
       return;
     }
 
-    onSharedMediaToggle(container.scrollTop >= (
+    let state: ProfileState = ProfileState.Profile;
+    if (container.scrollTop >= (
       chatInfoEl.offsetHeight + 16 + (chatExtraEl ? chatExtraEl.offsetHeight : 0)
-    ));
-  }, [onSharedMediaToggle]);
+    )) {
+      state = mediaType === 'members'
+        ? ProfileState.MemberList
+        : ProfileState.SharedMedia;
+    }
+
+    onProfileStateChange(state);
+  }, [onProfileStateChange, mediaType]);
+
+  useEffect(() => {
+    determineSharedMedia();
+  }, [determineSharedMedia, mediaType]);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) {
       return;
     }
-    const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
+    const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
     const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
 
-    if (chatInfoEl && !isSharedMedia && tabsEl.offsetTop - container.scrollTop === 0) {
+    if (tabsEl && chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop === 0) {
       isScrollingProgrammatically = true;
       fastSmoothScroll(container, chatInfoEl, 'start', container.offsetHeight * 2);
       setTimeout(() => {
@@ -138,7 +207,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         determineSharedMedia();
       }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
     }
-  }, [determineSharedMedia, isSharedMedia]);
+  }, [determineSharedMedia, profileState]);
 
   const handleScroll = useCallback(() => {
     if (isScrollingProgrammatically) {
@@ -164,9 +233,13 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     container.style.marginRight = '0';
   }, []);
 
-  const handleSelectMedia = useCallback((messageId) => {
-    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, isFromSharedMedia: true });
+  const handleSelectMedia = useCallback((messageId: number) => {
+    openMediaViewer({ chatId: resolvedUserId || chatId, messageId, origin: MediaViewerOrigin.SharedMedia });
   }, [chatId, resolvedUserId, openMediaViewer]);
+
+  const handleMemberClick = useCallback((id: number) => {
+    openUserInfo({ id });
+  }, [openUserInfo]);
 
   function renderSharedMedia() {
     return (
@@ -197,9 +270,18 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               inSharedMedia
               message={chatMessages![id]}
               date={chatMessages![id].date}
+              lastSyncTime={lastSyncTime}
             />
           ))
-        ) : null}
+        ) : mediaType === 'members' ? (
+          memberIds.length
+            ? memberIds.map((id) => (
+              <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
+                <PrivateChatInfo userId={id} forceShowSelf />
+              </div>
+            ))
+            : <Loading />
+        ) : undefined}
       </div>
     );
   }
@@ -208,9 +290,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     <InfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
-      items={messageIds}
+      items={mediaType === 'members' ? memberIds : messageIds}
       preloadBackwards={SHARED_MEDIA_SLICE}
-      onLoadMore={searchMessages}
+      onLoadMore={handleLoadMore}
       onScroll={handleScroll}
     >
       {resolvedUserId ? [
@@ -225,27 +307,34 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         <GroupChatInfo chatId={chatId} avatarSize="jumbo" showFullInfo />,
         <GroupExtra chatId={chatId} />,
       ]}
-      <div className="shared-media">
-        <Transition
-          name="slide"
-          activeKey={activeTab}
-          renderCount={TAB_TITLES.length}
-          shouldRestoreHeight
-          onStart={handleTransitionStart}
-          onStop={handleTransitionStop}
-        >
-          {renderSharedMedia}
-        </Transition>
-        <TabList activeTab={activeTab} tabs={TAB_TITLES} onSwitchTab={setActiveTab} />
-      </div>
+      {!isRestricted && (
+        <div className="shared-media">
+          <Transition
+            name="slide"
+            activeKey={activeTab}
+            renderCount={tabTitles.length}
+            shouldRestoreHeight
+            onStart={handleTransitionStart}
+            onStop={handleTransitionStop}
+          >
+            {renderSharedMedia}
+          </Transition>
+          <TabList activeTab={activeTab} tabs={tabTitles} onSwitchTab={setActiveTab} />
+        </div>
+      )}
     </InfiniteScroll>
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { chatId, userId }): StateProps => {
+    const chat = selectChat(global, chatId);
     const chatMessages = selectChatMessages(global, userId || chatId);
     const { currentType: searchType } = global.messageSearch.byChatId[chatId] || {};
+    const { byId: usersById } = global.users;
+
+    const hasMembersTab = !userId && chat && isChatBasicGroup(chat) && !chat.migratedTo;
+    const groupChatMembers = chat && chat.fullInfo && chat.fullInfo.members;
 
     let resolvedUserId;
     if (userId) {
@@ -258,10 +347,19 @@ export default withGlobal<OwnProps>(
       resolvedUserId,
       chatMessages,
       isSearchTypeEmpty: !searchType,
+      hasMembersTab,
+      ...(hasMembersTab && groupChatMembers && {
+        groupChatMembers,
+        usersById,
+      }),
+      isRestricted: chat && chat.isRestricted,
+      lastSyncTime: global.lastSyncTime,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { setMessageSearchMediaType, searchMessages, openMediaViewer } = actions;
-    return { setMessageSearchMediaType, searchMessages, openMediaViewer };
-  },
-)(Profile);
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setMessageSearchMediaType',
+    'searchMessages',
+    'openMediaViewer',
+    'openUserInfo',
+  ]),
+)(Profile));

@@ -2,20 +2,19 @@
   position: relative;
   width: 200px;
   height: 200px;
-
-  &.playable video {
-    cursor: pointer;
-  }
-
-  video {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
+  cursor: pointer;
 
   .thumbnail-wrapper {
     width: 200px;
     height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .video-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
     border-radius: 50%;
     overflow: hidden;
   }

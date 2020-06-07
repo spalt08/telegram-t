@@ -1,13 +1,15 @@
 .MessageList {
   position: relative;
-  // TODO @css-magic
   display: grid;
   flex: 1;
   width: 100%;
   height: calc(100% - 1.1rem);
-  overflow-y: auto;
-  overflow-x: hidden;
   overflow-anchor: none;
+
+  // Disable `.custom-scroll` + `@mixin while-transition` optimization
+  overflow: auto !important;
+  overflow-x: hidden !important;
+  margin-right: 0 !important;
 
   &.no-avatars .Message > .Avatar {
     display: none;
@@ -22,6 +24,34 @@
     justify-content: flex-end;
     flex-direction: column;
     padding: 1rem 1rem .5rem 1.125rem;
+  }
+
+  .chat-restricted {
+    height: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    > p {
+      background: rgba(var(--color-text-secondary-rgb), 0.45);
+      color: white;
+      text-align: center;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      line-height: 1.5rem;
+      padding: 0 .5rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  .empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &.bottom-padding {
@@ -46,7 +76,7 @@
       z-index: -1;
 
       opacity: 0;
-      transition: opacity 500ms;
+      transition: opacity .5s;
 
       .no-right-column & {
         left: -17rem;
@@ -82,7 +112,8 @@
 
   .message-date-header,
   .unread-divider,
-  .ActionMessage {
+  .ActionMessage,
+  .empty {
     text-align: center;
 
     > span {
@@ -98,26 +129,26 @@
   }
 
   .message-date-header {
-    position: sticky;
-    top: 0.625rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
     z-index: var(--z-message-date-header);
     pointer-events: none;
+    opacity: 1;
 
-    &.stuck {
-      transition: opacity .3s ease;
+    transition: opacity .3s ease;
+
+    &.no-transition {
+      transition: none !important;
+    }
+
+    &.invisible {
       opacity: 0;
-
-      &.hidden {
-        visibility: hidden;
-      }
     }
   }
 
-  &.is-scrolling .message-date-header.stuck {
-    visibility: visible !important;
-    opacity: 1;
+  &.scrolled .message-date-header {
+    position: sticky;
+    top: 0.625rem;
   }
 
   .unread-divider,
@@ -138,5 +169,28 @@
 
   .message-date-header + .ActionMessage {
     margin-top: -0.5rem;
+  }
+
+  @media (min-width: 1276px) {
+    width: calc(100% - var(--right-column-width));
+    transform: translate3d(0, 0, 0);
+
+    body:not(.transition-locked) & {
+      transition: transform var(--layer-transition);
+    }
+
+    body.message-list-no-transform & {
+      transform: none;
+      left: 0;
+    }
+
+    body.is-right-column-shown & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
+
+    body.message-list-no-transform.is-right-column-shown & {
+      transform: none;
+      left: calc(var(--right-column-width) / -2);
+    }
   }
 }

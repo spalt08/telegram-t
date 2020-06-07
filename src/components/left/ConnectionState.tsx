@@ -1,6 +1,9 @@
 import React, { FC } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
+
 import { GlobalState } from '../../global/types';
+
+import { pick } from '../../util/iteratees';
 
 import Spinner from '../ui/Spinner';
 
@@ -19,8 +22,5 @@ const ConnectionState: FC<StateProps> = ({ connectionState }) => {
 };
 
 export default withGlobal(
-  (global): StateProps => {
-    const { connectionState } = global;
-    return { connectionState };
-  },
+  (global): StateProps => pick(global, ['connectionState']),
 )(ConnectionState);

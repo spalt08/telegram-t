@@ -1,10 +1,13 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import React, { FC, useEffect, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { ApiUser } from '../../api/types';
 import { GlobalActions, GlobalState } from '../../global/types';
+
 import { selectUser } from '../../modules/selectors';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
+import renderText from '../common/helpers/renderText';
+import { pick } from '../../util/iteratees';
 
 type OwnProps = {
   userId: number;
@@ -22,24 +25,24 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const {
     id: userId,
-    full_info,
+    fullInfo,
     username,
-    phone_number,
-    is_self,
+    phoneNumber,
+    isSelf,
   } = user || {};
 
   useEffect(() => {
-    if (lastSyncTime && !is_self) {
+    if (lastSyncTime && !isSelf) {
       loadFullUser({ userId });
     }
-  }, [is_self, loadFullUser, userId, lastSyncTime]);
+  }, [isSelf, loadFullUser, userId, lastSyncTime]);
 
-  if (!user || (is_self && !forceShowSelf)) {
-    return null;
+  if (!user || (isSelf && !forceShowSelf)) {
+    return undefined;
   }
 
-  const bio = full_info && full_info.bio;
-  const formattedNumber = phone_number && formatPhoneNumberWithCode(phone_number);
+  const bio = fullInfo && fullInfo.bio;
+  const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneNumber);
 
   return (
     <div className="ChatExtra">
@@ -47,7 +50,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="item">
           <i className="icon-info" />
           <div>
-            <p className="title">{bio}</p>
+            <p className="title">{renderText(bio)}</p>
             <p className="subtitle">Bio</p>
           </div>
         </div>
@@ -56,7 +59,7 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="item">
           <i className="icon-username" />
           <div>
-            <p className="title">{username}</p>
+            <p className="title">{renderText(username)}</p>
             <p className="subtitle">Username</p>
           </div>
         </div>
@@ -74,15 +77,12 @@ const UserExtra: FC<OwnProps & StateProps & DispatchProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { lastSyncTime } = global;
     const user = selectUser(global, userId);
 
     return { lastSyncTime, user };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { loadFullUser } = actions;
-    return { loadFullUser };
-  },
-)(UserExtra);
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadFullUser']),
+)(UserExtra));

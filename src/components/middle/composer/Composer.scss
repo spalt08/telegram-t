@@ -7,7 +7,20 @@
   align-items: flex-end;
   z-index: 10;
 
+  @media (min-width: 1276px) {
+    width: calc(100% - var(--right-column-width));
+
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--layer-transition);
+
+    body.is-right-column-shown & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
+  }
+
   &::before {
+    --shadow-color: #84a686;
+
     content: "";
     display: block;
     position: absolute;
@@ -15,12 +28,31 @@
     left: 1.125rem;
     right: 1.125rem;
     height: calc(50%);
-    box-shadow: 0 0 .5rem .5rem #84a686;
-    background: #84a686;
+    box-shadow: 0 0 .5rem .5rem var(--shadow-color);
+    background: var(--shadow-color);
 
     @media screen and (min-height: 750px) {
-      box-shadow: 0 0 .5rem .5rem #759b72;
-      background: #759b72;
+      --shadow-color: #759b72;
+    }
+
+    @media screen and (min-width: 1276px) {
+      body.animation-level-2 & {
+        --shadow-color: #97af8e;
+      }
+
+      body.animation-level-2.is-right-column-shown & {
+        --shadow-color: #84a686;
+      }
+
+      @media (min-height: 750px) {
+        body.animation-level-2 & {
+          --shadow-color: #91a67f;
+        }
+
+        body.animation-level-2.is-right-column-shown & {
+          --shadow-color: #759b72;
+        }
+      }
     }
   }
 
@@ -67,7 +99,7 @@
         animation: hide-icon .4s forwards ease-out;
       }
 
-      transition: box-shadow 200ms ease-out;
+      transition: box-shadow .2s ease-out;
     }
 
     &.record {
@@ -180,7 +212,8 @@
     line-height: 1.5rem;
 
     &.overflown {
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     &.touched, &:focus {
@@ -204,9 +237,8 @@
 
   .form-control {
     margin-bottom: 0;
-
     background: transparent !important;
-    border-color: transparent !important;
+    border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     caret-color: var(--color-text);
@@ -224,6 +256,14 @@
     .form-control.overflown {
       margin-top: 0.75rem;
     }
+  }
+
+  .emoji {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0 1px -5px;
+    vertical-align: 0;
+    pointer-events: none;
   }
 }
 

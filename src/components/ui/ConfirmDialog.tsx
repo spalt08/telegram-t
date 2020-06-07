@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 import Modal from './Modal';
 import Button from './Button';
@@ -28,7 +28,9 @@ const ConfirmDialog: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <p>{text}</p>
+      {text.split('\\n').map((textPart) => (
+        <p>{textPart}</p>
+      ))}
       <Button
         className="confirm-dialog-button"
         isText
@@ -42,4 +44,4 @@ const ConfirmDialog: FC<OwnProps> = ({
   );
 };
 
-export default ConfirmDialog;
+export default memo(ConfirmDialog);

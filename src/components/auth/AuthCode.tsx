@@ -1,11 +1,12 @@
 import { FormEvent } from 'react';
 import React, {
-  FC, useState, useEffect, useCallback,
+  FC, useState, useEffect, useCallback, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import getMonkeyAnimationData from '../common/helpers/monkeys';
+import { pick } from '../../util/iteratees';
 
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
@@ -23,9 +24,9 @@ const TRACKING_END_FRAME = 180;
 const AuthCode: FC<StateProps & DispatchProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
-  const [code, setCode] = useState(undefined);
-  const [idleMonkeyData, setIdleMonkeyData] = useState(undefined);
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState(undefined);
+  const [code, setCode] = useState();
+  const [idleMonkeyData, setIdleMonkeyData] = useState();
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);
@@ -111,7 +112,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
             className={!isTracking ? 'hidden' : 'shown'}
             animationData={trackingMonkeyData}
             play={isTracking}
-            playSegment={isTracking && getTrackingFrames()}
+            playSegment={isTracking ? getTrackingFrames() : undefined}
             speed={2}
             noLoop
           />
@@ -139,19 +140,15 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
         onInput={onCodeChange}
         value={code}
         error={authError}
+        autoComplete="one-time-code"
+        inputMode="decimal"
       />
       {authIsLoading && <Loading />}
     </div>
   );
 };
 
-export default withGlobal(
-  (global): StateProps => {
-    const { authPhoneNumber, authIsLoading, authError } = global;
-    return { authPhoneNumber, authIsLoading, authError };
-  },
-  (setGlobal, actions): DispatchProps => {
-    const { setAuthCode, returnToAuthPhoneNumber, clearAuthError } = actions;
-    return { setAuthCode, returnToAuthPhoneNumber, clearAuthError };
-  },
-)(AuthCode);
+export default memo(withGlobal(
+  (global): StateProps => pick(global, ['authPhoneNumber', 'authIsLoading', 'authError']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setAuthCode', 'returnToAuthPhoneNumber', 'clearAuthError']),
+)(AuthCode));

@@ -2,10 +2,6 @@
   line-height: 1.2;
   font-size: 10rem;
 
-  &.round video, &.round img {
-    border-radius: 50% !important;
-  }
-
   .reply-message {
     display: flex;
     align-items: flex-start;
@@ -43,9 +39,25 @@
     }
   }
 
+  .emoji {
+    display: inline-block;
+    color: transparent;
+
+    &::selection {
+      background-color: var(--color-selection-highlight-emoji);
+      color: transparent;
+    }
+  }
+
   &.emoji-only-1 {
     font-size: 5rem;
 
+    .emoji {
+      width: 5rem;
+      height: 5rem;
+    }
+
+    .emoji,
     .text-content {
       margin-bottom: 1rem;
     }
@@ -53,6 +65,12 @@
 
   &.emoji-only-2 {
     font-size: 4rem;
+
+    .emoji {
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: .725rem;
+    }
 
     .text-content {
       margin-bottom: 1.1rem;
@@ -62,8 +80,15 @@
   &.emoji-only-3 {
     font-size: 3rem;
 
+
+    .emoji {
+      width: 3rem;
+      height: 3rem;
+      margin-bottom: .725rem;
+    }
+
     .text-content {
-      margin-bottom: 1.1rem;
+      margin-bottom: 1.125rem;
     }
   }
 

@@ -11,21 +11,22 @@ import {
   setTarget,
   VirtualElement,
   VirtualElementComponent,
-  VirtualElementTag,
   VirtualRealElement,
 } from './teact';
+import generateIdFor from '../../util/generateIdFor';
 
 type VirtualDomHead = {
   children: [VirtualElement] | [];
 };
 
-const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactChildrenKeyOrder']);
+const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 const MAPPED_ATTRIBUTES: { [k: string]: string } = {
   autoPlay: 'autoplay',
   autoComplete: 'autocomplete',
 };
+const INDEX_KEY_PREFIX = '__indexKey#';
 
-const $head: VirtualDomHead = { children: [] };
+const headsByElement: Record<string, VirtualDomHead> = {};
 let DEBUG_virtualTreeSize = 1;
 
 function render($element: VirtualElement, parentEl: HTMLElement | null) {
@@ -33,7 +34,15 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
     return undefined;
   }
 
-  $head.children = [renderWithVirtual(parentEl, undefined, $element, $head, 0) as VirtualElement];
+  let headId = parentEl.getAttribute('data-teact-head-id');
+  if (!headId) {
+    headId = generateIdFor(headsByElement);
+    headsByElement[headId] = { children: [] };
+    parentEl.setAttribute('data-teact-head-id', headId);
+  }
+
+  const $head = headsByElement[headId];
+  $head.children = [renderWithVirtual(parentEl, $head.children[0], $element, $head, 0) as VirtualElement];
 
   if (process.env.NODE_ENV === 'perf') {
     DEBUG_virtualTreeSize = 0;
@@ -51,8 +60,17 @@ function renderWithVirtual(
   $new: VirtualElement | undefined,
   $parent: VirtualRealElement | VirtualDomHead,
   index: number,
-  skipComponentUpdate = false,
-  insertAfterOrPrepend?: Element | 'prepend',
+  {
+    skipComponentUpdate = false,
+    forceIndex = false,
+    fragment,
+    moveDirection,
+  }: {
+    skipComponentUpdate?: boolean;
+    forceIndex?: boolean;
+    fragment?: DocumentFragment;
+    moveDirection?: 'up' | 'down';
+  } = {},
 ) {
   if (
     !skipComponentUpdate
@@ -80,12 +98,10 @@ function renderWithVirtual(
     const node = createNode($new);
     setTarget($new, node);
 
-    if (insertAfterOrPrepend === 'prepend' && parentEl.firstChild) {
-      parentEl.insertBefore(node, parentEl.firstChild);
-    } else if ((insertAfterOrPrepend instanceof Element) && insertAfterOrPrepend.nextSibling) {
-      parentEl.insertBefore(node, insertAfterOrPrepend.nextSibling);
+    if (forceIndex && parentEl.childNodes[index]) {
+      parentEl.insertBefore(node, parentEl.childNodes[index]);
     } else {
-      parentEl.appendChild(node);
+      (fragment || parentEl).appendChild(node);
     }
   } else if ($current && !$new) {
     unmountTree($current);
@@ -108,6 +124,17 @@ function renderWithVirtual(
       }
 
       if (isRealElement($current) && isRealElement($new)) {
+        if (moveDirection) {
+          const node = getTarget($current)!;
+          const nextSibling = parentEl.childNodes[moveDirection === 'up' ? index : index + 1];
+
+          if (nextSibling) {
+            parentEl.insertBefore(node, nextSibling);
+          } else {
+            (fragment || parentEl).appendChild(node);
+          }
+        }
+
         if (!areComponents) {
           updateAttributes($current, $new, getTarget($current) as HTMLElement);
         }
@@ -166,7 +193,7 @@ function setupComponentUpdateListener(
       componentInstance.$element,
       $parent,
       index,
-      true,
+      { skipComponentUpdate: true },
     ) as VirtualElementComponent;
   };
 }
@@ -205,12 +232,13 @@ function createNode($element: VirtualElement): Node {
 function renderChildren(
   $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
 ) {
-  if ($new.props.teactChildrenKeyOrder === 'asc') {
-    return renderOrderedChildren($current, $new, currentEl);
+  if ($new.props.teactFastList) {
+    return renderFastListChildren($current, $new, currentEl);
   }
 
   const maxLength = Math.max($current.children.length, $new.children.length);
   const newChildren = [];
+  const fragment = $new.children.length > $current.children.length + 1 ? document.createDocumentFragment() : undefined;
 
   for (let i = 0; i < maxLength; i++) {
     const $newChild = renderWithVirtual(
@@ -219,6 +247,7 @@ function renderChildren(
       $new.children[i],
       $new,
       i,
+      i >= $current.children.length ? { fragment } : undefined,
     );
 
     if ($newChild) {
@@ -226,53 +255,128 @@ function renderChildren(
     }
   }
 
-  return newChildren;
-}
-
-// A simple diff algorithm for two ordered lists. This is different to React which supports diffs for any keyed lists.
-function renderOrderedChildren(
-  $current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement,
-) {
-  let prevChild = $current.children[0] as VirtualRealElement;
-  let nextChild = $new.children[0] as VirtualRealElement;
-  let prevI = 0;
-  let nextI = 0;
-
-  const newChildren = [];
-  let i = 0;
-
-  let insertAfterOrPrepend: Element | 'prepend' = 'prepend';
-
-  while (prevChild || nextChild) {
-    if (nextChild && (!prevChild || nextChild.props.key < prevChild.props.key)) {
-      const newChild = renderWithVirtual(
-        currentEl, undefined, nextChild, $new, i, false, insertAfterOrPrepend,
-      ) as VirtualElementTag;
-      newChildren.push(newChild);
-      insertAfterOrPrepend = getTarget(newChild) as Element;
-
-      nextI++;
-      nextChild = $new.children[nextI] as VirtualRealElement;
-    } else if (prevChild && (!nextChild || nextChild.props.key > prevChild.props.key)) {
-      renderWithVirtual(currentEl, prevChild, undefined, $new, i);
-
-      prevI++;
-      prevChild = $current.children[prevI] as VirtualRealElement;
-    } else {
-      const newChild = renderWithVirtual(currentEl, prevChild, nextChild, $new, i) as VirtualElementTag;
-      newChildren.push(newChild);
-      insertAfterOrPrepend = getTarget(newChild) as Element;
-
-      prevI++;
-      prevChild = $current.children[prevI] as VirtualRealElement;
-      nextI++;
-      nextChild = $new.children[nextI] as VirtualRealElement;
-    }
-
-    i++;
+  if (fragment) {
+    currentEl.appendChild(fragment);
   }
 
   return newChildren;
+}
+
+function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement) {
+  const newKeys = new Set(
+    $new.children.map(($newChild) => ('props' in $newChild && $newChild.props.key)),
+  );
+
+  let currentRemainingIndex = 0;
+  const remainingByKey = $current.children
+    .reduce((acc, $currentChild, i) => {
+      let key = 'props' in $currentChild ? $currentChild.props.key : undefined;
+
+      // First we handle removed children
+      if (key && !newKeys.has(key)) {
+        renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
+
+        return acc;
+      } else if (!key) {
+        const $newChild = $new.children[i];
+        const newChildKey = ('props' in $newChild) ? $newChild.props.key : undefined;
+        // If a non-key element remains at the same index we preserve it with a virtual `key`
+        if ($newChild && !newChildKey) {
+          key = `${INDEX_KEY_PREFIX}${i}`;
+        } else {
+          renderWithVirtual(currentEl, $currentChild, undefined, $new, -1);
+
+          return acc;
+        }
+      }
+
+      // Then we build up info about remaining children
+      return {
+        ...acc,
+        [key]: {
+          $element: $currentChild,
+          index: currentRemainingIndex++,
+          order: 'props' in $currentChild ? $currentChild.props.teactOrderKey : undefined,
+        },
+      };
+    }, {} as Record<string, { $element: VirtualElement; index: number; order?: number }>);
+
+  const newChildren: VirtualElement[] = [];
+
+  let fragmentQueue: VirtualElement[] | undefined;
+  let fragmentIndex: number | undefined;
+
+  let currentPreservedIndex = 0;
+
+  $new.children.forEach(($newChild, i) => {
+    const key = 'props' in $newChild ? $newChild.props.key : `${INDEX_KEY_PREFIX}${i}`;
+    const currentChildInfo = remainingByKey[key];
+
+    if (!currentChildInfo) {
+      // All new nodes are queued to be inserted with fragments if possible.
+      if (!fragmentQueue) {
+        fragmentQueue = [];
+        fragmentIndex = i;
+      }
+
+      fragmentQueue.push($newChild);
+      return;
+    }
+
+    if (fragmentQueue) {
+      newChildren.push(...flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
+      fragmentIndex = undefined;
+      fragmentQueue = undefined;
+    }
+
+    // This is a "magic" `teactOrderKey` property that tells us the element is updated
+    const order = 'props' in $newChild ? $newChild.props.teactOrderKey : undefined;
+    const shouldMoveNode = currentChildInfo.index !== currentPreservedIndex && currentChildInfo.order !== order;
+    const isMovingDown = shouldMoveNode && currentPreservedIndex > currentChildInfo.index;
+
+    // When the node goes down, preserved indexing actually breaks, so the "magic" should help.
+    if (!shouldMoveNode || isMovingDown) {
+      currentPreservedIndex++;
+    }
+
+    newChildren.push(
+      renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, {
+        forceIndex: true,
+        ...(shouldMoveNode && {
+          moveDirection: isMovingDown ? 'down' : 'up',
+        }),
+      })!,
+    );
+  });
+
+  if (fragmentQueue) {
+    newChildren.push(...flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
+  }
+
+  return newChildren;
+}
+
+function flushFragmentQueue(
+  fragmentQueue: VirtualElement[], fragmentIndex: number, parentEl: HTMLElement, $parent: VirtualRealElement,
+) {
+  if (fragmentQueue.length === 1) {
+    return [renderWithVirtual(parentEl, undefined, fragmentQueue[0], $parent, fragmentIndex, { forceIndex: true })!];
+  } else if (fragmentQueue.length > 1) {
+    const fragment = document.createDocumentFragment();
+    const newChildren = fragmentQueue.map(($fragmentChild) => (
+      renderWithVirtual(parentEl, undefined, $fragmentChild, $parent, fragmentIndex!, { fragment })!
+    ));
+
+    if (parentEl.childNodes[fragmentIndex]) {
+      parentEl.insertBefore(fragment, parentEl.childNodes[fragmentIndex]);
+    } else {
+      parentEl.appendChild(fragment);
+    }
+
+    return newChildren;
+  }
+
+  throw new Error('Unexpected input');
 }
 
 function updateAttributes($current: VirtualRealElement, $new: VirtualRealElement, element: HTMLElement) {

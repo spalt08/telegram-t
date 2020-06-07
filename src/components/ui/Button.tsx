@@ -1,6 +1,8 @@
-import { MouseEvent as ReactMouseEvent, FocusEvent, RefObject } from 'react';
+import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 
-import React, { FC, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useRef, useCallback, useState,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -9,28 +11,31 @@ import RippleEffect from './RippleEffect';
 
 import './Button.scss';
 
-type MouseEventHandler = (e: ReactMouseEvent<HTMLButtonElement>) => void;
-type OnFocusHandler = (e: FocusEvent<HTMLButtonElement>) => void;
-
-type OwnProps = {
+export type OwnProps = {
   ref?: RefObject<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
-  onClick?: Function;
-  onMouseDown?: Function;
-  onMouseEnter?: Function;
-  onFocus?: Function;
+  onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: NoneToVoidFunction;
+  onMouseLeave?: NoneToVoidFunction;
+  onFocus?: NoneToVoidFunction;
   children: any;
-  size?: 'default' | 'smaller';
-  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white';
+  size?: 'default' | 'smaller' | 'tiny';
+  color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'dark';
   className?: string;
   round?: boolean;
+  fluid?: boolean;
   isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
   href?: string;
   download?: string;
   disabled?: boolean;
+  ripple?: boolean;
 };
+
+// Longest animation duration;
+const CLICKED_TIMEOUT = 400;
 
 const Button: FC<OwnProps> = ({
   ref,
@@ -38,23 +43,28 @@ const Button: FC<OwnProps> = ({
   onClick,
   onMouseDown,
   onMouseEnter,
+  onMouseLeave,
   onFocus,
   children,
   size = 'default',
   color = 'primary',
   className,
   round,
+  fluid,
   isText,
   isLoading,
   ariaLabel,
   href,
   download,
   disabled,
+  ripple,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
     elementRef = ref;
   }
+
+  const [isClicked, setIsClicked] = useState(false);
 
   const fullClassName = buildClassName(
     'Button',
@@ -62,10 +72,31 @@ const Button: FC<OwnProps> = ({
     size,
     color,
     round && 'round',
+    fluid && 'fluid',
     disabled && 'disabled',
     isText && 'text',
     isLoading && 'loading',
+    ripple && 'has-ripple',
+    isClicked && 'clicked',
   );
+
+  const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (!disabled && onClick) {
+      onClick(e);
+    }
+
+    setIsClicked(true);
+    setTimeout(() => {
+      setIsClicked(false);
+    }, CLICKED_TIMEOUT);
+  }, [disabled, onClick]);
+
+  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!disabled && onMouseDown) {
+      onMouseDown(e);
+    }
+  }, [onMouseDown, disabled]);
 
   if (href) {
     return (
@@ -77,7 +108,9 @@ const Button: FC<OwnProps> = ({
         download={download}
       >
         {children}
-        <RippleEffect />
+        {!disabled && ripple && (
+          <RippleEffect />
+        )}
       </a>
     );
   }
@@ -88,20 +121,23 @@ const Button: FC<OwnProps> = ({
       ref={elementRef as RefObject<HTMLButtonElement>}
       type={type}
       className={fullClassName}
-      onClick={onClick ? onClick as MouseEventHandler : undefined}
-      onMouseDown={onMouseDown ? onMouseDown as MouseEventHandler : undefined}
-      onMouseEnter={onMouseEnter ? onMouseEnter as MouseEventHandler : undefined}
-      onFocus={onFocus ? onFocus as OnFocusHandler : undefined}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}
+      onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
+      onFocus={onFocus && !disabled ? onFocus : undefined}
       aria-label={ariaLabel}
       title={ariaLabel}
     >
       {isLoading ? (
         <div>
           <span>Please wait...</span>
-          <Spinner color="white" />
+          <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       ) : children}
-      <RippleEffect />
+      {!disabled && ripple && (
+        <RippleEffect />
+      )}
     </button>
   );
 };

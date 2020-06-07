@@ -1,8 +1,11 @@
-import React, { FC, useState, useEffect } from '../../lib/teact/teact';
+import React, {
+  FC, useState, useEffect, memo, useCallback,
+} from '../../lib/teact/teact';
 
 import { countryList } from '../../util/phoneNumber';
-import { getPlatform } from '../../util/environment';
+import { PLATFORM_ENV } from '../../util/environment';
 import searchWords from '../../util/searchWords';
+import buildClassName from '../../util/buildClassName';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -18,6 +21,9 @@ type OwnProps = {
 };
 
 const DROPDOWN_HIDING_DURATION = 100;
+const BASE_FLAG_CLASS = PLATFORM_ENV === 'Windows'
+  ? 'country-flag sprite'
+  : 'country-flag';
 
 const CountryCodeInput: FC<OwnProps> = (props) => {
   const {
@@ -26,7 +32,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
     isLoading,
     onChange,
   } = props;
-  const [filter, setFilter] = useState(undefined);
+  const [filter, setFilter] = useState();
   const [filteredList, setFilteredList] = useState(countryList);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
@@ -34,30 +40,20 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
     setTimeout(() => updateFilter(undefined), DROPDOWN_HIDING_DURATION);
   }, [value]);
 
-  let className = 'input-group';
-  if (value) {
-    className += ' touched';
-  }
-
-  const baseFlagClass = getPlatform() === 'Windows'
-    ? 'country-flag sprite'
-    : 'country-flag';
-
   function updateFilter(filterValue?: string) {
     setFilter(filterValue);
     setFilteredList(getFilteredList(filterValue));
     setFocusedIndex(-1);
   }
 
-  function handleChange(e: React.MouseEvent<HTMLElement, MouseEvent>) {
-    const target = e.currentTarget as HTMLButtonElement;
-    const input = target.querySelector('input');
+  const handleChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
+    const { countryId } = (e.currentTarget.firstElementChild as HTMLDivElement).dataset;
 
-    const country: Country | undefined = countryList.find((c) => input && c.id === input.value);
+    const country: Country | undefined = countryList.find((c) => c.id === countryId);
     if (country && onChange) {
       onChange(country);
     }
-  }
+  }, [onChange]);
 
   function onInput(e: React.FormEvent<HTMLInputElement>) {
     const target = e.target as HTMLInputElement;
@@ -78,6 +74,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
 
   function onKeyDown(e: React.KeyboardEvent<any>) {
     const dropdown = document.querySelector('.CountryCodeInput .menu-container') as Element;
+
     if (e.keyCode !== 38 && e.keyCode !== 40) {
       return;
     }
@@ -94,7 +91,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
       return;
     }
 
-    const item = dropdown.childNodes[newIndex].firstChild as HTMLElement;
+    const item = dropdown.childNodes[newIndex] as HTMLElement;
     if (item) {
       setFocusedIndex(newIndex);
       item.focus();
@@ -114,7 +111,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
       : (value && value.name) || '';
 
     return (
-      <div className={className}>
+      <div className={buildClassName('input-group', value && 'touched')}>
         <input
           className={`form-control ${isOpen ? 'focus' : ''}`}
           type="text"
@@ -131,7 +128,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
         {isLoading ? (
           <Spinner color="black" />
         ) : (
-          <i onClick={handleTrigger} className={`icon-down ${isOpen ? 'open' : ''}`} />
+          <i onClick={handleTrigger} className={buildClassName('css-icon-down', isOpen && 'open')} />
         )}
       </div>
     );
@@ -149,8 +146,8 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
           className={value && country.id === value.id ? 'selected' : ''}
           onClick={handleChange}
         >
-          <input type="hidden" value={country.id} />
-          <span className={`${baseFlagClass} ${country.id.toLowerCase()}`}>{country.flag}</span>
+          <span data-country-id={country.id} />
+          <span className={`${BASE_FLAG_CLASS} ${country.id.toLowerCase()}`}>{country.flag}</span>
           <span className="country-name">{country.name}</span>
           <span className="country-code">{country.code}</span>
         </MenuItem>
@@ -174,4 +171,4 @@ function getFilteredList(filter = ''): Country[] {
     : countryList;
 }
 
-export default CountryCodeInput;
+export default memo(CountryCodeInput);

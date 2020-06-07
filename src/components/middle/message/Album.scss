@@ -20,6 +20,7 @@
 
   &.item-count-2 {
     display: flex;
+    max-height: 27rem;
 
     > .media-inner:last-child {
       margin-left: var(--album-media-gap) !important;
@@ -39,6 +40,23 @@
     grid-template-columns: auto auto;
     grid-template-rows: 15rem 8rem;
 
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 6.5rem;
+
+      > .media-inner {
+        &:first-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+        &:not(:first-child) {
+          img, video {
+            min-height: 6.5rem;
+          }
+        }
+      }
+    }
+
     > .media-inner:first-child {
       grid-column: span 2;
     }
@@ -47,6 +65,22 @@
   &.item-count-4 {
     grid-template-columns: repeat(3, auto);
     grid-template-rows: 15rem 6.25rem;
+
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 5rem;
+        }
+
+        &:first-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+      }
+    }
 
     > .media-inner:first-child {
       grid-column: span 3;
@@ -57,6 +91,22 @@
     grid-template-columns: repeat(3, auto);
     grid-template-rows: 15rem 6.25rem 15rem;
 
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 5rem 12.5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 5rem;
+        }
+
+        &:first-child, &:last-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+      }
+    }
+
     > .media-inner:first-child,
     > .media-inner:last-child {
       grid-column: span 3;
@@ -66,6 +116,28 @@
   &.item-count-6 {
     grid-template-columns: repeat(6, auto);
     grid-template-rows: 6.25rem 15rem 8rem;
+
+    @media (max-width: 600px) {
+      grid-template-rows: 5rem 12.5rem 6.5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 5rem;
+        }
+
+        &:nth-child(4) {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+
+        &:nth-child(5), &:nth-child(6) {
+          img, video {
+            min-height: 6.5rem;
+          }
+        }
+      }
+    }
 
     >.media-inner:nth-child(1),
     >.media-inner:nth-child(2),
@@ -87,6 +159,22 @@
     grid-template-columns: auto auto;
     grid-template-rows: 15rem 8rem 8rem 8rem;
 
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 6.5rem 6.5rem 6.5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 6.5rem;
+        }
+
+        &:first-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+      }
+    }
+
     > .media-inner:first-child {
       grid-column: span 2;
     }
@@ -95,6 +183,28 @@
   &.item-count-8 {
     grid-template-columns: repeat(6, auto);
     grid-template-rows: 15rem 6.25rem 8rem 8rem;
+
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 5rem 6.5rem 6.5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 6.5rem;
+        }
+
+        &:first-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+
+        &:nth-child(2), &:nth-child(3), &:nth-child(4) {
+          img, video {
+            min-height: 5rem;
+          }
+        }
+      }
+    }
 
     >.media-inner {
       grid-column: span 3;
@@ -115,6 +225,28 @@
     grid-template-columns: repeat(6, auto);
     grid-template-rows: 15rem 6.25rem 8rem 6.25rem;
 
+    @media (max-width: 600px) {
+      grid-template-rows: 12.5rem 5rem 6.5rem 5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 5rem;
+        }
+
+        &:first-child {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+
+        &:nth-child(5), &:nth-child(6) {
+          img, video {
+            min-height: 6.5rem;
+          }
+        }
+      }
+    }
+
     >.media-inner {
       grid-column: span 2;
     }
@@ -132,6 +264,22 @@
   &.item-count-10 {
     grid-template-columns: repeat(3, auto);
     grid-template-rows: 6.25rem 15rem 6.25rem 6.25rem;
+
+    @media (max-width: 600px) {
+      grid-template-rows: 5rem 12.5rem 5rem 5rem;
+
+      > .media-inner {
+        img, video {
+          min-height: 5rem;
+        }
+
+        &:nth-child(4) {
+          img, video {
+            min-height: 12.5rem;
+          }
+        }
+      }
+    }
 
     >.media-inner:nth-child(4) {
       grid-column: span 3;

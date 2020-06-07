@@ -5,6 +5,7 @@ import { ApiUser, ApiTypingStatus } from '../../api/types';
 
 import { selectUser } from '../../modules/selectors';
 import { getUserFirstName } from '../../modules/helpers';
+import renderText from './helpers/renderText';
 
 import './TypingStatus.scss';
 
@@ -17,14 +18,15 @@ type StateProps = {
 };
 
 const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
-  const typingUserName = typingUser && !typingUser.is_self && getUserFirstName(typingUser);
+  const typingUserName = typingUser && !typingUser.isSelf && getUserFirstName(typingUser);
 
   return (
     <p className="typing-status">
       {typingUserName && (
-        <span className="sender-name">{typingUserName}</span>
+        <span className="sender-name">{renderText(typingUserName)}</span>
       )}
       {typingStatus.action}
+      <span className="ellipsis" />
     </p>
   );
 };

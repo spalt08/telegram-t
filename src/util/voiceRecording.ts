@@ -21,6 +21,7 @@ interface OpusMediaRecorder extends MediaRecorder {
   ): MediaRecorder;
 }
 
+
 const RECORDER_PARAMS = { mimeType: 'audio/ogg; codecs=opus' };
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
@@ -35,10 +36,6 @@ async function ensureOpusMediaRecorder() {
   }
 
   return opusMediaRecorderPromise;
-}
-
-export function isSupported() {
-  return 'getUserMedia' in navigator.mediaDevices;
 }
 
 export async function start(analyzerCallback: Function) {

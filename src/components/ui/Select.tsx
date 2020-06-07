@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, memo } from '../../lib/teact/teact';
 
 type OwnProps = {
   id?: string;
@@ -43,4 +43,4 @@ const Select: FC<OwnProps> = (props) => {
   );
 };
 
-export default Select;
+export default memo(Select);

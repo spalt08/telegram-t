@@ -4,11 +4,16 @@ import TelegramClient from './TelegramClient';
 import { generateRandomBytes, readBigIntFromBuffer } from '../Helpers';
 import { getAppropriatedPartSize } from '../Utils';
 
+interface OnProgress {
+    // Float between 0 and 1.
+    (progress: number): void;
+
+    isCanceled?: boolean;
+}
+
 export interface UploadFileParams {
     file: File;
-    onProgress?: (
-        progress: number, // Float between 0 and 1.
-    ) => void;
+    onProgress?: OnProgress;
 }
 
 const KB_TO_BYTES = 1024;
@@ -21,7 +26,7 @@ export async function uploadFile(
     const { file, onProgress } = fileParams;
     const { name, size } = file;
 
-    const fileId = generateRandomBigInt();
+    const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);
     const isLarge = size > LARGE_FILE_THRESHOLD;
 
     const partSize = getAppropriatedPartSize(size) * KB_TO_BYTES;
@@ -53,6 +58,10 @@ export async function uploadFile(
         );
 
         if (result && onProgress) {
+            if (onProgress.isCanceled) {
+                throw new Error('USER_CANCELED')
+            }
+
             onProgress((i + 1) / partCount);
         }
     }

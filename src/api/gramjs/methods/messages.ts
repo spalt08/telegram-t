@@ -10,13 +10,13 @@ import {
   ApiVideo,
   ApiNewPoll,
   ApiMessageEntity,
+  ApiOnProgress,
 } from '../../types';
 
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
   buildLocalMessage,
-  resolveMessageApiChatId,
   buildWebPage,
   buildForwardedMessage,
 } from '../apiBuilders/messages';
@@ -34,13 +34,8 @@ import {
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { requestChatUpdate } from './chats';
 import { fetchFile } from '../../../util/files';
-
-type OnUploadProgress = (
-  messageLocalId: number,
-  progress: number, // Float between 0 and 1.
-) => void;
+import { addMessageToLocalDb } from '../helpers';
 
 let onUpdate: OnApiUpdate;
 
@@ -58,7 +53,7 @@ export async function fetchMessages({
   limit: number;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetHistory({
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     ...pagination,
   }));
 
@@ -87,7 +82,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.GetMessages({
-        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
         id: [new GramJs.InputMessageID({ id: messageId })],
       })
       : new GramJs.messages.GetMessages({
@@ -110,8 +105,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   }
 
   if (mtpMessage instanceof GramJs.Message) {
-    const messageFullId = `${resolveMessageApiChatId(mtpMessage)}-${mtpMessage.id}`;
-    localDb.messages[messageFullId] = mtpMessage;
+    addMessageToLocalDb(mtpMessage);
   }
 
   const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
@@ -129,7 +123,7 @@ export async function sendMessage(
     attachment,
     sticker,
     gif,
-    pollSummary,
+    poll,
   }: {
     chat: ApiChat;
     currentUserId: number;
@@ -139,17 +133,17 @@ export async function sendMessage(
     attachment?: ApiAttachment;
     sticker?: ApiSticker;
     gif?: ApiVideo;
-    pollSummary?: ApiNewPoll;
+    poll?: ApiNewPoll;
   },
-  onProgress: OnUploadProgress,
+  onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, pollSummary,
+    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
   );
   onUpdate({
     '@type': 'newMessage',
     id: localMessage.id,
-    chat_id: chat.id,
+    chatId: chat.id,
     message: localMessage,
   });
 
@@ -158,13 +152,13 @@ export async function sendMessage(
 
   let media: GramJs.TypeInputMedia | undefined;
   if (attachment) {
-    media = await uploadMedia(localMessage, attachment, onProgress);
+    media = await uploadMedia(localMessage, attachment, onProgress!);
   } else if (sticker) {
     media = buildInputMediaDocument(sticker);
   } else if (gif) {
     media = buildInputMediaDocument(gif);
-  } else if (pollSummary) {
-    media = buildInputPoll(pollSummary, randomId);
+  } else if (poll) {
+    media = buildInputPoll(poll, randomId);
   }
 
   const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
@@ -174,7 +168,7 @@ export async function sendMessage(
     clearDraft: true,
     message: text || '',
     entities: mtpEntities,
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     randomId,
     ...(replyingTo && { replyToMsgId: replyingTo }),
     ...(media && { media }),
@@ -196,7 +190,6 @@ export async function editMessage({
     content: {
       ...message.content,
       text: {
-        '@type': 'formattedText',
         text,
         entities,
       },
@@ -206,7 +199,7 @@ export async function editMessage({
   onUpdate({
     '@type': 'updateMessage',
     id: message.id,
-    chat_id: chat.id,
+    chatId: chat.id,
     message: messageUpdate,
   });
 
@@ -217,21 +210,25 @@ export async function editMessage({
   await invokeRequest(new GramJs.messages.EditMessage({
     message: text || '',
     entities: mtpEntities,
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     id: message.id,
   }), true);
 }
 
-async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: OnUploadProgress) {
+async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
     filename, blobUrl, mimeType, quick, voice,
   } = attachment;
 
   const file = await fetchFile(blobUrl, filename);
-  const inputFile = await uploadFile(file, (progress) => {
-    onProgress(localMessage.id, progress);
-  });
-
+  const patchedOnProgress: ApiOnProgress = (progress) => {
+    if (onProgress.isCanceled) {
+      patchedOnProgress.isCanceled = true;
+    } else {
+      onProgress(progress, localMessage.id);
+    }
+  };
+  const inputFile = await uploadFile(file, patchedOnProgress);
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (quick) {
@@ -267,7 +264,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
 
 export async function pinMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {
   await invokeRequest(new GramJs.messages.UpdatePinnedMessage({
-    peer: buildInputPeer(chat.id, chat.access_hash),
+    peer: buildInputPeer(chat.id, chat.accessHash),
     id: messageId,
   }), true);
 }
@@ -282,7 +279,7 @@ export async function deleteMessages({
   const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.DeleteMessages({
-        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
         id: messageIds,
       })
       : new GramJs.messages.DeleteMessages({
@@ -298,41 +295,69 @@ export async function deleteMessages({
   onUpdate({
     '@type': 'deleteMessages',
     ids: messageIds,
-    ...(isChannel && { chat_id: chat.id }),
+    ...(isChannel && { chatId: chat.id }),
+  });
+}
+
+export async function deleteHistory({
+  chat, shouldDeleteForAll, maxId,
+}: {
+  chat: ApiChat; shouldDeleteForAll?: boolean; maxId: number;
+}) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+  const result = await invokeRequest(
+    isChannel
+      ? new GramJs.channels.DeleteHistory({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        maxId,
+      })
+      : new GramJs.messages.DeleteHistory({
+        peer: buildInputPeer(chat.id, chat.accessHash),
+        ...(shouldDeleteForAll && { revoke: true }),
+        ...(!shouldDeleteForAll && { just_clear: true }),
+        maxId,
+      }),
+  );
+
+  if (!result) {
+    return;
+  }
+
+  onUpdate({
+    '@type': 'deleteHistory',
+    chatId: chat.id,
   });
 }
 
 export async function markMessagesRead({
-  chat, maxId,
+  chat, messageIds,
 }: {
-  chat: ApiChat; maxId?: number;
+  chat: ApiChat; messageIds: number[];
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
   await invokeRequest(
     isChannel
-      ? new GramJs.channels.ReadHistory({
-        channel: buildInputEntity(chat.id, chat.access_hash) as GramJs.InputChannel,
-        maxId,
+      ? new GramJs.channels.ReadMessageContents({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        id: messageIds,
       })
-      : new GramJs.messages.ReadHistory({
-        peer: buildInputPeer(chat.id, chat.access_hash),
-        maxId,
+      : new GramJs.messages.ReadMessageContents({
+        id: messageIds,
       }),
+    true,
   );
 
-  void requestChatUpdate(chat);
-}
-
-export async function readMessageContents({ messageId }: { messageId: number }) {
-  await invokeRequest(new GramJs.messages.ReadMessageContents({
-    id: [messageId],
-  }), true);
-
   onUpdate({
-    '@type': 'updateCommonBoxMessages',
-    ids: [messageId],
+    ...(isChannel ? {
+      '@type': 'updateChannelMessages',
+      channelId: chat.id,
+    } : {
+      '@type': 'updateCommonBoxMessages',
+    }),
+    ids: messageIds,
     messageUpdate: {
+      hasUnreadMention: false,
       isMediaUnread: false,
     },
   });
@@ -368,7 +393,7 @@ export async function searchMessages({
   }
 
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: buildInputPeer(chatOrUser.id, chatOrUser.access_hash),
+    peer: buildInputPeer(chatOrUser.id, chatOrUser.accessHash),
     filter,
     q: query || '',
     ...pagination,
@@ -436,7 +461,7 @@ export async function searchMessagesGlobal({
 
     const messages = result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any);
     const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
-    const chats = result.chats.map(buildApiChatFromPreview).filter<ApiChat>(Boolean as any);
+    const chats = result.chats.map((user) => buildApiChatFromPreview(user)).filter<ApiChat>(Boolean as any);
 
     let totalCount = messages.length;
     let nextRate: number | undefined;
@@ -475,10 +500,10 @@ export async function sendPollVote({
   messageId: number;
   options: string[];
 }) {
-  const { id, access_hash } = chat;
+  const { id, accessHash } = chat;
 
   await invokeRequest(new GramJs.messages.SendVote({
-    peer: buildInputPeer(id, access_hash),
+    peer: buildInputPeer(id, accessHash),
     msgId: messageId,
     options: options.map((option) => Buffer.from(option)),
   }), true);
@@ -508,14 +533,14 @@ export async function forwardMessages({
       onUpdate({
         '@type': 'newMessage',
         id: localMessage.id,
-        chat_id: toChat.id,
+        chatId: toChat.id,
         message: localMessage,
       });
     });
 
     await invokeRequest(new GramJs.messages.ForwardMessages({
-      fromPeer: buildInputPeer(fromChat.id, fromChat.access_hash),
-      toPeer: buildInputPeer(toChat.id, toChat.access_hash),
+      fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),
+      toPeer: buildInputPeer(toChat.id, toChat.accessHash),
       randomId: randomIds,
       id: messageIds,
     }), true);
@@ -545,8 +570,7 @@ function updateLocalDb(
 
   result.messages.forEach((message) => {
     if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
-      const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
-      localDb.messages[messageFullId] = message;
+      addMessageToLocalDb(message);
     }
   });
 }

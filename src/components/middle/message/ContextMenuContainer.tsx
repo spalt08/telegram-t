@@ -8,6 +8,7 @@ import { ApiMessage } from '../../../api/types';
 
 import { selectAllowedMessagedActions } from '../../../modules/selectors';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
+import { pick } from '../../../util/iteratees';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
@@ -15,7 +16,7 @@ import MessageContextMenu from './MessageContextMenu';
 
 import './ContextMenuContainer.scss';
 
-type IAnchorPosition = {
+export type IAnchorPosition = {
   x: number;
   y: number;
 };
@@ -33,9 +34,17 @@ type StateProps = {
   canPin?: boolean;
   canDelete?: boolean;
   canEdit?: boolean;
+  canForward?: boolean;
+  canFaveSticker?: boolean;
+  canUnfaveSticker?: boolean;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setChatReplyingTo' | 'setChatEditing' | 'pinMessage' | 'openForwardMenu' |
+  'faveSticker' | 'unfaveSticker'
+)>;
+
+const TRANSITION_LOCK_CLEAR_DELAY_MS = 50;
 
 const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isOpen,
@@ -47,12 +56,27 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   canPin,
   canDelete,
   canEdit,
+  canForward,
+  canFaveSticker,
+  canUnfaveSticker,
   setChatReplyingTo,
   setChatEditing,
   pinMessage,
   openForwardMenu,
+  faveSticker,
+  unfaveSticker,
 }) => {
-  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+  const handleCloseAnimationEnd = useCallback(() => {
+    // This reverts MessageList back to `transform` based position after Context Menu has been fully closed
+    // `transiton-locked` class is removed with a slight delay to prevent content from jumping while properties change
+    document.body.classList.remove('message-list-no-transform');
+    setTimeout(() => {
+      document.body.classList.remove('transition-locked');
+    }, TRANSITION_LOCK_CLEAR_DELAY_MS);
+    onCloseAnimationEnd();
+  }, [onCloseAnimationEnd]);
+
+  const { transitionClassNames } = useShowTransition(isOpen, handleCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -72,30 +96,50 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [onClose]);
 
   const handleReply = useCallback(() => {
-    setChatReplyingTo({ chatId: message.chat_id, messageId: message.id });
+    setChatReplyingTo({ chatId: message.chatId, messageId: message.id });
     closeMenu();
   }, [setChatReplyingTo, message, closeMenu]);
 
   const handleEdit = useCallback(() => {
-    setChatEditing({ chatId: message.chat_id, messageId: message.id });
+    setChatEditing({ chatId: message.chatId, messageId: message.id });
     closeMenu();
   }, [setChatEditing, message, closeMenu]);
 
   const handlePin = useCallback(() => {
     pinMessage({ messageId: message.id });
     closeMenu();
-  }, [pinMessage, message, closeMenu]);
+  }, [pinMessage, message.id, closeMenu]);
 
   const handleForward = useCallback(() => {
-    openForwardMenu({ fromChatId: message.chat_id, messageIds: [message.id] });
     closeMenu();
+    openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
   }, [openForwardMenu, message, closeMenu]);
+
+  const handleFaveSticker = useCallback(() => {
+    closeMenu();
+    faveSticker({ sticker: message.content.sticker });
+  }, [closeMenu, message.content.sticker, faveSticker]);
+
+  const handleUnfaveSticker = useCallback(() => {
+    closeMenu();
+    unfaveSticker({ sticker: message.content.sticker });
+  }, [closeMenu, message.content.sticker, unfaveSticker]);
 
   useEffect(() => {
     disableScrolling();
 
     return enableScrolling;
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('has-open-context-menu', isOpen);
+    if (isOpen) {
+      // This replaces `transform` based MessageList position with relative positioning to prevent
+      // issues with Context Menu backdrop.
+      // `transiton-locked` class prevents content from jumping when properties change
+      document.body.classList.add('message-list-no-transform', 'transition-locked');
+    }
+  }, [isOpen]);
 
   return (
     <div className={['ContextMenuContainer', transitionClassNames].join(' ')}>
@@ -107,11 +151,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
         canDelete={canDelete}
         canPin={canPin}
         canEdit={canEdit}
+        canForward={canForward}
+        canFaveSticker={canFaveSticker}
+        canUnfaveSticker={canUnfaveSticker}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}
         onForward={handleForward}
         onDelete={handleDelete}
+        onFaveSticker={handleFaveSticker}
+        onUnfaveSticker={handleUnfaveSticker}
         onClose={closeMenu}
       />
       <DeleteMessageModal
@@ -126,7 +175,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const {
-      canReply, canPin, canDelete, canEdit,
+      canReply,
+      canPin,
+      canDelete,
+      canEdit,
+      canForward,
+      canFaveSticker,
+      canUnfaveSticker,
     } = selectAllowedMessagedActions(global, message);
 
     return {
@@ -134,20 +189,17 @@ export default memo(withGlobal<OwnProps>(
       canPin,
       canDelete,
       canEdit,
+      canForward,
+      canFaveSticker,
+      canUnfaveSticker,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const {
-      setChatReplyingTo,
-      setChatEditing,
-      pinMessage,
-      openForwardMenu,
-    } = actions;
-    return {
-      setChatReplyingTo,
-      setChatEditing,
-      pinMessage,
-      openForwardMenu,
-    };
-  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setChatReplyingTo',
+    'setChatEditing',
+    'pinMessage',
+    'openForwardMenu',
+    'faveSticker',
+    'unfaveSticker',
+  ]),
 )(ContextMenuContainer));

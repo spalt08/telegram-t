@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useCallback, useEffect, useState, memo,
 } from '../../lib/teact/teact';
 
 import { ApiMessage } from '../../api/types';
@@ -28,28 +28,35 @@ const Document: FC<OwnProps> = ({
   const extension = getDocumentExtension(document) || '';
   const { fileName, size, timestamp } = document;
 
-  const [shouldDownload, setShouldDownload] = useState();
-  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(getMessageMediaHash(message), !shouldDownload);
+  const [isDownloadAllowed, setIsDownloadAllowed] = useState(false);
   const {
-    isUploading, isDownloading, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload);
+    mediaData, downloadProgress,
+  } = useMediaWithDownloadProgress(getMessageMediaHash(message), !isDownloadAllowed);
+  const {
+    isUploading, isTransferring, transferProgress,
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isDownloadAllowed);
 
   const hasPreview = getDocumentHasPreview(document);
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
   const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
   const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !load);
 
-  // TODO Support canceling
-  const handleDownload = useCallback(() => {
-    setShouldDownload(true);
-  }, []);
+  const handleClick = useCallback(() => {
+    if (isUploading) {
+      if (onCancelUpload) {
+        onCancelUpload();
+      }
+    } else {
+      setIsDownloadAllowed((isAllowed) => !isAllowed);
+    }
+  }, [isUploading, onCancelUpload]);
 
   useEffect(() => {
-    if (shouldDownload && mediaData) {
+    if (isDownloadAllowed && mediaData) {
       download(mediaData, fileName);
-      setShouldDownload(false);
+      setIsDownloadAllowed(false);
     }
-  }, [fileName, mediaData, shouldDownload]);
+  }, [fileName, mediaData, isDownloadAllowed]);
 
   return (
     <File
@@ -60,12 +67,12 @@ const Document: FC<OwnProps> = ({
       thumbnailDataUri={thumbDataUri}
       previewData={localBlobUrl || previewData}
       smaller={smaller}
+      isTransferring={isTransferring}
       isUploading={isUploading}
-      isDownloading={isDownloading}
       transferProgress={transferProgress}
-      onClick={isUploading ? onCancelUpload : handleDownload}
+      onClick={handleClick}
     />
   );
 };
 
-export default Document;
+export default memo(Document);

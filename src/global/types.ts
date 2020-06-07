@@ -12,11 +12,19 @@ import {
   ApiError,
   ApiFormattedText,
 } from '../api/types';
-import { FocusDirection, ISettings } from '../types';
+import {
+  FocusDirection,
+  ISettings,
+  MediaViewerOrigin,
+  ChatCreationProgress,
+  ProfileEditProgress,
+} from '../types';
 
 export type GlobalState = {
-  showChatInfo: boolean;
-  isUiReady: boolean;
+  isChatInfoShown: boolean;
+  isStatisticsShown?: boolean;
+  isLeftColumnShown: boolean;
+  uiReadyState: 0 | 1 | 2;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: number;
   lastSyncTime?: number;
@@ -26,10 +34,16 @@ export type GlobalState = {
   authState?: ApiUpdateAuthorizationStateType;
   authPhoneNumber?: string;
   authIsLoading?: boolean;
+  authIsLoadingQrCode?: boolean;
   authError?: string;
   authRememberMe?: boolean;
   authIsSessionRemembered?: boolean;
   authNearestCountry?: string;
+  authHint?: string;
+  authQrCode?: {
+    token: string;
+    expires: number;
+  };
 
   contactList?: {
     hash: number;
@@ -71,7 +85,7 @@ export type GlobalState = {
   };
 
   fileUploads: {
-    byMessageKey: Record<string, {
+    byMessageLocalId: Record<string, {
       progress: number;
     }>;
   };
@@ -84,6 +98,10 @@ export type GlobalState = {
       byId: Record<string, ApiStickerSet>;
     };
     recent: {
+      hash?: number;
+      stickers: ApiSticker[];
+    };
+    favorite: {
       hash?: number;
       stickers: ApiSticker[];
     };
@@ -132,7 +150,7 @@ export type GlobalState = {
     chatId?: number;
     messageId?: number;
     avatarOwnerId?: number;
-    isFromSharedMedia?: boolean;
+    origin?: MediaViewerOrigin;
   };
 
   topPeers: {
@@ -144,10 +162,21 @@ export type GlobalState = {
   webPagePreview?: ApiWebPage;
 
   forwardMessages: {
+    isColumnShown?: boolean;
     fromChatId?: number;
     messageIds?: number[];
     toChatIds?: number[];
     inProgress?: boolean;
+  };
+
+  chatCreation?: {
+    progress: ChatCreationProgress;
+    error?: string;
+  };
+
+  profileEdit?: {
+    progress: ProfileEditProgress;
+    isUsernameAvailable?: boolean;
   };
 
   settings: {
@@ -160,34 +189,39 @@ export type GlobalState = {
 
 export type ActionTypes = (
   // system
-  'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' |
+  'init' | 'initApi' | 'apiUpdate' | 'showError' | 'dismissError' | 'sync' | 'saveSession' | 'afterSync' |
   // ui
-  'toggleChatInfo' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
+  'toggleChatInfo' | 'toggleStatistics' | 'setIsUiReady' | 'addRecentEmoji' | 'addRecentSticker' |
   // auth
   'setAuthPhoneNumber' | 'setAuthCode' | 'setAuthPassword' | 'signUp' | 'returnToAuthPhoneNumber' | 'signOut' |
-  'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' |
+  'setAuthRememberMe' | 'clearAuthError' | 'uploadProfilePhoto' | 'gotToAuthQrCode' |
   // chats
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'setChatEditing' | 'editLastChatMessage' |
-  'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' |
+  'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
+  'joinChannel' | 'leaveChannel' | 'deleteChannel' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusTopMessage' | 'sendPollVote' | 'editMessage' |
+  'markChatRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |
+  'deleteHistory' |
   // forwarding messages
   'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search
   'setGlobalSearchQuery' | 'searchMessagesGlobal' | 'addRecentlyFoundChatId' |
   // message search
   'openMessageTextSearch' | 'closeMessageTextSearch' | 'setMessageSearchQuery' | 'setMessageSearchMediaType' |
-  'searchMessages' | 'readMessageContents' |
+  'searchMessages' | 'markMessagesRead' |
   // users
-  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' |
+  'loadFullUser' | 'openUserInfo' | 'loadNearestCountry' | 'loadTopUsers' | 'loadContactList' | 'loadCurrentUser' |
+  'updateProfile' | 'checkUsername' |
+  // Channel / groups creation
+  'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
   'setSettingOption' | 'clearAnimationSettingAttention' |
   // misc
   'openMediaViewer' |
-  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' |
-  'loadWebPagePreview' | 'clearWebPagePreview' |
+  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
+  'loadWebPagePreview' | 'clearWebPagePreview' | 'faveSticker' | 'unfaveSticker' |
   'saveDraft' | 'clearDraft' | 'loadChatDrafts'
 );
 

@@ -1,10 +1,11 @@
 import React, {
-  FC, useCallback, useEffect, useState,
+  FC, useCallback, useEffect, useState, memo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { pick } from '../../util/iteratees';
 import { selectIsForwardMenuOpen, selectIsMediaViewerOpen } from '../../modules/selectors';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -46,7 +47,7 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
   } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
 
   if (!shouldRender) {
-    return null;
+    return undefined;
   }
 
   return (
@@ -56,13 +57,13 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
         <RightHeader onClose={onClose} />
         {isForwarding ? (
           <ForwardPicker />
-        ) : null}
+        ) : undefined}
       </div>
     </div>
   );
 };
 
-export default withGlobal(
+export default memo(withGlobal(
   (global): StateProps => {
     const isForwarding = selectIsForwardMenuOpen(global) && selectIsMediaViewerOpen(global);
 
@@ -70,8 +71,5 @@ export default withGlobal(
       isForwarding,
     };
   },
-  (setGlobal, actions): DispatchProps => {
-    const { closeForwardMenu } = actions;
-    return { closeForwardMenu };
-  },
-)(RightOverlay);
+  (setGlobal, actions): DispatchProps => pick(actions, ['closeForwardMenu']),
+)(RightOverlay));

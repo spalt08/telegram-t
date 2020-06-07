@@ -1,4 +1,6 @@
-import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  FC, useEffect, useRef, memo,
+} from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -13,7 +15,7 @@ const ProgressSpinner: FC<{
   progress?: number;
   size?: 's' | 'm' | 'l';
   transparent?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }> = ({
   progress = 0,
   size = 'l',
@@ -25,13 +27,6 @@ const ProgressSpinner: FC<{
   const borderRadius = radius - 1;
   const circumference = circleRadius * 2 * Math.PI;
   const container = useRef<HTMLDivElement>();
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (onClick) {
-      e.stopPropagation();
-      onClick();
-    }
-  };
 
   useEffect(() => {
     if (!container.current) {
@@ -64,7 +59,7 @@ const ProgressSpinner: FC<{
   }, [container, circumference, borderRadius, circleRadius, progress]);
 
   const className = buildClassName(
-    `ProgressSpinner not-implemented size-${size}`,
+    `ProgressSpinner size-${size}`,
     transparent && 'transparent',
   );
 
@@ -72,9 +67,9 @@ const ProgressSpinner: FC<{
     <div
       ref={container}
       className={className}
-      onClick={handleClick}
+      onClick={onClick}
     />
   );
 };
 
-export default ProgressSpinner;
+export default memo(ProgressSpinner);
