@@ -2,7 +2,8 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 const { EnvironmentPlugin } = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserJSPlugin = require('terser-webpack-plugin');
@@ -66,12 +67,25 @@ module.exports = (env, argv) => {
       extensions: ['.js', '.ts', '.tsx'],
     },
     plugins: [
-      new HtmlWebpackPlugin({
+      new HtmlPlugin({
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash].css',
         chunkFilename: '[name].[chunkhash].css',
+      }),
+      new CopyPlugin({
+        patterns: [
+          { from: 'public/' },
+          {
+            from: 'node_modules/opus-recorder/dist/encoderWorker.min.wasm',
+            to: '',
+          },
+          {
+            from: 'node_modules/opus-recorder/dist/decoderWorker.min.wasm',
+            to: '',
+          },
+        ],
       }),
       new EnvironmentPlugin(['NODE_ENV', 'TELEGRAM_T_API_ID', 'TELEGRAM_T_API_HASH']),
       ...(argv.mode === 'production' ? [

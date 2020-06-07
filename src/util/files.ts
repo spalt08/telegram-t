@@ -84,8 +84,12 @@ export async function createPosterForVideo(url: string): Promise<string | undefi
   ]);
 }
 
-export async function fetchFile(blobUrl: string, fileName: string) {
+export async function fetchBlob(blobUrl: string) {
   const response = await fetch(blobUrl);
-  const blob = await response.blob();
+  return response.blob();
+}
+
+export async function fetchFile(blobUrl: string, fileName: string) {
+  const blob = await fetchBlob(blobUrl);
   return blobToFile(blob, fileName);
 }

@@ -1,12 +1,11 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
 } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_OPUS_SUPPORTED, IS_TOUCH_ENV } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
 import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
@@ -64,9 +63,11 @@ const Audio: FC<OwnProps> = ({
   // We need to preload on mobiles to enable playing by click.
   const shouldDownload = (isActive || IS_TOUCH_ENV) && lastSyncTime;
 
-  const {
-    mediaData, downloadProgress,
-  } = useMediaWithDownloadProgress(getMessageMediaHash(message, 'inline'), !shouldDownload, ApiMediaFormat.Progressive);
+  const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
+    getMessageMediaHash(message, 'inline'),
+    !shouldDownload,
+    IS_OPUS_SUPPORTED ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+  );
   const { isBuffered, bufferingHandlers } = useBuffering();
   const {
     isUploading, isTransferring, transferProgress,

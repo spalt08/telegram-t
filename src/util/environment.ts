@@ -27,6 +27,7 @@ export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentE
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && ['Mac OS', 'iOS'].includes(PLATFORM_ENV);
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
 export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
+export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
 
 let isWebpSupportedCache: boolean | undefined;
 

@@ -9,8 +9,9 @@ import {
 import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
-import { preloadImage } from './files';
-import { IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
+import { fetchBlob, preloadImage } from './files';
+import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
+import { oggToWav } from './oggToWav';
 
 const asCacheApiType = {
   [ApiMediaFormat.DataUri]: cacheApi.Type.Text,
@@ -70,7 +71,13 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
   if (!MEDIA_CACHE_DISABLED) {
     const cached = await cacheApi.fetch(MEDIA_CACHE_NAME, url, asCacheApiType[mediaFormat]!);
     if (cached) {
-      const prepared = prepareMedia(cached);
+      let media = cached;
+
+      if (cached.type === 'audio/ogg' && !IS_OPUS_SUPPORTED) {
+        media = await oggToWav(media);
+      }
+
+      const prepared = prepareMedia(media);
 
       if (mediaFormat === ApiMediaFormat.BlobUrl) {
         await preload(prepared as string, cached.type);
@@ -87,7 +94,15 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
     throw new Error('Failed to fetch media');
   }
 
-  const { prepared, mimeType } = remote;
+  let { prepared, mimeType } = remote;
+
+  if (mimeType === 'audio/ogg' && !IS_OPUS_SUPPORTED) {
+    const blob = await fetchBlob(prepared as string);
+    const media = await oggToWav(blob);
+    URL.revokeObjectURL(prepared as string);
+    prepared = prepareMedia(media);
+    mimeType = blob.type;
+  }
 
   if (mediaFormat === ApiMediaFormat.BlobUrl && mimeType) {
     await preload(prepared as string, mimeType);
