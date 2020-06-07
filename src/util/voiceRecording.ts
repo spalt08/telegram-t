@@ -1,42 +1,41 @@
-import Worker from 'worker-loader!opus-media-recorder/encoderWorker';
 // @ts-ignore
-import OggOpusEncoderWasmPath from 'opus-media-recorder/OggOpusEncoder.wasm';
-
-const POLYFILL_OPTIONS = {
-  encoderWorkerFactory: () => new Worker(),
-  OggOpusEncoderWasmPath,
-};
-
-const MIN_RECORDING_TIME = 1000;
+import encoderPath from 'file-loader!opus-recorder/dist/encoderWorker.min';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 
-type MediaRecorderParameters = ConstructorParameters<typeof MediaRecorder>;
+interface OpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
+  new(options: AnyLiteral): OpusRecorder;
 
-interface OpusMediaRecorder extends MediaRecorder {
-  new(
-    p1: MediaRecorderParameters[0], p2: MediaRecorderParameters[1], polyfillOptions: typeof POLYFILL_OPTIONS,
-  ): MediaRecorder;
+  start(stream: MediaStream): void;
+
+  ondataavailable: (typedArray: Uint8Array) => void;
 }
 
-const RECORDER_PARAMS = { mimeType: 'audio/ogg; codecs=opus' };
+const MIN_RECORDING_TIME = 1000;
+const POLYFILL_OPTIONS = {
+  encoderPath,
+  monitorGain: 0,
+  numberOfChannels: 1,
+  bitRate: 35300,
+  encoderSampleRate: 48000,
+};
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
-let opusMediaRecorderPromise: Promise<OpusMediaRecorder>;
-let OpusMediaRecorder: OpusMediaRecorder;
+let opusRecorderPromise: Promise<{ default: OpusRecorder }>;
+let OpusRecorder: OpusRecorder;
 
-async function ensureOpusMediaRecorder() {
-  if (!opusMediaRecorderPromise) {
+async function ensureOpusRecorder() {
+  if (!opusRecorderPromise) {
     // @ts-ignore
-    opusMediaRecorderPromise = import('opus-media-recorder');
-    OpusMediaRecorder = await opusMediaRecorderPromise;
+    opusRecorderPromise = import('opus-recorder');
+    OpusRecorder = (await opusRecorderPromise).default;
   }
 
-  return opusMediaRecorderPromise;
+  return opusRecorderPromise;
 }
 
 export async function start(analyzerCallback: Function) {
-  const chunks: Blob[] = [];
+  const chunks: Uint8Array[] = [];
   const waveform: number[] = [];
   const startedAt = Date.now();
 
@@ -47,10 +46,9 @@ export async function start(analyzerCallback: Function) {
     analyzerCallback(volume);
   });
 
-  let mediaRecorder: MediaRecorder | OpusMediaRecorder;
+  let mediaRecorder: OpusRecorder;
   try {
-    mediaRecorder = await initMediaRecorder(stream);
-    mediaRecorder.start();
+    mediaRecorder = await startMediaRecorder(stream);
   } catch (err) {
     releaseAnalyzer();
     releaseStream();
@@ -58,8 +56,8 @@ export async function start(analyzerCallback: Function) {
     throw err;
   }
 
-  mediaRecorder.ondataavailable = (e: BlobEvent) => {
-    chunks.push(e.data);
+  mediaRecorder.ondataavailable = (typedArray) => {
+    chunks.push(typedArray);
   };
 
   return () => new Promise<Result>((resolve, reject) => {
@@ -96,18 +94,11 @@ async function requestStream() {
   return { stream, release };
 }
 
-async function initMediaRecorder(stream: MediaStream) {
-  const isNativeMediaRecorder = typeof MediaRecorder !== 'undefined'
-    && MediaRecorder.isTypeSupported(RECORDER_PARAMS.mimeType);
+async function startMediaRecorder(stream: MediaStream) {
+  await ensureOpusRecorder();
 
-  let mediaRecorder: MediaRecorder | OpusMediaRecorder;
-  if (isNativeMediaRecorder) {
-    mediaRecorder = new MediaRecorder(stream, RECORDER_PARAMS);
-  } else {
-    await ensureOpusMediaRecorder();
-    mediaRecorder = new OpusMediaRecorder(stream, RECORDER_PARAMS, POLYFILL_OPTIONS);
-  }
-
+  const mediaRecorder = new OpusRecorder(POLYFILL_OPTIONS);
+  mediaRecorder.start(stream);
   return mediaRecorder;
 }
 
