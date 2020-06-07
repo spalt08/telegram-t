@@ -1,7 +1,7 @@
 import countryList from '../../public/countries.json';
 
 export function getCountryById(id: string) {
-  return countryList.find((c) => c.id === id);
+  return countryList.find((c) => c.id === id) as Country;
 }
 
 function getPhoneNumberFormat(country?: Country) {

@@ -3,10 +3,10 @@ import React, { FC, useRef, useState } from '../../lib/teact/teact';
 
 const TestOrdered: FC<{}> = () => {
   const [items, setItems] = useState<Record<string, number>>({ a: 1, b: 5, c: 10 });
-  const [value, setValue] = useState();
+  const [value, setValue] = useState<number | undefined>();
   const [isDesc, setIsDesc] = useState(false);
 
-  const insertData = (newValue: number = value) => {
+  const insertData = (newValue: number) => {
     const key = `key${Math.random()}`;
     setItems((currentItems) => (
       { ...currentItems, [key]: newValue }
@@ -58,7 +58,7 @@ const TestOrdered: FC<{}> = () => {
         </p>
         <p>
           <input type="text" value={value} onChange={handleInputChange} />
-          <input type="submit" className="button" onClick={() => insertData()} value="Insert Ordered" />
+          <input type="submit" className="button" onClick={() => insertData(value || 0)} value="Insert Ordered" />
         </p>
         <p>
           <input type="submit" className="button" onClick={addSmalls} value="Add Smalls" />

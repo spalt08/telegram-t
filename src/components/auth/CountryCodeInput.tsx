@@ -32,7 +32,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
     isLoading,
     onChange,
   } = props;
-  const [filter, setFilter] = useState();
+  const [filter, setFilter] = useState<string | undefined>();
   const [filteredList, setFilteredList] = useState(countryList);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 

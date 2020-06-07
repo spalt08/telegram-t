@@ -24,9 +24,9 @@ const TRACKING_END_FRAME = 180;
 const AuthCode: FC<StateProps & DispatchProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
-  const [code, setCode] = useState();
-  const [idleMonkeyData, setIdleMonkeyData] = useState();
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState();
+  const [code, setCode] = useState<string>();
+  const [idleMonkeyData, setIdleMonkeyData] = useState<AnyLiteral>();
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState<AnyLiteral>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);
@@ -71,7 +71,7 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
     }
   }
 
-  function getTrackingFrames() {
+  function getTrackingFrames(): [number, number] {
     const startFrame = (code && code.length > 1) || trackingDirection < 0
       ? TRACKING_START_FRAME + TRACKING_FRAMES_PER_SYMBOL * (code.length - 1)
       : 0;

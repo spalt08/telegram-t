@@ -1,3 +1,4 @@
+import type { AnimationItem } from 'lottie-web';
 import React, {
   FC, useEffect, useRef, useState, memo,
 } from '../../lib/teact/teact';
@@ -9,7 +10,7 @@ type OwnProps = {
   width?: number;
   height?: number;
   play?: boolean;
-  playSegment?: number[];
+  playSegment?: [number, number];
   speed?: number;
   noLoop?: boolean;
   className?: string;
@@ -40,7 +41,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   speed,
   onLoad,
 }) => {
-  const [animation, setAnimation] = useState();
+  const [animation, setAnimation] = useState<AnimationItem>();
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
 

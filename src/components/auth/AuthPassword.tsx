@@ -18,9 +18,9 @@ type DispatchProps = Pick<GlobalActions, 'setAuthPassword' | 'clearAuthError'>;
 
 const MIN_PASSWORD_LENGTH = 3;
 const PEEK_MONKEY_SHOW_DELAY = 700;
-const SEGMENT_COVER_EYES = [0, 50];
-const SEGMENT_UNCOVER_EYE = [0, 20];
-const SEGMENT_COVER_EYE = [20, 0];
+const SEGMENT_COVER_EYES: [number, number] = [0, 50];
+const SEGMENT_UNCOVER_EYE: [number, number] = [0, 20];
+const SEGMENT_COVER_EYE: [number, number] = [20, 0];
 
 const AuthPassword: FC<StateProps & DispatchProps> = ({
   authIsLoading, authError, authHint, setAuthPassword, clearAuthError,
@@ -28,8 +28,8 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [closeMonkeyData, setCloseMonkeyData] = useState();
-  const [peekMonkeyData, setPeekMonkeyData] = useState();
+  const [closeMonkeyData, setCloseMonkeyData] = useState<AnyLiteral>();
+  const [peekMonkeyData, setPeekMonkeyData] = useState<AnyLiteral>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
 

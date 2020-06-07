@@ -48,8 +48,8 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   gotToAuthQrCode,
 }) => {
   const phoneNumberRef = useRef<HTMLInputElement>();
-  const [country, setCountry] = useState();
-  const [phoneNumber, setPhoneNumber] = useState();
+  const [country, setCountry] = useState<Country | undefined>();
+  const [phoneNumber, setPhoneNumber] = useState<string>();
   const [isTouched, setIsTouched] = useState(false);
   const [lastSelection, setLastSelection] = useState<[number, number] | undefined>();
 

@@ -3,6 +3,8 @@ import { OriginMessageEvent, WorkerMessageData } from './types';
 import { initApi, callApi, cancelApiProgress } from '../provider';
 import { DEBUG } from '../../../config';
 
+declare const self: WorkerGlobalScope;
+
 handleErrors();
 
 const callbackState: Record<string, ApiOnProgress> = {};
