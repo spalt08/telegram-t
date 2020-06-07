@@ -35,25 +35,25 @@ const Statistics: FC = () => {
         return;
       }
 
-      const growth = await fetchJson('./data/growth.json');
+      const growth = await fetchJson('./chartDummyData/growth.json');
       LovelyChart.create(containerRef.current, growth);
       setLoadedChartsCount(1);
 
-      const notifications = await fetchJson('./data/notifications.json');
-      notifications.onZoom = (timestamp: number) => fetchDayData('data/notifications_zoom', timestamp);
+      const notifications = await fetchJson('./chartDummyData/notifications.json');
+      notifications.onZoom = (timestamp: number) => fetchDayData('chartDummyData/notifications_zoom', timestamp);
       LovelyChart.create(containerRef.current, notifications);
       setLoadedChartsCount(2);
 
-      const interactions = await fetchJson('./data/interactions.json');
+      const interactions = await fetchJson('./chartDummyData/interactions.json');
       LovelyChart.create(containerRef.current, interactions);
       setLoadedChartsCount(3);
 
-      const views = await fetchJson('./data/views.json');
-      views.onZoom = (timestamp: number) => fetchDayData('data/views_zoom', timestamp);
+      const views = await fetchJson('./chartDummyData/views.json');
+      views.onZoom = (timestamp: number) => fetchDayData('chartDummyData/views_zoom', timestamp);
       LovelyChart.create(containerRef.current, views);
       setLoadedChartsCount(4);
 
-      const languages = await fetchJson('./data/languages.json');
+      const languages = await fetchJson('./chartDummyData/languages.json');
       LovelyChart.create(containerRef.current, languages);
       setLoadedChartsCount(5);
     })();

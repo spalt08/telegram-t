@@ -3,7 +3,8 @@ import { DEBUG_ALERT_MSG, GLOBAL_STATE_CACHE_KEY, GRAMJS_SESSION_ID_KEY } from '
 window.onerror = handleError;
 window.addEventListener('unhandledrejection', handleError);
 
-const { NODE_ENV } = process.env;
+// eslint-disable-next-line prefer-destructuring
+const NODE_ENV = process.env.NODE_ENV;
 const STARTUP_TIMEOUT = 5000;
 
 const startedAt = Date.now();

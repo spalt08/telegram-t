@@ -1,4 +1,4 @@
-import countryList from '../../public/countries.json';
+import countryList from './countries.json';
 
 export function getCountryById(id: string) {
   return countryList.find((c) => c.id === id) as Country;

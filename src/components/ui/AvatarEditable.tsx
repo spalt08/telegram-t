@@ -3,10 +3,11 @@ import React, {
   FC, useState, useEffect, memo,
 } from '../../lib/teact/teact';
 
+import buildClassName from '../../util/buildClassName';
+
 import CropModal from './CropModal';
 
 import './AvatarEditable.scss';
-import buildClassName from '../../util/buildClassName';
 
 interface OwnProps {
   title?: string;

@@ -1,3 +1,5 @@
+import Worker from 'worker-loader!./worker';
+
 import { ApiOnProgress, OnApiUpdate } from '../../types';
 import { Methods, MethodArgs, MethodResponse } from '../methods/types';
 import { WorkerMessageEvent, ThenArg, OriginRequest } from './types';
@@ -16,7 +18,7 @@ const requestStates: Record<string, RequestStates> = {};
 
 export function initApi(onUpdate: OnApiUpdate, sessionId = '') {
   if (!worker) {
-    worker = new Worker('./worker.ts');
+    worker = new Worker();
     subscribeToWorker(onUpdate);
   }
 

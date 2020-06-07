@@ -1,10 +1,13 @@
-const { readFileSync } = require('fs')
 const {
     parseTl,
     serializeBytes,
     serializeDate
 } = require('./generationHelpers')
 const { readBufferFromBigInt,toSignedLittleBuffer } = require('../Helpers')
+
+const tlContent = require('./static/api.reduced.tl').default;
+const schemeContent = require('./static/schema.reduced.tl').default;
+
 /*CONTEST
 const NAMED_AUTO_CASTS = new Set([
     'chatId,int'
@@ -56,8 +59,6 @@ function loadFromCache() {
 }
 
 function loadFromTlSchemas() {
-    const tlContent = readFileSync('./static/api.tl', 'utf-8')
-    const schemeContent = readFileSync('./static/schema.tl', 'utf-8')
     const [constructorParamsApi, functionParamsApi] = extractParams(tlContent)
     const [constructorParamsSchema, functionParamsSchema] = extractParams(schemeContent)
     const constructors = [].concat(constructorParamsApi, constructorParamsSchema)

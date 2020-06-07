@@ -1,9 +1,12 @@
-import { initOpusWorker } from '../workers';
+import Worker from 'worker-loader!opus-media-recorder/encoderWorker';
+// @ts-ignore
+import OggOpusEncoderWasmPath from 'opus-media-recorder/OggOpusEncoder.wasm';
 
 const POLYFILL_OPTIONS = {
-  OggOpusEncoderWasmPath: './OggOpusEncoder.wasm',
-  encoderWorkerFactory: initOpusWorker,
+  encoderWorkerFactory: () => new Worker(),
+  OggOpusEncoderWasmPath,
 };
+
 const MIN_RECORDING_TIME = 1000;
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
@@ -15,7 +18,6 @@ interface OpusMediaRecorder extends MediaRecorder {
     p1: MediaRecorderParameters[0], p2: MediaRecorderParameters[1], polyfillOptions: typeof POLYFILL_OPTIONS,
   ): MediaRecorder;
 }
-
 
 const RECORDER_PARAMS = { mimeType: 'audio/ogg; codecs=opus' };
 const BLOB_PARAMS = { type: 'audio/ogg' };

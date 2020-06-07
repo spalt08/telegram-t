@@ -51,3 +51,22 @@ declare module 'pako/dist/pako_inflate' {
 }
 
 type WindowWithPerf = typeof window & { perf: AnyLiteral };
+
+declare module 'worker-loader!*' {
+  class WebpackWorker extends Worker {
+    constructor();
+  }
+
+  export default WebpackWorker;
+}
+
+declare module 'service-worker-loader!*' {
+  const register: import('service-worker-loader/types').ServiceWorkerRegister;
+  const ServiceWorkerNoSupportError: import('service-worker-loader/types').ServiceWorkerNoSupportError;
+  const scriptUrl: import('service-worker-loader/types').ScriptUrl;
+  export default register;
+  export {
+    ServiceWorkerNoSupportError,
+    scriptUrl,
+  };
+}

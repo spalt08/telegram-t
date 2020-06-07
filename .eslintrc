@@ -33,6 +33,7 @@
     "import/no-extraneous-dependencies": "off",
     "import/prefer-default-export": "off",
     "import/named": "off",
+    "import/no-webpack-loader-syntax": "off",
     "react/prop-types": "off",
     "react/jsx-one-expression-per-line": "off",
     // Teact feature
@@ -49,5 +50,8 @@
     ],
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/member-delimiter-style": "error"
+  },
+  "settings": {
+    "import/resolver": "webpack"
   }
 }
