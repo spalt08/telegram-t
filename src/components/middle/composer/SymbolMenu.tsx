@@ -29,11 +29,12 @@ export type OwnProps = {
   onStickerSelect: (sticker: ApiSticker) => void;
   onGifSelect: (gif: ApiVideo) => void;
   onRemoveSymbol: () => void;
+  onSearchOpen: (type: 'stickers' | 'gifs') => void;
 };
 
 const SymbolMenu: FC<OwnProps> = ({
   isOpen, allowedAttachmentOptions,
-  onClose, onEmojiSelect, onStickerSelect, onGifSelect, onRemoveSymbol,
+  onClose, onEmojiSelect, onStickerSelect, onGifSelect, onRemoveSymbol, onSearchOpen,
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const isActivated = useRef(false);
@@ -131,6 +132,7 @@ const SymbolMenu: FC<OwnProps> = ({
         activeTab={activeTab}
         onSwitchTab={setActiveTab}
         onRemoveSymbol={onRemoveSymbol}
+        onSearchOpen={onSearchOpen}
       />
     </Menu>
   );

@@ -40,8 +40,9 @@ const INITIAL_STATE: GlobalState = {
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy'],
 
   stickers: {
-    all: {
-      byId: {},
+    setsById: {},
+    added: {
+      setIds: [],
     },
     recent: {
       stickers: [],
@@ -49,9 +50,16 @@ const INITIAL_STATE: GlobalState = {
     favorite: {
       stickers: [],
     },
+    featured: {
+      setIds: [],
+    },
+    search: {},
   },
 
-  savedGifs: {},
+  gifs: {
+    saved: {},
+    search: {},
+  },
 
   globalSearch: {},
 

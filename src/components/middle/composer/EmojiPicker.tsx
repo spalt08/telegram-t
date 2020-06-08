@@ -6,7 +6,12 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../../global/types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { EmojiRawData, EmojiData, uncompressEmoji } from '../../../util/emoji';
+import {
+  EmojiModule,
+  EmojiRawData,
+  EmojiData,
+  uncompressEmoji,
+} from '../../../util/emoji';
 import { throttle } from '../../../util/schedulers';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
@@ -27,7 +32,7 @@ type OwnProps = {
 type StateProps = Pick<GlobalState, 'recentEmojis'>;
 type DispatchProps = Pick<GlobalActions, 'addRecentEmoji'>;
 
-let emojiDataPromise: Promise<EmojiRawData>;
+let emojiDataPromise: Promise<EmojiModule>;
 let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
@@ -52,8 +57,9 @@ const SMOOTH_SCROLL_DISTANCE = 800;
 
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
-    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiRawData>;
-    emojiRawData = await emojiDataPromise;
+    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiModule>;
+    emojiRawData = (await emojiDataPromise).default;
+
     emojiData = uncompressEmoji(emojiRawData);
   }
 

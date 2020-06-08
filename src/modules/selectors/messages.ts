@@ -3,7 +3,6 @@ import {
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiUser,
-  ApiSticker,
 } from '../../api/types';
 
 import { selectChat, selectIsChatWithSelf } from './chats';
@@ -22,6 +21,7 @@ import {
   isCommonBoxChat,
   isServiceNotificationMessage,
 } from '../helpers';
+import { selectIsStickerFavorite } from './stickers';
 
 const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
 
@@ -296,9 +296,4 @@ export function selectCommonBoxChatId(global: GlobalState, messageId: number) {
     const chat = selectChat(global, Number(chatId));
     return chat && isCommonBoxChat(chat) && byChatId[chat.id].byId[messageId];
   }));
-}
-
-export function selectIsStickerFavorite(global: GlobalState, sticker: ApiSticker) {
-  const { stickers } = global.stickers.favorite;
-  return stickers && stickers.some(({ id }) => id === sticker.id);
 }

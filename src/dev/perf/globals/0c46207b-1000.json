@@ -12,18 +12,26 @@
     "trophy"
   ],
   "stickers": {
-    "all": {
-      "byId": {}
+    "setsById": {},
+    "added": {
+      "setIds": []
     },
     "recent": {
       "stickers": []
     },
     "favorite": {
       "stickers": []
-    }
+    },
+    "featured": {
+      "setIds": []
+    },
+    "search": {}
   },
-  "savedGifs": {
-    "gifs": []
+  "gifs": {
+    "saved": {
+      "gifs": []
+    },
+    "search": {}
   },
   "globalSearch": {},
   "messageSearch": {

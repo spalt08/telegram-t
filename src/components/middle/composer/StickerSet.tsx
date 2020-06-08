@@ -4,7 +4,7 @@ import { GlobalActions } from '../../../global/types';
 import { ApiSticker } from '../../../api/types';
 import { StickerSetOrRecent } from '../../../types';
 
-import StickerButton from './StickerButton';
+import StickerButton from '../../common/StickerButton';
 
 type OwnProps = {
   set: StickerSetOrRecent;

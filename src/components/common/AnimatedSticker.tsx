@@ -1,4 +1,4 @@
-import type { AnimationItem } from 'lottie-web';
+import { AnimationItem } from 'lottie-web';
 import React, {
   FC, useEffect, useRef, useState, memo,
 } from '../../lib/teact/teact';
@@ -97,9 +97,11 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
 
     if (play) {
-      animation.goToAndPlay(0);
+      animation.play();
+      // animation.goToAndPlay(0);
     } else {
-      animation.goToAndStop(0);
+      animation.pause();
+      // animation.goToAndStop(0);
     }
   }, [play, animation]);
 

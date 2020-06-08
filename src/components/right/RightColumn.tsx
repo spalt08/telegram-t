@@ -12,6 +12,8 @@ import {
   selectCurrentMessageSearch,
   selectIsForwardMenuOpen,
   selectIsMediaViewerOpen,
+  selectCurrentStickerSearch,
+  selectCurrentGifSearch,
   selectAreActiveChatsLoaded,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -23,6 +25,8 @@ import Profile, { ProfileState } from './Profile';
 import Transition from '../ui/Transition';
 import ForwardPicker from '../common/ForwardPicker.async';
 import RightSearch from './RightSearch.async';
+import StickerSearch from './StickerSearch.async';
+import GifSearch from './GifSearch.async';
 import Statistics from './Statistics.async';
 
 import './RightColumn.scss';
@@ -33,6 +37,10 @@ enum ColumnContent {
   // eslint-disable-next-line no-shadow
   Statistics,
   Search,
+  // eslint-disable-next-line no-shadow
+  StickerSearch,
+  // eslint-disable-next-line no-shadow
+  GifSearch,
   Forward,
 }
 
@@ -44,11 +52,20 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' | 'closeMessageTextSearch' | 'closeForwardMenu'
+  'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' |
+  'closeMessageTextSearch' | 'closeForwardMenu' |
+  'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
 
 const COLUMN_CLOSE_DELAY_MS = 300;
 const TRANSITION_RENDER_COUNT = Object.keys(ColumnContent).length / 2;
+
+function blurSearchInput() {
+  const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
+  if (searchInput) {
+    searchInput.blur();
+  }
+}
 
 const RightColumn: FC<StateProps & DispatchProps> = ({
   contentKey,
@@ -59,6 +76,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   toggleStatistics,
   openUserInfo,
   closeMessageTextSearch,
+  setStickerSearchQuery,
+  setGifSearchQuery,
   closeForwardMenu,
 }) => {
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
@@ -66,6 +85,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   const isOpen = contentKey !== undefined;
   const isSearch = contentKey === ColumnContent.Search;
+  const isStickerSearch = contentKey === ColumnContent.StickerSearch;
+  const isGifSearch = contentKey === ColumnContent.GifSearch;
   const isForwarding = contentKey === ColumnContent.Forward;
   const isStatistics = contentKey === ColumnContent.Statistics;
   const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
@@ -103,11 +124,15 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         toggleStatistics();
         break;
       case ColumnContent.Search: {
-        const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
-        if (searchInput) {
-          searchInput.blur();
-        }
+        blurSearchInput();
         closeMessageTextSearch();
+        break;
+      }
+      case ColumnContent.StickerSearch:
+      case ColumnContent.GifSearch: {
+        blurSearchInput();
+        setStickerSearchQuery({ query: undefined });
+        setGifSearchQuery({ query: undefined });
         break;
       }
       case ColumnContent.Forward:
@@ -117,6 +142,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   }, [
     contentKey, isScrolledDown, toggleChatInfo, openUserInfo,
     toggleStatistics, closeForwardMenu, closeMessageTextSearch,
+    setStickerSearchQuery, setGifSearchQuery,
   ]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
@@ -150,6 +176,10 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     switch (renderedContentKey) {
       case ColumnContent.Search:
         return <RightSearch chatId={selectedChatId!} />;
+      case ColumnContent.StickerSearch:
+        return <StickerSearch />;
+      case ColumnContent.GifSearch:
+        return <GifSearch />;
       case ColumnContent.Forward:
         return <ForwardPicker />;
       case ColumnContent.Statistics:
@@ -176,6 +206,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         <RightHeader
           onClose={close}
           isSearch={isSearch}
+          isStickerSearch={isStickerSearch}
+          isGifSearch={isGifSearch}
           isForwarding={isForwarding}
           isStatistics={isStatistics}
           profileState={profileState}
@@ -203,8 +235,12 @@ export default memo(withGlobal(
     } = global;
 
     const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
-    const currentSearch = selectCurrentMessageSearch(global);
-    const isSearch = Boolean(currentSearch && currentSearch.currentType === 'text');
+    const messageSearch = selectCurrentMessageSearch(global);
+    const isSearch = Boolean(messageSearch && messageSearch.currentType === 'text');
+    const stickerSearch = selectCurrentStickerSearch(global);
+    const isStickerSearch = stickerSearch.query !== undefined;
+    const gifSearch = selectCurrentGifSearch(global);
+    const isGifSearch = gifSearch.query !== undefined;
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
@@ -217,6 +253,10 @@ export default memo(withGlobal(
       ColumnContent.Forward
     ) : isSearch ? (
       ColumnContent.Search
+    ) : isStickerSearch ? (
+      ColumnContent.StickerSearch
+    ) : isGifSearch ? (
+      ColumnContent.GifSearch
     ) : isStatisticsShown ? (
       ColumnContent.Statistics
     ) : isUserInfo ? (
@@ -237,6 +277,8 @@ export default memo(withGlobal(
     'toggleChatInfo',
     'toggleStatistics',
     'closeMessageTextSearch',
+    'setStickerSearchQuery',
+    'setGifSearchQuery',
     'closeForwardMenu',
   ]),
 )(RightColumn));

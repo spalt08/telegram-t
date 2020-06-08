@@ -2,6 +2,7 @@ import { GlobalState } from '../../global/types';
 
 import { selectIsForwardMenuOpen } from './messages';
 import { selectCurrentMessageSearch } from './messageSearch';
+import { selectCurrentStickerSearch, selectCurrentGifSearch } from './stickers';
 import { selectAreActiveChatsLoaded } from './chats';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {
@@ -19,10 +20,14 @@ export function selectIsRightColumnShown(global: GlobalState) {
 
   const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
   const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
-  const currentSearch = selectCurrentMessageSearch(global);
-  const isSearch = Boolean(currentSearch && currentSearch.currentType === 'text');
+  const messageSearch = selectCurrentMessageSearch(global);
+  const isSearch = Boolean(messageSearch && messageSearch.currentType === 'text');
+  const stickerSearch = selectCurrentStickerSearch(global);
+  const isStickerSearch = stickerSearch.query !== undefined;
+  const gifSearch = selectCurrentGifSearch(global);
+  const isGifSearch = gifSearch.query !== undefined;
   const isUserInfo = Boolean(users.selectedId && areActiveChatsLoaded);
   const isChatInfo = Boolean(chats.selectedId && isChatInfoShown && areActiveChatsLoaded);
 
-  return isChatInfo || isUserInfo || isStatisticsShown || isForwarding || isSearch;
+  return isChatInfo || isUserInfo || isStatisticsShown || isForwarding || isSearch || isStickerSearch || isGifSearch;
 }

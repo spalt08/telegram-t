@@ -18,7 +18,7 @@ import { pick } from '../../../util/iteratees';
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
 import StickerSet from './StickerSet';
-import StickerButton from './StickerButton';
+import StickerButton from '../../common/StickerButton';
 
 import './StickerPicker.scss';
 
@@ -32,7 +32,8 @@ type OwnProps = {
 type StateProps = {
   recentStickers: ApiSticker[];
   favoriteStickers: ApiSticker[];
-  stickerSets: Record<string, ApiStickerSet>;
+  addedSetIds: string[];
+  stickerSetsById: Record<string, ApiStickerSet>;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -53,7 +54,8 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   canSendStickers,
   recentStickers,
   favoriteStickers,
-  stickerSets,
+  addedSetIds,
+  stickerSetsById,
   onStickerSelect,
   loadStickerSets,
   loadRecentStickers,
@@ -67,14 +69,14 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const [activeSetIndex, setActiveSetIndex] = useState<number>();
   const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
-  const areLoaded = Boolean(Object.keys(stickerSets).length);
+  const areLoaded = Boolean(addedSetIds.length && Object.keys(stickerSetsById).length);
 
   const allSets = useMemo(() => {
     if (!areLoaded) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    const themeSets: StickerSetOrRecent[] = Object.values(stickerSets);
+    const themeSets: StickerSetOrRecent[] = addedSetIds.map((id) => stickerSetsById[id]).filter(Boolean);
 
     if (favoriteStickers.length) {
       themeSets.unshift({
@@ -95,7 +97,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return themeSets;
-  }, [areLoaded, recentStickers, favoriteStickers, stickerSets]);
+  }, [areLoaded, addedSetIds, recentStickers, favoriteStickers, stickerSetsById]);
 
   const updateVisibleSetIndexes = useCallback(() => {
     const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
@@ -249,12 +251,18 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { all, recent, favorite } = global.stickers;
+    const {
+      setsById,
+      added,
+      recent,
+      favorite,
+    } = global.stickers;
 
     return {
       recentStickers: recent.stickers,
       favoriteStickers: favorite.stickers,
-      stickerSets: all.byId,
+      addedSetIds: added.setIds,
+      stickerSetsById: setsById,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

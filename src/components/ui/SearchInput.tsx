@@ -11,12 +11,19 @@ type OwnProps = {
   className?: string;
   focused?: boolean;
   isLoading?: boolean;
+  placeholder?: string;
   onChange: (value: string) => void;
   onFocus?: () => void;
 };
 
 const SearchInput: FC<OwnProps> = ({
-  value, className, focused, isLoading, onChange, onFocus,
+  value,
+  className,
+  focused,
+  isLoading,
+  placeholder = 'Search',
+  onChange,
+  onFocus,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
 
@@ -42,7 +49,7 @@ const SearchInput: FC<OwnProps> = ({
       <input
         ref={inputRef}
         type="text"
-        placeholder="Search"
+        placeholder={placeholder}
         className="form-control"
         value={value}
         onChange={handleChange}

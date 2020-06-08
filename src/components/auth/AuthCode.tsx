@@ -25,8 +25,8 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
   authPhoneNumber, authIsLoading, authError, setAuthCode, returnToAuthPhoneNumber, clearAuthError,
 }) => {
   const [code, setCode] = useState<string>();
-  const [idleMonkeyData, setIdleMonkeyData] = useState<AnyLiteral>();
-  const [trackingMonkeyData, setTrackingMonkeyData] = useState<AnyLiteral>();
+  const [idleMonkeyData, setIdleMonkeyData] = useState<Record<string, any>>();
+  const [trackingMonkeyData, setTrackingMonkeyData] = useState<Record<string, any>>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingDirection, setTrackingDirection] = useState(1);

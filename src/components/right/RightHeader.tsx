@@ -7,7 +7,11 @@ import { GlobalActions } from '../../global/types';
 
 import { debounce } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
-import { selectCurrentMessageSearch } from '../../modules/selectors';
+import {
+  selectCurrentMessageSearch,
+  selectCurrentStickerSearch,
+  selectCurrentGifSearch,
+} from '../../modules/selectors';
 
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
@@ -22,15 +26,22 @@ type OwnProps = {
   onClose: () => void;
   isForwarding?: boolean;
   isSearch?: boolean;
+  isStickerSearch?: boolean;
+  isGifSearch?: boolean;
   isStatistics?: boolean;
   profileState?: ProfileState;
 };
 
 type StateProps = {
-  searchQuery?: string;
+  messageSearchQuery?: string;
+  stickerSearchQuery?: string;
+  gifSearchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setMessageSearchQuery' | 'searchMessages' | 'toggleStatistics'>;
+type DispatchProps = Pick<GlobalActions, (
+  'setMessageSearchQuery' | 'setStickerSearchQuery' | 'setGifSearchQuery' |
+  'searchMessages' | 'toggleStatistics'
+)>;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
@@ -40,6 +51,8 @@ enum HeaderContent {
   Statistics,
   MemberList,
   Search,
+  StickerSearch,
+  GifSearch,
   Forward,
 }
 
@@ -47,22 +60,40 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isForwarding,
   isSearch,
+  isStickerSearch,
+  isGifSearch,
   isStatistics,
   profileState,
-  searchQuery,
+  messageSearchQuery,
+  stickerSearchQuery,
+  gifSearchQuery,
   setMessageSearchQuery,
+  setStickerSearchQuery,
+  setGifSearchQuery,
   searchMessages,
   toggleStatistics,
 }) => {
-  const handleSearchQueryChange = useCallback((query: string) => {
+  const handleMessageSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
     runDebouncedForSearch(searchMessages);
   }, [searchMessages, setMessageSearchQuery]);
+
+  const handleStickerSearchQueryChange = useCallback((query: string) => {
+    setStickerSearchQuery({ query });
+  }, [setStickerSearchQuery]);
+
+  const handleGifSearchQueryChange = useCallback((query: string) => {
+    setGifSearchQuery({ query });
+  }, [setGifSearchQuery]);
 
   const contentKey = isForwarding ? (
     HeaderContent.Forward
   ) : isSearch ? (
     HeaderContent.Search
+  ) : isStickerSearch ? (
+    HeaderContent.StickerSearch
+  ) : isGifSearch ? (
+    HeaderContent.GifSearch
   ) : isStatistics ? (
     HeaderContent.Statistics
   ) : profileState === ProfileState.SharedMedia ? (
@@ -91,7 +122,23 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
       case HeaderContent.Forward:
         return <h3>Forward</h3>;
       case HeaderContent.Search:
-        return <SearchInput value={searchQuery} onChange={handleSearchQueryChange} />;
+        return <SearchInput value={messageSearchQuery} onChange={handleMessageSearchQueryChange} />;
+      case HeaderContent.StickerSearch:
+        return (
+          <SearchInput
+            value={stickerSearchQuery}
+            placeholder="Search Stickers"
+            onChange={handleStickerSearchQueryChange}
+          />
+        );
+      case HeaderContent.GifSearch:
+        return (
+          <SearchInput
+            value={gifSearchQuery}
+            placeholder="Search GIFs"
+            onChange={handleGifSearchQueryChange}
+          />
+        );
       case HeaderContent.Statistics:
         return <h3>Statistics</h3>;
       case HeaderContent.SharedMedia:
@@ -113,7 +160,9 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  const isBackButton = contentKey === HeaderContent.SharedMedia || contentKey === HeaderContent.MemberList;
+  const isBackButton = contentKey === HeaderContent.SharedMedia
+    || contentKey === HeaderContent.MemberList
+    || contentKey === HeaderContent.StickerSearch;
 
   return (
     <div className="RightHeader">
@@ -135,12 +184,20 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { query: searchQuery } = selectCurrentMessageSearch(global) || {};
+    const { query: messageSearchQuery } = selectCurrentMessageSearch(global) || {};
+    const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
+    const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
 
-    return { searchQuery };
+    return {
+      messageSearchQuery,
+      stickerSearchQuery,
+      gifSearchQuery,
+    };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'setMessageSearchQuery',
+    'setStickerSearchQuery',
+    'setGifSearchQuery',
     'searchMessages',
     'toggleStatistics',
   ]),

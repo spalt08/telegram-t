@@ -28,8 +28,8 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [closeMonkeyData, setCloseMonkeyData] = useState<AnyLiteral>();
-  const [peekMonkeyData, setPeekMonkeyData] = useState<AnyLiteral>();
+  const [closeMonkeyData, setCloseMonkeyData] = useState<Record<string, any>>();
+  const [peekMonkeyData, setPeekMonkeyData] = useState<Record<string, any>>();
   const [isFirstMonkeyLoaded, setIsFirstMonkeyLoaded] = useState(false);
   const [isPeekShown, setIsPeekShown] = useState(false);
 

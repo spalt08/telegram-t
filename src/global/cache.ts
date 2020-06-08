@@ -83,7 +83,7 @@ function updateCache(global: GlobalState) {
     focusedMessage: {},
     fileUploads: { byMessageLocalId: {} },
     stickers: reduceStickers(global),
-    savedGifs: reduceSavedGifs(global),
+    gifs: reduceGifs(global),
     globalSearch: {
       recentlyFoundChatIds: global.globalSearch.recentlyFoundChatIds,
     },
@@ -155,8 +155,9 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 // Remove `hash` so we can request all MTP entities on next load.
 function reduceStickers(global: GlobalState): GlobalState['stickers'] {
   return {
-    all: {
-      byId: global.stickers.all.byId,
+    setsById: filterKeys(global.stickers.setsById, global.stickers.added.setIds),
+    added: {
+      setIds: global.stickers.added.setIds,
     },
     recent: {
       stickers: global.stickers.recent.stickers,
@@ -165,13 +166,20 @@ function reduceStickers(global: GlobalState): GlobalState['stickers'] {
       hash: 0,
       stickers: [],
     },
+    featured: {
+      setIds: [],
+    },
+    search: {},
   };
 }
 
 // Remove `hash` so we can request all MTP entities on next load.
-function reduceSavedGifs(global: GlobalState): GlobalState['savedGifs'] {
+function reduceGifs(global: GlobalState): GlobalState['gifs'] {
   return {
-    gifs: global.savedGifs.gifs,
+    saved: {
+      gifs: global.gifs.saved.gifs,
+    },
+    search: {},
   };
 }
 

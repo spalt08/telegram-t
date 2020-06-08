@@ -70,6 +70,13 @@
     }
   }
 
+  &.pill {
+    border-radius: 1.75rem;
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    text-transform: none;
+  }
+
   &.primary {
     background: var(--color-primary);
     color: var(--color-white);
@@ -219,6 +226,12 @@
     &.round {
       width: 2.75rem;
     }
+
+    &.pill {
+      height: 2rem;
+      border-radius: 1rem;
+      padding: 0.3125rem 1rem;
+    }
   }
 
   &.tiny {
@@ -227,6 +240,13 @@
     border-radius: var(--border-radius-default-tiny);
     font-size: .875rem;
     font-weight: 500;
+
+    &.pill {
+      height: 2rem;
+      border-radius: 1rem;
+      padding: 0.3125rem 1rem;
+      font-size: 1rem;
+    }
   }
 
   &.loading {

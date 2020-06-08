@@ -1,14 +1,14 @@
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
-} from '../../../lib/teact/teact';
+} from '../../lib/teact/teact';
 
-import { ApiMediaFormat, ApiVideo } from '../../../api/types';
+import { ApiMediaFormat, ApiVideo } from '../../api/types';
 
-import buildClassName from '../../../util/buildClassName';
-import useMedia from '../../../hooks/useMedia';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
+import buildClassName from '../../util/buildClassName';
+import useMedia from '../../hooks/useMedia';
+import useTransitionForMedia from '../../hooks/useTransitionForMedia';
 
-import Spinner from '../../ui/Spinner';
+import Spinner from '../ui/Spinner';
 
 import './GifButton.scss';
 

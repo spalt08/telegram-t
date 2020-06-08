@@ -18,7 +18,8 @@ import {
   fetchTopUsers, fetchContactList, fetchUsers,
 } from './users';
 import {
-  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, faveSticker, fetchStickers, fetchSavedGifs,
+  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers,
+  faveSticker, fetchStickers, fetchSavedGifs, searchStickers, searchGifs,
 } from './stickers';
 
 export default {
@@ -76,7 +77,10 @@ export default {
   fetchStickerSets,
   fetchRecentStickers,
   fetchFavoriteStickers,
+  fetchFeaturedStickers,
+  searchStickers,
   faveSticker,
   fetchStickers,
   fetchSavedGifs,
+  searchGifs,
 };

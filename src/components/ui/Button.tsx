@@ -24,6 +24,7 @@ export type OwnProps = {
   color?: 'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'dark';
   className?: string;
   round?: boolean;
+  pill?: boolean;
   fluid?: boolean;
   isText?: boolean;
   isLoading?: boolean;
@@ -50,6 +51,7 @@ const Button: FC<OwnProps> = ({
   color = 'primary',
   className,
   round,
+  pill,
   fluid,
   isText,
   isLoading,
@@ -72,6 +74,7 @@ const Button: FC<OwnProps> = ({
     size,
     color,
     round && 'round',
+    pill && 'pill',
     fluid && 'fluid',
     disabled && 'disabled',
     isText && 'text',

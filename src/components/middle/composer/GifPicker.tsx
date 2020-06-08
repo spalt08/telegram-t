@@ -12,7 +12,7 @@ import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
-import GifButton from './GifButton';
+import GifButton from '../../common/GifButton';
 
 import './GifPicker.scss';
 
@@ -95,7 +95,7 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { gifs: savedGifs } = global.savedGifs;
+    const { gifs: savedGifs } = global.gifs.saved;
 
     return {
       savedGifs,

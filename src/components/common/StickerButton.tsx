@@ -1,17 +1,17 @@
 import { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
   FC, memo, useCallback, useEffect, useRef, useState,
-} from '../../../lib/teact/teact';
+} from '../../lib/teact/teact';
 
-import { ApiMediaFormat, ApiSticker } from '../../../api/types';
+import { ApiMediaFormat, ApiSticker } from '../../api/types';
 
-import useMedia from '../../../hooks/useMedia';
-import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
-import webpHero from '../../../util/webpHero';
-import buildClassName from '../../../util/buildClassName';
+import useMedia from '../../hooks/useMedia';
+import useTransitionForMedia from '../../hooks/useTransitionForMedia';
+import webpHero from '../../util/webpHero';
+import buildClassName from '../../util/buildClassName';
 
-import AnimatedSticker from '../../common/AnimatedSticker';
-import Button from '../../ui/Button';
+import AnimatedSticker from './AnimatedSticker';
+import Button from '../ui/Button';
 
 import './StickerButton.scss';
 

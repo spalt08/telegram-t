@@ -1,5 +1,10 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
+import {
+  ApiSticker,
+  ApiVideo,
+  OnApiUpdate,
+  ApiStickerSet,
+} from '../../types';
 
 import { invokeRequest } from './client';
 import { buildStickerFromDocument, buildStickerSet } from '../apiBuilders/stickers';
@@ -76,6 +81,42 @@ export async function fetchFavoriteStickers({ hash }: { hash: number }) {
   };
 }
 
+export async function fetchFeaturedStickers({ hash }: { hash: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetFeaturedStickers({ hash }));
+
+  if (!result || result instanceof GramJs.messages.FeaturedStickersNotModified) {
+    return undefined;
+  }
+
+  const sets: ApiStickerSet[] = [];
+
+  result.sets.forEach((coveredSet) => {
+    const set = buildStickerSet(coveredSet.set);
+
+    const setCovers = (coveredSet instanceof GramJs.StickerSetMultiCovered)
+      ? coveredSet.covers
+      : [coveredSet.cover];
+
+    set.covers = [];
+    setCovers.forEach((cover) => {
+      if (cover instanceof GramJs.Document) {
+        const coverSticker = buildStickerFromDocument(cover);
+        if (coverSticker) {
+          set.covers!.push(coverSticker);
+          localDb.documents[String(cover.id)] = cover;
+        }
+      }
+    });
+
+    sets.push(set);
+  });
+
+  return {
+    hash: result.hash,
+    sets,
+  };
+}
+
 export async function faveSticker({
   sticker,
   unfave,
@@ -123,6 +164,45 @@ export async function fetchStickers({ stickerSetId, accessHash }: { stickerSetId
   };
 }
 
+export async function searchStickers({ query, hash }: { query: string; hash: number }) {
+  const result = await invokeRequest(new GramJs.messages.SearchStickerSets({
+    q: query,
+    hash,
+  }));
+
+  if (!result || result instanceof GramJs.messages.FoundStickerSetsNotModified) {
+    return undefined;
+  }
+
+  const sets: ApiStickerSet[] = [];
+
+  result.sets.forEach((coveredSet) => {
+    const set = buildStickerSet(coveredSet.set);
+
+    const setCovers = (coveredSet instanceof GramJs.StickerSetMultiCovered)
+      ? coveredSet.covers
+      : [coveredSet.cover];
+
+    set.covers = [];
+    setCovers.forEach((cover) => {
+      if (cover instanceof GramJs.Document) {
+        const coverSticker = buildStickerFromDocument(cover);
+        if (coverSticker) {
+          set.covers!.push(coverSticker);
+          localDb.documents[String(cover.id)] = cover;
+        }
+      }
+    });
+
+    sets.push(set);
+  });
+
+  return {
+    hash: result.hash,
+    sets,
+  };
+}
+
 export async function fetchSavedGifs({ hash }: { hash: number }) {
   const result = await invokeRequest(new GramJs.messages.GetSavedGifs({ hash }));
 
@@ -143,6 +223,41 @@ export async function fetchSavedGifs({ hash }: { hash: number }) {
 
   return {
     hash: result.hash,
+    gifs,
+  };
+}
+
+export async function searchGifs({ query, offset }: { query: string; offset?: number }) {
+  const result = await invokeRequest(new GramJs.messages.SearchGifs({
+    q: query,
+    offset,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const { nextOffset, results } = result;
+
+  const gifs: ApiVideo[] = [];
+
+  results.forEach((foundGif) => {
+    if (foundGif instanceof GramJs.FoundGifCached) {
+      const { document } = foundGif;
+      if (document instanceof GramJs.Document) {
+        const video = buildVideoFromDocument(document);
+        if (video) {
+          gifs.push(video);
+          localDb.documents[String(document.id)] = document;
+        }
+      }
+    } else {
+      // TODO
+    }
+  });
+
+  return {
+    nextOffset,
     gifs,
   };
 }

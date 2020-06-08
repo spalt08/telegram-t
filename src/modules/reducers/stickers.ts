@@ -2,8 +2,18 @@ import { GlobalState } from '../../global/types';
 import { ApiStickerSet, ApiSticker } from '../../api/types';
 import { buildCollectionByKey } from '../../util/iteratees';
 
-export function updateStickerSets(global: GlobalState, hash: number, sets: ApiStickerSet[]): GlobalState {
-  const { byId: existingSets } = global.stickers.all || {};
+export function updateStickerSets(
+  global: GlobalState,
+  category: 'added' | 'featured' | 'search',
+  hash: number,
+  sets: ApiStickerSet[],
+  resultIds?: string[],
+): GlobalState {
+  const setIds = sets.map(({ id }) => id);
+  const existingSets = buildCollectionByKey(
+    setIds.map((id) => global.stickers.setsById[id]).filter(Boolean as any),
+    'id',
+  );
 
   let updatedSets: Record<string, ApiStickerSet> = {};
   if (!existingSets || !Object.keys(existingSets).length) {
@@ -25,31 +35,36 @@ export function updateStickerSets(global: GlobalState, hash: number, sets: ApiSt
     ...global,
     stickers: {
       ...global.stickers,
-      all: {
+      setsById: {
+        ...global.stickers.setsById,
+        ...updatedSets,
+      },
+      [category]: {
+        ...global.stickers[category],
         hash,
-        byId: updatedSets,
+        ...(
+          category === 'search'
+            ? { resultIds }
+            : { setIds }
+        ),
       },
     },
   };
 }
 
 export function updateStickerSet(global: GlobalState, set: ApiStickerSet, stickers: ApiSticker[]): GlobalState {
-  const allStickers = global.stickers.all;
-  const existingSet = allStickers.byId[set.id] || {};
+  const existingSet = global.stickers.setsById[set.id] || {};
 
   return {
     ...global,
     stickers: {
       ...global.stickers,
-      all: {
-        ...allStickers,
-        byId: {
-          ...allStickers.byId,
-          [set.id]: {
-            ...existingSet,
-            ...set,
-            stickers,
-          },
+      setsById: {
+        ...global.stickers.setsById,
+        [set.id]: {
+          ...existingSet,
+          ...set,
+          stickers,
         },
       },
     },

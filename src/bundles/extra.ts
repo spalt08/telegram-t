@@ -21,4 +21,6 @@ export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu'
 export { default as AttachMenu } from '../components/middle/composer/AttachMenu';
 
 export { default as RightSearch } from '../components/right/RightSearch';
+export { default as StickerSearch } from '../components/right/StickerSearch';
+export { default as GifSearch } from '../components/right/GifSearch';
 export { default as Statistics } from '../components/right/Statistics';

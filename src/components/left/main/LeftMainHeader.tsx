@@ -158,6 +158,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         value={contactsFilter || searchQuery}
         focused={isSearchFocused}
         isLoading={isLoading}
+        placeholder="Telegram Search"
         onChange={onSearchQuery}
         onFocus={handleSearchFocus}
       />

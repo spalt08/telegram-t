@@ -3,6 +3,7 @@ import './ui/chats';
 import './ui/messages';
 import './ui/globalSearch';
 import './ui/messageSearch';
+import './ui/stickerSearch';
 import './ui/users';
 import './ui/settings';
 import './ui/misc';

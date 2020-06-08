@@ -37,6 +37,7 @@ export interface ApiStickerSet {
   count: number;
   hash: number;
   stickers: ApiSticker[];
+  covers?: ApiSticker[];
 }
 
 export interface ApiVideo {

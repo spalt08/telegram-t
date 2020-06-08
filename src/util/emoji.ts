@@ -1,4 +1,5 @@
 export type EmojiRawData = typeof import('emoji-data-ios/emoji-data.json');
+export type EmojiModule = { default: EmojiRawData };
 
 export type EmojiData = {
   categories: Array<EmojiCategory>;

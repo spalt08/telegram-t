@@ -56,7 +56,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'sendMessage' | 'editMessage' | 'saveDraft' |
-  'clearDraft' | 'showError'
+  'clearDraft' | 'showError' | 'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
 
 enum MainButtonState {
@@ -86,6 +86,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
   saveDraft,
   clearDraft,
   showError,
+  setStickerSearchQuery,
+  setGifSearchQuery,
 }) => {
   const [html, setHtml] = useState<string>('');
   const lastMessageSendTimeSeconds = useRef<number>();
@@ -256,6 +258,16 @@ const Composer: FC<StateProps & DispatchProps> = ({
     closePollModal();
   }, [closePollModal, sendMessage]);
 
+  const handleSearchOpen = useCallback((type: 'stickers' | 'gifs') => {
+    if (type === 'stickers') {
+      setStickerSearchQuery({ query: '' });
+      setGifSearchQuery({ query: undefined });
+    } else {
+      setGifSearchQuery({ query: '' });
+      setStickerSearchQuery({ query: undefined });
+    }
+  }, [setStickerSearchQuery, setGifSearchQuery]);
+
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
     : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
@@ -354,6 +366,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             onStickerSelect={handleStickerSelect}
             onGifSelect={handleGifSelect}
             onRemoveSymbol={removeSymbol}
+            onSearchOpen={handleSearchOpen}
           />
         </div>
       </div>
@@ -422,5 +435,7 @@ export default memo(withGlobal(
     'saveDraft',
     'clearDraft',
     'showError',
+    'setStickerSearchQuery',
+    'setGifSearchQuery',
   ]),
 )(Composer));

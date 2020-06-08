@@ -1,4 +1,4 @@
-import React, { FC, memo } from '../../../lib/teact/teact';
+import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
 import Button from '../../ui/Button';
 
@@ -6,6 +6,7 @@ type OwnProps = {
   activeTab: SymbolMenuTabs;
   onSwitchTab: (tab: SymbolMenuTabs) => void;
   onRemoveSymbol: () => void;
+  onSearchOpen: (type: 'stickers' | 'gifs') => void;
 };
 
 export enum SymbolMenuTabs {
@@ -26,7 +27,7 @@ const SYMBOL_MENU_TAB_ICONS = {
 };
 
 const SymbolMenuFooter: FC<OwnProps> = ({
-  activeTab, onSwitchTab, onRemoveSymbol,
+  activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen,
 }) => {
   function renderTabButton(tab: SymbolMenuTabs) {
     return (
@@ -42,14 +43,20 @@ const SymbolMenuFooter: FC<OwnProps> = ({
     );
   }
 
+  const handleSearchOpen = useCallback(() => {
+    onSearchOpen(activeTab === SymbolMenuTabs.Stickers ? 'stickers' : 'gifs');
+  }, [activeTab, onSearchOpen]);
+
   return (
     <div className="SymbolMenu-footer">
-      {activeTab !== SymbolMenuTabs.Emoji && (
+      {/* TODO: GIF search button is hidden until search request issues are resolved */}
+      {activeTab === SymbolMenuTabs.Stickers && (
         <Button
-          className="symbol-search-button not-implemented"
+          className="symbol-search-button"
           ariaLabel={activeTab === SymbolMenuTabs.Stickers ? 'Search Stickers' : 'Search GIFs'}
           round
           color="translucent"
+          onClick={handleSearchOpen}
         >
           <i className="icon-search" />
         </Button>

@@ -99,9 +99,10 @@ export type GlobalState = {
   recentEmojis: string[];
 
   stickers: {
-    all: {
+    setsById: Record<string, ApiStickerSet>;
+    added: {
       hash?: number;
-      byId: Record<string, ApiStickerSet>;
+      setIds: string[];
     };
     recent: {
       hash?: number;
@@ -111,11 +112,26 @@ export type GlobalState = {
       hash?: number;
       stickers: ApiSticker[];
     };
+    featured: {
+      hash?: number;
+      setIds: string[];
+    };
+    search: {
+      query?: string;
+      resultIds?: string[];
+    };
   };
 
-  savedGifs: {
-    hash?: number;
-    gifs?: ApiVideo[];
+  gifs: {
+    saved: {
+      hash?: number;
+      gifs?: ApiVideo[];
+    };
+    search: {
+      query?: string;
+      offset?: number;
+      results?: ApiVideo[];
+    };
   };
 
   globalSearch: {
@@ -224,10 +240,13 @@ export type ActionTypes = (
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
   'setSettingOption' | 'clearAnimationSettingAttention' |
+  // Stickers & GIFs
+  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
+  'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'faveSticker' | 'unfaveSticker' |
   // misc
   'openMediaViewer' |
-  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
-  'loadWebPagePreview' | 'clearWebPagePreview' | 'faveSticker' | 'unfaveSticker' |
+  'loadWebPagePreview' | 'clearWebPagePreview' |
   'saveDraft' | 'clearDraft' | 'loadChatDrafts'
 );
 
