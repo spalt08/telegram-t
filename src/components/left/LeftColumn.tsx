@@ -14,6 +14,7 @@ import LeftMain from './main/LeftMain';
 import Settings from './settings/Settings.async';
 import NewChannel from './newChat/NewChannel.async';
 import NewGroup from './newChat/NewGroup.async';
+import ArchivedChats from './ArchivedChats';
 
 import './LeftColumn.scss';
 
@@ -27,7 +28,7 @@ enum ContentType {
   Main,
   // eslint-disable-next-line no-shadow
   Settings,
-  Contacts,
+  Archived,
   // eslint-disable-next-line no-shadow
   NewGroup,
   // eslint-disable-next-line no-shadow
@@ -51,6 +52,9 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
 
   let contentType: ContentType = ContentType.Main;
   switch (content) {
+    case LeftColumnContent.Archived:
+      contentType = ContentType.Archived;
+      break;
     case LeftColumnContent.Settings:
       contentType = ContentType.Settings;
       break;
@@ -131,6 +135,12 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     >
       {() => {
         switch (contentType) {
+          case ContentType.Archived:
+            return (
+              <ArchivedChats
+                onReset={handleReset}
+              />
+            );
           case ContentType.Settings:
             return (
               <Settings

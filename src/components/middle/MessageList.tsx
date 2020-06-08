@@ -570,6 +570,7 @@ function updateStickyDateOnScroll(container: HTMLElement, forceHide = false) {
     });
   } else {
     clearTimeout(scrollEndTimeout);
+    scrollEndTimeout = undefined;
   }
 
   scrollEndTimeout = window.setTimeout(() => {

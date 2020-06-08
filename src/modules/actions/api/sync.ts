@@ -50,13 +50,19 @@ async function sync(afterSyncCallback: () => void) {
 }
 
 async function loadAndReplaceChats() {
-  const result = await callApi('fetchChats', {
+  const resultActive = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,
+    isSync: true,
+  });
+  const resultArchived = await callApi('fetchChats', {
+    limit: CHAT_LIST_SLICE,
+    archived: true,
+    isSync: true,
   });
 
   let global = getGlobal();
 
-  if (!result) {
+  if (!resultActive && !resultArchived) {
     return global;
   }
 
@@ -93,24 +99,38 @@ async function loadAndReplaceChats() {
     }
   }
 
-  savedUsers.push(...result.users);
-  savedChats.push(...result.chats);
+  if (resultActive) {
+    savedUsers.push(...resultActive.users);
+    savedChats.push(...resultActive.chats);
+  }
+  if (resultArchived) {
+    savedUsers.push(...resultArchived.users);
+    savedChats.push(...resultArchived.chats);
+  }
 
   global = replaceUsers(global, buildCollectionByKey(savedUsers, 'id'));
   global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
-  global = replaceChatListIds(global, result.chatIds);
+  global = replaceChatListIds(global, 'active', resultActive ? resultActive.chatIds : undefined);
+  global = replaceChatListIds(global, 'archived', resultArchived ? resultArchived.chatIds : undefined);
   global = {
     ...global,
     chats: {
       ...global.chats,
       scrollOffsetById: {},
+      orderedPinnedIds: {
+        ...global.chats.orderedPinnedIds,
+        ...(resultActive && { active: resultActive.orderedPinnedIds }),
+        ...(resultArchived && { archived: resultArchived.orderedPinnedIds }),
+      },
       draftsById: {
         ...global.chats.draftsById,
-        ...result.draftsById,
+        ...(resultActive && resultActive.draftsById),
+        ...(resultArchived && resultArchived.draftsById),
       },
       replyingToById: {
         ...global.chats.replyingToById,
-        ...result.replyingToById,
+        ...(resultActive && resultActive.replyingToById),
+        ...(resultArchived && resultArchived.replyingToById),
       },
     },
   };
@@ -203,11 +223,11 @@ async function preloadTopChatMessages() {
     const {
       selectedId, byId, listIds, orderedPinnedIds,
     } = getGlobal().chats;
-    if (!listIds) {
+    if (!listIds.active) {
       return;
     }
 
-    const { pinnedChats, otherChats } = prepareChats(byId, listIds, orderedPinnedIds);
+    const { pinnedChats, otherChats } = prepareChats(byId, listIds.active, orderedPinnedIds.active);
     const topChats = [...pinnedChats, ...otherChats];
     const chatToPreload = topChats.find(({ id }) => id !== selectedId && !preloadedChatIds.includes(id));
     if (!chatToPreload) {

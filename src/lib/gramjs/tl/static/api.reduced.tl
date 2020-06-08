@@ -875,6 +875,8 @@ messages.getPeerDialogs#e470bcfd peers:Vector<InputDialogPeer> = messages.PeerDi
 messages.saveDraft#bc39e14b flags:# no_webpage:flags.1?true reply_to_msg_id:flags.0?int peer:InputPeer message:string entities:flags.3?Vector<MessageEntity> = Bool;
 messages.getRecentStickers#5ea192c9 flags:# attached:flags.0?true hash:int = messages.RecentStickers;
 messages.getWebPage#32ca8f91 url:string hash:int = WebPage;
+messages.toggleDialogPin#a731e257 flags:# pinned:flags.0?true peer:InputDialogPeer = Bool;
+messages.getPinnedDialogs#d6b94df2 folder_id:int = messages.PeerDialogs;
 messages.uploadMedia#519bc2b1 peer:InputPeer media:InputMedia = MessageMedia;
 messages.getFavedStickers#21ce0b0e hash:int = messages.FavedStickers;
 messages.faveSticker#b9ffc55b id:InputDocument unfave:Bool = Bool;
@@ -905,4 +907,5 @@ channels.joinChannel#24b524c5 channel:InputChannel = Updates;
 channels.leaveChannel#f836aa95 channel:InputChannel = Updates;
 channels.deleteChannel#c0111fe3 channel:InputChannel = Updates;
 channels.readMessageContents#eab5dc38 channel:InputChannel id:Vector<int> = Bool;
+folders.editPeerFolders#6847d0ab folder_peers:Vector<InputFolderPeer> = Updates;
 // LAYER 112

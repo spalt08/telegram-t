@@ -25,6 +25,11 @@ export interface ISettings extends Record<string, any> {
   language: 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'es' | 'uk';
 }
 
+export type IAnchorPosition = {
+  x: number;
+  y: number;
+};
+
 export enum SettingsScreens {
   Main,
   EditProfile,
@@ -49,6 +54,7 @@ export enum LeftColumnContent {
   GlobalSearch,
   Settings,
   Contacts,
+  Archived,
   NewChannel,
   NewGroupStep1,
   NewGroupStep2,

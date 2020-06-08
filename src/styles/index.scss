@@ -4,6 +4,7 @@
 @import 'spacing';
 @import 'forms';
 @import 'icons';
+@import 'common';
 @import '../assets/fonts/roboto.css';
 
 html {
@@ -155,135 +156,6 @@ div[role="button"] {
 
   &.slow {
     transition-duration: .3s;
-  }
-}
-
-// Common styles for all media-type components across the app.
-.media-inner {
-  position: relative;
-
-  video,
-  img {
-    display: block;
-  }
-
-  img {
-    object-fit: contain;
-  }
-
-  video {
-    object-fit: cover;
-  }
-
-  .thumbnail ~ .full-media, .media-loading {
-    position: absolute;
-  }
-
-  .thumbnail {
-    &.empty {
-      visibility: hidden;
-    }
-  }
-}
-
-// Common styles for clickable ChatInfo wrappers
-.chat-item-clickable {
-  position: relative;
-  overflow: hidden;
-  margin: 0 -0.5rem;
-  padding: 0.75rem;
-  border-radius: var(--border-radius-default);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--color-chat-hover);
-  }
-
-  &:not(.has-ripple) {
-    &:active {
-      background: var(--color-chat-active);
-    }
-  }
-
-  .ChatInfo {
-    display: flex;
-    align-items: center;
-
-    .Avatar {
-      width: 3rem;
-      height: 3rem;
-      margin-right: 0.75rem;
-    }
-
-    .title {
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-      font-size: 1rem;
-      line-height: 1.3125;
-      white-space: pre-wrap;
-
-      .VerifiedIcon {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-left: 0.25rem;
-        margin-top: 0.05rem;
-      }
-
-      .emoji {
-        background-position: 0 0;
-      }
-    }
-
-    .status, .typing-status {
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-      margin: 0;
-      color: var(--color-text-secondary);
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-
-      &.online {
-        color: var(--color-primary);
-      }
-    }
-  }
-}
-
-.animated-close-icon {
-  position: absolute;
-  transform: rotate(-45deg);
-
-  &, &::before, &::after {
-    width: 1.125rem;
-    height: 0.125rem;
-    border-radius: 0.125rem;
-    background-color: var(--color-text-secondary);
-    transition: transform .25s;
-  }
-
-  &::before, &::after {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: '';
-  }
-
-  &::before {
-    transform: rotate(90deg);
-  }
-
-  &.state-back {
-    transform: rotate(180deg);
-
-    &::before {
-      transform: rotate(45deg) scaleX(0.75) translate(0, -0.375rem);
-    }
-
-    &::after {
-      transform: rotate(-45deg) scaleX(0.75) translate(0, 0.375rem);
-    }
   }
 }
 

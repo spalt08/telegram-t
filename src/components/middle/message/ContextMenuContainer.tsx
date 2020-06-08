@@ -5,6 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
+import { IAnchorPosition } from '../../../types';
 
 import { selectAllowedMessagedActions } from '../../../modules/selectors';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
@@ -15,11 +16,6 @@ import DeleteMessageModal from '../../common/DeleteMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 
 import './ContextMenuContainer.scss';
-
-export type IAnchorPosition = {
-  x: number;
-  y: number;
-};
 
 export type OwnProps = {
   isOpen: boolean;

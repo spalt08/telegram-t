@@ -19,7 +19,7 @@ import './SymbolMenu.scss';
 const MENU_CLOSE_TIMEOUT = 250;
 const TRANSITION_NAME = IS_SMOOTH_SCROLL_SUPPORTED ? 'scroll-slide' : 'slide';
 
-let closeTimeout: number;
+let closeTimeout: number | undefined;
 
 export type OwnProps = {
   isOpen: boolean;
@@ -46,6 +46,7 @@ const SymbolMenu: FC<OwnProps> = ({
   useEffect(() => {
     if (closeTimeout) {
       clearTimeout(closeTimeout);
+      closeTimeout = undefined;
     }
     if (isOpen && !IS_TOUCH_ENV) {
       closeTimeout = window.setTimeout(() => {
@@ -64,6 +65,7 @@ const SymbolMenu: FC<OwnProps> = ({
     isMouseInside.current = false;
     if (closeTimeout) {
       clearTimeout(closeTimeout);
+      closeTimeout = undefined;
     }
     closeTimeout = window.setTimeout(() => {
       if (!isMouseInside.current) {

@@ -10,7 +10,7 @@ import { debounce } from '../../util/schedulers';
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
-  onLoadMore: AnyToVoidFunction;
+  onLoadMore: ({ direction }: { direction: LoadMoreDirection }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
   items: any[];
   sensitiveArea?: number;

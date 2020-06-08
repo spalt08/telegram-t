@@ -20,7 +20,7 @@ export type OwnProps = {
 };
 
 const MENU_CLOSE_TIMEOUT = 250;
-let closeTimeout: number;
+let closeTimeout: number | undefined;
 
 const AttachMenu: FC<OwnProps> = ({
   isOpen, allowedAttachmentOptions, onFileSelect, onPollCreate, onClose,
@@ -30,6 +30,7 @@ const AttachMenu: FC<OwnProps> = ({
   useEffect(() => {
     if (closeTimeout) {
       clearTimeout(closeTimeout);
+      closeTimeout = undefined;
     }
     if (isOpen && !IS_TOUCH_ENV) {
       closeTimeout = window.setTimeout(() => {
@@ -48,6 +49,7 @@ const AttachMenu: FC<OwnProps> = ({
     isMouseInside.current = false;
     if (closeTimeout) {
       clearTimeout(closeTimeout);
+      closeTimeout = undefined;
     }
     closeTimeout = window.setTimeout(() => {
       if (!isMouseInside.current) {

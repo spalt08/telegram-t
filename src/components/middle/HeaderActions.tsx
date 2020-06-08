@@ -5,13 +5,10 @@ import React, {
   useState,
 } from '../../lib/teact/teact';
 
+import { IAnchorPosition } from '../../types';
+
 import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
-
-type IAnchorPosition = {
-  x: number;
-  y: number;
-};
 
 type OwnProps = {
   chatId: number;

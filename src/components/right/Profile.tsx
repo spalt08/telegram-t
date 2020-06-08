@@ -28,6 +28,7 @@ import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
 import Loading from '../ui/Loading';
+import ListItem from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Document from '../common/Document';
@@ -276,9 +277,9 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
         ) : mediaType === 'members' ? (
           memberIds.length
             ? memberIds.map((id) => (
-              <div key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
+              <ListItem key={id} className="chat-item-clickable" onClick={() => handleMemberClick(id)}>
                 <PrivateChatInfo userId={id} forceShowSelf />
-              </div>
+              </ListItem>
             ))
             : <Loading />
         ) : undefined}

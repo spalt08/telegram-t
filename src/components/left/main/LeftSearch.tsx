@@ -10,7 +10,6 @@ import searchWords from '../../../util/searchWords';
 import { unique, pick } from '../../../util/iteratees';
 import {
   getUserFullName,
-  isChatPrivate,
   getChatTitle,
   getSenderName,
   getMessageSummaryText,
@@ -18,12 +17,11 @@ import {
 import renderText from '../../common/helpers/renderText';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
-import GroupChatInfo from '../../common/GroupChatInfo';
-import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Avatar from '../../common/Avatar';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import RippleEffect from '../../ui/RippleEffect';
 import InfiniteScroll from '../../ui/InfiniteScroll';
+import ListItem from '../../ui/ListItem';
+import LeftSearchResultChat from './LeftSearchResultChat';
 
 export type OwnProps = {
   searchQuery?: string;
@@ -78,21 +76,18 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
           return false;
         }
         const fullName = getUserFullName(user);
-        return user.isSelf
-          ? searchWords('Saved Messages', searchQuery)
-          : (
-            (fullName && searchWords(fullName, searchQuery))
-            || searchWords(user.username, searchQuery)
-          );
+        return (fullName && searchWords(fullName, searchQuery))
+          || searchWords(user.username, searchQuery);
       })
       : [];
 
     return unique([
+      ...(searchWords('Saved Messages', searchQuery) ? [currentUserId] : []),
       ...foundLocalContacts,
       ...(localChats ? localChats.map((chat) => chat.id) : []),
       ...(localUsers ? localUsers.map((user) => user.id) : []),
-    ]);
-  }, [searchQuery, localContactIds, localChats, localUsers, usersById]);
+    ]) as number[];
+  }, [searchQuery, localContactIds, localChats, localUsers, usersById, currentUserId]);
 
   const globalResults = useMemo(() => {
     if (
@@ -131,7 +126,11 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     const senderName = getSenderName(chat.id, user);
 
     return (
-      <div className="search-result-message" onClick={handleClick}>
+      <ListItem
+        className="search-result-message"
+        onClick={handleClick}
+        ripple
+      >
         <Avatar chat={chat} isSavedMessages={chat.id === currentUserId} />
         <div className="info">
           <div className="title">
@@ -145,8 +144,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             {renderText(text, ['emoji', 'highlight'], { query: searchQuery })}
           </p>
         </div>
-        <RippleEffect />
-      </div>
+      </ListItem>
     );
   }
 
@@ -168,13 +166,10 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Contacts and Chats</h3>
           {localResults.map((id) => (
-            <div className="chat-item-clickable search-result" onClick={() => handleChatClick(id)}>
-              {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} />
-              ) : (
-                <GroupChatInfo chatId={id} />
-              )}
-            </div>
+            <LeftSearchResultChat
+              chatId={id}
+              onClick={() => handleChatClick(id)}
+            />
           ))}
         </div>
       )}
@@ -182,13 +177,11 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Global Search</h3>
           {globalResults.map((id) => (
-            <div className="chat-item-clickable search-result" onClick={() => handleChatClick(id)}>
-              {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} showHandle />
-              ) : (
-                <GroupChatInfo chatId={id} showHandle />
-              )}
-            </div>
+            <LeftSearchResultChat
+              chatId={id}
+              showHandle
+              onClick={() => handleChatClick(id)}
+            />
           ))}
         </div>
       )}

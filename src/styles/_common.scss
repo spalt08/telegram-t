@@ -1,0 +1,169 @@
+// Common styles for all media-type components across the app.
+.media-inner {
+  position: relative;
+
+  video,
+  img {
+    display: block;
+  }
+
+  img {
+    object-fit: contain;
+  }
+
+  video {
+    object-fit: cover;
+  }
+
+  .thumbnail ~ .full-media, .media-loading {
+    position: absolute;
+  }
+
+  .thumbnail {
+    &.empty {
+      visibility: hidden;
+    }
+  }
+}
+
+.animated-close-icon {
+  position: absolute;
+  transform: rotate(-45deg);
+
+  &, &::before, &::after {
+    width: 1.125rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    background-color: var(--color-text-secondary);
+    transition: transform .25s;
+  }
+
+  &::before, &::after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: '';
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
+
+  &.state-back {
+    transform: rotate(180deg);
+
+    &::before {
+      transform: rotate(45deg) scaleX(0.75) translate(0, -0.375rem);
+    }
+
+    &::after {
+      transform: rotate(-45deg) scaleX(0.75) translate(0, 0.375rem);
+    }
+  }
+}
+
+.chat-item-clickable {
+  margin: 0 -0.5rem;
+
+  > button {
+    padding: 0.75rem;
+  }
+
+  .ChatInfo {
+    display: flex;
+    align-items: center;
+
+    .Avatar {
+      width: 3rem;
+      height: 3rem;
+      margin-right: 0.75rem;
+    }
+
+    .title {
+      font-weight: 500;
+      font-size: 1rem;
+      line-height: 1.3125;
+      white-space: pre-wrap;
+      text-align: left;
+
+      .VerifiedIcon {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-left: 0.25rem;
+        margin-top: 0.05rem;
+      }
+
+      .emoji {
+        background-position: 0 0;
+      }
+    }
+
+    .status, .typing-status {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      margin: 0;
+      color: var(--color-text-secondary);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      text-align: left;
+
+      &.online {
+        color: var(--color-primary);
+      }
+    }
+  }
+}
+
+.search-result-message {
+  margin-bottom: 0.35rem;
+
+  > button {
+    padding: 0.5rem;
+    display: flex;
+  }
+
+  .Avatar {
+    margin-right: 0.5rem;
+  }
+
+  .info {
+    flex: 1;
+    overflow: hidden;
+
+    .title {
+      overflow: hidden;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding-right: .15rem;
+    }
+
+    h3 {
+      max-width: 80%;
+    }
+
+    h3, .subtitle {
+      font-size: 1rem;
+      line-height: 1.6875rem;
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+
+    .LastMessageMeta {
+      margin-left: auto;
+    }
+
+    .subtitle {
+      color: var(--color-text-secondary);
+      margin-right: 2rem;
+
+      .matching-text-highlight {
+        color: var(--color-primary);
+      }
+    }
+  }
+}

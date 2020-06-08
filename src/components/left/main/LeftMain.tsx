@@ -30,7 +30,7 @@ type StateProps = {
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 const BUTTON_CLOSE_DELAY_MS = 250;
-let closeTimeout: number;
+let closeTimeout: number | undefined;
 
 const LeftMain: FC<OwnProps & StateProps> = ({
   content,
@@ -60,6 +60,10 @@ const LeftMain: FC<OwnProps & StateProps> = ({
     onContentChange(LeftColumnContent.NewGroupStep1);
   }, [onContentChange]);
 
+  const handleSelectArchived = useCallback(() => {
+    onContentChange(LeftColumnContent.Archived);
+  }, [onContentChange]);
+
   const handleMouseEnter = useCallback(() => {
     if (content !== LeftColumnContent.ChatList) {
       return;
@@ -73,6 +77,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
 
     if (closeTimeout) {
       clearTimeout(closeTimeout);
+      closeTimeout = undefined;
     }
 
     closeTimeout = window.setTimeout(() => {
@@ -83,7 +88,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
   }, []);
 
   useEffect(() => {
-    let autoCloseTimeout: number;
+    let autoCloseTimeout: number | undefined;
     if (content !== LeftColumnContent.ChatList) {
       autoCloseTimeout = window.setTimeout(() => {
         setIsNewChatButtonShown(false);
@@ -95,6 +100,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
     return () => {
       if (autoCloseTimeout) {
         clearTimeout(autoCloseTimeout);
+        autoCloseTimeout = undefined;
       }
     };
   }, [content]);
@@ -112,6 +118,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         onSelectSettings={handleSelectSettings}
         onSelectContacts={handleSelectContacts}
         onSelectNewGroup={handleSelectNewGroup}
+        onSelectArchived={handleSelectArchived}
         onReset={onReset}
       />
       <ConnectionState />
@@ -119,7 +126,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         {() => {
           switch (content) {
             case LeftColumnContent.ChatList:
-              return <ChatList />;
+              return <ChatList folder="active" />;
             case LeftColumnContent.RecentChats:
               return <LeftRecent onReset={onReset} />;
             case LeftColumnContent.GlobalSearch:

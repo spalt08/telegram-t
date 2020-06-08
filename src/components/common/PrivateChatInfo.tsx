@@ -95,7 +95,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
         isSavedMessages={isSavedMessages}
         onClick={handleAvatarViewerOpen}
       />
-      <div>
+      <div className="info">
         {isSavedMessages ? (
           <div className="title">Saved Messages</div>
         ) : (

@@ -5,6 +5,7 @@ import {
   getPrivateChatUserId, isChatSuperGroup, isUserBot, isUserOnline,
 } from '../helpers';
 import { selectUser } from './users';
+import { ARCHIVED_FOLDER_ID } from '../../config';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -52,4 +53,27 @@ export function selectIsChatWithBot(global: GlobalState, chatId: number) {
   const user = userId && selectUser(global, userId);
 
   return user ? isUserBot(user) : false;
+}
+
+export function selectAreActiveChatsLoaded(global: GlobalState): boolean {
+  return Boolean(global.chats.listIds.active);
+}
+
+export function selectIsChatListed(global: GlobalState, chatId: number, type?: 'active' | 'archived'): boolean {
+  const { listIds } = global.chats;
+  if (type) {
+    const targetList = listIds[type];
+    return Boolean(targetList && targetList.includes(chatId));
+  }
+
+  return Object.values(listIds).some((list) => list && list.includes(chatId));
+}
+
+export function selectChatFolder(global: GlobalState, chatId: number): 'active' | 'archived' | undefined {
+  const chat = selectChat(global, chatId);
+  if (!chat || !selectIsChatListed(global, chatId)) {
+    return undefined;
+  }
+
+  return chat.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
 }

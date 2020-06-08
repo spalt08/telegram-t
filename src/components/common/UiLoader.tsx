@@ -37,11 +37,11 @@ const AVATARS_TO_PRELOAD = 17;
 
 function preloadAvatars() {
   const { listIds, byId } = getGlobal().chats;
-  if (!listIds) {
+  if (!listIds.active) {
     return undefined;
   }
 
-  return Promise.all(listIds.slice(0, AVATARS_TO_PRELOAD).map((chatId) => {
+  return Promise.all(listIds.active.slice(0, AVATARS_TO_PRELOAD).map((chatId) => {
     const chat = byId[chatId];
     if (!chat) {
       return undefined;
@@ -80,7 +80,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
   const { shouldRender, transitionClassNames } = useShowTransition(!uiReadyState, undefined, true);
 
   useEffect(() => {
-    let timeout: number;
+    let timeout: number | undefined;
 
     Promise.race([
       pause(MAX_PRELOAD_DELAY),
@@ -96,6 +96,7 @@ const UiLoader: FC<OwnProps & StateProps & DispatchProps> = ({
     return () => {
       if (timeout) {
         clearTimeout(timeout);
+        timeout = undefined;
       }
 
       setIsUiReady({ uiReadyState: 0 });

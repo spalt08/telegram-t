@@ -93,6 +93,13 @@ export type ApiUpdateChatMembers = {
 export type ApiUpdatePinnedChatIds = {
   '@type': 'updatePinnedChatIds';
   ids: number[];
+  folderId?: number;
+};
+
+export type ApiUpdateChatFolder = {
+  '@type': 'updateChatFolder';
+  id: number;
+  folderId: number;
 };
 
 export type ApiUpdateChatPinned = {
@@ -218,7 +225,7 @@ export type ApiUpdateFavoriteStickers = {
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
+  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdateChatFolder |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

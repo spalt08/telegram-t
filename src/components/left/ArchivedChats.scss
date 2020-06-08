@@ -1,0 +1,11 @@
+.ArchivedChats {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .ChatList {
+    height: auto;
+    flex-grow: 1;
+  }
+}

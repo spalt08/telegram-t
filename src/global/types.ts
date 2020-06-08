@@ -56,14 +56,20 @@ export type GlobalState = {
   };
 
   chats: {
+    listIds: {
+      active?: number[];
+      archived?: number[];
+    };
+    orderedPinnedIds: {
+      active?: number[];
+      archived?: number[];
+    };
     selectedId?: number;
-    listIds?: number[];
     // TODO Replace with Partial<Record> to handle missing keys
     byId: Record<number, ApiChat>;
     scrollOffsetById: Record<number, number>;
     replyingToById: Record<number, number | undefined>;
     editingById: Record<number, number | undefined>;
-    orderedPinnedIds?: number[];
     draftsById: Record<number, ApiFormattedText>;
   };
 
@@ -199,7 +205,7 @@ export type ActionTypes = (
   'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' | 'setChatReplyingTo' |
   'setChatEditing' | 'editLastChatMessage' |
   'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
-  'joinChannel' | 'leaveChannel' | 'deleteChannel' |
+  'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markChatRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |

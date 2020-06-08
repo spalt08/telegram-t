@@ -30,11 +30,10 @@ const SettingsPrivacyBlockedUsers: FC<StateProps> = ({
         className="blocked-list-item not-implemented"
         ripple
         narrow
-        contextAction={{
+        contextActions={[{
           title: 'Unblock',
           icon: 'unlock',
-          handler: () => {},
-        }}
+        }]}
       >
         <Avatar size="medium" user={user} />
         <div className="contact-info">

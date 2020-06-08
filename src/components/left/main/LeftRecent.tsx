@@ -6,14 +6,13 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiUser } from '../../../api/types';
 
-import { getUserFirstName, isChatPrivate } from '../../../modules/helpers';
+import { getUserFirstName } from '../../../modules/helpers';
 import renderText from '../../common/helpers/renderText';
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
 
 import Avatar from '../../common/Avatar';
-import PrivateChatInfo from '../../common/PrivateChatInfo';
-import GroupChatInfo from '../../common/GroupChatInfo';
+import LeftSearchResultChat from './LeftSearchResultChat';
 
 export type OwnProps = {
   onReset: () => void;
@@ -93,13 +92,10 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
         <div className="search-section">
           <h3 className="section-heading">Recent</h3>
           {recentlyFoundChatIds.map((id) => (
-            <div className="chat-item-clickable search-result" onClick={() => handleClick(id)}>
-              {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} />
-              ) : (
-                <GroupChatInfo chatId={id} />
-              )}
-            </div>
+            <LeftSearchResultChat
+              chatId={id}
+              onClick={() => handleClick(id)}
+            />
           ))}
         </div>
       )}

@@ -1,18 +1,26 @@
 import { GlobalState } from '../../global/types';
 import { ApiChat } from '../../api/types';
+import { ARCHIVED_FOLDER_ID } from '../../config';
 
-export function replaceChatListIds(global: GlobalState, newIds: number[]): GlobalState {
+export function replaceChatListIds(
+  global: GlobalState,
+  type: 'active' | 'archived',
+  newIds: number[] | undefined,
+): GlobalState {
   return {
     ...global,
     chats: {
       ...global.chats,
-      listIds: newIds,
+      listIds: {
+        ...global.chats.listIds,
+        [type]: newIds,
+      },
     },
   };
 }
 
-export function updateChatListIds(global: GlobalState, idsUpdate: number[]): GlobalState {
-  const { listIds } = global.chats;
+export function updateChatListIds(global: GlobalState, type: 'active' | 'archived', idsUpdate: number[]): GlobalState {
+  const { [type]: listIds } = global.chats.listIds;
   const newIds = listIds && listIds.length
     ? idsUpdate.filter((id) => !listIds.includes(id))
     : idsUpdate;
@@ -21,7 +29,7 @@ export function updateChatListIds(global: GlobalState, idsUpdate: number[]): Glo
     return global;
   }
 
-  return replaceChatListIds(global, [
+  return replaceChatListIds(global, type, [
     ...(listIds || []),
     ...newIds,
   ]);
@@ -47,6 +55,15 @@ export function updateChat(global: GlobalState, chatId: number, chatUpdate: Part
 
   if (!updatedChat.id || !updatedChat.type) {
     return global;
+  }
+
+  // Sometimes when receiving full chat update, its pinned status can be set as `true`,
+  // (e.g. when un-archiving previosly pinned chat, when there are already max pinned chats)
+  // even though it isn't present in pinned chats. This clears the pinned status in such case to prevent confusion.
+  const orderedPinnedIds = chat
+    && global.chats.orderedPinnedIds[chat.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active'];
+  if (orderedPinnedIds && !orderedPinnedIds.includes(chatId)) {
+    updatedChat.isPinned = undefined;
   }
 
   return replaceChats(global, {
@@ -137,4 +154,41 @@ export function updateChatEditing(
       },
     },
   };
+}
+
+export function updateChatFolder(
+  global: GlobalState,
+  chatId: number,
+  folderId?: number,
+) {
+  const folder = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
+
+  let currentListIds = global.chats.listIds;
+  (Object.keys(currentListIds) as Array<keyof typeof currentListIds>).forEach((folderKey) => {
+    const currentFolderList = currentListIds[folderKey] || [];
+    if (folderKey === folder && !currentFolderList.includes(chatId)) {
+      currentListIds = {
+        ...currentListIds,
+        [folderKey]: [...currentFolderList, chatId],
+      };
+    } else if (folderKey !== folder && currentFolderList.includes(chatId)) {
+      currentListIds = {
+        ...currentListIds,
+        [folderKey]: currentFolderList.filter((id) => id !== chatId),
+      };
+    }
+  });
+
+  let newGlobal = {
+    ...global,
+    chats: {
+      ...global.chats,
+      listIds: currentListIds,
+    },
+  };
+
+  const pinnedIds = newGlobal.chats.orderedPinnedIds[folder] || [];
+  newGlobal = updateChat(newGlobal, chatId, { folderId: folderId || undefined, isPinned: pinnedIds.includes(chatId) });
+
+  return newGlobal;
 }

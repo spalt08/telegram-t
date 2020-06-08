@@ -1,17 +1,17 @@
 import React, {
   FC, memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { GlobalActions } from '../../global/types';
 import { withGlobal } from '../../lib/teact/teactn';
+
+import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
+import { IAnchorPosition } from '../../types';
 
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import useShowTransition from '../../hooks/useShowTransition';
 import { selectChat, selectIsChatWithSelf } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
-import {
-  isChatBasicGroup, isChatChannel, isChatPrivate, isChatSuperGroup,
-} from '../../modules/helpers';
+import { isChatPrivate, getCanDeleteChat } from '../../modules/helpers';
 
 import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
@@ -21,11 +21,6 @@ import DeleteChatModal from '../common/DeleteChatModal';
 import './HeaderMenuContainer.scss';
 
 type DispatchProps = Pick<GlobalActions, 'updateChatMutedState'>;
-
-type IAnchorPosition = {
-  x: number;
-  y: number;
-};
 
 export type OwnProps = {
   chatId: number;
@@ -105,7 +100,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
             </MenuItem>
           )}
           <MenuItem
-            className="danger"
+            destructive
             icon="delete"
             onClick={handleDelete}
           >
@@ -136,7 +131,7 @@ export default memo(withGlobal<OwnProps>(
       isMuted: chat.isMuted,
       isChatWithSelf: selectIsChatWithSelf(global, chat),
       isPrivate: isChatPrivate(chat.id),
-      canDeleteChat: isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator),
+      canDeleteChat: getCanDeleteChat(chat),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

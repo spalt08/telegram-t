@@ -16,6 +16,7 @@ import {
   isChatChannel,
   isChatPrivate,
   isChatSuperGroup,
+  isChatArchived,
 } from '../../modules/helpers';
 import {
   selectChat,
@@ -140,6 +141,10 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     let isActive = false;
 
     const totalCount = Object.values(chatsById).reduce((total, chat) => {
+      if (isChatArchived(chat)) {
+        return total;
+      }
+
       const count = chat.unreadCount || 0;
       if (count && (!chat.isMuted || chat.unreadMentionsCount)) {
         isActive = true;

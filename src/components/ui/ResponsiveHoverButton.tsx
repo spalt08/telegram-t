@@ -15,7 +15,7 @@ type OwnProps = {
 )>;
 
 const BUTTON_ACTIVATE_DELAY = 200;
-let openTimeout: number;
+let openTimeout: number | undefined;
 let isFirstTimeActivation = true;
 
 const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => {
@@ -33,6 +33,7 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
 
     if (openTimeout) {
       clearTimeout(openTimeout);
+      openTimeout = undefined;
     }
     openTimeout = window.setTimeout(() => {
       if (isMouseInside.current) {

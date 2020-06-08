@@ -6,6 +6,7 @@ import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
   saveDraft, clearDraft, fetchChat, markChatRead, updateChatMutedState,
   createChannel, editChannelPhoto, joinChannel, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
+  toggleChatPinned, editChatFolder,
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, deleteHistory, markMessagesRead,
@@ -45,6 +46,8 @@ export default {
   deleteChannel,
   createGroupChat,
   editChatPhoto,
+  toggleChatPinned,
+  editChatFolder,
   markMessagesRead,
   searchMessages,
   searchMessagesGlobal,

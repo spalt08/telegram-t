@@ -17,6 +17,7 @@ import {
   selectListedIds,
   selectChatMessageByPollId,
   selectCommonBoxChatId,
+  selectIsChatListed,
 } from '../../selectors';
 import { getMessageContent } from '../../helpers';
 
@@ -47,8 +48,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       }
 
       // Edge case: New message in an old (not loaded) chat.
-      const { listIds } = newGlobal.chats;
-      if (!listIds || !listIds.includes(chatId)) {
+      if (!selectIsChatListed(global, id)) {
         actions.loadTopChats();
       }
 

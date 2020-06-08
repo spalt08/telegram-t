@@ -5,6 +5,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent } from '../../../types';
+import { ApiChat } from '../../../api/types';
 
 import { SUPPORT_BOT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
@@ -17,6 +18,7 @@ import AttentionIndicator from '../../ui/AttentionIndicator';
 import SearchInput from '../../ui/SearchInput';
 
 import './LeftMainHeader.scss';
+import { isChatArchived } from '../../../modules/helpers';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -25,6 +27,7 @@ type OwnProps = {
   onSelectSettings: () => void;
   onSelectContacts: () => void;
   onSelectNewGroup: () => void;
+  onSelectArchived: () => void;
   onReset: () => void;
 };
 
@@ -33,6 +36,7 @@ type StateProps = {
   isLoading: boolean;
   isSettingsAttentionNeeded: boolean;
   currentUserId?: number;
+  chatsById?: Record<number, ApiChat>;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
@@ -44,14 +48,30 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onSelectSettings,
   onSelectContacts,
   onSelectNewGroup,
+  onSelectArchived,
   onReset,
   searchQuery,
   isLoading,
   isSettingsAttentionNeeded,
   currentUserId,
+  chatsById,
   openChat,
 }) => {
   const hasMenu = content === LeftColumnContent.ChatList;
+
+  const archivedUnreadChatsCount = useMemo(() => {
+    if (!hasMenu || !chatsById) {
+      return 0;
+    }
+
+    return Object.values(chatsById).reduce((total, chat) => {
+      if (!isChatArchived(chat)) {
+        return total;
+      }
+
+      return chat.unreadCount ? total + 1 : total;
+    }, 0);
+  }, [hasMenu, chatsById]);
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -104,7 +124,15 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         >
           Contacts
         </MenuItem>
-        <MenuItem className="not-implemented" disabled icon="archive">Archived</MenuItem>
+        <MenuItem
+          icon="archive"
+          onClick={onSelectArchived}
+        >
+          Archived
+          {archivedUnreadChatsCount > 0 && (
+            <div className="archived-badge">{archivedUnreadChatsCount}</div>
+          )}
+        </MenuItem>
         <MenuItem
           icon="saved-messages"
           onClick={handleSelectSaved}
@@ -142,12 +170,14 @@ export default memo(withGlobal<OwnProps>(
     const { query: searchQuery, fetchingStatus } = global.globalSearch;
     const { isAnimationLevelSettingViewed } = global.settings;
     const { currentUserId } = global;
+    const { byId: chatsById } = global.chats;
 
     return {
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
       isSettingsAttentionNeeded: !isAnimationLevelSettingViewed,
       currentUserId,
+      chatsById,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),

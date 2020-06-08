@@ -4,6 +4,7 @@ import {
   ApiChatBannedRights,
   ApiChatAdminRights,
 } from '../../api/types';
+import { ARCHIVED_FOLDER_ID } from '../../config';
 
 export function isChatPrivate(chatId: number) {
   return chatId > 0;
@@ -171,4 +172,12 @@ export function getChatSlowModeOptions(chat?: ApiChat) {
 
 export function getChatOrder(chat: ApiChat) {
   return Math.max(chat.joinDate || 0, chat.lastMessage ? chat.lastMessage.date : 0);
+}
+
+export function isChatArchived(chat: ApiChat) {
+  return chat.folderId === ARCHIVED_FOLDER_ID;
+}
+
+export function getCanDeleteChat(chat: ApiChat) {
+  return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }

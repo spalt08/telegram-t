@@ -1,18 +1,15 @@
-import React, { FC, useEffect, useState } from '../../../lib/teact/teact';
+import React, { FC, useCallback } from '../../../lib/teact/teact';
 
 import { ApiMessage } from '../../../api/types';
+import { IAnchorPosition } from '../../../types';
 
 import { getMessageCopyOptions } from './helpers/copyOptions';
+import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 
 import './MessageContextMenu.scss';
-
-type IAnchorPosition = {
-  x: number;
-  y: number;
-};
 
 type OwnProps = {
   isOpen: boolean;
@@ -59,50 +56,30 @@ const MessageContextMenu: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const [positionX, setPositionX] = useState<'right' | 'left'>('right');
-  const [positionY, setPositionY] = useState<'top' | 'bottom'>('bottom');
-  const [style, setStyle] = useState('');
   const copyOptions = getMessageCopyOptions(message, onClose);
 
-  useEffect(() => {
-    let { x, y } = anchor;
-    const messageEl = document.querySelector(`div[data-message-id="${message.id}"]`);
+  const getTriggerElement = useCallback(() => {
+    return document.querySelector(`div[data-message-id="${message.id}"]`);
+  }, [message.id]);
 
-    if (messageEl) {
-      const emptyRect = {
-        width: 0, left: 0, height: 0, top: 0,
-      };
-      const menuEl = document.querySelector<HTMLDivElement>('.MessageContextMenu .bubble');
-      const rootEl = document.querySelector('.MessageList');
-      const headerHeight = (document.querySelector('.MiddleHeader') as HTMLElement).offsetHeight;
-      const rootRect = rootEl ? rootEl.getBoundingClientRect() : emptyRect;
-      const menuRect = menuEl ? { width: menuEl.offsetWidth, height: menuEl.offsetHeight } : emptyRect;
-      const messageRect = messageEl.getBoundingClientRect();
+  const getRootElement = useCallback(
+    () => document.querySelector('.MessageList'),
+    [],
+  );
 
-      if (x + menuRect.width + SCROLLBAR_WIDTH < rootRect.width + rootRect.left) {
-        setPositionX('left');
-        x += 3;
-      } else if (x - menuRect.width > 0) {
-        setPositionX('right');
-        x -= 3;
-      } else {
-        setPositionX('left');
-        x = 16;
-      }
+  const getMenuElement = useCallback(
+    () => document.querySelector('.MessageContextMenu .bubble'),
+    [],
+  );
 
-      if (y + menuRect.height + SCROLLBAR_WIDTH < rootRect.height + rootRect.top) {
-        setPositionY('top');
-      } else {
-        setPositionY('bottom');
-
-        if (y - menuRect.height < rootRect.top + headerHeight) {
-          y = rootRect.top + headerHeight + menuRect.height;
-        }
-      }
-
-      setStyle(`left: ${x - messageRect.left}px; top: ${y - messageRect.top}px;`);
-    }
-  }, [message, anchor]);
+  const { positionX, positionY, style } = useContextMenuPosition(
+    anchor,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    SCROLLBAR_WIDTH,
+    (document.querySelector('.MiddleHeader') as HTMLElement).offsetHeight,
+  );
 
   return (
     <Menu
@@ -123,7 +100,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       ))}
       {canPin && <MenuItem icon="pin" onClick={onPin}>Pin</MenuItem>}
       {canForward && <MenuItem icon="forward" onClick={onForward}>Forward</MenuItem>}
-      {canDelete && <MenuItem className="danger" icon="delete" onClick={onDelete}>Delete</MenuItem>}
+      {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>Delete</MenuItem>}
     </Menu>
   );
 };

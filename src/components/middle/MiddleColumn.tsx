@@ -75,7 +75,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const { chats: { selectedId: openChatId, listIds } } = global;
-    if (!listIds || !openChatId) {
+    if (!listIds.active || !openChatId) {
       return {};
     }
 

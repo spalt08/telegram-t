@@ -20,8 +20,8 @@ import renderText from '../common/helpers/renderText';
 import { orderBy, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import ListItem from '../ui/ListItem';
 import LastMessageMeta from '../common/LastMessageMeta';
 import Avatar from '../common/Avatar';
 
@@ -82,7 +82,11 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
     const title = chat && isChatChannel(chat) ? getChatTitle(chat) : getUserFullName(user);
 
     return (
-      <div className={`search-result-message ${!onClick ? 'not-implemented' : ''}`} onClick={onClick}>
+      <ListItem
+        className={`search-result-message ${!onClick ? 'not-implemented' : ''}`}
+        onClick={onClick}
+        ripple
+      >
         <Avatar chat={chat && isChatChannel(chat) ? chat : undefined} user={user} />
         <div className="info">
           <div className="title">
@@ -91,8 +95,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
           </div>
           <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { query })}</p>
         </div>
-        <RippleEffect />
-      </div>
+      </ListItem>
     );
   };
 

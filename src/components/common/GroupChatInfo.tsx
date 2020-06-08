@@ -108,7 +108,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className={className}>
       <Avatar key={chat.id} size={avatarSize} chat={chat} onClick={handleAvatarViewerOpen} />
-      <div>
+      <div className="info">
         <div className="title">
           {renderText(getChatTitle(chat))}
           {chat.isVerified && <VerifiedIcon />}

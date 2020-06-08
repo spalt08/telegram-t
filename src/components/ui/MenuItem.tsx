@@ -17,6 +17,7 @@ type OwnProps = {
   disabled?: boolean;
   attention?: boolean;
   ripple?: boolean;
+  destructive?: boolean;
 };
 
 const MenuItem: FC<OwnProps> = (props) => {
@@ -28,6 +29,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     disabled,
     attention,
     ripple,
+    destructive,
   } = props;
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -61,6 +63,7 @@ const MenuItem: FC<OwnProps> = (props) => {
     className,
     ripple && 'has-ripple',
     disabled && 'disabled',
+    destructive && 'destructive',
   );
 
   return (

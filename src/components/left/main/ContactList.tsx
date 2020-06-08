@@ -12,8 +12,8 @@ import { pick } from '../../../util/iteratees';
 import { getUserFullName, getSortedUserIds } from '../../../modules/helpers';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import RippleEffect from '../../ui/RippleEffect';
 import Loading from '../../ui/Loading';
+import ListItem from '../../ui/ListItem';
 
 import './ContactList.scss';
 
@@ -75,10 +75,14 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
         <p className="no-results">No contacts matched your search.</p>
       )}
       {displayedIds.map((id) => (
-        <div key={id} className="chat-item-clickable has-ripple" onClick={() => handleClick(id)}>
+        <ListItem
+          key={id}
+          className="chat-item-clickable"
+          onClick={() => handleClick(id)}
+          ripple
+        >
           <PrivateChatInfo userId={id} forceShowSelf />
-          <RippleEffect />
-        </div>
+        </ListItem>
       ))}
     </div>
   );

@@ -4,10 +4,10 @@ import React, {
 
 import { isChatPrivate } from '../../modules/helpers';
 
-import RippleEffect from '../ui/RippleEffect';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
+import ListItem from '../ui/ListItem';
 import PrivateChatInfo from './PrivateChatInfo';
 import GroupChatInfo from './GroupChatInfo';
 import PickerSelectedItem from './PickerSelectedItem';
@@ -65,7 +65,12 @@ const Picker: FC<OwnProps> = ({
 
   function renderItem(id: number) {
     return (
-      <div key={id} className="chat-item-clickable has-ripple picker-list-item" onClick={() => handleItemClick(id)}>
+      <ListItem
+        key={id}
+        className="chat-item-clickable picker-list-item"
+        onClick={() => handleItemClick(id)}
+        ripple
+      >
         <Checkbox
           label=""
           checked={selectedIds.includes(id)}
@@ -75,8 +80,7 @@ const Picker: FC<OwnProps> = ({
         ) : (
           <GroupChatInfo chatId={id} />
         )}
-        <RippleEffect />
-      </div>
+      </ListItem>
     );
   }
 

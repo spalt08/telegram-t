@@ -372,6 +372,17 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updatePinnedChatIds',
       ids,
+      folderId: update.folderId || undefined,
+    });
+  } else if (update instanceof GramJs.UpdateFolderPeers) {
+    update.folderPeers.forEach((folderPeer) => {
+      const { folderId, peer } = folderPeer;
+
+      onUpdate({
+        '@type': 'updateChatFolder',
+        id: getApiChatIdFromMtpPeer(peer),
+        folderId,
+      });
     });
   } else if (update instanceof GramJs.UpdateChatParticipants) {
     const replacedMembers = buildChatMembers(update.participants);

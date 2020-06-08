@@ -33,11 +33,10 @@ const SettingsPrivacyActiveSessions: FC = () => {
           className="not-implemented"
           ripple
           narrow
-          contextAction={{
+          contextActions={[{
             title: 'Terminate',
             icon: 'stop',
-            handler: () => { },
-          }}
+          }]}
         >
           <div className="multiline-menu-item">
             <span className="title">Telegram iOS 5.12</span>
@@ -49,11 +48,10 @@ const SettingsPrivacyActiveSessions: FC = () => {
           className="not-implemented"
           ripple
           narrow
-          contextAction={{
+          contextActions={[{
             title: 'Terminate',
             icon: 'stop',
-            handler: () => { },
-          }}
+          }]}
         >
           <div className="multiline-menu-item">
             <span className="title">Telegram Android 5.11</span>

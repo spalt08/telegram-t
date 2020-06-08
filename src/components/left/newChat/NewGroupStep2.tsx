@@ -13,6 +13,7 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import Spinner from '../../ui/Spinner';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Button from '../../ui/Button';
+import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 export type OwnProps = {
@@ -110,9 +111,9 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <div className="group-members-list custom-scroll">
           {memberIds.map((id) => (
-            <div className="chat-item-clickable">
+            <ListItem className="chat-item-clickable">
               <PrivateChatInfo userId={id} />
-            </div>
+            </ListItem>
           ))}
         </div>
       </div>

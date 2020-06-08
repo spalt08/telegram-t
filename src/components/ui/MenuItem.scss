@@ -29,6 +29,14 @@
     cursor: default !important;
   }
 
+  &.destructive {
+    color: var(--color-error);
+
+    i {
+      opacity: 1;
+    }
+  }
+
   &:not(.has-ripple):not(.disabled):active {
     background-color: var(--color-chat-active);
     transition: none !important;
@@ -38,16 +46,4 @@
     top: 0.5rem;
     left: 2.5rem;
   }
-
-
-  &.danger {
-    color: var(--color-error);
-    button {
-      color: var(--color-error);
-      i {
-        opacity: 1;
-      }
-    }
-  }
-
 }

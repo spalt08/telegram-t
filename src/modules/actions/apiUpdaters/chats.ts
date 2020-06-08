@@ -6,16 +6,22 @@ import {
   updateChat,
   replaceChatListIds,
   updateChatListIds,
+  updateChatFolder,
 } from '../../reducers';
-import { selectChat, selectCommonBoxChatId } from '../../selectors';
+import {
+  selectChat,
+  selectCommonBoxChatId,
+  selectIsChatListed,
+  selectChatFolder,
+} from '../../selectors';
+import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
 addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
   switch (update['@type']) {
     case 'updateChat': {
-      const { listIds } = global.chats;
-      if (!listIds || !listIds.includes(update.id)) {
+      if (!selectIsChatListed(global, update.id)) {
         // Chat can appear in dialogs list.
         actions.loadTopChats();
       }
@@ -27,7 +33,12 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
 
     case 'updateChatJoin': {
       let newGlobal = global;
-      newGlobal = updateChatListIds(newGlobal, [update.id]);
+      const folder = selectChatFolder(newGlobal, update.id);
+      if (!folder) {
+        break;
+      }
+
+      newGlobal = updateChatListIds(newGlobal, folder, [update.id]);
       newGlobal = updateChat(newGlobal, update.id, { hasLeft: undefined });
       setGlobal(newGlobal);
 
@@ -39,11 +50,15 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updateChatLeave': {
-      const { listIds } = global.chats;
+      const folder = selectChatFolder(global, update.id);
+      if (!folder) {
+        break;
+      }
+      const { [folder]: listIds } = global.chats.listIds;
 
       if (listIds) {
         let newGlobal = global;
-        newGlobal = replaceChatListIds(newGlobal, listIds.filter((listId) => listId !== update.id));
+        newGlobal = replaceChatListIds(newGlobal, folder, listIds.filter((listId) => listId !== update.id));
         newGlobal = updateChat(newGlobal, update.id, { hasLeft: true });
         setGlobal(newGlobal);
       }
@@ -134,26 +149,33 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
     }
 
     case 'updatePinnedChatIds': {
-      const { ids } = update;
+      const { ids, folderId } = update;
       const allChats = Object.values(global.chats.byId);
 
       let newGlobal = global;
 
-      allChats.forEach((chat) => {
-        if (!chat.isPinned && ids.includes(chat.id)) {
-          newGlobal = updateChat(newGlobal, chat.id, { isPinned: true });
-        } else if (chat.isPinned && !ids.includes(chat.id)) {
-          newGlobal = updateChat(newGlobal, chat.id, { isPinned: false });
-        }
-      });
+      const folder = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
 
       newGlobal = {
         ...newGlobal,
         chats: {
           ...newGlobal.chats,
-          orderedPinnedIds: ids,
+          orderedPinnedIds: {
+            ...newGlobal.chats.orderedPinnedIds,
+            [folder]: ids.length ? ids : undefined,
+          },
         },
       };
+
+      allChats
+        .filter((chat) => chat.folderId === folderId)
+        .forEach((chat) => {
+          if (!chat.isPinned && ids.includes(chat.id)) {
+            newGlobal = updateChat(newGlobal, chat.id, { isPinned: true });
+          } else if (chat.isPinned && !ids.includes(chat.id)) {
+            newGlobal = updateChat(newGlobal, chat.id, { isPinned: false });
+          }
+        });
 
       setGlobal(newGlobal);
 
@@ -164,19 +186,50 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const { id, isPinned } = update;
       let newGlobal = global;
 
-      newGlobal = updateChat(newGlobal, id, { isPinned });
-      const { orderedPinnedIds } = newGlobal.chats;
-      if (orderedPinnedIds) {
-        newGlobal = {
-          ...newGlobal,
-          chats: {
-            ...newGlobal.chats,
-            orderedPinnedIds: orderedPinnedIds.filter((pinnedId) => pinnedId !== id),
-          },
-        };
+      const folder = selectChatFolder(newGlobal, id);
+      if (folder) {
+        const { [folder]: orderedPinnedIds } = newGlobal.chats.orderedPinnedIds;
+        if (orderedPinnedIds) {
+          let newOrderedPinnedIds = orderedPinnedIds;
+          if (!isPinned) {
+            newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => pinnedId !== id);
+          } else if (!newOrderedPinnedIds.includes(id)) {
+            // When moving pinned chats to archive, active ordered pinned ids don't get updated
+            // (to preserve chat pinned state when it returns from archive)
+            // If user already has max pinned chats, we should check for orderedIds
+            // that don't point to listed chats
+            if (folder === 'active' && newOrderedPinnedIds.length >= MAX_ACTIVE_PINNED_CHATS) {
+              const listIds = newGlobal.chats.listIds.active;
+              newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => listIds && listIds.includes(pinnedId));
+            }
+
+            newOrderedPinnedIds = [id, ...newOrderedPinnedIds];
+          }
+
+          newGlobal = {
+            ...newGlobal,
+            chats: {
+              ...newGlobal.chats,
+              orderedPinnedIds: {
+                ...newGlobal.chats.orderedPinnedIds,
+                [folder]: newOrderedPinnedIds.length ? newOrderedPinnedIds : undefined,
+              },
+            },
+          };
+        }
       }
 
+      newGlobal = updateChat(newGlobal, id, { isPinned });
+
       setGlobal(newGlobal);
+
+      break;
+    }
+
+    case 'updateChatFolder': {
+      const { id, folderId } = update;
+
+      setGlobal(updateChatFolder(global, id, folderId));
 
       break;
     }

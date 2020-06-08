@@ -129,7 +129,8 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
   const savedIds = [
-    ...(global.chats.listIds || []),
+    ...(global.chats.listIds.active || []),
+    ...(global.chats.listIds.archived || []),
     ...(global.chats.selectedId ? [global.chats.selectedId] : []),
   ];
 

@@ -6,6 +6,7 @@ type ApiChatType = 'chatTypePrivate' | 'chatTypeSecret' |
 
 export interface ApiChat {
   id: number;
+  folderId?: number;
   type: ApiChatType;
   title?: string;
   lastMessage?: ApiMessage;

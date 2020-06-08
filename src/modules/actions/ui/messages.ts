@@ -9,7 +9,7 @@ import { selectOpenChat, selectViewportIds, selectIsRightColumnShown } from '../
 const FOCUS_DURATION = 2000;
 const FORWARD_MENU_OPEN_DELAY_MS = 450;
 
-let blurTimeout: number;
+let blurTimeout: number | undefined;
 
 addReducer('openMediaViewer', (global, actions, payload) => {
   const {
@@ -48,6 +48,7 @@ addReducer('focusMessage', (global, actions, payload) => {
 
   if (blurTimeout) {
     clearTimeout(blurTimeout);
+    blurTimeout = undefined;
   }
   blurTimeout = window.setTimeout(() => {
     let newGlobal = getGlobal();

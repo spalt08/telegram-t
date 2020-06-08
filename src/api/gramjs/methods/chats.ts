@@ -3,7 +3,7 @@ import {
   OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText, ApiChatFullInfo,
 } from '../../types';
 
-import { DEBUG } from '../../../config';
+import { DEBUG, ARCHIVED_FOLDER_ID } from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiChatFromDialog,
@@ -35,33 +35,62 @@ export function init(_onUpdate: OnApiUpdate) {
 export async function fetchChats({
   limit,
   offsetDate,
+  archived,
+  isSync,
 }: {
   limit: number;
   offsetDate?: number;
+  archived?: boolean;
+  isSync?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
     limit,
     offsetDate,
+    folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
+    ...(isSync && { excludePinned: true }),
   }));
+  const resultPinned = isSync
+    ? await invokeRequest(new GramJs.messages.GetPinnedDialogs({
+      folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
+    }))
+    : undefined;
 
   if (!result || result instanceof GramJs.messages.DialogsNotModified) {
     return undefined;
   }
 
   updateLocalDb(result);
+  if (resultPinned) {
+    updateLocalDb(resultPinned);
+  }
 
   const lastMessagesByChatId = buildCollectionByKey(
-    result.messages.map(buildApiMessage).filter<ApiMessage>(Boolean as any),
+    [...result.messages, ...(resultPinned ? resultPinned.messages : [])]
+      .map(buildApiMessage)
+      .filter<ApiMessage>(Boolean as any),
     'chatId',
   );
-  const peersByKey = preparePeers(result);
+  const peersByKey: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {
+    ...preparePeers(result),
+    ...(resultPinned && preparePeers(resultPinned)),
+  };
   const chats: ApiChat[] = [];
   const draftsById: Record<number, ApiFormattedText> = {};
   const replyingToById: Record<number, number> = {};
 
-  result.dialogs.forEach((dialog) => {
-    if (!(dialog instanceof GramJs.Dialog)) {
+  const dialogs = [
+    ...result.dialogs,
+    ...(resultPinned ? resultPinned.dialogs : []),
+  ];
+
+  dialogs.forEach((dialog) => {
+    if (
+      !(dialog instanceof GramJs.Dialog)
+      // This request can return dialogs not belonging to specified folder
+      || (!archived && dialog.folderId === ARCHIVED_FOLDER_ID)
+      || (archived && dialog.folderId !== ARCHIVED_FOLDER_ID)
+    ) {
       return;
     }
 
@@ -81,8 +110,13 @@ export async function fetchChats({
     }
   });
 
-  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const users = [...result.users, ...(resultPinned ? resultPinned.users : [])]
+    .map(buildApiUser)
+    .filter<ApiUser>(Boolean as any);
   const chatIds = chats.map((chat) => chat.id);
+  const orderedPinnedIds = isSync
+    ? chats.filter((chat) => chat.isPinned).map(({ id }) => id)
+    : undefined;
 
   return {
     chatIds,
@@ -90,6 +124,7 @@ export async function fetchChats({
     users,
     draftsById,
     replyingToById,
+    orderedPinnedIds,
   };
 }
 
@@ -484,7 +519,43 @@ export async function editChatPhoto({
   }), true);
 }
 
-function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice) {
+export async function toggleChatPinned(chat: ApiChat) {
+  const { id, accessHash } = chat;
+
+  const isActionSuccessful = await invokeRequest(new GramJs.messages.ToggleDialogPin({
+    peer: new GramJs.InputDialogPeer({
+      peer: buildInputPeer(id, accessHash),
+    }),
+    pinned: chat.isPinned ? undefined : true,
+  }));
+
+  if (isActionSuccessful) {
+    onUpdate({
+      '@type': 'updateChatPinned',
+      id: chat.id,
+      isPinned: !chat.isPinned,
+    });
+  }
+}
+
+export function editChatFolder({
+  chat, folderId,
+}: {
+  chat: ApiChat; folderId: number;
+}) {
+  const { id, accessHash } = chat;
+
+  return invokeRequest(new GramJs.folders.EditPeerFolders({
+    folderPeers: [new GramJs.InputFolderPeer({
+      peer: buildInputPeer(id, accessHash),
+      folderId,
+    })],
+  }), true);
+}
+
+function preparePeers(
+  result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.messages.PeerDialogs,
+) {
   const store: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {};
 
   result.chats.forEach((chat) => {
@@ -500,7 +571,7 @@ function preparePeers(result: GramJs.messages.Dialogs | GramJs.messages.DialogsS
 
 function updateLocalDb(result: (
   GramJs.messages.Dialogs | GramJs.messages.DialogsSlice |
-  GramJs.contacts.Found | GramJs.messages.ChatFull
+  GramJs.contacts.Found | GramJs.messages.ChatFull | GramJs.messages.PeerDialogs
 )) {
   result.users.forEach((user) => {
     if (user instanceof GramJs.User) {

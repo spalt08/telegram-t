@@ -1,7 +1,7 @@
 .ListItem {
   position: relative;
 
-  button {
+  > button {
     width: 100%;
     background: none;
     border: none !important;
@@ -14,6 +14,7 @@
     line-height: 1.5rem;
     white-space: nowrap;
     color: var(--color-text);
+    border-radius: var(--border-radius-default);
     --ripple-color: rgba(0, 0, 0, .08);
 
     &:not([disabled]) {
@@ -28,7 +29,7 @@
       opacity: 0.5;
     }
 
-    i {
+    > i {
       font-size: 1.5rem;
       margin-right: 2rem;
       opacity: 0.5;
@@ -36,10 +37,14 @@
   }
 
   &:not(.has-ripple) {
-    button:active {
+    > button:active {
       background-color: var(--color-chat-active);
       transition: none !important;
     }
+  }
+
+  &.no-selection {
+    user-select: none;
   }
 
   &.has-menu-open > button {
@@ -49,7 +54,7 @@
   &.narrow {
     margin-bottom: 0.75rem;
 
-    button {
+    > button {
       padding: 0.5rem 1rem;
     }
   }

@@ -20,6 +20,8 @@ const INITIAL_STATE: GlobalState = {
   },
 
   chats: {
+    listIds: {},
+    orderedPinnedIds: {},
     byId: {},
     scrollOffsetById: {},
     replyingToById: {},

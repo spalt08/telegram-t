@@ -12,6 +12,7 @@ import {
   selectCurrentMessageSearch,
   selectIsForwardMenuOpen,
   selectIsMediaViewerOpen,
+  selectAreActiveChatsLoaded,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
@@ -206,9 +207,9 @@ export default memo(withGlobal(
     const isSearch = Boolean(currentSearch && currentSearch.currentType === 'text');
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
-    const areChatsLoaded = Boolean(chats.listIds);
-    const isUserInfo = Boolean(selectedUserId && areChatsLoaded);
-    const isChatShown = Boolean(selectedChatId && areChatsLoaded);
+    const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
+    const isUserInfo = Boolean(selectedUserId && areActiveChatsLoaded);
+    const isChatShown = Boolean(selectedChatId && areActiveChatsLoaded);
     const isChatInfo = isChatShown && isChatInfoShown;
     const shouldPreload = isChatShown && uiReadyState === 2;
 

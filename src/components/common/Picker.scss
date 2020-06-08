@@ -114,9 +114,12 @@
 
   .picker-list-item {
     margin: 0;
-    padding-left: 0;
-    display: flex;
-    align-items: center;
+
+    > button {
+      padding-left: 0;
+      display: flex;
+      align-items: center;
+    }
 
     .Checkbox {
       height: 1.5rem;

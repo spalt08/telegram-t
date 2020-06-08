@@ -1,11 +1,10 @@
 .Chat {
-  position: relative;
-  overflow: hidden;
-  padding: 0.5rem;
-  display: flex;
-  cursor: pointer;
   margin-bottom: 0.35rem;
-  border-radius: var(--border-radius-default);
+
+  > button {
+    line-height: inherit;
+    padding: 0.5rem;
+  }
 
   &.animate-opacity {
     will-change: opacity;
@@ -18,8 +17,6 @@
   }
 
   &:hover, &.selected {
-    background: var(--color-chat-hover);
-
     .Avatar.online::after {
       border-color: var(--color-chat-hover)
     }
@@ -57,6 +54,7 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      text-align: left;
     }
 
     .VerifiedIcon {

@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef,
+  FC, memo, useCallback, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -9,7 +9,6 @@ import {
 } from '../../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
 import {
   getChatTitle,
   getMessageSummaryText,
@@ -28,12 +27,14 @@ import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
+import useChatContextActions from '../../../hooks/useChatContextActions';
 
-import RippleEffect from '../../ui/RippleEffect';
 import Avatar from '../../common/Avatar';
 import VerifiedIcon from '../../common/VerifiedIcon';
 import TypingStatus from '../../common/TypingStatus';
 import LastMessageMeta from '../../common/LastMessageMeta';
+import DeleteChatModal from '../../common/DeleteChatModal';
+import ListItem from '../../ui/ListItem';
 import Badge from './Badge';
 
 import './Chat.scss';
@@ -54,7 +55,9 @@ type StateProps = {
   draft?: ApiFormattedText;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusLastMessage'>;
+type DispatchProps = Pick<GlobalActions, (
+  'openChat' | 'focusLastMessage' | 'toggleChatPinned' | 'toggleChatArchived' | 'updateChatMutedState'
+)>;
 
 const ANIMATION_DURATION = 200;
 
@@ -73,6 +76,8 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   focusLastMessage,
 }) => {
   const ref = useRef<HTMLDivElement>();
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { lastMessage, typingStatus } = chat || {};
   const isAction = lastMessage && isActionMessage(lastMessage);
@@ -117,11 +122,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     openChat({ id: chatId });
   }, [selected, focusLastMessage, openChat, chatId]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button === 0) {
-      handleClick();
-    }
-  }, [handleClick]);
+  const handleDelete = useCallback(() => {
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
+  }, []);
+
+  const contextActions = useChatContextActions(chat, privateChatUser, handleDelete);
 
   if (!chat) {
     return undefined;
@@ -177,11 +186,15 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     selected && 'selected',
   );
 
-  const clickListener = IS_TOUCH_ENV ? { onClick: handleClick } : { onMouseDown: handleMouseDown };
-
   return (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <div ref={ref} className={className} {...clickListener}>
+    <ListItem
+      ref={ref}
+      className={className}
+      ripple
+      shouldDelayRipple={!selected}
+      contextActions={contextActions}
+      onClick={handleClick}
+    >
       <Avatar
         chat={chat}
         user={privateChatUser}
@@ -202,8 +215,12 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
           <Badge chat={chat} />
         </div>
       </div>
-      <RippleEffect delayed={!selected} />
-    </div>
+      <DeleteChatModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        chat={chat}
+      />
+    </ListItem>
   );
 };
 
@@ -234,5 +251,11 @@ export default memo(withGlobal<OwnProps>(
       draft: draftsById[chatId],
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['openChat', 'focusLastMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openChat',
+    'focusLastMessage',
+    'toggleChatPinned',
+    'toggleChatArchived',
+    'updateChatMutedState',
+  ]),
 )(Chat));

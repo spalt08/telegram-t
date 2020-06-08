@@ -101,66 +101,13 @@
   }
 
   .search-result-message {
-    position: relative;
-    overflow: hidden;
     margin: 0 -0.5rem 0.35rem;
-    padding: 0.5rem;
-    display: flex;
-    cursor: pointer;
-    border-radius: var(--border-radius-default);
 
-    &:hover {
-      background: var(--color-chat-hover);
-    }
+    .sender-name {
+      color: var(--color-text);
 
-    .Avatar {
-      margin-right: 0.5rem;
-    }
-
-    .info {
-      flex: 1;
-      overflow: hidden;
-
-      .title {
-        overflow: hidden;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        padding-right: .15rem;
-      }
-
-      h3 {
-        max-width: 80%;
-      }
-
-      h3, .subtitle {
-        font-size: 1rem;
-        line-height: 1.6875rem;
-        margin: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .LastMessageMeta {
-        margin-left: auto;
-      }
-
-      .subtitle {
-        color: var(--color-text-secondary);
-        margin-right: 2rem;
-
-        .matching-text-highlight {
-          color: var(--color-primary);
-        }
-      }
-
-      .sender-name {
-        color: var(--color-text);
-
-        &::after {
-          content: ': ';
-        }
+      &::after {
+        content: ': ';
       }
     }
   }

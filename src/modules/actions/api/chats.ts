@@ -5,7 +5,7 @@ import {
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
 
-import { CHAT_LIST_SLICE, SUPPORT_BOT_ID } from '../../../config';
+import { CHAT_LIST_SLICE, SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   addUsers,
@@ -18,7 +18,7 @@ import {
 import { selectChat, selectOpenChat, selectUser } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, throttle } from '../../../util/schedulers';
-import { isChatSummaryOnly } from '../../helpers';
+import { isChatSummaryOnly, isChatArchived } from '../../helpers';
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -46,14 +46,19 @@ addReducer('openChat', (global, actions, payload) => {
   }
 });
 
-addReducer('loadMoreChats', (global) => {
-  const chatsWithLastMessages = Object.values(global.chats.byId).filter((chat) => Boolean(chat.lastMessage));
+addReducer('loadMoreChats', (global, actions, payload) => {
+  const { folder } = payload!;
+  const chatsWithLastMessages = Object.values(global.chats.byId)
+    .filter((chat) => (
+      Boolean(chat.lastMessage)
+      && (folder === 'archived' ? chat.folderId === ARCHIVED_FOLDER_ID : chat.folderId !== ARCHIVED_FOLDER_ID)
+    ));
   const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
 
   if (lastChat) {
-    void loadChats(lastChat.id, lastChat.lastMessage!.date);
+    void loadChats(folder, lastChat.id, lastChat.lastMessage!.date);
   } else {
-    void loadChats();
+    void loadChats(folder);
   }
 });
 
@@ -78,7 +83,7 @@ addReducer('loadSuperGroupOnlines', (global, actions, payload) => {
 });
 
 addReducer('loadTopChats', () => {
-  runThrottledForLoadTopChats(() => loadChats());
+  runThrottledForLoadTopChats(() => loadChats('active'));
 });
 
 addReducer('requestChatUpdate', (global, actions, payload) => {
@@ -220,10 +225,30 @@ addReducer('createGroupChat', (global, actions, payload) => {
   void createGroupChat(title, members, photo);
 });
 
-async function loadChats(offsetId?: number, offsetDate?: number) {
+addReducer('toggleChatPinned', (global, actions, payload) => {
+  const { id } = payload!;
+  const chat = selectChat(global, id);
+  if (chat) {
+    void callApi('toggleChatPinned', chat);
+  }
+});
+
+addReducer('toggleChatArchived', (global, actions, payload) => {
+  const { id } = payload!;
+  const chat = selectChat(global, id);
+  if (chat) {
+    void callApi('editChatFolder', {
+      chat,
+      folderId: isChatArchived(chat) ? 0 : ARCHIVED_FOLDER_ID,
+    });
+  }
+});
+
+async function loadChats(folder: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,
     offsetDate,
+    archived: folder === 'archived',
   });
 
   if (!result) {
@@ -240,7 +265,7 @@ async function loadChats(offsetId?: number, offsetDate?: number) {
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChatListIds(global, chatIds);
+  global = updateChatListIds(global, folder, chatIds);
 
   setGlobal(global);
 }
