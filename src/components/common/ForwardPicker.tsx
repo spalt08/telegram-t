@@ -6,8 +6,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat } from '../../api/types';
 
-import { isChatChannel, getChatTitle } from '../../modules/helpers';
-import prepareChats from './helpers/prepareChats';
+import { isChatChannel, getChatTitle, prepareChatList } from '../../modules/helpers';
 import searchWords from '../../util/searchWords';
 import { pick } from '../../util/iteratees';
 
@@ -41,7 +40,7 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
   const [filter, setFilter] = useState('');
 
   const chats = useMemo(() => {
-    const chatArrays = listIds ? prepareChats(chatsById, listIds, orderedPinnedIds, 'active') : undefined;
+    const chatArrays = listIds ? prepareChatList(chatsById, listIds, orderedPinnedIds, 'active') : undefined;
     return chatArrays && [...chatArrays.pinnedChats, ...chatArrays.otherChats];
   }, [chatsById, listIds, orderedPinnedIds]);
 

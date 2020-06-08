@@ -1,6 +1,4 @@
-import {
-  addReducer, getDispatch, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 import { GlobalState } from '../../../global/types';
@@ -13,12 +11,8 @@ import {
 } from '../../reducers';
 import { selectUser, selectChat } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
-import { pause } from '../../../util/schedulers';
-import prepareChats from '../../../components/common/helpers/prepareChats';
 
 const TOP_MESSAGES_LIMIT = MESSAGE_LIST_SLICE * 2;
-const TOP_CHATS_PRELOAD_LIMIT = 10;
-const TOP_CHATS_PRELOAD_PAUSE = 500;
 
 addReducer('sync', (global, actions) => {
   const { afterSync } = actions;
@@ -26,8 +20,6 @@ addReducer('sync', (global, actions) => {
 });
 
 addReducer('afterSync', (global, actions) => {
-  preloadTopChatMessages();
-
   // Until favorite stickers aren't loaded, adding and removing Favorite Stickers is not possible
   actions.loadFavoriteStickers();
 });
@@ -212,30 +204,4 @@ function loadTopMessages(chat: ApiChat) {
     addOffset: -(Math.round(TOP_MESSAGES_LIMIT / 2) + 1),
     limit: TOP_MESSAGES_LIMIT,
   });
-}
-
-async function preloadTopChatMessages() {
-  const preloadedChatIds: number[] = [];
-
-  for (let i = 0; i < TOP_CHATS_PRELOAD_LIMIT; i++) {
-    await pause(TOP_CHATS_PRELOAD_PAUSE);
-
-    const {
-      selectedId, byId, listIds, orderedPinnedIds,
-    } = getGlobal().chats;
-    if (!listIds.active) {
-      return;
-    }
-
-    const { pinnedChats, otherChats } = prepareChats(byId, listIds.active, orderedPinnedIds.active);
-    const topChats = [...pinnedChats, ...otherChats];
-    const chatToPreload = topChats.find(({ id }) => id !== selectedId && !preloadedChatIds.includes(id));
-    if (!chatToPreload) {
-      return;
-    }
-
-    preloadedChatIds.push(chatToPreload.id);
-
-    getDispatch().loadViewportMessages({ chatId: chatToPreload.id });
-  }
 }

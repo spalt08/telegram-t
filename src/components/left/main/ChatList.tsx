@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useMemo, useCallback,
+  FC, memo, useMemo, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
@@ -9,8 +9,7 @@ import { LoadMoreDirection } from '../../../types';
 
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
-import { getChatOrder } from '../../../modules/helpers';
-import prepareChats from '../../common/helpers/prepareChats';
+import { getChatOrder, prepareChatList } from '../../../modules/helpers';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -28,9 +27,10 @@ type StateProps = {
   listIds?: number[];
   selectedChatId?: number;
   orderedPinnedIds?: number[];
+  lastSyncTime?: number;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMoreChats'>;
+type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages'>;
 
 const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   folder,
@@ -39,14 +39,16 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   listIds,
   selectedChatId,
   orderedPinnedIds,
+  lastSyncTime,
   loadMoreChats,
+  preloadTopChatMessages,
 }) => {
   const [chatArrays, orderById] = useMemo(() => {
     if (!listIds) {
       return [];
     }
 
-    const newChatArrays = prepareChats(chats, listIds, orderedPinnedIds, folder);
+    const newChatArrays = prepareChatList(chats, listIds, orderedPinnedIds, folder);
     const newOrderById = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats]
       .reduce((acc, chat, index) => ({ ...acc, [chat.id]: index }), {} as Record<string, number>);
 
@@ -60,9 +62,15 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     })
     : {};
 
-  const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection}) => {
+  const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     loadMoreChats({ direction, folder });
   }, [loadMoreChats, folder]);
+
+  useEffect(() => {
+    if (lastSyncTime) {
+      preloadTopChatMessages({ folder });
+    }
+  }, [lastSyncTime, folder, preloadTopChatMessages]);
 
   return (
     <InfiniteScroll className="ChatList custom-scroll" items={listIds || []} onLoadMore={handleLoadMore}>
@@ -108,6 +116,7 @@ export default memo(withGlobal<OwnProps>(
         selectedId: selectedChatId,
         orderedPinnedIds,
       },
+      lastSyncTime,
     } = global;
 
     return {
@@ -115,7 +124,8 @@ export default memo(withGlobal<OwnProps>(
       listIds: listIds[folder],
       selectedChatId,
       orderedPinnedIds: orderedPinnedIds[folder],
+      lastSyncTime,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats', 'preloadTopChatMessages']),
 )(ChatList));

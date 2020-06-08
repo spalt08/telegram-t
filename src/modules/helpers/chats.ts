@@ -4,7 +4,9 @@ import {
   ApiChatBannedRights,
   ApiChatAdminRights,
 } from '../../api/types';
+
 import { ARCHIVED_FOLDER_ID } from '../../config';
+import { orderBy } from '../../util/iteratees';
 
 export function isChatPrivate(chatId: number) {
   return chatId > 0;
@@ -180,4 +182,50 @@ export function isChatArchived(chat: ApiChat) {
 
 export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
+}
+
+export function prepareChatList(
+  chats: Record<number, ApiChat>,
+  listIds: number[],
+  orderedPinnedIds?: number[],
+  folder: 'all' | 'archived' | 'active' = 'all',
+) {
+  const chatFilter = (chat?: ApiChat) => {
+    if (!chat || !chat.lastMessage) {
+      return false;
+    }
+
+    switch (folder) {
+      case 'active':
+        if (isChatArchived(chat)) {
+          return false;
+        }
+        break;
+      case 'archived':
+        if (!isChatArchived(chat)) {
+          return false;
+        }
+        break;
+    }
+
+    return !chat.isRestricted && !chat.hasLeft;
+  };
+
+  const listedChats = listIds.map((id) => chats[id]).filter(chatFilter);
+
+  const pinnedChats = orderedPinnedIds
+    ? orderedPinnedIds.map((id) => chats[id]).filter(chatFilter)
+    : listedChats.filter((chat) => chat.isPinned);
+  const otherChats = orderBy(
+    listedChats.filter(
+      (chat) => (orderedPinnedIds ? !orderedPinnedIds.includes(chat.id) : !chat.isPinned),
+    ),
+    getChatOrder,
+    'desc',
+  );
+
+  return {
+    pinnedChats,
+    otherChats,
+  };
 }

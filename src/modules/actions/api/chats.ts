@@ -1,6 +1,4 @@
-import {
-  addReducer, getGlobal, setGlobal,
-} from '../../../lib/teact/teactn';
+import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
@@ -17,12 +15,48 @@ import {
 } from '../../reducers';
 import { selectChat, selectOpenChat, selectUser } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { debounce, throttle } from '../../../util/schedulers';
-import { isChatSummaryOnly, isChatArchived } from '../../helpers';
+import { debounce, pause, throttle } from '../../../util/schedulers';
+import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helpers';
+
+const TOP_CHATS_PRELOAD_LIMIT = 10;
+const TOP_CHATS_PRELOAD_PAUSE = 500;
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
+
+addReducer('preloadTopChatMessages', (global, actions, payload) => {
+  const { folder }: { folder: 'active' | 'archived' } = payload;
+
+  (async () => {
+    const preloadedChatIds: number[] = [];
+
+    for (let i = 0; i < TOP_CHATS_PRELOAD_LIMIT; i++) {
+      await pause(TOP_CHATS_PRELOAD_PAUSE);
+
+      const {
+        selectedId,
+        byId,
+        listIds: { [folder]: listIds },
+        orderedPinnedIds: { [folder]: orderedPinnedIds },
+      } = getGlobal().chats;
+      if (!listIds) {
+        return;
+      }
+
+      const { pinnedChats, otherChats } = prepareChatList(byId, listIds, orderedPinnedIds);
+      const topChats = [...pinnedChats, ...otherChats];
+      const chatToPreload = topChats.find(({ id }) => id !== selectedId && !preloadedChatIds.includes(id));
+      if (!chatToPreload) {
+        return;
+      }
+
+      preloadedChatIds.push(chatToPreload.id);
+
+      actions.loadViewportMessages({ chatId: chatToPreload.id });
+    }
+  })();
+});
 
 addReducer('openChat', (global, actions, payload) => {
   const { id } = payload!;
