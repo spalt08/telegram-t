@@ -14,10 +14,8 @@ interface OpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> 
 const MIN_RECORDING_TIME = 1000;
 const POLYFILL_OPTIONS = {
   encoderPath,
-  monitorGain: 0,
-  numberOfChannels: 1,
-  bitRate: 35300,
-  encoderSampleRate: 48000,
+  encoderApplication: 2048,
+  encoderSampleRate: 24000,
 };
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
@@ -41,7 +39,7 @@ export async function start(analyzerCallback: Function) {
 
   const { stream, release: releaseStream } = await requestStream();
 
-  const releaseAnalyzer = subscribeToAnalyzer(stream, (volume: number) => {
+  const releaseAnalyzer = subscribeToAnalyzer(stream.clone(), (volume: number) => {
     waveform.push((volume - 128) * 2);
     analyzerCallback(volume);
   });
@@ -98,7 +96,7 @@ async function startMediaRecorder(stream: MediaStream) {
   await ensureOpusRecorder();
 
   const mediaRecorder = new OpusRecorder(POLYFILL_OPTIONS);
-  mediaRecorder.start(stream);
+  await mediaRecorder.start(stream);
   return mediaRecorder;
 }
 

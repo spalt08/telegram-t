@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 
 const { EnvironmentPlugin } = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserJSPlugin = require('terser-webpack-plugin');
@@ -15,6 +14,17 @@ module.exports = (env, argv) => {
   return {
     mode: argv.mode,
     entry: './src/index.tsx',
+    devServer: {
+      contentBase: [
+        path.resolve(__dirname, 'public'),
+        path.resolve(__dirname, 'node_modules/emoji-data-ios'),
+        path.resolve(__dirname, 'node_modules/opus-recorder/dist'),
+      ],
+      port: 1234,
+      host: '0.0.0.0',
+      disableHostCheck: true,
+      stats: 'minimal',
+    },
     output: {
       filename: '[name].[contenthash].js',
       chunkFilename: '[name].[chunkhash].js',
@@ -73,19 +83,7 @@ module.exports = (env, argv) => {
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash].css',
         chunkFilename: '[name].[chunkhash].css',
-      }),
-      new CopyPlugin({
-        patterns: [
-          { from: 'public/' },
-          {
-            from: 'node_modules/opus-recorder/dist/encoderWorker.min.wasm',
-            to: '',
-          },
-          {
-            from: 'node_modules/opus-recorder/dist/decoderWorker.min.wasm',
-            to: '',
-          },
-        ],
+        ignoreOrder: true,
       }),
       new EnvironmentPlugin(['NODE_ENV', 'TELEGRAM_T_API_ID', 'TELEGRAM_T_API_HASH']),
       ...(argv.mode === 'production' ? [
