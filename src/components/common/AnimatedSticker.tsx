@@ -1,6 +1,6 @@
 import { AnimationItem } from 'lottie-web';
 import React, {
-  FC, useEffect, useRef, useState, memo,
+  FC, useEffect, useRef, memo,
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';
@@ -41,12 +41,12 @@ const AnimatedSticker: FC<OwnProps> = ({
   speed,
   onLoad,
 }) => {
-  const [animation, setAnimation] = useState<AnimationItem>();
+  const animationRef = useRef<AnimationItem>();
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
 
   useEffect(() => {
-    if (animation || !animationData) {
+    if (animationRef.current || !animationData) {
       return;
     }
 
@@ -67,7 +67,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         newAnimation.setSpeed(speed);
       }
 
-      setAnimation(newAnimation);
+      animationRef.current = newAnimation;
 
       if (onLoad) {
         onLoad();
@@ -81,31 +81,32 @@ const AnimatedSticker: FC<OwnProps> = ({
         fastRaf(exec);
       });
     }
-  }, [animation, animationData, noLoop, speed, onLoad]);
+  }, [animationData, noLoop, speed, onLoad]);
 
   useEffect(() => {
     return () => {
-      if (animation) {
-        animation.destroy();
+      if (animationRef.current) {
+        animationRef.current.destroy();
       }
     };
-  }, [animation]);
+  }, []);
 
   useEffect(() => {
+    const animation = animationRef.current;
     if (!animation) {
       return;
     }
 
     if (play) {
       animation.play();
-      // animation.goToAndPlay(0);
     } else {
       animation.pause();
-      // animation.goToAndStop(0);
     }
-  }, [play, animation]);
+  }, [play]);
 
   useEffect(() => {
+    const animation = animationRef.current;
+
     if (
       !animation
       || !playSegment
@@ -120,7 +121,7 @@ const AnimatedSticker: FC<OwnProps> = ({
 
     animation.playSegments([playSegment], true);
     prevPlaySegment.current = playSegment;
-  }, [playSegment, animation]);
+  }, [playSegment]);
 
   const style = width && height
     ? `width: ${width}px; height: ${height}px;`
