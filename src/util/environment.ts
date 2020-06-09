@@ -22,7 +22,9 @@ export function getPlatform() {
 
 export const PLATFORM_ENV = getPlatform();
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
-export const IS_VOICE_RECORDING_SUPPORTED = navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices;
+export const IS_VOICE_RECORDING_SUPPORTED = (navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
+  window.AudioContext || (window as any).webkitAudioContext
+));
 export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentElement.style;
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && ['Mac OS', 'iOS'].includes(PLATFORM_ENV);
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;

@@ -6,17 +6,13 @@ export type Result = { blob: Blob; duration: number; waveform: number[] };
 interface OpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {
   new(options: AnyLiteral): OpusRecorder;
 
-  start(stream: MediaStream): void;
+  start(stream: MediaStreamAudioSourceNode): void;
 
   ondataavailable: (typedArray: Uint8Array) => void;
 }
 
 const MIN_RECORDING_TIME = 1000;
-const POLYFILL_OPTIONS = {
-  encoderPath,
-  encoderApplication: 2048,
-  encoderSampleRate: 24000,
-};
+const POLYFILL_OPTIONS = { encoderPath, reuseWorker: true };
 const BLOB_PARAMS = { type: 'audio/ogg' };
 
 let opusRecorderPromise: Promise<{ default: OpusRecorder }>;
@@ -39,17 +35,26 @@ export async function start(analyzerCallback: Function) {
 
   const { stream, release: releaseStream } = await requestStream();
 
-  const releaseAnalyzer = subscribeToAnalyzer(stream.clone(), (volume: number) => {
+  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+  const audioCtx = new AudioContext();
+  const source = audioCtx.createMediaStreamSource(stream);
+
+  const releaseAnalyzer = subscribeToAnalyzer(audioCtx, source, (volume: number) => {
     waveform.push((volume - 128) * 2);
     analyzerCallback(volume);
   });
 
+  async function releaseAll() {
+    releaseAnalyzer();
+    await audioCtx.close();
+    releaseStream();
+  }
+
   let mediaRecorder: OpusRecorder;
   try {
-    mediaRecorder = await startMediaRecorder(stream);
+    mediaRecorder = await startMediaRecorder(source);
   } catch (err) {
-    releaseAnalyzer();
-    releaseStream();
+    await releaseAll();
 
     throw err;
   }
@@ -70,11 +75,10 @@ export async function start(analyzerCallback: Function) {
 
     const delayStop = Math.max(0, startedAt + MIN_RECORDING_TIME - Date.now());
     setTimeout(
-      () => {
+      async () => {
         mediaRecorder.stop();
 
-        releaseAnalyzer();
-        releaseStream();
+        await releaseAll();
       },
       delayStop,
     );
@@ -92,23 +96,15 @@ async function requestStream() {
   return { stream, release };
 }
 
-async function startMediaRecorder(stream: MediaStream) {
+async function startMediaRecorder(source: MediaStreamAudioSourceNode) {
   await ensureOpusRecorder();
 
   const mediaRecorder = new OpusRecorder(POLYFILL_OPTIONS);
-  await mediaRecorder.start(stream);
+  await mediaRecorder.start(source);
   return mediaRecorder;
 }
 
-function subscribeToAnalyzer(stream: MediaStream, cb: Function) {
-  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  if (!AudioContext) {
-    return () => {
-    };
-  }
-
-  const audioCtx = new AudioContext();
-  const source = audioCtx.createMediaStreamSource(stream);
+function subscribeToAnalyzer(audioCtx: AudioContext, source: MediaStreamAudioSourceNode, cb: Function) {
   const analyser = audioCtx.createAnalyser();
   analyser.fftSize = 2048;
   const bufferLength = analyser.frequencyBinCount;
