@@ -49,8 +49,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
 
   return (
     <div className="SymbolMenu-footer">
-      {/* TODO: GIF search button is hidden until search request issues are resolved */}
-      {activeTab === SymbolMenuTabs.Stickers && (
+      {activeTab !== SymbolMenuTabs.Emoji && (
         <Button
           className="symbol-search-button"
           ariaLabel={activeTab === SymbolMenuTabs.Stickers ? 'Search Stickers' : 'Search GIFs'}
