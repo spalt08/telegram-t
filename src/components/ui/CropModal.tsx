@@ -106,7 +106,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
       onClose={onClose}
       title="Drag to reposition"
       className="CropModal"
-      showCloseButton
+      hasCloseButton
     >
       {isCroppieReady ? (
         <div id="avatar-crop" />

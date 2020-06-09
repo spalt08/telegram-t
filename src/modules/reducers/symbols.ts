@@ -1,5 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { ApiStickerSet, ApiSticker } from '../../api/types';
+import { ApiStickerSet } from '../../api/types';
 import { buildCollectionByKey } from '../../util/iteratees';
 
 export function updateStickerSets(
@@ -52,8 +52,10 @@ export function updateStickerSets(
   };
 }
 
-export function updateStickerSet(global: GlobalState, set: ApiStickerSet, stickers: ApiSticker[]): GlobalState {
-  const existingSet = global.stickers.setsById[set.id] || {};
+export function updateStickerSet(
+  global: GlobalState, stickerSetId: string, update: Partial<ApiStickerSet>,
+): GlobalState {
+  const currentStickerSet = global.stickers.setsById[stickerSetId] || {};
 
   return {
     ...global,
@@ -61,10 +63,9 @@ export function updateStickerSet(global: GlobalState, set: ApiStickerSet, sticke
       ...global.stickers,
       setsById: {
         ...global.stickers.setsById,
-        [set.id]: {
-          ...existingSet,
-          ...set,
-          stickers,
+        [stickerSetId]: {
+          ...currentStickerSet,
+          ...update,
         },
       },
     },

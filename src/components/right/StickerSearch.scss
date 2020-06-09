@@ -39,7 +39,10 @@
         &.is-added {
           background: var(--color-chat-hover);
           color: var(--color-text-secondary);
-          pointer-events: none;
+
+          &:hover, &:active {
+            background: var(--color-chat-active) !important;
+          }
         }
       }
     }

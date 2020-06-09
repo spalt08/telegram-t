@@ -2,7 +2,7 @@ import { GlobalState } from '../../global/types';
 
 import { selectIsForwardMenuOpen } from './messages';
 import { selectCurrentMessageSearch } from './messageSearch';
-import { selectCurrentStickerSearch, selectCurrentGifSearch } from './stickers';
+import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
 import { selectAreActiveChatsLoaded } from './chats';
 
 export function selectIsMediaViewerOpen(global: GlobalState) {

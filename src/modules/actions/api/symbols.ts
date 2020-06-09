@@ -3,11 +3,9 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiSticker } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import { throttle } from '../../../util/schedulers';
-import {
-  updateStickerSets,
-  updateStickerSet,
-} from '../../reducers';
+import { updateStickerSets, updateStickerSet } from '../../reducers';
 import searchWords from '../../../util/searchWords';
+import { selectStickerSet } from '../../selectors';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
@@ -33,11 +31,18 @@ addReducer('loadFeaturedStickers', (global) => {
 
 addReducer('loadStickers', (global, actions, payload) => {
   const { stickerSetId } = payload!;
-  const set = global.stickers.setsById[stickerSetId];
-  if (!set) {
-    return;
+  let { stickerSetAccessHash } = payload!;
+
+  if (!stickerSetAccessHash) {
+    const stickerSet = selectStickerSet(global, stickerSetId);
+    if (!stickerSet) {
+      return;
+    }
+
+    stickerSetAccessHash = stickerSet.accessHash;
   }
-  void loadStickers(stickerSetId, set.accessHash);
+
+  void loadStickers(stickerSetId, stickerSetAccessHash);
 });
 
 addReducer('loadSavedGifs', (global) => {
@@ -59,6 +64,18 @@ addReducer('unfaveSticker', (global, actions, payload) => {
   if (sticker) {
     void unfaveSticker(sticker);
   }
+});
+
+addReducer('toggleStickerSet', (global, actions, payload) => {
+  const { stickerSetId } = payload!;
+  const stickerSet = selectStickerSet(global, stickerSetId);
+  if (!stickerSet) {
+    return;
+  }
+
+  const { accessHash, installedDate } = stickerSet;
+
+  void callApi(!installedDate ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
 });
 
 async function loadStickerSets(hash = 0) {
@@ -131,11 +148,7 @@ async function loadStickers(stickerSetId: string, accessHash: string) {
 
   const { set, stickers } = stickerSet;
 
-  setGlobal(updateStickerSet(
-    getGlobal(),
-    set,
-    stickers,
-  ));
+  setGlobal(updateStickerSet(getGlobal(), set.id, { ...set, stickers }));
 }
 
 function unfaveSticker(sticker: ApiSticker) {

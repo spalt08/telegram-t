@@ -47,7 +47,7 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
   function renderContent() {
     if (!query && featuredIds) {
       return featuredIds.map((id) => (
-        <StickerSetResult key={id} setId={id} canSendStickers={canSendStickers} />
+        <StickerSetResult key={id} stickerSetId={id} canSendStickers={canSendStickers} />
       ));
     }
 
@@ -57,7 +57,7 @@ const StickerSearch: FC<StateProps & DispatchProps> = ({
       }
 
       return resultIds.map((id) => (
-        <StickerSetResult key={id} setId={id} canSendStickers={canSendStickers} />
+        <StickerSetResult key={id} stickerSetId={id} canSendStickers={canSendStickers} />
       ));
     }
 

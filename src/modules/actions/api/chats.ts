@@ -3,7 +3,9 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
 
-import { CHAT_LIST_SLICE, SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID } from '../../../config';
+import {
+  CHAT_LIST_SLICE, SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID, TOP_CHATS_PRELOAD_LIMIT,
+} from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
   addUsers,
@@ -18,7 +20,6 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helpers';
 
-const TOP_CHATS_PRELOAD_LIMIT = 10;
 const TOP_CHATS_PRELOAD_PAUSE = 500;
 
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);

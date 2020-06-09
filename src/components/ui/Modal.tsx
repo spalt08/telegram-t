@@ -15,7 +15,7 @@ type OwnProps = {
   className?: string;
   isOpen?: boolean;
   header?: FC;
-  showCloseButton?: boolean;
+  hasCloseButton?: boolean;
   transparentBackdrop?: boolean;
   children: any;
   onClose: () => void;
@@ -28,7 +28,7 @@ const Modal: FC<OwnProps> = (props) => {
     className,
     isOpen,
     header,
-    showCloseButton,
+    hasCloseButton,
     transparentBackdrop,
     children,
     onClose,
@@ -59,7 +59,7 @@ const Modal: FC<OwnProps> = (props) => {
 
     return (
       <div className="modal-header">
-        {showCloseButton && (
+        {hasCloseButton && (
           <Button
             round
             color="translucent"

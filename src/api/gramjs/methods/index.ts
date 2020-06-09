@@ -19,8 +19,9 @@ import {
 } from './users';
 import {
   fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers,
-  faveSticker, fetchStickers, fetchSavedGifs, searchStickers, searchGifs,
-} from './stickers';
+  faveSticker, fetchStickers, fetchSavedGifs, searchStickers, installStickerSet, uninstallStickerSet,
+  searchGifs,
+} from './symbols';
 
 export default {
   destroy,
@@ -82,5 +83,7 @@ export default {
   faveSticker,
   fetchStickers,
   fetchSavedGifs,
+  installStickerSet,
+  uninstallStickerSet,
   searchGifs,
 };

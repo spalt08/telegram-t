@@ -81,7 +81,7 @@ const GifButton: FC<OwnProps> = ({
       onMouseMove={play}
       onMouseLeave={stop}
     >
-      {!(videoBlobUrl && shouldPlay) && (
+      {previewData && !(videoBlobUrl && shouldPlay) && (
         <div
           className="preview"
           // @ts-ignore

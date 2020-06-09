@@ -8,6 +8,7 @@ interface LocalDb {
   users: Record<number, GramJs.User>;
   messages: Record<string, GramJs.Message>;
   documents: Record<string, GramJs.Document>;
+  stickerSets: Record<string, GramJs.StickerSet>;
 }
 
 export default {
@@ -16,4 +17,5 @@ export default {
   users: {},
   messages: {},
   documents: {},
+  stickerSets: {},
 } as LocalDb;

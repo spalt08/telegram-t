@@ -10,9 +10,10 @@ import { pick } from '../../util/iteratees';
 
 import Button from '../ui/Button';
 import StickerButton from '../common/StickerButton';
+import { selectStickerSet } from '../../modules/selectors';
 
 type OwnProps = {
-  setId: string;
+  stickerSetId: string;
   canSendStickers?: boolean;
 };
 
@@ -20,13 +21,14 @@ type StateProps = {
   set?: ApiStickerSet;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadStickers' | 'sendMessage'>;
+type DispatchProps = Pick<GlobalActions, 'loadStickers' | 'sendMessage' | 'toggleStickerSet'>;
 
 const STICKERS_TO_DISPLAY = 5;
 
 const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
-  setId, set, canSendStickers, loadStickers, sendMessage,
+  stickerSetId, set, canSendStickers, loadStickers, sendMessage, toggleStickerSet,
 }) => {
+  const isAdded = set && Boolean(set.installedDate);
   const areStickersLoaded = Boolean(set && set.stickers.length);
 
   const displayedStickers = useMemo(() => {
@@ -42,11 +44,15 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (!areStickersLoaded && displayedStickers.length < STICKERS_TO_DISPLAY) {
-      loadStickers({ stickerSetId: setId });
+      loadStickers({ stickerSetId });
     }
-  }, [areStickersLoaded, displayedStickers.length, loadStickers, setId]);
+  }, [areStickersLoaded, displayedStickers.length, loadStickers, stickerSetId]);
 
-  const handleClick = useCallback((sticker: ApiSticker) => {
+  const handleAddClick = useCallback(() => {
+    toggleStickerSet({ stickerSetId });
+  }, [toggleStickerSet, stickerSetId]);
+
+  const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     if (!canSendStickers) {
       return;
     }
@@ -57,7 +63,6 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
     return undefined;
   }
 
-  const isAdded = Boolean(set.installedDate);
 
   return (
     <div key={set.id} className="sticker-set">
@@ -67,18 +72,19 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
           <p className="count">{set.count} stickers</p>
         </div>
         <Button
-          className={`not-implemented ${isAdded ? 'is-added' : undefined}`}
+          className={isAdded ? 'is-added' : undefined}
           color="primary"
           size="tiny"
           pill
           fluid
+          onClick={handleAddClick}
         >
           {isAdded ? 'Added' : 'Add'}
         </Button>
       </div>
       <div className="sticker-set-main">
         {displayedStickers.map((sticker) => (
-          <StickerButton sticker={sticker} load onClick={() => handleClick(sticker)} />
+          <StickerButton sticker={sticker} load onClick={() => handleStickerSelect(sticker)} />
         ))}
       </div>
     </div>
@@ -86,10 +92,10 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { setId }): StateProps => {
+  (global, { stickerSetId }): StateProps => {
     return {
-      set: global.stickers.setsById[setId],
+      set: selectStickerSet(global, stickerSetId),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadStickers', 'sendMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadStickers', 'sendMessage', 'toggleStickerSet']),
 )(StickerSetResult));

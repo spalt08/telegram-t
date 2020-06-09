@@ -243,7 +243,7 @@ export type ActionTypes = (
   // Stickers & GIFs
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
   'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |
-  'faveSticker' | 'unfaveSticker' |
+  'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |
   // misc
   'openMediaViewer' |
   'loadWebPagePreview' | 'clearWebPagePreview' |

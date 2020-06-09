@@ -24,7 +24,7 @@ import { pick } from '../../../util/iteratees';
 import { reduceWaveform } from '../gramjsBuilders';
 import { getApiChatIdFromMtpPeer } from './chats';
 import { isPeerUser } from './peers';
-import { buildStickerFromDocument } from './stickers';
+import { buildStickerFromDocument } from './symbols';
 import { buildApiThumbnailFromStripped } from './common';
 
 const LOCAL_VIDEO_TEMP_ID = 'temp';

@@ -9,7 +9,6 @@ import { StickerSetOrRecent } from '../../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
-import { getFirstLetters } from '../../../util/textFormat';
 import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -17,8 +16,9 @@ import { pick } from '../../../util/iteratees';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
-import StickerSet from './StickerSet';
 import StickerButton from '../../common/StickerButton';
+import StickerSet from './StickerSet';
+import StickerSetCover from './StickerSetCover';
 
 import './StickerPicker.scss';
 
@@ -170,42 +170,42 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     runThrottledForScroll(updateVisibleSetIndexes);
   }, [updateVisibleSetIndexes]);
 
-  function renderSetButton(set: StickerSetOrRecent, index: number) {
-    const stickerSetCover = set.stickers[0];
+  function renderCover(stickerSet: StickerSetOrRecent, index: number) {
+    const firstSticker = stickerSet.stickers[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',
       index === activeSetIndex && 'activated',
     );
 
-    if (!stickerSetCover || set.id === 'recent' || set.id === 'favorite') {
+    if (stickerSet.id !== 'recent' && stickerSet.id !== 'favorite' && firstSticker) {
+      return (
+        <StickerButton
+          sticker={firstSticker}
+          load
+          title={stickerSet.title}
+          className={buttonClassName}
+          onClick={() => selectSet(index)}
+        />
+      );
+    } else {
       return (
         <Button
           className={buttonClassName}
           onClick={() => selectSet(index)}
-          ariaLabel={set.title}
+          ariaLabel={stickerSet.title}
           round
           color="translucent"
         >
-          {set.id === 'recent' ? (
+          {stickerSet.id === 'recent' ? (
             <i className="icon-recent" />
-          ) : set.id === 'favorite' ? (
+          ) : stickerSet.id === 'favorite' ? (
             <i className="icon-favorite" />
           ) : (
-            <span className="sticker-set-initial">{getFirstLetters(set.title).slice(0, 2)}</span>
+            <StickerSetCover stickerSet={stickerSet as ApiStickerSet} />
           )}
         </Button>
       );
     }
-
-    return (
-      <StickerButton
-        sticker={stickerSetCover}
-        load
-        title={set.title}
-        className={buttonClassName}
-        onClick={() => selectSet(index)}
-      />
-    );
   }
 
   const fullClassName = buildClassName('StickerPicker', className);
@@ -228,16 +228,16 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
         ref={headerRef}
         className="StickerPicker-header"
       >
-        {allSets.map(renderSetButton)}
+        {allSets.map(renderCover)}
       </div>
       <div
         ref={containerRef}
         className="StickerPicker-main no-scroll"
         onScroll={handleScroll}
       >
-        {allSets.map((set, index) => (
+        {allSets.map((stickerSet, index) => (
           <StickerSet
-            set={set}
+            stickerSet={stickerSet}
             load={visibleSetIndexes.includes(index)}
             loadStickers={loadStickers}
             onStickerSelect={handleStickerSelect}

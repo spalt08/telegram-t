@@ -102,7 +102,7 @@ const StickerButton: FC<OwnProps> = ({
     transitionClassNames,
   );
 
-  const style = canAnimatedPlay ? '' : `background-image: url(${previewBlobUrl})`;
+  const style = previewBlobUrl && !canAnimatedPlay ? `background-image: url(${previewBlobUrl})` : '';
 
   return (
     <div

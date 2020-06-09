@@ -4,7 +4,7 @@ import {
   ApiTypingStatus,
   ApiChatMember,
 } from './chats';
-import { ApiMessage, ApiPoll } from './messages';
+import { ApiMessage, ApiPoll, ApiStickerSet } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
 
 export type ApiUpdateAuthorizationStateType = (
@@ -222,6 +222,12 @@ export type ApiUpdateFavoriteStickers = {
   '@type': 'updateFavoriteStickers';
 };
 
+export type ApiUpdateStickerSet = {
+  '@type': 'updateStickerSet';
+  id: string;
+  stickerSet: Partial<ApiStickerSet>;
+};
+
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
@@ -231,7 +237,8 @@ export type ApiUpdate = (
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo |
   ApiUpdateAvatar | ApiUpdateMessageImage |
-  ApiUpdateError | ApiUpdateResetContacts | ApiUpdateFavoriteStickers
+  ApiUpdateError | ApiUpdateResetContacts |
+  ApiUpdateFavoriteStickers | ApiUpdateStickerSet
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

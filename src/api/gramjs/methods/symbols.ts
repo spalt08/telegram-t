@@ -1,16 +1,12 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import {
-  ApiSticker,
-  ApiVideo,
-  OnApiUpdate,
-  ApiStickerSet,
-} from '../../types';
+import { ApiSticker, ApiVideo, OnApiUpdate } from '../../types';
 
 import { invokeRequest } from './client';
-import { buildStickerFromDocument, buildStickerSet } from '../apiBuilders/stickers';
+import { buildStickerFromDocument, buildStickerSet, buildStickerSetCovered } from '../apiBuilders/symbols';
 import { buildInputStickerSet, buildInputDocument } from '../gramjsBuilders';
-import localDb from '../localDb';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
+
+import localDb from '../localDb';
 
 let onUpdate: OnApiUpdate;
 
@@ -25,6 +21,12 @@ export async function fetchStickerSets({ hash }: { hash: number }) {
     return undefined;
   }
 
+  allStickers.sets.forEach((stickerSet) => {
+    if (stickerSet.thumb) {
+      localDb.stickerSets[String(stickerSet.id)] = stickerSet;
+    }
+  });
+
   return {
     hash: allStickers.hash,
     sets: allStickers.sets.map(buildStickerSet),
@@ -38,21 +40,9 @@ export async function fetchRecentStickers({ hash }: { hash: number }) {
     return undefined;
   }
 
-  const stickers: ApiSticker[] = [];
-
-  result.stickers.forEach((document) => {
-    if (document instanceof GramJs.Document) {
-      const sticker = buildStickerFromDocument(document);
-      if (sticker) {
-        stickers.push(sticker);
-        localDb.documents[String(document.id)] = document;
-      }
-    }
-  });
-
   return {
     hash: result.hash,
-    stickers,
+    stickers: processStickerResult(result.stickers),
   };
 }
 
@@ -63,21 +53,9 @@ export async function fetchFavoriteStickers({ hash }: { hash: number }) {
     return undefined;
   }
 
-  const stickers: ApiSticker[] = [];
-
-  result.stickers.forEach((document) => {
-    if (document instanceof GramJs.Document) {
-      const sticker = buildStickerFromDocument(document);
-      if (sticker) {
-        stickers.push(sticker);
-        localDb.documents[String(document.id)] = document;
-      }
-    }
-  });
-
   return {
     hash: result.hash,
-    stickers,
+    stickers: processStickerResult(result.stickers),
   };
 }
 
@@ -88,32 +66,9 @@ export async function fetchFeaturedStickers({ hash }: { hash: number }) {
     return undefined;
   }
 
-  const sets: ApiStickerSet[] = [];
-
-  result.sets.forEach((coveredSet) => {
-    const set = buildStickerSet(coveredSet.set);
-
-    const setCovers = (coveredSet instanceof GramJs.StickerSetMultiCovered)
-      ? coveredSet.covers
-      : [coveredSet.cover];
-
-    set.covers = [];
-    setCovers.forEach((cover) => {
-      if (cover instanceof GramJs.Document) {
-        const coverSticker = buildStickerFromDocument(cover);
-        if (coverSticker) {
-          set.covers!.push(coverSticker);
-          localDb.documents[String(cover.id)] = cover;
-        }
-      }
-    });
-
-    sets.push(set);
-  });
-
   return {
     hash: result.hash,
-    sets,
+    sets: result.sets.map(buildStickerSetCovered),
   };
 }
 
@@ -146,21 +101,9 @@ export async function fetchStickers({ stickerSetId, accessHash }: { stickerSetId
     return undefined;
   }
 
-  const stickers: ApiSticker[] = [];
-
-  result.documents.forEach((document) => {
-    if (document instanceof GramJs.Document) {
-      const sticker = buildStickerFromDocument(document);
-      if (sticker) {
-        stickers.push(sticker);
-        localDb.documents[String(document.id)] = document;
-      }
-    }
-  });
-
   return {
     set: buildStickerSet(result.set),
-    stickers,
+    stickers: processStickerResult(result.documents),
   };
 }
 
@@ -174,32 +117,9 @@ export async function searchStickers({ query, hash }: { query: string; hash: num
     return undefined;
   }
 
-  const sets: ApiStickerSet[] = [];
-
-  result.sets.forEach((coveredSet) => {
-    const set = buildStickerSet(coveredSet.set);
-
-    const setCovers = (coveredSet instanceof GramJs.StickerSetMultiCovered)
-      ? coveredSet.covers
-      : [coveredSet.cover];
-
-    set.covers = [];
-    setCovers.forEach((cover) => {
-      if (cover instanceof GramJs.Document) {
-        const coverSticker = buildStickerFromDocument(cover);
-        if (coverSticker) {
-          set.covers!.push(coverSticker);
-          localDb.documents[String(cover.id)] = cover;
-        }
-      }
-    });
-
-    sets.push(set);
-  });
-
   return {
     hash: result.hash,
-    sets,
+    sets: result.sets.map(buildStickerSetCovered),
   };
 }
 
@@ -210,21 +130,38 @@ export async function fetchSavedGifs({ hash }: { hash: number }) {
     return undefined;
   }
 
-  const gifs: ApiVideo[] = [];
-  result.gifs.forEach((document) => {
-    if (document instanceof GramJs.Document) {
-      const video = buildVideoFromDocument(document);
-      if (video) {
-        gifs.push(video);
-        localDb.documents[String(document.id)] = document;
-      }
-    }
-  });
-
   return {
     hash: result.hash,
-    gifs,
+    gifs: processGifResult(result.gifs),
   };
+}
+
+export async function installStickerSet({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {
+  const result = await invokeRequest(new GramJs.messages.InstallStickerSet({
+    stickerset: buildInputStickerSet(stickerSetId, accessHash),
+  }));
+
+  if (result) {
+    onUpdate({
+      '@type': 'updateStickerSet',
+      id: stickerSetId,
+      stickerSet: { installedDate: Date.now() },
+    });
+  }
+}
+
+export async function uninstallStickerSet({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {
+  const result = await invokeRequest(new GramJs.messages.UninstallStickerSet({
+    stickerset: buildInputStickerSet(stickerSetId, accessHash),
+  }));
+
+  if (result) {
+    onUpdate({
+      '@type': 'updateStickerSet',
+      id: stickerSetId,
+      stickerSet: { installedDate: undefined },
+    });
+  }
 }
 
 export async function searchGifs({ query, offset }: { query: string; offset?: number }) {
@@ -237,27 +174,53 @@ export async function searchGifs({ query, offset }: { query: string; offset?: nu
     return undefined;
   }
 
-  const { nextOffset, results } = result;
-
-  const gifs: ApiVideo[] = [];
-
-  results.forEach((foundGif) => {
-    if (foundGif instanceof GramJs.FoundGifCached) {
-      const { document } = foundGif;
-      if (document instanceof GramJs.Document) {
-        const video = buildVideoFromDocument(document);
-        if (video) {
-          gifs.push(video);
-          localDb.documents[String(document.id)] = document;
-        }
+  const documents = result.results
+    .map((foundGif) => {
+      if (foundGif instanceof GramJs.FoundGifCached) {
+        return foundGif.document;
+      } else {
+        // TODO
+        return undefined;
       }
-    } else {
-      // TODO
-    }
-  });
+    })
+    .filter<GramJs.TypeDocument>(Boolean as any);
 
   return {
-    nextOffset,
-    gifs,
+    nextOffset: result.nextOffset,
+    gifs: processGifResult(documents),
   };
+}
+
+function processStickerResult(stickers: GramJs.TypeDocument[]) {
+  return stickers
+    .map((document) => {
+      if (document instanceof GramJs.Document) {
+        const sticker = buildStickerFromDocument(document);
+        if (sticker) {
+          localDb.documents[String(document.id)] = document;
+
+          return sticker;
+        }
+      }
+
+      return undefined;
+    })
+    .filter<ApiSticker>(Boolean as any);
+}
+
+function processGifResult(gifs: GramJs.TypeDocument[]) {
+  return gifs
+    .map((document) => {
+      if (document instanceof GramJs.Document) {
+        const gif = buildVideoFromDocument(document);
+        if (gif) {
+          localDb.documents[String(document.id)] = document;
+
+          return gif;
+        }
+      }
+
+      return undefined;
+    })
+    .filter<ApiVideo>(Boolean as any);
 }

@@ -38,9 +38,18 @@
       height: 1rem;
     }
 
+    .sticker-set-cover img {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
     .sticker-set-button {
       display: inline-flex;
       vertical-align: middle;
+      opacity: 1 !important;
     }
   }
 

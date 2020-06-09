@@ -7,7 +7,7 @@ import { StickerSetOrRecent } from '../../../types';
 import StickerButton from '../../common/StickerButton';
 
 type OwnProps = {
-  set: StickerSetOrRecent;
+  stickerSet: StickerSetOrRecent;
   load: boolean;
   onStickerSelect: (sticker: ApiSticker) => void;
   onStickerUnfave: (sticker: ApiSticker) => void;
@@ -17,36 +17,35 @@ const STICKER_ROW_SIZE = 5;
 const STICKER_SIZE = 80; // px
 
 const StickerSet: FC<OwnProps> = ({
-  set, load, loadStickers, onStickerSelect, onStickerUnfave,
+  stickerSet, load, loadStickers, onStickerSelect, onStickerUnfave,
 }) => {
-  const areLoaded = Boolean(set.stickers.length);
-  const stickerSetHeight = Math.ceil(set.count / STICKER_ROW_SIZE) * STICKER_SIZE;
+  const stickerSetHeight = Math.ceil(stickerSet.count / STICKER_ROW_SIZE) * STICKER_SIZE;
 
   useEffect(() => {
-    if (!areLoaded && load) {
-      loadStickers({ stickerSetId: set.id });
+    if (load) {
+      loadStickers({ stickerSetId: stickerSet.id });
     }
-  }, [areLoaded, load, loadStickers, set.id]);
+  }, [load, loadStickers, stickerSet.id]);
 
   return (
     <div
-      key={set.id}
-      id={`sticker-set-${set.id}`}
+      key={stickerSet.id}
+      id={`sticker-set-${stickerSet.id}`}
       className="symbol-set"
     >
-      <p className="symbol-set-name">{set.title}</p>
+      <p className="symbol-set-name">{stickerSet.title}</p>
       <div
         className="symbol-set-container"
         // @ts-ignore teact feature
         style={`height: ${stickerSetHeight}px`}
       >
-        {set.stickers.map((sticker) => (
+        {stickerSet.stickers.map((sticker) => (
           <StickerButton
             key={sticker.id}
             sticker={sticker}
             load={load}
             onClick={onStickerSelect}
-            onUnfaveClick={set.id === 'favorite' ? onStickerUnfave : undefined}
+            onUnfaveClick={stickerSet.id === 'favorite' ? onStickerUnfave : undefined}
           />
         ))}
       </div>

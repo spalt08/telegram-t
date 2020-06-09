@@ -11,7 +11,7 @@ import { getEntityTypeById } from '../gramjsBuilders';
 import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
-type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user';
+type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user' | 'stickerSet';
 
 export default async function downloadMedia(
   {
@@ -48,7 +48,7 @@ export default async function downloadMedia(
 async function download(
   url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress, start?: number, end?: number,
 ) {
-  const mediaMatch = url.match(/(avatar|msg|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
+  const mediaMatch = url.match(/(avatar|msg|stickerSet|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
   }
@@ -66,13 +66,16 @@ async function download(
   let entityType: EntityType;
   let entityId: string | number = mediaMatch[2];
   const sizeType = mediaMatch[3] ? mediaMatch[3].replace('?size=', '') : undefined;
-  let entity: GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Message | GramJs.Document | undefined;
+  let entity: (
+    GramJs.User | GramJs.Chat | GramJs.Channel |
+    GramJs.Message | GramJs.Document | GramJs.StickerSet | undefined
+  );
 
   if (mediaMatch[1] === 'avatar') {
     entityType = getEntityTypeById(Number(entityId));
     entityId = Math.abs(Number(entityId));
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'gif';
+    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'gif' | 'stickerSet';
   }
 
   switch (entityType) {
@@ -89,6 +92,9 @@ async function download(
     case 'sticker':
     case 'gif':
       entity = localDb.documents[entityId as string];
+      break;
+    case 'stickerSet':
+      entity = localDb.stickerSets[entityId as string];
       break;
   }
 
@@ -118,6 +124,11 @@ async function download(
     }
 
     return { mimeType, data, fullSize };
+  } else if (entityType === 'stickerSet') {
+    const data = await client.downloadStickerSetThumb(entity, sizeType === 'big');
+    const mimeType = 'image/jpeg';
+
+    return { mimeType, data };
   } else {
     const data = await client.downloadProfilePhoto(entity, sizeType === 'big');
     const mimeType = 'image/jpeg';

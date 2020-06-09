@@ -11,8 +11,10 @@ export { default as NewChannel } from '../components/left/newChat/NewChannel';
 export { default as NewGroup } from '../components/left/newChat/NewGroup';
 export { default as NewGroupStep1 } from '../components/left/newChat/NewGroupStep1';
 export { default as NewGroupStep2 } from '../components/left/newChat/NewGroupStep2';
+export { default as ArchivedChats } from '../components/left/ArchivedChats';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
+export { default as StickerSetModal } from '../components/middle/message/StickerSetModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';

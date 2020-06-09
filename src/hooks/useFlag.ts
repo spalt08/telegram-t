@@ -3,7 +3,7 @@ import { useCallback, useState } from '../lib/teact/teact';
 export default (isDisabled = false): [boolean, AnyToVoidFunction, AnyToVoidFunction] => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const open = useCallback(() => {
+  const setTrue = useCallback(() => {
     if (isDisabled) {
       return;
     }
@@ -11,9 +11,9 @@ export default (isDisabled = false): [boolean, AnyToVoidFunction, AnyToVoidFunct
     setIsOpen(true);
   }, [isDisabled]);
 
-  const close = useCallback(() => {
+  const setFalse = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  return [isOpen, open, close];
+  return [isOpen, setTrue, setFalse];
 };

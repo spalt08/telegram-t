@@ -46,7 +46,7 @@ export enum SettingsScreens {
   PrivacyBlockedUsers,
 }
 
-export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers'>;
+export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail'>;
 
 export enum LeftColumnContent {
   ChatList,

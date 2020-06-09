@@ -519,8 +519,26 @@ class TelegramClient {
                 throw e
             }*/
         }
+    }
 
+    async downloadStickerSetThumb(stickerSet, args) {
+        if (!stickerSet.thumb || !stickerSet.thumb.location) {
+            return undefined
+        }
 
+        const { location } = stickerSet.thumb
+
+        return this.downloadFile(
+            new constructors.InputStickerSetThumb({
+                stickerset: new constructors.InputStickerSetID({
+                    id: stickerSet.id,
+                    accessHash: stickerSet.accessHash
+                }),
+                localId: location.localId,
+                volumeId: location.volumeId,
+            }),
+            { dcId: stickerSet.thumbDcId }
+        )
     }
 
     _pickFileSize(sizes, sizeType) {

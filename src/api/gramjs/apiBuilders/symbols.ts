@@ -1,7 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { ApiSticker, ApiStickerSet } from '../../types';
 
-import { buildApiThumbnailFromCached, buildApiThumbnailFromStripped } from './common';
+import { buildApiThumbnailFromCached } from './common';
+import localDb from '../localDb';
 
 export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
@@ -22,6 +23,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
       attr instanceof GramJs.DocumentAttributeImageSize
     ));
 
+  const stickerSetInfo = stickerAttribute.stickerset as GramJs.InputStickerSetID;
   const emoji = stickerAttribute.alt;
   const isAnimated = document.mimeType === 'application/x-tgsticker';
   const cachedThumb = document.thumbs && document.thumbs.find((s: any) => s instanceof GramJs.PhotoCachedSize);
@@ -30,6 +32,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument): ApiStic
 
   return {
     id: String(document.id),
+    stickerSetId: String(stickerSetInfo.id),
+    stickerSetAccessHash: String(stickerSetInfo.accessHash),
     emoji,
     isAnimated,
     width,
@@ -58,9 +62,30 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     id: String(id),
     accessHash: String(accessHash),
     title,
-    thumbnail: thumb ? buildApiThumbnailFromStripped([thumb], 'image/webp') : undefined,
+    hasThumbnail: Boolean(thumb),
     count,
     hash,
     stickers: [],
   };
+}
+
+export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetCovered): ApiStickerSet {
+  const stickerSet = buildStickerSet(coveredStickerSet.set);
+
+  const stickerSetCovers = (coveredStickerSet instanceof GramJs.StickerSetMultiCovered)
+    ? coveredStickerSet.covers
+    : [coveredStickerSet.cover];
+
+  stickerSet.covers = [];
+  stickerSetCovers.forEach((cover) => {
+    if (cover instanceof GramJs.Document) {
+      const coverSticker = buildStickerFromDocument(cover);
+      if (coverSticker) {
+        stickerSet.covers!.push(coverSticker);
+        localDb.documents[String(cover.id)] = cover;
+      }
+    }
+  });
+
+  return stickerSet;
 }

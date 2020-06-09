@@ -23,6 +23,8 @@ export const SHARED_MEDIA_SLICE = 30;
 export const MESSAGE_SEARCH_SLICE = 30;
 export const GLOBAL_SEARCH_SLICE = 20;
 
+export const TOP_CHATS_PRELOAD_LIMIT = 10;
+
 export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
 export const DEFAULT_ANIMATION_LEVEL = 1;
 export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;

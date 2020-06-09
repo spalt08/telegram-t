@@ -13,8 +13,10 @@ import useMedia from '../../../hooks/useMedia';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import buildClassName from '../../../util/buildClassName';
 import webpHero from '../../../util/webpHero';
+import useFlag from '../../../hooks/useFlag';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
+import StickerSetModal from './StickerSetModal.async';
 
 import './Sticker.scss';
 
@@ -23,10 +25,10 @@ type OwnProps = {
   loadAndPlay?: boolean;
 };
 
-const Sticker: FC<OwnProps> = ({
-  message, loadAndPlay,
-}) => {
+const Sticker: FC<OwnProps> = ({ message, loadAndPlay }) => {
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
+  const [isModalOpen, openModal, closeModal] = useFlag();
+
   const handleAnimationLoad = useCallback(() => setIsAnimationLoaded(true), []);
 
   const sticker = message.content.sticker!;
@@ -63,7 +65,7 @@ const Sticker: FC<OwnProps> = ({
   const thumbClassName = buildClassName('thumbnail', !thumbDataUri && 'empty');
 
   return (
-    <div className="media-inner">
+    <div className="Sticker media-inner" onClick={openModal}>
       {shouldRenderThumb && (
         <img
           id={`sticker-thumb-${message.id}`}
@@ -94,6 +96,11 @@ const Sticker: FC<OwnProps> = ({
           onLoad={handleAnimationLoad}
         />
       )}
+      <StickerSetModal
+        isOpen={isModalOpen}
+        fromSticker={sticker}
+        onClose={closeModal}
+      />
     </div>
   );
 };

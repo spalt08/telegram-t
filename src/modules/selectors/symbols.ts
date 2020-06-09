@@ -13,3 +13,7 @@ export function selectCurrentStickerSearch(global: GlobalState) {
 export function selectCurrentGifSearch(global: GlobalState) {
   return global.gifs.search;
 }
+
+export function selectStickerSet(global: GlobalState, id: string) {
+  return global.stickers.setsById[id];
+}

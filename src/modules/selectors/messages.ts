@@ -21,7 +21,7 @@ import {
   isCommonBoxChat,
   isServiceNotificationMessage,
 } from '../helpers';
-import { selectIsStickerFavorite } from './stickers';
+import { selectIsStickerFavorite } from './symbols';
 
 const MESSAGE_EDIT_ALLOWED_TIME_MS = 172800000; // 48 hours
 

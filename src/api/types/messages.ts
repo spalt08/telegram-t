@@ -18,6 +18,8 @@ export interface ApiPhoto {
 
 export interface ApiSticker {
   id: string;
+  stickerSetId: string;
+  stickerSetAccessHash: string;
   emoji: string;
   isAnimated: boolean;
   width?: number;
@@ -33,7 +35,7 @@ export interface ApiStickerSet {
   id: string;
   accessHash: string;
   title: string;
-  thumbnail?: ApiThumbnail;
+  hasThumbnail?: boolean;
   count: number;
   hash: number;
   stickers: ApiSticker[];

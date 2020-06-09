@@ -14,7 +14,7 @@ import LeftMain from './main/LeftMain';
 import Settings from './settings/Settings.async';
 import NewChannel from './newChat/NewChannel.async';
 import NewGroup from './newChat/NewGroup.async';
-import ArchivedChats from './ArchivedChats';
+import ArchivedChats from './ArchivedChats.async';
 
 import './LeftColumn.scss';
 
