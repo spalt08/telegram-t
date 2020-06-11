@@ -11,6 +11,7 @@ export default (
   src?: string,
   handlers?: Record<string, Handler>,
   onInit?: (element: HTMLAudioElement) => void,
+  isAutoPlay = false,
 ) => {
   const controllerRef = useRef<ReturnType<typeof register>>();
 
@@ -66,12 +67,12 @@ export default (
   // Cleanup
   useEffect(() => destroy, [destroy]);
 
-  // `src` appears
+  // Autoplay once src is present
   useEffect(() => {
-    if (src) {
+    if (isAutoPlay && src) {
       play(src);
     }
-  }, [play, src]);
+  }, [isAutoPlay, play, src]);
 
   const playPause = useCallback(() => {
     if (isPlaying) {

@@ -40,6 +40,8 @@ interface ISeekMethods {
   handleStopSeek: () => void;
 }
 
+const AUTO_LOAD = IS_TOUCH_ENV;
+
 const Audio: FC<OwnProps> = ({
   message,
   uploadProgress,
@@ -50,33 +52,35 @@ const Audio: FC<OwnProps> = ({
   onReadMedia,
   onCancelUpload,
 }) => {
+  const { content: { audio, voice }, isMediaUnread } = message;
+
   const isSeeking = useRef<boolean>(false);
 
   // We need to preload on mobiles to enable playing by click.
-  const [shouldDownload, setShouldDownload] = useState(IS_TOUCH_ENV);
+  const [isActivated, setIsActivated] = useState(false);
+
+  const shouldDownload = isActivated || AUTO_LOAD;
 
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
     !(shouldDownload && lastSyncTime),
-    IS_OPUS_SUPPORTED ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+    audio || IS_OPUS_SUPPORTED ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
   );
 
   const { isBuffered, bufferingHandlers, checkBuffering } = useBuffering();
 
   const {
     isPlaying, playProgress, playPause, setCurrentTime, audioProxy,
-  } = useAudioPlayer(message.id, mediaData, bufferingHandlers, checkBuffering);
+  } = useAudioPlayer(message.id, mediaData, bufferingHandlers, checkBuffering, !AUTO_LOAD);
 
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isPlaying && !isBuffered);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActivated && !isBuffered);
 
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring);
-
-  const { content: { audio, voice }, isMediaUnread } = message;
 
   const handleButtonClick = useCallback(() => {
     if (isUploading) {
@@ -91,14 +95,12 @@ const Audio: FC<OwnProps> = ({
       onPlay(message.id);
     }
 
-    if (!shouldDownload) {
-      setShouldDownload(true);
-
-      return;
+    if (!isActivated) {
+      setIsActivated(true);
     }
 
     playPause();
-  }, [isPlaying, isUploading, message.id, onCancelUpload, onPlay, playPause, shouldDownload]);
+  }, [isPlaying, isUploading, message.id, onCancelUpload, onPlay, playPause, isActivated]);
 
   useEffect(() => {
     if (isPlaying && onReadMedia && isMediaUnread) {
@@ -154,7 +156,7 @@ const Audio: FC<OwnProps> = ({
         ripple
         size={inSharedMedia ? 'smaller' : 'default'}
         className={buttonClassNames.join(' ')}
-        ariaLabel={isActive ? 'Pause audio' : 'Play audio'}
+        ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
         onClick={handleButtonClick}
       >
         <i className="icon-play" />

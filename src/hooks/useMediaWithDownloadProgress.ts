@@ -26,7 +26,7 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   const startedAtRef = useRef<number | undefined>();
 
   const handleProgress = useCallback((progress: number) => {
-    if (delay && (Date.now() - startedAtRef.current! < delay)) {
+    if (!delay || (Date.now() - startedAtRef.current! < delay)) {
       setDownloadProgress(progress);
     }
   }, [delay]);

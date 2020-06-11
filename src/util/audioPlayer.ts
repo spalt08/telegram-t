@@ -84,6 +84,10 @@ export function register(trackId: number, handler: Handler) {
       if (!track.handlers.length) {
         track.audio.pause();
         delete tracks[trackId];
+
+        if (trackId === currentTrackId) {
+          currentTrackId = undefined;
+        }
       }
     },
   };
