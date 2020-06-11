@@ -94,7 +94,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'focusMessage' | 'openMediaViewer' |
+  'focusMessage' | 'openMediaViewer' | 'openAudioPlayer' |
   'openUserInfo' | 'openChat' |
   'cancelSendingMessage' | 'markMessagesRead' |
   'sendPollVote'
@@ -129,6 +129,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isLastInList,
   focusMessage,
   openMediaViewer,
+  openAudioPlayer,
   openUserInfo,
   openChat,
   cancelSendingMessage,
@@ -215,6 +216,10 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleMediaClick = useCallback((): void => {
     openMediaViewer({ chatId, messageId, origin: MediaViewerOrigin.Inline });
   }, [chatId, messageId, openMediaViewer]);
+
+  const handleAudioPlay = useCallback((): void => {
+    openAudioPlayer({ chatId, messageId });
+  }, [chatId, messageId, openAudioPlayer]);
 
   const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
     openMediaViewer({ chatId, messageId: albumMessageId, origin: MediaViewerOrigin.Album });
@@ -318,6 +323,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
             loadAndPlay={loadAndPlayMedia}
             uploadProgress={uploadProgress}
             lastSyncTime={lastSyncTime}
+            onPlay={handleAudioPlay}
             onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
           />
@@ -474,6 +480,7 @@ export default memo(withGlobal<OwnProps>(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'focusMessage',
     'openMediaViewer',
+    'openAudioPlayer',
     'cancelSendingMessage',
     'openUserInfo',
     'openChat',

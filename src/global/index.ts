@@ -71,6 +71,8 @@ const INITIAL_STATE: GlobalState = {
 
   mediaViewer: {},
 
+  audioPlayer: {},
+
   forwardMessages: {},
 
   settings: {

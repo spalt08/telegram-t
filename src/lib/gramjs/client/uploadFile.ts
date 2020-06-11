@@ -1,7 +1,7 @@
 import { default as Api } from '../tl/api';
 
 import TelegramClient from './TelegramClient';
-import { generateRandomBytes, readBigIntFromBuffer } from '../Helpers';
+import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
 import { getAppropriatedPartSize } from '../Utils';
 
 interface OnProgress {
@@ -18,6 +18,7 @@ export interface UploadFileParams {
 
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
+const UPLOAD_TIMEOUT = 15 * 1000;
 
 export async function uploadFile(
     client: TelegramClient,
@@ -42,24 +43,39 @@ export async function uploadFile(
 
     for (let i = 0; i < partCount; i++) {
         const bytes = buffer.slice(i * partSize, (i + 1) * partSize);
-        const result = await sender.send(
-            isLarge
-                ? new Api.upload.SaveBigFilePart({
-                    fileId,
-                    filePart: i,
-                    fileTotalParts: partCount,
-                    bytes,
-                })
-                : new Api.upload.SaveFilePart({
-                    fileId,
-                    filePart: i,
-                    bytes,
-                }),
-        );
+
+        let result;
+        try {
+            result = await Promise.race([
+                sender.send(
+                    isLarge
+                        ? new Api.upload.SaveBigFilePart({
+                            fileId,
+                            filePart: i,
+                            fileTotalParts: partCount,
+                            bytes,
+                        })
+                        : new Api.upload.SaveFilePart({
+                            fileId,
+                            filePart: i,
+                            bytes,
+                        }),
+                ),
+                sleep(UPLOAD_TIMEOUT).then(() => Promise.reject(new Error('TIMEOUT'))),
+            ]);
+        } catch (err) {
+            if (err.message === 'TIMEOUT') {
+                console.warn('Upload timeout. Retrying...');
+                i--;
+                continue;
+            }
+
+            throw err;
+        }
 
         if (result && onProgress) {
             if (onProgress.isCanceled) {
-                throw new Error('USER_CANCELED')
+                throw new Error('USER_CANCELED');
             }
 
             onProgress((i + 1) / partCount);

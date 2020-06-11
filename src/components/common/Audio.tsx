@@ -1,6 +1,7 @@
 import React, {
   FC, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
+
 import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
 } from '../../api/types';
@@ -14,6 +15,7 @@ import renderText from './helpers/renderText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
+import useAudioPlayer from '../../hooks/useAudioPlayer';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -27,15 +29,10 @@ type OwnProps = {
   inSharedMedia?: boolean;
   date?: number;
   lastSyncTime?: number;
+  onPlay: (messageId: number) => void;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
 };
-
-enum PlayState {
-  Idle,
-  Playing,
-  Paused,
-}
 
 interface ISeekMethods {
   handleStartSeek: (e: React.MouseEvent<HTMLElement>) => void;
@@ -49,33 +46,37 @@ const Audio: FC<OwnProps> = ({
   inSharedMedia,
   date,
   lastSyncTime,
+  onPlay,
   onReadMedia,
   onCancelUpload,
 }) => {
-  const audioRef = useRef<HTMLAudioElement>();
-
-  const { content: { audio, voice }, isMediaUnread } = message;
-
-  const [playState, setPlayState] = useState<PlayState>(PlayState.Idle);
-  const isActive = playState === PlayState.Playing;
-  const [playProgress, setPlayProgress] = useState<number>(0);
   const isSeeking = useRef<boolean>(false);
+
   // We need to preload on mobiles to enable playing by click.
-  const shouldDownload = (isActive || IS_TOUCH_ENV) && lastSyncTime;
+  const [shouldDownload, setShouldDownload] = useState(IS_TOUCH_ENV);
 
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
-    !shouldDownload,
+    !(shouldDownload && lastSyncTime),
     IS_OPUS_SUPPORTED ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
   );
-  const { isBuffered, bufferingHandlers } = useBuffering();
+
+  const { isBuffered, bufferingHandlers, checkBuffering } = useBuffering();
+
+  const {
+    isPlaying, playProgress, playPause, setCurrentTime, audioProxy,
+  } = useAudioPlayer(message.id, mediaData, bufferingHandlers, checkBuffering);
+
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, isActive && !isBuffered);
+  } = getMediaTransferState(message, uploadProgress || downloadProgress, isPlaying && !isBuffered);
+
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring);
+
+  const { content: { audio, voice }, isMediaUnread } = message;
 
   const handleButtonClick = useCallback(() => {
     if (isUploading) {
@@ -86,59 +87,34 @@ const Audio: FC<OwnProps> = ({
       return;
     }
 
-    setPlayState((state) => {
-      switch (state) {
-        case PlayState.Paused:
-        case PlayState.Idle:
-          audioRef.current!.play();
-          return PlayState.Playing;
-        case PlayState.Playing:
-        default:
-          audioRef.current!.pause();
-          return PlayState.Paused;
-      }
-    });
-  }, [isUploading, onCancelUpload]);
-
-  useEffect(() => {
-    const audioEl = audioRef.current;
-    if (audioEl && audioEl.duration) {
-      setPlayProgress(audioEl.currentTime / audioEl.duration);
+    if (!isPlaying) {
+      onPlay(message.id);
     }
-  }, [playProgress]);
+
+    if (!shouldDownload) {
+      setShouldDownload(true);
+
+      return;
+    }
+
+    playPause();
+  }, [isPlaying, isUploading, message.id, onCancelUpload, onPlay, playPause, shouldDownload]);
 
   useEffect(() => {
-    if (isActive && onReadMedia && isMediaUnread) {
+    if (isPlaying && onReadMedia && isMediaUnread) {
       onReadMedia();
     }
-  }, [isActive, isMediaUnread, onReadMedia]);
-
-  useEffect(() => {
-    const audioEl = audioRef.current!;
-
-    return () => {
-      audioEl.pause();
-    };
-  }, []);
-
-  const handleTimeUpdate = useCallback(() => {
-    setPlayProgress(audioRef.current!.currentTime / audioRef.current!.duration);
-  }, []);
-
-  const handleEnded = useCallback(() => {
-    setPlayState(PlayState.Paused);
-  }, []);
+  }, [isPlaying, isMediaUnread, onReadMedia]);
 
   const handleSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const audioEl = audioRef.current;
-    if (audioEl && isSeeking.current) {
+    if (isSeeking.current) {
       const seekBar = e.currentTarget.closest('.seekline,.waveform');
       if (seekBar) {
         const { width, left } = seekBar.getBoundingClientRect();
-        audioEl.currentTime = (audioEl.duration * ((e.clientX - left) / width));
+        setCurrentTime(audioProxy.duration * ((e.clientX - left) / width));
       }
     }
-  }, []);
+  }, [audioProxy, setCurrentTime]);
 
   const handleStartSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
     isSeeking.current = true;
@@ -165,9 +141,9 @@ const Audio: FC<OwnProps> = ({
   const buttonClassNames = ['toggle-play'];
   if (shouldRenderSpinner) {
     buttonClassNames.push('loading');
-  } else if (isActive) {
+  } else if (isPlaying) {
     buttonClassNames.push('pause');
-  } else if (audioRef.current && playState === PlayState.Paused) {
+  } else if (!isPlaying) {
     buttonClassNames.push('play');
   }
 
@@ -194,24 +170,16 @@ const Audio: FC<OwnProps> = ({
         </div>
       )}
       {audio
-        ? renderAudio(audio, isActive, playProgress, seekHandlers, date)
+        ? renderAudio(audio, isPlaying, playProgress, seekHandlers, date)
         : renderVoice(voice!, renderedWaveform, isMediaUnread)}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio
-        ref={audioRef}
-        src={mediaData}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={handleEnded}
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...bufferingHandlers}
-      />
     </div>
   );
 };
 
 function renderAudio(
   audio: ApiAudio,
-  isActive: boolean,
+  isPlaying: boolean,
   playProgress: number,
   { handleStartSeek, handleSeek, handleStopSeek }: ISeekMethods,
   date?: number,
@@ -219,7 +187,7 @@ function renderAudio(
   const {
     title, performer, duration, fileName,
   } = audio;
-  const showSeekline = isActive || (playProgress > 0 && playProgress < 1);
+  const showSeekline = isPlaying || (playProgress > 0 && playProgress < 1);
 
   return (
     <div className="content">

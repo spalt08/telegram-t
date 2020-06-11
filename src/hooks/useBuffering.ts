@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from '../lib/teact/teact';
 
-type BufferingEvent = (e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => void;
+type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => void;
 
 const MIN_READY_STATE = 3;
 
 export default () => {
-  const [isBuffered, setIsBuffered] = useState(false);
+  const [isBuffered, setIsBuffered] = useState(true);
 
   const handleBuffering = useCallback<BufferingEvent>((e) => {
-    setIsBuffered(e.currentTarget.readyState >= MIN_READY_STATE);
+    setIsBuffered((e.currentTarget as HTMLMediaElement).readyState >= MIN_READY_STATE);
   }, []);
 
   const bufferingHandlers = {
@@ -18,5 +18,11 @@ export default () => {
     onPause: handleBuffering, // Chrome seeking
   };
 
-  return { isBuffered, bufferingHandlers };
+  return {
+    isBuffered,
+    bufferingHandlers,
+    checkBuffering(element: HTMLMediaElement) {
+      setIsBuffered(element.readyState >= MIN_READY_STATE);
+    },
+  };
 };

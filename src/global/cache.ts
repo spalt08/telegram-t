@@ -89,6 +89,7 @@ function updateCache(global: GlobalState) {
     },
     messageSearch: { byChatId: {} },
     mediaViewer: {},
+    audioPlayer: {},
     webPagePreview: undefined,
     forwardMessages: {},
     chatCreation: undefined,

@@ -28,6 +28,27 @@ addReducer('openMediaViewer', (global, actions, payload) => {
   };
 });
 
+addReducer('openAudioPlayer', (global, actions, payload) => {
+  const {
+    chatId, messageId,
+  } = payload!;
+
+  return {
+    ...global,
+    audioPlayer: {
+      chatId,
+      messageId,
+    },
+  };
+});
+
+addReducer('closeAudioPlayer', (global) => {
+  return {
+    ...global,
+    audioPlayer: {},
+  };
+});
+
 addReducer('focusLastMessage', (global, actions) => {
   const selectedChat = selectOpenChat(global);
   if (!selectedChat) {

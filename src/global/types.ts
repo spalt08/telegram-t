@@ -175,6 +175,11 @@ export type GlobalState = {
     origin?: MediaViewerOrigin;
   };
 
+  audioPlayer: {
+    chatId?: number;
+    messageId?: number;
+  };
+
   topPeers: {
     hashes?: Record<string, number>;
     lastRequestedAt?: Record<string, number>;
@@ -245,7 +250,7 @@ export type ActionTypes = (
   'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |
   // misc
-  'openMediaViewer' |
+  'openMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' |
   'loadWebPagePreview' | 'clearWebPagePreview' |
   'saveDraft' | 'clearDraft' | 'loadChatDrafts'
 );

@@ -65,7 +65,7 @@ type StateProps = {
 };
 
 type DispatchProps = Pick<GlobalActions, (
-  'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer' | 'openUserInfo'
+  'setMessageSearchMediaType' | 'searchMessages' | 'openMediaViewer' | 'openAudioPlayer' | 'openUserInfo'
 )>;
 
 const TAB_TITLES = [
@@ -102,6 +102,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   setMessageSearchMediaType,
   searchMessages,
   openMediaViewer,
+  openAudioPlayer,
   openUserInfo,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
@@ -238,6 +239,10 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     openMediaViewer({ chatId: resolvedUserId || chatId, messageId, origin: MediaViewerOrigin.SharedMedia });
   }, [chatId, resolvedUserId, openMediaViewer]);
 
+  const handlePlayAudio = useCallback((messageId: number) => {
+    openAudioPlayer({ chatId: resolvedUserId || chatId, messageId });
+  }, [chatId, resolvedUserId, openAudioPlayer]);
+
   const handleMemberClick = useCallback((id: number) => {
     openUserInfo({ id });
   }, [openUserInfo]);
@@ -272,6 +277,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
               message={chatMessages![id]}
               date={chatMessages![id].date}
               lastSyncTime={lastSyncTime}
+              onPlay={handlePlayAudio}
             />
           ))
         ) : mediaType === 'members' ? (
@@ -361,6 +367,7 @@ export default memo(withGlobal<OwnProps>(
     'setMessageSearchMediaType',
     'searchMessages',
     'openMediaViewer',
+    'openAudioPlayer',
     'openUserInfo',
   ]),
 )(Profile));

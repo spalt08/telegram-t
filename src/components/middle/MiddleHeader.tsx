@@ -17,6 +17,7 @@ import {
   isChatPrivate,
   isChatSuperGroup,
   isChatArchived,
+  getMessageKey,
 } from '../../modules/helpers';
 import {
   selectChat,
@@ -40,6 +41,7 @@ import GroupChatInfo from '../common/GroupChatInfo';
 import Button from '../ui/Button';
 import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
+import AudioPlayer from './AudioPlayer';
 
 import './MiddleHeader.scss';
 
@@ -58,6 +60,7 @@ type StateProps = {
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   isChannel?: boolean;
+  audioMessage?: ApiMessage;
   canSubscribeToChat?: boolean;
   chatsById?: Record<number, ApiChat>;
 };
@@ -76,6 +79,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   isLeftColumnShown,
   isRightColumnShown,
   isChannel,
+  audioMessage,
   canSubscribeToChat,
   chatsById,
   openChatWithInfo,
@@ -192,12 +196,15 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
       </div>
 
-      {pinnedMessage && !canSubscribeToChat && (
+      {pinnedMessage && !canSubscribeToChat && !audioMessage && (
         <HeaderPinnedMessage
           message={pinnedMessage}
           onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
         />
+      )}
+      {!canSubscribeToChat && audioMessage && (
+        <AudioPlayer key={getMessageKey(audioMessage)} message={audioMessage} />
       )}
       <HeaderActions
         chatId={chatId}
@@ -225,11 +232,17 @@ export default memo(withGlobal<OwnProps>(
     const { typingStatus } = chat || {};
     const isChannel = chat && isChatChannel(chat);
 
+    const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
+    const audioMessage = audioChatId && audioMessageId
+      ? selectChatMessage(global, audioChatId, audioMessageId)
+      : undefined;
+
     const state = {
       typingStatus,
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global),
       isChannel,
+      audioMessage,
       canSubscribeToChat: chat && (isChannel || isChatSuperGroup(chat)) && chat.hasLeft,
       chatsById,
     };
