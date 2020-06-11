@@ -293,6 +293,17 @@ const Composer: FC<StateProps & DispatchProps> = ({
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
     && !allowedAttachmentOptions.canAttachMedia;
 
+  let sendButtonAriaLabel = 'Send message';
+  switch (mainButtonState) {
+    case MainButtonState.Edit:
+      sendButtonAriaLabel = 'Save edited message';
+      break;
+    case MainButtonState.Record:
+      sendButtonAriaLabel = areVoiceMessagesNotAllowed
+        ? 'Posting media content is not allowed in this group.'
+        : 'Record a voice message';
+  }
+
   return (
     <div className="Composer">
       <AttachmentModal
@@ -325,6 +336,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             round
             color="translucent"
             onActivate={openSymbolMenu}
+            ariaLabel="Choose emoji, sticker or GIF"
           >
             <i className="icon-smile" />
           </ResponsiveHoverButton>
@@ -342,6 +354,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
               round
               color="translucent"
               onActivate={openAttachMenu}
+              ariaLabel="Add an attachment"
             >
               <i className="icon-attach" />
             </ResponsiveHoverButton>
@@ -376,6 +389,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
           color="danger"
           className="cancel"
           onClick={stopRecordingVoice}
+          ariaLabel="Cancel voice recording"
         >
           <i className="icon-delete" />
         </Button>
@@ -387,7 +401,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
         color="secondary"
         className={`${mainButtonState} ${activeVoiceRecording ? 'recording' : ''}`}
         disabled={areVoiceMessagesNotAllowed}
-        ariaLabel={areVoiceMessagesNotAllowed ? 'Posting media content is not allowed in this group.' : undefined}
+        ariaLabel={sendButtonAriaLabel}
         onClick={mainButtonHandler}
       >
         <i className="icon-send" />

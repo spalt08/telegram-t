@@ -248,6 +248,22 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [openUserInfo]);
 
   function renderSharedMedia() {
+    if (mediaType !== 'members' && !messageIds.length) {
+      const emptyText = mediaType === 'documents'
+        ? 'No documents found.'
+        : mediaType === 'links'
+          ? 'No links found.'
+          : mediaType === 'audio'
+            ? 'No audio found.'
+            : 'No media found.';
+
+      return (
+        <div className="content empty-list">
+          {emptyText}
+        </div>
+      );
+    }
+
     return (
       <div className={`content ${mediaType}-list`}>
         {mediaType === 'media' ? (

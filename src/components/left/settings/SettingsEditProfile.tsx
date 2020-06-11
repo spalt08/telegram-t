@@ -289,6 +289,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
         show={isSaveButtonShown}
         onClick={handleProfileSave}
         disabled={isLoading}
+        ariaLabel="Save changes"
       >
         {isLoading ? (
           <Spinner color="white" />

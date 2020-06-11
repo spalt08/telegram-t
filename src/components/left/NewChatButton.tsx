@@ -55,6 +55,7 @@ const NewChatButton: FC<OwnProps> = ({
         color="primary"
         className={isMenuOpen ? 'active' : ''}
         onMouseDown={toggleIsMenuOpen}
+        ariaLabel={isMenuOpen ? 'Close' : 'Create new chat'}
       >
         <i className="icon-new-chat-filled" />
         <i className="icon-close" />

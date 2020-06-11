@@ -61,6 +61,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps> = ({
       <FloatingActionButton
         show
         onClick={() => {}}
+        ariaLabel="Add a blocked user"
       >
         <i className="icon-add" />
       </FloatingActionButton>

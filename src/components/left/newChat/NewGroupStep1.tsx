@@ -81,6 +81,7 @@ const NewGroupStep1: FC<OwnProps & StateProps & DispatchProps> = ({
           size="smaller"
           color="translucent"
           onClick={onReset}
+          ariaLabel="Return to chat list"
         >
           <i className="icon-back" />
         </Button>
@@ -99,6 +100,7 @@ const NewGroupStep1: FC<OwnProps & StateProps & DispatchProps> = ({
         <FloatingActionButton
           show={Boolean(selectedMemberIds.length)}
           onClick={handleNextStep}
+          ariaLabel="Continue to group info"
         >
           <i className="icon-next" />
         </FloatingActionButton>

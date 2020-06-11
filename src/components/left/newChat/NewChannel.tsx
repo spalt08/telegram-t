@@ -79,6 +79,7 @@ const NewChannel: FC<OwnProps & StateProps & DispatchProps> = ({
           size="smaller"
           color="translucent"
           onClick={onReset}
+          ariaLabel="Return to chat list"
         >
           <i className="icon-back" />
         </Button>
@@ -110,6 +111,7 @@ const NewChannel: FC<OwnProps & StateProps & DispatchProps> = ({
         show={title.length !== 0}
         onClick={handleCreateChannel}
         disabled={isLoading}
+        ariaLabel="Create channel"
       >
         {isLoading ? (
           <Spinner color="white" />

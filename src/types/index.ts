@@ -60,6 +60,16 @@ export enum LeftColumnContent {
   NewGroupStep2,
 }
 
+export enum RightColumnContent {
+  ChatInfo,
+  UserInfo,
+  Statistics,
+  Search,
+  StickerSearch,
+  GifSearch,
+  Forward,
+}
+
 export enum MediaViewerOrigin {
   Inline,
   SharedMedia,

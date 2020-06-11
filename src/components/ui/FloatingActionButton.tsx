@@ -10,6 +10,7 @@ type OwnProps = {
   show: boolean;
   className?: string;
   color?: ButtonProps['color'];
+  ariaLabel?: ButtonProps['ariaLabel'];
   disabled?: boolean;
   onClick: () => void;
   children: any;
@@ -19,6 +20,7 @@ const FloatingActionButton: FC<OwnProps> = ({
   show,
   className,
   color = 'primary',
+  ariaLabel,
   disabled,
   onClick,
   children,
@@ -36,6 +38,7 @@ const FloatingActionButton: FC<OwnProps> = ({
       round
       disabled={disabled}
       onClick={show && !disabled ? onClick : undefined}
+      ariaLabel={ariaLabel}
     >
       {children}
     </Button>

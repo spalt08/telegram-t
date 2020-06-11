@@ -86,6 +86,7 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
           size="smaller"
           color="translucent"
           onClick={() => onReset()}
+          ariaLabel="Return to member selection"
         >
           <i className="icon-back" />
         </Button>
@@ -122,6 +123,7 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
         show={title.length !== 0}
         onClick={handleCreateGroup}
         disabled={isLoading}
+        ariaLabel="Create group"
       >
         {isLoading ? (
           <Spinner color="white" />

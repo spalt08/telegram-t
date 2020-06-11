@@ -83,6 +83,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         className={isOpen ? 'active' : ''}
         onMouseDown={hasMenu ? onTrigger : undefined}
         onClick={!hasMenu ? () => onReset() : undefined}
+        ariaLabel={hasMenu ? 'Open menu' : 'Return to chat list'}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
       </Button>
@@ -158,7 +159,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         value={contactsFilter || searchQuery}
         focused={isSearchFocused}
         isLoading={isLoading}
-        placeholder="Telegram Search"
+        placeholder={content === LeftColumnContent.Contacts ? 'Search Contacts' : 'Telegram Search'}
         onChange={onSearchQuery}
         onFocus={handleSearchFocus}
       />

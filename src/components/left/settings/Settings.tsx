@@ -54,6 +54,7 @@ const Settings: FC<OwnProps & DispatchProps> = ({
         color="translucent"
         className={isOpen ? 'active' : ''}
         onMouseDown={onTrigger}
+        ariaLabel="More actions"
       >
         <i className="icon-more" />
       </Button>
@@ -175,6 +176,7 @@ const Settings: FC<OwnProps & DispatchProps> = ({
             size="smaller"
             color="translucent"
             onClick={onReset}
+            ariaLabel="Go back"
           >
             <i className="icon-back" />
           </Button>

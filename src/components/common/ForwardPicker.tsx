@@ -79,6 +79,7 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
       <FloatingActionButton
         show={Boolean(!isLoading && selectedIds && selectedIds.length)}
         onClick={forwardMessages}
+        ariaLabel="Send message"
       >
         {isLoading ? (
           <Spinner color="white" />

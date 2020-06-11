@@ -1,5 +1,5 @@
 import React, {
-  FC, useCallback, memo, useMemo,
+  FC, useCallback, memo, useMemo, useState, useEffect,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -7,6 +7,7 @@ import { GlobalActions } from '../../global/types';
 
 import { debounce } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
+import buildClassName from '../../util/buildClassName';
 import {
   selectCurrentMessageSearch,
   selectCurrentStickerSearch,
@@ -24,6 +25,7 @@ import './RightHeader.scss';
 
 type OwnProps = {
   onClose: () => void;
+  isColumnOpen?: boolean;
   isForwarding?: boolean;
   isSearch?: boolean;
   isStickerSearch?: boolean;
@@ -43,6 +45,7 @@ type DispatchProps = Pick<GlobalActions, (
   'searchMessages' | 'toggleStatistics'
 )>;
 
+const COLUMN_CLOSE_DELAY_MS = 300;
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 enum HeaderContent {
@@ -58,6 +61,7 @@ enum HeaderContent {
 
 const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
+  isColumnOpen,
   isForwarding,
   isSearch,
   isStickerSearch,
@@ -86,6 +90,14 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     setGifSearchQuery({ query });
   }, [setGifSearchQuery]);
 
+  const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShouldSkipTransition(!isColumnOpen);
+    }, COLUMN_CLOSE_DELAY_MS);
+  }, [isColumnOpen]);
+
   const contentKey = isForwarding ? (
     HeaderContent.Forward
   ) : isSearch ? (
@@ -111,6 +123,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         color="translucent"
         className={isOpen ? 'active' : undefined}
         onMouseDown={onTrigger}
+        ariaLabel="More actions"
       >
         <i className="icon-more" />
       </Button>
@@ -164,6 +177,12 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     || contentKey === HeaderContent.MemberList
     || contentKey === HeaderContent.StickerSearch;
 
+  const buttonClassName = buildClassName(
+    'animated-close-icon',
+    isBackButton && 'state-back',
+    shouldSkipTransition && 'no-transition',
+  );
+
   return (
     <div className="RightHeader">
       <Button
@@ -172,10 +191,14 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         color="translucent"
         size="smaller"
         onClick={onClose}
+        ariaLabel={isBackButton ? 'Go back' : 'Close'}
       >
-        <div className={`animated-close-icon ${isBackButton ? 'state-back' : ''}`} />
+        <div className={buttonClassName} />
       </Button>
-      <Transition name="slide-fade" activeKey={contentKey}>
+      <Transition
+        name={shouldSkipTransition ? 'none' : 'slide-fade'}
+        activeKey={contentKey}
+      >
         {renderHeaderContent}
       </Transition>
     </div>

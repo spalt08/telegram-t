@@ -4,17 +4,14 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+import { RightColumnContent } from '../../types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import {
-  selectCurrentMessageSearch,
-  selectIsForwardMenuOpen,
-  selectIsMediaViewerOpen,
-  selectCurrentStickerSearch,
-  selectCurrentGifSearch,
   selectAreActiveChatsLoaded,
+  selectRightColumnContentKey,
 } from '../../modules/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
@@ -31,21 +28,8 @@ import Statistics from './Statistics.async';
 
 import './RightColumn.scss';
 
-enum ColumnContent {
-  ChatInfo,
-  UserInfo,
-  // eslint-disable-next-line no-shadow
-  Statistics,
-  Search,
-  // eslint-disable-next-line no-shadow
-  StickerSearch,
-  // eslint-disable-next-line no-shadow
-  GifSearch,
-  Forward,
-}
-
 type StateProps = {
-  contentKey?: ColumnContent;
+  contentKey?: RightColumnContent;
   selectedChatId?: number;
   selectedUserId?: number;
   shouldPreload?: boolean;
@@ -58,7 +42,7 @@ type DispatchProps = Pick<GlobalActions, (
 )>;
 
 const COLUMN_CLOSE_DELAY_MS = 300;
-const TRANSITION_RENDER_COUNT = Object.keys(ColumnContent).length / 2;
+const TRANSITION_RENDER_COUNT = Object.keys(RightColumnContent).length / 2;
 
 function blurSearchInput() {
   const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
@@ -84,11 +68,11 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
-  const isSearch = contentKey === ColumnContent.Search;
-  const isStickerSearch = contentKey === ColumnContent.StickerSearch;
-  const isGifSearch = contentKey === ColumnContent.GifSearch;
-  const isForwarding = contentKey === ColumnContent.Forward;
-  const isStatistics = contentKey === ColumnContent.Statistics;
+  const isSearch = contentKey === RightColumnContent.Search;
+  const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
+  const isGifSearch = contentKey === RightColumnContent.GifSearch;
+  const isForwarding = contentKey === RightColumnContent.Forward;
+  const isStatistics = contentKey === RightColumnContent.Statistics;
   const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
@@ -99,43 +83,43 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
     : previousContentKey !== null
       ? previousContentKey
       : shouldPreload
-        ? ColumnContent.ChatInfo
+        ? RightColumnContent.ChatInfo
         : undefined;
 
   useUpdateOnResize();
 
   const close = useCallback(() => {
     switch (contentKey) {
-      case ColumnContent.ChatInfo:
+      case RightColumnContent.ChatInfo:
         if (isScrolledDown) {
           setProfileState(ProfileState.Profile);
           break;
         }
         toggleChatInfo();
         break;
-      case ColumnContent.UserInfo:
+      case RightColumnContent.UserInfo:
         if (isScrolledDown) {
           setProfileState(ProfileState.Profile);
           break;
         }
         openUserInfo({ id: undefined });
         break;
-      case ColumnContent.Statistics:
+      case RightColumnContent.Statistics:
         toggleStatistics();
         break;
-      case ColumnContent.Search: {
+      case RightColumnContent.Search: {
         blurSearchInput();
         closeMessageTextSearch();
         break;
       }
-      case ColumnContent.StickerSearch:
-      case ColumnContent.GifSearch: {
+      case RightColumnContent.StickerSearch:
+      case RightColumnContent.GifSearch: {
         blurSearchInput();
         setStickerSearchQuery({ query: undefined });
         setGifSearchQuery({ query: undefined });
         break;
       }
-      case ColumnContent.Forward:
+      case RightColumnContent.Forward:
         closeForwardMenu();
         break;
     }
@@ -164,8 +148,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   // We need to clear `isSharedMedia` state, when changing between `ChatInfo` and `UserInfo` to prevent confusion
   useLayoutEffectWithPrevDeps(([prevContentKey, prevSelectedChatId]) => {
     if (
-      (prevContentKey === ColumnContent.ChatInfo && contentKey === ColumnContent.UserInfo)
-      || (prevContentKey === ColumnContent.UserInfo && contentKey === ColumnContent.ChatInfo)
+      (prevContentKey === RightColumnContent.ChatInfo && contentKey === RightColumnContent.UserInfo)
+      || (prevContentKey === RightColumnContent.UserInfo && contentKey === RightColumnContent.ChatInfo)
       || (prevSelectedChatId !== selectedChatId)
     ) {
       setProfileState(ProfileState.Profile);
@@ -174,15 +158,15 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
 
   function renderContent() {
     switch (renderedContentKey) {
-      case ColumnContent.Search:
+      case RightColumnContent.Search:
         return <RightSearch chatId={selectedChatId!} />;
-      case ColumnContent.StickerSearch:
+      case RightColumnContent.StickerSearch:
         return <StickerSearch />;
-      case ColumnContent.GifSearch:
+      case RightColumnContent.GifSearch:
         return <GifSearch />;
-      case ColumnContent.Forward:
+      case RightColumnContent.Forward:
         return <ForwardPicker />;
-      case ColumnContent.Statistics:
+      case RightColumnContent.Statistics:
         return <Statistics />;
       default:
         return (
@@ -205,6 +189,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
       <div id="RightColumn">
         <RightHeader
           onClose={close}
+          isColumnOpen={isOpen}
           isSearch={isSearch}
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
@@ -229,44 +214,17 @@ export default memo(withGlobal(
     const {
       chats,
       users,
-      isChatInfoShown,
-      isStatisticsShown,
       uiReadyState,
     } = global;
 
-    const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
-    const messageSearch = selectCurrentMessageSearch(global);
-    const isSearch = Boolean(messageSearch && messageSearch.currentType === 'text');
-    const stickerSearch = selectCurrentStickerSearch(global);
-    const isStickerSearch = stickerSearch.query !== undefined;
-    const gifSearch = selectCurrentGifSearch(global);
-    const isGifSearch = gifSearch.query !== undefined;
     const selectedChatId = chats.selectedId;
     const selectedUserId = users.selectedId;
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
-    const isUserInfo = Boolean(selectedUserId && areActiveChatsLoaded);
     const isChatShown = Boolean(selectedChatId && areActiveChatsLoaded);
-    const isChatInfo = isChatShown && isChatInfoShown;
     const shouldPreload = isChatShown && uiReadyState === 2;
 
-    const contentKey = isForwarding ? (
-      ColumnContent.Forward
-    ) : isSearch ? (
-      ColumnContent.Search
-    ) : isStickerSearch ? (
-      ColumnContent.StickerSearch
-    ) : isGifSearch ? (
-      ColumnContent.GifSearch
-    ) : isStatisticsShown ? (
-      ColumnContent.Statistics
-    ) : isUserInfo ? (
-      ColumnContent.UserInfo
-    ) : isChatInfo ? (
-      ColumnContent.ChatInfo
-    ) : undefined;
-
     return {
-      contentKey,
+      contentKey: selectRightColumnContentKey(global),
       selectedChatId,
       selectedUserId,
       shouldPreload,

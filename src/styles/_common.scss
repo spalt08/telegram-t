@@ -49,6 +49,12 @@
     transform: rotate(90deg);
   }
 
+  &.no-transition {
+    &, &::before, &::after {
+      transition: none;
+    }
+  }
+
   &.state-back {
     transform: rotate(180deg);
 

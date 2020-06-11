@@ -154,6 +154,7 @@ const Audio: FC<OwnProps> = ({
         ripple
         size={inSharedMedia ? 'smaller' : 'default'}
         className={buttonClassNames.join(' ')}
+        ariaLabel={isActive ? 'Pause audio' : 'Play audio'}
         onClick={handleButtonClick}
       >
         <i className="icon-play" />

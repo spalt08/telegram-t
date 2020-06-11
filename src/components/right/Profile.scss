@@ -102,6 +102,13 @@
   }
 
   .content {
+    &.empty-list {
+      height: 100%;
+      padding-top: 5rem;
+      text-align: center;
+      color: var(--color-text-secondary);
+    }
+
     &.media-list {
       display: grid;
       padding: .25rem;

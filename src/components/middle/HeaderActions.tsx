@@ -72,6 +72,7 @@ const HeaderActions: FC<OwnProps> = ({
         color="translucent"
         size="smaller"
         onClick={onSearchClick}
+        ariaLabel="Search in this chat"
       >
         <i className="icon-search" />
       </Button>
@@ -83,6 +84,7 @@ const HeaderActions: FC<OwnProps> = ({
           color="translucent"
           ref={menuButtonRef}
           onClick={handleHeaderMenuOpen}
+          ariaLabel="More actions"
         >
           <i className="icon-more" />
         </Button>

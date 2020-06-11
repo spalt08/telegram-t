@@ -113,7 +113,13 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
       ) : (
         <Loading />
       )}
-      <Button className="confirm-button" round color="primary" onClick={handleCropClick}>
+      <Button
+        className="confirm-button"
+        round
+        color="primary"
+        onClick={handleCropClick}
+        ariaLabel="Crop image"
+      >
         <i className="icon-check" />
       </Button>
     </Modal>

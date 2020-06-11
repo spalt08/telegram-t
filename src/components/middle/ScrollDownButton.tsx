@@ -51,6 +51,7 @@ const ScrollDownButton: FC<OwnProps & StateProps & DispatchProps> = ({
           color="gray"
           round
           onClick={handleClick}
+          ariaLabel="Scroll to bottom"
         >
           <i className="icon-down" />
         </Button>

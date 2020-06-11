@@ -178,6 +178,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             size="smaller"
             color="translucent"
             onClick={handleChatListRevealClick}
+            ariaLabel={isChatListButtonInBackState ? 'Back to chat list' : 'Close chat list'}
           >
             <div className={`animated-close-icon ${isChatListButtonInBackState ? 'state-back' : ''}`} />
           </Button>

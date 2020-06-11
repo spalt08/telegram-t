@@ -18,6 +18,7 @@ const ArchivedChats: FC<OwnProps> = ({ onReset }) => {
           size="smaller"
           color="translucent"
           onClick={onReset}
+          ariaLabel="Return to chat list"
         >
           <i className="icon-back" />
         </Button>
