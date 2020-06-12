@@ -19,6 +19,11 @@ export function renderMessageText(message: ApiMessage) {
     return rawText ? [rawText] : undefined;
   }
   const { text, entities } = formattedText;
+
+  return renderTextWithEntities(text, entities);
+}
+
+export function renderTextWithEntities(text?: string, entities?: ApiMessageEntity[]) {
   if (!text) {
     return undefined;
   }

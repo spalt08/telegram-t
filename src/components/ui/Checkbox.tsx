@@ -2,28 +2,39 @@ import { ChangeEvent } from 'react';
 import React, { FC, memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
+import Spinner from './Spinner';
+
 import './Checkbox.scss';
 
 type OwnProps = {
   id?: string;
+  value?: string;
   label: string;
   subLabel?: string;
   checked: boolean;
   disabled?: boolean;
+  round?: boolean;
+  isLoading?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const Checkbox: FC<OwnProps> = ({
   id,
+  value,
   label,
   subLabel,
   checked,
   disabled,
+  round,
+  isLoading,
   onChange,
 }) => {
   const className = buildClassName(
     'Checkbox',
     disabled && 'disabled',
+    round && 'round',
+    isLoading && 'loading',
   );
 
   return (
@@ -31,6 +42,7 @@ const Checkbox: FC<OwnProps> = ({
       <input
         type="checkbox"
         id={id}
+        value={value}
         checked={checked}
         disabled={disabled}
         onChange={onChange}
@@ -39,6 +51,7 @@ const Checkbox: FC<OwnProps> = ({
         <span className="label">{label}</span>
         {subLabel && <span className="subLabel">{subLabel}</span>}
       </div>
+      {isLoading && <Spinner />}
     </label>
   );
 };

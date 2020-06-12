@@ -4,7 +4,8 @@
   .poll-question {
     font-weight: 500;
     line-height: 1.25rem;
-    margin-top: 0.125rem;
+    margin: 0.125rem 0;
+    word-break: break-word;
   }
 
   .poll-type,
@@ -15,10 +16,13 @@
 
   .poll-type {
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
   }
 
   .poll-voters-count {
     margin: 0.5rem 0;
+    text-align: center;
   }
 
   .poll-answers {
@@ -26,8 +30,9 @@
     padding-bottom: 1rem;
   }
 
+  .Checkbox,
   .Radio {
-    padding-left: 2.5rem;
+    padding-left: 2.25rem;
 
     &:last-child {
       margin-bottom: 0;
@@ -38,36 +43,110 @@
       cursor: not-allowed;
     }
 
+    .Checkbox-main,
     .Radio-main {
       &::before {
-        left: 0.375rem;
+        left: 0.125rem;
         background-color: var(--background-color);
-        border-color: var(--secondary-color);
+        border-color: var(--color-borders);
       }
 
       &::after {
-        left: 0.6875rem;
+        left: 0.4375rem;
         background-color: var(--accent-color);
       }
     }
 
-    input:checked ~ .Radio-main {
+    input:checked ~ .Radio-main,
+    input:checked ~ .Checkbox-main {
       &::before {
         border-color: var(--accent-color);
       }
     }
 
-    .Spinner > div {
-      // gray spinner
-      background-image: var(--spinner-gray-data);
+    .Spinner {
+      left: 0.125rem;
+    }
+  }
 
-      .Message.own & {
-        // green spinner
-        background-image: var(--spinner-green-data);
+  .Checkbox {
+    .Checkbox-main {
+      &::after {
+        left: 0.125rem;
+        background-color: var(--color-primary);
+
+        .Message.own & {
+          background-color: var(--accent-color);
+        }
       }
     }
   }
 
+  .Spinner > div {
+    // gray spinner
+    background-image: var(--spinner-gray-data);
+
+    .Message.own & {
+      // green spinner
+      background-image: var(--spinner-green-data);
+    }
+  }
+
+  .poll-recent-voters {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: text-bottom;
+    margin-left: .875rem;
+    margin-right: .5rem;
+    margin-top: -2px;
+
+    .Avatar {
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid #fff;
+      margin-right: 0;
+      box-sizing: content-box;
+
+      &:not(:first-child) {
+        margin-left: -3px;
+      }
+    }
+  }
+
+  .poll-countdown {
+    margin-left: auto;
+    font-size: .75rem;
+    transition: color .2s;
+
+    &.hurry-up {
+      color: var(--color-error);
+
+      .poll-countdown-progress {
+        stroke: var(--color-error);
+      }
+    }
+
+    svg {
+      vertical-align: -3px;
+    }
+  }
+
+  .poll-countdown-progress {
+    stroke: var(--color-primary);
+    fill: transparent;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 2s, stroke .2s;
+  }
+
+  .poll-quiz-help {
+    margin: -.5rem 0 -.5rem auto;
+    .Message:not(.own) & {
+      color: var(--color-primary);
+    }
+  }
+
+  .poll-results,
   .poll-answers {
     padding-top: 0.25rem;
     padding-bottom: 0.5rem;
@@ -81,12 +160,39 @@
     &:last-child {
       margin-bottom: 0;
     }
+
+    &.extra-width .poll-answer-share {
+      width: 2rem;
+    }
+
   }
 
   .poll-answer-share {
+    position: relative;
+    margin-top: .125rem;
+    width: 1.75rem;
+    margin-right: .5rem;
     flex-shrink: 0;
     font-weight: 500;
-    width: 3rem;
+    font-size: .875rem;
+    text-align: right;
+  }
+
+  .poll-answer-chosen {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    width: 1rem;
+    height: 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: .5rem;
+    font-size: .75rem;
+    text-align: center;
+
+    &.wrong {
+      background: var(--color-error);
+    }
   }
 
   .poll-answer-right {
@@ -100,13 +206,18 @@
     border-radius: 0.125rem;
     margin-top: 0.5rem;
     background: var(--accent-color);
+
+    &.wrong {
+      background: var(--color-error);
+    }
   }
 
-  .poll-chosen-answer {
-    white-space: nowrap;
-    color: var(--secondary-color);
-    opacity: 0.75;
-    margin-left: 0.25rem;
-    font-size: 0.75rem;
+  .Button {
+    text-transform: none;
+    font-size: 1rem;
+
+    .Message.own & {
+      color: var(--accent-color);
+    }
   }
 }

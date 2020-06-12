@@ -141,6 +141,7 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
 
   const poll = new GramJs.Poll({
     id: randomId,
+    publicVoters: summary.publicVoters,
     question: summary.question,
     answers: summary.answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
     quiz: summary.quiz,
@@ -158,8 +159,10 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
   return new GramJs.InputMediaPoll({
     poll,
     correctAnswers,
-    solution,
-    solutionEntities,
+    ...(solution && {
+      solution,
+      solutionEntities,
+    }),
   });
 }
 

@@ -6,6 +6,7 @@ type IRadioOption = {
   label: string;
   subLabel?: string;
   value: string;
+  hidden?: boolean;
 };
 
 type OwnProps = {
@@ -41,6 +42,7 @@ const RadioGroup: FC<OwnProps> = ({
           subLabel={option.subLabel}
           value={option.value}
           checked={option.value === selected}
+          hidden={option.hidden}
           disabled={disabled}
           isLoading={loadingOption ? loadingOption === option.value : undefined}
           onChange={handleChange}

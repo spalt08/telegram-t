@@ -14,6 +14,7 @@ type OwnProps = {
   value: string;
   checked: boolean;
   disabled?: boolean;
+  hidden?: boolean;
   isLoading?: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
@@ -26,12 +27,14 @@ const Radio: FC<OwnProps> = ({
   name,
   checked,
   disabled,
+  hidden,
   isLoading,
   onChange,
 }) => {
   const className = buildClassName(
     'Radio',
     disabled && 'disabled',
+    hidden && 'hidden-widget',
     isLoading && 'loading',
   );
 
@@ -44,7 +47,7 @@ const Radio: FC<OwnProps> = ({
         id={id}
         checked={checked}
         onChange={onChange}
-        disabled={disabled}
+        disabled={disabled || hidden}
       />
       <div className="Radio-main">
         <span className="label">{label}</span>

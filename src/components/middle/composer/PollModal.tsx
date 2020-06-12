@@ -23,6 +23,10 @@ export type OwnProps = {
 };
 
 const MAX_LIST_HEIGHT = 320;
+const MAX_OPTIONS_COUNT = 10;
+const MAX_OPTION_LENGTH = 100;
+const MAX_QUESTION_LENGTH = 255;
+const MAX_SOLUTION_LENGTH = 200;
 
 const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   const questionInputRef = useRef<HTMLInputElement>();
@@ -31,7 +35,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
   const [question, setQuestion] = useState<string>('');
   const [options, setOptions] = useState<string[]>(['']);
-  const [isAnonimous, setIsAnonimous] = useState(true);
+  const [isAnonymous, setIsAnonymous] = useState(true);
   const [isMultipleAnswers, setIsMultipleAnswers] = useState(false);
   const [isQuizMode, setIsQuizMode] = useState(false);
   const [solution, setSolution] = useState<string>();
@@ -49,10 +53,11 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     if (!isOpen) {
       setQuestion('');
       setOptions(['']);
-      setIsAnonimous(true);
+      setIsAnonymous(true);
       setIsMultipleAnswers(false);
       setIsQuizMode(false);
       setSolution('');
+      setCorrectOption('');
       setHasErrors(false);
     }
   }, [isOpen]);
@@ -86,8 +91,8 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       return;
     }
 
-    const questionTrimmed = question.trim();
-    const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
+    const questionTrimmed = question.trim().substring(0, MAX_QUESTION_LENGTH);
+    const optionsTrimmed = options.map((o) => o.trim().substring(0, MAX_OPTION_LENGTH)).filter((o) => o.length);
 
     if (!questionTrimmed || optionsTrimmed.length < 2) {
       setQuestion(questionTrimmed);
@@ -104,7 +109,7 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       return;
     }
 
-    if (isQuizMode && !correctOption) {
+    if (isQuizMode && (!correctOption || !optionsTrimmed[Number(correctOption)])) {
       setHasErrors(true);
       return;
     }
@@ -120,28 +125,40 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       summary: {
         question: questionTrimmed,
         answers,
-        ...(isMultipleAnswers && { multipleChoice: isMultipleAnswers }),
-        ...(isQuizMode && { quiz: isQuizMode }),
+        ...(!isAnonymous && { publicVoters: true }),
+        ...(isMultipleAnswers && { multipleChoice: true }),
+        ...(isQuizMode && { quiz: true }),
       },
     };
 
     if (isQuizMode) {
-      const { text, entities } = (solution && parseMessageInput(solution)) || {};
+      const { text, entities } = (solution && parseMessageInput(solution.substring(0, MAX_SOLUTION_LENGTH))) || {};
 
       payload.quiz = {
         correctAnswers: [correctOption],
-        solution: text,
-        solutionEntities: entities,
+        ...(text && { solution: text }),
+        ...(entities && { solutionEntities: entities }),
       };
     }
 
     onSend(payload);
-  }, [isOpen, question, options, isQuizMode, correctOption, isMultipleAnswers, onSend, addNewOption, solution]);
+  }, [
+    isOpen,
+    question,
+    options,
+    isQuizMode,
+    correctOption,
+    isAnonymous,
+    isMultipleAnswers,
+    onSend,
+    addNewOption,
+    solution,
+  ]);
 
   const updateOption = useCallback((index: number, text: string) => {
     const newOptions = [...options];
     newOptions[index] = text;
-    if (newOptions[newOptions.length - 1].trim().length) {
+    if (newOptions[newOptions.length - 1].trim().length && newOptions.length < MAX_OPTIONS_COUNT) {
       addNewOption(newOptions);
     } else {
       setOptions(newOptions);
@@ -161,8 +178,12 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     });
   }, [options]);
 
-  const handleIsAnonimousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setIsAnonimous(e.target.checked);
+  const handleCorrectOptionChange = useCallback((newValue: string) => {
+    setCorrectOption(newValue);
+  }, [setCorrectOption]);
+
+  const handleIsAnonymousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setIsAnonymous(e.target.checked);
   }, []);
 
   const handleMultipleAnswersChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -218,7 +239,9 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
     return options.map((option, index) => (
       <div className="option-wrapper">
         <InputText
-          label={index !== options.length - 1 ? `Option ${index + 1}` : 'Add an Option'}
+          label={index !== options.length - 1 || options.length === MAX_OPTIONS_COUNT
+            ? `Option ${index + 1}`
+            : 'Add an Option'}
           error={getOptionsError(index)}
           value={option}
           onChange={(e) => updateOption(index, e.currentTarget.value)}
@@ -241,7 +264,18 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
   }
 
   function renderRadioOptions() {
-    return renderOptions().map((label, index) => ({ value: String(index), label }));
+    return renderOptions()
+      .map((label, index) => ({ value: String(index), label, hidden: index === options.length - 1 }));
+  }
+
+  function renderQuizNoOptionError() {
+    const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
+
+    return isQuizMode && (!correctOption || !optionsTrimmed[Number(correctOption)]) && (
+      <p className="error">
+        Please choose the correct answer
+      </p>
+    );
   }
 
   return (
@@ -259,8 +293,13 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
       <div className="options-list custom-scroll" ref={optionsListRef}>
         <h3 className="options-header">Options</h3>
 
+        {hasErrors && renderQuizNoOptionError()}
         {isQuizMode ? (
-          <RadioGroup name="correctOption" options={renderRadioOptions()} onChange={setCorrectOption} />
+          <RadioGroup
+            name="correctOption"
+            options={renderRadioOptions()}
+            onChange={handleCorrectOptionChange}
+          />
         ) : (
           renderOptions()
         )}
@@ -271,9 +310,9 @@ const PollModal: FC<OwnProps> = ({ isOpen, onSend, onClear }) => {
 
       <div className="quiz-mode">
         <Checkbox
-          label="Anonimous Voting"
-          checked={isAnonimous}
-          onChange={handleIsAnonimousChange}
+          label="Anonymous Voting"
+          checked={isAnonymous}
+          onChange={handleIsAnonymousChange}
         />
         <Checkbox
           label="Multiple Answers"

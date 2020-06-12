@@ -413,6 +413,8 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
         'multipleChoice',
         'quiz',
         'question',
+        'closePeriod',
+        'closeDate',
       ]),
       answers,
     },
@@ -422,7 +424,7 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
 
 export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['results'] {
   const {
-    results: rawResults, min, totalVoters, recentVoters,
+    results: rawResults, min, totalVoters, recentVoters, solution, solutionEntities: entities,
   } = pollResults;
   const results = rawResults && rawResults.map(({
     option, chosen, correct, voters,
@@ -438,6 +440,8 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
     totalVoters,
     recentVoters,
     results,
+    solution,
+    ...(entities && { solutionEntities: entities.map(buildApiMessageEntity) }),
   };
 }
 

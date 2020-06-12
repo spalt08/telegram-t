@@ -107,12 +107,16 @@ export interface ApiPoll {
     quiz?: true;
     question: string;
     answers: PollAnswer[];
+    closePeriod?: number;
+    closeDate?: number;
   };
   results: {
     min?: true;
     results?: PollAnswerVote[];
     totalVoters?: number;
     recentVoters?: number[];
+    solution?: string;
+    solutionEntities?: ApiMessageEntity[];
   };
 }
 
