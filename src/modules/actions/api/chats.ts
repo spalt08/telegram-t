@@ -279,6 +279,21 @@ addReducer('toggleChatArchived', (global, actions, payload) => {
   }
 });
 
+addReducer('toggleChatUnread', (global, actions, payload) => {
+  const { id } = payload!;
+  const chat = selectChat(global, id);
+  if (chat) {
+    if (chat.unreadCount) {
+      void callApi('markChatRead', { chat });
+    } else {
+      void callApi('toggleDialogUnread', {
+        chat,
+        hasUnreadMark: !chat.hasUnreadMark,
+      });
+    }
+  }
+});
+
 async function loadChats(folder: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,

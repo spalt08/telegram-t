@@ -553,6 +553,29 @@ export function editChatFolder({
   }), true);
 }
 
+export async function toggleDialogUnread({
+  chat, hasUnreadMark,
+}: {
+  chat: ApiChat; hasUnreadMark: boolean | undefined;
+}) {
+  const { id, accessHash } = chat;
+
+  const isActionSuccessful = await invokeRequest(new GramJs.messages.MarkDialogUnread({
+    peer: new GramJs.InputDialogPeer({
+      peer: buildInputPeer(id, accessHash),
+    }),
+    unread: hasUnreadMark || undefined,
+  }));
+
+  if (isActionSuccessful) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: chat.id,
+      chat: { hasUnreadMark },
+    });
+  }
+}
+
 function preparePeers(
   result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.messages.PeerDialogs,
 ) {

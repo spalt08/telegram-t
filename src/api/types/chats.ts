@@ -9,6 +9,7 @@ export interface ApiChat {
   folderId?: number;
   type: ApiChatType;
   title?: string;
+  hasUnreadMark?: boolean;
   lastMessage?: ApiMessage;
   lastReadOutboxMessageId?: number;
   lastReadInboxMessageId?: number;

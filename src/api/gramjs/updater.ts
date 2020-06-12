@@ -475,6 +475,17 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       });
     }
+  } else if (
+    update instanceof GramJs.UpdateDialogUnreadMark
+    && update.peer instanceof GramJs.DialogPeer
+  ) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      chat: {
+        hasUnreadMark: update.unread,
+      },
+    });
   } else if (update instanceof GramJs.UpdateChatDefaultBannedRights) {
     onUpdate({
       '@type': 'updateChat',

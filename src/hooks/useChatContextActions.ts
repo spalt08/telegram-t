@@ -8,7 +8,12 @@ export default (
   privateChatUser: ApiUser | undefined,
   handleDelete: () => void,
 ) => {
-  const { toggleChatPinned, updateChatMutedState, toggleChatArchived } = getDispatch();
+  const {
+    toggleChatPinned,
+    updateChatMutedState,
+    toggleChatArchived,
+    toggleChatUnread,
+  } = getDispatch();
 
   return useMemo(() => {
     if (!chat) {
@@ -17,9 +22,9 @@ export default (
 
     const isChatWithSelf = privateChatUser && privateChatUser.isSelf;
 
-    const actionUnreadMark = chat.unreadCount
-      ? { title: 'Mark as Read', icon: 'message' }
-      : { title: 'Mark as Unread', icon: 'unread' };
+    const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
+      ? { title: 'Mark as Read', icon: 'message', handler: () => toggleChatUnread({ id: chat.id }) }
+      : { title: 'Mark as Unread', icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
 
     const actionPin = chat.isPinned
       ? { title: 'Unpin', icon: 'unpin', handler: () => toggleChatPinned({ id: chat.id }) }
@@ -49,5 +54,8 @@ export default (
       ] : []),
       actionDelete,
     ];
-  }, [chat, privateChatUser, handleDelete, toggleChatPinned, updateChatMutedState, toggleChatArchived]);
+  }, [
+    chat, privateChatUser, handleDelete,
+    toggleChatPinned, updateChatMutedState, toggleChatArchived, toggleChatUnread,
+  ]);
 };

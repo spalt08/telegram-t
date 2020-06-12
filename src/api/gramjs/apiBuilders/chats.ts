@@ -50,6 +50,7 @@ export function buildApiChatFromDialog(
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     folderId: dialog.folderId || undefined,
+    hasUnreadMark: dialog.unreadMark,
     type: getApiChatTypeFromPeerEntity(peerEntity),
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
     lastReadOutboxMessageId: dialog.readOutboxMaxId,
