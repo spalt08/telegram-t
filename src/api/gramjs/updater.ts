@@ -20,6 +20,7 @@ import {
   buildChatTypingStatus,
   buildAvatar,
   buildApiChatFromPreview,
+  buildApiChatFolder,
 } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import {
@@ -383,10 +384,24 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       const { folderId, peer } = folderPeer;
 
       onUpdate({
-        '@type': 'updateChatFolder',
+        '@type': 'updateChatListType',
         id: getApiChatIdFromMtpPeer(peer),
         folderId,
       });
+    });
+  } else if (update instanceof GramJs.UpdateDialogFilter) {
+    const { id, filter } = update;
+    const folder = filter ? buildApiChatFolder(filter) : undefined;
+
+    onUpdate({
+      '@type': 'updateChatFolder',
+      id,
+      folder,
+    });
+  } else if (update instanceof GramJs.UpdateDialogFilterOrder) {
+    onUpdate({
+      '@type': 'updateChatFoldersOrder',
+      orderedIds: update.order,
     });
   } else if (update instanceof GramJs.UpdateChatParticipants) {
     const replacedMembers = buildChatMembers(update.participants);

@@ -7,9 +7,10 @@ import './Badge.scss';
 
 type OwnProps = {
   chat: ApiChat;
+  isPinned?: boolean;
 };
 
-const Badge: FC<OwnProps> = ({ chat }) => {
+const Badge: FC<OwnProps> = ({ chat, isPinned }) => {
   const classNames = ['Badge'];
 
   if (chat.unreadCount || chat.hasUnreadMark) {
@@ -43,7 +44,7 @@ const Badge: FC<OwnProps> = ({ chat }) => {
         {formatIntegerCompact(chat.unreadCount!)}
       </div>
     );
-  } else if (chat.isPinned) {
+  } else if (isPinned) {
     classNames.push('pinned');
 
     return (

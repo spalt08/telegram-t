@@ -10,6 +10,7 @@ import { getUserFirstName } from '../../../modules/helpers';
 import renderText from '../../common/helpers/renderText';
 import { throttle } from '../../../util/schedulers';
 import { pick } from '../../../util/iteratees';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 
 import Avatar from '../../common/Avatar';
 import LeftSearchResultChat from './LeftSearchResultChat';
@@ -44,23 +45,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [loadTopUsers, loadContactList]);
 
-  useEffect(() => {
-    if (!topUsers) {
-      return undefined;
-    }
-
-    const topUsersEl = topUsersRef.current!;
-
-    function scrollFooter(e: WheelEvent) {
-      topUsersEl.scrollLeft += e.deltaY / 3;
-    }
-
-    topUsersEl.addEventListener('wheel', scrollFooter, { passive: true });
-
-    return () => {
-      topUsersEl.removeEventListener('wheel', scrollFooter);
-    };
-  }, [topUsers]);
+  useHorizontalScroll(topUsersRef.current, !topUsers);
 
   const handleClick = useCallback(
     (id: number) => {

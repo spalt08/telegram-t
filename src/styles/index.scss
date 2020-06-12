@@ -81,13 +81,6 @@ body.scrollable {
   // Fix scroll lock on iOS
   pointer-events: auto;
 
-  // @optimization
-  @include while-transition() {
-    overflow: hidden;
-    margin-right: 5px;
-    transition: none;
-  }
-
   &::-webkit-scrollbar-thumb {
     background-color: rgba(90, 90, 90, 0);
     border-radius: 0.35rem;
@@ -120,6 +113,24 @@ body.scrollable {
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+// @optimization
+.optimized-list {
+  @include while-transition() {
+    .ListItem:nth-child(n + 16) {
+      display: none;
+    }
+  }
+
+  &:not(:hover) {
+    .ListItem:nth-child(n + 16) {
+      display: none;
+    }
+  }
+
+  // This prevents from a second scroll jump after restoring hidden content
+  overflow-anchor: none;
 }
 
 .emoji-small {

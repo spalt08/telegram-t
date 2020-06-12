@@ -14,16 +14,6 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
-export function filterKeys<M extends any>(
-  byKey: CollectionByKey<M>,
-  newKeys: (string | number)[],
-): CollectionByKey<M> {
-  return newKeys.reduce((newByKey: CollectionByKey<M>, key) => {
-    newByKey[key] = byKey[key];
-    return newByKey;
-  }, {});
-}
-
 export function mapValues<R extends any, M extends any>(
   byKey: CollectionByKey<M>,
   callback: (member: M, key: string, index: number, originalByKey: CollectionByKey<M>) => R,

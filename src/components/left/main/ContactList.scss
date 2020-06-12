@@ -1,16 +1,7 @@
-@import '../../../styles/mixins';
-
 .ContactList {
   height: 100%;
   overflow-y: auto;
   padding: 0 1rem 1rem;
-
-  // @optimization
-  @include while-transition() {
-    .chat-item-clickable:nth-child(n + 16) {
-      display: none;
-    }
-  }
 
   .no-results {
     height: 100%;

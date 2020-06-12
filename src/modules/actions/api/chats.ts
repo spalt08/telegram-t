@@ -15,7 +15,14 @@ import {
   updateChat,
   updateSelectedChatId,
 } from '../../reducers';
-import { selectChat, selectOpenChat, selectUser } from '../../selectors';
+import {
+  selectChat,
+  selectOpenChat,
+  selectUser,
+  selectChatListType,
+  selectIsChatPinned,
+  selectChatFolder,
+} from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helpers';
@@ -27,7 +34,7 @@ const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 
 addReducer('preloadTopChatMessages', (global, actions, payload) => {
-  const { folder }: { folder: 'active' | 'archived' } = payload;
+  const { listType }: { listType: 'active' | 'archived' } = payload;
 
   (async () => {
     const preloadedChatIds: number[] = [];
@@ -38,8 +45,8 @@ addReducer('preloadTopChatMessages', (global, actions, payload) => {
       const {
         selectedId,
         byId,
-        listIds: { [folder]: listIds },
-        orderedPinnedIds: { [folder]: orderedPinnedIds },
+        listIds: { [listType]: listIds },
+        orderedPinnedIds: { [listType]: orderedPinnedIds },
       } = getGlobal().chats;
       if (!listIds) {
         return;
@@ -82,18 +89,18 @@ addReducer('openChat', (global, actions, payload) => {
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {
-  const { folder } = payload!;
+  const { listType } = payload!;
   const chatsWithLastMessages = Object.values(global.chats.byId)
     .filter((chat) => (
       Boolean(chat.lastMessage)
-      && (folder === 'archived' ? chat.folderId === ARCHIVED_FOLDER_ID : chat.folderId !== ARCHIVED_FOLDER_ID)
+      && (listType === 'archived' ? chat.folderId === ARCHIVED_FOLDER_ID : chat.folderId !== ARCHIVED_FOLDER_ID)
     ));
   const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
 
   if (lastChat) {
-    void loadChats(folder, lastChat.id, lastChat.lastMessage!.date);
+    void loadChats(listType, lastChat.id, lastChat.lastMessage!.date);
   } else {
-    void loadChats(folder);
+    void loadChats(listType);
   }
 });
 
@@ -261,10 +268,35 @@ addReducer('createGroupChat', (global, actions, payload) => {
 });
 
 addReducer('toggleChatPinned', (global, actions, payload) => {
-  const { id } = payload!;
+  const { id, folderId } = payload!;
   const chat = selectChat(global, id);
-  if (chat) {
-    void callApi('toggleChatPinned', chat);
+  if (!chat) {
+    return;
+  }
+
+
+  if (folderId) {
+    const folder = selectChatFolder(global, folderId);
+    if (folder) {
+      const shouldBePinned = !selectIsChatPinned(global, id, folderId);
+
+      const { pinnedChatIds } = folder;
+      const newPinnedIds = shouldBePinned
+        ? [id, ...(pinnedChatIds || [])]
+        : (pinnedChatIds || []).filter((pinnedId) => pinnedId !== id);
+
+      void callApi('editChatFolder', {
+        id: folderId,
+        folderUpdate: {
+          ...folder,
+          pinnedChatIds: newPinnedIds,
+        },
+      });
+    }
+  } else {
+    const listType = selectChatListType(global, id);
+    const isPinned = selectIsChatPinned(global, id, listType === 'archived' ? ARCHIVED_FOLDER_ID : undefined);
+    void callApi('toggleChatPinned', { chat, shouldBePinned: !isPinned });
   }
 });
 
@@ -272,11 +304,15 @@ addReducer('toggleChatArchived', (global, actions, payload) => {
   const { id } = payload!;
   const chat = selectChat(global, id);
   if (chat) {
-    void callApi('editChatFolder', {
+    void callApi('toggleChatArchived', {
       chat,
       folderId: isChatArchived(chat) ? 0 : ARCHIVED_FOLDER_ID,
     });
   }
+});
+
+addReducer('loadChatFolders', () => {
+  void loadChatFolders();
 });
 
 addReducer('toggleChatUnread', (global, actions, payload) => {
@@ -294,11 +330,11 @@ addReducer('toggleChatUnread', (global, actions, payload) => {
   }
 });
 
-async function loadChats(folder: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
+async function loadChats(listType: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_SLICE,
     offsetDate,
-    archived: folder === 'archived',
+    archived: listType === 'archived',
   });
 
   if (!result) {
@@ -315,7 +351,19 @@ async function loadChats(folder: 'active' | 'archived', offsetId?: number, offse
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = updateChatListIds(global, folder, chatIds);
+  global = updateChatListIds(global, listType, chatIds);
+  if (result.totalChatCount !== undefined) {
+    global = {
+      ...global,
+      chats: {
+        ...global.chats,
+        totalCount: {
+          ...global.chats.totalCount,
+          [listType === 'active' ? 'all' : 'archived']: result.totalChatCount,
+        },
+      },
+    };
+  }
 
   setGlobal(global);
 }
@@ -393,5 +441,16 @@ async function createGroupChat(title: string, users: ApiUser[], photo?: File) {
 
   if (chatId && photo) {
     await callApi('editChatPhoto', { chatId, photo });
+  }
+}
+
+async function loadChatFolders() {
+  const chatFolders = await callApi('fetchChatFolders');
+
+  if (chatFolders) {
+    setGlobal({
+      ...getGlobal(),
+      chatFolders,
+    });
   }
 }

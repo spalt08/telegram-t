@@ -1,0 +1,46 @@
+#LeftColumn-main {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  > .Transition {
+    flex-grow: 1;
+  }
+
+  .ChatFolders {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .TabList {
+      justify-content: flex-start;
+      box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+      font-size: 0.875rem;
+
+      + .Transition {
+        .ChatList {
+          padding-top: 0.35rem;
+        }
+      }
+    }
+
+    .Tab {
+      flex: 0 0 auto;
+      min-width: 5rem;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+
+      > span {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+
+    > .Transition {
+      flex-grow: 1;
+    }
+  }
+}

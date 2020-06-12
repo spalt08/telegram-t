@@ -27,6 +27,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     id: mtpUser.id,
     isSelf: mtpUser.self || false,
     isVerified: mtpUser.verified || false,
+    isContact: mtpUser.mutualContact || false,
     type: buildApiUserType(mtpUser),
     firstName: mtpUser.firstName,
     lastName: mtpUser.lastName,

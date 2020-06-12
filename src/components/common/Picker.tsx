@@ -96,14 +96,14 @@ const Picker: FC<OwnProps> = ({
 
     if (onLoadMore) {
       return (
-        <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
+        <InfiniteScroll className="picker-list custom-scroll optimized-list" items={itemIds} onLoadMore={onLoadMore}>
           {content}
         </InfiniteScroll>
       );
     }
 
     return (
-      <div className="picker-list custom-scroll">
+      <div className="picker-list custom-scroll optimized-list">
         {content}
       </div>
     );

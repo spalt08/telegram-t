@@ -1,18 +1,9 @@
-@import '../../../styles/mixins';
-
 .NewGroup {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-
-  // @optimization
-  @include while-transition() {
-    .chat-item-clickable:nth-child(n + 16) {
-      display: none;
-    }
-  }
 
   &-inner {
     flex-grow: 1;

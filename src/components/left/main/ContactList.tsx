@@ -70,7 +70,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="ContactList custom-scroll">
+    <div className="ContactList custom-scroll optimized-list">
       {!displayedIds.length && !!filter.length && (
         <p className="no-results">No contacts matched your search.</p>
       )}

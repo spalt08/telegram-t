@@ -108,10 +108,14 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const [activeTab, setActiveTab] = useState(0);
 
-  const tabTitles = useMemo(() => ([
-    ...(hasMembersTab ? ['Members'] : []),
-    ...TAB_TITLES,
-  ].slice(0, 4)), [hasMembersTab]);
+  const mediaTabs = useMemo(() => {
+    const rawTitles = [
+      ...(hasMembersTab ? ['Members'] : []),
+      ...TAB_TITLES,
+    ];
+
+    return rawTitles.slice(0, 4).map((title) => ({ title }));
+  }, [hasMembersTab]);
 
   const mediaTypes = useMemo(() => ([
     ...(hasMembersTab ? ['members'] : []),
@@ -335,14 +339,14 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           <Transition
             name="slide"
             activeKey={activeTab}
-            renderCount={tabTitles.length}
+            renderCount={mediaTabs.length}
             shouldRestoreHeight
             onStart={handleTransitionStart}
             onStop={handleTransitionStop}
           >
             {renderSharedMedia}
           </Transition>
-          <TabList activeTab={activeTab} tabs={tabTitles} onSwitchTab={setActiveTab} />
+          <TabList activeTab={activeTab} tabs={mediaTabs} onSwitchTab={setActiveTab} />
         </div>
       )}
     </InfiniteScroll>

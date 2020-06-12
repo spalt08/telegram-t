@@ -11,7 +11,7 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
-import { filterKeys } from '../util/iteratees';
+import { pick } from '../util/iteratees';
 
 const CACHE_THROTTLE_TIMEOUT = 1000;
 
@@ -143,7 +143,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 
     byChatId[chatId] = {
       ...global.messages.byChatId[chatId],
-      byId: filterKeys(current.byId, current.viewportIds),
+      byId: pick(current.byId, current.viewportIds),
     };
   });
 
@@ -156,7 +156,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 // Remove `hash` so we can request all MTP entities on next load.
 function reduceStickers(global: GlobalState): GlobalState['stickers'] {
   return {
-    setsById: filterKeys(global.stickers.setsById, global.stickers.added.setIds),
+    setsById: pick(global.stickers.setsById, global.stickers.added.setIds),
     added: {
       setIds: global.stickers.added.setIds,
     },

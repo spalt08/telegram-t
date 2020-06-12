@@ -3,6 +3,7 @@ import {
   ApiChatFullInfo,
   ApiTypingStatus,
   ApiChatMember,
+  ApiChatFolder,
 } from './chats';
 import { ApiMessage, ApiPoll, ApiStickerSet } from './messages';
 import { ApiUser, ApiUserFullInfo, ApiUserStatus } from './users';
@@ -96,8 +97,8 @@ export type ApiUpdatePinnedChatIds = {
   folderId?: number;
 };
 
-export type ApiUpdateChatFolder = {
-  '@type': 'updateChatFolder';
+export type ApiUpdateChatListType = {
+  '@type': 'updateChatListType';
   id: number;
   folderId: number;
 };
@@ -106,6 +107,17 @@ export type ApiUpdateChatPinned = {
   '@type': 'updateChatPinned';
   id: number;
   isPinned: boolean;
+};
+
+export type ApiUpdateChatFolder = {
+  '@type': 'updateChatFolder';
+  id: number;
+  folder: ApiChatFolder | undefined;
+};
+
+export type ApiUpdateChatFoldersOrder = {
+  '@type': 'updateChatFoldersOrder';
+  orderedIds: number[];
 };
 
 export type ApiUpdateNewMessage = {
@@ -231,7 +243,8 @@ export type ApiUpdateStickerSet = {
 export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
-  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdateChatFolder |
+  ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
+  ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

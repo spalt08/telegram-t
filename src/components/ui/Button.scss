@@ -1,5 +1,3 @@
-@import '../../styles/mixins';
-
 @mixin active-styles() {
   &:not(.disabled):not(:disabled) {
     &:hover, &:active, &.active, &:focus {

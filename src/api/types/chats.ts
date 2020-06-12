@@ -15,7 +15,6 @@ export interface ApiChat {
   lastReadInboxMessageId?: number;
   unreadCount?: number;
   unreadMentionsCount?: number;
-  isPinned?: boolean;
   isVerified?: boolean;
   isMuted?: boolean;
   accessHash?: string;
@@ -102,4 +101,21 @@ export interface ApiChatBannedRights {
 export interface ApiRestrictionReason {
   reason: string;
   text: string;
+}
+
+export interface ApiChatFolder {
+  id: number;
+  title: string;
+  emoticon?: string;
+  contacts?: true;
+  nonContacts?: true;
+  groups?: true;
+  channels?: true;
+  bots?: true;
+  excludeMuted?: true;
+  excludeRead?: true;
+  excludeArchived?: true;
+  pinnedChatIds?: number[];
+  includedChatIds?: number[];
+  excludedChatIds?: number[];
 }

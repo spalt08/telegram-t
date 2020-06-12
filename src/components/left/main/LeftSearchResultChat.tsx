@@ -12,7 +12,7 @@ import GroupChatInfo from '../../common/GroupChatInfo';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import ListItem from '../../ui/ListItem';
 import { withGlobal } from '../../../lib/teact/teactn';
-import { selectChat, selectUser } from '../../../modules/selectors';
+import { selectChat, selectUser, selectIsChatPinned } from '../../../modules/selectors';
 
 type OwnProps = {
   chatId: number;
@@ -23,12 +23,14 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   privateChatUser?: ApiUser;
+  isPinned?: boolean;
 };
 
 const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   privateChatUser,
+  isPinned,
   showHandle,
   onClick,
 }) => {
@@ -42,7 +44,12 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     setIsDeleteModalOpen(false);
   }, []);
 
-  const contextActions = useChatContextActions(chat, privateChatUser, handleDelete);
+  const contextActions = useChatContextActions({
+    chat,
+    privateChatUser,
+    isPinned,
+    handleDelete,
+  });
 
   if (!chat) {
     return undefined;
@@ -73,10 +80,12 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const privateChatUserId = chat && getPrivateChatUserId(chat);
     const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const isPinned = selectIsChatPinned(global, chatId);
 
     return {
       chat,
       privateChatUser,
+      isPinned,
     };
   },
 )(LeftSearchResultChat));
