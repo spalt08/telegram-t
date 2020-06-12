@@ -187,15 +187,7 @@ export function canMessagePlayVideoInline(video: ApiVideo): boolean {
 }
 
 export function getChatMediaMessageIds(messages: Record<number, ApiMessage>, reverseOrder = false) {
-  const ids = Object.keys(messages)
-    .reduce((result: number[], id) => {
-      const messageId = Number(id);
-      if (getMessagePhoto(messages[messageId]) || getMessageVideo(messages[messageId])) {
-        result.push(messageId);
-      }
-
-      return result;
-    }, []);
+  const ids = getMessageContentIds(messages, 'media');
 
   return reverseOrder ? ids.reverse() : ids;
 }
