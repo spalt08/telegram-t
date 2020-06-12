@@ -177,17 +177,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       index === activeSetIndex && 'activated',
     );
 
-    if (stickerSet.id !== 'recent' && stickerSet.id !== 'favorite' && firstSticker) {
-      return (
-        <StickerButton
-          sticker={firstSticker}
-          load
-          title={stickerSet.title}
-          className={buttonClassName}
-          onClick={() => selectSet(index)}
-        />
-      );
-    } else {
+    if (stickerSet.id === 'recent' || stickerSet.id === 'favorite' || stickerSet.hasThumbnail || !firstSticker) {
       return (
         <Button
           className={buttonClassName}
@@ -204,6 +194,16 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             <StickerSetCover stickerSet={stickerSet as ApiStickerSet} />
           )}
         </Button>
+      );
+    } else {
+      return (
+        <StickerButton
+          sticker={firstSticker}
+          load
+          title={stickerSet.title}
+          className={buttonClassName}
+          onClick={() => selectSet(index)}
+        />
       );
     }
   }
