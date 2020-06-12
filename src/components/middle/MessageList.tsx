@@ -297,7 +297,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Container resize observer.
   useEffect(() => {
-    if (!('ResizeObserver' in window) || process.env.NODE_ENV === 'perf') {
+    if (!('ResizeObserver' in window) || process.env.APP_ENV === 'perf') {
       return undefined;
     }
 
@@ -344,7 +344,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     const container = containerRef.current!;
     listItemElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
 
-    if (process.env.NODE_ENV === 'perf') {
+    if (process.env.APP_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
     }
@@ -390,7 +390,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
     updateFabVisibility();
     fastRaf(updateViewportMessages);
 
-    if (process.env.NODE_ENV === 'perf') {
+    if (process.env.APP_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }

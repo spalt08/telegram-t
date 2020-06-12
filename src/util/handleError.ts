@@ -4,7 +4,7 @@ window.onerror = handleError;
 window.addEventListener('unhandledrejection', handleError);
 
 // eslint-disable-next-line prefer-destructuring
-const NODE_ENV = process.env.NODE_ENV;
+const APP_ENV = process.env.APP_ENV;
 const STARTUP_TIMEOUT = 5000;
 
 const startedAt = Date.now();
@@ -36,11 +36,11 @@ function handleError(...args: any[]) {
 
   const error = typeof args[4] === 'object' ? args[4].error : undefined;
   // Parcel bug.
-  if (NODE_ENV === 'development' && error && error.message.includes('css-loader.js')) {
+  if (APP_ENV === 'development' && error && error.message.includes('css-loader.js')) {
     return;
   }
 
-  if (NODE_ENV === 'development' || NODE_ENV === 'staging') {
+  if (APP_ENV === 'development' || APP_ENV === 'staging') {
     // eslint-disable-next-line no-alert
     window.alert(DEBUG_ALERT_MSG);
   }

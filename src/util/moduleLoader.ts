@@ -1,3 +1,5 @@
+import { DEBUG } from '../config';
+
 export enum Bundles {
   Auth,
   Main,
@@ -26,6 +28,11 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
         LOAD_PROMISES[Bundles.Auth] = import('../bundles/auth');
         break;
       case Bundles.Main:
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.log('>>> START LOADING MAIN BUNDLE');
+        }
+
         LOAD_PROMISES[Bundles.Main] = import('../bundles/main');
         break;
       case Bundles.Extra:

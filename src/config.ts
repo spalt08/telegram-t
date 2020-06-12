@@ -1,4 +1,4 @@
-export const DEBUG = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'perf';
+export const DEBUG = process.env.APP_ENV !== 'production' && process.env.APP_ENV !== 'perf';
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;
 

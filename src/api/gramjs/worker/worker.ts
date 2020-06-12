@@ -1,13 +1,19 @@
 import { ApiOnProgress, ApiUpdate } from '../../types';
 import { OriginMessageEvent, WorkerMessageData } from './types';
-import { initApi, callApi, cancelApiProgress } from '../provider';
+
 import { DEBUG } from '../../../config';
+import { initApi, callApi, cancelApiProgress } from '../provider';
 
 declare const self: WorkerGlobalScope;
 
 handleErrors();
 
 const callbackState: Record<string, ApiOnProgress> = {};
+
+if (DEBUG) {
+  // eslint-disable-next-line no-console
+  console.log('>>> FINISH WORKER LOAD');
+}
 
 onmessage = async (message: OriginMessageEvent) => {
   const { data } = message;

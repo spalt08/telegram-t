@@ -1,14 +1,14 @@
 import React, { FC, useEffect, memo } from '../lib/teact/teact';
 import { withGlobal } from '../lib/teact/teactn';
 
-import { GlobalActions, GlobalState } from '../global/types';
+import { GlobalState } from '../global/types';
 
 import '../modules/actions/all';
 import { pick } from '../util/iteratees';
 import buildClassName from '../util/buildClassName';
 import { selectIsRightColumnShown } from '../modules/selectors';
 
-import { ANIMATION_END_DELAY } from '../config';
+import { ANIMATION_END_DELAY, DEBUG } from '../config';
 import MediaViewer from './mediaViewer/MediaViewer.async';
 import LeftColumn from './left/LeftColumn';
 import MiddleColumn from './middle/MiddleColumn';
@@ -20,23 +20,22 @@ import './Main.scss';
 
 type StateProps = {
   isRightColumnShown?: boolean;
-} & Pick<GlobalState, 'connectionState' | 'isLeftColumnShown'>;
-type DispatchProps = Pick<GlobalActions, 'initApi'>;
+} & Pick<GlobalState, 'isLeftColumnShown'>;
 
 const ANIMATION_DURATION = 350;
 
 let timeout: number | undefined;
 
-const Main: FC<StateProps & DispatchProps> = ({
-  connectionState, isLeftColumnShown, isRightColumnShown, initApi,
+let DEBUG_isLogged = false;
+
+const Main: FC<StateProps> = ({
+  isLeftColumnShown, isRightColumnShown,
 }) => {
-  useEffect(() => {
-    // Initial connection after loading async bundle
-    if (connectionState !== 'connectionStateReady') {
-      initApi();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  if (DEBUG && !DEBUG_isLogged) {
+    DEBUG_isLogged = true;
+    // eslint-disable-next-line no-console
+    console.log('>>> START RENDERING MAIN');
+  }
 
   const className = buildClassName(
     isLeftColumnShown && 'is-left-column-shown',
@@ -72,8 +71,7 @@ const Main: FC<StateProps & DispatchProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => ({
-    ...pick(global, ['connectionState', 'isLeftColumnShown']),
+    ...pick(global, ['isLeftColumnShown']),
     isRightColumnShown: selectIsRightColumnShown(global),
   }),
-  (global, actions): DispatchProps => pick(actions, ['initApi']),
 )(Main));

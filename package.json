@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server -d",
+    "dev": "APP_ENV=development webpack-dev-server -d",
     "build": "webpack -p",
-    "build:staging": "rm -rf dist/ && npm run build -- --devtool source-map && ./deploy/copy_to_dist.sh",
+    "build:staging": "rm -rf dist/ && APP_ENV=staging npm run build && ./deploy/copy_to_dist.sh",
     "deploy:contest": "./deploy/contest.sh",
-    "perf:serve": "NODE_ENV=perf parcel src/index-perf.html",
+    "perf:serve": "APP_ENV=perf parcel src/index-perf.html",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "gramjs:types": "node ./src/lib/gramjs/tl/types-generator/generate.js"

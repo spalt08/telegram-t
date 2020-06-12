@@ -44,7 +44,7 @@ function render($element: VirtualElement, parentEl: HTMLElement | null) {
   const $head = headsByElement[headId];
   $head.children = [renderWithVirtual(parentEl, $head.children[0], $element, $head, 0) as VirtualElement];
 
-  if (process.env.NODE_ENV === 'perf') {
+  if (process.env.APP_ENV === 'perf') {
     DEBUG_virtualTreeSize = 0;
     DEBUG_addToVirtualTreeSize($head);
 

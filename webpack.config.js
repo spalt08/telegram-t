@@ -10,7 +10,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 dotenv.config();
 
-module.exports = (env, argv) => {
+module.exports = (env = {}, argv = {}) => {
   return {
     mode: argv.mode,
     entry: './src/index.tsx',
@@ -27,14 +27,14 @@ module.exports = (env, argv) => {
     },
     output: {
       filename: '[name].[contenthash].js',
-      chunkFilename: '[name].[chunkhash].js',
+      chunkFilename: '[id].[chunkhash].js',
       path: path.resolve(__dirname, argv['output-path'] || 'dist'),
     },
     module: {
       rules: [
         {
           test: /\.(ts|tsx|js)$/,
-          use: 'babel-loader',
+          loader: 'babel-loader',
           exclude: /node_modules/,
         },
         {
@@ -60,16 +60,22 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(woff(2)?|ttf|eot|svg|png|jpg|tgs)(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'file-loader',
+          loader: 'file-loader',
+          options: {
+            name: '[name].[contenthash].[ext]',
+          },
         },
         {
           test: /\.wasm$/,
           type: 'javascript/auto',
-          use: 'file-loader',
+          loader: 'file-loader',
+          options: {
+            name: '[name].[contenthash].[ext]',
+          },
         },
         {
           test: /\.tl$/i,
-          use: 'raw-loader',
+          loader: 'raw-loader',
         },
       ],
     },
@@ -85,7 +91,11 @@ module.exports = (env, argv) => {
         chunkFilename: '[name].[chunkhash].css',
         ignoreOrder: true,
       }),
-      new EnvironmentPlugin(['NODE_ENV', 'TELEGRAM_T_API_ID', 'TELEGRAM_T_API_HASH']),
+      new EnvironmentPlugin({
+        APP_ENV: 'production',
+        TELEGRAM_T_API_ID: '',
+        TELEGRAM_T_API_HASH: '',
+      }),
       ...(argv.mode === 'production' ? [
         new BundleAnalyzerPlugin({
           analyzerMode: 'static',
@@ -97,12 +107,13 @@ module.exports = (env, argv) => {
       fs: 'empty',
     },
 
-    ...(argv.devtool === 'source-map' && {
+    ...(!env.noSourceMap && {
       devtool: 'source-map',
     }),
 
     ...(argv['optimize-minimize'] && {
       optimization: {
+        minimize: !env.noMinify,
         minimizer: [
           new TerserJSPlugin({ sourceMap: true }),
           new OptimizeCSSAssetsPlugin({}),

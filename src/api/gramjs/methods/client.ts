@@ -23,6 +23,11 @@ let client: TelegramClient;
 let isConnected = false;
 
 export async function init(sessionId: string) {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('>>> START INIT API 2');
+  }
+
   const session = new sessions.CacheApiSession(sessionId);
   client = new TelegramClient(
     session,
