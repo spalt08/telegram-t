@@ -39,7 +39,7 @@ export interface VirtualElementComponent {
   children: VirtualElementChildren;
 }
 
-type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
+export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
 
 interface ComponentInstance {
   $element: VirtualElementComponent;

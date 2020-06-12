@@ -1,4 +1,4 @@
-import { useEffect } from '../../../../lib/teact/teact';
+import { StateHookSetter, useEffect } from '../../../../lib/teact/teact';
 import { ApiAttachment, ApiMessage } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
@@ -9,7 +9,7 @@ const MAX_MESSAGE_LENGTH = 4096;
 
 export default (
   insertTextAndUpdateCursor: (text: string) => void,
-  setAttachment: (attachment: ApiAttachment) => void,
+  setAttachments: StateHookSetter<ApiAttachment[]>,
   editedMessage: ApiMessage | undefined,
 ) => {
   useEffect(() => {
@@ -35,7 +35,11 @@ export default (
       e.preventDefault();
 
       if (file && !editedMessage) {
-        setAttachment(await buildAttachment(file.name, file, true));
+        const attachment = await buildAttachment(file.name, file, true);
+        setAttachments((attachments) => [
+          ...attachments,
+          attachment,
+        ]);
       }
 
       if (pastedText) {
@@ -48,5 +52,5 @@ export default (
     return () => {
       document.removeEventListener('paste', handlePaste, false);
     };
-  }, [insertTextAndUpdateCursor, editedMessage, setAttachment]);
+  }, [insertTextAndUpdateCursor, editedMessage, setAttachments]);
 };

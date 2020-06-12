@@ -122,7 +122,10 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     isGhostAnimation && ANIMATION_DURATION,
   );
 
-  const bestImageData = (!isVideo && fullMediaData) || blobUrlPreview || blobUrlPictogram || thumbDataUri;
+  const localBlobUrl = message ? (getMessagePhoto(message) || getMessageVideo(message))!.blobUrl : undefined;
+  const bestImageData = (
+    localBlobUrl || (isPhoto && fullMediaData) || blobUrlPreview || blobUrlPictogram || thumbDataUri
+  );
   const photoDimensions = isPhoto ? getPhotoFullDimensions((
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
@@ -247,13 +250,13 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       return (
         <div key={messageId} className={`media-viewer-content ${hasFooter ? 'has-footer' : ''}`}>
           {isPhoto && renderPhoto(
-            fullMediaData || blobUrlPreview || blobUrlPictogram,
+            localBlobUrl || fullMediaData || blobUrlPreview || blobUrlPictogram,
             message && calculateMediaViewerDimensions(photoDimensions!, hasFooter),
           )}
           {isVideo && (
             <VideoPlayer
-              key={fullMediaData}
-              url={fullMediaData}
+              key={messageId}
+              url={localBlobUrl || fullMediaData}
               isGif={isGif}
               posterData={blobUrlPreview || thumbDataUri}
               posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter)}

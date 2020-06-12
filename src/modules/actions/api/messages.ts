@@ -1,6 +1,14 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiMessage, ApiOnProgress } from '../../../api/types';
+import {
+  ApiAttachment,
+  ApiChat,
+  ApiMessage,
+  ApiMessageEntity, ApiNewPoll,
+  ApiOnProgress,
+  ApiSticker,
+  ApiVideo,
+} from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { MESSAGE_LIST_SLICE } from '../../../config';
@@ -118,45 +126,69 @@ addReducer('sendMessage', (global, actions, payload) => {
     return;
   }
 
-  const {
-    text, entities, attachment, sticker, gif, poll,
-  } = payload!;
-  const replyingTo = global.chats.replyingToById[chat.id];
+  const params = {
+    ...payload,
+    chat,
+    currentUserId,
+    replyingTo: global.chats.replyingToById[chat.id],
+  };
 
-  const progressCallback = attachment ? (progress: number, messageLocalId: number) => {
-    if (!uploadProgressCallbacks[messageLocalId]) {
-      uploadProgressCallbacks[messageLocalId] = progressCallback!;
-    }
+  const isSingle = !payload.attachments || payload.attachments.length <= 1;
+  const isGrouped = !isSingle && (
+    payload.attachments && payload.attachments.length > 1 && payload.attachments.every((a: ApiAttachment) => a.quick)
+  );
 
-    const newGlobal = getGlobal();
-
-    setGlobal({
-      ...newGlobal,
-      fileUploads: {
-        byMessageLocalId: {
-          ...newGlobal.fileUploads.byMessageLocalId,
-          [messageLocalId]: { progress },
-        },
-      },
+  if (isSingle) {
+    const { attachments, ...restParams } = params;
+    sendMessage({
+      ...restParams,
+      attachment: attachments ? attachments[0] : undefined,
     });
-  } : undefined;
+  } else if (isGrouped) {
+    const {
+      text, entities, attachments, ...commonParams
+    } = params;
+    const [firstAttachment, ...restAttachements] = attachments;
+    const groupedId = String(Date.now());
 
-  (async () => {
-    await callApi('sendMessage', {
-      chat, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
-    }, progressCallback);
+    sendMessage({
+      ...commonParams,
+      text,
+      entities,
+      attachment: firstAttachment,
+      groupedId,
+    });
 
-    if (progressCallback) {
-      const callbackKey = Object.keys(uploadProgressCallbacks).find((key) => (
-        uploadProgressCallbacks[key] === progressCallback
-      ));
-      if (callbackKey) {
-        delete uploadProgressCallbacks[callbackKey];
-      }
+    restAttachements.forEach((attachment: ApiAttachment) => {
+      sendMessage({
+        ...commonParams,
+        attachment,
+        groupedId,
+      });
+    });
+  } else {
+    const {
+      text, entities, attachments, replyingTo, ...commonParams
+    } = params;
+
+    if (text) {
+      sendMessage({
+        ...commonParams,
+        text,
+        entities,
+        replyingTo,
+      });
     }
 
-    actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
-  })();
+    attachments.forEach((attachment: ApiAttachment) => {
+      sendMessage({
+        ...commonParams,
+        attachment,
+      });
+    });
+  }
+
+  actions.setChatReplyingTo({ chatId: chat.id, messageId: undefined });
 });
 
 addReducer('editMessage', (global, actions, payload) => {
@@ -397,6 +429,47 @@ function getViewportSlice(
   }
 
   return { newViewportIds, areSomeLocal, areAllLocal };
+}
+
+async function sendMessage(params: {
+  chat: ApiChat;
+  currentUserId: number;
+  text: string;
+  entities: ApiMessageEntity[];
+  replyingTo: number;
+  attachment: ApiAttachment;
+  sticker: ApiSticker;
+  gif: ApiVideo;
+  poll: ApiNewPoll;
+}) {
+  const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
+    if (!uploadProgressCallbacks[messageLocalId]) {
+      uploadProgressCallbacks[messageLocalId] = progressCallback!;
+    }
+
+    const newGlobal = getGlobal();
+
+    setGlobal({
+      ...newGlobal,
+      fileUploads: {
+        byMessageLocalId: {
+          ...newGlobal.fileUploads.byMessageLocalId,
+          [messageLocalId]: { progress },
+        },
+      },
+    });
+  } : undefined;
+
+  await callApi('sendMessage', params, progressCallback);
+
+  if (progressCallback) {
+    const callbackKey = Object.keys(uploadProgressCallbacks).find((key) => (
+      uploadProgressCallbacks[key] === progressCallback
+    ));
+    if (callbackKey) {
+      delete uploadProgressCallbacks[callbackKey];
+    }
+  }
 }
 
 async function forwardMessages(

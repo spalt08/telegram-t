@@ -213,7 +213,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
 }
 
 export function generateRandomBigInt() {
-  return readBigIntFromBuffer(generateRandomBytes(8), false);
+  return readBigIntFromBuffer(generateRandomBytes(8), true, true);
 }
 
 export function reduceWaveform(waveform: number[]) {

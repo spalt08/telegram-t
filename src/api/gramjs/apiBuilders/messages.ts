@@ -557,6 +557,7 @@ export function buildLocalMessage(
   sticker?: ApiSticker,
   gif?: ApiVideo,
   poll?: ApiNewPoll,
+  groupedId?: string,
 ): ApiMessage {
   const localId = localMessageCounter++;
 
@@ -580,6 +581,7 @@ export function buildLocalMessage(
     senderUserId: currentUserId,
     sendingState: 'messageSendingStatePending',
     ...(replyingTo && { replyToMessageId: replyingTo }),
+    groupedId,
   };
 }
 

@@ -224,13 +224,20 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if ((
     originRequest instanceof GramJs.messages.SendMessage
     || originRequest instanceof GramJs.messages.SendMedia
+    || originRequest instanceof GramJs.messages.SendMultiMedia
     || originRequest instanceof GramJs.messages.ForwardMessages
   ) && (
     update instanceof GramJs.UpdateMessageID
     || update instanceof GramJs.UpdateShortSentMessage
   )) {
-    const { randomId } = originRequest;
-    const localMessage = localDb.localMessages[randomId.toString()];
+    let randomId;
+    if ('randomId' in update) {
+      randomId = update.randomId;
+    } else if ('randomId' in originRequest) {
+      randomId = originRequest.randomId;
+    }
+
+    const localMessage = randomId && localDb.localMessages[randomId.toString()];
     if (!localMessage) {
       throw new Error('Local message not found');
     }

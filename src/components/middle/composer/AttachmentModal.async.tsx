@@ -5,8 +5,8 @@ import { Bundles } from '../../../util/moduleLoader';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const AttachmentModalAsync: FC<OwnProps> = (props) => {
-  const { attachment } = props;
-  const AttachmentModal = useModuleLoader(Bundles.Extra, 'AttachmentModal', !attachment);
+  const { attachments } = props;
+  const AttachmentModal = useModuleLoader(Bundles.Extra, 'AttachmentModal', !attachments.length);
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return AttachmentModal ? <AttachmentModal {...props} /> : undefined;

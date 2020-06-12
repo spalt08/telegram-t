@@ -7,26 +7,47 @@
   }
 
   .media-wrapper {
-    max-height: 23.75rem;
-    flex-shrink: 0;
-    border-radius: var(--border-radius-default);
-    overflow: hidden;
+    max-height: 26rem;
+    overflow: auto;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     margin-bottom: 1.5rem;
 
     video,
     img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      object-position: center;
+      flex: 1;
+      width: calc(50% - 0.15rem);
+      height: 12rem;
+      margin-bottom: 0.3rem;
+      border-radius: var(--border-radius-default);
       object-fit: cover;
+
+      &:only-child {
+        height: auto;
+        max-height: 25rem;
+        margin-bottom: 0;
+      }
+
+      &:nth-child(even) {
+        margin-left: 0.3rem;
+      }
     }
   }
 
   .document-wrapper {
+    max-height: 25rem;
+    overflow: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
     margin: .75rem 0 1.75rem;
+
+    .File:not(:last-child) {
+      margin-bottom: 1.5rem;
+    }
+
+    .file-icon {
+      cursor: default !important;
+    }
   }
 }
