@@ -60,6 +60,7 @@ export function register(trackId: number, handler: Handler) {
 
       if (!audio.src) {
         audio.src = src;
+        audio.preload = 'auto';
       }
 
       audio.play().catch((err) => {
