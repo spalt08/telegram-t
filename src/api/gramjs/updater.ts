@@ -148,7 +148,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         const avatar = buildAvatar(photo);
 
         const localDbChatId = Math.abs(resolveMessageApiChatId(update.message)!);
-        localDb.chats[localDbChatId].photo = photo;
+        if (localDb.chats[localDbChatId]) {
+          localDb.chats[localDbChatId].photo = photo;
+        }
 
         if (avatar) {
           onUpdate({
@@ -159,7 +161,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         }
       } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
         const localDbChatId = Math.abs(resolveMessageApiChatId(update.message)!);
-        localDb.chats[localDbChatId].photo = new GramJs.ChatPhotoEmpty();
+        if (localDb.chats[localDbChatId]) {
+          localDb.chats[localDbChatId].photo = new GramJs.ChatPhotoEmpty();
+        }
 
         onUpdate({
           '@type': 'updateChat',
@@ -518,7 +522,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     const { userId, photo } = update;
     const avatar = buildAvatar(photo);
 
-    localDb.users[userId].photo = photo;
+    if (localDb.users[userId]) {
+      localDb.users[userId].photo = photo;
+    }
 
     onUpdate({
       '@type': 'updateUser',
