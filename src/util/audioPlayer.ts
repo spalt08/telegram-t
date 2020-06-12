@@ -1,3 +1,5 @@
+import { DEBUG } from '../config';
+
 type Handler = (eventName: string, e: Event) => void;
 
 const tracks: Record<number, {
@@ -13,6 +15,10 @@ function createAudio(trackId: number) {
 
   function handleEvent(eventName: string) {
     return (e: Event) => {
+      if (!tracks[trackId]) {
+        return;
+      }
+
       tracks[trackId].handlers.forEach((handler) => {
         handler(eventName, e);
       });
@@ -45,7 +51,7 @@ export function register(trackId: number, handler: Handler) {
   handlers.push(handler);
 
   return {
-    async play(src: string) {
+    play(src: string) {
       if (currentTrackId && currentTrackId !== trackId) {
         tracks[currentTrackId].audio.pause();
       }
@@ -56,7 +62,12 @@ export function register(trackId: number, handler: Handler) {
         audio.src = src;
       }
 
-      return audio.play();
+      audio.play().catch((err) => {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
+      });
     },
 
     pause() {
