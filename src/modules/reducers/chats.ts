@@ -193,7 +193,7 @@ export function updateSecondaryChatsInfo(
     replyingToById: Record<number, number>;
   },
 ) {
-  const pinedIdsKey = type;
+  const pinnedIdsKey = type;
   const totalCountKey = type === 'active' ? 'all' : 'archived';
 
   return {
@@ -202,7 +202,7 @@ export function updateSecondaryChatsInfo(
       ...global.chats,
       orderedPinnedIds: {
         ...global.chats.orderedPinnedIds,
-        [pinedIdsKey]: info.orderedPinnedIds,
+        [pinnedIdsKey]: info.orderedPinnedIds,
       },
       totalCount: {
         ...global.chats.totalCount,

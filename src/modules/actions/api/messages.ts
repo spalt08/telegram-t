@@ -92,7 +92,7 @@ addReducer('loadViewportMessages', (global, actions, payload) => {
       const offsetId = viewportIds[viewportIds.length - 1];
       const {
         newViewportIds, areSomeLocal, areAllLocal,
-      } = getViewportSlice(historyIds!, offsetId, LoadMoreDirection.Forwards);
+      } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Forwards);
 
       if (areSomeLocal) {
         newGlobal = safeReplaceViewportIds(newGlobal, chatId, newViewportIds);

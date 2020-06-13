@@ -25,7 +25,7 @@ import { pick } from '../../util/iteratees';
 import fastSmoothScroll from '../../util/fastSmoothScroll';
 
 import Transition from '../ui/Transition';
-import InfiniteScroll from '../ui/InfiniteScroll';
+import SimpleInfiniteScroll from '../ui/SimpleInfiniteScroll';
 import TabList from '../ui/TabList';
 import Loading from '../ui/Loading';
 import ListItem from '../ui/ListItem';
@@ -314,7 +314,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <InfiniteScroll
+    <SimpleInfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
       items={mediaType === 'members' ? memberIds : messageIds}
@@ -349,7 +349,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
           <TabList activeTab={activeTab} tabs={mediaTabs} onSwitchTab={setActiveTab} />
         </div>
       )}
-    </InfiniteScroll>
+    </SimpleInfiniteScroll>
   );
 };
 

@@ -83,10 +83,10 @@ const ChatFolders: FC<StateProps & DispatchProps> = ({
       .find(({ title }) => title === folderTabs[activeTab].title);
 
     if (!activeFolder || activeTab === 0) {
-      return <ChatList listType="active" />;
+      return <ChatList folderType="all" />;
     }
 
-    return <ChatList listType="folder" folderId={activeFolder.id} noChatsText="Folder is empty." />;
+    return <ChatList folderType="folder" folderId={activeFolder.id} noChatsText="Folder is empty." />;
   }
 
   return (

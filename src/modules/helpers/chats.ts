@@ -256,15 +256,15 @@ export function prepareChatList(
   chatsById: Record<number, ApiChat>,
   listIds: number[],
   orderedPinnedIds?: number[],
-  listType: 'all' | 'archived' | 'active' | 'folder' = 'all',
+  folderType: 'all' | 'archived' | 'folder' = 'all',
 ) {
   const chatFilter = (chat?: ApiChat) => {
-    if (!chat || !chat.lastMessage) {
+    if (!chat || !chat.lastMessage || !listIds.includes(chat.id)) {
       return false;
     }
 
-    switch (listType) {
-      case 'active':
+    switch (folderType) {
+      case 'all':
         if (isChatArchived(chat)) {
           return false;
         }

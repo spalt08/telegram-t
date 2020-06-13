@@ -5,21 +5,22 @@ import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
-import { LoadMoreDirection } from '../../../types';
 
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
 import { selectTotalChatCount, selectChatFolder } from '../../../modules/selectors';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 
 import './ChatList.scss';
+import { CHAT_LIST_SLICE } from '../../../config';
 
 type OwnProps = {
-  listType: 'active' | 'archived' | 'folder';
+  folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
   noChatsText?: string;
 };
@@ -37,8 +38,13 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, 'loadMoreChats' | 'preloadTopChatMessages'>;
 
+enum FolderTypeToListType {
+  'all' = 'active',
+  'archived' = 'archived'
+}
+
 const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
-  listType,
+  folderType,
   folderId,
   noChatsText = 'Chat list is empty.',
   chatFolder,
@@ -47,28 +53,29 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
   listIds,
   selectedChatId,
   orderedPinnedIds,
-  totalCount,
   lastSyncTime,
   loadMoreChats,
   preloadTopChatMessages,
 }) => {
   const [currentListIds, currentPinnedIds] = useMemo(() => {
-    return listType === 'folder' && chatFolder
+    return folderType === 'folder' && chatFolder
       ? prepareFolderListIds(chatsById, usersById, chatFolder)
       : [listIds, orderedPinnedIds];
-  }, [listType, chatsById, usersById, chatFolder, listIds, orderedPinnedIds]);
+  }, [folderType, chatsById, usersById, chatFolder, listIds, orderedPinnedIds]);
 
-  const [chatArrays, orderById] = useMemo(() => {
-    if (!currentListIds || (listType === 'folder' && !chatFolder)) {
+  const [orderById, orderedIds] = useMemo(() => {
+    if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
       return [];
     }
 
-    const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, listType);
-    const newOrderById = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats]
+    const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, folderType);
+    const singleList = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats];
+    const newOrderedIds = singleList.map(({ id }) => id);
+    const newOrderById = singleList
       .reduce((acc, chat, index) => ({ ...acc, [chat.id]: index }), {} as Record<string, number>);
 
-    return [newChatArrays, newOrderById];
-  }, [currentListIds, currentPinnedIds, listType, chatFolder, chatsById]);
+    return [newOrderById, newOrderedIds];
+  }, [currentListIds, currentPinnedIds, folderType, chatFolder, chatsById]);
 
   const prevOrderById = usePrevious(orderById);
   const orderDiffById = orderById && prevOrderById
@@ -77,32 +84,28 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     })
     : {};
 
-  const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    loadMoreChats({ direction, listType });
-  }, [loadMoreChats, listType]);
+  const loadMoreOfType = useCallback(() => {
+    loadMoreChats({ listType: folderType === 'archived' ? 'archived' : 'active' });
+  }, [loadMoreChats, folderType]);
+
+  const [viewportIds, getMore] = useInfiniteScroll(loadMoreOfType, orderedIds);
+  // TODO Refactor to not call `prepareChatList` twice
+  const chatArrays = prepareChatList(chatsById, viewportIds, currentPinnedIds, folderType);
 
   useEffect(() => {
-    if (lastSyncTime) {
-      preloadTopChatMessages({ listType });
+    if (lastSyncTime && folderType === 'all') {
+      preloadTopChatMessages();
     }
-  }, [lastSyncTime, listType, preloadTopChatMessages]);
-
-  useEffect(() => {
-    if (
-      listIds && totalCount
-      && listIds.length < totalCount
-    ) {
-      loadMoreChats({ listType });
-    }
-  }, [listIds, totalCount, listType, loadMoreChats]);
+  }, [lastSyncTime, folderType, preloadTopChatMessages]);
 
   return (
     <InfiniteScroll
       className="ChatList custom-scroll optimized-list"
-      items={currentListIds || []}
-      onLoadMore={handleLoadMore}
+      items={viewportIds}
+      onLoadMore={getMore}
+      preloadBackwards={CHAT_LIST_SLICE}
     >
-      {currentListIds && currentListIds.length && chatArrays ? (
+      {viewportIds && viewportIds.length && chatArrays ? (
         <div teactFastList>
           {chatArrays.pinnedChats.map(({ id }, i) => (
             <Chat
@@ -129,7 +132,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
             />
           ))}
         </div>
-      ) : currentListIds && currentListIds.length === 0 ? (
+      ) : viewportIds && viewportIds.length === 0 ? (
         <div className="no-chats">{noChatsText}</div>
       ) : (
         <Loading />
@@ -139,7 +142,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { listType, folderId }): StateProps => {
+  (global, { folderType, folderId }): StateProps => {
     const {
       chats: {
         listIds,
@@ -151,19 +154,21 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
     } = global;
 
+    const listType = folderType !== 'folder' ? FolderTypeToListType[folderType] : undefined;
     const chatFolder = folderId ? selectChatFolder(global, folderId) : undefined;
 
     return {
       chatsById,
       usersById,
-      chatFolder,
-      ...(listType !== 'folder' && {
+      selectedChatId,
+      lastSyncTime,
+      ...(listType ? {
         listIds: listIds[listType],
         orderedPinnedIds: orderedPinnedIds[listType],
         totalCount: selectTotalChatCount(global, listType),
+      } : {
+        chatFolder,
       }),
-      selectedChatId,
-      lastSyncTime,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['loadMoreChats', 'preloadTopChatMessages']),
