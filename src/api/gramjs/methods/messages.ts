@@ -173,6 +173,8 @@ export function sendMessage(
           console.warn(err);
         }
 
+        await prevQueue;
+
         return;
       }
     } else if (sticker) {
@@ -227,16 +229,14 @@ function sendGroupedMedia(
   onProgress?: ApiOnProgress,
 ) {
   let groupIndex = -1;
-  if (groupedId) {
-    if (!groupedUploads[groupedId]) {
-      groupedUploads[groupedId] = {
-        counter: 0,
-        singleMediaByIndex: {},
-      };
-    }
-
-    groupIndex = groupedUploads[groupedId].counter++;
+  if (!groupedUploads[groupedId]) {
+    groupedUploads[groupedId] = {
+      counter: 0,
+      singleMediaByIndex: {},
+    };
   }
+
+  groupIndex = groupedUploads[groupedId].counter++;
 
   const prevQueue = queue;
   queue = (async () => {
@@ -251,6 +251,8 @@ function sendGroupedMedia(
 
       groupedUploads[groupedId].counter--;
 
+      await prevQueue;
+
       return;
     }
 
@@ -259,9 +261,17 @@ function sendGroupedMedia(
       media as GramJs.InputMediaUploadedPhoto | GramJs.InputMediaUploadedDocument,
     );
 
+    await prevQueue;
+
     if (!inputMedia) {
       groupedUploads[groupedId].counter--;
-      throw new Error('Failed to upload grouped media');
+
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to upload grouped media');
+      }
+
+      return;
     }
 
     groupedUploads[groupedId].singleMediaByIndex[groupIndex] = new GramJs.InputSingleMedia({
@@ -275,20 +285,15 @@ function sendGroupedMedia(
       return;
     }
 
-    await prevQueue;
+    const { singleMediaByIndex } = groupedUploads[groupedId];
+    delete groupedUploads[groupedId];
 
-    if (groupedId) {
-      const { singleMediaByIndex } = groupedUploads[groupedId];
-
-      delete groupedUploads[groupedId];
-
-      await invokeRequest(new GramJs.messages.SendMultiMedia({
-        clearDraft: true,
-        peer: buildInputPeer(chat.id, chat.accessHash),
-        multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
-        replyToMsgId: replyingTo,
-      }), true);
-    }
+    await invokeRequest(new GramJs.messages.SendMultiMedia({
+      clearDraft: true,
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
+      replyToMsgId: replyingTo,
+    }), true);
   })();
 
   return queue;
