@@ -38,12 +38,18 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMessage'>;
+type DispatchProps = Pick<GlobalActions, ('loadMessage' | 'openPollResults')>;
 
 const NBSP = '\u00A0';
 
 const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, poll, recentVoterIds, usersById, onSendVote, loadMessage,
+  message,
+  poll,
+  recentVoterIds,
+  usersById,
+  loadMessage,
+  onSendVote,
+  openPollResults,
 }) => {
   const { id: messageId, chatId } = message;
   const { summary, results } = poll;
@@ -173,6 +179,12 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
       setWasSubmitted(true);
       onSendVote(chosenOptions);
     }, [onSendVote, chosenOptions],
+  );
+
+  const handleViewResultsClick = useCallback(
+    () => {
+      openPollResults({ chatId, messageId });
+    }, [chatId, messageId, openPollResults],
   );
 
   const handleSolutionShow = useCallback(() => {
@@ -321,7 +333,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
           isText
           ripple
           size="tiny"
-          className="not-implemented"
+          onClick={handleViewResultsClick}
         >
           View Results
         </Button>
@@ -372,5 +384,5 @@ export default memo(withGlobal<OwnProps>(
       usersById,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadMessage', 'openPollResults']),
 )(Poll));

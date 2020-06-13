@@ -295,6 +295,14 @@ addReducer('sendPollVote', (global, actions, payload) => {
   }
 });
 
+addReducer('getPollVotes', (global, actions, payload) => {
+  const {
+    chat, messageId, option, offset, limit,
+  } = payload!;
+
+  void loadPollResults(chat, messageId, option, offset, limit);
+});
+
 addReducer('forwardMessages', (global) => {
   const { currentUserId } = global;
   const { fromChatId, messageIds, toChatIds } = global.forwardMessages;
@@ -499,4 +507,42 @@ async function forwardMessages(
       forwardMessages: {},
     });
   }
+}
+
+async function loadPollResults(
+  chat: ApiChat,
+  messageId: number,
+  option: string,
+  offset?: string,
+  limit?: number,
+) {
+  const result = await callApi('getPollVotes', {
+    chat, messageId, option, offset, limit,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  let global = getGlobal();
+
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+
+  setGlobal({
+    ...global,
+    pollResults: {
+      ...global.pollResults,
+      voters: {
+        ...(global.pollResults.voters ? global.pollResults.voters : {}),
+        [option]: [
+          ...(global.pollResults.voters && global.pollResults.voters[option] ? global.pollResults.voters[option] : []),
+          ...(result && result.users.map((user) => user.id)),
+        ],
+      },
+      offsets: {
+        ...(global.pollResults.offsets ? global.pollResults.offsets : {}),
+        [option]: result.nextOffset || '',
+      },
+    },
+  });
 }

@@ -27,6 +27,7 @@ type OwnProps = {
   onClose: () => void;
   isColumnOpen?: boolean;
   isForwarding?: boolean;
+  isPollResults?: boolean;
   isSearch?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
@@ -57,12 +58,14 @@ enum HeaderContent {
   StickerSearch,
   GifSearch,
   Forward,
+  PollResults,
 }
 
 const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isColumnOpen,
   isForwarding,
+  isPollResults,
   isSearch,
   isStickerSearch,
   isGifSearch,
@@ -102,6 +105,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     HeaderContent.Forward
   ) : isSearch ? (
     HeaderContent.Search
+  ) : isPollResults ? (
+    HeaderContent.PollResults
   ) : isStickerSearch ? (
     HeaderContent.StickerSearch
   ) : isGifSearch ? (
@@ -134,6 +139,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     switch (contentKey) {
       case HeaderContent.Forward:
         return <h3>Forward</h3>;
+      case HeaderContent.PollResults:
+        return <h3>Results</h3>;
       case HeaderContent.Search:
         return <SearchInput value={messageSearchQuery} onChange={handleMessageSearchQueryChange} />;
       case HeaderContent.StickerSearch:

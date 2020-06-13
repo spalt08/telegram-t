@@ -92,6 +92,7 @@ function updateCache(global: GlobalState) {
     audioPlayer: {},
     webPagePreview: undefined,
     forwardMessages: {},
+    pollResults: {},
     chatCreation: undefined,
     profileEdit: undefined,
     settings: reduceSettings(global),

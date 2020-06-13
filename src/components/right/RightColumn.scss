@@ -17,7 +17,7 @@
     }
   }
 
-  @media (min-width: 1276px) {
+  @media (min-width: 1276px), (max-width: 600px) {
     pointer-events: all;
   }
 

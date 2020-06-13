@@ -11,6 +11,7 @@ import {
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, deleteHistory, markMessagesRead,
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
+  getPollVotes,
 } from './messages';
 import {
   fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
@@ -58,6 +59,7 @@ export default {
   searchMessagesGlobal,
   fetchWebPagePreview,
   sendPollVote,
+  getPollVotes,
   editMessage,
   forwardMessages,
   fetchFullChat,

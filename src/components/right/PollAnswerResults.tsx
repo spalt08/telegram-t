@@ -1,0 +1,144 @@
+import React, {
+  FC, useCallback, useState, memo, useEffect,
+} from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
+
+import { ApiChat, PollAnswer, PollAnswerVote } from '../../api/types';
+import { selectChat } from '../../modules/selectors';
+import { GlobalActions } from '../../global/types';
+import { pick } from '../../util/iteratees';
+
+import Button from '../ui/Button';
+import Loading from '../ui/Loading';
+import ListItem from '../ui/ListItem';
+import PrivateChatInfo from '../common/PrivateChatInfo';
+
+import './PollAnswerResults.scss';
+
+type OwnProps = {
+  chatId: number;
+  messageId: number;
+  answer: PollAnswer;
+  answerVote: PollAnswerVote;
+  totalVoters: number;
+};
+
+type StateProps = {
+  chat: ApiChat;
+  voters: number[];
+  offset: string;
+};
+
+type DispatchProps = Pick<GlobalActions, 'getPollVotes' | 'openChat' | 'closePollResults'>;
+
+const INITIAL_LIMIT = 4;
+const VIEW_MORE_LIMIT = 50;
+
+const isMobile = matchMedia('(max-width: 600px)');
+
+const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
+  chat,
+  messageId,
+  answer,
+  answerVote,
+  totalVoters,
+  voters,
+  offset,
+  getPollVotes,
+  openChat,
+  closePollResults,
+}) => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [limit, setLimit] = useState<number>(INITIAL_LIMIT);
+  const { option, text } = answer;
+
+  useEffect(() => {
+    getPollVotes({
+      chat, messageId, option, offset, limit,
+    });
+    setLimit(VIEW_MORE_LIMIT);
+    // eslint-disable-next-line
+  }, []);
+
+  const handleViewMoreClick = useCallback(() => {
+    setIsLoading(true);
+    getPollVotes({
+      chat, messageId, option, offset, limit,
+    });
+  }, [chat, getPollVotes, limit, messageId, offset, option]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [voters]);
+
+  const handleMemberClick = useCallback((id: number) => {
+    openChat({ id });
+    if (isMobile.matches) {
+      closePollResults();
+    }
+  }, [closePollResults, openChat]);
+
+  function renderViewMoreButton() {
+    const leftVotersCount = answerVote.voters - voters.length;
+
+    return voters.length > 0 && leftVotersCount > 0 && (
+      <Button
+        color="translucent"
+        ripple
+        size="smaller"
+        isText
+        isLoading={isLoading}
+        onClick={handleViewMoreClick}
+      >
+        <i className="icon-down" />
+          Show {leftVotersCount} more {leftVotersCount > 1 ? 'voters' : 'voter'}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="PollAnswerResults">
+      <div className="answer-head">
+        <span className="answer-title">{text}</span>
+        <span className="answer-percent">{getPercentage(answerVote.voters, totalVoters)}%</span>
+      </div>
+      <div className="poll-voters">
+        {voters.length || answerVote.voters === 0
+          ? voters.map((id) => (
+            <ListItem
+              key={id}
+              className="chat-item-clickable"
+              onClick={() => handleMemberClick(id)}
+            >
+              <PrivateChatInfo
+                avatarSize="tiny"
+                userId={id}
+                forceShowSelf
+                showStatusOrTyping={false}
+              />
+            </ListItem>
+          ))
+          : <Loading />}
+        {renderViewMoreButton()}
+      </div>
+    </div>
+  );
+};
+
+function getPercentage(value: number, total: number) {
+  return total > 0 ? ((value / total) * 100).toFixed() : 0;
+}
+
+export default memo(withGlobal<OwnProps>(
+  (global, { chatId, answer }: OwnProps): StateProps => {
+    const chat = selectChat(global, chatId)!;
+    const { voters, offsets } = global.pollResults;
+
+    return {
+      chat,
+      voters: (voters && voters[answer.option]) || [],
+      offset: (offsets && offsets[answer.option]) || '',
+    };
+  },
+  (global, actions): DispatchProps => pick(actions, ['getPollVotes', 'openChat', 'closePollResults']),
+)(PollAnswerResults));

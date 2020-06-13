@@ -664,6 +664,49 @@ export async function sendPollVote({
   }), true);
 }
 
+export async function getPollVotes({
+  chat, messageId, option, offset, limit,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  option?: string;
+  offset?: string;
+  limit?: number;
+}) {
+  const { id, accessHash } = chat;
+
+  const result = await invokeRequest(new GramJs.messages.GetPollVotes({
+    peer: buildInputPeer(id, accessHash),
+    id: messageId,
+    ...(option && { option: Buffer.from(option) }),
+    ...(offset && { offset }),
+    ...(limit && { limit }),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  updateLocalDb({
+    chats: [] as GramJs.TypeChat[],
+    users: result.users,
+    messages: [] as GramJs.Message[],
+  } as GramJs.messages.Messages);
+
+  const users = result.users.map(buildApiUser).filter<ApiUser>(Boolean as any);
+  const votes = result.votes.map((vote) => ({
+    userId: vote.userId,
+    date: vote.date,
+  }));
+
+  return {
+    count: result.count,
+    votes,
+    users,
+    nextOffset: result.nextOffset,
+  };
+}
+
 export async function forwardMessages({
   fromChat,
   toChats,

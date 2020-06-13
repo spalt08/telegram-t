@@ -206,6 +206,14 @@ export type GlobalState = {
     inProgress?: boolean;
   };
 
+  pollResults: {
+    isColumnShown?: boolean;
+    chatId?: number;
+    messageId?: number;
+    voters?: Record<string, number[]>;
+    offsets?: Record<string, string>;
+  };
+
   chatCreation?: {
     progress: ChatCreationProgress;
     error?: string;
@@ -242,6 +250,8 @@ export type ActionTypes = (
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markChatRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |
   'deleteHistory' |
+  // poll result
+  'openPollResults' | 'closePollResults' | 'getPollVotes' |
   // forwarding messages
   'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search
