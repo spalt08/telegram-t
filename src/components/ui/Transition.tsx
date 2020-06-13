@@ -5,6 +5,7 @@ import React, {
 import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import './Transition.scss';
 
@@ -122,6 +123,8 @@ const Transition: FC<OwnProps> = ({
         behavior: 'smooth',
       });
     }
+
+    dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
 
     requestAnimationFrame(() => {
       container.classList.add('animating');

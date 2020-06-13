@@ -45,6 +45,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   const animationRef = useRef<AnimationItem>();
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
+  const playRef = useRef();
+  playRef.current = play;
 
   useEffect(() => {
     if (animationRef.current || !animationData) {
@@ -93,16 +95,14 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, []);
 
   const playAnimation = () => {
-    const animation = animationRef.current;
-    if (animation) {
-      animation.play();
+    if (animationRef.current && playRef.current) {
+      animationRef.current.play();
     }
   };
 
   const pauseAnimation = () => {
-    const animation = animationRef.current;
-    if (animation) {
-      animation.pause();
+    if (animationRef.current) {
+      animationRef.current.pause();
     }
   };
 

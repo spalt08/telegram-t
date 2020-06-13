@@ -28,14 +28,14 @@
     z-index: var(--z-menu-bubble);
 
     transform: scale(0.2);
-    transition: opacity 0.15s ease-out, transform 0.2s ease-out !important;
+    transition: opacity .2s ease-out, transform .2s ease-out !important;
 
     &.open {
       transform: scale(1);
     }
 
     &.closing {
-      transition: opacity 0.15s ease-in, transform 0.2s ease-in !important;
+      transition: opacity .2s ease-in, transform .2s ease-in !important;
     }
 
     body.has-open-dialog & {

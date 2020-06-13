@@ -4,11 +4,14 @@ import useShowTransition from '../../hooks/useShowTransition';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import Button from './Button';
 import Portal from './Portal';
 
 import './Modal.scss';
+
+const ANIMATION_DURATION = 200;
 
 type OwnProps = {
   title?: string;
@@ -42,6 +45,7 @@ const Modal: FC<OwnProps> = (props) => {
 
   useEffect(() => {
     document.body.classList.toggle('has-open-dialog', isOpen);
+    dispatchHeavyAnimationEvent(ANIMATION_DURATION);
   }, [isOpen]);
 
   if (!shouldRender) {

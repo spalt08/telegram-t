@@ -38,6 +38,7 @@ import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgre
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import { pick } from '../../util/iteratees';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -150,12 +151,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
   useEffect(() => {
     if (isGhostAnimation && isOpen && !prevMessage && !prevAvatarOwner) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
       const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
       animateOpening(message!, hasFooter, origin!, bestImageData!);
     }
 
     if (isGhostAnimation && !isOpen && (prevMessage || prevAvatarOwner)) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
       animateClosing(prevMessage!, prevOrigin!);
     }
   }, [isGhostAnimation, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner, bestImageData]);
