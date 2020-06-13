@@ -209,11 +209,11 @@ export function safeReplaceViewportIds(
 ): GlobalState {
   const viewportIds = selectViewportIds(global, chatId) || [];
 
-  if (areSortedArraysEqual(viewportIds, newViewportIds)) {
-    return global;
-  }
-
-  return replaceViewportIds(global, chatId, newViewportIds);
+  return replaceViewportIds(
+    global,
+    chatId,
+    areSortedArraysEqual(viewportIds, newViewportIds) ? viewportIds : newViewportIds,
+  );
 }
 
 export function updateFocusedMessage(
