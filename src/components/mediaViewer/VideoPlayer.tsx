@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef,
+  FC, memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
 import { IDimensions } from '../../modules/helpers';
@@ -18,6 +18,7 @@ type OwnProps = {
   posterSize?: IDimensions;
   downloadProgress?: number;
   isMediaViewerOpen?: boolean;
+  noPlay?: boolean;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
@@ -28,6 +29,7 @@ const VideoPlayer: FC<OwnProps> = ({
   posterSize,
   downloadProgress,
   isMediaViewerOpen,
+  noPlay,
   onClose,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
@@ -38,11 +40,13 @@ const VideoPlayer: FC<OwnProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
 
-  useLayoutEffect(() => {
-    if (!isMediaViewerOpen) {
+  useEffect(() => {
+    if (noPlay || !isMediaViewerOpen) {
       videoRef.current!.pause();
+    } else if (url) {
+      videoRef.current!.play();
     }
-  }, [isMediaViewerOpen]);
+  }, [noPlay, isMediaViewerOpen, url]);
 
   const stopEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -52,7 +56,7 @@ const VideoPlayer: FC<OwnProps> = ({
     <div className="VideoPlayer" onClick={!isGif ? stopEvent : undefined}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
-        autoPlay
+        ref={videoRef}
         playsInline
         controls={!isGif}
         loop={isGif}
@@ -65,7 +69,7 @@ const VideoPlayer: FC<OwnProps> = ({
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...bufferingHandlers}
       >
-        <source src={url} />
+        {url && <source src={url} />}
       </video>
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>

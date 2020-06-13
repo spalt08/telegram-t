@@ -8,7 +8,7 @@ import buildClassName from '../../util/buildClassName';
 
 import './Transition.scss';
 
-type ChildrenFn = () => any;
+type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
   activeKey: any;
   name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
@@ -190,10 +190,12 @@ const Transition: FC<OwnProps> = ({
   if (renderCount) {
     contents = [];
     for (let key = 0; key < renderCount; key++) {
-      contents.push(renders[key] ? <div key={key}>{renders[key]()}</div> : undefined);
+      contents.push(renders[key] ? <div key={key}>{renders[key](key === activeKey)}</div> : undefined);
     }
   } else {
-    contents = Object.keys(renders).map((key) => <div key={key}>{renders[Number(key)]()}</div>);
+    contents = Object.keys(renders).map((key) => (
+      <div key={key}>{renders[Number(key)](Number(key) === activeKey)}</div>
+    ));
   }
 
   const fullClassName = buildClassName(

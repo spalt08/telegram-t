@@ -1,5 +1,5 @@
 import React, {
-  FC, memo, useCallback, useEffect, useMemo, useState,
+  FC, memo, useCallback, useEffect, useMemo,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
@@ -37,6 +37,7 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import useMediaWithDownloadProgress from '../../hooks/useMediaWithDownloadProgress';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import { pick } from '../../util/iteratees';
+import useForceUpdate from '../../hooks/useForceUpdate';
 
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
@@ -73,26 +74,29 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   openForwardMenu,
   animationLevel,
 }) => {
-  const [, onMediaQueryChanged] = useState();
-  const prevOrigin = usePrevious(origin);
-  const isWebPagePhoto = Boolean(message && getMessageWebPagePhoto(message));
-  const isPhoto = message ? Boolean(getMessagePhoto(message)) || isWebPagePhoto : false;
-  const isVideo = message ? Boolean(getMessageVideo(message)) : false;
-  const isGif = message && isVideo ? getMessageVideo(message)!.isGif : undefined;
+  const isOpen = Boolean(avatarOwner || messageId);
+  const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
+  const photo = message ? getMessagePhoto(message) : undefined;
+  const video = message ? getMessageVideo(message) : undefined;
+  const isWebPagePhoto = Boolean(webPagePhoto);
+  const isPhoto = Boolean(photo || webPagePhoto);
+  const isVideo = Boolean(video);
+  const isGif = video ? video.isGif : undefined;
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
-  const fileName = avatarOwner
-    ? `avatar${avatarOwner.id}.jpg`
-    : message && getMessageMediaFilename(message);
-
   const slideAnimation = animationLevel >= 1 ? 'mv-slide' : 'none';
   const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
   const isGhostAnimation = animationLevel === 2;
+  const fileName = avatarOwner ? `avatar${avatarOwner.id}.jpg` : message && getMessageMediaFilename(message);
 
   const messageIds = useMemo(() => {
     return isWebPagePhoto && messageId
       ? [messageId]
       : getChatMediaMessageIds(chatMessages || {}, isFromSharedMedia);
   }, [isWebPagePhoto, messageId, chatMessages, isFromSharedMedia]);
+
+  const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
+  const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
+  const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
 
   function getMediaHash(full?: boolean) {
     if (avatarOwner) {
@@ -101,13 +105,6 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
 
     return message && getMessageMediaHash(message, full ? 'viewerFull' : 'viewerPreview');
   }
-
-  const selectedMediaMessageIndex = messageId ? messageIds.indexOf(messageId) : -1;
-  const isFirst = selectedMediaMessageIndex === 0 || selectedMediaMessageIndex === -1;
-  const isLast = selectedMediaMessageIndex === messageIds.length - 1 || selectedMediaMessageIndex === -1;
-  const isOpen = Boolean(avatarOwner || messageId);
-  const prevMessage = usePrevious<ApiMessage | undefined>(message);
-  const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
 
   const thumbDataUri = message && getMessageMediaThumbDataUri(message);
   const blobUrlPictogram = useMedia(message && isFromSharedMedia && getMessageMediaHash(message, 'pictogram'));
@@ -121,8 +118,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     undefined,
     isGhostAnimation && ANIMATION_DURATION,
   );
-
-  const localBlobUrl = message ? (getMessagePhoto(message) || getMessageVideo(message))!.blobUrl : undefined;
+  const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
   const bestImageData = (
     localBlobUrl || (isPhoto && fullMediaData) || blobUrlPreview || blobUrlPictogram || thumbDataUri
   );
@@ -131,23 +127,27 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   )!) : undefined;
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
 
+  const forceUpdate = useForceUpdate();
   useEffect(() => {
     const mql = window.matchMedia(MEDIA_VIEWER_MEDIA_QUERY);
     if (typeof mql.addEventListener === 'function') {
-      mql.addEventListener('change', onMediaQueryChanged);
+      mql.addEventListener('change', forceUpdate);
     } else if (typeof mql.addListener === 'function') {
-      mql.addListener(onMediaQueryChanged);
+      mql.addListener(forceUpdate);
     }
 
     return () => {
       if (typeof mql.removeEventListener === 'function') {
-        mql.removeEventListener('change', onMediaQueryChanged);
+        mql.removeEventListener('change', forceUpdate);
       } else if (typeof mql.removeListener === 'function') {
-        mql.removeListener(onMediaQueryChanged);
+        mql.removeListener(forceUpdate);
       }
     };
-  }, []);
+  }, [forceUpdate]);
 
+  const prevMessage = usePrevious<ApiMessage | undefined>(message);
+  const prevOrigin = usePrevious(origin);
+  const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
   useEffect(() => {
     if (isGhostAnimation && isOpen && !prevMessage && !prevAvatarOwner) {
       const textParts = message ? renderMessageText(message) : undefined;
@@ -236,7 +236,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     });
   }
 
-  function renderSlide() {
+  function renderSlide(isActive: boolean) {
     if (avatarOwner) {
       return (
         <div key={chatId} className="media-viewer-content">
@@ -262,6 +262,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter)}
               downloadProgress={downloadProgress}
               isMediaViewerOpen={isOpen}
+              noPlay={!isActive}
               onClose={handleClose}
             />
           )}
