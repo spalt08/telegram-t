@@ -36,39 +36,42 @@ const Statistics: FC = () => {
       }
 
       const growth = await fetchJson('./chartDummyData/growth.json');
-      LovelyChart.create(containerRef.current, growth);
+      LovelyChart.create(containerRef.current!.children[0], growth);
       setLoadedChartsCount(1);
 
       const notifications = await fetchJson('./chartDummyData/notifications.json');
       notifications.onZoom = (timestamp: number) => fetchDayData('chartDummyData/notifications_zoom', timestamp);
-      LovelyChart.create(containerRef.current, notifications);
+      LovelyChart.create(containerRef.current!.children[1], notifications);
       setLoadedChartsCount(2);
 
       const interactions = await fetchJson('./chartDummyData/interactions.json');
-      LovelyChart.create(containerRef.current, interactions);
+      LovelyChart.create(containerRef.current!.children[2], interactions);
       setLoadedChartsCount(3);
 
       const views = await fetchJson('./chartDummyData/views.json');
       views.onZoom = (timestamp: number) => fetchDayData('chartDummyData/views_zoom', timestamp);
-      LovelyChart.create(containerRef.current, views);
+      LovelyChart.create(containerRef.current!.children[3], views);
       setLoadedChartsCount(4);
 
       const languages = await fetchJson('./chartDummyData/languages.json');
-      LovelyChart.create(containerRef.current, languages);
+      LovelyChart.create(containerRef.current!.children[4], languages);
       setLoadedChartsCount(5);
     })();
   }, [isReady]);
 
-  useEffect(() => {
-    const chartEls = Array.from(containerRef.current!.querySelectorAll<HTMLDivElement>('.lovely-chart--container'));
-    chartEls.forEach((element) => {
-      element.classList.add('shown');
-    });
-  }, [loadedChartsCount]);
-
   return (
     <div className={buildClassName('Statistics custom-scroll', isReady && 'ready')} ref={containerRef}>
-      {!isReady && <Loading />}
+      {!isReady ? (
+        <Loading />
+      ) : (
+        <>
+          <div className={buildClassName('chat-container', loadedChartsCount < 1 && 'hidden')} />
+          <div className={buildClassName('chat-container', loadedChartsCount < 2 && 'hidden')} />
+          <div className={buildClassName('chat-container', loadedChartsCount < 3 && 'hidden')} />
+          <div className={buildClassName('chat-container', loadedChartsCount < 4 && 'hidden')} />
+          <div className={buildClassName('chat-container', loadedChartsCount < 5 && 'hidden')} />
+        </>
+      )}
     </div>
   );
 };

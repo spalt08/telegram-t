@@ -7,18 +7,21 @@
     overflow-y: scroll !important;
   }
 
-  .lovely-chart--container {
-    font: inherit !important;
-    font-size: 13px !important;
+  .chat-container {
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--color-borders);
 
-    opacity: 0;
+    opacity: 1;
     transition: opacity .3s ease;
 
-    &.shown {
-      opacity: 1;
+    &.hidden {
+      opacity: 0;
     }
+  }
+
+  .lovely-chart--container {
+    font: inherit !important;
+    font-size: 13px !important;
   }
 
   .lovely-chart--header {
