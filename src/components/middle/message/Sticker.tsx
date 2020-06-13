@@ -91,7 +91,7 @@ const Sticker: FC<OwnProps> = ({ message, loadAndPlay }) => {
           animationData={mediaData as AnyLiteral}
           width={width}
           height={height}
-          play={loadAndPlay}
+          play={isAnimationLoaded && loadAndPlay}
           className={['full-media', transitionClassNames].join(' ')}
           onLoad={handleAnimationLoad}
         />

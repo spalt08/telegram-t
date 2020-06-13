@@ -7,6 +7,7 @@ import '../modules/actions/all';
 import { pick } from '../util/iteratees';
 import buildClassName from '../util/buildClassName';
 import { selectIsRightColumnShown } from '../modules/selectors';
+import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 
 import { ANIMATION_END_DELAY, DEBUG } from '../config';
 import MediaViewer from './mediaViewer/MediaViewer.async';
@@ -45,6 +46,7 @@ const Main: FC<StateProps> = ({
   useEffect(() => {
     document.body.classList.toggle('is-right-column-shown', isRightColumnShown);
     document.body.classList.add('animating-right-column');
+    dispatchHeavyAnimationEvent(ANIMATION_DURATION);
 
     if (timeout) {
       clearTimeout(timeout);
