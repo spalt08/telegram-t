@@ -1,9 +1,10 @@
 import React, {
-  FC, memo, useCallback, useEffect, useLayoutEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import { IDimensions } from '../../modules/helpers';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 
@@ -43,7 +44,10 @@ const VideoPlayer: FC<OwnProps> = ({
   useEffect(() => {
     if (noPlay || !isMediaViewerOpen) {
       videoRef.current!.pause();
-    } else if (url) {
+    } else if (url && !IS_TOUCH_ENV) {
+      // Chrome does not automatically start playing when `url` becomes available (even with `autoPlay`),
+      // so we force it here. Contrary, iOS does not allow to call `play` without mouse event,
+      // so we need to use `autoPlay` instead to allow pre-buffering.
       videoRef.current!.play();
     }
   }, [noPlay, isMediaViewerOpen, url]);
@@ -57,6 +61,7 @@ const VideoPlayer: FC<OwnProps> = ({
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         ref={videoRef}
+        autoPlay={IS_TOUCH_ENV}
         playsInline
         controls={!isGif}
         loop={isGif}

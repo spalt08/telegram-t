@@ -80,7 +80,7 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
       const prepared = prepareMedia(media);
 
       if (mediaFormat === ApiMediaFormat.BlobUrl) {
-        await preload(prepared as string, cached.type);
+        await preload(prepared as string, media.type);
       }
 
       MEMORY_CACHE[url] = prepared;
@@ -98,8 +98,8 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
   if (mimeType === 'audio/ogg' && !IS_OPUS_SUPPORTED) {
     const blob = await fetchBlob(prepared as string);
-    const media = await oggToWav(blob);
     URL.revokeObjectURL(prepared as string);
+    const media = await oggToWav(blob);
     prepared = prepareMedia(media);
     mimeType = blob.type;
   }
