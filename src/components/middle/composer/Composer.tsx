@@ -102,7 +102,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
     lastMessageSendTimeSeconds.current = null;
   }, [chatId]);
 
-  const [attachment, setAttachment] = useState<ApiAttachment | undefined>();
+  const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
 
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
@@ -153,7 +153,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const resetComposer = useCallback(() => {
     setHtml('');
-    setAttachment(undefined);
+    setAttachments([]);
     closeSymbolMenu(false);
   }, [closeSymbolMenu]);
 
@@ -170,14 +170,14 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const handleEditComplete = useEditing(htmlRef, setHtml, editedMessage, resetComposer, openDeleteModal, editMessage);
   useDraft(draft, chatId, html, htmlRef, setHtml, editedMessage, saveDraft, clearDraft);
-  useClipboardPaste(insertTextAndUpdateCursor, setAttachment, editedMessage);
+  useClipboardPaste(insertTextAndUpdateCursor, setAttachments, editedMessage);
 
-  const handleFileSelect = useCallback(async (file: File, isQuick: boolean) => {
-    setAttachment(await buildAttachment(file.name, file, isQuick));
+  const handleFileSelect = useCallback(async (files: File[], isQuick: boolean) => {
+    setAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
   }, []);
 
   const handleClearAttachment = useCallback(() => {
-    setAttachment(undefined);
+    setAttachments([]);
   }, []);
 
   const handleSend = useCallback(async () => {
@@ -185,24 +185,24 @@ const Composer: FC<StateProps & DispatchProps> = ({
       return;
     }
 
-    let currentAttachment = attachment;
+    let currentAttachments = attachments;
 
     if (activeVoiceRecording) {
       const record = await stopRecordingVoice();
       if (record) {
         const { blob, duration, waveform } = record;
-        currentAttachment = await buildAttachment(
+        currentAttachments = [await buildAttachment(
           VOICE_RECORDING_FILENAME,
           blob,
           false,
           { voice: { duration, waveform } },
-        );
+        )];
       }
     }
 
     const { text, entities } = parseMessageInput(htmlRef.current!);
 
-    if (!currentAttachment && !text) {
+    if (!currentAttachments.length && !text) {
       return;
     }
 
@@ -231,7 +231,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
     sendMessage({
       text,
       entities,
-      attachment: currentAttachment,
+      attachments: currentAttachments,
     });
 
     lastMessageSendTimeSeconds.current = Math.floor(Date.now() / 1000);
@@ -239,7 +239,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
     resetComposer();
     clearDraft({ chatId, localOnly: true });
   }, [
-    activeVoiceRecording, attachment, connectionState, chatId, slowMode,
+    activeVoiceRecording, attachments, connectionState, chatId, slowMode,
     sendMessage, stopRecordingVoice, resetComposer, clearDraft, showError,
   ]);
 
@@ -270,7 +270,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
 
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
-    : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachment)
+    : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length)
       ? MainButtonState.Send
       : MainButtonState.Record;
 
@@ -307,8 +307,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
   return (
     <div className="Composer">
       <AttachmentModal
-        attachment={attachment}
-        caption={attachment ? html : ''}
+        attachments={attachments}
+        caption={attachments.length ? html : ''}
         onCaptionUpdate={setHtml}
         onSend={handleSend}
         onClear={handleClearAttachment}
@@ -328,7 +328,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       <div id="message-compose">
         <ComposerEmbeddedMessage />
         {allowedAttachmentOptions.canAttachEmbedLinks && (
-          <WebPagePreview messageText={!attachment ? html : ''} />
+          <WebPagePreview messageText={!attachments.length ? html : ''} />
         )}
         <div className="message-input-wrapper">
           <ResponsiveHoverButton
@@ -342,7 +342,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
           </ResponsiveHoverButton>
           <MessageInput
             id="message-input-text"
-            html={!attachment ? html : ''}
+            html={!attachments.length ? html : ''}
             placeholder={window.innerWidth < SCREEN_WIDTH_TO_HIDE_PLACEHOLDER && !activeVoiceRecording ? 'Message' : ''}
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}

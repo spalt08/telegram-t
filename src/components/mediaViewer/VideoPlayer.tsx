@@ -1,11 +1,13 @@
 import React, {
-  FC, memo, useCallback, useLayoutEffect, useRef,
+  FC, memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import { IDimensions } from '../../modules/helpers';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
+import safePlay from '../../util/safePlay';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -18,6 +20,7 @@ type OwnProps = {
   posterSize?: IDimensions;
   downloadProgress?: number;
   isMediaViewerOpen?: boolean;
+  noPlay?: boolean;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
@@ -28,6 +31,7 @@ const VideoPlayer: FC<OwnProps> = ({
   posterSize,
   downloadProgress,
   isMediaViewerOpen,
+  noPlay,
   onClose,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
@@ -38,11 +42,16 @@ const VideoPlayer: FC<OwnProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(!isBuffered, undefined, undefined, 'slow');
 
-  useLayoutEffect(() => {
-    if (!isMediaViewerOpen) {
+  useEffect(() => {
+    if (noPlay || !isMediaViewerOpen) {
       videoRef.current!.pause();
+    } else if (url && !IS_TOUCH_ENV) {
+      // Chrome does not automatically start playing when `url` becomes available (even with `autoPlay`),
+      // so we force it here. Contrary, iOS does not allow to call `play` without mouse event,
+      // so we need to use `autoPlay` instead to allow pre-buffering.
+      safePlay(videoRef.current!);
     }
-  }, [isMediaViewerOpen]);
+  }, [noPlay, isMediaViewerOpen, url]);
 
   const stopEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -52,7 +61,8 @@ const VideoPlayer: FC<OwnProps> = ({
     <div className="VideoPlayer" onClick={!isGif ? stopEvent : undefined}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
-        autoPlay
+        ref={videoRef}
+        autoPlay={IS_TOUCH_ENV}
         playsInline
         controls={!isGif}
         loop={isGif}
@@ -65,7 +75,7 @@ const VideoPlayer: FC<OwnProps> = ({
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...bufferingHandlers}
       >
-        <source src={url} />
+        {url && <source src={url} />}
       </video>
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>

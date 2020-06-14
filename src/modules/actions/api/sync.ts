@@ -1,13 +1,19 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiChat, ApiUser } from '../../../api/types';
-import { GlobalState } from '../../../global/types';
+import { GlobalState, GlobalActions } from '../../../global/types';
 
-import { CHAT_LIST_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
+import { CHAT_LIST_LOAD_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  replaceChatListIds, replaceChats, updateSelectedChatId, replaceUsers, updateUsers,
+  replaceChatListIds,
+  replaceChats,
+  updateSelectedChatId,
+  replaceUsers,
+  updateUsers,
+  updateChats,
+  updateChatListSecondaryInfo,
 } from '../../reducers';
 import { selectUser, selectChat } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
@@ -15,16 +21,22 @@ import { isChatPrivate } from '../../helpers';
 const TOP_MESSAGES_LIMIT = MESSAGE_LIST_SLICE * 2;
 
 addReducer('sync', (global, actions) => {
-  const { afterSync } = actions;
-  void sync(afterSync);
+  void sync(actions.afterSync);
 });
 
 addReducer('afterSync', (global, actions) => {
-  // Until favorite stickers aren't loaded, adding and removing Favorite Stickers is not possible
-  actions.loadFavoriteStickers();
+  void afterSync(actions);
 });
 
+async function afterSync(actions: GlobalActions) {
+  await loadAndReplaceArchivedChats();
+
+  // Until favorite stickers aren't loaded, adding and removing Favorite Stickers is not possible
+  actions.loadFavoriteStickers();
+}
+
 async function sync(afterSyncCallback: () => void) {
+  // This fetches only active chats and clears archived chats, which will be fetched in `afterSync`
   let global = await loadAndReplaceChats();
   setGlobal(await loadAndReplaceMessages(global));
 
@@ -42,19 +54,14 @@ async function sync(afterSyncCallback: () => void) {
 }
 
 async function loadAndReplaceChats() {
-  const resultActive = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
-    isSync: true,
-  });
-  const resultArchived = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
-    archived: true,
-    isSync: true,
+  const result = await callApi('fetchChats', {
+    limit: CHAT_LIST_LOAD_SLICE,
+    withPinned: true,
   });
 
   let global = getGlobal();
 
-  if (!resultActive && !resultArchived) {
+  if (!result) {
     return global;
   }
 
@@ -91,41 +98,22 @@ async function loadAndReplaceChats() {
     }
   }
 
-  if (resultActive) {
-    savedUsers.push(...resultActive.users);
-    savedChats.push(...resultActive.chats);
-  }
-  if (resultArchived) {
-    savedUsers.push(...resultArchived.users);
-    savedChats.push(...resultArchived.chats);
-  }
+  savedUsers.push(...result.users);
+  savedChats.push(...result.chats);
 
   global = replaceUsers(global, buildCollectionByKey(savedUsers, 'id'));
   global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
-  global = replaceChatListIds(global, 'active', resultActive ? resultActive.chatIds : undefined);
-  global = replaceChatListIds(global, 'archived', resultArchived ? resultArchived.chatIds : undefined);
+  global = replaceChatListIds(global, 'active', result.chatIds);
+
   global = {
     ...global,
     chats: {
       ...global.chats,
       scrollOffsetById: {},
-      orderedPinnedIds: {
-        ...global.chats.orderedPinnedIds,
-        ...(resultActive && { active: resultActive.orderedPinnedIds }),
-        ...(resultArchived && { archived: resultArchived.orderedPinnedIds }),
-      },
-      draftsById: {
-        ...global.chats.draftsById,
-        ...(resultActive && resultActive.draftsById),
-        ...(resultArchived && resultArchived.draftsById),
-      },
-      replyingToById: {
-        ...global.chats.replyingToById,
-        ...(resultActive && resultActive.replyingToById),
-        ...(resultArchived && resultArchived.replyingToById),
-      },
     },
   };
+
+  global = updateChatListSecondaryInfo(global, 'active', result);
 
   const currentSelectedId = global.chats.selectedId;
   if (
@@ -136,6 +124,27 @@ async function loadAndReplaceChats() {
   }
 
   return global;
+}
+
+async function loadAndReplaceArchivedChats() {
+  const result = await callApi('fetchChats', {
+    limit: CHAT_LIST_LOAD_SLICE,
+    archived: true,
+    withPinned: true,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  let global = getGlobal();
+
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = replaceChatListIds(global, 'archived', result.chatIds);
+  global = updateChatListSecondaryInfo(global, 'archived', result);
+
+  setGlobal(global);
 }
 
 async function loadAndReplaceMessages(global: GlobalState) {

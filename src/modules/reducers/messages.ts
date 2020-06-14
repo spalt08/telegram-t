@@ -197,7 +197,7 @@ export function addViewportId(
     return global;
   }
 
-  const newIds = [...viewportIds, newId].slice(-MESSAGE_LIST_VIEWPORT_LIMIT);
+  const newIds = orderHistoryIds([...viewportIds, newId].slice(-MESSAGE_LIST_VIEWPORT_LIMIT));
 
   return replaceViewportIds(global, chatId, newIds);
 }

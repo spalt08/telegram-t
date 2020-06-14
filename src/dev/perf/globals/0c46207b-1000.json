@@ -41,6 +41,9 @@
   "mediaViewer": {},
   "audioPlayer": {},
   "forwardMessages": {},
+  "chatFolders": {
+    "byId": {}
+  },
   "settings": {
     "byKey": {
       "animationLevel": 1,
@@ -1405,7 +1408,9 @@
         914597
       ]
     },
+    "isFullyLoaded": {},
     "orderedPinnedIds": {},
+    "totalCount": {},
     "byId": {
       "454000": {
         "id": 454000,

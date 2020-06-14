@@ -3,12 +3,25 @@ import { getDispatch } from '../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../api/types';
 import { isChatArchived, getCanDeleteChat, isChatPrivate } from '../modules/helpers';
 
-export default (
-  chat: ApiChat | undefined,
-  privateChatUser: ApiUser | undefined,
-  handleDelete: () => void,
-) => {
-  const { toggleChatPinned, updateChatMutedState, toggleChatArchived } = getDispatch();
+export default ({
+  chat,
+  privateChatUser,
+  handleDelete,
+  folderId,
+  isPinned,
+}: {
+  chat: ApiChat | undefined;
+  privateChatUser: ApiUser | undefined;
+  handleDelete: () => void;
+  folderId?: number;
+  isPinned?: boolean;
+}) => {
+  const {
+    toggleChatPinned,
+    updateChatMutedState,
+    toggleChatArchived,
+    toggleChatUnread,
+  } = getDispatch();
 
   return useMemo(() => {
     if (!chat) {
@@ -17,13 +30,13 @@ export default (
 
     const isChatWithSelf = privateChatUser && privateChatUser.isSelf;
 
-    const actionUnreadMark = chat.unreadCount
-      ? { title: 'Mark as Read', icon: 'message' }
-      : { title: 'Mark as Unread', icon: 'unread' };
+    const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
+      ? { title: 'Mark as Read', icon: 'message', handler: () => toggleChatUnread({ id: chat.id }) }
+      : { title: 'Mark as Unread', icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
 
-    const actionPin = chat.isPinned
-      ? { title: 'Unpin', icon: 'unpin', handler: () => toggleChatPinned({ id: chat.id }) }
-      : { title: 'Pin', icon: 'pin', handler: () => toggleChatPinned({ id: chat.id }) };
+    const actionPin = isPinned
+      ? { title: 'Unpin', icon: 'unpin', handler: () => toggleChatPinned({ id: chat.id, folderId }) }
+      : { title: 'Pin', icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
 
     const actionMute = chat.isMuted
       ? { title: 'Unmute', icon: 'unmute', handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }) }
@@ -49,5 +62,8 @@ export default (
       ] : []),
       actionDelete,
     ];
-  }, [chat, privateChatUser, handleDelete, toggleChatPinned, updateChatMutedState, toggleChatArchived]);
+  }, [
+    chat, privateChatUser, handleDelete, folderId, isPinned,
+    toggleChatPinned, updateChatMutedState, toggleChatArchived, toggleChatUnread,
+  ]);
 };

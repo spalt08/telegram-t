@@ -11,6 +11,9 @@ import ListItem from '../ui/ListItem';
 import PrivateChatInfo from './PrivateChatInfo';
 import GroupChatInfo from './GroupChatInfo';
 import PickerSelectedItem from './PickerSelectedItem';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+
+import Loading from '../ui/Loading';
 
 import './Picker.scss';
 
@@ -63,56 +66,14 @@ const Picker: FC<OwnProps> = ({
     onFilterChange(value);
   }, [onFilterChange]);
 
-  function renderItem(id: number) {
-    return (
-      <ListItem
-        key={id}
-        className="chat-item-clickable picker-list-item"
-        onClick={() => handleItemClick(id)}
-        ripple
-      >
-        <Checkbox
-          label=""
-          checked={selectedIds.includes(id)}
-        />
-        {isChatPrivate(id) ? (
-          <PrivateChatInfo userId={id} />
-        ) : (
-          <GroupChatInfo chatId={id} />
-        )}
-      </ListItem>
-    );
-  }
-
-  function renderList() {
-    const content = (
-      <>
-        {itemIds.map(renderItem)}
-        {!itemIds.length && (
-          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-        )}
-      </>
-    );
-
-    if (onLoadMore) {
-      return (
-        <InfiniteScroll className="picker-list custom-scroll" items={itemIds} onLoadMore={onLoadMore}>
-          {content}
-        </InfiniteScroll>
-      );
-    }
-
-    return (
-      <div className="picker-list custom-scroll">
-        {content}
-      </div>
-    );
-  }
+  const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, itemIds, Boolean(filterValue));
 
   return (
     <div className="Picker">
       <div className="picker-header">
-        {selectedIds.map((id) => <PickerSelectedItem chatId={id} onClick={() => handleItemClick(id)} />)}
+        {selectedIds.map((id) => (
+          <PickerSelectedItem chatId={id} onClick={() => handleItemClick(id)} />
+        ))}
         <InputText
           ref={inputRef}
           value={filterValue}
@@ -120,7 +81,35 @@ const Picker: FC<OwnProps> = ({
           placeholder={filterPlaceholder || 'Select chat'}
         />
       </div>
-      {renderList()}
+      <InfiniteScroll
+        className="picker-list custom-scroll optimized-list"
+        items={viewportIds}
+        onLoadMore={getMore}
+      >
+        {viewportIds && viewportIds.length ? (
+          <div teactFastList>
+            {viewportIds.map((id) => (
+              <ListItem
+                key={id}
+                className="chat-item-clickable picker-list-item"
+                onClick={() => handleItemClick(id)}
+                ripple
+              >
+                <Checkbox label="" checked={selectedIds.includes(id)} />
+                {isChatPrivate(id) ? (
+                  <PrivateChatInfo userId={id} />
+                ) : (
+                  <GroupChatInfo chatId={id} />
+                )}
+              </ListItem>
+            ))}
+          </div>
+        ) : viewportIds && !viewportIds.length ? (
+          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+        ) : (
+          <Loading />
+        )}
+      </InfiniteScroll>
     </div>
   );
 };

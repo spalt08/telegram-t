@@ -21,7 +21,9 @@ const INITIAL_STATE: GlobalState = {
 
   chats: {
     listIds: {},
+    isFullyLoaded: {},
     orderedPinnedIds: {},
+    totalCount: {},
     byId: {},
     scrollOffsetById: {},
     replyingToById: {},
@@ -31,6 +33,10 @@ const INITIAL_STATE: GlobalState = {
 
   messages: {
     byChatId: {},
+  },
+
+  chatFolders: {
+    byId: {},
   },
 
   fileUploads: {

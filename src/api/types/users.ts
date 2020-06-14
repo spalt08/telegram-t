@@ -2,6 +2,7 @@ export interface ApiUser {
   id: number;
   isSelf: boolean;
   isVerified: boolean;
+  isContact: boolean;
   type: ApiUserType;
   firstName?: string;
   lastName?: string;

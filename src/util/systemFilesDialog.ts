@@ -1,9 +1,10 @@
 let fileSelector: HTMLInputElement;
 
-export function openSystemFileDialog(accept = '*', callback: (e: Event) => void) {
+export function openSystemFilesDialog(accept = '*', callback: (e: Event) => void) {
   if (!fileSelector) {
     fileSelector = document.createElement('input');
     fileSelector.setAttribute('type', 'file');
+    fileSelector.multiple = true;
   }
 
   fileSelector.setAttribute('accept', accept);

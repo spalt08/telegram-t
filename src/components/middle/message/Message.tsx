@@ -340,7 +340,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
           <Contact contact={contact} />
         )}
         {poll && (
-          <Poll messageId={message.id} poll={poll} onSendVote={handleVoteSend} />
+          <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
         {textParts && <p className="text-content">{textParts}</p>}
         {webPage && (

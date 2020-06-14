@@ -13,6 +13,7 @@ import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -114,24 +115,12 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [load, loadStickerSets, loadRecentStickers, loadFavoriteStickers]);
 
   useEffect(() => {
-    if (!areLoaded) {
-      return undefined;
+    if (areLoaded) {
+      updateVisibleSetIndexes();
     }
-
-    updateVisibleSetIndexes();
-
-    const header = headerRef.current!;
-
-    function scrollHeader(e: WheelEvent) {
-      header.scrollLeft += e.deltaY / 4;
-    }
-
-    header.addEventListener('wheel', scrollHeader, { passive: true });
-
-    return () => {
-      header.removeEventListener('wheel', scrollHeader);
-    };
   }, [areLoaded, updateVisibleSetIndexes]);
+
+  useHorizontalScroll(headerRef.current);
 
   // Scroll header when active set updates
   useEffect(() => {
@@ -177,17 +166,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       index === activeSetIndex && 'activated',
     );
 
-    if (stickerSet.id !== 'recent' && stickerSet.id !== 'favorite' && firstSticker) {
-      return (
-        <StickerButton
-          sticker={firstSticker}
-          load
-          title={stickerSet.title}
-          className={buttonClassName}
-          onClick={() => selectSet(index)}
-        />
-      );
-    } else {
+    if (stickerSet.id === 'recent' || stickerSet.id === 'favorite' || stickerSet.hasThumbnail || !firstSticker) {
       return (
         <Button
           className={buttonClassName}
@@ -204,6 +183,16 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             <StickerSetCover stickerSet={stickerSet as ApiStickerSet} />
           )}
         </Button>
+      );
+    } else {
+      return (
+        <StickerButton
+          sticker={firstSticker}
+          load
+          title={stickerSet.title}
+          className={buttonClassName}
+          onClick={() => selectSet(index)}
+        />
       );
     }
   }

@@ -10,10 +10,12 @@ import { throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
 import { pick } from '../../../util/iteratees';
 import { getUserFullName, getSortedUserIds } from '../../../modules/helpers';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import Loading from '../../ui/Loading';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import ListItem from '../../ui/ListItem';
+import Loading from '../../ui/Loading';
 
 import './ContactList.scss';
 
@@ -48,7 +50,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
     [openChat],
   );
 
-  const displayedIds = useMemo(() => {
+  const listIds = useMemo(() => {
     if (!contactIds) {
       return undefined;
     }
@@ -65,26 +67,29 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
     return getSortedUserIds(resultIds, usersById);
   }, [filter, usersById, contactIds]);
 
-  if (!displayedIds) {
-    return <Loading />;
-  }
+  const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));
 
   return (
-    <div className="ContactList custom-scroll">
-      {!displayedIds.length && !!filter.length && (
+    <InfiniteScroll items={viewportIds} onLoadMore={getMore} className="ContactList custom-scroll optimized-list">
+      {viewportIds && viewportIds.length ? (
+        <div teactFastList>
+          {viewportIds.map((id) => (
+            <ListItem
+              key={id}
+              className="chat-item-clickable"
+              onClick={() => handleClick(id)}
+              ripple
+            >
+              <PrivateChatInfo userId={id} forceShowSelf />
+            </ListItem>
+          ))}
+        </div>
+      ) : viewportIds && !viewportIds.length && Boolean(filter.length) ? (
         <p className="no-results">No contacts matched your search.</p>
+      ) : (
+        <Loading />
       )}
-      {displayedIds.map((id) => (
-        <ListItem
-          key={id}
-          className="chat-item-clickable"
-          onClick={() => handleClick(id)}
-          ripple
-        >
-          <PrivateChatInfo userId={id} forceShowSelf />
-        </ListItem>
-      ))}
-    </div>
+    </InfiniteScroll>
   );
 };
 

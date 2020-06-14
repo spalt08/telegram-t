@@ -1,6 +1,13 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import {
-  OnApiUpdate, ApiChat, ApiMessage, ApiUser, ApiMessageEntity, ApiFormattedText, ApiChatFullInfo,
+  OnApiUpdate,
+  ApiChat,
+  ApiMessage,
+  ApiUser,
+  ApiMessageEntity,
+  ApiFormattedText,
+  ApiChatFullInfo,
+  ApiChatFolder,
 } from '../../types';
 
 import { DEBUG, ARCHIVED_FOLDER_ID } from '../../../config';
@@ -12,6 +19,7 @@ import {
   buildChatInviteLink,
   buildApiChatFromPreview,
   getApiChatIdFromMtpPeer,
+  buildApiChatFolder,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
@@ -22,6 +30,7 @@ import {
   buildInputPeer,
   buildMtpMessageEntity,
   getEntityTypeById,
+  buildFilterFromApiFolder,
 } from '../gramjsBuilders';
 
 const MAX_INT_32 = 2 ** 31 - 1;
@@ -36,21 +45,21 @@ export async function fetchChats({
   limit,
   offsetDate,
   archived,
-  isSync,
+  withPinned,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
-  isSync?: boolean;
+  withPinned?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
     limit,
     offsetDate,
     folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
-    ...(isSync && { excludePinned: true }),
+    ...(withPinned && { excludePinned: true }),
   }));
-  const resultPinned = isSync
+  const resultPinned = withPinned
     ? await invokeRequest(new GramJs.messages.GetPinnedDialogs({
       folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
     }))
@@ -80,9 +89,11 @@ export async function fetchChats({
   const replyingToById: Record<number, number> = {};
 
   const dialogs = [
-    ...result.dialogs,
     ...(resultPinned ? resultPinned.dialogs : []),
+    ...result.dialogs,
   ];
+
+  const orderedPinnedIds: number[] = [];
 
   dialogs.forEach((dialog) => {
     if (
@@ -99,6 +110,10 @@ export async function fetchChats({
     chat.lastMessage = lastMessagesByChatId[chat.id];
     chats.push(chat);
 
+    if (withPinned && dialog.pinned) {
+      orderedPinnedIds.push(chat.id);
+    }
+
     if (dialog.draft) {
       const { formattedText, replyingToId } = buildMessageDraft(dialog.draft) || {};
       if (formattedText) {
@@ -114,9 +129,18 @@ export async function fetchChats({
     .map(buildApiUser)
     .filter<ApiUser>(Boolean as any);
   const chatIds = chats.map((chat) => chat.id);
-  const orderedPinnedIds = isSync
-    ? chats.filter((chat) => chat.isPinned).map(({ id }) => id)
-    : undefined;
+
+  let totalChatCount: number;
+
+  if (result instanceof GramJs.messages.DialogsSlice) {
+    totalChatCount = result.count;
+
+    if (resultPinned instanceof GramJs.messages.DialogsSlice) {
+      totalChatCount = (totalChatCount || 0) + resultPinned.count;
+    }
+  } else {
+    totalChatCount = chatIds.length;
+  }
 
   return {
     chatIds,
@@ -124,7 +148,8 @@ export async function fetchChats({
     users,
     draftsById,
     replyingToById,
-    orderedPinnedIds,
+    orderedPinnedIds: withPinned ? orderedPinnedIds : undefined,
+    totalChatCount,
   };
 }
 
@@ -519,26 +544,32 @@ export async function editChatPhoto({
   }), true);
 }
 
-export async function toggleChatPinned(chat: ApiChat) {
+export async function toggleChatPinned({
+  chat,
+  shouldBePinned,
+}: {
+  chat: ApiChat;
+  shouldBePinned: boolean;
+}) {
   const { id, accessHash } = chat;
 
   const isActionSuccessful = await invokeRequest(new GramJs.messages.ToggleDialogPin({
     peer: new GramJs.InputDialogPeer({
       peer: buildInputPeer(id, accessHash),
     }),
-    pinned: chat.isPinned ? undefined : true,
+    pinned: shouldBePinned || undefined,
   }));
 
   if (isActionSuccessful) {
     onUpdate({
       '@type': 'updateChatPinned',
       id: chat.id,
-      isPinned: !chat.isPinned,
+      isPinned: shouldBePinned,
     });
   }
 }
 
-export function editChatFolder({
+export function toggleChatArchived({
   chat, folderId,
 }: {
   chat: ApiChat; folderId: number;
@@ -551,6 +582,65 @@ export function editChatFolder({
       folderId,
     })],
   }), true);
+}
+
+export async function fetchChatFolders() {
+  const result = await invokeRequest(new GramJs.messages.GetDialogFilters());
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    byId: buildCollectionByKey(result.map(buildApiChatFolder), 'id') as Record<number, ApiChatFolder>,
+    orderedIds: result.map(({ id }) => id),
+  };
+}
+
+export async function editChatFolder({
+  id,
+  folderUpdate,
+}: {
+  id: number;
+  folderUpdate: ApiChatFolder;
+}) {
+  const filter = buildFilterFromApiFolder(folderUpdate);
+
+  const isActionSuccessful = await invokeRequest(new GramJs.messages.UpdateDialogFilter({
+    id,
+    filter,
+  }));
+
+  if (isActionSuccessful) {
+    onUpdate({
+      '@type': 'updateChatFolder',
+      id,
+      folder: folderUpdate,
+    });
+  }
+}
+
+export async function toggleDialogUnread({
+  chat, hasUnreadMark,
+}: {
+  chat: ApiChat; hasUnreadMark: boolean | undefined;
+}) {
+  const { id, accessHash } = chat;
+
+  const isActionSuccessful = await invokeRequest(new GramJs.messages.MarkDialogUnread({
+    peer: new GramJs.InputDialogPeer({
+      peer: buildInputPeer(id, accessHash),
+    }),
+    unread: hasUnreadMark || undefined,
+  }));
+
+  if (isActionSuccessful) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: chat.id,
+      chat: { hasUnreadMark },
+    });
+  }
 }
 
 function preparePeers(

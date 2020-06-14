@@ -8,6 +8,7 @@ import {
   ApiNewPoll,
   ApiMessageEntity,
   ApiMessageEntityTypes,
+  ApiChatFolder,
 } from '../../types';
 import localDb from '../localDb';
 import { pick } from '../../../util/iteratees';
@@ -58,6 +59,34 @@ export function buildInputPeer(chatOrUserId: number, accessHash?: string): GramJ
       chatId: -chatOrUserId,
     });
   }
+}
+
+export function buildInputPeerFromLocalDb(chatOrUserId: number): GramJs.TypeInputPeer | undefined {
+  if (chatOrUserId > 0) {
+    const { accessHash } = localDb.users[chatOrUserId] || {};
+
+    return accessHash
+      ? new GramJs.InputPeerUser({
+        userId: chatOrUserId,
+        accessHash,
+      })
+      : undefined;
+  }
+
+  if (chatOrUserId <= -1000000000) {
+    const { accessHash } = (localDb.chats[chatOrUserId] as GramJs.Channel) || {};
+
+    return accessHash
+      ? new GramJs.InputPeerChannel({
+        channelId: -chatOrUserId,
+        accessHash,
+      })
+      : undefined;
+  }
+
+  return new GramJs.InputPeerChat({
+    chatId: -chatOrUserId,
+  });
 }
 
 export function buildInputEntity(chatOrUserId: number, accessHash?: string) {
@@ -112,6 +141,7 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
 
   const poll = new GramJs.Poll({
     id: randomId,
+    publicVoters: summary.publicVoters,
     question: summary.question,
     answers: summary.answers.map(({ text, option }) => new GramJs.PollAnswer({ text, option: Buffer.from(option) })),
     quiz: summary.quiz,
@@ -129,13 +159,61 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
   return new GramJs.InputMediaPoll({
     poll,
     correctAnswers,
-    solution,
-    solutionEntities,
+    ...(solution && {
+      solution,
+      solutionEntities,
+    }),
+  });
+}
+
+export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFilter {
+  const {
+    emoticon,
+    contacts,
+    nonContacts,
+    groups,
+    channels,
+    bots,
+    excludeArchived,
+    excludeMuted,
+    excludeRead,
+    pinnedChatIds,
+    includedChatIds,
+    excludedChatIds,
+  } = folder;
+
+  const pinnedPeers = pinnedChatIds
+    ? pinnedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    : [];
+
+  const includePeers = includedChatIds
+    ? includedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    : [];
+
+  const excludePeers = excludedChatIds
+    ? excludedChatIds.map(buildInputPeerFromLocalDb).filter<GramJs.TypeInputPeer>(Boolean as any)
+    : [];
+
+  return new GramJs.DialogFilter({
+    id: folder.id,
+    title: folder.title,
+    emoticon: emoticon || undefined,
+    contacts: contacts || undefined,
+    nonContacts: nonContacts || undefined,
+    groups: groups || undefined,
+    bots: bots || undefined,
+    excludeArchived: excludeArchived || undefined,
+    excludeMuted: excludeMuted || undefined,
+    excludeRead: excludeRead || undefined,
+    broadcasts: channels || undefined,
+    pinnedPeers,
+    includePeers,
+    excludePeers,
   });
 }
 
 export function generateRandomBigInt() {
-  return readBigIntFromBuffer(generateRandomBytes(8), false);
+  return readBigIntFromBuffer(generateRandomBytes(8), true, true);
 }
 
 export function reduceWaveform(waveform: number[]) {

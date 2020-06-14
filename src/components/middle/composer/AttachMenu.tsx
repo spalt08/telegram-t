@@ -2,7 +2,7 @@ import React, {
   FC, memo, useRef, useCallback, useEffect,
 } from '../../../lib/teact/teact';
 
-import { openSystemFileDialog } from '../../../util/systemFileDialog';
+import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { IAllowedAttachmentOptions } from '../../../modules/helpers';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 
@@ -14,7 +14,7 @@ import './AttachMenu.scss';
 export type OwnProps = {
   isOpen: boolean;
   allowedAttachmentOptions: IAllowedAttachmentOptions;
-  onFileSelect: (file: File, isQuick: boolean) => void;
+  onFileSelect: (files: File[], isQuick: boolean) => void;
   onPollCreate: () => void;
   onClose: () => void;
 };
@@ -62,19 +62,19 @@ const AttachMenu: FC<OwnProps> = ({
     const { files } = e.target as HTMLInputElement;
 
     if (files && files.length > 0) {
-      onFileSelect(files[0], isQuick);
+      onFileSelect(Array.from(files), isQuick);
     }
   };
 
   const handleQuickSelect = () => {
-    openSystemFileDialog(
+    openSystemFilesDialog(
       'image/png,image/gif,image/jpeg,video/mp4,video/avi,video/quicktime',
       (e) => handleFileSelect(e, true),
     );
   };
 
   const handleDocumentSelect = () => {
-    openSystemFileDialog('*', (e) => handleFileSelect(e, false));
+    openSystemFilesDialog('*', (e) => handleFileSelect(e, false));
   };
 
   const { canAttachMedia, canAttachPolls } = allowedAttachmentOptions;

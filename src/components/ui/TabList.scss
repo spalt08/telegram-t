@@ -5,6 +5,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  flex-wrap: nowrap;
   border-bottom: 1px solid var(--color-borders);
   background-color: white;
+  overflow-x: auto;
+  overflow-y: hidden;
+  user-select: none;
+
+  scrollbar-width: none;
+  scrollbar-color: rgba(0, 0, 0, 0);
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+  }
 }

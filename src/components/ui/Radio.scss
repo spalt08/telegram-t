@@ -12,6 +12,15 @@
     opacity: 0.5;
   }
 
+  &.hidden-widget {
+    cursor: default;
+    .Radio-main {
+      &::before, &::after {
+        visibility: hidden;
+      }
+    }
+  }
+
   > input {
     position: absolute;
     z-index: var(--z-below);

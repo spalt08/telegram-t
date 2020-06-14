@@ -6,6 +6,7 @@ export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
+export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 20;
 
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';
@@ -18,7 +19,8 @@ export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 export const MESSAGE_LIST_SLICE = isBigScreen ? 50 : 40;
 export const MESSAGE_LIST_VIEWPORT_LIMIT = MESSAGE_LIST_SLICE * 3;
 
-export const CHAT_LIST_SLICE = 50;
+export const CHAT_LIST_SLICE = 20;
+export const CHAT_LIST_LOAD_SLICE = 100;
 export const SHARED_MEDIA_SLICE = 30;
 export const MESSAGE_SEARCH_SLICE = 30;
 export const GLOBAL_SEARCH_SLICE = 20;
@@ -31,6 +33,7 @@ export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
 
 export const SUPPORT_BOT_ID = 470000;
 export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
+export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 

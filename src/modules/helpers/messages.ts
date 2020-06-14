@@ -21,25 +21,24 @@ export function getMessageSummaryText(message: ApiMessage, hasPictogram = false)
 
   if (message.groupedId) {
     if (text && text.text.length) {
-      return `${!hasPictogram ? '(Album) ' : ''}${text.text}`;
+      return `${!hasPictogram ? '🖼 ' : ''}${text.text}`;
     }
     return 'Album';
   }
 
   if (photo) {
     if (text && text.text.length) {
-      return `${!hasPictogram ? '(Photo) ' : ''}${text.text}`;
+      return `${!hasPictogram ? '🖼 ' : ''}${text.text}`;
     }
     return 'Photo';
   }
 
   if (video) {
-    const typeString = video.isGif ? 'GIF' : 'Video';
-
     if (text && text.text.length) {
-      return `${!hasPictogram ? `(${typeString}) ` : ''}${text.text}`;
+      return `${!hasPictogram ? `${video.isGif ? 'GIF' : '📹'} ` : ''}${text.text}`;
     }
-    return typeString;
+
+    return video.isGif ? 'GIF' : 'Video';
   }
 
   if (text) {
@@ -67,7 +66,7 @@ export function getMessageSummaryText(message: ApiMessage, hasPictogram = false)
   }
 
   if (poll) {
-    return `(Poll) ${poll.summary.question}`;
+    return `📊 ${poll.summary.question}`;
   }
 
   return CONTENT_NOT_SUPPORTED;

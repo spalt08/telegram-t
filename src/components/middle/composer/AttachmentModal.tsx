@@ -16,7 +16,7 @@ import MessageInput from './MessageInput';
 import './AttachmentModal.scss';
 
 export type OwnProps = {
-  attachment?: ApiAttachment;
+  attachments: ApiAttachment[];
   caption: string;
   onCaptionUpdate: (html: string) => void;
   onSend: () => void;
@@ -24,46 +24,54 @@ export type OwnProps = {
 };
 
 const AttachmentModal: FC<OwnProps> = ({
-  attachment, caption, onCaptionUpdate, onSend, onClear,
+  attachments, caption, onCaptionUpdate, onSend, onClear,
 }) => {
-  const prevAttachment = usePrevious(attachment);
-  const renderingAttachment = attachment || prevAttachment;
-  const isOpen = Boolean(attachment);
-
-  let photo: ApiAttachment | undefined;
-  let video: ApiAttachment | undefined;
-  if (renderingAttachment && renderingAttachment.quick) {
-    if (renderingAttachment.mimeType.startsWith('image/')) {
-      photo = renderingAttachment;
-    } else if (renderingAttachment.mimeType.startsWith('video/')) {
-      video = renderingAttachment;
-    }
-  }
+  const prevAttachments = usePrevious(attachments);
+  const renderingAttachments = attachments.length ? attachments : prevAttachments;
+  const isOpen = Boolean(attachments.length);
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
 
-  const sendAttachment = useCallback(() => {
+  const sendAttachments = useCallback(() => {
     if (isOpen) {
       onSend();
     }
   }, [isOpen, onSend]);
 
+  if (!renderingAttachments) {
+    return undefined;
+  }
+
+  const areAllPhotos = renderingAttachments.every((a) => a.mimeType.startsWith('image/'));
+  const areAllVideos = renderingAttachments.every((a) => a.mimeType.startsWith('video/'));
+
+  let title = '';
+  if (areAllPhotos) {
+    title = renderingAttachments.length === 1 ? 'Send Photo' : `Send ${renderingAttachments.length} Photos`;
+  } else if (areAllVideos) {
+    title = renderingAttachments.length === 1 ? 'Send Video' : `Send ${renderingAttachments.length} Videos`;
+  } else {
+    title = renderingAttachments.length === 1 ? 'Send File' : `Send ${renderingAttachments.length} Files`;
+  }
+
+  const isQuick = renderingAttachments.every((a) => a.quick);
+
   function renderHeader() {
-    if (!renderingAttachment) {
+    if (!renderingAttachments) {
       return undefined;
     }
 
     return (
       <div className="modal-header-condensed">
-        <Button round color="translucent" size="smaller" ariaLabel="Cancel attachment" onClick={onClear}>
+        <Button round color="translucent" size="smaller" ariaLabel="Cancel attachments" onClick={onClear}>
           <i className="icon-close" />
         </Button>
-        <div className="modal-title">{photo ? 'Send Photo' : video ? 'Send Video' : 'Send File'}</div>
+        <div className="modal-title">{title}</div>
         <Button
           color="primary"
           size="smaller"
           className="modal-action-button"
-          onClick={sendAttachment}
+          onClick={sendAttachments}
         >
           Send
         </Button>
@@ -71,27 +79,27 @@ const AttachmentModal: FC<OwnProps> = ({
     );
   }
 
-  if (!renderingAttachment) {
-    return undefined;
-  }
-
   return (
     <Modal isOpen={isOpen} onClose={onClear} header={renderHeader()} className="AttachmentModal">
-      {(photo || video) && (
-        <div className="media-wrapper">
-          {photo && <img src={photo.blobUrl} alt="" />}
-          {video && <video src={video.blobUrl} autoPlay muted loop />}
+      {isQuick ? (
+        <div className="media-wrapper custom-scroll">
+          {renderingAttachments.map((attachment) => (
+            attachment.mimeType.startsWith('image/')
+              ? <img src={attachment.blobUrl} alt="" />
+              : <video src={attachment.blobUrl} autoPlay muted loop />
+          ))}
         </div>
-      )}
-      {!photo && !video && (
-        <div className="document-wrapper">
-          <File
-            name={renderingAttachment.filename}
-            extension={getFileExtension(renderingAttachment.filename, renderingAttachment.mimeType)}
-            previewData={renderingAttachment.previewBlobUrl}
-            size={renderingAttachment.size}
-            smaller
-          />
+      ) : (
+        <div className="document-wrapper custom-scroll">
+          {renderingAttachments.map((attachment) => (
+            <File
+              name={attachment.filename}
+              extension={getFileExtension(attachment.filename, attachment.mimeType)}
+              previewData={attachment.previewBlobUrl}
+              size={attachment.size}
+              smaller
+            />
+          ))}
         </div>
       )}
 

@@ -10,6 +10,8 @@ type OwnProps = {
   className?: string;
   title: string;
   active?: boolean;
+  badgeCount?: number;
+  isBadgeActive?: boolean;
   previousActiveTab: number | null;
   onClick?: () => void;
 };
@@ -18,6 +20,8 @@ const Tab: FC<OwnProps> = ({
   className,
   title,
   active,
+  badgeCount,
+  isBadgeActive,
   previousActiveTab,
   onClick,
 }) => {
@@ -56,6 +60,9 @@ const Tab: FC<OwnProps> = ({
     >
       <span>
         {title}
+        {!!badgeCount && (
+          <span className={buildClassName('badge', isBadgeActive && 'active')}>{badgeCount}</span>
+        )}
         <i />
       </span>
     </button>

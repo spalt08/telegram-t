@@ -9,11 +9,13 @@ import { IS_TOUCH_ENV } from '../../../util/environment';
 import Transition from '../../ui/Transition';
 import LeftMainHeader from './LeftMainHeader';
 import ConnectionState from '../ConnectionState';
-import ChatList from './ChatList';
+import ChatFolders from './ChatFolders';
 import LeftRecent from './LeftRecent.async';
 import LeftSearch from './LeftSearch.async';
 import ContactList from './ContactList.async';
 import NewChatButton from '../NewChatButton';
+
+import './LeftMain.scss';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -126,7 +128,7 @@ const LeftMain: FC<OwnProps & StateProps> = ({
         {() => {
           switch (content) {
             case LeftColumnContent.ChatList:
-              return <ChatList folder="active" />;
+              return <ChatFolders />;
             case LeftColumnContent.RecentChats:
               return <LeftRecent onReset={onReset} />;
             case LeftColumnContent.GlobalSearch:

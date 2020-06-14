@@ -55,6 +55,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="MiddleColumn">
+      <div id="middle-column-portals" />
       {renderingChatId && (
         <div className="messages-layout">
           <MiddleHeader chatId={renderingChatId} />

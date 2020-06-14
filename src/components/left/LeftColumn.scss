@@ -1,13 +1,6 @@
 #LeftColumn {
   overflow: hidden;
 
-  // @optimization
-  &:not(:hover) {
-    .chat-item-clickable:nth-child(n + 16) {
-      display: none;
-    }
-  }
-
   > .Transition {
     height: 100%;
   }
@@ -15,18 +8,6 @@
 
 #NewGroup {
   height: 100%;
-}
-
-#LeftColumn-main {
-  height: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  > .Transition {
-    flex-grow: 1;
-  }
 }
 
 .LeftHeader {
@@ -126,14 +107,14 @@
     white-space: nowrap;
 
     scrollbar-width: none;
-    scrollbar-color: rgba(0,0,0,0);
+    scrollbar-color: rgba(0, 0, 0, 0);
 
     &::-webkit-scrollbar {
       height: 0;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: rgba(0,0,0,0);
+      background-color: rgba(0, 0, 0, 0);
     }
 
     // Spacer to counter last button margin not being accounted in scroll width

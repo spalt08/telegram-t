@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 import React, { FC, useRef, useCallback } from '../../lib/teact/teact';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
@@ -90,6 +91,22 @@ const ListItem: FC<OwnProps> = (props) => {
     onClick(e);
   }, [disabled, onClick]);
 
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (inactive) {
+      return;
+    }
+    if (contextActions) {
+      handleBeforeContextMenu(e);
+    }
+    if (!IS_TOUCH_ENV && e.button === 0) {
+      if (!onClick) {
+        handleContextMenu(e);
+      } else {
+        handleClick(e);
+      }
+    }
+  }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
+
   const fullClassName = buildClassName(
     'ListItem',
     className,
@@ -107,8 +124,8 @@ const ListItem: FC<OwnProps> = (props) => {
       <button
         type="button"
         disabled={disabled}
-        onClick={!inactive ? handleClick : undefined}
-        onMouseDown={!inactive && contextActions ? handleBeforeContextMenu : undefined}
+        onClick={!inactive && IS_TOUCH_ENV ? handleClick : undefined}
+        onMouseDown={handleMouseDown}
         onContextMenu={!inactive && contextActions ? handleContextMenu : undefined}
       >
         {icon && (

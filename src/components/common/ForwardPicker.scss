@@ -1,15 +1,6 @@
-@import '../../styles/mixins';
-
 .ForwardPicker {
   height: 100%;
   position: relative;
-
-  // @optimization
-  @include while-transition() {
-    .picker-list-item:nth-child(n + 16) {
-      display: none;
-    }
-  }
 
   #RightOverlay & {
     height: calc(100% - 60px);

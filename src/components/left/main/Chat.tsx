@@ -41,8 +41,10 @@ import './Chat.scss';
 
 type OwnProps = {
   chatId: number;
+  folderId?: number;
   orderDiff: number;
-  selected: boolean;
+  isSelected: boolean;
+  isPinned?: boolean;
 };
 
 type StateProps = {
@@ -55,22 +57,22 @@ type StateProps = {
   draft?: ApiFormattedText;
 };
 
-type DispatchProps = Pick<GlobalActions, (
-  'openChat' | 'focusLastMessage' | 'toggleChatPinned' | 'toggleChatArchived' | 'updateChatMutedState'
-)>;
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusLastMessage'>;
 
 const ANIMATION_DURATION = 200;
 
 const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   chatId,
-  chat,
+  folderId,
   orderDiff,
+  isSelected,
+  isPinned,
+  chat,
   privateChatUser,
   actionTargetUser,
   lastMessageSender,
   lastMessageOutgoingStatus,
   actionTargetMessage,
-  selected,
   draft,
   openChat,
   focusLastMessage,
@@ -116,11 +118,11 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [orderDiff]);
 
   const handleClick = useCallback(() => {
-    if (selected) {
+    if (isSelected) {
       focusLastMessage();
     }
     openChat({ id: chatId });
-  }, [selected, focusLastMessage, openChat, chatId]);
+  }, [isSelected, focusLastMessage, openChat, chatId]);
 
   const handleDelete = useCallback(() => {
     setIsDeleteModalOpen(true);
@@ -130,7 +132,13 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
     setIsDeleteModalOpen(false);
   }, []);
 
-  const contextActions = useChatContextActions(chat, privateChatUser, handleDelete);
+  const contextActions = useChatContextActions({
+    chat,
+    privateChatUser,
+    handleDelete,
+    folderId,
+    isPinned,
+  });
 
   if (!chat) {
     return undefined;
@@ -183,7 +191,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   const className = buildClassName(
     'Chat',
     isChatPrivate(chatId) ? 'private' : 'group',
-    selected && 'selected',
+    isSelected && 'selected',
   );
 
   return (
@@ -191,7 +199,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
       ref={ref}
       className={className}
       ripple
-      shouldDelayRipple={!selected}
+      shouldDelayRipple={!isSelected}
       contextActions={contextActions}
       onClick={handleClick}
     >
@@ -212,7 +220,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
         <div className="subtitle">
           {renderLastMessageOrTyping()}
-          <Badge chat={chat} />
+          <Badge chat={chat} isPinned={isPinned} />
         </div>
       </div>
       <DeleteChatModal
@@ -254,8 +262,5 @@ export default memo(withGlobal<OwnProps>(
   (setGlobal, actions): DispatchProps => pick(actions, [
     'openChat',
     'focusLastMessage',
-    'toggleChatPinned',
-    'toggleChatArchived',
-    'updateChatMutedState',
   ]),
 )(Chat));

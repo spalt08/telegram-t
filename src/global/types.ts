@@ -11,6 +11,7 @@ import {
   ApiVideo,
   ApiError,
   ApiFormattedText,
+  ApiChatFolder,
 } from '../api/types';
 import {
   FocusDirection,
@@ -60,9 +61,17 @@ export type GlobalState = {
       active?: number[];
       archived?: number[];
     };
+    isFullyLoaded: {
+      active?: boolean;
+      archived?: boolean;
+    };
     orderedPinnedIds: {
       active?: number[];
       archived?: number[];
+    };
+    totalCount: {
+      all?: number;
+      archived?: number;
     };
     selectedId?: number;
     // TODO Replace with Partial<Record> to handle missing keys
@@ -81,6 +90,11 @@ export type GlobalState = {
       viewportIds?: number[];
     }>;
     isReversed?: boolean;
+  };
+
+  chatFolders: {
+    orderedIds?: number[];
+    byId: Record<number, ApiChatFolder>;
   };
 
   focusedMessage?: {
@@ -226,7 +240,8 @@ export type ActionTypes = (
   'preloadTopChatMessages' | 'loadChats' | 'loadMoreChats' | 'openChat' | 'openChatWithInfo' | 'setChatScrollOffset' |
   'setChatReplyingTo' | 'setChatEditing' | 'editLastChatMessage' |
   'loadFullChat' | 'loadSuperGroupOnlines' | 'loadTopChats' | 'requestChatUpdate' | 'updateChatMutedState' |
-  'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' |
+  'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
+  'loadChatFolders' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
   'markChatRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |

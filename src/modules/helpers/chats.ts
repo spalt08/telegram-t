@@ -3,6 +3,7 @@ import {
   ApiUser,
   ApiChatBannedRights,
   ApiChatAdminRights,
+  ApiChatFolder,
 } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
@@ -184,19 +185,86 @@ export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
 
-export function prepareChatList(
-  chats: Record<number, ApiChat>,
-  listIds: number[],
-  orderedPinnedIds?: number[],
-  folder: 'all' | 'archived' | 'active' = 'all',
+function chatFolderFilter(
+  chat: ApiChat,
+  folder: ApiChatFolder,
+  usersById: Record<number, ApiUser>,
+): boolean {
+  const { excludedChatIds, includedChatIds } = folder;
+
+  if (excludedChatIds && excludedChatIds.includes(chat.id)) {
+    return false;
+  }
+
+  if (includedChatIds && includedChatIds.includes(chat.id)) {
+    return true;
+  }
+
+  if (isChatArchived(chat) && folder.excludeArchived) {
+    return false;
+  }
+
+  if (chat.isMuted && folder.excludeMuted) {
+    return false;
+  }
+
+  if (!chat.unreadCount && !chat.unreadMentionsCount && folder.excludeRead) {
+    return false;
+  }
+
+  if (isChatPrivate(chat.id)) {
+    const privateChatUser = usersById[chat.id];
+
+    const isChatWithBot = privateChatUser && privateChatUser.type === 'userTypeBot';
+    if (folder.bots && isChatWithBot) {
+      return true;
+    }
+
+    if (folder.contacts) {
+      return privateChatUser.isContact;
+    } else if (folder.nonContacts) {
+      return !privateChatUser.isContact;
+    }
+  } else if (isChatBasicGroup(chat) || isChatSuperGroup(chat)) {
+    return !!folder.groups;
+  } else if (isChatChannel(chat)) {
+    return !!folder.channels;
+  }
+
+  return false;
+}
+
+export function prepareFolderListIds(
+  chatsById: Record<number, ApiChat>,
+  usersById: Record<number, ApiUser>,
+  folder: ApiChatFolder,
 ) {
   const chatFilter = (chat?: ApiChat) => {
-    if (!chat || !chat.lastMessage) {
+    return chat ? chatFolderFilter(chat, folder, usersById) : false;
+  };
+
+  const listIds = Object.values(chatsById)
+    .filter(chatFilter)
+    .map(({ id }) => id);
+
+  const { pinnedChatIds } = folder;
+
+  return [listIds, pinnedChatIds];
+}
+
+export function prepareChatList(
+  chatsById: Record<number, ApiChat>,
+  listIds: number[],
+  orderedPinnedIds?: number[],
+  folderType: 'all' | 'archived' | 'folder' = 'all',
+) {
+  const chatFilter = (chat?: ApiChat) => {
+    if (!chat || !chat.lastMessage || !listIds.includes(chat.id)) {
       return false;
     }
 
-    switch (folder) {
-      case 'active':
+    switch (folderType) {
+      case 'all':
         if (isChatArchived(chat)) {
           return false;
         }
@@ -211,15 +279,15 @@ export function prepareChatList(
     return !chat.isRestricted && !chat.hasLeft;
   };
 
-  const listedChats = listIds.map((id) => chats[id]).filter(chatFilter);
+  const listedChats = listIds.map((id) => chatsById[id]).filter(chatFilter);
 
   const pinnedChats = orderedPinnedIds
-    ? orderedPinnedIds.map((id) => chats[id]).filter(chatFilter)
-    : listedChats.filter((chat) => chat.isPinned);
+    ? orderedPinnedIds.map((id) => chatsById[id]).filter(chatFilter)
+    : [];
   const otherChats = orderBy(
-    listedChats.filter(
-      (chat) => (orderedPinnedIds ? !orderedPinnedIds.includes(chat.id) : !chat.isPinned),
-    ),
+    orderedPinnedIds
+      ? listedChats.filter((chat) => !orderedPinnedIds.includes(chat.id))
+      : listedChats,
     getChatOrder,
     'desc',
   );
@@ -227,5 +295,31 @@ export function prepareChatList(
   return {
     pinnedChats,
     otherChats,
+  };
+}
+
+export function getFolderUnreadDialogs(
+  chatsById: Record<number, ApiChat>,
+  usersById: Record<number, ApiUser>,
+  folder: ApiChatFolder,
+) {
+  const [listIds] = prepareFolderListIds(chatsById, usersById, folder);
+  if (!listIds) {
+    return undefined;
+  }
+
+  const listedChats = listIds.map((id) => chatsById[id]).filter((chat) => (
+    chat && chat.lastMessage && !chat.isRestricted && !chat.hasLeft
+  ));
+
+  const unreadDialogsCount = listedChats.reduce((total, chat) => {
+    return chat.unreadCount ? total + 1 : total;
+  }, 0);
+
+  const hasActiveDialogs = listedChats.some((chat) => chat.unreadMentionsCount || (!chat.isMuted && chat.unreadCount));
+
+  return {
+    unreadDialogsCount,
+    hasActiveDialogs,
   };
 }

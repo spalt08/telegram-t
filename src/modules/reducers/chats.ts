@@ -1,5 +1,5 @@
 import { GlobalState } from '../../global/types';
-import { ApiChat } from '../../api/types';
+import { ApiChat, ApiFormattedText } from '../../api/types';
 import { ARCHIVED_FOLDER_ID } from '../../config';
 
 export function replaceChatListIds(
@@ -55,15 +55,6 @@ export function updateChat(global: GlobalState, chatId: number, chatUpdate: Part
 
   if (!updatedChat.id || !updatedChat.type) {
     return global;
-  }
-
-  // Sometimes when receiving full chat update, its pinned status can be set as `true`,
-  // (e.g. when un-archiving previosly pinned chat, when there are already max pinned chats)
-  // even though it isn't present in pinned chats. This clears the pinned status in such case to prevent confusion.
-  const orderedPinnedIds = chat
-    && global.chats.orderedPinnedIds[chat.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active'];
-  if (orderedPinnedIds && !orderedPinnedIds.includes(chatId)) {
-    updatedChat.isPinned = undefined;
   }
 
   return replaceChats(global, {
@@ -156,25 +147,25 @@ export function updateChatEditing(
   };
 }
 
-export function updateChatFolder(
+export function updateChatListType(
   global: GlobalState,
   chatId: number,
   folderId?: number,
 ) {
-  const folder = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
+  const listType = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
 
   let currentListIds = global.chats.listIds;
-  (Object.keys(currentListIds) as Array<keyof typeof currentListIds>).forEach((folderKey) => {
-    const currentFolderList = currentListIds[folderKey] || [];
-    if (folderKey === folder && !currentFolderList.includes(chatId)) {
+  (Object.keys(currentListIds) as Array<keyof typeof currentListIds>).forEach((listTypeKey) => {
+    const currentFolderList = currentListIds[listTypeKey] || [];
+    if (listTypeKey === listType && !currentFolderList.includes(chatId)) {
       currentListIds = {
         ...currentListIds,
-        [folderKey]: [...currentFolderList, chatId],
+        [listTypeKey]: [...currentFolderList, chatId],
       };
-    } else if (folderKey !== folder && currentFolderList.includes(chatId)) {
+    } else if (listTypeKey !== listType && currentFolderList.includes(chatId)) {
       currentListIds = {
         ...currentListIds,
-        [folderKey]: currentFolderList.filter((id) => id !== chatId),
+        [listTypeKey]: currentFolderList.filter((id) => id !== chatId),
       };
     }
   });
@@ -187,8 +178,46 @@ export function updateChatFolder(
     },
   };
 
-  const pinnedIds = newGlobal.chats.orderedPinnedIds[folder] || [];
-  newGlobal = updateChat(newGlobal, chatId, { folderId: folderId || undefined, isPinned: pinnedIds.includes(chatId) });
+  newGlobal = updateChat(newGlobal, chatId, { folderId: folderId || undefined });
 
   return newGlobal;
+}
+
+export function updateChatListSecondaryInfo(
+  global: GlobalState,
+  type: 'active' | 'archived',
+  info: {
+    orderedPinnedIds?: number[];
+    totalChatCount: number;
+    draftsById: Record<number, ApiFormattedText>;
+    replyingToById: Record<number, number>;
+  },
+) {
+  const pinnedIdsKey = type;
+  const totalCountKey = type === 'active' ? 'all' : 'archived';
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      ...(info.orderedPinnedIds && {
+        orderedPinnedIds: {
+          ...global.chats.orderedPinnedIds,
+          [pinnedIdsKey]: info.orderedPinnedIds,
+        },
+      }),
+      totalCount: {
+        ...global.chats.totalCount,
+        [totalCountKey]: info.totalChatCount,
+      },
+      draftsById: {
+        ...global.chats.draftsById,
+        ...info.draftsById,
+      },
+      replyingToById: {
+        ...global.chats.replyingToById,
+        ...info.replyingToById,
+      },
+    },
+  };
 }

@@ -5,16 +5,22 @@ import {
   ApiChatAdminRights,
   ApiChatBannedRights,
   ApiRestrictionReason,
+  ApiChatFolder,
 } from '../../types';
 import { pick } from '../../../util/iteratees';
-import { isPeerChat, isPeerUser } from './peers';
+import {
+  isPeerChat,
+  isPeerUser,
+  isInputPeerUser,
+  isInputPeerChat,
+  isInputPeerChannel,
+} from './peers';
 import { omitVirtualClassFields } from './helpers';
 
 type PeerEntityApiChatFields = Omit<ApiChat, (
   'id' | 'type' | 'title' |
   'lastReadOutboxMessageId' | 'lastReadInboxMessageId' |
-  'unreadCount' | 'unreadMentionsCount' |
-  'isPinned' | 'isMuted'
+  'unreadCount' | 'unreadMentionsCount' | 'isMuted'
 )>;
 
 function buildApiChatFieldsFromPeerEntity(
@@ -50,6 +56,7 @@ export function buildApiChatFromDialog(
   return {
     id: getApiChatIdFromMtpPeer(dialog.peer),
     folderId: dialog.folderId || undefined,
+    hasUnreadMark: dialog.unreadMark,
     type: getApiChatTypeFromPeerEntity(peerEntity),
     title: getApiChatTitleFromMtpPeer(dialog.peer, peerEntity),
     lastReadOutboxMessageId: dialog.readOutboxMaxId,
@@ -58,7 +65,6 @@ export function buildApiChatFromDialog(
       'unreadCount',
       'unreadMentionsCount',
     ]),
-    isPinned: dialog.pinned,
     isMuted: silent || (typeof muteUntil === 'number' && Date.now() < muteUntil * 1000),
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
@@ -184,6 +190,17 @@ export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer): number {
   }
 }
 
+export function getApiChatIdFromInputMtpPeer(peer: GramJs.TypeInputPeer): number | undefined {
+  if (isInputPeerUser(peer)) {
+    return peer.userId;
+  } else if (isInputPeerChat(peer)) {
+    return -peer.chatId;
+  } else if (isInputPeerChannel(peer)) {
+    return -peer.channelId;
+  }
+  return undefined;
+}
+
 export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJs.TypeUser) {
   if (peerEntity instanceof GramJs.User || peerEntity instanceof GramJs.UserEmpty) {
     return 'chatTypePrivate';
@@ -287,5 +304,18 @@ export function buildChatTypingStatus(update: GramJs.UpdateUserTyping | GramJs.U
     action,
     ...(update instanceof GramJs.UpdateChatUserTyping && { userId: update.userId }),
     timestamp: Date.now(),
+  };
+}
+
+export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
+  return {
+    ...pick(filter, [
+      'id', 'title', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
+      'excludeMuted', 'excludeRead', 'excludeArchived',
+    ]),
+    channels: filter.broadcasts,
+    pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
+    includedChatIds: filter.includePeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
+    excludedChatIds: filter.excludePeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
   };
 }

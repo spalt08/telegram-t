@@ -24,6 +24,9 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   MESSAGE_EDIT_TIME_EXPIRED: 'You can\'t edit this message anymore.',
   CHAT_ADMIN_REQUIRED: 'You must be an admin in this chat to do this',
   PINNED_DIALOGS_TOO_MUCH: 'Sorry, you can only pin 5 chats to the top',
+
+  // Non-API errors
+  SERVICE_WORKER_DISABLED: 'Service Worker is disabled. Please reload the page without holding <Shift> key.',
 };
 
 export default function getReadableErrorText(error: ApiError) {

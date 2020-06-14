@@ -13,6 +13,7 @@ import {
   ApiOnProgress,
 } from '../../types';
 
+import { DEBUG } from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
@@ -113,7 +114,9 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   return { message, users };
 }
 
-export async function sendMessage(
+let queue = Promise.resolve();
+
+export function sendMessage(
   {
     chat,
     currentUserId,
@@ -124,6 +127,7 @@ export async function sendMessage(
     sticker,
     gif,
     poll,
+    groupedId,
   }: {
     chat: ApiChat;
     currentUserId: number;
@@ -134,11 +138,12 @@ export async function sendMessage(
     sticker?: ApiSticker;
     gif?: ApiVideo;
     poll?: ApiNewPoll;
+    groupedId?: string;
   },
   onProgress?: ApiOnProgress,
 ) {
   const localMessage = buildLocalMessage(
-    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll,
+    chat.id, currentUserId, text, entities, replyingTo, attachment, sticker, gif, poll, groupedId,
   );
   onUpdate({
     '@type': 'newMessage',
@@ -150,29 +155,184 @@ export async function sendMessage(
   const randomId = generateRandomBigInt();
   localDb.localMessages[randomId.toString()] = localMessage;
 
-  let media: GramJs.TypeInputMedia | undefined;
-  if (attachment) {
-    media = await uploadMedia(localMessage, attachment, onProgress!);
-  } else if (sticker) {
-    media = buildInputMediaDocument(sticker);
-  } else if (gif) {
-    media = buildInputMediaDocument(gif);
-  } else if (poll) {
-    media = buildInputPoll(poll, randomId);
+  if (groupedId) {
+    return sendGroupedMedia({
+      chat, text, entities, replyingTo, attachment: attachment!, groupedId,
+    }, randomId, localMessage, onProgress);
   }
 
-  const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
-  const mtpEntities = entities && entities.map(buildMtpMessageEntity);
+  const prevQueue = queue;
+  queue = (async () => {
+    let media: GramJs.TypeInputMedia | undefined;
+    if (attachment) {
+      try {
+        media = await uploadMedia(localMessage, attachment, onProgress!);
+      } catch (err) {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
 
-  await invokeRequest(new RequestClass({
-    clearDraft: true,
-    message: text || '',
-    entities: mtpEntities,
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    randomId,
-    ...(replyingTo && { replyToMsgId: replyingTo }),
-    ...(media && { media }),
-  }), true);
+        await prevQueue;
+
+        return;
+      }
+    } else if (sticker) {
+      media = buildInputMediaDocument(sticker);
+    } else if (gif) {
+      media = buildInputMediaDocument(gif);
+    } else if (poll) {
+      media = buildInputPoll(poll, randomId);
+    }
+
+    await prevQueue;
+
+    const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
+
+    await invokeRequest(new RequestClass({
+      clearDraft: true,
+      message: text || '',
+      entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      randomId,
+      ...(replyingTo && { replyToMsgId: replyingTo }),
+      ...(media && { media }),
+    }), true);
+  })();
+
+  return queue;
+}
+
+const groupedUploads: Record<string, {
+  counter: number;
+  singleMediaByIndex: Record<number, GramJs.InputSingleMedia>;
+}> = {};
+
+function sendGroupedMedia(
+  {
+    chat,
+    text,
+    entities,
+    replyingTo,
+    attachment,
+    groupedId,
+  }: {
+    chat: ApiChat;
+    text?: string;
+    entities?: ApiMessageEntity[];
+    replyingTo?: number;
+    attachment: ApiAttachment;
+    groupedId: string;
+  },
+  randomId: GramJs.long,
+  localMessage: ApiMessage,
+  onProgress?: ApiOnProgress,
+) {
+  let groupIndex = -1;
+  if (!groupedUploads[groupedId]) {
+    groupedUploads[groupedId] = {
+      counter: 0,
+      singleMediaByIndex: {},
+    };
+  }
+
+  groupIndex = groupedUploads[groupedId].counter++;
+
+  const prevQueue = queue;
+  queue = (async () => {
+    let media;
+    try {
+      media = await uploadMedia(localMessage, attachment, onProgress!);
+    } catch (err) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.warn(err);
+      }
+
+      groupedUploads[groupedId].counter--;
+
+      await prevQueue;
+
+      return;
+    }
+
+    const inputMedia = await fetchInputMedia(
+      buildInputPeer(chat.id, chat.accessHash),
+      media as GramJs.InputMediaUploadedPhoto | GramJs.InputMediaUploadedDocument,
+    );
+
+    await prevQueue;
+
+    if (!inputMedia) {
+      groupedUploads[groupedId].counter--;
+
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to upload grouped media');
+      }
+
+      return;
+    }
+
+    groupedUploads[groupedId].singleMediaByIndex[groupIndex] = new GramJs.InputSingleMedia({
+      media: inputMedia,
+      randomId,
+      message: text || '',
+      entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
+    });
+
+    if (Object.keys(groupedUploads[groupedId].singleMediaByIndex).length < groupedUploads[groupedId].counter) {
+      return;
+    }
+
+    const { singleMediaByIndex } = groupedUploads[groupedId];
+    delete groupedUploads[groupedId];
+
+    await invokeRequest(new GramJs.messages.SendMultiMedia({
+      clearDraft: true,
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
+      replyToMsgId: replyingTo,
+    }), true);
+  })();
+
+  return queue;
+}
+
+async function fetchInputMedia(
+  peer: GramJs.TypeInputPeer,
+  uploadedMedia: GramJs.InputMediaUploadedPhoto | GramJs.InputMediaUploadedDocument,
+) {
+  const messageMedia = await invokeRequest(new GramJs.messages.UploadMedia({
+    peer,
+    media: uploadedMedia,
+  }));
+
+  if ((
+    messageMedia instanceof GramJs.MessageMediaPhoto
+    && messageMedia.photo
+    && messageMedia.photo instanceof GramJs.Photo)
+  ) {
+    const { photo: { id, accessHash, fileReference } } = messageMedia;
+
+    return new GramJs.InputMediaPhoto({
+      id: new GramJs.InputPhoto({ id, accessHash, fileReference }),
+    });
+  }
+
+  if ((
+    messageMedia instanceof GramJs.MessageMediaDocument
+    && messageMedia.document
+    && messageMedia.document instanceof GramJs.Document)
+  ) {
+    const { document: { id, accessHash, fileReference } } = messageMedia;
+
+    return new GramJs.InputMediaDocument({
+      id: new GramJs.InputDocument({ id, accessHash, fileReference }),
+    });
+  }
+
+  return undefined;
 }
 
 export async function editMessage({

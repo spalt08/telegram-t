@@ -1,10 +1,14 @@
 import React, { FC, useMemo, useCallback } from '../../../lib/teact/teact';
 
+import { GlobalActions, GlobalState } from '../../../global/types';
 import { ApiMessage } from '../../../api/types';
+import { IAlbum } from '../../../types';
+
 import { getMessageContent, IDimensions } from '../../../modules/helpers';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../../util/buildClassName';
-import { IAlbum } from '../../../types';
+import { withGlobal } from '../../../lib/teact/teactn';
+import { pick } from '../../../util/iteratees';
 
 import Photo from './Photo';
 import Video from './Video';
@@ -18,11 +22,19 @@ type OwnProps = {
   onMediaClick: (messageId: number) => void;
 };
 
-const Album: FC<OwnProps> = ({
+type StateProps = {
+  uploadsById: GlobalState['fileUploads']['byMessageLocalId'];
+};
+
+type DispatchProps = Pick<GlobalActions, 'cancelSendingMessage'>;
+
+const Album: FC<OwnProps & StateProps & DispatchProps> = ({
   album,
   loadAndPlay,
   hasCustomAppendix,
   onMediaClick,
+  uploadsById,
+  cancelSendingMessage,
 }) => {
   const albumMediaParams = useMemo(() => {
     const mediaCount = album.messages.length;
@@ -90,10 +102,16 @@ const Album: FC<OwnProps> = ({
     };
   }, [albumMediaParams]);
 
+  const handleCancelUpload = useCallback((message: ApiMessage) => {
+    cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
+  }, [cancelSendingMessage]);
+
   const { mediaCount, isVerticalLayout } = albumMediaParams;
 
   function renderAlbumMessage(message: ApiMessage, index: number) {
     const { photo, video } = getMessageContent(message);
+    const fileUpload = uploadsById[message.previousLocalId || message.id];
+    const uploadProgress = fileUpload ? fileUpload.progress : undefined;
 
     if (photo) {
       return (
@@ -103,7 +121,9 @@ const Album: FC<OwnProps> = ({
           load={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
           shouldAffectAppendix={hasCustomAppendix && index === mediaCount - 1}
+          uploadProgress={uploadProgress}
           onClick={() => onMediaClick(message.id)}
+          onCancelUpload={() => handleCancelUpload(message)}
         />
       );
     } else if (video) {
@@ -113,7 +133,9 @@ const Album: FC<OwnProps> = ({
           message={message}
           loadAndPlay={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
+          uploadProgress={uploadProgress}
           onClick={() => onMediaClick(message.id)}
+          onCancelUpload={() => handleCancelUpload(message)}
         />
       );
     }
@@ -138,4 +160,13 @@ const Album: FC<OwnProps> = ({
   );
 };
 
-export default Album;
+export default withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      uploadsById: global.fileUploads.byMessageLocalId,
+    };
+  },
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'cancelSendingMessage',
+  ]),
+)(Album);

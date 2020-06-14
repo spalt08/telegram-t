@@ -68,8 +68,9 @@ export default (
   useEffect(() => destroy, [destroy]);
 
   // Autoplay once src is present
+  const wasSrcMissingRef = useRef(!src);
   useEffect(() => {
-    if (isAutoPlay && src) {
+    if (wasSrcMissingRef.current && isAutoPlay && src) {
       play(src);
     }
   }, [isAutoPlay, play, src]);

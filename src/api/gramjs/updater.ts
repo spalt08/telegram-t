@@ -20,6 +20,7 @@ import {
   buildChatTypingStatus,
   buildAvatar,
   buildApiChatFromPreview,
+  buildApiChatFolder,
 } from './apiBuilders/chats';
 import { buildApiUser, buildApiUserStatus } from './apiBuilders/users';
 import {
@@ -148,7 +149,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         const avatar = buildAvatar(photo);
 
         const localDbChatId = Math.abs(resolveMessageApiChatId(update.message)!);
-        localDb.chats[localDbChatId].photo = photo;
+        if (localDb.chats[localDbChatId]) {
+          localDb.chats[localDbChatId].photo = photo;
+        }
 
         if (avatar) {
           onUpdate({
@@ -159,7 +162,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         }
       } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
         const localDbChatId = Math.abs(resolveMessageApiChatId(update.message)!);
-        localDb.chats[localDbChatId].photo = new GramJs.ChatPhotoEmpty();
+        if (localDb.chats[localDbChatId]) {
+          localDb.chats[localDbChatId].photo = new GramJs.ChatPhotoEmpty();
+        }
 
         onUpdate({
           '@type': 'updateChat',
@@ -219,13 +224,20 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if ((
     originRequest instanceof GramJs.messages.SendMessage
     || originRequest instanceof GramJs.messages.SendMedia
+    || originRequest instanceof GramJs.messages.SendMultiMedia
     || originRequest instanceof GramJs.messages.ForwardMessages
   ) && (
     update instanceof GramJs.UpdateMessageID
     || update instanceof GramJs.UpdateShortSentMessage
   )) {
-    const { randomId } = originRequest;
-    const localMessage = localDb.localMessages[randomId.toString()];
+    let randomId;
+    if ('randomId' in update) {
+      randomId = update.randomId;
+    } else if ('randomId' in originRequest) {
+      randomId = originRequest.randomId;
+    }
+
+    const localMessage = randomId && localDb.localMessages[randomId.toString()];
     if (!localMessage) {
       throw new Error('Local message not found');
     }
@@ -379,10 +391,24 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       const { folderId, peer } = folderPeer;
 
       onUpdate({
-        '@type': 'updateChatFolder',
+        '@type': 'updateChatListType',
         id: getApiChatIdFromMtpPeer(peer),
         folderId,
       });
+    });
+  } else if (update instanceof GramJs.UpdateDialogFilter) {
+    const { id, filter } = update;
+    const folder = filter ? buildApiChatFolder(filter) : undefined;
+
+    onUpdate({
+      '@type': 'updateChatFolder',
+      id,
+      folder,
+    });
+  } else if (update instanceof GramJs.UpdateDialogFilterOrder) {
+    onUpdate({
+      '@type': 'updateChatFoldersOrder',
+      orderedIds: update.order,
     });
   } else if (update instanceof GramJs.UpdateChatParticipants) {
     const replacedMembers = buildChatMembers(update.participants);
@@ -475,6 +501,17 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         id: getApiChatIdFromMtpPeer({ channelId: update.channelId } as GramJs.PeerChannel),
       });
     }
+  } else if (
+    update instanceof GramJs.UpdateDialogUnreadMark
+    && update.peer instanceof GramJs.DialogPeer
+  ) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      chat: {
+        hasUnreadMark: update.unread,
+      },
+    });
   } else if (update instanceof GramJs.UpdateChatDefaultBannedRights) {
     onUpdate({
       '@type': 'updateChat',
@@ -507,7 +544,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     const { userId, photo } = update;
     const avatar = buildAvatar(photo);
 
-    localDb.users[userId].photo = photo;
+    if (localDb.users[userId]) {
+      localDb.users[userId].photo = photo;
+    }
 
     onUpdate({
       '@type': 'updateUser',

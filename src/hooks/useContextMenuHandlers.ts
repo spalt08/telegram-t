@@ -6,10 +6,10 @@ import { IS_TOUCH_ENV } from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 250;
 
-export default function (
+export default (
   elementRef: RefObject<HTMLElement>,
   isMenuDisabled?: boolean,
-) {
+) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
@@ -111,4 +111,4 @@ export default function (
     handleContextMenuClose,
     handleContextMenuHide,
   };
-}
+};

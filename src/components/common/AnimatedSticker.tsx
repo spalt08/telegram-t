@@ -4,6 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { fastRaf } from '../../util/schedulers';
+import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 
 type OwnProps = {
   animationData: AnyLiteral;
@@ -44,6 +45,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   const animationRef = useRef<AnimationItem>();
   const container = useRef<HTMLDivElement>();
   const prevPlaySegment = useRef<number[]>();
+  const playRef = useRef();
+  playRef.current = play;
 
   useEffect(() => {
     if (animationRef.current || !animationData) {
@@ -91,16 +94,25 @@ const AnimatedSticker: FC<OwnProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    const animation = animationRef.current;
-    if (!animation) {
-      return;
+  const playAnimation = () => {
+    if (animationRef.current && playRef.current) {
+      animationRef.current.play();
     }
+  };
 
+  const pauseAnimation = () => {
+    if (animationRef.current) {
+      animationRef.current.pause();
+    }
+  };
+
+  useHeavyAnimationCheck(pauseAnimation, playAnimation);
+
+  useEffect(() => {
     if (play) {
-      animation.play();
+      playAnimation();
     } else {
-      animation.pause();
+      pauseAnimation();
     }
   }, [play]);
 
