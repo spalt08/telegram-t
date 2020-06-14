@@ -129,6 +129,7 @@ function reduceChats(global: GlobalState): GlobalState['chats'] {
     listIds: {
       active: chatIdsToSave,
     },
+    isFullyLoaded: {},
     orderedPinnedIds: {
       active: global.chats.orderedPinnedIds.active,
     },

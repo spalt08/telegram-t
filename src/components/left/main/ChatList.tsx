@@ -90,7 +90,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [viewportIds, getMore] = useInfiniteScroll(loadMoreOfType, orderedIds, !lastSyncTime);
   // TODO Refactor to not call `prepareChatList` twice
-  const chatArrays = prepareChatList(chatsById, viewportIds, currentPinnedIds, folderType);
+  const chatArrays = viewportIds && prepareChatList(chatsById, viewportIds, currentPinnedIds, folderType);
 
   useEffect(() => {
     if (lastSyncTime && folderType === 'all') {
@@ -132,7 +132,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
             />
           ))}
         </div>
-      ) : viewportIds && viewportIds.length === 0 ? (
+      ) : viewportIds && !viewportIds.length ? (
         <div className="no-chats">{noChatsText}</div>
       ) : (
         <Loading />

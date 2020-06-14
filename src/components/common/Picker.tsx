@@ -13,6 +13,8 @@ import GroupChatInfo from './GroupChatInfo';
 import PickerSelectedItem from './PickerSelectedItem';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 
+import Loading from '../ui/Loading';
+
 import './Picker.scss';
 
 type OwnProps = {
@@ -82,28 +84,31 @@ const Picker: FC<OwnProps> = ({
       <InfiniteScroll
         className="picker-list custom-scroll optimized-list"
         items={viewportIds}
-        onLoadMore={!filterValue ? getMore : undefined}
+        onLoadMore={getMore}
       >
-        <div teactFastList>
-          {viewportIds.map((id) => (
-            <ListItem
-              key={id}
-              className="chat-item-clickable picker-list-item"
-              onClick={() => handleItemClick(id)}
-              ripple
-            >
-              <Checkbox label="" checked={selectedIds.includes(id)} />
-              {isChatPrivate(id) ? (
-                <PrivateChatInfo userId={id} />
-              ) : (
-                <GroupChatInfo chatId={id} />
-              )}
-            </ListItem>
-          ))}
-          {!viewportIds.length && (
-            <p className="no-results" key="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-          )}
-        </div>
+        {viewportIds && viewportIds.length ? (
+          <div teactFastList>
+            {viewportIds.map((id) => (
+              <ListItem
+                key={id}
+                className="chat-item-clickable picker-list-item"
+                onClick={() => handleItemClick(id)}
+                ripple
+              >
+                <Checkbox label="" checked={selectedIds.includes(id)} />
+                {isChatPrivate(id) ? (
+                  <PrivateChatInfo userId={id} />
+                ) : (
+                  <GroupChatInfo chatId={id} />
+                )}
+              </ListItem>
+            ))}
+          </div>
+        ) : viewportIds && !viewportIds.length ? (
+          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+        ) : (
+          <Loading />
+        )}
       </InfiniteScroll>
     </div>
   );

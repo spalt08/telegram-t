@@ -14,6 +14,7 @@ import {
   updateUsers,
   updateChat,
   updateSelectedChatId,
+  updateChatListSecondaryInfo,
 } from '../../reducers';
 import {
   selectChat,
@@ -280,7 +281,6 @@ addReducer('toggleChatPinned', (global, actions, payload) => {
     return;
   }
 
-
   if (folderId) {
     const folder = selectChatFolder(global, folderId);
     if (folder) {
@@ -341,6 +341,7 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     archived: listType === 'archived',
+    withPinned: getGlobal().chats.orderedPinnedIds[listType] === undefined,
   });
 
   if (!result) {
@@ -358,6 +359,7 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateChatListIds(global, listType, chatIds);
+  global = updateChatListSecondaryInfo(global, listType, result);
 
   if (chatIds.length === 0 && !global.chats.isFullyLoaded[listType]) {
     global = {
@@ -367,19 +369,6 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
         isFullyLoaded: {
           ...global.chats.isFullyLoaded,
           [listType]: true,
-        },
-      },
-    };
-  }
-
-  if (result.totalChatCount !== undefined) {
-    global = {
-      ...global,
-      chats: {
-        ...global.chats,
-        totalCount: {
-          ...global.chats.totalCount,
-          [listType === 'active' ? 'all' : 'archived']: result.totalChatCount,
         },
       },
     };

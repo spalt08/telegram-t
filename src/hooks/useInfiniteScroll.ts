@@ -10,18 +10,14 @@ const LIST_SLICE = 30;
 
 export default (
   loadMoreBackwards?: LoadMoreBackwards, listIds?: number[], isDisabled = false,
-): [number[], GetMore?] => {
+): [number[]?, GetMore?] => {
   const lastParamsRef = useRef<{
     direction?: LoadMoreDirection;
     offsetId?: number;
   }>();
 
   const [viewportIds, setViewportIds] = useState<number[]>((() => {
-    if (!listIds) {
-      return [];
-    }
-
-    if (!lastParamsRef.current) {
+    if (listIds && !lastParamsRef.current) {
       const { newViewportIds } = getViewportSlice(listIds, listIds[0], LoadMoreDirection.Forwards);
       return newViewportIds;
     }
@@ -75,7 +71,7 @@ export default (
     }
   }, [isDisabled, viewportIds, listIds, loadMoreBackwards]);
 
-  return isDisabled ? [listIds || []] : [viewportIds || [], getMore];
+  return isDisabled ? [listIds] : [viewportIds, getMore];
 };
 
 function getViewportSlice(

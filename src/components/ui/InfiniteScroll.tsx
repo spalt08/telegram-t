@@ -12,7 +12,7 @@ type OwnProps = {
   className?: string;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
-  items: any[];
+  items?: any[];
   itemSelector?: string;
   preloadBackwards?: number;
   sensitiveArea?: number;

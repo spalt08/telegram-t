@@ -183,11 +183,11 @@ export function updateChatListType(
   return newGlobal;
 }
 
-export function updateSecondaryChatsInfo(
+export function updateChatListSecondaryInfo(
   global: GlobalState,
   type: 'active' | 'archived',
   info: {
-    orderedPinnedIds: number[] | undefined;
+    orderedPinnedIds?: number[];
     totalChatCount: number;
     draftsById: Record<number, ApiFormattedText>;
     replyingToById: Record<number, number>;
@@ -200,10 +200,12 @@ export function updateSecondaryChatsInfo(
     ...global,
     chats: {
       ...global.chats,
-      orderedPinnedIds: {
-        ...global.chats.orderedPinnedIds,
-        [pinnedIdsKey]: info.orderedPinnedIds,
-      },
+      ...(info.orderedPinnedIds && {
+        orderedPinnedIds: {
+          ...global.chats.orderedPinnedIds,
+          [pinnedIdsKey]: info.orderedPinnedIds,
+        },
+      }),
       totalCount: {
         ...global.chats.totalCount,
         [totalCountKey]: info.totalChatCount,
