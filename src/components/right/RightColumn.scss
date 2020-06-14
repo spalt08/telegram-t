@@ -90,13 +90,17 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity var(--layer-transition);
-
-        body.animation-level-0 &, body.animation-level-1 & {
-          display: none;
-        }
       }
     }
   }
+
+  body.is-right-column-shown.animation-level-0 &,
+  body.is-right-column-shown.animation-level-1 & {
+    #RightColumn::after {
+      display: none;
+    }
+  }
+
   body.is-right-column-shown.has-open-context-menu & {
     #RightColumn {
       &, * {
@@ -108,4 +112,5 @@
       }
     }
   }
+
 }
