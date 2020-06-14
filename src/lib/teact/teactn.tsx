@@ -75,6 +75,11 @@ function onDispatch(name: string, payload?: ActionPayload) {
 }
 
 function updateContainers() {
+  let DEBUG_startAt: number | undefined;
+  if (DEBUG) {
+    DEBUG_startAt = performance.now();
+  }
+
   Object.keys(containers).forEach((id) => {
     const {
       mapStateToProps, mapReducersToProps, ownProps, mappedProps, forceUpdate,
@@ -106,6 +111,14 @@ function updateContainers() {
       forceUpdate();
     }
   });
+
+  if (DEBUG) {
+    const updateTime = performance.now() - DEBUG_startAt!;
+    if (updateTime > 5) {
+      // eslint-disable-next-line no-console
+      console.warn('[TeactN] Slow containers update', updateTime);
+    }
+  }
 }
 
 export function addReducer(name: ActionTypes, reducer: Reducer) {
