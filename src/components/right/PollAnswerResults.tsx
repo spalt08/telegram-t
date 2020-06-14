@@ -39,6 +39,7 @@ const isMobile = matchMedia('(max-width: 600px)');
 
 const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
+  chatId,
   messageId,
   answer,
   answerVote,
@@ -54,6 +55,10 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   const previousVotersCount = usePrevious<number>(answerVote.voters);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { option, text } = answer;
+
+  if (chatId !== chat.id) {
+    console.error('WRONG DATA', chat, chatId);
+  }
 
   useEffect(() => {
     if (previousChatId !== chat.id
