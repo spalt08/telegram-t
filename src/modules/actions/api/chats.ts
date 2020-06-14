@@ -93,7 +93,7 @@ addReducer('loadMoreChats', (global, actions, payload) => {
   const oldestChat = listIds
     ? listIds
       .map((id) => global.chats.byId[id])
-      .filter((chat) => Boolean(chat && chat.lastMessage))
+      .filter((chat) => Boolean(chat && chat.lastMessage) && !selectIsChatPinned(global, chat.id))
       .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
     : undefined;
 
