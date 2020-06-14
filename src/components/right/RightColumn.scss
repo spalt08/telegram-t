@@ -9,16 +9,13 @@
   background: var(--color-background);
   border-left: 1px solid var(--color-borders);
   z-index: var(--z-right-column);
+  pointer-events: all;
 
   // @optimization
   &:not(:hover) {
     .Picker .chat-item-clickable:nth-child(n + 16) {
       display: none !important;
     }
-  }
-
-  @media (min-width: 1276px), (max-width: 600px) {
-    pointer-events: all;
   }
 
   @media (max-width: 1275px) {
@@ -98,15 +95,16 @@
           display: none;
         }
       }
+    }
+  }
+  body.is-right-column-shown.has-open-context-menu & {
+    #RightColumn {
+      &, * {
+        pointer-events: none !important;
+      }
 
-      body.has-open-context-menu & {
-        &, * {
-          pointer-events: none !important;
-        }
-
-        &::after {
-          opacity: 0.25;
-        }
+      &::after {
+        opacity: 0.25;
       }
     }
   }

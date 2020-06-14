@@ -66,7 +66,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   const { results: voteResults, totalVoters } = results;
   const hasVoted = voteResults && voteResults.some((r) => r.chosen);
   const canVote = !summary.closed && !hasVoted;
-  const canViewResult = !canVote && summary.publicVoters && Boolean(results.totalVoters);
+  const canViewResult = !canVote && summary.publicVoters && Number(results.totalVoters) > (hasVoted ? 1 : 0);
   const isMultiple = canVote && summary.multipleChoice;
   const maxVotersCount = voteResults ? Math.max(...voteResults.map((r) => r.voters)) : totalVoters;
   const correctResults = voteResults ? voteResults.reduce((answers: string[], r) => {

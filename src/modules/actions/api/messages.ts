@@ -524,6 +524,7 @@ async function loadPollResults(
     return;
   }
 
+  const isUnique = (v: number, i: number, a: number[]) => a.indexOf(v) === i;
   let global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
@@ -537,7 +538,7 @@ async function loadPollResults(
         [option]: [
           ...(global.pollResults.voters && global.pollResults.voters[option] ? global.pollResults.voters[option] : []),
           ...(result && result.users.map((user) => user.id)),
-        ],
+        ].filter(isUnique),
       },
       offsets: {
         ...(global.pollResults.offsets ? global.pollResults.offsets : {}),

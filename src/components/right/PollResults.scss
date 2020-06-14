@@ -27,8 +27,9 @@
   }
 
   .poll-question {
-    padding: 0 1.5rem;
+    padding: .75rem 1.5rem;
     flex-shrink: 0;
+    font-size: 1.25rem;
 
     @media (max-width: 600px) {
       padding: 0 1rem;
@@ -36,6 +37,7 @@
   }
 
   .poll-results-list {
+    border-top: 1px solid var(--color-borders);
     flex-grow: 1;
     overflow: auto;
   }

@@ -3,6 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
+import usePrevious from '../../hooks/usePrevious';
 import { ApiChat, PollAnswer, PollAnswerVote } from '../../api/types';
 import { selectChat } from '../../modules/selectors';
 import { GlobalActions } from '../../global/types';
@@ -48,24 +49,32 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   openChat,
   closePollResults,
 }) => {
+  const previousChatId = usePrevious<number>(chat.id);
+  const previousMessageId = usePrevious<number>(messageId);
+  const previousVotersCount = usePrevious<number>(answerVote.voters);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [limit, setLimit] = useState<number>(INITIAL_LIMIT);
   const { option, text } = answer;
 
   useEffect(() => {
-    getPollVotes({
-      chat, messageId, option, offset, limit,
-    });
-    setLimit(VIEW_MORE_LIMIT);
+    if (previousChatId !== chat.id
+      || previousMessageId !== messageId
+      || previousVotersCount === null
+      || previousVotersCount <= INITIAL_LIMIT
+      || (previousVotersCount > voters.length && voters.length === 0)
+    ) {
+      getPollVotes({
+        chat, messageId, option, offset, limit: INITIAL_LIMIT,
+      });
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [chat.id, messageId, option, voters.length, answerVote.voters]);
 
   const handleViewMoreClick = useCallback(() => {
     setIsLoading(true);
     getPollVotes({
-      chat, messageId, option, offset, limit,
+      chat, messageId, option, offset, limit: VIEW_MORE_LIMIT,
     });
-  }, [chat, getPollVotes, limit, messageId, offset, option]);
+  }, [chat, getPollVotes, messageId, offset, option]);
 
   useEffect(() => {
     setIsLoading(false);
