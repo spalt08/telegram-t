@@ -4,8 +4,12 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import usePrevious from '../../hooks/usePrevious';
-import { ApiChat, PollAnswer, PollAnswerVote } from '../../api/types';
-import { selectChat } from '../../modules/selectors';
+import {
+  ApiChat,
+  ApiMessage,
+  PollAnswer,
+  PollAnswerVote,
+} from '../../api/types';
 import { GlobalActions } from '../../global/types';
 import { pick } from '../../util/iteratees';
 
@@ -17,15 +21,14 @@ import PrivateChatInfo from '../common/PrivateChatInfo';
 import './PollAnswerResults.scss';
 
 type OwnProps = {
-  chatId: number;
-  messageId: number;
+  chat: ApiChat;
+  message: ApiMessage;
   answer: PollAnswer;
   answerVote: PollAnswerVote;
   totalVoters: number;
 };
 
 type StateProps = {
-  chat: ApiChat;
   voters: number[];
   offset: string;
 };
@@ -39,8 +42,7 @@ const isMobile = matchMedia('(max-width: 600px)');
 
 const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
-  chatId,
-  messageId,
+  message,
   answer,
   answerVote,
   totalVoters,
@@ -51,35 +53,31 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   closePollResults,
 }) => {
   const previousChatId = usePrevious<number>(chat.id);
-  const previousMessageId = usePrevious<number>(messageId);
+  const previousMessageId = usePrevious<number>(message.id);
   const previousVotersCount = usePrevious<number>(answerVote.voters);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { option, text } = answer;
 
-  if (chatId !== chat.id) {
-    console.error('WRONG DATA', chat, chatId);
-  }
-
   useEffect(() => {
     if (previousChatId !== chat.id
-      || previousMessageId !== messageId
+      || previousMessageId !== message.id
       || previousVotersCount === null
       || previousVotersCount <= INITIAL_LIMIT
       || (previousVotersCount > voters.length && voters.length === 0)
     ) {
       getPollVotes({
-        chat, messageId, option, offset, limit: INITIAL_LIMIT,
+        chat, messageId: message.id, option, offset, limit: INITIAL_LIMIT,
       });
     }
     // eslint-disable-next-line
-  }, [chat.id, messageId, option, voters.length, answerVote.voters]);
+  }, [chat.id, message.id, option, voters.length, answerVote.voters]);
 
   const handleViewMoreClick = useCallback(() => {
     setIsLoading(true);
     getPollVotes({
-      chat, messageId, option, offset, limit: VIEW_MORE_LIMIT,
+      chat, messageId: message.id, option, offset, limit: VIEW_MORE_LIMIT,
     });
-  }, [chat, getPollVotes, messageId, offset, option]);
+  }, [chat, getPollVotes, message.id, offset, option]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -144,12 +142,10 @@ function getPercentage(value: number, total: number) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, answer }: OwnProps): StateProps => {
-    const chat = selectChat(global, chatId)!;
+  (global, { answer }: OwnProps): StateProps => {
     const { voters, offsets } = global.pollResults;
 
     return {
-      chat,
       voters: (voters && voters[answer.option]) || [],
       offset: (offsets && offsets[answer.option]) || '',
     };

@@ -2,8 +2,8 @@ import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, PollAnswerVote } from '../../api/types';
-import { selectChatMessage } from '../../modules/selectors';
+import { ApiMessage, PollAnswerVote, ApiChat } from '../../api/types';
+import { selectChat, selectChatMessage } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { getMessagePoll } from '../../modules/helpers';
 
@@ -13,6 +13,7 @@ import Loading from '../ui/Loading';
 import './PollResults.scss';
 
 type StateProps = {
+  chat?: ApiChat;
   message?: ApiMessage;
   lastSyncTime?: number;
 };
@@ -21,10 +22,11 @@ type DispatchProps = Pick<GlobalActions, 'setForwardChatIds' | 'forwardMessages'
 
 
 const PollResults: FC<StateProps & DispatchProps> = ({
+  chat,
   message,
   lastSyncTime,
 }) => {
-  if (!message) {
+  if (!message || !chat) {
     return <Loading />;
   }
 
@@ -48,8 +50,8 @@ const PollResults: FC<StateProps & DispatchProps> = ({
         {lastSyncTime && summary.answers.map((answer) => (
           <PollAnswerResults
             key={answer.option}
-            chatId={message.chatId}
-            messageId={message.id}
+            chat={chat}
+            message={message}
             answer={answer}
             answerVote={resultsByOption[answer.option]}
             totalVoters={results.totalVoters!}
@@ -72,9 +74,11 @@ export default memo(withGlobal(
       return {};
     }
 
+    const chat = selectChat(global, chatId);
     const message = selectChatMessage(global, chatId, messageId);
 
     return {
+      chat,
       message,
       lastSyncTime,
     };
