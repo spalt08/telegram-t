@@ -7,6 +7,7 @@ import { IDimensions } from '../../modules/helpers';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
+import safePlay from '../../util/safePlay';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 
@@ -48,7 +49,7 @@ const VideoPlayer: FC<OwnProps> = ({
       // Chrome does not automatically start playing when `url` becomes available (even with `autoPlay`),
       // so we force it here. Contrary, iOS does not allow to call `play` without mouse event,
       // so we need to use `autoPlay` instead to allow pre-buffering.
-      videoRef.current!.play();
+      safePlay(videoRef.current!);
     }
   }, [noPlay, isMediaViewerOpen, url]);
 

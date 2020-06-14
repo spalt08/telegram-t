@@ -1,4 +1,4 @@
-import { DEBUG } from '../config';
+import safePlay from './safePlay';
 
 type Handler = (eventName: string, e: Event) => void;
 
@@ -63,12 +63,7 @@ export function register(trackId: number, handler: Handler) {
         audio.preload = 'auto';
       }
 
-      audio.play().catch((err) => {
-        if (DEBUG) {
-          // eslint-disable-next-line no-console
-          console.warn(err);
-        }
-      });
+      safePlay(audio);
     },
 
     pause() {

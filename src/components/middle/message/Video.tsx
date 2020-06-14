@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useState } from '../../../lib/teact/teact';
+import React, {
+  FC, useCallback, useRef, useState,
+} from '../../../lib/teact/teact';
 
 import { ApiMediaFormat, ApiMessage } from '../../../api/types';
 
@@ -19,6 +21,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
+import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -43,6 +46,7 @@ const Video: FC<OwnProps> = ({
   onClick,
   onCancelUpload,
 }) => {
+  const ref = useRef<HTMLVideoElement>();
   const video = message.content.video!;
   const localBlobUrl = video.blobUrl;
   const thumbDataUri = getMessageMediaThumbDataUri(message);
@@ -80,6 +84,8 @@ const Video: FC<OwnProps> = ({
   const isForwarded = isForwardedMessage(message);
   const { width, height } = calculateVideoDimensions(video, isOwn, isForwarded, albumMediaParams);
 
+  useHeavyAnimationCheckForVideo(ref, isInline);
+
   const handleClick = useCallback(() => {
     if (isUploading) {
       if (onCancelUpload) {
@@ -111,6 +117,7 @@ const Video: FC<OwnProps> = ({
       )}
       {isInline && (
         <video
+          ref={ref}
           className={buildClassName('full-media', isTransferring && 'blur', transitionClassNames)}
           width={width}
           height={height}

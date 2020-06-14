@@ -18,6 +18,8 @@ import useTransitionForMedia from '../../../hooks/useTransitionForMedia';
 import usePrevious from '../../../hooks/usePrevious';
 import useBuffering from '../../../hooks/useBuffering';
 import buildClassName from '../../../util/buildClassName';
+import useHeavyAnimationCheckForVideo from '../../../hooks/useHeavyAnimationCheckForVideo';
+import safePlay from '../../../util/safePlay';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -89,6 +91,22 @@ const RoundVideo: FC<OwnProps> = ({
     setProgress(playerEl.currentTime / playerEl.duration);
   }, [isActivated, progress]);
 
+  const shouldPlay = Boolean(mediaData && loadAndPlay);
+
+  useEffect(() => {
+    if (!playerRef.current) {
+      return;
+    }
+
+    if (shouldPlay) {
+      safePlay(playerRef.current);
+    } else {
+      playerRef.current.pause();
+    }
+  }, [shouldPlay]);
+
+  useHeavyAnimationCheckForVideo(playerRef, shouldPlay);
+
   const handleClick = useCallback(() => {
     if (!mediaData) {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
@@ -99,7 +117,7 @@ const RoundVideo: FC<OwnProps> = ({
     const playerEl = playerRef.current!;
     if (isActivated) {
       if (playerEl.paused) {
-        playerEl.play();
+        safePlay(playerEl);
       } else {
         playerEl.pause();
       }
@@ -118,7 +136,7 @@ const RoundVideo: FC<OwnProps> = ({
   const handleEnded = useCallback(() => {
     setIsActivated(false);
     setProgress(0);
-    playerRef.current!.play();
+    safePlay(playerRef.current!);
 
     requestAnimationFrame(() => {
       playingProgressRef.current!.innerHTML = '';
