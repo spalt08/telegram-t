@@ -3,7 +3,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { GlobalState, GlobalActions } from '../../../global/types';
 
-import { CHAT_LIST_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
+import { CHAT_LIST_LOAD_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
@@ -13,7 +13,7 @@ import {
   replaceUsers,
   updateUsers,
   updateChats,
-  updateSecondaryChatsInfo,
+  updateChatListSecondaryInfo,
 } from '../../reducers';
 import { selectUser, selectChat } from '../../selectors';
 import { isChatPrivate } from '../../helpers';
@@ -55,8 +55,8 @@ async function sync(afterSyncCallback: () => void) {
 
 async function loadAndReplaceChats() {
   const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
-    isSync: true,
+    limit: CHAT_LIST_LOAD_SLICE,
+    withPinned: true,
   });
 
   let global = getGlobal();
@@ -113,7 +113,7 @@ async function loadAndReplaceChats() {
     },
   };
 
-  global = updateSecondaryChatsInfo(global, 'active', result);
+  global = updateChatListSecondaryInfo(global, 'active', result);
 
   const currentSelectedId = global.chats.selectedId;
   if (
@@ -128,9 +128,9 @@ async function loadAndReplaceChats() {
 
 async function loadAndReplaceArchivedChats() {
   const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
+    limit: CHAT_LIST_LOAD_SLICE,
     archived: true,
-    isSync: true,
+    withPinned: true,
   });
 
   if (!result) {
@@ -142,7 +142,7 @@ async function loadAndReplaceArchivedChats() {
   global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = replaceChatListIds(global, 'archived', result.chatIds);
-  global = updateSecondaryChatsInfo(global, 'archived', result);
+  global = updateChatListSecondaryInfo(global, 'archived', result);
 
   setGlobal(global);
 }

@@ -6,14 +6,13 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { debounce } from '../../util/schedulers';
-import { IS_TOUCH_ENV } from '../../util/environment';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   className?: string;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
-  items: any[];
+  items?: any[];
   itemSelector?: string;
   preloadBackwards?: number;
   sensitiveArea?: number;
@@ -23,9 +22,6 @@ type OwnProps = {
 const DEFAULT_LIST_SELECTOR = '.ListItem';
 const DEFAULT_PRELOAD_BACKWARDS = 20;
 const DEFAULT_SENSITIVE_AREA = 1200;
-const MAX_PRELOADS = 30;
-// TODO Check if this workaround is only required for iOS 13+
-const SCROLL_DEBOUNCE_ARGS = IS_TOUCH_ENV ? [700, false, true] : [1000, true, false];
 
 const InfiniteScroll: FC<OwnProps> = ({
   ref,
@@ -48,39 +44,33 @@ const InfiniteScroll: FC<OwnProps> = ({
     isScrollTopJustUpdated: boolean;
     currentAnchor: HTMLDivElement | undefined;
     currentAnchorTop: number;
-    preloadCounter: number;
-  }>({
-    preloadCounter: 0,
-  } as any);
+  }>({} as any);
 
-  const [loadMoreBackwards, loadMoreForwards] = useMemo(
-    () => (
-      onLoadMore
-        ? [
-          // @ts-ignore
-          debounce(() => onLoadMore({ direction: LoadMoreDirection.Backwards }), ...SCROLL_DEBOUNCE_ARGS),
-          // @ts-ignore
-          debounce(() => onLoadMore({ direction: LoadMoreDirection.Forwards }), ...SCROLL_DEBOUNCE_ARGS),
-        ]
-        : []
-    ),
+  const [loadMoreBackwards, loadMoreForwards] = useMemo(() => {
+    if (!onLoadMore) {
+      return [];
+    }
+
+    return [
+      // @ts-ignore
+      debounce(() => onLoadMore({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
+      // @ts-ignore
+      debounce(() => onLoadMore({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+    ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onLoadMore, items],
-  );
+  }, [onLoadMore, items]);
 
   // Initial preload
   useEffect(() => {
-    if (!loadMoreBackwards || stateRef.current.preloadCounter > MAX_PRELOADS) {
+    if (!loadMoreBackwards) {
       return;
     }
 
     if (!items || items.length < preloadBackwards) {
-      stateRef.current.preloadCounter++;
       loadMoreBackwards();
     } else {
       const { scrollHeight, clientHeight } = containerRef.current!;
       if (clientHeight && scrollHeight <= clientHeight) {
-        stateRef.current.preloadCounter++;
         loadMoreBackwards();
       }
     }
@@ -104,8 +94,10 @@ const InfiniteScroll: FC<OwnProps> = ({
       newScrollTop = 0;
 
       const nextAnchor = listItemElements[0];
-      stateRef.current.currentAnchor = nextAnchor;
-      stateRef.current.currentAnchorTop = 0;
+      if (nextAnchor) {
+        stateRef.current.currentAnchor = nextAnchor;
+        stateRef.current.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+      }
     }
 
     container.scrollTop = newScrollTop;

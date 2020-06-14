@@ -46,7 +46,7 @@ const Main: FC<StateProps> = ({
   useEffect(() => {
     document.body.classList.toggle('is-right-column-shown', isRightColumnShown);
     document.body.classList.add('animating-right-column');
-    dispatchHeavyAnimationEvent(ANIMATION_DURATION);
+    dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
 
     if (timeout) {
       clearTimeout(timeout);

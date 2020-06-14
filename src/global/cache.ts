@@ -5,6 +5,7 @@ import { GlobalState } from './types';
 import { throttle } from '../util/schedulers';
 import {
   DEBUG,
+  GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
   GRAMJS_SESSION_ID_KEY,
@@ -119,8 +120,20 @@ function reduceUsers(global: GlobalState): GlobalState['users'] {
 }
 
 function reduceChats(global: GlobalState): GlobalState['chats'] {
+  const chatIdsToSave = [
+    ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT),
+  ];
+
   return {
     ...global.chats,
+    byId: pick(global.chats.byId, chatIdsToSave),
+    listIds: {
+      active: chatIdsToSave,
+    },
+    isFullyLoaded: {},
+    orderedPinnedIds: {
+      active: global.chats.orderedPinnedIds.active,
+    },
     replyingToById: {},
     editingById: {},
     ...(window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH && { selectedId: undefined }),
@@ -130,13 +143,12 @@ function reduceChats(global: GlobalState): GlobalState['chats'] {
 function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const byChatId: GlobalState['messages']['byChatId'] = {};
 
-  const savedIds = [
+  const chatIdsToSave = [
     ...(global.chats.listIds.active || []),
-    ...(global.chats.listIds.archived || []),
     ...(global.chats.selectedId ? [global.chats.selectedId] : []),
   ];
 
-  savedIds.forEach((chatId) => {
+  chatIdsToSave.forEach((chatId) => {
     const current = global.messages.byChatId[chatId];
     if (!current || !current.viewportIds) {
       return;

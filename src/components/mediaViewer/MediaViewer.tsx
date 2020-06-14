@@ -9,6 +9,7 @@ import {
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import {
   AVATAR_FULL_DIMENSIONS,
   calculateMediaViewerDimensions,
@@ -151,14 +152,14 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
   useEffect(() => {
     if (isGhostAnimation && isOpen && !prevMessage && !prevAvatarOwner) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
       const textParts = message ? renderMessageText(message) : undefined;
       const hasFooter = Boolean(textParts);
       animateOpening(message!, hasFooter, origin!, bestImageData!);
     }
 
     if (isGhostAnimation && !isOpen && (prevMessage || prevAvatarOwner)) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(prevMessage!, prevOrigin!);
     }
   }, [isGhostAnimation, isOpen, origin, prevOrigin, message, prevMessage, prevAvatarOwner, bestImageData]);

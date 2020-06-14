@@ -5,7 +5,7 @@ import {
   getPrivateChatUserId, isChatSuperGroup, isUserBot, isUserOnline,
 } from '../helpers';
 import { selectUser } from './users';
-import { ARCHIVED_FOLDER_ID } from '../../config';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../config';
 
 export function selectChat(global: GlobalState, chatId: number): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -94,10 +94,10 @@ export function selectTotalChatCount(global: GlobalState, listType: 'active' | '
   return allChatsCount ? allChatsCount - archivedChatsCount : 0;
 }
 
-export function selectIsChatPinned(global: GlobalState, chatId: number, folderId?: number): boolean {
+export function selectIsChatPinned(global: GlobalState, chatId: number, folderId = ALL_FOLDER_ID): boolean {
   const { active, archived } = global.chats.orderedPinnedIds;
 
-  if (!folderId || folderId === 0) {
+  if (folderId === ALL_FOLDER_ID) {
     return !!active && active.includes(chatId);
   }
 

@@ -166,7 +166,7 @@ export function isUserOnline(user: ApiUser) {
 }
 
 export function isDeletedUser(user: ApiUser) {
-  if (!user.status || user.type === 'userTypeBot') {
+  if (!user.status || user.type === 'userTypeBot' || user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return false;
   }
 

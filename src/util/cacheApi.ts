@@ -14,18 +14,29 @@ export async function fetch(cacheName: string, key: string, type: Type) {
 
   const request = new Request(key);
   const cache = await cacheApi.open(cacheName);
-  const cached = await cache.match(request);
-  if (!cached) {
+  const response = await cache.match(request);
+  if (!response) {
     return undefined;
   }
 
   switch (type) {
     case Type.Text:
-      return cached.text();
-    case Type.Blob:
-      return cached.blob();
+      return response.text();
+    case Type.Blob: {
+      const blob = await response.blob();
+
+      // iOS Safari fails to preserve `type` in cache
+      if (!blob.type) {
+        const contentType = response.headers.get('Content-Type');
+        if (contentType) {
+          return new Blob([blob], { type: contentType });
+        }
+      }
+
+      return blob;
+    }
     case Type.Json:
-      return cached.json();
+      return response.json();
     default:
       return undefined;
   }

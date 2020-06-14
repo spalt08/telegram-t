@@ -69,16 +69,9 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));
 
-  if (!listIds) {
-    return <Loading />;
-  }
-
   return (
     <InfiniteScroll items={viewportIds} onLoadMore={getMore} className="ContactList custom-scroll optimized-list">
-      {!viewportIds.length && !!filter.length && (
-        <p className="no-results">No contacts matched your search.</p>
-      )}
-      {viewportIds.length && (
+      {viewportIds && viewportIds.length ? (
         <div teactFastList>
           {viewportIds.map((id) => (
             <ListItem
@@ -91,6 +84,10 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
             </ListItem>
           ))}
         </div>
+      ) : viewportIds && !viewportIds.length && Boolean(filter.length) ? (
+        <p className="no-results">No contacts matched your search.</p>
+      ) : (
+        <Loading />
       )}
     </InfiniteScroll>
   );

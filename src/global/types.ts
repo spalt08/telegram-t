@@ -61,6 +61,10 @@ export type GlobalState = {
       active?: number[];
       archived?: number[];
     };
+    isFullyLoaded: {
+      active?: boolean;
+      archived?: boolean;
+    };
     orderedPinnedIds: {
       active?: number[];
       archived?: number[];

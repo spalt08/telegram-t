@@ -45,21 +45,21 @@ export async function fetchChats({
   limit,
   offsetDate,
   archived,
-  isSync,
+  withPinned,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
-  isSync?: boolean;
+  withPinned?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
     offsetPeer: new GramJs.InputPeerEmpty(),
     limit,
     offsetDate,
     folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
-    ...(isSync && { excludePinned: true }),
+    ...(withPinned && { excludePinned: true }),
   }));
-  const resultPinned = isSync
+  const resultPinned = withPinned
     ? await invokeRequest(new GramJs.messages.GetPinnedDialogs({
       folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
     }))
@@ -110,7 +110,7 @@ export async function fetchChats({
     chat.lastMessage = lastMessagesByChatId[chat.id];
     chats.push(chat);
 
-    if (isSync && dialog.pinned) {
+    if (withPinned && dialog.pinned) {
       orderedPinnedIds.push(chat.id);
     }
 
@@ -148,7 +148,7 @@ export async function fetchChats({
     users,
     draftsById,
     replyingToById,
-    orderedPinnedIds: isSync ? orderedPinnedIds : undefined,
+    orderedPinnedIds: withPinned ? orderedPinnedIds : undefined,
     totalChatCount,
   };
 }
