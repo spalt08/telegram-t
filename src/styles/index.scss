@@ -125,12 +125,6 @@ body.scrollable {
     }
   }
 
-  &:not(:hover) {
-    .ListItem:nth-child(n + 16) {
-      display: none;
-    }
-  }
-
   // This prevents from a second scroll jump after restoring hidden content
   overflow-anchor: none;
 }

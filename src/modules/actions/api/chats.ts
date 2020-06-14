@@ -29,13 +29,12 @@ import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helper
 
 const TOP_CHATS_PRELOAD_PAUSE = 500;
 
+const runThrottledForLoadChats = throttle((cb) => cb(), 500, true);
+const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
-const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 
-addReducer('preloadTopChatMessages', (global, actions, payload) => {
-  const { listType }: { listType: 'active' | 'archived' } = payload;
-
+addReducer('preloadTopChatMessages', (global, actions) => {
   (async () => {
     const preloadedChatIds: number[] = [];
 
@@ -45,8 +44,8 @@ addReducer('preloadTopChatMessages', (global, actions, payload) => {
       const {
         selectedId,
         byId,
-        listIds: { [listType]: listIds },
-        orderedPinnedIds: { [listType]: orderedPinnedIds },
+        listIds: { active: listIds },
+        orderedPinnedIds: { active: orderedPinnedIds },
       } = getGlobal().chats;
       if (!listIds) {
         return;
@@ -89,18 +88,19 @@ addReducer('openChat', (global, actions, payload) => {
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {
-  const { listType } = payload!;
-  const chatsWithLastMessages = Object.values(global.chats.byId)
-    .filter((chat) => (
-      Boolean(chat.lastMessage)
-      && (listType === 'archived' ? chat.folderId === ARCHIVED_FOLDER_ID : chat.folderId !== ARCHIVED_FOLDER_ID)
-    ));
-  const lastChat = chatsWithLastMessages[chatsWithLastMessages.length - 1];
+  const { listType = 'active' } = payload!;
+  const listIds = global.chats.listIds[listType as ('active' | 'archived')];
+  const oldestChat = listIds
+    ? listIds
+      .map((id) => global.chats.byId[id])
+      .filter((chat) => Boolean(chat && chat.lastMessage))
+      .sort((chat1, chat2) => (chat1.lastMessage!.date - chat2.lastMessage!.date))[0]
+    : undefined;
 
-  if (lastChat) {
-    void loadChats(listType, lastChat.id, lastChat.lastMessage!.date);
+  if (oldestChat) {
+    runThrottledForLoadChats(() => loadChats(listType, oldestChat.id, oldestChat.lastMessage!.date));
   } else {
-    void loadChats(listType);
+    runThrottledForLoadChats(() => loadChats(listType));
   }
 });
 

@@ -5,10 +5,11 @@ import React, {
 import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import './Transition.scss';
 
-type ChildrenFn = () => any;
+type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
   activeKey: any;
   name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
@@ -123,6 +124,8 @@ const Transition: FC<OwnProps> = ({
       });
     }
 
+    dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+
     requestAnimationFrame(() => {
       container.classList.add('animating');
 
@@ -190,10 +193,12 @@ const Transition: FC<OwnProps> = ({
   if (renderCount) {
     contents = [];
     for (let key = 0; key < renderCount; key++) {
-      contents.push(renders[key] ? <div key={key}>{renders[key]()}</div> : undefined);
+      contents.push(renders[key] ? <div key={key}>{renders[key](key === activeKey)}</div> : undefined);
     }
   } else {
-    contents = Object.keys(renders).map((key) => <div key={key}>{renders[Number(key)]()}</div>);
+    contents = Object.keys(renders).map((key) => (
+      <div key={key}>{renders[Number(key)](Number(key) === activeKey)}</div>
+    ));
   }
 
   const fullClassName = buildClassName(

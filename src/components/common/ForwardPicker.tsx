@@ -40,7 +40,7 @@ const ForwardPicker: FC<StateProps & DispatchProps> = ({
   const [filter, setFilter] = useState('');
 
   const chats = useMemo(() => {
-    const chatArrays = listIds ? prepareChatList(chatsById, listIds, orderedPinnedIds, 'active') : undefined;
+    const chatArrays = listIds ? prepareChatList(chatsById, listIds, orderedPinnedIds) : undefined;
     return chatArrays && [...chatArrays.pinnedChats, ...chatArrays.otherChats];
   }, [chatsById, listIds, orderedPinnedIds]);
 

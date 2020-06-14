@@ -105,17 +105,11 @@ async function loadAndReplaceChats() {
   global = replaceChats(global, buildCollectionByKey(savedChats, 'id'));
   global = replaceChatListIds(global, 'active', result.chatIds);
 
-  // Reset archived chat ids, which will be fetched after sync
-  global = replaceChatListIds(global, 'archived', undefined);
   global = {
     ...global,
     chats: {
       ...global.chats,
       scrollOffsetById: {},
-      orderedPinnedIds: {
-        ...global.chats.orderedPinnedIds,
-        archived: undefined,
-      },
     },
   };
 

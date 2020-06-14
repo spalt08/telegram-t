@@ -1,5 +1,9 @@
 import { FocusDirection } from '../types';
 
+import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
+
+const AVG_DURATION = 1000;
+
 export default (
   container: HTMLElement,
   element: HTMLElement,
@@ -28,6 +32,8 @@ export default (
   } else if (forceDirection === FocusDirection.Down) {
     container.scrollTop = Math.max(0, offsetTop - maxDistance);
   }
+
+  dispatchHeavyAnimationEvent(AVG_DURATION);
 
   // TODO Re-implement to be `ease-out`.
   element.scrollIntoView({
