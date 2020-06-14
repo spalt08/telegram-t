@@ -6,6 +6,7 @@ export const GRAMJS_SESSION_ID_KEY = 'GramJs:sessionId';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
+export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 20;
 
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';
@@ -19,6 +20,7 @@ export const MESSAGE_LIST_SLICE = isBigScreen ? 50 : 40;
 export const MESSAGE_LIST_VIEWPORT_LIMIT = MESSAGE_LIST_SLICE * 3;
 
 export const CHAT_LIST_SLICE = 20;
+export const CHAT_LIST_LOAD_SLICE = 100;
 export const SHARED_MEDIA_SLICE = 30;
 export const MESSAGE_SEARCH_SLICE = 30;
 export const GLOBAL_SEARCH_SLICE = 20;

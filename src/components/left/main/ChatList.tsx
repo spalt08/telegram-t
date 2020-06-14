@@ -6,6 +6,7 @@ import { withGlobal } from '../../../lib/teact/teactn';
 import { GlobalActions } from '../../../global/types';
 import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
 
+import { CHAT_LIST_SLICE } from '../../../config';
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
@@ -17,7 +18,6 @@ import Loading from '../../ui/Loading';
 import Chat from './Chat';
 
 import './ChatList.scss';
-import { CHAT_LIST_SLICE } from '../../../config';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
@@ -88,7 +88,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     loadMoreChats({ listType: folderType === 'archived' ? 'archived' : 'active' });
   }, [loadMoreChats, folderType]);
 
-  const [viewportIds, getMore] = useInfiniteScroll(loadMoreOfType, orderedIds);
+  const [viewportIds, getMore] = useInfiniteScroll(loadMoreOfType, orderedIds, !lastSyncTime);
   // TODO Refactor to not call `prepareChatList` twice
   const chatArrays = prepareChatList(chatsById, viewportIds, currentPinnedIds, folderType);
 

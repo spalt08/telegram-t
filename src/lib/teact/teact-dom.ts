@@ -279,7 +279,7 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
         return acc;
       } else if (!key) {
         const $newChild = $new.children[i];
-        const newChildKey = ('props' in $newChild) ? $newChild.props.key : undefined;
+        const newChildKey = ($newChild && 'props' in $newChild) ? $newChild.props.key : undefined;
         // If a non-key element remains at the same index we preserve it with a virtual `key`
         if ($newChild && !newChildKey) {
           key = `${INDEX_KEY_PREFIX}${i}`;

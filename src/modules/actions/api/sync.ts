@@ -3,7 +3,7 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../../api/types';
 import { GlobalState, GlobalActions } from '../../../global/types';
 
-import { CHAT_LIST_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
+import { CHAT_LIST_LOAD_SLICE, MESSAGE_LIST_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
@@ -55,7 +55,7 @@ async function sync(afterSyncCallback: () => void) {
 
 async function loadAndReplaceChats() {
   const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
+    limit: CHAT_LIST_LOAD_SLICE,
     isSync: true,
   });
 
@@ -128,7 +128,7 @@ async function loadAndReplaceChats() {
 
 async function loadAndReplaceArchivedChats() {
   const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
+    limit: CHAT_LIST_LOAD_SLICE,
     archived: true,
     isSync: true,
   });

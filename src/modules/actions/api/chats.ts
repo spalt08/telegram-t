@@ -4,7 +4,7 @@ import { ApiChat, ApiUser } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
 
 import {
-  CHAT_LIST_SLICE, SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID, TOP_CHATS_PRELOAD_LIMIT,
+  SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID, TOP_CHATS_PRELOAD_LIMIT, CHAT_LIST_LOAD_SLICE,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -29,7 +29,7 @@ import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helper
 
 const TOP_CHATS_PRELOAD_PAUSE = 500;
 
-const runThrottledForLoadChats = throttle((cb) => cb(), 500, true);
+const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
 const runDebouncedForFetchFullChat = debounce((cb) => cb(), 500, false, true);
 const runDebouncedForFetchOnlines = debounce((cb) => cb(), 500, false, true);
@@ -90,6 +90,12 @@ addReducer('openChat', (global, actions, payload) => {
 addReducer('loadMoreChats', (global, actions, payload) => {
   const { listType = 'active' } = payload!;
   const listIds = global.chats.listIds[listType as ('active' | 'archived')];
+  const isFullyLoaded = global.chats.isFullyLoaded[listType as ('active' | 'archived')];
+
+  if (isFullyLoaded) {
+    return;
+  }
+
   const oldestChat = listIds
     ? listIds
       .map((id) => global.chats.byId[id])
@@ -332,7 +338,7 @@ addReducer('toggleChatUnread', (global, actions, payload) => {
 
 async function loadChats(listType: 'active' | 'archived', offsetId?: number, offsetDate?: number) {
   const result = await callApi('fetchChats', {
-    limit: CHAT_LIST_SLICE,
+    limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     archived: listType === 'archived',
   });
@@ -352,6 +358,20 @@ async function loadChats(listType: 'active' | 'archived', offsetId?: number, off
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateChatListIds(global, listType, chatIds);
+
+  if (chatIds.length === 0 && !global.chats.isFullyLoaded[listType]) {
+    global = {
+      ...global,
+      chats: {
+        ...global.chats,
+        isFullyLoaded: {
+          ...global.chats.isFullyLoaded,
+          [listType]: true,
+        },
+      },
+    };
+  }
+
   if (result.totalChatCount !== undefined) {
     global = {
       ...global,
