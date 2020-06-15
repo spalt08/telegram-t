@@ -103,17 +103,13 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
         onClick={handleViewMoreClick}
       >
         <i className="icon-down" />
-          Show {leftVotersCount} more {leftVotersCount > 1 ? 'voters' : 'voter'}
+        Show {leftVotersCount} more {leftVotersCount > 1 ? 'voters' : 'voter'}
       </Button>
     );
   }
 
   return (
     <div className="PollAnswerResults">
-      <div className="answer-head">
-        <span className="answer-title">{text}</span>
-        <span className="answer-percent">{getPercentage(answerVote.voters, totalVoters)}%</span>
-      </div>
       <div className="poll-voters">
         {voters.length || answerVote.voters === 0
           ? voters.map((id) => (
@@ -132,6 +128,10 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
           ))
           : <Loading />}
         {renderViewMoreButton()}
+      </div>
+      <div className="answer-head">
+        <span className="answer-title">{text}</span>
+        <span className="answer-percent">{getPercentage(answerVote.voters, totalVoters)}%</span>
       </div>
     </div>
   );
