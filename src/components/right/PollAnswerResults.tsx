@@ -13,7 +13,7 @@ import {
 import { GlobalActions } from '../../global/types';
 import { pick } from '../../util/iteratees';
 
-import Button from '../ui/Button';
+import ShowMoreButton from '../ui/ShowMoreButton';
 import Loading from '../ui/Loading';
 import ListItem from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -87,17 +87,12 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
     const leftVotersCount = answerVote.voters - voters!.length;
 
     return answerVote.voters > INITIAL_LIMIT && leftVotersCount > 0 && (
-      <Button
-        color="translucent"
-        ripple
-        size="smaller"
-        isText
+      <ShowMoreButton
+        count={leftVotersCount}
+        itemName="voter"
         isLoading={isLoading}
         onClick={handleViewMoreClick}
-      >
-        <i className="icon-down" />
-        Show {leftVotersCount} more {leftVotersCount > 1 ? 'voters' : 'voter'}
-      </Button>
+      />
     );
   }
 

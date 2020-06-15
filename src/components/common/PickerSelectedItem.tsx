@@ -9,8 +9,14 @@ import renderText from './helpers/renderText';
 
 import Avatar from './Avatar';
 
+import './PickerSelectedItem.scss';
+import buildClassName from '../../util/buildClassName';
+
 type OwnProps = {
-  chatId: number;
+  chatId?: number;
+  icon?: string;
+  title?: string;
+  isMinimized?: boolean;
   onClick: () => void;
 };
 
@@ -20,30 +26,59 @@ type StateProps = {
 };
 
 const PickerSelectedItem: FC<OwnProps & StateProps> = ({
+  icon,
+  title,
+  isMinimized,
   onClick,
   chat,
   privateChatUser,
 }) => {
-  if (!chat) {
-    return undefined;
-  }
+  let iconElement: any;
+  let titleText: any;
 
-  const name = privateChatUser && !privateChatUser.isSelf
-    ? getUserFirstName(privateChatUser)
-    : getChatTitle(chat, privateChatUser);
+  if (icon && title) {
+    iconElement = (
+      <div className="item-icon">
+        <i className={`icon-${icon}`} />
+      </div>
+    );
 
-  return (
-    <div className="picker-selected-item" onClick={onClick}>
+    titleText = title;
+  } else if (chat) {
+    iconElement = (
       <Avatar
         chat={chat}
         user={privateChatUser}
         size="small"
         isSavedMessages={privateChatUser && privateChatUser.isSelf}
       />
-      <div className="picker-selected-item-name">
-        {name && renderText(name)}
-      </div>
-      <div className="picker-selected-item-remove">
+    );
+
+    const name = privateChatUser && !privateChatUser.isSelf
+      ? getUserFirstName(privateChatUser)
+      : getChatTitle(chat, privateChatUser);
+
+    titleText = name ? renderText(name) : undefined;
+  }
+
+  const className = buildClassName(
+    'PickerSelectedItem',
+    isMinimized && 'minimized',
+  );
+
+  return (
+    <div
+      className={className}
+      onClick={onClick}
+      title={isMinimized ? titleText : undefined}
+    >
+      {iconElement}
+      {!isMinimized && (
+        <div className="item-name">
+          {titleText}
+        </div>
+      )}
+      <div className="item-remove">
         <i className="icon-close" />
       </div>
     </div>
@@ -52,7 +87,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const chat = selectChat(global, chatId);
+    const chat = chatId ? selectChat(global, chatId) : undefined;
     if (!chat) {
       return {};
     }

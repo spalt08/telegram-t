@@ -48,17 +48,9 @@
     font-weight: 400;
   }
 
-  .Button {
-    color: var(--secondary-color);
-    text-align: left;
-    text-transform: none;
-    padding-left: .75rem;
+  .ShowMoreButton {
     margin: .25rem 0 0 -0.5rem;
     width: calc(100% + 1rem);
-
-    .Spinner {
-      top: 0.4375rem;
-    }
   }
 
   .icon-down {

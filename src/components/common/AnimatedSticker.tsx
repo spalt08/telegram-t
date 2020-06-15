@@ -5,6 +5,7 @@ import React, {
 
 import { fastRaf } from '../../util/schedulers';
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
+import { ANIMATION_END_DELAY } from '../../config';
 
 type OwnProps = {
   animationData: AnyLiteral;
@@ -94,6 +95,12 @@ const AnimatedSticker: FC<OwnProps> = ({
     };
   }, []);
 
+  const restartAnimation = () => {
+    if (animationRef.current && playRef.current) {
+      animationRef.current.goToAndPlay(0);
+    }
+  };
+
   const playAnimation = () => {
     if (animationRef.current && playRef.current) {
       animationRef.current.play();
@@ -106,15 +113,29 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   };
 
-  useHeavyAnimationCheck(pauseAnimation, playAnimation);
+  const pauseNoLoopAnimation = () => {
+    const animation = animationRef.current;
+    if (animation) {
+      animation.pause();
+      setTimeout(() => {
+        animation.goToAndStop(0);
+      }, ANIMATION_END_DELAY);
+    }
+  };
+
+  useHeavyAnimationCheck(noLoop ? pauseNoLoopAnimation : pauseAnimation, noLoop ? restartAnimation : playAnimation);
 
   useEffect(() => {
     if (play) {
-      playAnimation();
+      if (noLoop) {
+        restartAnimation();
+      } else {
+        playAnimation();
+      }
     } else {
       pauseAnimation();
     }
-  }, [play]);
+  }, [play, noLoop]);
 
   useEffect(() => {
     const animation = animationRef.current;

@@ -31,7 +31,7 @@ export default ({
     const isChatWithSelf = privateChatUser && privateChatUser.isSelf;
 
     const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
-      ? { title: 'Mark as Read', icon: 'message', handler: () => toggleChatUnread({ id: chat.id }) }
+      ? { title: 'Mark as Read', icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
       : { title: 'Mark as Unread', icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
 
     const actionPin = isPinned

@@ -44,6 +44,11 @@ export enum SettingsScreens {
   PrivacyGroupChats,
   PrivacyActiveSessions,
   PrivacyBlockedUsers,
+  Folders,
+  FoldersCreateFolder,
+  FoldersEditFolder,
+  FoldersIncludedChats,
+  FoldersExcludedChats,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail'>;

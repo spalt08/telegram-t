@@ -10,7 +10,7 @@ import { CHAT_LIST_SLICE } from '../../../config';
 import usePrevious from '../../../hooks/usePrevious';
 import { buildCollectionByKey, mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
-import { selectTotalChatCount, selectChatFolder } from '../../../modules/selectors';
+import { selectChatFolder } from '../../../modules/selectors';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -32,7 +32,6 @@ type StateProps = {
   listIds?: number[];
   selectedChatId?: number;
   orderedPinnedIds?: number[];
-  totalCount?: number;
   lastSyncTime?: number;
 };
 
@@ -166,7 +165,6 @@ export default memo(withGlobal<OwnProps>(
       ...(listType ? {
         listIds: listIds[listType],
         orderedPinnedIds: orderedPinnedIds[listType],
-        totalCount: selectTotalChatCount(global, listType),
       } : {
         chatFolder,
       }),

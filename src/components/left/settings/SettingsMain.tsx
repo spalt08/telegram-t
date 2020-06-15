@@ -42,6 +42,12 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           Edit Profile
         </ListItem>
         <ListItem
+          icon="folder"
+          onClick={() => onScreenSelect(SettingsScreens.Folders)}
+        >
+          Chat Folders
+        </ListItem>
+        <ListItem
           icon="settings"
           attention={isAnimationLevelBadgeShown}
           onClick={() => onScreenSelect(SettingsScreens.General)}
