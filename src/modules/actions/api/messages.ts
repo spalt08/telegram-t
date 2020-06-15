@@ -295,12 +295,12 @@ addReducer('sendPollVote', (global, actions, payload) => {
   }
 });
 
-addReducer('getPollVotes', (global, actions, payload) => {
+addReducer('loadPollOptionResults', (global, actions, payload) => {
   const {
-    chat, messageId, option, offset, limit,
+    chat, messageId, option, offset, limit, shouldResetVoters,
   } = payload!;
 
-  void loadPollResults(chat, messageId, option, offset, limit);
+  void loadPollOptionResults(chat, messageId, option, offset, limit, shouldResetVoters);
 });
 
 addReducer('forwardMessages', (global) => {
@@ -509,14 +509,15 @@ async function forwardMessages(
   }
 }
 
-async function loadPollResults(
+async function loadPollOptionResults(
   chat: ApiChat,
   messageId: number,
   option: string,
   offset?: string,
   limit?: number,
+  shouldResetVoters?: boolean,
 ) {
-  const result = await callApi('getPollVotes', {
+  const result = await callApi('loadPollOptionResults', {
     chat, messageId, option, offset, limit,
   });
 
@@ -528,15 +529,16 @@ async function loadPollResults(
   let global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  const { voters } = global.pollResults;
 
   setGlobal({
     ...global,
     pollResults: {
       ...global.pollResults,
       voters: {
-        ...(global.pollResults.voters ? global.pollResults.voters : {}),
+        ...voters,
         [option]: [
-          ...(global.pollResults.voters && global.pollResults.voters[option] ? global.pollResults.voters[option] : []),
+          ...(!shouldResetVoters && voters && voters[option] ? voters[option] : []),
           ...(result && result.users.map((user) => user.id)),
         ].filter(isUnique),
       },

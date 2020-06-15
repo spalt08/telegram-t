@@ -29,11 +29,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  voters: number[];
+  voters?: number[];
   offset: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'getPollVotes' | 'openChat' | 'closePollResults'>;
+type DispatchProps = Pick<GlobalActions, 'loadPollOptionResults' | 'openChat' | 'closePollResults'>;
 
 const INITIAL_LIMIT = 4;
 const VIEW_MORE_LIMIT = 50;
@@ -48,36 +48,33 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   totalVoters,
   voters,
   offset,
-  getPollVotes,
+  loadPollOptionResults,
   openChat,
   closePollResults,
 }) => {
-  const previousChatId = usePrevious<number>(chat.id);
-  const previousMessageId = usePrevious<number>(message.id);
   const previousVotersCount = usePrevious<number>(answerVote.voters);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { option, text } = answer;
 
   useEffect(() => {
-    if (previousChatId !== chat.id
-      || previousMessageId !== message.id
-      || previousVotersCount === null
+    // For update when new votes arrive or when the user takes back his vote
+    if (previousVotersCount === null
       || previousVotersCount <= INITIAL_LIMIT
-      || (previousVotersCount > voters.length && voters.length === 0)
+      || answerVote.voters <= INITIAL_LIMIT
     ) {
-      getPollVotes({
-        chat, messageId: message.id, option, offset, limit: INITIAL_LIMIT,
+      loadPollOptionResults({
+        chat, messageId: message.id, option, offset, limit: INITIAL_LIMIT, shouldResetVoters: true,
       });
     }
     // eslint-disable-next-line
-  }, [chat.id, message.id, option, voters.length, answerVote.voters]);
+  }, [answerVote.voters]);
 
   const handleViewMoreClick = useCallback(() => {
     setIsLoading(true);
-    getPollVotes({
+    loadPollOptionResults({
       chat, messageId: message.id, option, offset, limit: VIEW_MORE_LIMIT,
     });
-  }, [chat, getPollVotes, message.id, offset, option]);
+  }, [chat, loadPollOptionResults, message.id, offset, option]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -91,9 +88,9 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closePollResults, openChat]);
 
   function renderViewMoreButton() {
-    const leftVotersCount = answerVote.voters - voters.length;
+    const leftVotersCount = answerVote.voters - voters!.length;
 
-    return voters.length > 0 && leftVotersCount > 0 && (
+    return voters!.length > INITIAL_LIMIT && leftVotersCount > 0 && (
       <Button
         color="translucent"
         ripple
@@ -111,7 +108,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="PollAnswerResults">
       <div className="poll-voters">
-        {voters.length || answerVote.voters === 0
+        {voters
           ? voters.map((id) => (
             <ListItem
               key={id}
@@ -122,12 +119,12 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
                 avatarSize="tiny"
                 userId={id}
                 forceShowSelf
-                showStatusOrTyping={false}
+                noStatusOrTyping
               />
             </ListItem>
           ))
           : <Loading />}
-        {renderViewMoreButton()}
+        {voters && renderViewMoreButton()}
       </div>
       <div className="answer-head">
         <span className="answer-title">{text}</span>
@@ -146,9 +143,9 @@ export default memo(withGlobal<OwnProps>(
     const { voters, offsets } = global.pollResults;
 
     return {
-      voters: (voters && voters[answer.option]) || [],
+      voters: voters && voters[answer.option],
       offset: (offsets && offsets[answer.option]) || '',
     };
   },
-  (global, actions): DispatchProps => pick(actions, ['getPollVotes', 'openChat', 'closePollResults']),
+  (global, actions): DispatchProps => pick(actions, ['loadPollOptionResults', 'openChat', 'closePollResults']),
 )(PollAnswerResults));

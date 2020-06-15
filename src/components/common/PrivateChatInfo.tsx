@@ -24,7 +24,7 @@ type OwnProps = {
   forceShowSelf?: boolean;
   showHandle?: boolean;
   showFullInfo?: boolean;
-  showStatusOrTyping?: boolean;
+  noStatusOrTyping?: boolean;
 };
 
 type StateProps = {
@@ -42,7 +42,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   isSavedMessages,
   showHandle,
   showFullInfo,
-  showStatusOrTyping = true,
+  noStatusOrTyping,
   loadFullUser,
   openMediaViewer,
 }) => {
@@ -106,7 +106,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}
-        {!isSavedMessages && showStatusOrTyping && renderStatusOrTyping()}
+        {!isSavedMessages && !noStatusOrTyping && renderStatusOrTyping()}
       </div>
     </div>
   );

@@ -2,9 +2,9 @@ import React, { FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
-import { ApiMessage, PollAnswerVote, ApiChat } from '../../api/types';
+import { ApiMessage, ApiChat } from '../../api/types';
 import { selectChat, selectChatMessage } from '../../modules/selectors';
-import { pick } from '../../util/iteratees';
+import { pick, buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../modules/helpers';
 
 import PollAnswerResults from './PollAnswerResults';
@@ -35,13 +35,7 @@ const PollResults: FC<StateProps & DispatchProps> = ({
     return null;
   }
 
-  const resultsByOption = results.results.reduce((
-    result: Record<string, PollAnswerVote>, pollAnswerVote: PollAnswerVote,
-  ) => {
-    result[pollAnswerVote.option] = pollAnswerVote;
-
-    return result;
-  }, {});
+  const resultsByOption = buildCollectionByKey(results.results, 'option');
 
   return (
     <div className="PollResults">
@@ -49,7 +43,7 @@ const PollResults: FC<StateProps & DispatchProps> = ({
       <div className="poll-results-list custom-scroll">
         {lastSyncTime && summary.answers.map((answer) => (
           <PollAnswerResults
-            key={answer.option}
+            key={`${message.id}-${answer.option}`}
             chat={chat}
             message={message}
             answer={answer}

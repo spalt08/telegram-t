@@ -55,15 +55,21 @@ addReducer('openPollResults', (global, actions, payload) => {
 
   const shouldOpenInstantly = selectIsRightColumnShown(global);
 
-  setGlobal({
-    ...global,
-    pollResults: {
-      chatId,
-      messageId,
-      ...(shouldOpenInstantly && { isColumnShown: true }),
-      voters: {},
-    },
-  });
+  if (
+    chatId !== global.pollResults.chatId
+    || messageId !== global.pollResults.messageId
+    || !global.pollResults.isColumnShown
+  ) {
+    setGlobal({
+      ...global,
+      pollResults: {
+        chatId,
+        messageId,
+        ...(shouldOpenInstantly && { isColumnShown: true }),
+        voters: {},
+      },
+    });
+  }
 
   if (!shouldOpenInstantly) {
     window.setTimeout(() => {

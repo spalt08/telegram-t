@@ -669,14 +669,15 @@ export async function sendPollVote({
   }), true);
 }
 
-export async function getPollVotes({
-  chat, messageId, option, offset, limit,
+export async function loadPollOptionResults({
+  chat, messageId, option, offset, limit, shouldResetVoters,
 }: {
   chat: ApiChat;
   messageId: number;
   option?: string;
   offset?: string;
   limit?: number;
+  shouldResetVoters?: boolean;
 }) {
   const { id, accessHash } = chat;
 
@@ -709,6 +710,7 @@ export async function getPollVotes({
     votes,
     users,
     nextOffset: result.nextOffset,
+    shouldResetVoters,
   };
 }
 

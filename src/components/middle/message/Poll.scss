@@ -52,7 +52,10 @@
       &::before {
         left: 0.125rem;
         background-color: var(--background-color);
-        border-color: var(--color-borders);
+
+        .Message.own & {
+          border-color: var(--accent-shade-color);
+        }
       }
 
       &::after {
@@ -222,6 +225,7 @@
 
     .Message.own & {
       color: var(--accent-color);
+      --color-primary-shade-rgb: var(--color-text-green-rgb);
     }
   }
 }

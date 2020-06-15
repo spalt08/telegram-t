@@ -281,6 +281,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
             className="poll-quiz-help"
             disabled={isSolutionShown}
             onClick={handleSolutionShow}
+            ariaLabel="Show Solution"
           >
             <i className="icon-lamp" />
           </Button>

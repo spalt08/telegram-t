@@ -255,7 +255,7 @@ export type ActionTypes = (
   'markChatRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' | 'sendPollVote' | 'editMessage' |
   'deleteHistory' |
   // poll result
-  'openPollResults' | 'closePollResults' | 'getPollVotes' |
+  'openPollResults' | 'closePollResults' | 'loadPollOptionResults' |
   // forwarding messages
   'openForwardMenu' | 'closeForwardMenu' | 'setForwardChatIds' | 'forwardMessages' |
   // global search
