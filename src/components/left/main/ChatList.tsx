@@ -8,7 +8,7 @@ import { ApiChat, ApiChatFolder, ApiUser } from '../../../api/types';
 
 import { CHAT_LIST_SLICE } from '../../../config';
 import usePrevious from '../../../hooks/usePrevious';
-import { mapValues, pick } from '../../../util/iteratees';
+import { buildCollectionByKey, mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
 import { selectTotalChatCount, selectChatFolder } from '../../../modules/selectors';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -67,12 +67,13 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
       return [];
     }
-
     const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, folderType);
     const singleList = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats];
     const newOrderedIds = singleList.map(({ id }) => id);
-    const newOrderById = singleList
-      .reduce((acc, chat, index) => ({ ...acc, [chat.id]: index }), {} as Record<string, number>);
+    const newOrderById = mapValues(
+      buildCollectionByKey(singleList, 'id'),
+      (chat, id, index) => index,
+    );
 
     return [newOrderById, newOrderedIds];
   }, [currentListIds, currentPinnedIds, folderType, chatFolder, chatsById]);

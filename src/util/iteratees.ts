@@ -88,10 +88,7 @@ export function orderBy<T>(
 export function flatten(array: any[]) {
   return array.reduce((result, member) => {
     if (Array.isArray(member)) {
-      return [
-        ...result,
-        ...member,
-      ];
+      return result.concat(member);
     } else {
       result.push(member);
       return result;
