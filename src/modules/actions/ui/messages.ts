@@ -55,22 +55,6 @@ addReducer('openPollResults', (global, actions, payload) => {
 
   const shouldOpenInstantly = selectIsRightColumnShown(global);
 
-  if (
-    chatId !== global.pollResults.chatId
-    || messageId !== global.pollResults.messageId
-    || !global.pollResults.isColumnShown
-  ) {
-    setGlobal({
-      ...global,
-      pollResults: {
-        chatId,
-        messageId,
-        ...(shouldOpenInstantly && { isColumnShown: true }),
-        voters: {},
-      },
-    });
-  }
-
   if (!shouldOpenInstantly) {
     window.setTimeout(() => {
       const newGlobal = getGlobal();
@@ -78,11 +62,21 @@ addReducer('openPollResults', (global, actions, payload) => {
       setGlobal({
         ...newGlobal,
         pollResults: {
-          ...newGlobal.pollResults,
-          isColumnShown: true,
+          chatId,
+          messageId,
+          voters: {},
         },
       });
     }, POLL_RESULT_OPEN_DELAY_MS);
+  } else if (chatId !== global.pollResults.chatId || messageId !== global.pollResults.messageId) {
+    setGlobal({
+      ...global,
+      pollResults: {
+        chatId,
+        messageId,
+        voters: {},
+      },
+    });
   }
 });
 

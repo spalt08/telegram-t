@@ -211,7 +211,6 @@ export type GlobalState = {
   };
 
   pollResults: {
-    isColumnShown?: boolean;
     chatId?: number;
     messageId?: number;
     voters?: Record<string, number[]>;

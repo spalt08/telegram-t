@@ -280,7 +280,7 @@ export function selectFirstUnreadId(global: GlobalState, chatId: number) {
 
 export function selectIsPollResultsOpen(global: GlobalState) {
   const { pollResults } = global;
-  return Boolean(pollResults.isColumnShown);
+  return Boolean(pollResults.messageId);
 }
 
 export function selectIsForwardMenuOpen(global: GlobalState) {
