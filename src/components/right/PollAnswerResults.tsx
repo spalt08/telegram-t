@@ -86,7 +86,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   function renderViewMoreButton() {
     const leftVotersCount = answerVote.voters - voters!.length;
 
-    return voters!.length > INITIAL_LIMIT && leftVotersCount > 0 && (
+    return answerVote.voters > INITIAL_LIMIT && leftVotersCount > 0 && (
       <Button
         color="translucent"
         ripple
