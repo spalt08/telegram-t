@@ -38,8 +38,6 @@ type DispatchProps = Pick<GlobalActions, 'loadPollOptionResults' | 'openChat' | 
 const INITIAL_LIMIT = 4;
 const VIEW_MORE_LIMIT = 50;
 
-const isMobile = matchMedia('(max-width: 600px)');
-
 const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
   chat,
   message,
@@ -82,9 +80,7 @@ const PollAnswerResults: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const handleMemberClick = useCallback((id: number) => {
     openChat({ id });
-    if (isMobile.matches) {
-      closePollResults();
-    }
+    closePollResults();
   }, [closePollResults, openChat]);
 
   function renderViewMoreButton() {
