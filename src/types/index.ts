@@ -68,6 +68,7 @@ export enum RightColumnContent {
   StickerSearch,
   GifSearch,
   Forward,
+  PollResults,
 }
 
 export enum MediaViewerOrigin {

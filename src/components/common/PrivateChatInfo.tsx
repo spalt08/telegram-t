@@ -20,10 +20,11 @@ import TypingStatus from './TypingStatus';
 type OwnProps = {
   userId: number;
   typingStatus?: ApiTypingStatus;
-  avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
+  avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   showHandle?: boolean;
   showFullInfo?: boolean;
+  noStatusOrTyping?: boolean;
 };
 
 type StateProps = {
@@ -41,6 +42,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   isSavedMessages,
   showHandle,
   showFullInfo,
+  noStatusOrTyping,
   loadFullUser,
   openMediaViewer,
 }) => {
@@ -104,7 +106,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}
-        {!isSavedMessages && renderStatusOrTyping()}
+        {!isSavedMessages && !noStatusOrTyping && renderStatusOrTyping()}
       </div>
     </div>
   );

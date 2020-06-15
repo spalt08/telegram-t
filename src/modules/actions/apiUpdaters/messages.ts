@@ -157,12 +157,14 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
         const { results: updatedResults } = updatedPoll.results || {};
         if (updatedResults && !updatedResults.some(((result) => result.chosen))) {
           const { results } = message.content.poll.results;
-          const chosenAnswer = results && results.find((result) => result.chosen);
-          const chosenAnswerIndex = chosenAnswer
-            ? updatedResults.findIndex((result) => result.option === chosenAnswer.option)
-            : -1;
-          if (chosenAnswerIndex >= 0) {
-            updatedPoll.results.results![chosenAnswerIndex].chosen = true;
+          const chosenAnswers = results && results.filter((result) => result.chosen);
+          if (chosenAnswers) {
+            chosenAnswers.forEach((chosenAnswer) => {
+              const chosenAnswerIndex = updatedResults.findIndex((result) => result.option === chosenAnswer.option);
+              if (chosenAnswerIndex >= 0) {
+                updatedPoll.results.results![chosenAnswerIndex].chosen = true;
+              }
+            });
           }
         }
 

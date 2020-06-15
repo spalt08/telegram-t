@@ -16,11 +16,13 @@ import {
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useUpdateOnResize from '../../hooks/useUpdateOnResize';
 import usePrevious from '../../hooks/usePrevious';
+import windowSize from '../../util/windowSize';
 
 import RightHeader from './RightHeader';
 import Profile, { ProfileState } from './Profile';
 import Transition from '../ui/Transition';
 import ForwardPicker from '../common/ForwardPicker.async';
+import PollResults from './PollResults.async';
 import RightSearch from './RightSearch.async';
 import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
@@ -37,7 +39,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' |
-  'closeMessageTextSearch' | 'closeForwardMenu' |
+  'closeMessageTextSearch' | 'closeForwardMenu' | 'closePollResults'|
   'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
 
@@ -63,6 +65,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   setStickerSearchQuery,
   setGifSearchQuery,
   closeForwardMenu,
+  closePollResults,
 }) => {
   const [profileState, setProfileState] = useState<ProfileState>(ProfileState.Profile);
   const isScrolledDown = profileState !== ProfileState.Profile;
@@ -73,7 +76,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isForwarding = contentKey === RightColumnContent.Forward;
   const isStatistics = contentKey === RightColumnContent.Statistics;
-  const isOverlaying = window.innerWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+  const isPollResults = contentKey === RightColumnContent.PollResults;
+  const isOverlaying = windowSize.get().width <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
 
@@ -122,10 +126,13 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
       case RightColumnContent.Forward:
         closeForwardMenu();
         break;
+      case RightColumnContent.PollResults:
+        closePollResults();
+        break;
     }
   }, [
     contentKey, isScrolledDown, toggleChatInfo, openUserInfo,
-    toggleStatistics, closeForwardMenu, closeMessageTextSearch,
+    toggleStatistics, closeForwardMenu, closeMessageTextSearch, closePollResults,
     setStickerSearchQuery, setGifSearchQuery,
   ]);
 
@@ -168,6 +175,8 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         return <ForwardPicker />;
       case RightColumnContent.Statistics:
         return <Statistics />;
+      case RightColumnContent.PollResults:
+        return <PollResults />;
       default:
         return (
           <Profile
@@ -194,6 +203,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isForwarding={isForwarding}
+          isPollResults={isPollResults}
           isStatistics={isStatistics}
           profileState={profileState}
         />
@@ -238,5 +248,6 @@ export default memo(withGlobal(
     'setStickerSearchQuery',
     'setGifSearchQuery',
     'closeForwardMenu',
+    'closePollResults',
   ]),
 )(RightColumn));

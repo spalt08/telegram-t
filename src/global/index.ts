@@ -81,6 +81,8 @@ const INITIAL_STATE: GlobalState = {
 
   forwardMessages: {},
 
+  pollResults: {},
+
   settings: {
     byKey: {
       animationLevel: DEFAULT_ANIMATION_LEVEL,

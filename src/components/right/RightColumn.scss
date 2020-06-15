@@ -9,16 +9,13 @@
   background: var(--color-background);
   border-left: 1px solid var(--color-borders);
   z-index: var(--z-right-column);
+  pointer-events: all;
 
   // @optimization
   &:not(:hover) {
     .Picker .chat-item-clickable:nth-child(n + 16) {
       display: none !important;
     }
-  }
-
-  @media (min-width: 1276px) {
-    pointer-events: all;
   }
 
   @media (max-width: 1275px) {
@@ -93,21 +90,27 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity var(--layer-transition);
-
-        body.animation-level-0 &, body.animation-level-1 & {
-          display: none;
-        }
-      }
-
-      body.has-open-context-menu & {
-        &, * {
-          pointer-events: none !important;
-        }
-
-        &::after {
-          opacity: 0.25;
-        }
       }
     }
   }
+
+  body.is-right-column-shown.animation-level-0 &,
+  body.is-right-column-shown.animation-level-1 & {
+    #RightColumn::after {
+      display: none;
+    }
+  }
+
+  body.is-right-column-shown.has-open-context-menu & {
+    #RightColumn {
+      &, * {
+        pointer-events: none !important;
+      }
+
+      &::after {
+        opacity: 0.25;
+      }
+    }
+  }
+
 }

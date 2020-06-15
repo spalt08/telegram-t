@@ -41,6 +41,7 @@
   "mediaViewer": {},
   "audioPlayer": {},
   "forwardMessages": {},
+  "pollResults": {},
   "chatFolders": {
     "byId": {}
   },
