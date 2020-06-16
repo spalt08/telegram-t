@@ -224,6 +224,14 @@
         margin-right: 0.5rem;
       }
     }
+
+    @media (max-width: 600px) {
+      height: 2.5rem;
+
+      &.round {
+        width: 2.5rem;
+      }
+    }
   }
 
   &.tiny {

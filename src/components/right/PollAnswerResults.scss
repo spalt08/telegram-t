@@ -15,8 +15,9 @@
     position: sticky;
     top: 0;
     background: #fff;
+
     @media (max-width: 600px) {
-      padding: 0 .25rem .5rem .5rem;
+      padding: .5rem .25rem .5rem .5rem;
     }
   }
 

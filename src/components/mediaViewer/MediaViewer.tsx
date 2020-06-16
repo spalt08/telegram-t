@@ -9,7 +9,7 @@ import {
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { ANIMATION_END_DELAY } from '../../config';
+import { ANIMATION_END_DELAY, MOBILE_SCREEN_MAX_WIDTH } from '../../config';
 import {
   AVATAR_FULL_DIMENSIONS,
   calculateMediaViewerDimensions,
@@ -44,6 +44,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import Spinner from '../ui/Spinner';
 import AnimationFade from '../ui/AnimationFade';
 import Transition from '../ui/Transition';
+import Button from '../ui/Button';
 import SenderInfo from './SenderInfo';
 import MediaViewerActions from './MediaViewerActions';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -128,6 +129,8 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
+
+  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
   const forceUpdate = useForceUpdate();
   useEffect(() => {
@@ -298,6 +301,18 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       {() => (
         <>
           <div className="media-viewer-head" onClick={stopEvent}>
+            {isMobile && (
+              <Button
+                className="media-viewer-close"
+                round
+                size="smaller"
+                color="translucent-white"
+                ariaLabel="Close"
+                onClick={closeMediaViewer}
+              >
+                <i className="icon-close" />
+              </Button>
+            )}
             <Transition activeKey={selectedMediaMessageIndex} name={headerAnimation}>
               {renderSenderInfo}
             </Transition>

@@ -4,6 +4,10 @@
   height: 3.75rem;
   padding: 0.5rem .8125rem;
 
+  @media (max-width: 600px) {
+    padding: 0.5rem;
+  }
+
   .close-button {
     flex-shrink: 0;
   }

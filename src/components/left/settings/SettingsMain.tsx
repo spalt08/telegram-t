@@ -26,7 +26,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   currentUser,
 }) => {
   return (
-    <div className="settings-content">
+    <div className="settings-content custom-scroll">
       <div className="settings-main-menu">
         {currentUser && (
           <div className="settings-current-user">

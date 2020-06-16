@@ -50,6 +50,14 @@
     & > .Transition {
       width: 100%;
     }
+
+    @media (max-width: 600px) {
+      padding: 0 0.5rem;
+
+      .media-viewer-close {
+        margin-right: 1.5rem;
+      }
+    }
   }
 
   & > .Transition {
@@ -132,7 +140,11 @@
     cursor: pointer;
     z-index: 1;
 
-    &:hover {
+    @media (max-width: 600px) {
+      width: 20vw;
+    }
+
+    &:hover, .is-touch-env & {
       opacity: 1;
     }
 

@@ -11,6 +11,7 @@
 }
 
 .LeftHeader {
+  height: 3.75rem;
   padding: 0.5rem 1.25rem .5rem 0.8125rem;
   display: flex;
   align-items: center;
@@ -27,6 +28,10 @@
   .SearchInput {
     margin-left: 0.875rem;
   }
+
+  @media (max-width: 600px) {
+    padding: 0.5rem;
+  }
 }
 
 .ChatList, .LeftRecent, .LeftSearch {
@@ -35,9 +40,6 @@
 }
 
 .LeftRecent, .LeftSearch {
-  flex-grow: 1;
-  overflow: auto;
-
   .search-section {
     padding: 0 1rem 0.5rem;
 
