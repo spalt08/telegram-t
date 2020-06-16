@@ -25,9 +25,6 @@ type MapActionsToProps = ((setGlobal: Function, actions: GlobalActions) => Parti
 
 let global = {} as GlobalState;
 
-// TODO Remove before release.
-(window as any).getGlobal = getGlobal;
-
 const reducers: Record<string, Reducer[]> = {};
 const callbacks: Function[] = [updateContainers];
 const actions = {} as GlobalActions;
@@ -114,9 +111,9 @@ function updateContainers() {
 
   if (DEBUG) {
     const updateTime = performance.now() - DEBUG_startAt!;
-    if (updateTime > 5) {
+    if (updateTime > 7) {
       // eslint-disable-next-line no-console
-      console.warn('[TeactN] Slow containers update', updateTime);
+      console.warn(`[TeactN] Slow containers update: ${Math.round(updateTime)} ms`);
     }
   }
 }
@@ -196,7 +193,11 @@ export function withGlobal<OwnProps>(
   };
 }
 
-document.addEventListener('dblclick', () => {
-  // eslint-disable-next-line no-console
-  console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates'));
-});
+if (DEBUG) {
+  (window as any).getGlobal = getGlobal;
+
+  document.addEventListener('dblclick', () => {
+    // eslint-disable-next-line no-console
+    console.log('GLOBAL CONTAINERS', orderBy(Object.values(containers), 'DEBUG_updates', 'desc'));
+  });
+}

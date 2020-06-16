@@ -261,9 +261,9 @@ export function renderComponent(componentInstance: ComponentInstance) {
     if (DEBUG) {
       const renderTime = performance.now() - DEBUG_startAt!;
       const componentName = componentInstance.name;
-      if (renderTime > 10) {
+      if (renderTime > 7) {
         // eslint-disable-next-line no-console
-        console.warn('[Teact] Slow component render:', componentName, renderTime);
+        console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(renderTime)} ms`);
       }
       DEBUG_components[componentName].renderTimes.push(renderTime);
       DEBUG_components[componentName].renderCount++;
