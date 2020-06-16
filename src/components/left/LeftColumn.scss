@@ -11,6 +11,7 @@
 }
 
 .LeftHeader {
+  height: var(--header-height);
   padding: 0.375rem 1.25rem .5rem 0.8125rem;
   display: flex;
   align-items: center;
@@ -64,7 +65,11 @@
     color: var(--color-text-secondary);
   }
 
-  .search-result {
+  .ListItem.search-result {
+    > button {
+      padding: 0.5625rem 0.5rem;
+    }
+
     .ChatInfo {
       .handle {
         color: var(--color-primary);
@@ -81,7 +86,7 @@
     }
   }
 
-  .search-result-message {
+  .ListItem.search-result-message {
      margin: 0 -0.5rem;
 
     .sender-name {

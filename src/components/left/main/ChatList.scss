@@ -1,6 +1,11 @@
 .ChatList {
   padding: 0 .125rem .5rem .4375rem;
 
+  @media (max-width: 600px) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .Loading {
     min-height: 75vh;
   }

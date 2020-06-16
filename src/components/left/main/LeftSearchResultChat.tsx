@@ -62,9 +62,9 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       contextActions={contextActions}
     >
       {isChatPrivate(chatId) ? (
-        <PrivateChatInfo userId={chatId} showHandle={showHandle} />
+        <PrivateChatInfo userId={chatId} showHandle={showHandle} avatarSize="large" />
       ) : (
-        <GroupChatInfo chatId={chatId} showHandle={showHandle} />
+        <GroupChatInfo chatId={chatId} showHandle={showHandle} avatarSize="large" />
       )}
       <DeleteChatModal
         isOpen={isDeleteModalOpen}

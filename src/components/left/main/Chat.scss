@@ -4,6 +4,12 @@
     padding: .5625rem .6975rem .5625rem .5625rem;
   }
 
+  @media (max-width: 600px) {
+    > button {
+      border-radius: 0;
+    }
+  }
+
   &.animate-opacity {
     will-change: opacity;
     transition: opacity .2s ease-out;

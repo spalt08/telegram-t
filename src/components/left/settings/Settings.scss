@@ -27,7 +27,7 @@
 }
 
 .settings-content {
-  height: calc(100% - 3.75rem);
+  height: calc(100% - var(--header-height));
   overflow-y: auto;
 
   .ListItem > button {
@@ -198,7 +198,7 @@
 }
 
 .settings-fab-wrapper {
-  height: calc(100% - 3.75rem);
+  height: calc(100% - var(--header-height));
   position: relative;
 
   .settings-content {

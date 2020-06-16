@@ -96,6 +96,7 @@ $color-selection: #3993fb;
   --border-radius-messages-small: 0.375rem;
   --messages-container-width: 45.5rem;
   --right-column-width: 26.5rem;
+  --header-height: 3.625rem;
 
   @media (min-width: 1276px) and (max-width: 1680px) {
     --right-column-width: 25vw;
@@ -103,6 +104,7 @@ $color-selection: #3993fb;
 
   @media (max-width: 600px) {
     --right-column-width: 100vw;
+    --header-height: 3.5rem;
   }
 
   --z-ui-loader-mask: 2000;

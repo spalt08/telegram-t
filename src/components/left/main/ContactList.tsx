@@ -80,7 +80,7 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
               onClick={() => handleClick(id)}
               ripple
             >
-              <PrivateChatInfo userId={id} forceShowSelf />
+              <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
             </ListItem>
           ))}
         </div>

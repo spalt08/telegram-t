@@ -68,21 +68,23 @@
   }
 }
 
-.chat-item-clickable {
+.ListItem.chat-item-clickable {
   margin: 0 -0.5rem;
 
   > button {
     padding: 0.75rem;
+
+    @media (max-width: 600px) {
+      padding: .5625rem .6975rem .5625rem .5625rem;
+    }
   }
 
   .ChatInfo {
     display: flex;
     align-items: center;
-    max-width: 100%;
+    flex-grow: 1;
 
     .Avatar {
-      width: 3rem;
-      height: 3rem;
       margin-right: 0.75rem;
     }
 
@@ -91,6 +93,8 @@
     }
 
     .title {
+      display: flex;
+      align-items: center;
       font-weight: 500;
       font-size: 1rem;
       line-height: 1.3125;
