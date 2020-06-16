@@ -13,6 +13,10 @@
 
   .Avatar {
     margin-right: 1rem;
+
+    @media (max-width: 600px) {
+      display: none;
+    }
   }
 
   .meta {

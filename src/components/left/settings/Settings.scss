@@ -27,7 +27,7 @@
 }
 
 .settings-content {
-  height: 100%;
+  height: calc(100% - 3.75rem);
   overflow-y: auto;
 
   .ListItem > button {
@@ -72,6 +72,10 @@
 .settings-item {
   border-top: 1px solid var(--color-borders);
   padding: 1.5rem 1.5rem 1rem;
+
+  &.no-border {
+    border-top: none;
+  }
 
   &-header {
     font-size: 1rem;
@@ -194,8 +198,12 @@
 }
 
 .settings-fab-wrapper {
-  height: 100%;
+  height: calc(100% - 3.75rem);
   position: relative;
+
+  .settings-content {
+    height: 100%;
+  }
 
   .FloatingActionButton {
     right: 1.5rem;

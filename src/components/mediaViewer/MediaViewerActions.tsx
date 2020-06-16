@@ -1,6 +1,10 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useMemo } from '../../lib/teact/teact';
+
+import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
 
 import Button from '../ui/Button';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
 
 import './MediaViewerActions.scss';
 
@@ -13,8 +17,64 @@ type OwnProps = {
 };
 
 const MediaViewerActions: FC<OwnProps> = ({
-  blobUrl, fileName, isAvatar, onCloseMediaViewer, onForward,
+  blobUrl,
+  fileName,
+  isAvatar,
+  onCloseMediaViewer,
+  onForward,
 }) => {
+  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
+
+  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        round
+        ripple
+        size="smaller"
+        color="translucent"
+        className={isOpen ? 'active' : undefined}
+        onClick={onTrigger}
+        ariaLabel="More actions"
+      >
+        <i className="icon-more" />
+      </Button>
+    );
+  }, []);
+
+  if (isMobile) {
+    return (
+      <DropdownMenu
+        trigger={MenuButton}
+        positionX="right"
+      >
+        {!isAvatar && (
+          <MenuItem
+            icon="forward"
+            onClick={onForward}
+          >
+            Forward
+          </MenuItem>
+        )}
+        <MenuItem
+          icon="download"
+          href={blobUrl}
+          download={fileName}
+        >
+          Download
+        </MenuItem>
+        {!isAvatar && (
+          <MenuItem
+            className="not-implemented"
+            icon="delete"
+            destructive
+          >
+            Delete
+          </MenuItem>
+        )}
+      </DropdownMenu>
+    );
+  }
+
   return (
     <div className="MediaViewerActions">
       {!isAvatar && (

@@ -1,0 +1,95 @@
+.SettingsFoldersChatsPicker {
+  height: calc(100% - 3.75rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .picker-header {
+    margin-top: -0.75rem;
+    padding: 0.75rem 1rem 0.25rem 0.75rem;
+    border-bottom: 1px solid var(--color-borders);
+    display: flex;
+    flex-flow: row wrap;
+    flex-shrink: 0;
+
+    overflow-y: auto;
+    max-height: 20rem;
+
+    box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
+
+    .input-group, .max-items-reached {
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .max-items-reached {
+      color: var(--color-text-secondary);
+    }
+
+    .form-control {
+      height: 2rem;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+  }
+
+  .picker-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 0.5rem 0.5rem;
+
+    .no-results {
+      height: 10rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .picker-list-item {
+    margin: 0;
+
+    > button {
+      padding-right: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    &.chat-type-item > button {
+      padding: 0.875rem 0.75rem;
+    }
+
+    &.chat-item > button {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .Checkbox {
+      height: 1.5rem;
+      margin: 0;
+      margin-left: auto;
+      padding-left: 3.25rem;
+    }
+
+    .chat-type {
+      font-size: 1rem;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+
+  .settings-item-header {
+    margin-left: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .picker-list-divider {
+    margin: 0.5rem -0.5rem 0;
+    border-bottom: 1px solid var(--color-borders);
+  }
+}

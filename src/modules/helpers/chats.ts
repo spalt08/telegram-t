@@ -323,3 +323,46 @@ export function getFolderUnreadDialogs(
     hasActiveDialogs,
   };
 }
+
+export function getFolderDescriptionText(
+  chatsById: Record<number, ApiChat>,
+  usersById: Record<number, ApiUser>,
+  folder: ApiChatFolder,
+) {
+  const {
+    id, title, emoticon, description, pinnedChatIds,
+    excludedChatIds, includedChatIds,
+    excludeArchived, excludeMuted, excludeRead,
+    ...filters
+  } = folder;
+
+  // If folder has multiple additive filters or uses include/exclude lists,
+  // we display folder chats count
+  if (
+    Object.values(filters).filter(Boolean).length > 1
+    || (excludedChatIds && excludedChatIds.length)
+    || (includedChatIds && includedChatIds.length)
+  ) {
+    const [listIds] = prepareFolderListIds(chatsById, usersById, folder);
+    if (!listIds) {
+      return undefined;
+    }
+
+    return `${listIds.length} ${listIds.length === 1 ? 'chat' : 'chats'}`;
+  }
+
+  // Otherwise, we return a short description of a single filter
+  if (filters.bots) {
+    return 'All Bots';
+  } else if (filters.groups) {
+    return 'All Groups';
+  } else if (filters.channels) {
+    return 'All Channels';
+  } else if (filters.contacts) {
+    return 'All Contacts';
+  } else if (filters.nonContacts) {
+    return 'All Non-Contacts';
+  } else {
+    return undefined;
+  }
+}

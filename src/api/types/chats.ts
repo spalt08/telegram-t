@@ -106,6 +106,7 @@ export interface ApiRestrictionReason {
 export interface ApiChatFolder {
   id: number;
   title: string;
+  description?: string;
   emoticon?: string;
   contacts?: true;
   nonContacts?: true;
@@ -116,6 +117,6 @@ export interface ApiChatFolder {
   excludeRead?: true;
   excludeArchived?: true;
   pinnedChatIds?: number[];
-  includedChatIds?: number[];
-  excludedChatIds?: number[];
+  includedChatIds: number[];
+  excludedChatIds: number[];
 }

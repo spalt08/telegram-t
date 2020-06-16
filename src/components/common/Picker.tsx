@@ -70,7 +70,7 @@ const Picker: FC<OwnProps> = ({
 
   return (
     <div className="Picker">
-      <div className="picker-header">
+      <div className="picker-header custom-scroll">
         {selectedIds.map((id) => (
           <PickerSelectedItem chatId={id} onClick={() => handleItemClick(id)} />
         ))}

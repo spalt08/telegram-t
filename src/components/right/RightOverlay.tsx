@@ -54,7 +54,10 @@ const RightOverlay: FC<StateProps & DispatchProps> = ({
     <div id="RightOverlay">
       <div className="overlay-backdrop" onClick={onClose} />
       <div className={`overlay-main ${transitionClassNames}`}>
-        <RightHeader onClose={onClose} />
+        <RightHeader
+          isForwarding={isForwarding}
+          onClose={onClose}
+        />
         {isForwarding ? (
           <ForwardPicker />
         ) : undefined}

@@ -5,7 +5,7 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
-import getMonkeyAnimationData from '../common/helpers/monkeys';
+import getAnimationData from '../common/helpers/animatedAssets';
 import { pick } from '../../util/iteratees';
 
 import InputText from '../ui/InputText';
@@ -33,13 +33,13 @@ const AuthCode: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (!idleMonkeyData) {
-      getMonkeyAnimationData('MonkeyIdle').then(setIdleMonkeyData);
+      getAnimationData('MonkeyIdle').then(setIdleMonkeyData);
     }
   }, [idleMonkeyData]);
 
   useEffect(() => {
     if (!trackingMonkeyData) {
-      getMonkeyAnimationData('MonkeyTracking').then(setTrackingMonkeyData);
+      getAnimationData('MonkeyTracking').then(setTrackingMonkeyData);
     }
   }, [trackingMonkeyData]);
 

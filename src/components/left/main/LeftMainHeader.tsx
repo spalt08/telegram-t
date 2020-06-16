@@ -10,6 +10,7 @@ import { ApiChat } from '../../../api/types';
 import { SUPPORT_BOT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
+import { isChatArchived } from '../../../modules/helpers';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -18,7 +19,6 @@ import AttentionIndicator from '../../ui/AttentionIndicator';
 import SearchInput from '../../ui/SearchInput';
 
 import './LeftMainHeader.scss';
-import { isChatArchived } from '../../../modules/helpers';
 
 type OwnProps = {
   content: LeftColumnContent;

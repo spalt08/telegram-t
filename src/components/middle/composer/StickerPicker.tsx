@@ -20,6 +20,7 @@ import Button from '../../ui/Button';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from './StickerSet';
 import StickerSetCover from './StickerSetCover';
+import StickerSetCoverAnimated from './StickerSetCoverAnimated';
 
 import './StickerPicker.scss';
 
@@ -179,6 +180,8 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             <i className="icon-recent" />
           ) : stickerSet.id === 'favorite' ? (
             <i className="icon-favorite" />
+          ) : stickerSet.isAnimated ? (
+            <StickerSetCoverAnimated stickerSet={stickerSet as ApiStickerSet} />
           ) : (
             <StickerSetCover stickerSet={stickerSet as ApiStickerSet} />
           )}

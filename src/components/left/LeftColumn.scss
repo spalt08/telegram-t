@@ -27,6 +27,10 @@
   .SearchInput {
     margin-left: 0.875rem;
   }
+
+  @media (max-width: 600px) {
+    padding: 0.5rem;
+  }
 }
 
 .ChatList, .LeftRecent, .LeftSearch {
@@ -35,9 +39,6 @@
 }
 
 .LeftRecent, .LeftSearch {
-  flex-grow: 1;
-  overflow: auto;
-
   .search-section {
     padding: 0 1rem 0.5rem;
 
@@ -81,7 +82,7 @@
   }
 
   .search-result-message {
-    margin: 0 -0.5rem;
+     margin: 0 -0.5rem;
 
     .sender-name {
       color: var(--color-text);

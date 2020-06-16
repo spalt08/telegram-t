@@ -240,6 +240,7 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       setGlobal({
         ...global,
         chatFolders: {
+          ...global.chatFolders,
           byId: newChatFoldersById,
           orderedIds: newOrderedIds,
         },

@@ -1,6 +1,10 @@
 .Poll {
   min-width: 15rem;
 
+  @media (max-width: 600px) {
+    min-width: 50vw;
+  }
+
   .poll-question {
     font-weight: 500;
     line-height: 1.25rem;

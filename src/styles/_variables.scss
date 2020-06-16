@@ -101,6 +101,10 @@ $color-selection: #3993fb;
     --right-column-width: 25vw;
   }
 
+  @media (max-width: 600px) {
+    --right-column-width: 100vw;
+  }
+
   --z-ui-loader-mask: 2000;
   --z-right-column: 900;
   --z-header-menu: 990;
@@ -114,7 +118,7 @@ $color-selection: #3993fb;
   --z-message-highlighted: 12;
   --z-message-context-menu: 11;
   --z-message-middle-header: 10;
-  --z-message-date-header: 10;
+  --z-message-date-header: 9;
   --z-country-code-input-group: 10;
   --z-register-add-avatar: 5;
   --z-below: -1;

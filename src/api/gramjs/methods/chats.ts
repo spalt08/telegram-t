@@ -20,6 +20,7 @@ import {
   buildApiChatFromPreview,
   getApiChatIdFromMtpPeer,
   buildApiChatFolder,
+  buildApiChatFolderFromSuggested,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
@@ -597,6 +598,16 @@ export async function fetchChatFolders() {
   };
 }
 
+export async function fetchRecommendedChatFolders() {
+  const results = await invokeRequest(new GramJs.messages.GetSuggestedDialogFilters());
+
+  if (!results) {
+    return undefined;
+  }
+
+  return results.map(buildApiChatFolderFromSuggested);
+}
+
 export async function editChatFolder({
   id,
   folderUpdate,
@@ -616,6 +627,21 @@ export async function editChatFolder({
       '@type': 'updateChatFolder',
       id,
       folder: folderUpdate,
+    });
+  }
+}
+
+export async function deleteChatFolder(id: number) {
+  const isActionSuccessful = await invokeRequest(new GramJs.messages.UpdateDialogFilter({
+    id,
+    filter: undefined,
+  }));
+
+  if (isActionSuccessful) {
+    onUpdate({
+      '@type': 'updateChatFolder',
+      id,
+      folder: undefined,
     });
   }
 }

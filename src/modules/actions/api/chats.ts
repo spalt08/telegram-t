@@ -321,6 +321,65 @@ addReducer('loadChatFolders', () => {
   void loadChatFolders();
 });
 
+addReducer('loadRecommendedChatFolders', () => {
+  void loadRecommendedChatFolders();
+});
+
+addReducer('editChatFolder', (global, actions, payload) => {
+  const { id, folderUpdate } = payload!;
+  const folder = selectChatFolder(global, id);
+
+  if (folder) {
+    void callApi('editChatFolder', {
+      id,
+      folderUpdate: {
+        id,
+        emoticon: folder.emoticon,
+        pinnedChatIds: folder.pinnedChatIds,
+        ...folderUpdate,
+      },
+    });
+  }
+});
+
+addReducer('addChatFolder', (global, actions, payload) => {
+  const { folder } = payload!;
+  const { orderedIds, recommended } = global.chatFolders;
+  const maxId = orderedIds && orderedIds.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
+
+  // Clear fields from recommended folders
+  const { id: recommendedId, description, ...newFolder } = folder;
+
+  callApi('editChatFolder', {
+    id: maxId + 1,
+    folderUpdate: {
+      id: maxId + 1,
+      ...newFolder,
+    },
+  });
+
+  if (description && recommended) {
+    return {
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        recommended: recommended.filter(({ id }) => id !== recommendedId),
+      },
+    };
+  }
+
+  return global;
+});
+
+addReducer('deleteChatFolder', (global, actions, payload) => {
+  const { id } = payload!;
+  const folder = selectChatFolder(global, id);
+
+  if (folder) {
+    void deleteChatFolder(id);
+  }
+});
+
 addReducer('toggleChatUnread', (global, actions, payload) => {
   const { id } = payload!;
   const chat = selectChat(global, id);
@@ -457,9 +516,36 @@ async function loadChatFolders() {
   const chatFolders = await callApi('fetchChatFolders');
 
   if (chatFolders) {
+    const global = getGlobal();
+
     setGlobal({
-      ...getGlobal(),
-      chatFolders,
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        ...chatFolders,
+      },
     });
   }
+}
+
+async function loadRecommendedChatFolders() {
+  const recommendedChatFolders = await callApi('fetchRecommendedChatFolders');
+
+  if (recommendedChatFolders) {
+    const global = getGlobal();
+
+    setGlobal({
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        recommended: recommendedChatFolders,
+      },
+    });
+  }
+}
+
+async function deleteChatFolder(id: number) {
+  await callApi('deleteChatFolder', id);
+
+  loadRecommendedChatFolders();
 }

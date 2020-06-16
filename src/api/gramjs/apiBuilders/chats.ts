@@ -319,3 +319,15 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
     excludedChatIds: filter.excludePeers.map(getApiChatIdFromInputMtpPeer).filter<number>(Boolean as any),
   };
 }
+
+export function buildApiChatFolderFromSuggested({
+  filter, description,
+}: {
+  filter: GramJs.DialogFilter;
+  description: string;
+}): ApiChatFolder {
+  return {
+    ...buildApiChatFolder(filter),
+    description,
+  };
+}

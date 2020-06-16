@@ -11,9 +11,13 @@
     flex-flow: row wrap;
     flex-shrink: 0;
 
+    overflow-y: auto;
+    max-height: 20rem;
+
     .input-group {
       margin-bottom: 0.5rem;
       margin-left: 0.5rem;
+      flex-grow: 1;
     }
 
     .form-control {
@@ -22,77 +26,6 @@
       border-radius: 0;
       padding: 0;
       box-shadow: none;
-    }
-  }
-
-  .picker-selected-item {
-    display: flex;
-    align-items: center;
-    background: var(--color-chat-hover);
-    height: 2rem;
-    margin-left: 0.5rem;
-    margin-bottom: 0.5rem;
-    padding-right: 1rem;
-    border-radius: 1rem;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 1;
-    transition: background-color .15s ease;
-
-    &:hover {
-      background-color: rgba(var(--color-error-rgb), 0.16);
-
-      .picker-selected-item-remove {
-        opacity: 1;
-      }
-
-      .Avatar {
-        opacity: 0;
-      }
-    }
-
-    .Avatar {
-      width: 2rem;
-      height: 2rem;
-      opacity: 1;
-      flex-shrink: 0;
-      transition: opacity .15s ease;
-
-      i {
-        font-size: 2rem;
-      }
-    }
-
-    &-name {
-      margin-left: 0.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      .emoji.emoji-small {
-        width: 1.125rem;
-        height: 1.125rem;
-        background-size: 1.125rem;
-        vertical-align: -2px;
-      }
-    }
-
-    &-remove {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--color-error);
-      font-size: 1.5rem;
-      color: white;
-      opacity: 0;
-      transition: opacity .15s ease;
     }
   }
 

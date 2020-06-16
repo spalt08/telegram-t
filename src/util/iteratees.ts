@@ -31,6 +31,13 @@ export function pick<T, K extends keyof T>(object: T, keys: K[]) {
   }, {} as Pick<T, K>);
 }
 
+export function omit<T, K extends keyof T>(object: T, keys: K[]) {
+  const savedKeys = (Object.keys(object) as Array<keyof T>)
+    .filter((key) => !(keys as Array<keyof T>).includes(key)) as Array<Exclude<keyof T, K>>;
+
+  return pick(object, savedKeys);
+}
+
 export function orderBy<T>(
   collection: T[],
   orderKey: (keyof T) | OrderCallback<T> | ((keyof T) | OrderCallback<T>)[],
@@ -110,4 +117,8 @@ export function areSortedArraysEqual(array1: any[], array2: any[]) {
 
 export function areSortedArraysIntersecting(array1: any[], array2: any[]) {
   return array1[0] <= array2[array2.length - 1] && array1[array1.length - 1] >= array2[0];
+}
+
+export function findIntersectionWithSet<T>(array: T[], set: Set<T>): T[] {
+  return array.filter((a) => set.has(a));
 }

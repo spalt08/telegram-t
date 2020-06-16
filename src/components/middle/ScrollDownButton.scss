@@ -8,11 +8,23 @@
   z-index: 10;
   pointer-events: none;
 
+  @media (max-width: 600px) {
+    right: 0.5rem;
+    bottom: 4rem;
+  }
 
   &-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    > .Button {
+      box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
+
+      i {
+        font-size: 1.75rem;
+      }
+    }
 
     @media (min-width: 1276px) {
       transition: transform var(--layer-transition);
@@ -20,6 +32,13 @@
 
       body.is-right-column-shown & {
         transform: translateX(calc(-1 * var(--right-column-width)));
+      }
+    }
+
+    @media (max-width: 600px) {
+      > .Button {
+        width: 2.875rem;
+        height: 2.875rem;
       }
     }
   }
@@ -32,14 +51,6 @@
     transform: translateY(0);
     opacity: 1;
     pointer-events: all;
-  }
-
-  > .Button {
-    box-shadow: 0 1px 2px rgba(114, 114, 114, 0.25);
-
-    i {
-      font-size: 1.75rem;
-    }
   }
 
   .unread-count {
