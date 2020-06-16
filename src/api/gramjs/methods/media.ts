@@ -23,7 +23,9 @@ export default async function downloadMedia(
   isConnected: boolean,
   onProgress?: ApiOnProgress,
 ) {
-  const { data, mimeType, fullSize } = await download(url, client, isConnected, onProgress, start, end) || {};
+  const {
+    data, mimeType, fullSize,
+  } = await download(url, client, isConnected, onProgress, start, end, mediaFormat) || {};
   if (!data) {
     return undefined;
   }
@@ -46,7 +48,13 @@ export default async function downloadMedia(
 }
 
 async function download(
-  url: string, client: TelegramClient, isConnected: boolean, onProgress?: ApiOnProgress, start?: number, end?: number,
+  url: string,
+  client: TelegramClient,
+  isConnected: boolean,
+  onProgress?: ApiOnProgress,
+  start?: number,
+  end?: number,
+  mediaFormat?: ApiMediaFormat,
 ) {
   const mediaMatch = url.match(/(avatar|msg|stickerSet|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
@@ -125,8 +133,8 @@ async function download(
 
     return { mimeType, data, fullSize };
   } else if (entityType === 'stickerSet') {
-    const data = await client.downloadStickerSetThumb(entity, sizeType === 'big');
-    const mimeType = 'image/jpeg';
+    const data = await client.downloadStickerSetThumb(entity);
+    const mimeType = mediaFormat === ApiMediaFormat.Lottie ? 'application/json' : 'image/jpeg';
 
     return { mimeType, data };
   } else {

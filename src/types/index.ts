@@ -51,7 +51,9 @@ export enum SettingsScreens {
   FoldersExcludedChats,
 }
 
-export type StickerSetOrRecent = Pick<ApiStickerSet, 'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail'>;
+export type StickerSetOrRecent = Pick<ApiStickerSet, (
+  'id' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isAnimated'
+)>;
 
 export enum LeftColumnContent {
   ChatList,
