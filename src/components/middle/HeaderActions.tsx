@@ -7,6 +7,8 @@ import React, {
 
 import { IAnchorPosition } from '../../types';
 
+import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+
 import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
 
@@ -31,6 +33,7 @@ const HeaderActions: FC<OwnProps> = ({
   const menuButtonRef = useRef<HTMLButtonElement>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
+  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
   const handleHeaderMenuOpen = useCallback(() => {
     setIsMenuOpen(true);
@@ -56,7 +59,7 @@ const HeaderActions: FC<OwnProps> = ({
       className="HeaderActions"
       onClick={stopPropagation}
     >
-      {canSubscribe && (
+      {!isMobile && canSubscribe && (
         <Button
           size="tiny"
           ripple
@@ -66,22 +69,25 @@ const HeaderActions: FC<OwnProps> = ({
           {isChannel ? 'Subscribe' : 'Join Group'}
         </Button>
       )}
-      <Button
-        round
-        ripple={isRightColumnShown}
-        color="translucent"
-        size="smaller"
-        onClick={onSearchClick}
-        ariaLabel="Search in this chat"
-      >
-        <i className="icon-search" />
-      </Button>
-      {!canSubscribe && (
+      {!isMobile && (
+        <Button
+          round
+          ripple={isRightColumnShown}
+          color="translucent"
+          size="smaller"
+          onClick={onSearchClick}
+          ariaLabel="Search in this chat"
+        >
+          <i className="icon-search" />
+        </Button>
+      )}
+      {(isMobile || !canSubscribe) && (
         <Button
           round
           ripple
           size="smaller"
           color="translucent"
+          className={isMenuOpen ? 'active' : ''}
           ref={menuButtonRef}
           onClick={handleHeaderMenuOpen}
           ariaLabel="More actions"
@@ -94,6 +100,10 @@ const HeaderActions: FC<OwnProps> = ({
           chatId={chatId}
           isOpen={isMenuOpen}
           anchor={menuPosition}
+          canSubscribe={canSubscribe}
+          isChannel={isChannel}
+          onSubscribeChannel={onSubscribeChannel}
+          onSearchClick={onSearchClick}
           onClose={handleHeaderMenuClose}
           onCloseAnimationEnd={handleHeaderMenuHide}
         />

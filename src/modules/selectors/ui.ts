@@ -1,7 +1,7 @@
 import { GlobalState } from '../../global/types';
 import { RightColumnContent } from '../../types';
 
-import { selectIsForwardMenuOpen } from './messages';
+import { selectIsForwardMenuOpen, selectIsPollResultsOpen } from './messages';
 import { selectCurrentMessageSearch } from './messageSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
 import { selectAreActiveChatsLoaded } from './chats';
@@ -20,6 +20,7 @@ export function selectRightColumnContentKey(global: GlobalState) {
   } = global;
 
   const isForwarding = selectIsForwardMenuOpen(global) && !selectIsMediaViewerOpen(global);
+  const isPollResults = selectIsPollResultsOpen(global);
   const messageSearch = selectCurrentMessageSearch(global);
   const isSearch = Boolean(messageSearch && messageSearch.currentType === 'text');
   const stickerSearch = selectCurrentStickerSearch(global);
@@ -35,6 +36,8 @@ export function selectRightColumnContentKey(global: GlobalState) {
 
   return isForwarding ? (
     RightColumnContent.Forward
+  ) : isPollResults ? (
+    RightColumnContent.PollResults
   ) : isSearch ? (
     RightColumnContent.Search
   ) : isStickerSearch ? (

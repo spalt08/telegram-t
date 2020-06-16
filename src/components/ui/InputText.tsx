@@ -6,6 +6,7 @@ import buildClassName from '../../util/buildClassName';
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
   id?: string;
+  className?: string;
   value?: string;
   label?: string;
   error?: string;
@@ -23,6 +24,7 @@ type OwnProps = {
 const InputText: FC<OwnProps> = ({
   ref,
   id,
+  className,
   value,
   label,
   error,
@@ -36,15 +38,16 @@ const InputText: FC<OwnProps> = ({
   onKeyPress,
   onBlur,
 }) => {
-  const className = buildClassName(
+  const fullClassName = buildClassName(
     'input-group',
     value && 'touched',
     error ? 'error' : success && 'success',
     disabled && 'disabled',
+    className,
   );
 
   return (
-    <div className={className}>
+    <div className={fullClassName}>
       <input
         ref={ref}
         className="form-control"

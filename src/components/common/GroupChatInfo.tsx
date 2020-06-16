@@ -31,6 +31,7 @@ type OwnProps = {
   avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
   showHandle?: boolean;
   showFullInfo?: boolean;
+  showChatType?: boolean;
 };
 
 type StateProps = {
@@ -45,6 +46,7 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
   avatarSize = 'medium',
   showHandle,
   showFullInfo,
+  showChatType,
   lastSyncTime,
   chat,
   onlineCount,
@@ -87,6 +89,13 @@ const GroupChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
     if (typingStatus) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
+
+    if (showChatType) {
+      return (
+        <div className="status">{getChatTypeString(chat)}</div>
+      );
+    }
+
     const handle = showHandle ? chat.username : undefined;
     const groupStatus = getGroupStatus(chat);
     const onlineStatus = onlineCount ? `, ${formatInteger(onlineCount)} online` : undefined;

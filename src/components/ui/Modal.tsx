@@ -98,7 +98,7 @@ const Modal: FC<OwnProps> = (props) => {
           <div className="modal-backdrop" onClick={onClose} />
           <div className="modal-dialog">
             {renderHeader()}
-            <div className="modal-content">
+            <div className="modal-content custom-scroll">
               {children}
             </div>
           </div>

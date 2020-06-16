@@ -8,6 +8,7 @@ import { selectOpenChat, selectViewportIds, selectIsRightColumnShown } from '../
 
 const FOCUS_DURATION = 2000;
 const FORWARD_MENU_OPEN_DELAY_MS = 450;
+const POLL_RESULT_OPEN_DELAY_MS = 450;
 
 let blurTimeout: number | undefined;
 
@@ -47,6 +48,43 @@ addReducer('closeAudioPlayer', (global) => {
     ...global,
     audioPlayer: {},
   };
+});
+
+addReducer('openPollResults', (global, actions, payload) => {
+  const { chatId, messageId } = payload!;
+
+  const shouldOpenInstantly = selectIsRightColumnShown(global);
+
+  if (!shouldOpenInstantly) {
+    window.setTimeout(() => {
+      const newGlobal = getGlobal();
+
+      setGlobal({
+        ...newGlobal,
+        pollResults: {
+          chatId,
+          messageId,
+          voters: {},
+        },
+      });
+    }, POLL_RESULT_OPEN_DELAY_MS);
+  } else if (chatId !== global.pollResults.chatId || messageId !== global.pollResults.messageId) {
+    setGlobal({
+      ...global,
+      pollResults: {
+        chatId,
+        messageId,
+        voters: {},
+      },
+    });
+  }
+});
+
+addReducer('closePollResults', (global) => {
+  setGlobal({
+    ...global,
+    pollResults: {},
+  });
 });
 
 addReducer('focusLastMessage', (global, actions) => {

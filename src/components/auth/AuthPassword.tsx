@@ -7,7 +7,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalState, GlobalActions } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
-import getMonkeyAnimationData from '../common/helpers/monkeys';
+import getAnimationData from '../common/helpers/animatedAssets';
 
 import InputPassword from '../ui/InputPassword';
 import Button from '../ui/Button';
@@ -35,7 +35,7 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (!closeMonkeyData) {
-      getMonkeyAnimationData('MonkeyClose').then(setCloseMonkeyData);
+      getAnimationData('MonkeyClose').then(setCloseMonkeyData);
     } else {
       setTimeout(() => setIsPeekShown(true), PEEK_MONKEY_SHOW_DELAY);
     }
@@ -43,7 +43,7 @@ const AuthPassword: FC<StateProps & DispatchProps> = ({
 
   useEffect(() => {
     if (!peekMonkeyData) {
-      getMonkeyAnimationData('MonkeyPeek').then(setPeekMonkeyData);
+      getAnimationData('MonkeyPeek').then(setPeekMonkeyData);
     }
   }, [peekMonkeyData]);
 

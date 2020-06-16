@@ -6,11 +6,13 @@ import {
   fetchChats, fetchFullChat, fetchSuperGroupOnlines, searchChats, requestChatUpdate,
   saveDraft, clearDraft, fetchChat, markChatRead, updateChatMutedState,
   createChannel, editChannelPhoto, joinChannel, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
-  toggleChatPinned, toggleChatArchived, toggleDialogUnread, fetchChatFolders, editChatFolder,
+  toggleChatPinned, toggleChatArchived, toggleDialogUnread,
+  fetchChatFolders, editChatFolder, deleteChatFolder, fetchRecommendedChatFolders,
 } from './chats';
 import {
   fetchMessages, fetchMessage, sendMessage, pinMessage, deleteMessages, deleteHistory, markMessagesRead,
   searchMessages, searchMessagesGlobal, fetchWebPagePreview, sendPollVote, editMessage, forwardMessages,
+  loadPollOptionResults,
 } from './messages';
 import {
   fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
@@ -51,13 +53,16 @@ export default {
   toggleChatPinned,
   toggleChatArchived,
   fetchChatFolders,
+  fetchRecommendedChatFolders,
   editChatFolder,
+  deleteChatFolder,
   toggleDialogUnread,
   markMessagesRead,
   searchMessages,
   searchMessagesGlobal,
   fetchWebPagePreview,
   sendPollVote,
+  loadPollOptionResults,
   editMessage,
   forwardMessages,
   fetchFullChat,

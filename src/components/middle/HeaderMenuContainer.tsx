@@ -12,6 +12,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import { selectChat, selectIsChatWithSelf } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { isChatPrivate, getCanDeleteChat } from '../../modules/helpers';
+import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
 
 import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
@@ -26,6 +27,10 @@ export type OwnProps = {
   chatId: number;
   isOpen: boolean;
   anchor: IAnchorPosition;
+  canSubscribe?: boolean;
+  isChannel?: boolean;
+  onSubscribeChannel: () => void;
+  onSearchClick: () => void;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
 };
@@ -47,6 +52,10 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   isMuted,
   canDeleteChat,
   anchor,
+  canSubscribe,
+  isChannel,
+  onSubscribeChannel,
+  onSearchClick,
   onClose,
   onCloseAnimationEnd,
   updateChatMutedState,
@@ -54,6 +63,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { x, y } = anchor;
+  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
+
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
 
   const handleDelete = useCallback(() => {
@@ -76,6 +87,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
     closeMenu();
   }, [chatId, closeMenu, isMuted, updateChatMutedState]);
 
+  const handleSubscribe = useCallback(() => {
+    onSubscribeChannel();
+    closeMenu();
+  }, [closeMenu, onSubscribeChannel]);
+
+  const handleSearch = useCallback(() => {
+    onSearchClick();
+    closeMenu();
+  }, [closeMenu, onSearchClick]);
+
   useEffect(() => {
     disableScrolling();
 
@@ -91,7 +112,23 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
-          {!isChatWithSelf && (
+          {isMobile && canSubscribe && (
+            <MenuItem
+              icon={isChannel ? 'channel' : 'group'}
+              onClick={handleSubscribe}
+            >
+              {isChannel ? 'Subscribe' : 'Join Group'}
+            </MenuItem>
+          )}
+          {isMobile && (
+            <MenuItem
+              icon="search"
+              onClick={handleSearch}
+            >
+              Search
+            </MenuItem>
+          )}
+          {!canSubscribe && !isChatWithSelf && (
             <MenuItem
               icon={isMuted ? 'unmute' : 'mute'}
               onClick={handleToggleMuteClick}
@@ -99,13 +136,15 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {isMuted ? 'Unmute' : 'Mute'}
             </MenuItem>
           )}
-          <MenuItem
-            destructive
-            icon="delete"
-            onClick={handleDelete}
-          >
-            {isPrivate ? 'Delete' : (canDeleteChat ? 'Delete and Leave' : 'Leave')}
-          </MenuItem>
+          {!canSubscribe && (
+            <MenuItem
+              destructive
+              icon="delete"
+              onClick={handleDelete}
+            >
+              {isPrivate ? 'Delete' : (canDeleteChat ? 'Delete and Leave' : 'Leave')}
+            </MenuItem>
+          )}
         </Menu>
         {chat && (
           <DeleteChatModal

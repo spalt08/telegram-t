@@ -38,12 +38,18 @@ type StateProps = {
   usersById: Record<number, ApiUser>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'loadMessage'>;
+type DispatchProps = Pick<GlobalActions, ('loadMessage' | 'openPollResults')>;
 
 const NBSP = '\u00A0';
 
 const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, poll, recentVoterIds, usersById, onSendVote, loadMessage,
+  message,
+  poll,
+  recentVoterIds,
+  usersById,
+  loadMessage,
+  onSendVote,
+  openPollResults,
 }) => {
   const { id: messageId, chatId } = message;
   const { summary, results } = poll;
@@ -60,7 +66,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
   const { results: voteResults, totalVoters } = results;
   const hasVoted = voteResults && voteResults.some((r) => r.chosen);
   const canVote = !summary.closed && !hasVoted;
-  const canViewResult = !canVote && summary.publicVoters && Boolean(results.totalVoters);
+  const canViewResult = !canVote && summary.publicVoters && Number(results.totalVoters) > (hasVoted ? 1 : 0);
   const isMultiple = canVote && summary.multipleChoice;
   const maxVotersCount = voteResults ? Math.max(...voteResults.map((r) => r.voters)) : totalVoters;
   const correctResults = voteResults ? voteResults.reduce((answers: string[], r) => {
@@ -175,6 +181,12 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
     }, [onSendVote, chosenOptions],
   );
 
+  const handleViewResultsClick = useCallback(
+    () => {
+      openPollResults({ chatId, messageId });
+    }, [chatId, messageId, openPollResults],
+  );
+
   const handleSolutionShow = useCallback(() => {
     setIsSolutionShown(true);
   }, []);
@@ -269,6 +281,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
             className="poll-quiz-help"
             disabled={isSolutionShown}
             onClick={handleSolutionShow}
+            ariaLabel="Show Solution"
           >
             <i className="icon-lamp" />
           </Button>
@@ -321,7 +334,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
           isText
           ripple
           size="tiny"
-          className="not-implemented"
+          onClick={handleViewResultsClick}
         >
           View Results
         </Button>
@@ -372,5 +385,5 @@ export default memo(withGlobal<OwnProps>(
       usersById,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['loadMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['loadMessage', 'openPollResults']),
 )(Poll));

@@ -1,8 +1,11 @@
 .AttachmentModal {
   --border-radius-default: 0.625rem;
 
+  .modal-dialog {
+    max-width: 26.25rem;
+  }
+
   .modal-content {
-    width: 26.25rem;
     padding: .5rem 1.25rem 1.875rem;
   }
 

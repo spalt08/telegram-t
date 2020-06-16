@@ -14,6 +14,8 @@ type OwnProps = {
   className?: string;
   children: any;
   onClick?: OnClickHandler;
+  href?: string;
+  download?: string;
   disabled?: boolean;
   attention?: boolean;
   ripple?: boolean;
@@ -26,6 +28,8 @@ const MenuItem: FC<OwnProps> = (props) => {
     className,
     children,
     onClick,
+    href,
+    download,
     disabled,
     attention,
     ripple,
@@ -66,8 +70,8 @@ const MenuItem: FC<OwnProps> = (props) => {
     destructive && 'destructive',
   );
 
-  return (
-    <div role="button" tabIndex={0} className={fullClassName} onClick={handleClick} onKeyDown={handleKeyDown}>
+  const content = (
+    <>
       {icon && (
         <i className={`icon-${icon}`} />
       )}
@@ -76,6 +80,31 @@ const MenuItem: FC<OwnProps> = (props) => {
         <RippleEffect />
       )}
       {attention && <AttentionIndicator show={attention} />}
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        tabIndex={0}
+        className={fullClassName}
+        href={href}
+        download={download}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={fullClassName}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      {content}
     </div>
   );
 };

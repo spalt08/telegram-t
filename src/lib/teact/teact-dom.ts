@@ -291,17 +291,15 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
       }
 
       // Then we build up info about remaining children
-      return {
-        ...acc,
-        [key]: {
-          $element: $currentChild,
-          index: currentRemainingIndex++,
-          order: 'props' in $currentChild ? $currentChild.props.teactOrderKey : undefined,
-        },
+      acc[key] = {
+        $element: $currentChild,
+        index: currentRemainingIndex++,
+        order: 'props' in $currentChild ? $currentChild.props.teactOrderKey : undefined,
       };
+      return acc;
     }, {} as Record<string, { $element: VirtualElement; index: number; order?: number }>);
 
-  const newChildren: VirtualElement[] = [];
+  let newChildren: VirtualElement[] = [];
 
   let fragmentQueue: VirtualElement[] | undefined;
   let fragmentIndex: number | undefined;
@@ -324,7 +322,7 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
     }
 
     if (fragmentQueue) {
-      newChildren.push(...flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
+      newChildren = newChildren.concat(flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
       fragmentIndex = undefined;
       fragmentQueue = undefined;
     }
@@ -350,7 +348,7 @@ function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealE
   });
 
   if (fragmentQueue) {
-    newChildren.push(...flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
+    newChildren = newChildren.concat(flushFragmentQueue(fragmentQueue, fragmentIndex!, currentEl, $new));
   }
 
   return newChildren;

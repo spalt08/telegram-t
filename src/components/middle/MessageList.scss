@@ -21,6 +21,10 @@
     justify-content: flex-end;
     flex-direction: column;
     padding: 1rem 1rem .5rem 1.125rem;
+
+    @media (max-width: 600px) {
+      padding: 1rem 0.5rem 0.5rem;
+    }
   }
 
   .chat-restricted {
@@ -54,6 +58,10 @@
   &.bottom-padding {
     .messages-container {
       padding-bottom: 2.5rem;
+
+      @media (max-width: 600px) {
+        padding-bottom: 2rem;
+      }
     }
   }
 
@@ -146,6 +154,12 @@
   &.scrolled .message-date-header {
     position: sticky;
     top: 0.625rem;
+  }
+
+  @media (max-width: 600px) {
+    .has-pinned-message & .message-date-header {
+      top: 3.75rem;
+    }
   }
 
   .unread-divider,

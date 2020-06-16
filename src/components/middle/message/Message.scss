@@ -32,6 +32,11 @@
     position: absolute;
     bottom: 0;
     left: 0;
+
+    @media (max-width: 600px) {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
   }
 
   &.last-in-group {
@@ -48,6 +53,14 @@
     .no-avatars & {
       padding-left: 0;
     }
+
+    @media (max-width: 600px) {
+      padding-left: 2.875rem;
+
+      .no-avatars & {
+        padding-left: 0.25rem;
+      }
+    }
   }
 
   &.own {
@@ -62,6 +75,10 @@
     --color-code-bg: var(--color-code-own-bg);
     --meta-safe-area-base: 3.5rem;
     --deleting-translate-x: 50%;
+
+    @media (max-width: 600px) {
+      padding-right: 0.25rem;
+    }
   }
 
   &.has-menu-open .message-content,

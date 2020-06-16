@@ -3,6 +3,14 @@
   overflow-y: auto;
   padding: 0 1rem 1rem;
 
+  @media (max-width: 600px) {
+    padding: 0 0.5rem 1rem;
+
+    .ListItem.chat-item-clickable > button {
+      border-radius: 0;
+    }
+  }
+
   .no-results {
     height: 100%;
     margin: 0;

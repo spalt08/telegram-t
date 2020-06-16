@@ -893,7 +893,9 @@ messages.markDialogUnread#c286d98f flags:# unread:flags.0?true peer:InputDialogP
 messages.updatePinnedMessage#d2aaf7ec flags:# silent:flags.0?true peer:InputPeer id:int = Updates;
 messages.sendVote#10ea6184 peer:InputPeer msg_id:int options:Vector<bytes> = Updates;
 messages.getOnlines#6e2be050 peer:InputPeer = ChatOnlines;
+messages.getPollVotes#b86e380e flags:# peer:InputPeer id:int option:flags.0?bytes offset:flags.1?string limit:int = messages.VotesList;
 messages.getDialogFilters#f19ed96d = Vector<DialogFilter>;
+messages.getSuggestedDialogFilters#a29cd42c = Vector<DialogFilterSuggested>;
 messages.updateDialogFilter#1ad4a04a flags:# id:int filter:flags.0?DialogFilter = Bool;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#25939651 flags:# pts:int pts_total_limit:flags.0?int date:int qts:int = updates.Difference;

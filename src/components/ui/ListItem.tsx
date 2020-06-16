@@ -35,7 +35,6 @@ type OwnProps = {
   contextActions?: MenuItemContextAction[];
   shouldDelayRipple?: boolean;
   onClick?: OnClickHandler;
-  onMouseDown?: OnClickHandler;
 };
 
 const ListItem: FC<OwnProps> = (props) => {

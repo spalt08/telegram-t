@@ -20,6 +20,7 @@ import Button from '../../ui/Button';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from './StickerSet';
 import StickerSetCover from './StickerSetCover';
+import StickerSetCoverAnimated from './StickerSetCoverAnimated';
 
 import './StickerPicker.scss';
 
@@ -101,7 +102,11 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [areLoaded, addedSetIds, recentStickers, favoriteStickers, stickerSetsById]);
 
   const updateVisibleSetIndexes = useCallback(() => {
-    const { visibleIndexes } = findInViewport(containerRef.current!, '.symbol-set');
+    if (!containerRef.current) {
+      return;
+    }
+
+    const { visibleIndexes } = findInViewport(containerRef.current, '.symbol-set');
     setActiveSetIndex(visibleIndexes[0]);
     setVisibleSetIndexes(visibleIndexes);
   }, []);
@@ -129,7 +134,11 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     setTimeout(() => {
-      const header = headerRef.current!;
+      const header = headerRef.current;
+      if (!header) {
+        return;
+      }
+
       const newLeft = activeSetIndex * HEADER_BUTTON_WIDTH - header.offsetWidth / 2 + HEADER_BUTTON_WIDTH / 2;
 
       header.scrollTo({
@@ -179,6 +188,8 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             <i className="icon-recent" />
           ) : stickerSet.id === 'favorite' ? (
             <i className="icon-favorite" />
+          ) : stickerSet.isAnimated ? (
+            <StickerSetCoverAnimated stickerSet={stickerSet as ApiStickerSet} />
           ) : (
             <StickerSetCover stickerSet={stickerSet as ApiStickerSet} />
           )}

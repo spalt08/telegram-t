@@ -4,9 +4,15 @@ import React, {
 import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
+import { ApiChat, ApiUser } from '../../api/types';
 
-import { selectChat } from '../../modules/selectors';
-import { getCanPostInChat, getMessageSendingRestrictionReason } from '../../modules/helpers';
+import { selectChat, selectUser } from '../../modules/selectors';
+import {
+  getCanPostInChat,
+  getMessageSendingRestrictionReason,
+  isChatPrivate,
+  getPrivateChatUserId,
+} from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import usePrevious from '../../hooks/usePrevious';
@@ -23,6 +29,7 @@ type StateProps = {
   openChatId?: number;
   canPost?: boolean;
   messageSendingRestrictionReason?: string;
+  hasPinnedMessage?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
@@ -31,6 +38,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   openChatId,
   canPost,
   messageSendingRestrictionReason,
+  hasPinnedMessage,
   openChat,
 }) => {
   const [showFab, setShowFab] = useState(false);
@@ -54,7 +62,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   }, [openChatId, openChat]);
 
   return (
-    <div id="MiddleColumn">
+    <div id="MiddleColumn" className={hasPinnedMessage ? 'has-pinned-message' : undefined}>
       <div id="middle-column-portals" />
       {renderingChatId && (
         <div className="messages-layout">
@@ -81,11 +89,19 @@ export default memo(withGlobal(
     }
 
     const chat = selectChat(global, openChatId);
+    let target: ApiChat | ApiUser | undefined = chat;
+    if (isChatPrivate(openChatId)) {
+      const id = chat && getPrivateChatUserId(chat);
+      target = id ? selectUser(global, id) : undefined;
+    }
+
+    const { pinnedMessageId } = (target && target.fullInfo) || {};
 
     return {
       openChatId,
       canPost: !chat || getCanPostInChat(chat),
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
+      hasPinnedMessage: Boolean(pinnedMessageId),
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),

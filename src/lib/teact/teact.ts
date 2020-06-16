@@ -233,15 +233,6 @@ document.addEventListener('dblclick', () => {
 });
 
 export function renderComponent(componentInstance: ComponentInstance) {
-  const componentName = componentInstance.name;
-  if (!DEBUG_components[componentName]) {
-    DEBUG_components[componentName] = {
-      componentName,
-      renderCount: 0,
-    };
-  }
-  DEBUG_components[componentName].renderCount++;
-
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
@@ -251,7 +242,32 @@ export function renderComponent(componentInstance: ComponentInstance) {
   let newRenderedValue;
 
   try {
+    let DEBUG_startAt: number | undefined;
+    if (DEBUG) {
+      const componentName = componentInstance.name;
+      if (!DEBUG_components[componentName]) {
+        DEBUG_components[componentName] = {
+          componentName,
+          renderCount: 0,
+          renderTimes: [],
+        };
+      }
+
+      DEBUG_startAt = performance.now();
+    }
+
     newRenderedValue = Component(props);
+
+    if (DEBUG) {
+      const renderTime = performance.now() - DEBUG_startAt!;
+      const componentName = componentInstance.name;
+      if (renderTime > 7) {
+        // eslint-disable-next-line no-console
+        console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(renderTime)} ms`);
+      }
+      DEBUG_components[componentName].renderTimes.push(renderTime);
+      DEBUG_components[componentName].renderCount++;
+    }
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console

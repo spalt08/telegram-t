@@ -521,7 +521,7 @@ class TelegramClient {
         }
     }
 
-    async downloadStickerSetThumb(stickerSet, args) {
+    async downloadStickerSetThumb(stickerSet) {
         if (!stickerSet.thumb || !stickerSet.thumb.location) {
             return undefined
         }

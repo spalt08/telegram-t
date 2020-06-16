@@ -37,6 +37,7 @@
     position: relative;
     display: inline-flex;
     flex-direction: column;
+    width: 100%;
     max-width: 35rem;
     min-width: 17.5rem;
     margin: 2rem auto;
@@ -46,6 +47,10 @@
 
     transform: translate3d(0, -1rem, 0);
     transition: transform .2s ease, opacity .15s ease;
+
+    @media (max-width: 450px) {
+      max-width: calc(100vw - 3rem) !important;
+    }
   }
 
   &.open .modal-dialog {
@@ -90,8 +95,10 @@
   }
 
   .modal-content {
+    width: 100%;
     flex-grow: 1;
     padding: 1rem;
+    overflow-y: auto;
 
     strong {
       word-break: break-word;

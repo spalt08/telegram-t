@@ -79,6 +79,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     if (content === LeftColumnContent.Settings) {
       switch (settingsScreen) {
         case SettingsScreens.EditProfile:
+        case SettingsScreens.Folders:
         case SettingsScreens.General:
         case SettingsScreens.Notifications:
         case SettingsScreens.Privacy:
@@ -93,6 +94,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.PrivacyActiveSessions:
         case SettingsScreens.PrivacyBlockedUsers:
           setSettingsScreen(SettingsScreens.Privacy);
+          return;
+        case SettingsScreens.FoldersCreateFolder:
+        case SettingsScreens.FoldersEditFolder:
+          setSettingsScreen(SettingsScreens.Folders);
           return;
         default:
           break;

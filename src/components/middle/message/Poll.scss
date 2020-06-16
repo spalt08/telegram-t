@@ -1,6 +1,10 @@
 .Poll {
   min-width: 15rem;
 
+  @media (max-width: 600px) {
+    min-width: 50vw;
+  }
+
   .poll-question {
     font-weight: 500;
     line-height: 1.25rem;
@@ -30,6 +34,10 @@
     padding-bottom: 1rem;
   }
 
+  .poll-answer-text {
+    word-break: break-word;
+  }
+
   .Checkbox,
   .Radio {
     padding-left: 2.25rem;
@@ -48,7 +56,10 @@
       &::before {
         left: 0.125rem;
         background-color: var(--background-color);
-        border-color: var(--color-borders);
+
+        .Message.own & {
+          border-color: var(--accent-color);
+        }
       }
 
       &::after {
@@ -106,6 +117,7 @@
       border: 1px solid #fff;
       margin-right: 0;
       box-sizing: content-box;
+      font-size: .5rem;
 
       &:not(:first-child) {
         margin-left: -3px;
@@ -184,7 +196,7 @@
     bottom: -5px;
     width: 1rem;
     height: 1rem;
-    background: var(--color-primary);
+    background: var(--accent-color);
     color: #fff;
     border-radius: .5rem;
     font-size: .75rem;
@@ -192,6 +204,10 @@
 
     &.wrong {
       background: var(--color-error);
+    }
+
+    .is-forwarded & > i {
+      margin-left: 1px;
     }
   }
 
@@ -218,6 +234,7 @@
 
     .Message.own & {
       color: var(--accent-color);
+      --color-primary-shade-rgb: var(--color-text-green-rgb);
     }
   }
 }

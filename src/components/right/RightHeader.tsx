@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
 import { debounce } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
@@ -27,6 +28,7 @@ type OwnProps = {
   onClose: () => void;
   isColumnOpen?: boolean;
   isForwarding?: boolean;
+  isPollResults?: boolean;
   isSearch?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
@@ -57,12 +59,14 @@ enum HeaderContent {
   StickerSearch,
   GifSearch,
   Forward,
+  PollResults,
 }
 
 const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onClose,
   isColumnOpen,
   isForwarding,
+  isPollResults,
   isSearch,
   isStickerSearch,
   isGifSearch,
@@ -77,6 +81,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessages,
   toggleStatistics,
 }) => {
+  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
+
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
     runDebouncedForSearch(searchMessages);
@@ -102,6 +108,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     HeaderContent.Forward
   ) : isSearch ? (
     HeaderContent.Search
+  ) : isPollResults ? (
+    HeaderContent.PollResults
   ) : isStickerSearch ? (
     HeaderContent.StickerSearch
   ) : isGifSearch ? (
@@ -134,6 +142,8 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     switch (contentKey) {
       case HeaderContent.Forward:
         return <h3>Forward</h3>;
+      case HeaderContent.PollResults:
+        return <h3>Results</h3>;
       case HeaderContent.Search:
         return <SearchInput value={messageSearchQuery} onChange={handleMessageSearchQueryChange} />;
       case HeaderContent.StickerSearch:
@@ -173,7 +183,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  const isBackButton = contentKey === HeaderContent.SharedMedia
+  const isBackButton = isMobile || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
     || contentKey === HeaderContent.StickerSearch;
 

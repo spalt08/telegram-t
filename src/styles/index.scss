@@ -167,6 +167,14 @@ div[role="button"] {
   }
 }
 
+.color-primary {
+  color: var(--color-primary) !important;
+}
+
+.color-danger {
+  color: var(--color-error) !important;
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);

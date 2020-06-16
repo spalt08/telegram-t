@@ -10,7 +10,7 @@ import { CHAT_LIST_SLICE } from '../../../config';
 import usePrevious from '../../../hooks/usePrevious';
 import { mapValues, pick } from '../../../util/iteratees';
 import { getChatOrder, prepareChatList, prepareFolderListIds } from '../../../modules/helpers';
-import { selectTotalChatCount, selectChatFolder } from '../../../modules/selectors';
+import { selectChatFolder } from '../../../modules/selectors';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -32,7 +32,6 @@ type StateProps = {
   listIds?: number[];
   selectedChatId?: number;
   orderedPinnedIds?: number[];
-  totalCount?: number;
   lastSyncTime?: number;
 };
 
@@ -67,12 +66,13 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
     if (!currentListIds || (folderType === 'folder' && !chatFolder)) {
       return [];
     }
-
     const newChatArrays = prepareChatList(chatsById, currentListIds, currentPinnedIds, folderType);
     const singleList = [...newChatArrays.pinnedChats, ...newChatArrays.otherChats];
     const newOrderedIds = singleList.map(({ id }) => id);
-    const newOrderById = singleList
-      .reduce((acc, chat, index) => ({ ...acc, [chat.id]: index }), {} as Record<string, number>);
+    const newOrderById = singleList.reduce((acc, chat, i) => {
+      acc[chat.id] = i;
+      return acc;
+    }, {} as Record<string, number>);
 
     return [newOrderById, newOrderedIds];
   }, [currentListIds, currentPinnedIds, folderType, chatFolder, chatsById]);
@@ -118,9 +118,6 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
               orderDiff={orderDiffById[id]}
             />
           ))}
-          {chatArrays.pinnedChats.length > 0 && (
-            <div key="chats-divider" className="pinned-chats-divider" />
-          )}
           {chatArrays.otherChats.map((chat) => (
             <Chat
               key={chat.id}
@@ -165,7 +162,6 @@ export default memo(withGlobal<OwnProps>(
       ...(listType ? {
         listIds: listIds[listType],
         orderedPinnedIds: orderedPinnedIds[listType],
-        totalCount: selectTotalChatCount(global, listType),
       } : {
         chatFolder,
       }),

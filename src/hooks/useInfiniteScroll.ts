@@ -1,7 +1,9 @@
-import { useCallback, useRef, useState } from '../lib/teact/teact';
+import { useCallback, useRef } from '../lib/teact/teact';
 import { LoadMoreDirection } from '../types';
+
 import { areSortedArraysEqual } from '../util/iteratees';
-import useOnChange from './useOnChange';
+import useForceUpdate from './useForceUpdate';
+import usePrevious from './usePrevious';
 
 type GetMore = (args: { direction: LoadMoreDirection }) => void;
 type LoadMoreBackwards = (args: { offsetId?: number }) => void;
@@ -16,7 +18,7 @@ export default (
     offsetId?: number;
   }>();
 
-  const [viewportIds, setViewportIds] = useState<number[]>((() => {
+  const viewportIdsRef = useRef<number[] | undefined>((() => {
     if (listIds && !lastParamsRef.current) {
       const { newViewportIds } = getViewportSlice(listIds, listIds[0], LoadMoreDirection.Forwards);
       return newViewportIds;
@@ -26,23 +28,24 @@ export default (
     return undefined;
   })());
 
-  useOnChange(() => {
-    if (!listIds || isDisabled) {
-      return;
-    }
+  const forceUpdate = useForceUpdate();
 
+  const prevListIds = usePrevious(listIds);
+  if (listIds && !isDisabled && listIds !== prevListIds) {
     const { offsetId = listIds[0], direction = LoadMoreDirection.Forwards } = lastParamsRef.current || {};
     const { newViewportIds } = getViewportSlice(listIds, offsetId, direction);
 
-    if (!viewportIds || !areSortedArraysEqual(viewportIds, newViewportIds)) {
-      setViewportIds(newViewportIds);
+    if (!viewportIdsRef.current || !areSortedArraysEqual(viewportIdsRef.current, newViewportIds)) {
+      viewportIdsRef.current = newViewportIds;
     }
-  }, [listIds, isDisabled, viewportIds]);
+  }
 
   const getMore: GetMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (isDisabled) {
       return;
     }
+
+    const viewportIds = viewportIdsRef.current;
 
     const offsetId = viewportIds
       ? direction === LoadMoreDirection.Backwards ? viewportIds[viewportIds.length - 1] : viewportIds[0]
@@ -63,15 +66,16 @@ export default (
     } = getViewportSlice(listIds, offsetId, direction);
 
     if (areSomeLocal && !(viewportIds && areSortedArraysEqual(viewportIds, newViewportIds))) {
-      setViewportIds(newViewportIds);
+      viewportIdsRef.current = newViewportIds;
+      forceUpdate();
     }
 
     if (!areAllLocal && loadMoreBackwards) {
       loadMoreBackwards({ offsetId });
     }
-  }, [isDisabled, viewportIds, listIds, loadMoreBackwards]);
+  }, [isDisabled, listIds, loadMoreBackwards, forceUpdate]);
 
-  return isDisabled ? [listIds] : [viewportIds, getMore];
+  return isDisabled ? [listIds] : [viewportIdsRef.current, getMore];
 };
 
 function getViewportSlice(

@@ -26,7 +26,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   currentUser,
 }) => {
   return (
-    <div className="settings-content">
+    <div className="settings-content custom-scroll">
       <div className="settings-main-menu">
         {currentUser && (
           <div className="settings-current-user">
@@ -40,6 +40,12 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
         >
           Edit Profile
+        </ListItem>
+        <ListItem
+          icon="folder"
+          onClick={() => onScreenSelect(SettingsScreens.Folders)}
+        >
+          Chat Folders
         </ListItem>
         <ListItem
           icon="settings"

@@ -1,21 +1,16 @@
-import React, {
-  FC, memo, useState, useMemo, useCallback,
-} from '../../../lib/teact/teact';
-import { withGlobal } from '../../../lib/teact/teactn';
+import React, { FC, memo, useCallback } from '../../../lib/teact/teact';
 
-import { GlobalActions } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
+import useFoldersReducer from '../../../hooks/reducers/useFoldersReducer';
 
 import Transition from '../../ui/Transition';
-import Button from '../../ui/Button';
-import DropdownMenu from '../../ui/DropdownMenu';
-import MenuItem from '../../ui/MenuItem';
-import ConfirmDialog from '../../ui/ConfirmDialog';
+
+import SettingsHeader from './SettingsHeader';
 
 import SettingsMain from './SettingsMain';
 import SettingsEditProfile from './SettingsEditProfile';
+import SettingsFolders from './folders/SettingsFolders';
 import SettingsGeneral from './SettingsGeneral';
 import SettingsNotifications from './SettingsNotifications';
 import SettingsPrivacy from './SettingsPrivacy';
@@ -28,6 +23,7 @@ import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
 import './Settings.scss';
 
 const TRANSITION_RENDER_COUNT = Object.keys(SettingsScreens).length / 2;
+const TRANSITION_DURATION = 200;
 
 export type OwnProps = {
   currentScreen: SettingsScreens;
@@ -35,90 +31,45 @@ export type OwnProps = {
   onReset: () => void;
 };
 
-type DispatchProps = Pick<GlobalActions, 'signOut'>;
-
-const Settings: FC<OwnProps & DispatchProps> = ({
+const Settings: FC<OwnProps> = ({
   currentScreen,
   onScreenSelect,
   onReset,
-  signOut,
 }) => {
-  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState<boolean>(false);
+  const [foldersState, foldersDispatch] = useFoldersReducer();
 
-  const SettingsMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
-      <Button
-        round
-        ripple
-        size="smaller"
-        color="translucent"
-        className={isOpen ? 'active' : ''}
-        onMouseDown={onTrigger}
-        ariaLabel="More actions"
-      >
-        <i className="icon-more" />
-      </Button>
-    );
-  }, []);
-
-  const openSignOutConfirmation = useCallback(() => {
-    setIsSignOutDialogOpen(true);
-  }, []);
-
-  const closeSignOutConfirmation = useCallback(() => {
-    setIsSignOutDialogOpen(false);
-  }, []);
-
-  const handleSignOutMessage = useCallback(() => {
-    closeSignOutConfirmation();
-    signOut();
-  }, [closeSignOutConfirmation, signOut]);
-
-  function renderHeaderContent() {
-    switch (currentScreen) {
-      case SettingsScreens.EditProfile:
-        return <h3>Edit Profile</h3>;
-      case SettingsScreens.General:
-        return <h3>General</h3>;
-      case SettingsScreens.Notifications:
-        return <h3>Notifications</h3>;
-      case SettingsScreens.Privacy:
-        return <h3>Privacy and Security</h3>;
-      case SettingsScreens.Language:
-        return <h3>Language</h3>;
-
-      case SettingsScreens.PrivacyPhoneNumber:
-        return <h3>Phone Number</h3>;
-      case SettingsScreens.PrivacyLastSeen:
-        return <h3>Last Seen &amp; Online</h3>;
-      case SettingsScreens.PrivacyProfilePhoto:
-        return <h3>Profile Photo</h3>;
-      case SettingsScreens.PrivacyForwarding:
-        return <h3>Forwarding Messages</h3>;
-      case SettingsScreens.PrivacyGroupChats:
-        return <h3>Group Chats</h3>;
-
-      case SettingsScreens.PrivacyActiveSessions:
-        return <h3>Active Sessions</h3>;
-      case SettingsScreens.PrivacyBlockedUsers:
-        return <h3>Blocked Users</h3>;
-
-      default:
-        return (
-          <div className="settings-main-header">
-            <h3>Settings</h3>
-
-            <DropdownMenu
-              className="settings-more-menu"
-              trigger={SettingsMenuButton}
-              positionX="right"
-            >
-              <MenuItem icon="logout" onClick={openSignOutConfirmation}>Log Out</MenuItem>
-            </DropdownMenu>
-          </div>
-        );
+  const handleReset = useCallback(() => {
+    if (
+      currentScreen === SettingsScreens.FoldersCreateFolder
+      || currentScreen === SettingsScreens.FoldersEditFolder
+    ) {
+      setTimeout(() => {
+        foldersDispatch({ type: 'reset' });
+      }, TRANSITION_DURATION);
     }
-  }
+
+    if (
+      currentScreen === SettingsScreens.FoldersIncludedChats
+      || currentScreen === SettingsScreens.FoldersExcludedChats
+    ) {
+      if (foldersState.mode === 'create') {
+        onScreenSelect(SettingsScreens.FoldersCreateFolder);
+      } else {
+        onScreenSelect(SettingsScreens.FoldersEditFolder);
+      }
+      return;
+    }
+
+    onReset();
+  }, [
+    foldersState.mode, foldersDispatch,
+    currentScreen, onReset, onScreenSelect,
+  ]);
+
+  const handleSaveFilter = useCallback(() => {
+    foldersDispatch({ type: 'saveFilters' });
+    handleReset();
+  }, [foldersDispatch, handleReset]);
 
   function renderCurrentSectionContent() {
     switch (currentScreen) {
@@ -146,6 +97,7 @@ const Settings: FC<OwnProps & DispatchProps> = ({
         return (
           <SettingsLanguage />
         );
+
       case SettingsScreens.PrivacyActiveSessions:
         return (
           <SettingsPrivacyActiveSessions />
@@ -162,6 +114,22 @@ const Settings: FC<OwnProps & DispatchProps> = ({
         return (
           <SettingsPrivacyVisibility screen={currentScreen} />
         );
+
+      case SettingsScreens.Folders:
+      case SettingsScreens.FoldersCreateFolder:
+      case SettingsScreens.FoldersEditFolder:
+      case SettingsScreens.FoldersIncludedChats:
+      case SettingsScreens.FoldersExcludedChats:
+        return (
+          <SettingsFolders
+            currentScreen={currentScreen}
+            state={foldersState}
+            dispatch={foldersDispatch}
+            onScreenSelect={onScreenSelect}
+            onReset={handleReset}
+          />
+        );
+
       default:
         return undefined;
     }
@@ -170,39 +138,27 @@ const Settings: FC<OwnProps & DispatchProps> = ({
   function renderCurrentSection() {
     return (
       <>
-        <div className="LeftHeader">
-          <Button
-            round
-            size="smaller"
-            color="translucent"
-            onClick={onReset}
-            ariaLabel="Go back"
-          >
-            <i className="icon-back" />
-          </Button>
-          {renderHeaderContent()}
-          <ConfirmDialog
-            isOpen={isSignOutDialogOpen}
-            onClose={closeSignOutConfirmation}
-            text="Are you sure you want to log out?"
-            confirmLabel="Log Out"
-            confirmHandler={handleSignOutMessage}
-            confirmIsDestructive
-          />
-        </div>
+        <SettingsHeader
+          currentScreen={currentScreen}
+          onReset={handleReset}
+          onSaveFilter={handleSaveFilter}
+          editedFolderId={foldersState.folderId}
+        />
         {renderCurrentSectionContent()}
       </>
     );
   }
 
   return (
-    <Transition name="slide-layers" activeKey={currentScreen} renderCount={TRANSITION_RENDER_COUNT} id="Settings">
+    <Transition
+      id="Settings"
+      name="slide-layers"
+      activeKey={currentScreen}
+      renderCount={TRANSITION_RENDER_COUNT}
+    >
       {renderCurrentSection}
     </Transition>
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  undefined,
-  (setGlobal, actions): DispatchProps => pick(actions, ['signOut']),
-)(Settings));
+export default memo(Settings);
