@@ -47,9 +47,13 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const areLoaded = Boolean(savedGifs);
 
   const updateVisibleIndexes = useCallback(() => {
+    if (!containerRef.current) {
+      return;
+    }
+
     const {
       visibleIndexes: newVisibleIndexes,
-    } = findInViewport(containerRef.current!, '.GifButton', VIEWPORT_MARGIN, true);
+    } = findInViewport(containerRef.current, '.GifButton', VIEWPORT_MARGIN, true);
     setVisibleIndexes(newVisibleIndexes);
   }, []);
 
