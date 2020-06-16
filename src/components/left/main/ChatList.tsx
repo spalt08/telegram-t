@@ -119,9 +119,6 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
               orderDiff={orderDiffById[id]}
             />
           ))}
-          {chatArrays.pinnedChats.length > 0 && (
-            <div key="chats-divider" className="pinned-chats-divider" />
-          )}
           {chatArrays.otherChats.map((chat) => (
             <Chat
               key={chat.id}

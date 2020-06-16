@@ -32,14 +32,16 @@
     }
   }
 
-  .chat-item-clickable .ChatInfo .Avatar.size-tiny {
-    width: 2rem;
-    height: 2rem;
-    margin-right: 1.75rem;
-  }
+  .chat-item-clickable .ChatInfo {
+    .Avatar.size-tiny {
+      width: 2rem;
+      height: 2rem;
+      margin-right: 1.75rem;
+    }
 
-  .chat-item-clickable .ChatInfo .title {
-    font-weight: 400;
+    .title {
+      font-weight: 400;
+    }
   }
 
   .Button {

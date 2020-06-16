@@ -17,21 +17,16 @@
 
     .TabList {
       justify-content: flex-start;
-      box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
-      font-size: 0.875rem;
-
-      + .Transition {
-        .ChatList {
-          padding-top: 0.35rem;
-        }
-      }
+      box-shadow: 0 0 2px rgba(114, 114, 114, 0.25), inset 0 -1px 0 0 var(--color-borders);
+      padding-left: .5625rem;
+      padding-bottom: 1px;
+      border-bottom: 0;
     }
 
     .Tab {
       flex: 0 0 auto;
-      min-width: 5rem;
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+      padding-left: 0.625rem;
+      padding-right: 0.625rem;
 
       > span {
         padding-left: 0.5rem;
