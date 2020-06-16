@@ -54,7 +54,9 @@
 .Notification-portal:first-of-type {
   margin-top: 4.25rem;
 
-  .has-pinned-message & {
-    margin-top: 7.375rem;
+  @media (max-width: 600px) {
+    .has-pinned-message & {
+      margin-top: 7.375rem;
+    }
   }
 }

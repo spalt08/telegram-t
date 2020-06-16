@@ -3,6 +3,6 @@
   overflow: hidden;
 
   .ChatList {
-    height: calc(100% - 3.75rem);
+    height: calc(100% - var(--header-height));
   }
 }

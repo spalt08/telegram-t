@@ -61,10 +61,11 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
       return {
         message,
-        user: message.senderUserId ? selectUser(getGlobal(), message.senderUserId) : undefined,
+        // During application initialization, the messagesById array may not contain all messages.
+        user: message && message.senderUserId ? selectUser(getGlobal(), message.senderUserId) : undefined,
         onClick: () => focusMessage({ chatId, messageId: id }),
       };
-    });
+    }).filter((f) => Boolean(f.message));
 
     return orderBy(results, ({ message }) => message.date, 'desc');
   }, [chatId, focusMessage, foundIds, messagesById, query]);

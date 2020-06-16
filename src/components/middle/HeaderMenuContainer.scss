@@ -16,6 +16,7 @@
 
     .bubble {
       z-index: var(--z-header-menu);
+      --offset-y: calc(100% + 1rem);
     }
   }
 }
