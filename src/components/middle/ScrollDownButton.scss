@@ -11,7 +11,9 @@
   pointer-events: none;
 
   body.animation-level-0 & {
-    transition: none !important;
+    transform: none !important;
+
+    transition: opacity .15s;
   }
 
   @media (max-width: 600px) {
@@ -33,8 +35,13 @@
     }
 
     @media (min-width: 1276px) {
-      transition: transform var(--layer-transition);
       transform: translateX(0);
+
+      transition: transform var(--layer-transition);
+
+      body.animation-level-0 & {
+        transition: none !important;
+      }
 
       body.is-right-column-shown & {
         transform: translateX(calc(-1 * var(--right-column-width)));

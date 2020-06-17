@@ -36,6 +36,11 @@
       transition: opacity .2s ease-in, transform .2s ease-in !important;
     }
 
+    body.animation-level-0 & {
+      transform: none !important;
+      transition: opacity .15s !important;
+    }
+
     body.has-open-dialog & {
       transition: none !important;
     }

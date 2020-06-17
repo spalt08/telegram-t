@@ -61,6 +61,7 @@ $color-selection: #3993fb;
   --color-primary-shade-rgb: #{toRGB(mix($color-primary, $color-black, 92%))};
 
   --color-green: #{$color-green};
+  --color-green-darker: #{mix($color-green, $color-black, 84%)};
 
   --color-error: #{$color-error};
   --color-error-shade: #{mix($color-error, $color-black, 92%)};

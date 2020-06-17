@@ -4,6 +4,10 @@
   margin-top: -.25rem;
   margin-bottom: -.25rem;
 
+  body.animation-level-0 & {
+    transition: none !important;
+  }
+
   > .Button {
     flex-shrink: 0;
     margin: .125rem;

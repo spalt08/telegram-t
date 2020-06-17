@@ -1,6 +1,7 @@
 import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
@@ -8,7 +9,6 @@ import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import './Transition.scss';
-import { withGlobal } from '../../lib/teact/teactn';
 
 type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
@@ -213,7 +213,7 @@ const Transition: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'Transition',
     className,
-    name,
+    animationLevel === 0 && name === 'scroll-slide' ? 'slide' : name,
   );
 
   return (
