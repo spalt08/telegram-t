@@ -27,8 +27,7 @@ export const GLOBAL_SEARCH_SLICE = 20;
 
 export const TOP_CHATS_PRELOAD_LIMIT = 10;
 
-export const ANIMATION_SETTINGS_VIEWED_KEY = 'tt-animation-level-settings-viewed';
-export const DEFAULT_ANIMATION_LEVEL = 1;
+export const DEFAULT_ANIMATION_LEVEL = 2;
 export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
 
 export const SUPPORT_BOT_ID = 470000;

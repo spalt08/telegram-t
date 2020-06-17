@@ -36,7 +36,14 @@
     }
   }
 
-  &:not(.has-ripple) {
+  body.animation-level-0 & {
+    .ripple-container {
+      display: none;
+    }
+  }
+
+  &:not(.has-ripple),
+  body.animation-level-0 & {
     > button:active {
       background-color: var(--color-chat-active);
       transition: none !important;
@@ -57,11 +64,6 @@
 
   &.inactive {
     pointer-events: none;
-  }
-
-  .AttentionIndicator {
-    top: 0.5rem;
-    left: 2.5rem;
   }
 
   &-context-menu {

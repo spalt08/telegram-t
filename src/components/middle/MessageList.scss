@@ -149,8 +149,9 @@
 
     transition: opacity .3s ease;
 
-    &.no-transition {
-      transition: none !important;
+    &.no-transition,
+    body.animation-level-0 & {
+      transition: none;
     }
 
     &.invisible {
@@ -195,6 +196,10 @@
 
     body:not(.transition-locked) & {
       transition: transform var(--layer-transition);
+    }
+
+    body.animation-level-0 & {
+      transition: none;
     }
 
     body.message-list-no-transform & {

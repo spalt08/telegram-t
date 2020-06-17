@@ -16,13 +16,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  isAnimationLevelBadgeShown: boolean;
   currentUser?: ApiUser;
 };
 
 const SettingsMain: FC<OwnProps & StateProps> = ({
   onScreenSelect,
-  isAnimationLevelBadgeShown,
   currentUser,
 }) => {
   return (
@@ -49,7 +47,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="settings"
-          attention={isAnimationLevelBadgeShown}
           onClick={() => onScreenSelect(SettingsScreens.General)}
         >
           General Settings
@@ -80,10 +77,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentUserId } = global;
-    const { isAnimationLevelSettingViewed } = global.settings;
 
     return {
-      isAnimationLevelBadgeShown: !isAnimationLevelSettingViewed,
       currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
     };
   },

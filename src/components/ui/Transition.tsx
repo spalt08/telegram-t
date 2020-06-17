@@ -8,6 +8,7 @@ import buildClassName from '../../util/buildClassName';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import './Transition.scss';
+import { withGlobal } from '../../lib/teact/teactn';
 
 type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
@@ -23,6 +24,10 @@ type OwnProps = {
   children: ChildrenFn;
 };
 
+type StateProps = {
+  animationLevel: number;
+};
+
 const ANIMATION_DURATION = {
   slide: 350,
   'mv-slide': 400,
@@ -33,7 +38,7 @@ const ANIMATION_DURATION = {
   fade: 150,
 };
 
-const Transition: FC<OwnProps> = ({
+const Transition: FC<OwnProps & StateProps> = ({
   activeKey,
   name,
   direction = 'auto',
@@ -44,6 +49,7 @@ const Transition: FC<OwnProps> = ({
   onStart,
   onStop,
   children,
+  animationLevel,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const rendersRef = useRef<Record<number, ChildrenFn>>({});
@@ -94,7 +100,7 @@ const Transition: FC<OwnProps> = ({
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
-    if (name === 'none') {
+    if (name === 'none' || animationLevel === 0) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           node.classList.remove('from', 'through', 'to');
@@ -124,7 +130,9 @@ const Transition: FC<OwnProps> = ({
       });
     }
 
-    dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+    if (animationLevel > 0) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+    }
 
     requestAnimationFrame(() => {
       container.classList.add('animating');
@@ -173,6 +181,7 @@ const Transition: FC<OwnProps> = ({
     onStop,
     renderCount,
     shouldRestoreHeight,
+    animationLevel,
   ]);
 
   useLayoutEffect(() => {
@@ -214,4 +223,7 @@ const Transition: FC<OwnProps> = ({
   );
 };
 
-export default Transition;
+export default withGlobal<OwnProps>((global) => {
+  const { animationLevel } = global.settings.byKey;
+  return { animationLevel };
+})(Transition);

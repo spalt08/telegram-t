@@ -55,6 +55,7 @@ type StateProps = {
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   draft?: ApiFormattedText;
+  animationLevel?: number;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat' | 'focusLastMessage'>;
@@ -76,6 +77,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   draft,
   openChat,
   focusLastMessage,
+  animationLevel,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
@@ -88,6 +90,10 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
   useLayoutEffect(() => {
+    if (animationLevel === 0) {
+      return;
+    }
+
     const element = ref.current!;
 
     if (orderDiff < 0) {
@@ -115,7 +121,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
         element.style.transform = '';
       });
     }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [orderDiff]);
+  }, [animationLevel, orderDiff]);
 
   const handleClick = useCallback(() => {
     if (isSelected) {
@@ -247,7 +253,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const { targetUserId: actionTargetUserId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
-    const { chats: { draftsById } } = global;
+    const { chats: { draftsById }, settings: { byKey: { animationLevel } } } = global;
 
     return {
       chat,
@@ -257,6 +263,7 @@ export default memo(withGlobal<OwnProps>(
       ...(actionTargetUserId && { actionTargetUser: selectUser(global, actionTargetUserId) }),
       actionTargetMessage,
       draft: draftsById[chatId],
+      animationLevel,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

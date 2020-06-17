@@ -121,6 +121,13 @@
     margin-left: auto;
     cursor: default;
 
+    body.animation-level-0 &,
+    body.animation-level-1 & {
+      .ripple-container {
+        display: none;
+      }
+    }
+
     > .Button {
       flex-shrink: 0;
       margin: 0 0.25rem;
@@ -128,6 +135,10 @@
 
     & + .HeaderActions {
       margin-left: 1rem;
+    }
+
+    body.animation-level-0 & {
+      transition: none !important;
     }
 
     @media (min-width: 1276px) and (max-width: 1439px) {
@@ -279,6 +290,10 @@
     @media (min-width: 1276px) {
       transform: translate3d(0, 0, 0);
       transition: transform var(--layer-transition);
+
+      body.animation-level-0 & {
+        transition: none;
+      }
 
       body.is-right-column-shown & {
         transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);

@@ -10,6 +10,13 @@
   overflow: hidden;
   cursor: pointer;
 
+  body.animation-level-0 &,
+  body.animation-level-1 & {
+    .ripple-container {
+      display: none;
+    }
+  }
+
   .custom-shape & {
     max-width: 15rem;
     padding: 0.5rem;

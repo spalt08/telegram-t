@@ -230,7 +230,6 @@ export type GlobalState = {
 
   settings: {
     byKey: ISettings;
-    isAnimationLevelSettingViewed?: boolean;
   };
 
   errors: ApiError[];
@@ -269,7 +268,7 @@ export type ActionTypes = (
   // Channel / groups creation
   'createChannel' | 'createGroupChat' | 'resetChatCreation' |
   // settings
-  'setSettingOption' | 'clearAnimationSettingAttention' |
+  'setSettingOption' |
   // Stickers & GIFs
   'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
   'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |

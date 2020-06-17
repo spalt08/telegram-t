@@ -75,6 +75,10 @@
     &.animate {
       // This equals to `Transition.slide` animation params.
       transition: transform .25s ease;
+
+      body.animation-level-0 & {
+        transition: none !important;
+      }
     }
   }
 }

@@ -7,7 +7,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
 
 import RippleEffect from './RippleEffect';
-import AttentionIndicator from './AttentionIndicator';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 
@@ -28,7 +27,6 @@ type OwnProps = {
   className?: string;
   children: any;
   disabled?: boolean;
-  attention?: boolean;
   ripple?: boolean;
   narrow?: boolean;
   inactive?: boolean;
@@ -44,7 +42,6 @@ const ListItem: FC<OwnProps> = (props) => {
     className,
     children,
     disabled,
-    attention,
     ripple,
     narrow,
     inactive,
@@ -134,7 +131,6 @@ const ListItem: FC<OwnProps> = (props) => {
         {!disabled && !inactive && ripple && (
           <RippleEffect delayed={shouldDelayRipple} />
         )}
-        {attention && <AttentionIndicator show={attention} />}
       </button>
       {contextActions && contextMenuPosition !== undefined && (
         <Menu

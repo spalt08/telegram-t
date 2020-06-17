@@ -21,6 +21,7 @@ import './Main.scss';
 
 type StateProps = {
   isRightColumnShown?: boolean;
+  animationLevel: number;
 } & Pick<GlobalState, 'isLeftColumnShown'>;
 
 const ANIMATION_DURATION = 350;
@@ -30,7 +31,7 @@ let timeout: number | undefined;
 let DEBUG_isLogged = false;
 
 const Main: FC<StateProps> = ({
-  isLeftColumnShown, isRightColumnShown,
+  isLeftColumnShown, isRightColumnShown, animationLevel,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
@@ -45,19 +46,22 @@ const Main: FC<StateProps> = ({
   // Add `body` classes when toggling right column
   useEffect(() => {
     document.body.classList.toggle('is-right-column-shown', isRightColumnShown);
-    document.body.classList.add('animating-right-column');
-    dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
 
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = undefined;
+    if (animationLevel > 0) {
+      document.body.classList.add('animating-right-column');
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = undefined;
+      }
+
+      timeout = window.setTimeout(() => {
+        document.body.classList.remove('animating-right-column');
+        timeout = undefined;
+      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     }
-
-    timeout = window.setTimeout(() => {
-      document.body.classList.remove('animating-right-column');
-      timeout = undefined;
-    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [isRightColumnShown]);
+  }, [animationLevel, isRightColumnShown]);
 
   return (
     <div id="Main" className={className}>
@@ -75,5 +79,6 @@ export default memo(withGlobal(
   (global): StateProps => ({
     ...pick(global, ['isLeftColumnShown']),
     isRightColumnShown: selectIsRightColumnShown(global),
+    animationLevel: global.settings.byKey.animationLevel,
   }),
 )(Main));
