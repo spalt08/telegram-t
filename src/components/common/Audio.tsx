@@ -137,7 +137,7 @@ const Audio: FC<OwnProps> = ({
   const className = buildClassName(
     'Audio media-inner',
     isOwn && !inSharedMedia && 'own',
-    inSharedMedia && 'smaller',
+    inSharedMedia && 'bigger',
   );
 
   const buttonClassNames = ['toggle-play'];
