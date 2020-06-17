@@ -324,7 +324,7 @@ const Poll: FC<OwnProps & StateProps & DispatchProps> = ({
           ripple
           disabled={chosenOptions.length === 0}
           size="tiny"
-          onMouseDown={handleVoteClick}
+          onClick={handleVoteClick}
         >
           Vote
         </Button>

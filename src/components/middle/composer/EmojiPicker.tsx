@@ -84,7 +84,7 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const [emojis, setEmojis] = useState<AllEmojis>();
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
-  useHorizontalScroll(headerRef.current, !IS_MOBILE_SCREEN);
+  useHorizontalScroll(headerRef, !IS_MOBILE_SCREEN);
 
   // Scroll header when active set updates
   useEffect(() => {

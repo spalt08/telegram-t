@@ -1,4 +1,4 @@
-import React, { FC, useState } from '../../lib/teact/teact';
+import React, { FC, useState, useRef } from '../../lib/teact/teact';
 
 import Menu from './Menu';
 
@@ -10,7 +10,6 @@ type OwnProps = {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   children: any;
-  onKeyDown?: (e: React.KeyboardEvent<any>) => void;
 };
 
 const DropdownMenu: FC<OwnProps> = (props) => {
@@ -20,8 +19,8 @@ const DropdownMenu: FC<OwnProps> = (props) => {
     children,
     positionX = 'left',
     positionY = 'top',
-    onKeyDown,
   } = props;
+  const menuRef = useRef<HTMLDivElement>();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleIsOpen = () => {
@@ -29,11 +28,18 @@ const DropdownMenu: FC<OwnProps> = (props) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
-    if (!onKeyDown || !isOpen) {
+    const menu = menuRef.current;
+
+    if (!isOpen || e.keyCode !== 40 || !menu) {
       return;
     }
 
-    onKeyDown(e);
+    const focusedElement = document.activeElement;
+    const elementChildren = Array.from(menu.children);
+
+    if (!focusedElement || elementChildren.indexOf(focusedElement) === -1) {
+      (elementChildren[0] as HTMLElement).focus();
+    }
   };
 
   const handleClose = () => {
@@ -41,16 +47,19 @@ const DropdownMenu: FC<OwnProps> = (props) => {
   };
 
   return (
-    <div className={`DropdownMenu ${className || ''}`} onKeyDown={handleKeyDown}>
+    <div
+      className={`DropdownMenu ${className || ''}`}
+      onKeyDown={handleKeyDown}
+    >
       {trigger({ onTrigger: toggleIsOpen, isOpen })}
 
       <Menu
+        ref={menuRef}
         isOpen={isOpen}
         className={className || ''}
         positionX={positionX}
         positionY={positionY}
         autoClose
-        onKeyDown={onKeyDown}
         onClose={handleClose}
       >
         {children}

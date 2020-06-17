@@ -78,8 +78,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={hasMenu ? onTrigger : undefined}
-        onClick={!hasMenu ? () => onReset() : undefined}
+        onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? 'Open menu' : 'Return to chat list'}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />

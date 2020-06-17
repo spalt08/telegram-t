@@ -131,7 +131,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : undefined}
-        onMouseDown={onTrigger}
+        onClick={onTrigger}
         ariaLabel="More actions"
       >
         <i className="icon-more" />

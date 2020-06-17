@@ -68,7 +68,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={onTrigger}
+        onClick={onTrigger}
         ariaLabel="More actions"
       >
         <i className="icon-more" />
@@ -141,7 +141,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
               size="smaller"
               color="translucent"
               className="color-primary"
-              onMouseDown={onSaveFilter}
+              onClick={onSaveFilter}
               ariaLabel="Confirm"
             >
               <i className="icon-check" />

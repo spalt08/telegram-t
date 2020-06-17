@@ -39,6 +39,7 @@ const FloatingActionButton: FC<OwnProps> = ({
       disabled={disabled}
       onClick={show && !disabled ? onClick : undefined}
       ariaLabel={ariaLabel}
+      tabIndex={-1}
     >
       {children}
     </Button>

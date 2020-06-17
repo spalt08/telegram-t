@@ -125,7 +125,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }, [areLoaded, updateVisibleSetIndexes]);
 
-  useHorizontalScroll(headerRef.current);
+  useHorizontalScroll(headerRef);
 
   // Scroll header when active set updates
   useEffect(() => {

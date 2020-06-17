@@ -1,7 +1,9 @@
+import { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 
-export default (container: HTMLElement | null, disabled?: boolean) => {
+export default (containerRef: RefObject<HTMLElement>, disabled?: boolean) => {
   useEffect(() => {
+    const container = containerRef.current;
     if (!container) {
       return undefined;
     }
@@ -18,5 +20,5 @@ export default (container: HTMLElement | null, disabled?: boolean) => {
     return () => {
       container.removeEventListener('wheel', handleScroll);
     };
-  }, [container, disabled]);
+  }, [containerRef, disabled]);
 };

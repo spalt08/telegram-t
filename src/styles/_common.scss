@@ -71,7 +71,7 @@
 .ListItem.chat-item-clickable {
   margin: 0 -0.5rem;
 
-  > button {
+  .ListItem-button {
     padding: 0.75rem;
 
     @media (max-width: 600px) {
@@ -133,7 +133,7 @@
 }
 
 .ListItem.search-result-message {
-  > button {
+  .ListItem-button {
     padding: 0.5625rem 0.5rem;
     display: flex;
     align-items: center;

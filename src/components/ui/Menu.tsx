@@ -1,12 +1,15 @@
-import React, { FC, useEffect } from '../../lib/teact/teact';
+import { RefObject } from 'react';
+import React, { FC, useEffect, useRef } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 
 import './Menu.scss';
 
 type OwnProps = {
+  ref?: RefObject<HTMLDivElement>;
   isOpen: boolean;
   className?: string;
   style?: string;
@@ -23,6 +26,7 @@ type OwnProps = {
 };
 
 const Menu: FC<OwnProps> = ({
+  ref,
   isOpen,
   className,
   style,
@@ -31,31 +35,38 @@ const Menu: FC<OwnProps> = ({
   positionY = 'top',
   autoClose = false,
   noCloseOnBackdrop = false,
-  onKeyDown,
   onCloseAnimationEnd,
   onClose,
   onMouseEnter,
   onMouseLeave,
 }) => {
+  let menuRef = useRef<HTMLDivElement>();
+  if (ref) {
+    menuRef = ref;
+  }
+
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd);
 
   useEffect(() => (isOpen && onClose ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
   const backDropHandler = noCloseOnBackdrop ? undefined : onClose;
 
+  const handleKeyDown = useKeyboardListNavigation(menuRef, isOpen, autoClose ? onClose : undefined);
+
   return (
     <div
       className={buildClassName('Menu no-selection', className)}
-      onKeyDown={isOpen ? onKeyDown : undefined}
+      onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
       // @ts-ignore teact feature
       style={style}
     >
       {isOpen && (
-        <div className="backdrop" onMouseDown={backDropHandler} />
+        <div className="backdrop" onMouseDown={backDropHandler} tabIndex={-1} />
       )}
       <div
+        ref={menuRef}
         className={buildClassName('bubble menu-container custom-scroll', positionY, positionX, transitionClassNames)}
         // @ts-ignore teact feature
         style={`transform-origin: ${positionY} ${positionX}`}

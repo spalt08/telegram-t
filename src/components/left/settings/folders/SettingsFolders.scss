@@ -57,7 +57,7 @@
     }
   }
 
-  &.color-primary > button {
+  &.color-primary .ListItem-button {
     color: var(--color-primary);
 
     i {

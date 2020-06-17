@@ -6,7 +6,7 @@
   @media (max-width: 600px) {
     padding: 0 0.5rem 1rem;
 
-    .ListItem.chat-item-clickable > button {
+    .ListItem.chat-item-clickable .ListItem-button {
       border-radius: 0;
     }
   }

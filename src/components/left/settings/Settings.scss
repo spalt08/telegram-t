@@ -30,7 +30,7 @@
   height: calc(100% - var(--header-height));
   overflow-y: auto;
 
-  .ListItem > button {
+  .ListItem-button {
     border-radius: var(--border-radius-default);
   }
 }

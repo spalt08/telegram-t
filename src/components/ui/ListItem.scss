@@ -1,7 +1,7 @@
 .ListItem {
   position: relative;
 
-  > button {
+  .ListItem-button {
     width: 100%;
     background: none;
     border: none !important;
@@ -17,22 +17,28 @@
     border-radius: var(--border-radius-default);
     --ripple-color: rgba(0, 0, 0, .08);
 
-    &:not([disabled]) {
+    > i {
+      font-size: 1.5rem;
+      margin-right: 2rem;
+      opacity: 0.5;
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+
+    .ListItem-button {
+      opacity: 0.5;
+    }
+  }
+
+  &:not(.disabled) {
+    .ListItem-button {
       cursor: pointer;
 
       &:hover, &:focus {
         background-color: var(--color-chat-hover);
       }
-    }
-
-    &[disabled] {
-      opacity: 0.5;
-    }
-
-    > i {
-      font-size: 1.5rem;
-      margin-right: 2rem;
-      opacity: 0.5;
     }
   }
 
@@ -44,20 +50,20 @@
 
   &:not(.has-ripple),
   body.animation-level-0 & {
-    > button:active {
+    .ListItem-button:active {
       background-color: var(--color-chat-active);
       transition: none !important;
     }
   }
 
-  &.has-menu-open > button {
+  &.has-menu-open .ListItem-button {
     background-color: var(--color-chat-hover);
   }
 
   &.narrow {
     margin-bottom: 0.75rem;
 
-    > button {
+    .ListItem-button {
       padding: 0.5rem 1rem;
     }
   }

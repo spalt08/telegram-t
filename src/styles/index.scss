@@ -99,7 +99,7 @@ body.scrollable {
     border-radius: 0.35rem;
   }
 
-  &:hover {
+  &:hover, &:focus, &:focus-within {
     scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
 
     &::-webkit-scrollbar-thumb {

@@ -31,9 +31,9 @@ export default function trapFocus(element: HTMLElement) {
     focusableElements[newFocusedIndex].focus();
   }
 
-  element.addEventListener('keydown', handleKeyDown, false);
+  document.addEventListener('keydown', handleKeyDown, false);
 
   return () => {
-    element.removeEventListener('keydown', handleKeyDown, false);
+    document.removeEventListener('keydown', handleKeyDown, false);
   };
 }
