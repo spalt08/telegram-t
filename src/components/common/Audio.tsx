@@ -137,7 +137,7 @@ const Audio: FC<OwnProps> = ({
   const className = buildClassName(
     'Audio media-inner',
     isOwn && !inSharedMedia && 'own',
-    inSharedMedia && 'smaller',
+    inSharedMedia && 'bigger',
   );
 
   const buttonClassNames = ['toggle-play'];
@@ -154,7 +154,7 @@ const Audio: FC<OwnProps> = ({
       <Button
         round
         ripple
-        size={inSharedMedia ? 'smaller' : 'default'}
+        size={inSharedMedia ? 'smaller' : 'tiny'}
         className={buttonClassNames.join(' ')}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
         onClick={handleButtonClick}
@@ -167,7 +167,7 @@ const Audio: FC<OwnProps> = ({
           <ProgressSpinner
             progress={transferProgress}
             transparent
-            size={inSharedMedia ? 'm' : 'l'}
+            size={inSharedMedia ? 'm' : 's'}
             onClick={handleButtonClick}
           />
         </div>
