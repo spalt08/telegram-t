@@ -16,6 +16,10 @@
     background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
     background-size: cover;
     z-index: -1;
+
+    @media (max-width: 600px) {
+      background-image: url('../../assets/chat-bg-mobile.jpg');
+    }
   }
 
   @media screen and (min-width: 1276px) {

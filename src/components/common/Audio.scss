@@ -34,10 +34,12 @@
 
     i {
       position: absolute;
-      margin-top: -.05rem;
 
       &.icon-play {
-        margin-left: .15rem;
+        margin-left: .125rem;
+        @media (max-width: 600px) {
+          margin-left: .0625rem;
+        }
       }
     }
 

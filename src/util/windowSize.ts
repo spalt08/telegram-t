@@ -5,9 +5,13 @@ type IDimensions = {
   height: number;
 };
 
-let windowSize = getSize();
+let windowSize = updateSizes();
 
-function getSize(): IDimensions {
+function updateSizes(): IDimensions {
+  const vh = window.innerHeight * 0.01;
+
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+
   return {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -15,7 +19,7 @@ function getSize(): IDimensions {
 }
 
 const handleResize = throttle(() => {
-  windowSize = getSize();
+  windowSize = updateSizes();
 }, 250, true);
 
 window.addEventListener('resize', handleResize);

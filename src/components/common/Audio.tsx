@@ -6,7 +6,9 @@ import {
   ApiAudio, ApiMediaFormat, ApiMessage, ApiVoice,
 } from '../../api/types';
 
-import { IS_OPUS_SUPPORTED, IS_TOUCH_ENV } from '../../util/environment';
+import windowSize from '../../util/windowSize';
+import { REM } from './helpers/mediaDimensions';
+import { IS_OPUS_SUPPORTED, IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
 import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
@@ -41,6 +43,8 @@ interface ISeekMethods {
 }
 
 const AUTO_LOAD = IS_TOUCH_ENV;
+const MAX_WIDTH_ON_MOBILE = 69;
+const BUTTON_WIDTH_ON_MOBILE = 3.75 * REM;
 
 const Audio: FC<OwnProps> = ({
   message,
@@ -262,8 +266,25 @@ function renderWaveform(
   const spikeWidth = 2;
   const spikeStep = 4;
   const spikeRadius = 1;
-  const width = spikes.length * spikeStep - spikeWidth;
+  let width = spikes.length * spikeStep - spikeWidth;
   const height = 23;
+
+  if (IS_MOBILE_SCREEN) {
+    const vw = windowSize.get().width * 0.01;
+    const maxWaveformWidth = Math.round(MAX_WIDTH_ON_MOBILE * vw - BUTTON_WIDTH_ON_MOBILE);
+    // Reduce waveform for small screens
+    if (maxWaveformWidth < width) {
+      const slicesForRemove = Math.ceil((width - maxWaveformWidth) / spikeStep);
+      for (let i = 0; i < slicesForRemove; i++) {
+        const idx = i * slicesForRemove - i;
+        if (spikes[idx] !== undefined) {
+          spikes[idx - 1] = Math.round((spikes[idx - 1] + spikes[idx]) / 2);
+          spikes.splice(idx, 1);
+        }
+      }
+      width = spikes.length * spikeStep - spikeWidth;
+    }
+  }
 
   const src = renderWaveformToDataUri(spikes, playProgress, {
     width,

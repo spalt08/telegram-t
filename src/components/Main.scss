@@ -7,6 +7,9 @@
     position: relative;
     overflow: hidden;
   }
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 #LeftColumn {
@@ -14,6 +17,9 @@
   min-width: 18rem;
   max-width: 26.5rem;
   height: 100%;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 #LeftColumn {
@@ -29,7 +35,7 @@
     position: fixed;
     left: 0;
     top: 0;
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     width: 26.5rem;
 
     transform: translate3d(-5rem, 0, 0);
@@ -79,7 +85,7 @@
   }
 
   @media (max-width: 600px) {
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100 + 1px);
   }
 }
 
