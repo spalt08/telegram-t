@@ -24,7 +24,6 @@ import MessageList from './MessageList';
 import ScrollDownButton from './ScrollDownButton';
 import Composer from './composer/Composer';
 import MobileSearchFooter from './MobileSearchFooter';
-import MobileSearchHeader from './MobileSearchHeader';
 
 import './MiddleColumn.scss';
 
@@ -71,7 +70,6 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       <div id="middle-column-portals" />
       {renderingChatId && (
         <>
-          {IS_MOBILE_SCREEN && <MobileSearchHeader />}
           <div className="messages-layout">
             <MiddleHeader chatId={renderingChatId} />
             <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />

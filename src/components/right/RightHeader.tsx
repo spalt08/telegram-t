@@ -83,7 +83,10 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 }) => {
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
-    runDebouncedForSearch(searchMessages);
+
+    if (query.length) {
+      runDebouncedForSearch(searchMessages);
+    }
   }, [searchMessages, setMessageSearchQuery]);
 
   const handleStickerSearchQueryChange = useCallback((query: string) => {

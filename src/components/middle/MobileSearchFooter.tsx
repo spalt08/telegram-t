@@ -57,22 +57,22 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
 
   const handleMessageSearchQueryChange = useCallback((newQuery: string) => {
     setMessageSearchQuery({ query: newQuery });
-    runDebouncedForSearch(searchMessages);
+
+    if (newQuery.length) {
+      runDebouncedForSearch(searchMessages);
+    }
   }, [searchMessages, setMessageSearchQuery]);
 
   const handleFocus = useCallback(() => {
-    const dummySearchInput = document.querySelector<HTMLInputElement>('.dummy-search-input')!;
-    const targetTop = Number(dummySearchInput.dataset.top);
+    const originalHeight = window.innerHeight;
+    const magicHeader = document.querySelector<HTMLDivElement>('.magic-header')!;
+    const originalTop = magicHeader.getBoundingClientRect().top;
 
     setTimeout(() => {
-      const magicSearchInput = document.querySelector<HTMLDivElement>('.magic-search-input')!;
-      magicSearchInput.style
-        .setProperty('--translate-y', `-${magicSearchInput.getBoundingClientRect().top - targetTop}px`);
+      const reducedHeight = window.innerHeight;
 
-      const newDummyTop = dummySearchInput.getBoundingClientRect().top;
-      const keyboardHeight = targetTop - newDummyTop;
-
-      dummySearchInput.parentElement!.style.transform = `translateY(${keyboardHeight}px)`;
+      magicHeader.style
+        .setProperty('--translate-y', `-${originalTop - (originalHeight - reducedHeight)}px`);
 
       // Disable native up/down buttons
       (document.getElementById('telegram-search-input') as HTMLInputElement).disabled = true;
@@ -84,13 +84,15 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
   const handleBlur = useCallback(() => {
     blur();
 
-    const dummySearchInput = document.querySelector<HTMLInputElement>('.dummy-search-input')!;
-    dummySearchInput.parentElement!.style.transform = '';
-
     (document.getElementById('telegram-search-input') as HTMLInputElement).disabled = false;
 
     closeMessageTextSearch();
   }, [blur, closeMessageTextSearch]);
+
+  const handleCloseSearch = useCallback(() => {
+    document.getElementById('magic-input')!.blur();
+    closeMessageTextSearch();
+  }, [closeMessageTextSearch]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -125,14 +127,23 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="MobileSearchFooter" className={buildClassName(isFocused && 'focused')}>
-      <SearchInput
-        className="magic-search-input"
-        inputId="magic-input"
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        value={query}
-        onChange={handleMessageSearchQueryChange}
-      />
+      <div className="magic-header">
+        <Button
+          size="smaller"
+          round
+          color="translucent"
+          onClick={handleCloseSearch}
+        >
+          <i className="icon-back" />
+        </Button>
+        <SearchInput
+          inputId="magic-input"
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          value={query}
+          onChange={handleMessageSearchQueryChange}
+        />
+      </div>
       <div className="counter">
         {foundIds && foundIds.length ? (
           `${focusedIndex + 1} of ${totalCount}`
@@ -147,7 +158,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         onClick={handleUp}
-        disabled={!foundIds || (focusedIndex === foundIds.length - 1)}
+        disabled={!foundIds || !foundIds.length || focusedIndex === foundIds.length - 1}
       >
         <i className="icon-up" />
       </Button>
@@ -156,7 +167,7 @@ const MobileSearchFooter: FC<StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         onClick={handleDown}
-        disabled={!foundIds || (focusedIndex === 0)}
+        disabled={!foundIds || !foundIds.length || focusedIndex === 0}
       >
         <i className="icon-down" />
       </Button>

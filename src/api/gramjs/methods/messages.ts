@@ -548,8 +548,13 @@ export async function searchMessages({
       filter = new GramJs.InputMessagesFilterMusic();
       break;
     case 'text':
-    default:
+    default: {
+      if (!query) {
+        return undefined;
+      }
+
       filter = new GramJs.InputMessagesFilterEmpty();
+    }
   }
 
   const result = await invokeRequest(new GramJs.messages.Search({

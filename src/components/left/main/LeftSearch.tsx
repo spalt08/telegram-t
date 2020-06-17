@@ -141,7 +141,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             {senderName && (
               <span className="sender-name">{renderText(senderName)}</span>
             )}
-            {renderText(text, ['emoji', 'highlight'], { query: searchQuery })}
+            {renderText(text, ['emoji', 'highlight'], { highlight: searchQuery })}
           </p>
         </div>
       </ListItem>

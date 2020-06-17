@@ -20,7 +20,7 @@ import {
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
-  selectIsMessageFocused,
+  selectIsMessageFocused, selectCurrentMessageSearch,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -92,6 +92,7 @@ type StateProps = {
   isSelectedToForward?: boolean;
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
+  highlight?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -129,6 +130,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isSelectedToForward,
   isChatWithSelf,
   lastSyncTime,
+  highlight,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
@@ -173,7 +175,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage,
   } = getMessageContent(message);
-  const textParts = renderMessageText(message);
+  const textParts = renderMessageText(message, highlight);
   const hasMedia = (
     getMessageMediaHash(message, 'inline')
     || hasMessageLocalBlobUrl(message)
@@ -466,6 +468,9 @@ export default memo(withGlobal<OwnProps>(
     const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
+    const messageSearch = !IS_MOBILE_SCREEN && selectCurrentMessageSearch(global);
+    const highlight = (messageSearch && messageSearch.currentType === 'text' && messageSearch.query) || undefined;
+
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       originSender,
@@ -480,6 +485,7 @@ export default memo(withGlobal<OwnProps>(
       // Heavy inline videos are never cached and should be re-fetched after connection.
       // Audio on mobiles are also started automatically on page load.
       ...((isVideo || isAudio) && { lastSyncTime }),
+      highlight,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
