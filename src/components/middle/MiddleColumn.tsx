@@ -7,7 +7,7 @@ import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN } from '../../config';
-import { IS_MOBILE } from '../../util/environment';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 import { selectChat, selectCurrentMessageSearch, selectUser } from '../../modules/selectors';
 import {
   getCanPostInChat,
@@ -71,7 +71,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       <div id="middle-column-portals" />
       {renderingChatId && (
         <>
-          {IS_MOBILE && <MobileSearchHeader />}
+          {IS_MOBILE_SCREEN && <MobileSearchHeader />}
           <div className="messages-layout">
             <MiddleHeader chatId={renderingChatId} />
             <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
@@ -83,7 +83,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
             )}
             <ScrollDownButton show={showFab} />
           </div>
-          {IS_MOBILE && <MobileSearchFooter />}
+          {IS_MOBILE_SCREEN && <MobileSearchFooter />}
         </>
       )}
     </div>
@@ -106,7 +106,7 @@ export default memo(withGlobal(
 
     const { pinnedMessageId } = (target && target.fullInfo) || {};
 
-    const mobileSearch = IS_MOBILE && selectCurrentMessageSearch(global);
+    const mobileSearch = IS_MOBILE_SCREEN && selectCurrentMessageSearch(global);
     const isMobileSearch = Boolean(mobileSearch && mobileSearch.currentType === 'text');
 
     return {

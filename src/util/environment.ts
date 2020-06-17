@@ -24,7 +24,7 @@ export function getPlatform() {
 
 export const PLATFORM_ENV = getPlatform();
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
-export const IS_MOBILE = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
+export const IS_MOBILE_SCREEN = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 export const IS_VOICE_RECORDING_SUPPORTED = (navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices && (
   window.AudioContext || (window as any).webkitAudioContext
 ));
@@ -33,7 +33,6 @@ export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && ['Mac OS', 'iOS'].includes(PLA
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
 export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
-export const IS_MOBILE_SCREEN = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
 let isWebpSupportedCache: boolean | undefined;
 
