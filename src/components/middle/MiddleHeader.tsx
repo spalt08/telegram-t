@@ -197,24 +197,26 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         )}
       </div>
 
-      {pinnedMessage && !canSubscribeToChat && !audioMessage && (
-        <HeaderPinnedMessage
-          message={pinnedMessage}
-          onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
-          onClick={handlePinnedMessageClick}
+      <div className="header-secondary-wrapper">
+        {pinnedMessage && !canSubscribeToChat && !audioMessage && (
+          <HeaderPinnedMessage
+            message={pinnedMessage}
+            onUnpinMessage={canUnpin ? handleUnpinMessage : undefined}
+            onClick={handlePinnedMessageClick}
+          />
+        )}
+        {!canSubscribeToChat && audioMessage && (
+          <AudioPlayer key={getMessageKey(audioMessage)} message={audioMessage} />
+        )}
+        <HeaderActions
+          chatId={chatId}
+          isChannel={isChannel}
+          canSubscribe={canSubscribeToChat}
+          isRightColumnShown={isRightColumnShown}
+          onSearchClick={handleSearchClick}
+          onSubscribeChannel={handleChannelSubscribeClick}
         />
-      )}
-      {!canSubscribeToChat && audioMessage && (
-        <AudioPlayer key={getMessageKey(audioMessage)} message={audioMessage} />
-      )}
-      <HeaderActions
-        chatId={chatId}
-        isChannel={isChannel}
-        canSubscribe={canSubscribeToChat}
-        isRightColumnShown={isRightColumnShown}
-        onSearchClick={handleSearchClick}
-        onSubscribeChannel={handleChannelSubscribeClick}
-      />
+      </div>
     </div>
   );
 };
