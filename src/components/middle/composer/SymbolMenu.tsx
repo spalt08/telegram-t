@@ -1,11 +1,14 @@
 import React, {
-  FC, memo, useState, useRef, useCallback, useEffect,
+  FC, memo, useState, useRef, useCallback, useEffect, useLayoutEffect,
 } from '../../../lib/teact/teact';
 
 import { ApiSticker, ApiVideo } from '../../../api/types';
 
 import { IAllowedAttachmentOptions } from '../../../modules/helpers';
-import { IS_SMOOTH_SCROLL_SUPPORTED, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_SMOOTH_SCROLL_SUPPORTED, IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../../../util/environment';
+import useShowTransition from '../../../hooks/useShowTransition';
+import buildClassName from '../../../util/buildClassName';
+import { fastRaf } from '../../../util/schedulers';
 
 import Menu from '../../ui/Menu';
 import Transition from '../../ui/Transition';
@@ -13,10 +16,12 @@ import EmojiPicker from './EmojiPicker';
 import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
 import SymbolMenuFooter, { SymbolMenuTabs, SYMBOL_MENU_TAB_TITLES } from './SymbolMenuFooter';
+import Portal from '../../ui/Portal';
 
 import './SymbolMenu.scss';
 
 const MENU_CLOSE_TIMEOUT = 250;
+const SYMBOL_MENU_CLOSE_TIMEOUT = 350;
 const TRANSITION_NAME = IS_SMOOTH_SCROLL_SUPPORTED ? 'scroll-slide' : 'slide';
 
 let closeTimeout: number | undefined;
@@ -40,6 +45,8 @@ const SymbolMenu: FC<OwnProps> = ({
   const isActivated = useRef(false);
   const isMouseInside = useRef(false);
 
+  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
+
   if (!isActivated.current && isOpen) {
     isActivated.current = true;
   }
@@ -57,6 +64,24 @@ const SymbolMenu: FC<OwnProps> = ({
       }, MENU_CLOSE_TIMEOUT * 2);
     }
   }, [isOpen, onClose]);
+
+  useLayoutEffect(() => {
+    if (!IS_MOBILE_SCREEN) {
+      return;
+    }
+
+    if (isOpen) {
+      document.body.classList.add('enable-symbol-menu-transforms');
+      document.body.classList.add('is-symbol-menu-open');
+    } else {
+      fastRaf(() => {
+        document.body.classList.remove('is-symbol-menu-open');
+        setTimeout(() => {
+          document.body.classList.add('enable-symbol-menu-transforms');
+        }, SYMBOL_MENU_CLOSE_TIMEOUT);
+      });
+    }
+  }, [isOpen]);
 
   const handleMouseEnter = useCallback(() => {
     isMouseInside.current = true;
@@ -109,19 +134,13 @@ const SymbolMenu: FC<OwnProps> = ({
     return undefined;
   }
 
-  return (
-    <Menu
-      isOpen={isOpen}
-      positionX="left"
-      positionY="bottom"
-      onClose={onClose}
-      className="SymbolMenu"
-      onCloseAnimationEnd={onClose}
-      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
-      noCloseOnBackdrop={!IS_TOUCH_ENV}
-    >
-      <div className="SymbolMenu-main">
+  function stopPropagation(event: any) {
+    event.stopPropagation();
+  }
+
+  const content = (
+    <>
+      <div className="SymbolMenu-main" onClick={stopPropagation}>
         {isActivated.current && (
           <Transition name={TRANSITION_NAME} activeKey={activeTab} renderCount={SYMBOL_MENU_TAB_TITLES.length}>
             {renderContent}
@@ -134,6 +153,41 @@ const SymbolMenu: FC<OwnProps> = ({
         onRemoveSymbol={onRemoveSymbol}
         onSearchOpen={onSearchOpen}
       />
+    </>
+  );
+
+  if (IS_MOBILE_SCREEN) {
+    if (!shouldRender) {
+      return undefined;
+    }
+
+    const className = buildClassName(
+      'SymbolMenu mobile-menu',
+      transitionClassNames,
+    );
+
+    return (
+      <Portal>
+        <div className={className}>
+          {content}
+        </div>
+      </Portal>
+    );
+  }
+
+  return (
+    <Menu
+      isOpen={isOpen}
+      positionX="left"
+      positionY="bottom"
+      onClose={onClose}
+      className="SymbolMenu"
+      onCloseAnimationEnd={onClose}
+      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCloseOnBackdrop={!IS_TOUCH_ENV}
+    >
+      {content}
     </Menu>
   );
 };

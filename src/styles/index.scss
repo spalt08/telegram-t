@@ -48,6 +48,11 @@ body.scrollable {
   visibility: hidden;
 }
 
+.no-selection {
+  user-select: none;
+  -webkit-user-select: none !important;
+}
+
 /*
  See the article for more information on this visually-hidden pattern.
  https://snook.ca/archives/html_and_css/hiding-content-for-accessibility

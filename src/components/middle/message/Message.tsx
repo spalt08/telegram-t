@@ -46,6 +46,7 @@ import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
+import { IS_MOBILE_SCREEN } from '../../../util/environment';
 
 import Avatar from '../../common/Avatar';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -106,6 +107,10 @@ const FOCUS_MAX_OFFSET = 2000;
 const RELOCATED_FOCUS_OFFSET = 1500;
 const NBSP = '\u00A0';
 
+function getIsMenuDisabled() {
+  return IS_MOBILE_SCREEN && window.document.body.classList.contains('enable-symbol-menu-transforms');
+}
+
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
   album,
@@ -142,7 +147,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(elementRef);
+  } = useContextMenuHandlers(elementRef, getIsMenuDisabled);
 
   const { chatId, id: messageId } = message;
 

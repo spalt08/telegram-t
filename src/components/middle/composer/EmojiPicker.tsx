@@ -17,6 +17,8 @@ import findInViewport from '../../../util/findInViewport';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import { IS_MOBILE_SCREEN } from '../../../util/environment';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -68,13 +70,38 @@ async function ensureEmojiData() {
 
 const runThrottledForScroll = throttle((cb) => cb(), 500, false);
 
+// For some reason, parallel `scrollIntoView` executions are conflicting.
+const HEADER_SCROLL_DELAY = 500;
+const HEADER_BUTTON_WIDTH = 42; // px. Includes margins
+
 const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   className, onEmojiSelect, recentEmojis, addRecentEmoji,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
+  const headerRef = useRef<HTMLDivElement>();
+
   const [categories, setCategories] = useState<EmojiCategoryData[]>();
   const [emojis, setEmojis] = useState<AllEmojis>();
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+
+  useHorizontalScroll(headerRef.current, !IS_MOBILE_SCREEN);
+
+  // Scroll header when active set updates
+  useEffect(() => {
+    if (!categories) {
+      return;
+    }
+
+    setTimeout(() => {
+      const header = headerRef.current!;
+      const newLeft = activeCategoryIndex * HEADER_BUTTON_WIDTH - header.offsetWidth / 2 + HEADER_BUTTON_WIDTH / 2;
+
+      header.scrollTo({
+        left: newLeft,
+        behavior: 'smooth',
+      });
+    }, HEADER_SCROLL_DELAY);
+  }, [categories, activeCategoryIndex]);
 
   const allCategories = useMemo(() => {
     if (!categories) {
@@ -168,12 +195,12 @@ const EmojiPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className={containerClassName}>
-      <div className="EmojiPicker-header">
+      <div ref={headerRef} className="EmojiPicker-header">
         {allCategories.map(renderCategoryButton)}
       </div>
       <div
         ref={containerRef}
-        className="EmojiPicker-main no-scroll"
+        className="EmojiPicker-main no-selection no-scroll"
         onScroll={handleScroll}
         onMouseDown={preventEvent}
       >

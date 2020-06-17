@@ -43,10 +43,6 @@
     }
   }
 
-  &.no-selection {
-    user-select: none;
-  }
-
   &.has-menu-open > button {
     background-color: var(--color-chat-hover);
   }

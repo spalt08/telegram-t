@@ -98,6 +98,10 @@ $color-selection: #3993fb;
   --right-column-width: 26.5rem;
   --header-height: 3.625rem;
 
+  --symbol-menu-width: 26.25rem;
+  --symbol-menu-height: 23.25rem;
+  --symbol-menu-footer-height: 3rem;
+
   @media (min-width: 1276px) and (max-width: 1680px) {
     --right-column-width: 25vw;
   }
@@ -105,6 +109,8 @@ $color-selection: #3993fb;
   @media (max-width: 600px) {
     --right-column-width: 100vw;
     --header-height: 3.5rem;
+    --symbol-menu-width: 100vw;
+    --symbol-menu-height: 14.6875rem;
   }
 
   --z-ui-loader-mask: 2000;

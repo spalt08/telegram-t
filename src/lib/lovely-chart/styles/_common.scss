@@ -4,9 +4,9 @@
   position: relative;
   text-align: left;
   overflow: hidden;
+  user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  -webkit-touch-callout: none;
 
   &.lovely-chart--state-invisible > * {
     display: none;

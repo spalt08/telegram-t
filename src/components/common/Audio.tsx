@@ -197,7 +197,7 @@ function renderAudio(
       <p className="title">{renderText(title || fileName)}</p>
       {showSeekline && (
         <div
-          className="seekline"
+          className="seekline no-selection"
           onMouseDown={handleStartSeek}
           onMouseMove={handleSeek}
           onMouseUp={handleStopSeek}

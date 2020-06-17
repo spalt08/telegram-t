@@ -8,6 +8,13 @@
   overflow: auto;
   overflow-x: hidden;
 
+  @media (pointer: coarse) {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    touch-callout: none;
+  }
+
   &.no-avatars .Message > .Avatar {
     display: none;
   }
@@ -202,6 +209,20 @@
     body.message-list-no-transform.is-right-column-shown & {
       transform: none;
       left: calc(var(--right-column-width) / -2);
+    }
+  }
+
+  @media (max-width: 600px) {
+    body.enable-symbol-menu-transforms {
+      transform: translate3d(0, 0, 0);
+    }
+
+    body:not(.transition-locked) & {
+      transition: transform var(--layer-transition);
+    }
+
+    body.is-symbol-menu-open & {
+      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
     }
   }
 }

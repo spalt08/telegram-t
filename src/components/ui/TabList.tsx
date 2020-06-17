@@ -53,7 +53,7 @@ const TabList: FC<OwnProps> = ({ tabs, activeTab, onSwitchTab }) => {
   }, [activeTab]);
 
   return (
-    <div className="TabList" ref={containerRef}>
+    <div className="TabList no-selection" ref={containerRef}>
       {tabs.map((tab, i) => (
         <Tab
           key={tab.title}

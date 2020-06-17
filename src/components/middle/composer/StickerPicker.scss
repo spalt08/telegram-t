@@ -2,10 +2,13 @@
   height: 100%;
 
   &-main {
-    position: relative;
-    height: 20.25rem;
+    height: calc(100% - 3rem);
     overflow-y: auto;
     padding: 0.5rem;
+
+    @media (max-width: 600px) {
+      padding: 0.5rem 0.25rem;
+    }
   }
 
   &-header {
@@ -14,7 +17,6 @@
     padding: 0.125rem 0;
     overflow-x: auto;
     overflow-y: hidden;
-    user-select: none;
     white-space: nowrap;
     box-shadow: 0 0 2px rgba(114, 114, 114, 0.25);
 

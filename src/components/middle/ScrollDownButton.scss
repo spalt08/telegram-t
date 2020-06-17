@@ -1,6 +1,8 @@
 .ScrollDownButton {
+  --base-bottom-pos: 6rem;
+
   position: absolute;
-  bottom: 6rem;
+  bottom: var(--base-bottom-pos);
   right: 1rem;
   opacity: 0;
   transform: translateY(4.5rem);
@@ -44,7 +46,7 @@
   }
 
   &.bottom-padding {
-    bottom: 2rem;
+    --base-bottom-pos: 2rem;
   }
 
   &.revealed {
@@ -70,5 +72,11 @@
     color: white;
 
     pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    body.is-symbol-menu-open & {
+      bottom: calc(var(--base-bottom-pos) + var(--symbol-menu-height) + var(--symbol-menu-footer-height));
+    }
   }
 }

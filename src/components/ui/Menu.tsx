@@ -45,7 +45,7 @@ const Menu: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('Menu', className)}
+      className={buildClassName('Menu no-selection', className)}
       onKeyDown={isOpen ? onKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}

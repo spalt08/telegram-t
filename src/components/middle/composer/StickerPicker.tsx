@@ -226,7 +226,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     <div className={fullClassName}>
       <div
         ref={headerRef}
-        className="StickerPicker-header"
+        className="StickerPicker-header no-selection"
       >
         {allSets.map(renderCover)}
       </div>

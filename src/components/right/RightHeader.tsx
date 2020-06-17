@@ -5,7 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import { pick } from '../../util/iteratees';
 import buildClassName from '../../util/buildClassName';
@@ -81,8 +81,6 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   searchMessages,
   toggleStatistics,
 }) => {
-  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
-
   const handleMessageSearchQueryChange = useCallback((query: string) => {
     setMessageSearchQuery({ query });
     runDebouncedForSearch(searchMessages);
@@ -183,7 +181,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     }
   }
 
-  const isBackButton = isMobile || contentKey === HeaderContent.SharedMedia
+  const isBackButton = IS_MOBILE_SCREEN || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
     || contentKey === HeaderContent.StickerSearch;
 

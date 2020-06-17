@@ -91,13 +91,13 @@ const ListItem: FC<OwnProps> = (props) => {
   }, [disabled, onClick]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (inactive) {
+    if (inactive || IS_TOUCH_ENV) {
       return;
     }
-    if (contextActions) {
+    if (contextActions && (e.button === 2 || !onClick)) {
       handleBeforeContextMenu(e);
     }
-    if (!IS_TOUCH_ENV && e.button === 0) {
+    if (e.button === 0) {
       if (!onClick) {
         handleContextMenu(e);
       } else {
@@ -107,7 +107,7 @@ const ListItem: FC<OwnProps> = (props) => {
   }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
 
   const fullClassName = buildClassName(
-    'ListItem',
+    'ListItem no-selection',
     className,
     ripple && 'has-ripple',
     narrow && 'narrow',

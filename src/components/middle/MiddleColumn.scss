@@ -32,6 +32,9 @@
     }
   }
 
+  @media (max-width: 600px) {
+    overflow: hidden;
+  }
 
   .messages-layout {
     display: flex;

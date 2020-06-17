@@ -47,8 +47,12 @@ const SymbolMenuFooter: FC<OwnProps> = ({
     onSearchOpen(activeTab === SymbolMenuTabs.Stickers ? 'stickers' : 'gifs');
   }, [activeTab, onSearchOpen]);
 
+  function stopPropagation(event: any) {
+    event.stopPropagation();
+  }
+
   return (
-    <div className="SymbolMenu-footer">
+    <div className="SymbolMenu-footer" onClick={stopPropagation}>
       {activeTab !== SymbolMenuTabs.Emoji && (
         <Button
           className="symbol-search-button"

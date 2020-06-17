@@ -81,7 +81,7 @@ const RangeSlider: FC<OwnProps> = ({
           <div className="slider-options">
             {options.map((option, index) => (
               <div
-                className={buildClassName('slider-option', index === value && 'active')}
+                className={buildClassName('slider-option no-selection', index === value && 'active')}
                 onClick={() => onChange(index)}
               >
                 {option}

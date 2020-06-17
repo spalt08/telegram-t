@@ -15,7 +15,7 @@ import {
 } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { IS_EMOJI_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED } from '../../../util/environment';
+import { IS_EMOJI_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED, IS_MOBILE_SCREEN } from '../../../util/environment';
 import { selectChatMessage, selectChat, selectIsChatWithBot } from '../../../modules/selectors';
 import { getAllowedAttachmentOptions, getChatSlowModeOptions } from '../../../modules/helpers';
 import { formatVoiceRecordDuration } from '../../../util/dateFormat';
@@ -24,6 +24,7 @@ import parseMessageInput from './helpers/parseMessageInput';
 import buildAttachment from './helpers/buildAttachment';
 import renderText from '../../common/helpers/renderText';
 import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
+import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharacterOutsideSelection';
 import { pick } from '../../../util/iteratees';
 
 import useFlag from '../../../hooks/useFlag';
@@ -69,10 +70,6 @@ const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 const MAX_NESTING_PARENTS = 5;
 // When voice recording is active, composer placeholder will hide to prevent overlapping
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
-
-const removeSymbol = () => {
-  document.execCommand('delete', false);
-};
 
 const Composer: FC<StateProps & DispatchProps> = ({
   editedMessage,
@@ -148,13 +145,29 @@ const Composer: FC<StateProps & DispatchProps> = ({
       requestAnimationFrame(() => {
         focusEditableElement(messageInput);
       });
+    } else if (IS_MOBILE_SCREEN) {
+      setHtml(`${htmlRef.current!}${newHtml}`);
     }
+  }, []);
+
+  const removeSymbol = useCallback(() => {
+    const selection = window.getSelection()!;
+
+    if (selection.rangeCount) {
+      const selectionRange = selection.getRangeAt(0);
+      if (isSelectionInsideInput(selectionRange)) {
+        document.execCommand('delete', false);
+        return;
+      }
+    }
+
+    setHtml(deleteLastCharacterOutsideSelection(htmlRef.current!));
   }, []);
 
   const resetComposer = useCallback(() => {
     setHtml('');
     setAttachments([]);
-    closeSymbolMenu(false);
+    closeSymbolMenu();
   }, [closeSymbolMenu]);
 
   // Handle chat change
@@ -275,6 +288,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       : MainButtonState.Record;
 
   const mainButtonHandler = useCallback(() => {
+    closeSymbolMenu();
     switch (mainButtonState) {
       case MainButtonState.Send:
         handleSend();
@@ -288,7 +302,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
       default:
         break;
     }
-  }, [mainButtonState, handleSend, startRecordingVoice, handleEditComplete]);
+  }, [mainButtonState, handleSend, startRecordingVoice, handleEditComplete, closeSymbolMenu]);
 
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
     && !allowedAttachmentOptions.canAttachMedia;
@@ -331,15 +345,28 @@ const Composer: FC<StateProps & DispatchProps> = ({
           <WebPagePreview messageText={!attachments.length ? html : ''} />
         )}
         <div className="message-input-wrapper">
-          <ResponsiveHoverButton
-            className={`${isSymbolMenuOpen ? 'activated' : ''}`}
-            round
-            color="translucent"
-            onActivate={openSymbolMenu}
-            ariaLabel="Choose emoji, sticker or GIF"
-          >
-            <i className="icon-smile" />
-          </ResponsiveHoverButton>
+          {IS_MOBILE_SCREEN ? (
+            <Button
+              className={`mobile-symbol-menu-button ${isSymbolMenuOpen ? 'menu-opened' : ''}`}
+              round
+              color="translucent"
+              onClick={isSymbolMenuOpen ? closeSymbolMenu : openSymbolMenu}
+              ariaLabel="Choose emoji, sticker or GIF"
+            >
+              <i className="icon-smile" />
+              <i className="icon-keyboard" />
+            </Button>
+          ) : (
+            <ResponsiveHoverButton
+              className={`${isSymbolMenuOpen ? 'activated' : ''}`}
+              round
+              color="translucent"
+              onActivate={openSymbolMenu}
+              ariaLabel="Choose emoji, sticker or GIF"
+            >
+              <i className="icon-smile" />
+            </ResponsiveHoverButton>
+          )}
           <MessageInput
             id="message-input-text"
             html={!attachments.length ? html : ''}
