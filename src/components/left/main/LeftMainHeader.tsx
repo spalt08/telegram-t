@@ -151,6 +151,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         </MenuItem>
       </DropdownMenu>
       <SearchInput
+        inputId="telegram-search-input"
         value={contactsFilter || searchQuery}
         focused={isSearchFocused}
         isLoading={isLoading}

@@ -35,7 +35,7 @@ export function replaceMessageSearchResults(
   global: GlobalState,
   chatId: number,
   type: ApiMessageSearchType,
-  foundIds: number[],
+  foundIds?: number[],
   totalCount?: number,
   nextOffsetId?: number,
 ): GlobalState {

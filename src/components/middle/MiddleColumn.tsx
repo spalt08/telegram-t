@@ -6,7 +6,9 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { GlobalActions } from '../../global/types';
 import { ApiChat, ApiUser } from '../../api/types';
 
-import { selectChat, selectUser } from '../../modules/selectors';
+import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN } from '../../config';
+import { IS_MOBILE } from '../../util/environment';
+import { selectChat, selectCurrentMessageSearch, selectUser } from '../../modules/selectors';
 import {
   getCanPostInChat,
   getMessageSendingRestrictionReason,
@@ -16,12 +18,13 @@ import {
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
 import usePrevious from '../../hooks/usePrevious';
-import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN } from '../../config';
 
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
 import ScrollDownButton from './ScrollDownButton';
 import Composer from './composer/Composer';
+import MobileSearchFooter from './MobileSearchFooter';
+import MobileSearchHeader from './MobileSearchHeader';
 
 import './MiddleColumn.scss';
 
@@ -30,6 +33,7 @@ type StateProps = {
   canPost?: boolean;
   messageSendingRestrictionReason?: string;
   hasPinnedMessage?: boolean;
+  isMobileSearch?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
@@ -40,6 +44,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   messageSendingRestrictionReason,
   hasPinnedMessage,
   openChat,
+  isMobileSearch,
 }) => {
   const [showFab, setShowFab] = useState(false);
   const prevChatId = usePrevious(openChatId, true);
@@ -65,17 +70,21 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
     <div id="MiddleColumn" className={hasPinnedMessage ? 'has-pinned-message' : undefined}>
       <div id="middle-column-portals" />
       {renderingChatId && (
-        <div className="messages-layout">
-          <MiddleHeader chatId={renderingChatId} />
-          <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
-          {renderingCanPost && <Composer />}
-          {!renderingCanPost && messageSendingRestrictionReason && (
-            <div className="messaging-disabled">
-              <span>{messageSendingRestrictionReason}</span>
-            </div>
-          )}
-          <ScrollDownButton show={showFab} />
-        </div>
+        <>
+          {IS_MOBILE && <MobileSearchHeader />}
+          <div className="messages-layout">
+            <MiddleHeader chatId={renderingChatId} />
+            <MessageList key={renderingChatId} chatId={renderingChatId} onFabToggle={setShowFab} />
+            {renderingCanPost && !isMobileSearch && <Composer />}
+            {!renderingCanPost && !isMobileSearch && messageSendingRestrictionReason && (
+              <div className="messaging-disabled">
+                <span>{messageSendingRestrictionReason}</span>
+              </div>
+            )}
+            <ScrollDownButton show={showFab} />
+          </div>
+          {IS_MOBILE && <MobileSearchFooter />}
+        </>
       )}
     </div>
   );
@@ -97,11 +106,15 @@ export default memo(withGlobal(
 
     const { pinnedMessageId } = (target && target.fullInfo) || {};
 
+    const mobileSearch = IS_MOBILE && selectCurrentMessageSearch(global);
+    const isMobileSearch = Boolean(mobileSearch && mobileSearch.currentType === 'text');
+
     return {
       openChatId,
       canPost: !chat || getCanPostInChat(chat),
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedMessage: Boolean(pinnedMessageId),
+      isMobileSearch,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),

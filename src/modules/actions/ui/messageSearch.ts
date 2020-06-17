@@ -1,4 +1,5 @@
 import { addReducer } from '../../../lib/teact/teactn';
+
 import { replaceMessageSearchResults, updateMessageSearchType } from '../../reducers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
@@ -19,7 +20,9 @@ addReducer('closeMessageTextSearch', (global) => {
     return undefined;
   }
 
-  return updateMessageSearchType(global, chatId, undefined);
+  let newGlobal = updateMessageSearchType(global, chatId, undefined);
+  newGlobal = replaceMessageSearchResults(newGlobal, chatId, 'text', undefined);
+  return newGlobal;
 });
 
 addReducer('setMessageSearchQuery', (global, actions, payload) => {

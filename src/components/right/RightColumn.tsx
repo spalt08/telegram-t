@@ -39,7 +39,7 @@ type StateProps = {
 
 type DispatchProps = Pick<GlobalActions, (
   'toggleChatInfo' | 'toggleStatistics' | 'openUserInfo' |
-  'closeMessageTextSearch' | 'closeForwardMenu' | 'closePollResults'|
+  'closeMessageTextSearch' | 'closeForwardMenu' | 'closePollResults' |
   'setStickerSearchQuery' | 'setGifSearchQuery'
 )>;
 
@@ -210,7 +210,7 @@ const RightColumn: FC<StateProps & DispatchProps> = ({
         <Transition
           name={shouldSkipTransition ? 'none' : 'zoom-fade'}
           renderCount={TRANSITION_RENDER_COUNT}
-          activeKey={renderedContentKey}
+          activeKey={renderedContentKey as number}
         >
           {renderContent}
         </Transition>

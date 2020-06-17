@@ -12,7 +12,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
-  activeKey: any;
+  activeKey: number;
   name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;

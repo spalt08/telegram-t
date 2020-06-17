@@ -7,23 +7,29 @@ import Loading from './Loading';
 import './SearchInput.scss';
 
 type OwnProps = {
-  value?: string;
   className?: string;
+  inputId?: string;
+  value?: string;
   focused?: boolean;
   isLoading?: boolean;
   placeholder?: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 const SearchInput: FC<OwnProps> = ({
   value,
+  inputId,
   className,
   focused,
   isLoading,
   placeholder = 'Search',
+  disabled,
   onChange,
   onFocus,
+  onBlur,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
 
@@ -48,12 +54,15 @@ const SearchInput: FC<OwnProps> = ({
     <div className={`SearchInput ${className || ''}`}>
       <input
         ref={inputRef}
+        id={inputId}
         type="text"
         placeholder={placeholder}
         className="form-control"
         value={value}
+        disabled={disabled}
         onChange={handleChange}
         onFocus={onFocus}
+        onBlur={onBlur}
       />
       <i className="icon-search" />
       {isLoading && (

@@ -92,6 +92,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeMenu, onSubscribeChannel]);
 
   const handleSearch = useCallback(() => {
+    document.getElementById('magic-input')!.focus();
     onSearchClick();
     closeMenu();
   }, [closeMenu, onSearchClick]);
