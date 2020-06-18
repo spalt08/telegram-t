@@ -90,7 +90,7 @@ const GifSearch: FC<StateProps & DispatchProps> = ({
       {foundResults.length ? (
         foundResults.map(renderSearchResult)
       ) : (
-        <p className="helper-text">
+        <p className="helper-text" key="helper-text">
           {query ? 'Nothing Found' : 'Start typing to search GIFs'}
         </p>
       )}

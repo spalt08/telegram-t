@@ -81,35 +81,34 @@ const Picker: FC<OwnProps> = ({
           placeholder={filterPlaceholder || 'Select chat'}
         />
       </div>
-      <InfiniteScroll
-        className="picker-list custom-scroll optimized-list"
-        items={viewportIds}
-        onLoadMore={getMore}
-      >
-        {viewportIds && viewportIds.length ? (
-          <div teactFastList>
-            {viewportIds.map((id) => (
-              <ListItem
-                key={id}
-                className="chat-item-clickable picker-list-item"
-                onClick={() => handleItemClick(id)}
-                ripple
-              >
-                <Checkbox label="" checked={selectedIds.includes(id)} />
-                {isChatPrivate(id) ? (
-                  <PrivateChatInfo userId={id} />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
-              </ListItem>
-            ))}
-          </div>
-        ) : viewportIds && !viewportIds.length ? (
-          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-        ) : (
-          <Loading />
-        )}
-      </InfiniteScroll>
+
+      {viewportIds && viewportIds.length ? (
+        <InfiniteScroll
+          className="picker-list custom-scroll optimized-list"
+          items={viewportIds}
+          onLoadMore={getMore}
+        >
+          {viewportIds.map((id) => (
+            <ListItem
+              key={id}
+              className="chat-item-clickable picker-list-item"
+              onClick={() => handleItemClick(id)}
+              ripple
+            >
+              <Checkbox label="" checked={selectedIds.includes(id)} />
+              {isChatPrivate(id) ? (
+                <PrivateChatInfo userId={id} />
+              ) : (
+                <GroupChatInfo chatId={id} />
+              )}
+            </ListItem>
+          ))}
+        </InfiniteScroll>
+      ) : viewportIds && !viewportIds.length ? (
+        <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 };

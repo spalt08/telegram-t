@@ -156,6 +156,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       className="LeftSearch custom-scroll"
       items={foundMessages}
       onLoadMore={searchMessagesGlobal}
+      noFastList
     >
       {nothingFound && (
         <div className="search-section">

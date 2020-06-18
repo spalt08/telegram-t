@@ -105,7 +105,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
     || content === LeftColumnContent.Contacts;
 
   return (
-    <div id="LeftMainHeader" className="LeftHeader">
+    <div id="LeftMainHeader" className="left-header">
       <DropdownMenu
         trigger={MainButton}
       >

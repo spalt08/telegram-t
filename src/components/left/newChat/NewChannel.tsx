@@ -73,7 +73,7 @@ const NewChannel: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="NewChannel">
-      <div className="LeftHeader">
+      <div className="left-header">
         <Button
           round
           size="smaller"

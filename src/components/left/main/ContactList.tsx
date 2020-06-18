@@ -72,18 +72,16 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <InfiniteScroll items={viewportIds} onLoadMore={getMore} className="ContactList custom-scroll optimized-list">
       {viewportIds && viewportIds.length ? (
-        <div teactFastList>
-          {viewportIds.map((id) => (
-            <ListItem
-              key={id}
-              className="chat-item-clickable"
-              onClick={() => handleClick(id)}
-              ripple
-            >
-              <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
-            </ListItem>
-          ))}
-        </div>
+        viewportIds.map((id) => (
+          <ListItem
+            key={id}
+            className="chat-item-clickable"
+            onClick={() => handleClick(id)}
+            ripple
+          >
+            <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
+          </ListItem>
+        ))
       ) : viewportIds && !viewportIds.length && Boolean(filter.length) ? (
         <p className="no-results">No contacts matched your search.</p>
       ) : (

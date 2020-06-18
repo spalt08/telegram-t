@@ -1,9 +1,12 @@
 declare const process: NodeJS.Process;
 
 declare namespace React {
-  interface Attributes {
+  interface HTMLAttributes {
     // Optimization for DOM nodes prepends and inserts
     teactFastList?: boolean;
+  }
+
+  interface Attributes {
     // Optimization for DOM nodes reordering. Requires `teactFastList` for parent
     teactOrderKey?: number;
   }

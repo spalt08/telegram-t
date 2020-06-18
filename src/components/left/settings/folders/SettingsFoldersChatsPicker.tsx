@@ -181,22 +181,19 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
       >
         {(!viewportIds || !viewportIds.length || viewportIds.includes(chatIds[0])) && (
           <>
-            <h4 className="settings-item-header">Chat types</h4>
-
+            <h4 key="header1" className="settings-item-header">Chat types</h4>
             {chatTypes.map(renderChatType)}
-
-            <div className="picker-list-divider" />
-
-            <h4 className="settings-item-header">Chats</h4>
+            <div key="divider" className="picker-list-divider" />
+            <h4 key="header2" className="settings-item-header">Chats</h4>
           </>
         )}
 
         {viewportIds && viewportIds.length ? (
           viewportIds.map(renderItem)
         ) : viewportIds && !viewportIds.length ? (
-          <p className="no-results">Sorry, nothing found.</p>
+          <p className="no-results" key="no-results">Sorry, nothing found.</p>
         ) : (
-          <Loading />
+          <Loading key="loading" />
         )}
       </InfiniteScroll>
     </div>

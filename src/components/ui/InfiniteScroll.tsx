@@ -18,6 +18,7 @@ type OwnProps = {
   itemSelector?: string;
   preloadBackwards?: number;
   sensitiveArea?: number;
+  noFastList?: boolean;
   children: any;
 };
 
@@ -36,6 +37,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   itemSelector = DEFAULT_LIST_SELECTOR,
   preloadBackwards = DEFAULT_PRELOAD_BACKWARDS,
   sensitiveArea = DEFAULT_SENSITIVE_AREA,
+  noFastList,
   children,
 }: OwnProps) => {
   let containerRef = useRef<HTMLDivElement>();
@@ -186,7 +188,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   }, [loadMoreBackwards, loadMoreForwards, onScroll, sensitiveArea]);
 
   return (
-    <div ref={containerRef} className={className} onScroll={handleScroll}>
+    <div ref={containerRef} className={className} onScroll={handleScroll} teactFastList={!noFastList}>
       {children}
     </div>
   );

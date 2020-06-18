@@ -106,6 +106,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       items={foundResults}
       preloadBackwards={0}
       onLoadMore={searchMessages}
+      noFastList
     >
       <p className="helper-text">
         {!query ? (
