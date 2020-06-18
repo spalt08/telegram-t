@@ -16,9 +16,10 @@ type RequestStates = {
   reject: () => void;
 };
 
-const DEFAULT_PART_SIZE = 512 * 1024; // 512 kB
+const MB = 1024 * 1024;
+const DEFAULT_PART_SIZE = 0.5 * MB;
+const MAX_END_TO_CACHE = 3 * MB - 1; // We only cache the first 3 MB of each file
 const PART_TIMEOUT = 10000;
-const MAX_END_TO_CACHE = 3 * 1024 * 1024 - 1; // We only cache the first 3 MB of each file
 
 const requestStates: Record<string, RequestStates> = {};
 
@@ -27,8 +28,9 @@ export async function respondForProgressive(e: FetchEvent) {
   const range = e.request.headers.get('range');
   const bytes = /^bytes=(\d+)-(\d+)?$/g.exec(range || '')!;
   const start = Number(bytes[1]);
+  const originalEnd = Number(bytes[2]);
 
-  let end = Number(bytes[2]);
+  let end = originalEnd;
   if (!end || (end - start + 1) > DEFAULT_PART_SIZE) {
     end = start + DEFAULT_PART_SIZE - 1;
   }
@@ -38,7 +40,9 @@ export async function respondForProgressive(e: FetchEvent) {
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
-    console.log('FETCH PROGRESSIVE', cacheKey, 'CACHED:', Boolean(cachedArrayBuffer));
+    console.log(
+      `FETCH PROGRESSIVE ${cacheKey} (request: ${start}-${originalEnd}) CACHED: ${Boolean(cachedArrayBuffer)}`,
+    );
   }
 
   if (cachedArrayBuffer) {
