@@ -29,6 +29,11 @@
       transform: scale(1);
       transform-origin: left center;
       transition: transform var(--layer-transition);
+
+      // Fix content shifting when scrolling chats in Safari
+      @supports (-webkit-backdrop-filter: blur(1px)) {
+        margin: 0;
+      }
     }
 
     body.animation-level-2.is-right-column-shown &::before {

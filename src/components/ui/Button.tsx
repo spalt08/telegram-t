@@ -33,6 +33,7 @@ export type OwnProps = {
   download?: string;
   disabled?: boolean;
   ripple?: boolean;
+  faded?: boolean;
   tabIndex?: number;
 };
 
@@ -61,6 +62,7 @@ const Button: FC<OwnProps> = ({
   download,
   disabled,
   ripple,
+  faded,
   tabIndex,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
@@ -82,6 +84,7 @@ const Button: FC<OwnProps> = ({
     isText && 'text',
     isLoading && 'loading',
     ripple && 'has-ripple',
+    faded && 'faded',
     isClicked && 'clicked',
   );
 

@@ -7,7 +7,7 @@ type IDimensions = {
 
 let windowSize = updateSizes();
 
-function updateSizes(): IDimensions {
+export function updateSizes(): IDimensions {
   const vh = window.innerHeight * 0.01;
 
   document.documentElement.style.setProperty('--vh', `${vh}px`);

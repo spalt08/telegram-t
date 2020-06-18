@@ -57,11 +57,18 @@
     }
   }
 
+  .ListItem-button {
+    i {
+      opacity: 0.9;
+    }
+  }
+
   &.color-primary .ListItem-button {
     color: var(--color-primary);
 
     i {
       opacity: 1;
+      color: inherit;
     }
   }
 }
