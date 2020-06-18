@@ -20,7 +20,8 @@ import {
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
-  selectIsMessageFocused, selectCurrentMessageSearch,
+  selectIsMessageFocused,
+  selectCurrentMessageSearch,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -468,7 +469,7 @@ export default memo(withGlobal<OwnProps>(
     const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
-    const messageSearch = !IS_MOBILE_SCREEN && selectCurrentMessageSearch(global);
+    const messageSearch = selectCurrentMessageSearch(global);
     const highlight = (messageSearch && messageSearch.currentType === 'text' && messageSearch.query) || undefined;
 
     return {
