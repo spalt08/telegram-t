@@ -128,9 +128,9 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
           ))}
         </>
       ) : viewportIds && !viewportIds.length ? (
-        <div className="no-chats">{noChatsText}</div>
+        <div className="no-results" key="no-results">{noChatsText}</div>
       ) : (
-        <Loading />
+        <Loading key="loading" />
       )}
     </InfiniteScroll>
   );
