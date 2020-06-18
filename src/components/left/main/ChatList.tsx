@@ -17,8 +17,6 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 
-import './ChatList.scss';
-
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;

@@ -127,7 +127,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return (
       <ListItem
-        className="search-result-message"
+        className="chat-item-clickable search-result-message"
         onClick={handleClick}
         ripple
       >
@@ -137,12 +137,12 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             <h3>{renderText(getChatTitle(chat, user))}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">
+          <div className="subtitle">
             {senderName && (
               <span className="sender-name">{renderText(senderName)}</span>
             )}
             {renderText(text, ['emoji', 'highlight'], { highlight: searchQuery })}
-          </p>
+          </div>
         </div>
       </ListItem>
     );

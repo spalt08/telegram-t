@@ -31,6 +31,9 @@ type OwnProps = {
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 500;
 
+const MAX_FULL_ITEMS = 10;
+const ALWAYS_FULL_ITEMS_COUNT = 5;
+
 const Picker: FC<OwnProps> = ({
   itemIds,
   selectedIds,
@@ -42,6 +45,7 @@ const Picker: FC<OwnProps> = ({
   onLoadMore,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
+  const shouldMinimize = selectedIds.length > MAX_FULL_ITEMS;
 
   useEffect(() => {
     setTimeout(() => {
@@ -71,8 +75,12 @@ const Picker: FC<OwnProps> = ({
   return (
     <div className="Picker">
       <div className="picker-header custom-scroll">
-        {selectedIds.map((id) => (
-          <PickerSelectedItem chatId={id} onClick={() => handleItemClick(id)} />
+        {selectedIds.map((id, i) => (
+          <PickerSelectedItem
+            chatId={id}
+            isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
+            onClick={() => handleItemClick(id)}
+          />
         ))}
         <InputText
           ref={inputRef}

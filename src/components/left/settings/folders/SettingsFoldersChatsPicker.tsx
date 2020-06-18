@@ -8,6 +8,7 @@ import {
   EXCLUDED_CHAT_TYPES,
   FolderChatType,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 
 import Checkbox from '../../../ui/Checkbox';
 import InputText from '../../../ui/InputText';
@@ -15,11 +16,11 @@ import ListItem from '../../../ui/ListItem';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import PickerSelectedItem from '../../../common/PickerSelectedItem';
-
-import './SettingsFoldersChatsPicker.scss';
-import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import InfiniteScroll from '../../../ui/InfiniteScroll';
 import Loading from '../../../ui/Loading';
+
+import '../../../common/Picker.scss';
+import './SettingsFoldersChatsPicker.scss';
 
 type OwnProps = {
   mode: 'included' | 'excluded';
@@ -152,7 +153,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, chatIds, Boolean(filterValue));
 
   return (
-    <div className="SettingsFoldersChatsPicker">
+    <div className="Picker SettingsFoldersChatsPicker">
       <div className="picker-header custom-scroll">
         {selectedChatTypes.map(renderSelectedChatType)}
         {selectedIds.map((id, i) => (

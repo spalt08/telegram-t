@@ -195,7 +195,7 @@ const Chat: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   const className = buildClassName(
-    'Chat',
+    'Chat chat-item-clickable',
     isChatPrivate(chatId) ? 'private' : 'group',
     isSelected && 'selected',
   );

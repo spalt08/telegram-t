@@ -112,7 +112,7 @@ const NewGroupStep2: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <div className="group-members-list custom-scroll">
           {memberIds.map((id) => (
-            <ListItem className="chat-item-clickable">
+            <ListItem inactive className="chat-item-clickable">
               <PrivateChatInfo userId={id} />
             </ListItem>
           ))}
