@@ -1,9 +1,10 @@
-import { FC } from './lib/teact/teact';
+import { FC, useEffect } from './lib/teact/teact';
 import React, { withGlobal } from './lib/teact/teactn';
 
 import { GlobalState } from './global/types';
 
 import { pick } from './util/iteratees';
+import { updateSizes } from './util/windowSize';
 
 import Auth from './components/auth/Auth';
 import UiLoader from './components/common/UiLoader';
@@ -13,6 +14,9 @@ import Main from './components/Main.async';
 type StateProps = Pick<GlobalState, 'authState' | 'authIsSessionRemembered'>;
 
 const App: FC<StateProps> = ({ authState, authIsSessionRemembered }) => {
+  useEffect(() => {
+    updateSizes();
+  }, []);
   // return <Test />;
 
   if (authState) {

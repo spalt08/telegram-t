@@ -36,6 +36,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
         onClick={() => onSwitchTab(tab)}
         ariaLabel={SYMBOL_MENU_TAB_TITLES[tab]}
         round
+        faded
         color="translucent"
       >
         <i className={SYMBOL_MENU_TAB_ICONS[tab]} />
@@ -58,6 +59,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           className="symbol-search-button"
           ariaLabel={activeTab === SymbolMenuTabs.Stickers ? 'Search Stickers' : 'Search GIFs'}
           round
+          faded
           color="translucent"
           onClick={handleSearchOpen}
         >
@@ -75,6 +77,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           onClick={onRemoveSymbol}
           ariaLabel="Remove Symbol"
           round
+          faded
           color="translucent"
         >
           <i className="icon-delete-left" />

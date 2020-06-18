@@ -31,6 +31,9 @@ type OwnProps = {
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 500;
 
+const MAX_FULL_ITEMS = 10;
+const ALWAYS_FULL_ITEMS_COUNT = 5;
+
 const Picker: FC<OwnProps> = ({
   itemIds,
   selectedIds,
@@ -42,6 +45,7 @@ const Picker: FC<OwnProps> = ({
   onLoadMore,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
+  const shouldMinimize = selectedIds.length > MAX_FULL_ITEMS;
 
   useEffect(() => {
     setTimeout(() => {
@@ -71,8 +75,13 @@ const Picker: FC<OwnProps> = ({
   return (
     <div className="Picker">
       <div className="picker-header custom-scroll">
-        {selectedIds.map((id) => (
-          <PickerSelectedItem chatId={id} onClick={() => handleItemClick(id)} />
+        {selectedIds.map((id, i) => (
+          <PickerSelectedItem
+            chatId={id}
+            isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
+            onClick={handleItemClick}
+            clickArg={id}
+          />
         ))}
         <InputText
           ref={inputRef}
@@ -81,35 +90,34 @@ const Picker: FC<OwnProps> = ({
           placeholder={filterPlaceholder || 'Select chat'}
         />
       </div>
-      <InfiniteScroll
-        className="picker-list custom-scroll optimized-list"
-        items={viewportIds}
-        onLoadMore={getMore}
-      >
-        {viewportIds && viewportIds.length ? (
-          <div teactFastList>
-            {viewportIds.map((id) => (
-              <ListItem
-                key={id}
-                className="chat-item-clickable picker-list-item"
-                onClick={() => handleItemClick(id)}
-                ripple
-              >
-                <Checkbox label="" checked={selectedIds.includes(id)} />
-                {isChatPrivate(id) ? (
-                  <PrivateChatInfo userId={id} />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
-              </ListItem>
-            ))}
-          </div>
-        ) : viewportIds && !viewportIds.length ? (
-          <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
-        ) : (
-          <Loading />
-        )}
-      </InfiniteScroll>
+
+      {viewportIds && viewportIds.length ? (
+        <InfiniteScroll
+          className="picker-list custom-scroll optimized-list"
+          items={viewportIds}
+          onLoadMore={getMore}
+        >
+          {viewportIds.map((id) => (
+            <ListItem
+              key={id}
+              className="chat-item-clickable picker-list-item"
+              onClick={() => handleItemClick(id)}
+              ripple
+            >
+              <Checkbox label="" checked={selectedIds.includes(id)} />
+              {isChatPrivate(id) ? (
+                <PrivateChatInfo userId={id} />
+              ) : (
+                <GroupChatInfo chatId={id} />
+              )}
+            </ListItem>
+          ))}
+        </InfiniteScroll>
+      ) : viewportIds && !viewportIds.length ? (
+        <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 };

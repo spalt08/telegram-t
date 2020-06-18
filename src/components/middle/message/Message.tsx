@@ -20,7 +20,8 @@ import {
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
-  selectIsMessageFocused, selectCurrentMessageSearch,
+  selectIsMessageFocused,
+  selectCurrentMessageSearch,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -204,17 +205,17 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     hasReply, customShape, isLastInGroup,
   });
 
-  const handleSenderClick = useCallback((chatOrUser?: ApiUser | ApiChat) => {
-    if (!chatOrUser) {
+  const handleSenderClick = useCallback(() => {
+    if (!sender) {
       return;
     }
 
-    if (isChatPrivate(chatOrUser.id)) {
-      openUserInfo({ id: chatOrUser.id });
+    if (isChatPrivate(sender.id)) {
+      openUserInfo({ id: sender.id });
     } else {
-      openChat({ id: chatOrUser.id });
+      openChat({ id: sender.id });
     }
-  }, [openUserInfo, openChat]);
+  }, [sender, openUserInfo, openChat]);
 
   const handleReplyClick = useCallback((): void => {
     focusMessage({ chatId, messageId: message.replyToMessageId });
@@ -259,7 +260,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     );
 
     return (
-      <div className="message-title interactive" onClick={() => handleSenderClick(userOrChat)}>
+      <div className="message-title interactive" onClick={handleSenderClick}>
         {renderText(senderTitle || NBSP)}
       </div>
     );
@@ -394,7 +395,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
         <Avatar
           size="small"
           user={sender}
-          onClick={() => handleSenderClick(sender)}
+          onClick={handleSenderClick}
         />
       )}
       <div
@@ -468,7 +469,7 @@ export default memo(withGlobal<OwnProps>(
     const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
-    const messageSearch = !IS_MOBILE_SCREEN && selectCurrentMessageSearch(global);
+    const messageSearch = selectCurrentMessageSearch(global);
     const highlight = (messageSearch && messageSearch.currentType === 'text' && messageSearch.query) || undefined;
 
     return {

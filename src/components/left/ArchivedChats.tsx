@@ -12,7 +12,7 @@ export type OwnProps = {
 const ArchivedChats: FC<OwnProps> = ({ onReset }) => {
   return (
     <div className="ArchivedChats">
-      <div className="LeftHeader">
+      <div className="left-header">
         <Button
           round
           size="smaller"

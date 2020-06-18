@@ -21,12 +21,6 @@ type DispatchProps = Pick<GlobalActions, 'initApi'>;
 const Auth: FC<StateProps & DispatchProps> = ({ authState, initApi }) => {
   useEffect(() => {
     initApi();
-
-    document.body.classList.add('scrollable');
-
-    return () => {
-      document.body.classList.remove('scrollable');
-    };
   }, [initApi]);
 
   switch (authState) {

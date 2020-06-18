@@ -29,10 +29,6 @@
 .settings-content {
   height: calc(100% - var(--header-height));
   overflow-y: auto;
-
-  .ListItem-button {
-    border-radius: var(--border-radius-default);
-  }
 }
 
 .settings-main-menu {
@@ -134,11 +130,11 @@
     }
 
     &.destructive {
-      button {
+      .ListItem-button {
         color: var(--color-error);
 
         i {
-          opacity: 1;
+          color: inherit;
         }
       }
     }
@@ -146,7 +142,7 @@
     &.blocked-list-item {
       margin-bottom: 0.5rem;
 
-      button {
+      .ListItem-button {
         align-items: center;
         text-align: left;
         padding: 0.5rem;

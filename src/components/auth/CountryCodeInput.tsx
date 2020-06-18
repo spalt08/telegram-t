@@ -76,6 +76,8 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
         return;
       }
       onTrigger();
+      const formEl = document.getElementById('auth-phone-number-form')!;
+      formEl.scrollTo({ top: formEl.scrollHeight, behavior: 'smooth' });
     };
 
     const inputValue = filter !== undefined

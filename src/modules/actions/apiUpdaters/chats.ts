@@ -263,6 +263,20 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       break;
     }
 
+    case 'updateRecommendedChatFolders': {
+      const { folders } = update;
+
+      setGlobal({
+        ...global,
+        chatFolders: {
+          ...global.chatFolders,
+          recommended: folders,
+        },
+      });
+
+      break;
+    }
+
     case 'updateChatMembers': {
       const targetChat = global.chats.byId[update.id];
       const { replacedMembers, addedMember, deletedMemberId } = update;

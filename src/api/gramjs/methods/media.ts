@@ -112,7 +112,7 @@ async function download(
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
     const data = await client.downloadMedia(entity, {
-      sizeType, start, end, progressCallback: onProgress,
+      sizeType, start, end, progressCallback: onProgress, workers: 16,
     });
     let mimeType;
     let fullSize;

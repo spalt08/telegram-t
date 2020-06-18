@@ -1,16 +1,12 @@
 #LeftColumn {
   overflow: hidden;
-
-  > .Transition {
-    height: 100%;
-  }
 }
 
 #NewGroup {
   height: 100%;
 }
 
-.LeftHeader {
+.left-header {
   height: var(--header-height);
   padding: 0.375rem 1.25rem .5rem 0.8125rem;
   display: flex;
@@ -58,6 +54,12 @@
       height: 4.5rem;
       margin-bottom: 0.5rem;
     }
+
+    @media (max-width: 600px) {
+      .ListItem {
+        margin: 0 -0.625rem;
+      }
+    }
   }
 
   .search-no-results {
@@ -66,10 +68,6 @@
   }
 
   .ListItem.search-result {
-    .ListItem-button {
-      padding: 0.5625rem 0.5rem;
-    }
-
     .ChatInfo {
       .handle {
         color: var(--color-primary);
@@ -87,8 +85,6 @@
   }
 
   .ListItem.search-result-message {
-     margin: 0 -0.5rem;
-
     .sender-name {
       color: var(--color-text);
 

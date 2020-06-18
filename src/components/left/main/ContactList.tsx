@@ -17,8 +17,6 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 
-import './ContactList.scss';
-
 export type OwnProps = {
   filter: string;
 };
@@ -70,20 +68,18 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));
 
   return (
-    <InfiniteScroll items={viewportIds} onLoadMore={getMore} className="ContactList custom-scroll optimized-list">
+    <InfiniteScroll items={viewportIds} onLoadMore={getMore} className="ChatList custom-scroll optimized-list">
       {viewportIds && viewportIds.length ? (
-        <div teactFastList>
-          {viewportIds.map((id) => (
-            <ListItem
-              key={id}
-              className="chat-item-clickable"
-              onClick={() => handleClick(id)}
-              ripple
-            >
-              <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
-            </ListItem>
-          ))}
-        </div>
+        viewportIds.map((id) => (
+          <ListItem
+            key={id}
+            className="chat-item-clickable"
+            onClick={() => handleClick(id)}
+            ripple
+          >
+            <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
+          </ListItem>
+        ))
       ) : viewportIds && !viewportIds.length && Boolean(filter.length) ? (
         <p className="no-results">No contacts matched your search.</p>
       ) : (

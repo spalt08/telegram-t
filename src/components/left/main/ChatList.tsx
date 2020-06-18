@@ -17,8 +17,6 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 
-import './ChatList.scss';
-
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
@@ -106,7 +104,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
       preloadBackwards={CHAT_LIST_SLICE}
     >
       {viewportIds && viewportIds.length && chatArrays ? (
-        <div teactFastList>
+        <>
           {chatArrays.pinnedChats.map(({ id }, i) => (
             <Chat
               key={id}
@@ -128,11 +126,11 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
               orderDiff={orderDiffById[chat.id]}
             />
           ))}
-        </div>
+        </>
       ) : viewportIds && !viewportIds.length ? (
-        <div className="no-chats">{noChatsText}</div>
+        <div className="no-results" key="no-results">{noChatsText}</div>
       ) : (
-        <Loading />
+        <Loading key="loading" />
       )}
     </InfiniteScroll>
   );

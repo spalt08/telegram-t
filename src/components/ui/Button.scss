@@ -46,7 +46,7 @@
   }
 
   &.disabled {
-    opacity: 0.5 !important;;
+    opacity: 0.5 !important;
     cursor: default;
     pointer-events: none;
   }
@@ -79,7 +79,7 @@
 
   &.secondary {
     background: var(--color-background);
-    color: var(--color-text-secondary);
+    color: rgba(var(--color-text-secondary-rgb), 0.75);
     --ripple-color: rgba(0, 0, 0, .08);
 
     @include active-styles() {
@@ -154,15 +154,26 @@
     }
   }
 
+  &.faded {
+    opacity: 0.75;
+
+    @include active-styles() {
+      opacity: 1;
+    }
+
+    &.activated {
+      opacity: 1;
+    }
+  }
+
   &.translucent {
     background-color: transparent;
     color: var(--color-text-secondary);
-    opacity: 0.75;
+
     --ripple-color: rgba(var(--color-text-secondary-rgb), 0.08);
 
     @include active-styles() {
       background-color: rgba(var(--color-text-secondary-rgb), 0.08);
-      opacity: 1;
     }
 
     @include no-ripple-styles() {
@@ -171,7 +182,6 @@
 
     &.activated {
       color: var(--color-primary);
-      opacity: 1;
     }
   }
 

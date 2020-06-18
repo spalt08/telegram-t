@@ -75,7 +75,7 @@ const NewGroupStep1: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="NewGroup step-1">
-      <div className="LeftHeader">
+      <div className="left-header">
         <Button
           round
           size="smaller"

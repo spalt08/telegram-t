@@ -8,6 +8,7 @@ import {
   EXCLUDED_CHAT_TYPES,
   FolderChatType,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 
 import Checkbox from '../../../ui/Checkbox';
 import InputText from '../../../ui/InputText';
@@ -15,11 +16,11 @@ import ListItem from '../../../ui/ListItem';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import PickerSelectedItem from '../../../common/PickerSelectedItem';
-
-import './SettingsFoldersChatsPicker.scss';
-import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import InfiniteScroll from '../../../ui/InfiniteScroll';
 import Loading from '../../../ui/Loading';
+
+import '../../../common/Picker.scss';
+import './SettingsFoldersChatsPicker.scss';
 
 type OwnProps = {
   mode: 'included' | 'excluded';
@@ -100,7 +101,8 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
         icon={selectedType.icon}
         title={selectedType.title}
         isMinimized={shouldMinimize}
-        onClick={() => handleChatTypeClick(selectedType.key)}
+        onClick={handleChatTypeClick}
+        clickArg={selectedType.key}
       />
     );
   }
@@ -152,14 +154,15 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, chatIds, Boolean(filterValue));
 
   return (
-    <div className="SettingsFoldersChatsPicker">
+    <div className="Picker SettingsFoldersChatsPicker">
       <div className="picker-header custom-scroll">
         {selectedChatTypes.map(renderSelectedChatType)}
         {selectedIds.map((id, i) => (
           <PickerSelectedItem
             chatId={id}
             isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
-            onClick={() => handleItemClick(id)}
+            onClick={handleItemClick}
+            clickArg={id}
           />
         ))}
         {!hasMaxChats ? (
@@ -181,22 +184,19 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
       >
         {(!viewportIds || !viewportIds.length || viewportIds.includes(chatIds[0])) && (
           <>
-            <h4 className="settings-item-header">Chat types</h4>
-
+            <h4 key="header1" className="settings-item-header">Chat types</h4>
             {chatTypes.map(renderChatType)}
-
-            <div className="picker-list-divider" />
-
-            <h4 className="settings-item-header">Chats</h4>
+            <div key="divider" className="picker-list-divider" />
+            <h4 key="header2" className="settings-item-header">Chats</h4>
           </>
         )}
 
         {viewportIds && viewportIds.length ? (
           viewportIds.map(renderItem)
         ) : viewportIds && !viewportIds.length ? (
-          <p className="no-results">Sorry, nothing found.</p>
+          <p className="no-results" key="no-results">Sorry, nothing found.</p>
         ) : (
-          <Loading />
+          <Loading key="loading" />
         )}
       </InfiniteScroll>
     </div>

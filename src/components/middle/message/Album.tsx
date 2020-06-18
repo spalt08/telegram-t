@@ -122,8 +122,8 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           albumMediaParams={getMediaParams(index)}
           shouldAffectAppendix={hasCustomAppendix && index === mediaCount - 1}
           uploadProgress={uploadProgress}
-          onClick={() => onMediaClick(message.id)}
-          onCancelUpload={() => handleCancelUpload(message)}
+          onClick={onMediaClick}
+          onCancelUpload={handleCancelUpload}
         />
       );
     } else if (video) {
@@ -134,8 +134,8 @@ const Album: FC<OwnProps & StateProps & DispatchProps> = ({
           loadAndPlay={loadAndPlay}
           albumMediaParams={getMediaParams(index)}
           uploadProgress={uploadProgress}
-          onClick={() => onMediaClick(message.id)}
-          onCancelUpload={() => handleCancelUpload(message)}
+          onClick={onMediaClick}
+          onCancelUpload={handleCancelUpload}
         />
       );
     }

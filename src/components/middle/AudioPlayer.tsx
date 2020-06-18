@@ -37,6 +37,13 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
     focusMessage({ chatId: message.chatId, messageId: message.id });
   }, [focusMessage, message.chatId, message.id]);
 
+  const handleClose = useCallback(() => {
+    if (isPlaying) {
+      playPause();
+    }
+    closeAudioPlayer();
+  }, [closeAudioPlayer, isPlaying, playPause]);
+
   const audio = getMessageAudio(message);
 
   return (
@@ -65,7 +72,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         className="player-close"
         color="translucent"
         size="smaller"
-        onClick={closeAudioPlayer}
+        onClick={handleClose}
         ariaLabel="Close player"
       >
         <i className="icon-close" />

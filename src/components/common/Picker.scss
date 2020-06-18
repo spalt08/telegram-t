@@ -33,36 +33,15 @@
     flex-grow: 1;
     overflow-y: auto;
     padding: 0.5rem;
-
-    .no-results {
-      height: 100%;
-      margin: 0;
-      padding: 1rem 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-text-secondary);
-    }
   }
 
-  .ListItem.picker-list-item {
+  .no-results {
+    height: 100%;
     margin: 0;
-
-    .ListItem-button {
-      padding-left: 0;
-      display: flex;
-      align-items: center;
-    }
-
-    .Avatar {
-      width: 3rem;
-      height: 3rem;
-    }
-
-    .Checkbox {
-      height: 1.5rem;
-      margin: 0;
-      padding-left: 4rem;
-    }
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
   }
 }

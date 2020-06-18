@@ -67,6 +67,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 
   return (
     <div id="MiddleColumn" className={hasPinnedMessage ? 'has-pinned-message' : undefined}>
+      <div id="middle-column-bg" />
       <div id="middle-column-portals" />
       {renderingChatId && (
         <>

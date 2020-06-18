@@ -19,7 +19,7 @@ const SettingsPrivacyBlockedUsers: FC<StateProps> = ({
   const mockupUsers = useMemo(() => {
     return Object.values(usersById)
       .filter((user) => !user.isSelf && !!user.lastName && !!user.phoneNumber)
-      .slice(0, 6);
+      .slice(0, 2);
   }, [usersById]);
 
   function renderBlockedUser(user: ApiUser) {

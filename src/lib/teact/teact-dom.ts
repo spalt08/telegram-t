@@ -14,6 +14,7 @@ import {
   VirtualRealElement,
 } from './teact';
 import generateIdFor from '../../util/generateIdFor';
+import { DEBUG } from '../../config';
 
 type VirtualDomHead = {
   children: [VirtualElement] | [];
@@ -264,7 +265,16 @@ function renderChildren(
 
 function renderFastListChildren($current: VirtualRealElement, $new: VirtualRealElement, currentEl: HTMLElement) {
   const newKeys = new Set(
-    $new.children.map(($newChild) => ('props' in $newChild && $newChild.props.key)),
+    $new.children.map(($newChild) => {
+      const key = 'props' in $newChild && $newChild.props.key;
+
+      if (DEBUG && isRealElement($newChild) && !key) {
+        // eslint-disable-next-line no-console
+        console.warn('Missing `key` in `teactFastList`');
+      }
+
+      return key;
+    }),
   );
 
   let currentRemainingIndex = 0;

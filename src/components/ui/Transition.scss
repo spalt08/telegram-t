@@ -182,8 +182,9 @@
 
     > .to {
       transform-origin: center;
-      transform: scale(1.1);
       opacity: 0;
+      // We can omit `transform: scale(1.1);` here because `opacity` is 0.
+      // We need to for proper position calculation in `InfiniteScroll`.
     }
 
     &.animating {

@@ -32,8 +32,8 @@ type OwnProps = {
   size?: 'inline' | 'pictogram';
   shouldAffectAppendix?: boolean;
   albumMediaParams?: AlbumMediaParameters;
-  onClick?: () => void;
-  onCancelUpload?: () => void;
+  onClick?: (id: number) => void;
+  onCancelUpload?: (message: ApiMessage) => void;
 };
 
 const Photo: FC<OwnProps> = ({
@@ -74,14 +74,14 @@ const Photo: FC<OwnProps> = ({
   const handleClick = useCallback(() => {
     if (isUploading) {
       if (onCancelUpload) {
-        onCancelUpload();
+        onCancelUpload(message);
       }
     } else if (!fullMediaData) {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
     } else if (onClick) {
-      onClick();
+      onClick(message.id);
     }
-  }, [fullMediaData, isUploading, onCancelUpload, onClick]);
+  }, [fullMediaData, isUploading, message, onCancelUpload, onClick]);
 
   const isOwn = isOwnMessage(message);
   useLayoutEffect(() => {

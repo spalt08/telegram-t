@@ -120,6 +120,11 @@ export type ApiUpdateChatFoldersOrder = {
   orderedIds: number[];
 };
 
+export type ApiUpdateRecommendedChatFolders = {
+  '@type': 'updateRecommendedChatFolders';
+  folders: ApiChatFolder[];
+};
+
 export type ApiUpdateNewMessage = {
   '@type': 'newMessage';
   chatId: number;
@@ -244,7 +249,7 @@ export type ApiUpdate = (
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned |
-  ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder |
+  ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

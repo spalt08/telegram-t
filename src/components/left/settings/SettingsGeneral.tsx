@@ -76,7 +76,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
         <h4 className="settings-item-header">
           Animation Level
         </h4>
-        <p className="settings-item-description">Please choose the desired animations amount.</p>
+        <p className="settings-item-description">Choose the desired animations amount.</p>
 
         <RangeSlider
           options={ANIMATION_LEVEL_OPTIONS}

@@ -123,10 +123,11 @@ function reduceChats(global: GlobalState): GlobalState['chats'] {
   const chatIdsToSave = [
     ...(global.chats.listIds.active || []).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT),
   ];
+  const { selectedId } = global.chats;
 
   return {
     ...global.chats,
-    byId: pick(global.chats.byId, chatIdsToSave),
+    byId: pick(global.chats.byId, selectedId ? [...chatIdsToSave, selectedId] : chatIdsToSave),
     listIds: {
       active: chatIdsToSave,
     },

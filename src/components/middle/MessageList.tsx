@@ -38,6 +38,7 @@ import buildClassName from '../../util/buildClassName';
 import { groupMessages, MessageDateGroup, isAlbum } from './helpers/groupMessages';
 import useOnChange from '../../hooks/useOnChange';
 import findInViewport from '../../util/findInViewport';
+import setScrollTop from '../../util/setScrollTop';
 
 import Loading from '../ui/Loading';
 import Message from './message/Message';
@@ -73,7 +74,6 @@ const INDICATOR_TOP_MARGIN = 10;
 const SCROLL_THROTTLE = 1000;
 const FOCUSING_DURATION = 1000;
 
-// TODO Check if this workaround is only required for iOS 13+
 const SCROLL_DEBOUNCE_ARGS = IS_TOUCH_ENV ? [700, false, true] : [1000, true, false];
 
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, false);
@@ -382,7 +382,7 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
         newScrollTop = scrollHeight - scrollOffset;
       }
 
-      container.scrollTop = newScrollTop;
+      setScrollTop(container, newScrollTop);
       isScrollTopJustUpdated = true;
     }
 

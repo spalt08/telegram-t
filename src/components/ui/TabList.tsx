@@ -62,7 +62,8 @@ const TabList: FC<OwnProps> = ({ tabs, activeTab, onSwitchTab }) => {
           badgeCount={tab.badgeCount}
           isBadgeActive={tab.isBadgeActive}
           previousActiveTab={previousActiveTab}
-          onClick={() => onSwitchTab(i)}
+          onClick={onSwitchTab}
+          clickArg={i}
         />
       ))}
     </div>

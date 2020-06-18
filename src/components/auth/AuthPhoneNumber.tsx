@@ -141,48 +141,50 @@ const AuthPhoneNumber: FC<StateProps & DispatchProps> = ({
   const isAuthReady = authState === 'authorizationStateWaitPhoneNumber';
 
   return (
-    <div id="auth-phone-number-form" className="auth-form">
-      <div id="logo" />
-      <div className="caption-image" />
-      <p className="note">
-        Please confirm your country and
-        <br />enter your phone number.
-      </p>
-      <form action="" onSubmit={handleSubmit}>
-        <CountryCodeInput
-          id="sign-in-phone-code"
-          value={country}
-          isLoading={!authNearestCountry && !country}
-          onChange={handleCountryChange}
-        />
-        <InputText
-          ref={phoneNumberRef}
-          id="sign-in-phone-number"
-          label="Phone Number"
-          value={fullNumber}
-          error={authError}
-          inputMode="tel"
-          onChange={handlePhoneNumberChange}
-        />
-        <Checkbox
-          id="sign-in-keep-session"
-          label="Keep me signed in"
-          checked={Boolean(authRememberMe)}
-          onChange={handleKeepSessionChange}
-        />
-        {canSubmit && (
-          isAuthReady ? (
-            <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
-          ) : (
-            <Loading />
-          )
-        )}
-        {isAuthReady && (
-          <Button isText ripple isLoading={authIsLoadingQrCode} onClick={gotToAuthQrCode}>
-            Log in by QR code
-          </Button>
-        )}
-      </form>
+    <div id="auth-phone-number-form" className="custom-scroll">
+      <div className="auth-form">
+        <div id="logo" />
+        <div className="caption-image" />
+        <p className="note">
+          Please confirm your country and
+          <br />enter your phone number.
+        </p>
+        <form action="" onSubmit={handleSubmit}>
+          <CountryCodeInput
+            id="sign-in-phone-code"
+            value={country}
+            isLoading={!authNearestCountry && !country}
+            onChange={handleCountryChange}
+          />
+          <InputText
+            ref={phoneNumberRef}
+            id="sign-in-phone-number"
+            label="Phone Number"
+            value={fullNumber}
+            error={authError}
+            inputMode="tel"
+            onChange={handlePhoneNumberChange}
+          />
+          <Checkbox
+            id="sign-in-keep-session"
+            label="Keep me signed in"
+            checked={Boolean(authRememberMe)}
+            onChange={handleKeepSessionChange}
+          />
+          {canSubmit && (
+            isAuthReady ? (
+              <Button type="submit" ripple isLoading={authIsLoading}>Next</Button>
+            ) : (
+              <Loading />
+            )
+          )}
+          {isAuthReady && (
+            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={gotToAuthQrCode}>
+              Log in by QR code
+            </Button>
+          )}
+        </form>
+      </div>
     </div>
   );
 };

@@ -84,7 +84,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
 
     return (
       <ListItem
-        className={`search-result-message ${!onClick ? 'not-implemented' : ''}`}
+        className={`chat-item-clickable search-result-message m-0 ${!onClick ? 'not-implemented' : ''}`}
         onClick={onClick}
         ripple
       >
@@ -94,7 +94,9 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             <h3>{title && renderText(title)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { highlight: query })}</p>
+          <div className="subtitle">
+            {renderText(text, ['emoji', 'highlight'], { highlight: query })}
+          </div>
         </div>
       </ListItem>
     );
@@ -106,6 +108,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
       items={foundResults}
       preloadBackwards={0}
       onLoadMore={searchMessages}
+      noFastList
     >
       <p className="helper-text">
         {!query ? (

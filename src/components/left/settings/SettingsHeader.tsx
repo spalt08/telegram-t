@@ -167,7 +167,7 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
   }
 
   return (
-    <div className="LeftHeader">
+    <div className="left-header">
       <Button
         round
         size="smaller"

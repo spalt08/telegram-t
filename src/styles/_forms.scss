@@ -16,27 +16,6 @@
     transition: all 0.15s ease;
   }
 
-  // TODO Revise and remove if the component isn't used
-  .input-clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 3.375rem;
-    height: 3.375rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity .2s ease, color .15s ease;
-    font-size: 1.5rem;
-    color: rgba(var(--color-text-secondary-rgb), 0.8);
-
-    &:hover {
-      color: rgba(var(--color-text-secondary-rgb), 1);
-    }
-  }
-
   &.touched label,
   &.error label,
   &.success label,
@@ -97,11 +76,6 @@
 
     & + label {
       color: var(--color-primary);
-    }
-
-    // TODO Revise and remove if the component isn't used
-    & + .input-clear {
-      opacity: 1;
     }
   }
 

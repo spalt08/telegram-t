@@ -1,6 +1,6 @@
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
-import { ApiChat, ApiUser } from '../../../api/types';
+import { ApiChat, ApiUser, ApiChatFolder } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
 
 import {
@@ -344,31 +344,10 @@ addReducer('editChatFolder', (global, actions, payload) => {
 
 addReducer('addChatFolder', (global, actions, payload) => {
   const { folder } = payload!;
-  const { orderedIds, recommended } = global.chatFolders;
+  const { orderedIds } = global.chatFolders;
   const maxId = orderedIds && orderedIds.length ? Math.max.apply(Math.max, orderedIds) : ARCHIVED_FOLDER_ID;
 
-  // Clear fields from recommended folders
-  const { id: recommendedId, description, ...newFolder } = folder;
-
-  callApi('editChatFolder', {
-    id: maxId + 1,
-    folderUpdate: {
-      id: maxId + 1,
-      ...newFolder,
-    },
-  });
-
-  if (description && recommended) {
-    return {
-      ...global,
-      chatFolders: {
-        ...global.chatFolders,
-        recommended: recommended.filter(({ id }) => id !== recommendedId),
-      },
-    };
-  }
-
-  return global;
+  void createChatFolder(folder, maxId);
 });
 
 addReducer('deleteChatFolder', (global, actions, payload) => {
@@ -544,8 +523,36 @@ async function loadRecommendedChatFolders() {
   }
 }
 
+async function createChatFolder(folder: ApiChatFolder, maxId: number) {
+  // Clear fields from recommended folders
+  const { id: recommendedId, description, ...newFolder } = folder;
+
+  await callApi('editChatFolder', {
+    id: maxId + 1,
+    folderUpdate: {
+      id: maxId + 1,
+      ...newFolder,
+    },
+  });
+
+  if (!description) {
+    return;
+  }
+
+  const global = getGlobal();
+  const { recommended } = global.chatFolders;
+
+  if (recommended) {
+    setGlobal({
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        recommended: recommended.filter(({ id }) => id !== recommendedId),
+      },
+    });
+  }
+}
+
 async function deleteChatFolder(id: number) {
   await callApi('deleteChatFolder', id);
-
-  loadRecommendedChatFolders();
 }

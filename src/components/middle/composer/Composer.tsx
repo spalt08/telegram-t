@@ -360,6 +360,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={`${isSymbolMenuOpen ? 'activated' : ''}`}
               round
+              faded
               color="translucent"
               onActivate={openSymbolMenu}
               ariaLabel="Choose emoji, sticker or GIF"
@@ -379,6 +380,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
             <ResponsiveHoverButton
               className={`${isAttachMenuOpen ? 'activated' : ''}`}
               round
+              faded
               color="translucent"
               onActivate={openAttachMenu}
               ariaLabel="Add an attachment"

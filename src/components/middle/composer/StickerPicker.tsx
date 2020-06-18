@@ -182,6 +182,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
           onClick={() => selectSet(index)}
           ariaLabel={stickerSet.title}
           round
+          faded={stickerSet.id === 'recent' || stickerSet.id === 'favorite'}
           color="translucent"
         >
           {stickerSet.id === 'recent' ? (
