@@ -396,7 +396,8 @@ class TelegramClient {
                         break
                     }
                 }
-                results = await Promise.all(results)
+                results = await Promise.all(results.map(p => p.catch(e => e)))
+                results = results.filter(result => !(result instanceof Error));
                 for (const result of results) {
                     if (result.bytes.length) {
                         this._log.debug(`Saving ${result.bytes.length} more bytes`)
