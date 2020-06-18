@@ -228,7 +228,7 @@ class TelegramClient {
                 return promise
                     .then((sender) => sender.disconnect())
             })
-        ]);
+        ])
 
         this._eventBuilders = []
     }
@@ -253,7 +253,7 @@ class TelegramClient {
     // export region
 
     removeSender(dcId) {
-        delete this._borrowedSenderPromises[dcId];
+        delete this._borrowedSenderPromises[dcId]
     }
 
     async _borrowExportedSender(dcId, retries = 5) {
@@ -320,11 +320,12 @@ class TelegramClient {
      * @param [args[start] {number}]
      * @param [args[end] {number}]
      * @param [args[dcId] {number}]
+     * @param [args[workers] {number}]
      * @returns {Promise<Buffer>}
      */
     async downloadFile(inputLocation, args = {}) {
 
-        let { partSizeKb, fileSize } = args
+        let { partSizeKb, fileSize, workers } = args
         const { dcId } = args
 
         if (!partSizeKb) {
@@ -334,7 +335,7 @@ class TelegramClient {
                 partSizeKb = utils.getAppropriatedPartSize(fileSize)
             }
         }
-        let partSize = parseInt(partSizeKb * 1024)
+        const partSize = parseInt(partSizeKb * 1024)
         if (partSize % MIN_CHUNK_SIZE !== 0) {
             throw new Error('The part size must be evenly divisible by 4096')
         }
@@ -361,63 +362,62 @@ class TelegramClient {
         }
 
         this._log.info(`Downloading file in chunks of ${partSize} bytes`)
-
         if (args.progressCallback) {
             args.progressCallback(0)
         }
 
+        if (!workers) {
+            workers = 1
+        }
+
         try {
-            let offset = args.start || 0
             let limit = partSize
-
-            // eslint-disable-next-line no-constant-condition
+            let offset = args.start || 0
             while (true) {
-                let precise = false;
-                if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
-                    limit = ONE_MB - offset % ONE_MB
-                    precise = true
-                }
+                let results = []
+                let i = 0
+                while (true) {
+                    let precise = false;
+                    if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
+                        limit = ONE_MB - offset % ONE_MB
+                        precise = true
+                    }
 
-                let result
-                try {
-                    result = await sender.send(new requests.upload.GetFile({
+                    results.push(sender.send(new requests.upload.GetFile({
                         location: inputLocation,
                         offset,
                         limit,
                         precise
-                    }))
-                    if (result instanceof constructors.upload.FileCdnRedirect) {
-                        throw new Error('not implemented')
-                    }
-                } catch (e) {
-                    if (e instanceof errors.FileMigrateError) {
-                        this._log.info('File lives in another DC')
-                        sender = await this._borrowExportedSender(e.newDc)
-                        exported = true
-                        continue
-                    } else {
-                        throw e
+                    })))
+
+                    offset += partSize
+                    i++
+                    if ((args.end && (offset + partSize) > args.end) || workers === i) {
+                        break
                     }
                 }
-                offset += partSize
+                results = await Promise.all(results)
+                for (const result of results) {
+                    if (result.bytes.length) {
+                        this._log.debug(`Saving ${result.bytes.length} more bytes`)
 
-                if (result.bytes.length) {
-                    this._log.debug(`Saving ${result.bytes.length} more bytes`)
+                        fileWriter.write(result.bytes)
+                        if (args.progressCallback) {
+                            if (args.progressCallback.isCanceled) {
+                                throw new Error('USER_CANCELED')
+                            }
 
-                    fileWriter.write(result.bytes)
-
-                    if (args.progressCallback) {
-                        if (args.progressCallback.isCanceled) {
-                            throw new Error('USER_CANCELED')
+                            const progress = offset / fileSize
+                            args.progressCallback(progress)
                         }
-
-                        const progress = fileWriter.getValue().length / fileSize
-                        args.progressCallback(progress)
+                    }
+                    // Last chunk.
+                    if (result.bytes.length < partSize) {
+                        return fileWriter.getValue()
                     }
                 }
-
                 // Last chunk.
-                if (result.bytes.length < partSize || (args.end && (offset + result.bytes.length) > args.end)) {
+                if (args.end && (offset + results[results.length - 1].bytes.length) > args.end) {
                     return fileWriter.getValue()
                 }
             }
@@ -606,11 +606,11 @@ class TelegramClient {
             return
         }
 
-        let size = null;
+        let size = null
         if (args.sizeType) {
             size = doc.thumbs ? this._pickFileSize(doc.thumbs, args.sizeType) : null
             if (!size && doc.mimeType.startsWith('video/')) {
-                return;
+                return
             }
 
             if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
@@ -631,6 +631,7 @@ class TelegramClient {
                 start: args.start,
                 end: args.end,
                 dcId: doc.dcId,
+                workers: args.workers,
             },
         )
     }
@@ -724,19 +725,19 @@ class TelegramClient {
         }
 
         if (await checkAuthorization(this)) {
-            return;
+            return
         }
 
         const apiCredentials = {
             apiId: this.apiId,
             apiHash: this.apiHash
-        };
+        }
 
         await authFlow(this, apiCredentials, authParams)
     }
 
     uploadFile(fileParams) {
-        return uploadFile(this, fileParams);
+        return uploadFile(this, fileParams)
     }
 
     // event region

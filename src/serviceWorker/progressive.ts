@@ -18,6 +18,7 @@ type RequestStates = {
 
 const DEFAULT_PART_SIZE = 512 * 1024; // 512 kB
 const PART_TIMEOUT = 10000;
+const MAX_END_TO_CACHE = 3 * 1024 * 1024 - 1; // We only cache the first 3 MB of each file
 
 const requestStates: Record<string, RequestStates> = {};
 
@@ -77,7 +78,7 @@ export async function respondForProgressive(e: FetchEvent) {
     ['Content-Type', mimeType],
   ];
 
-  if (fullSize <= MEDIA_CACHE_MAX_BYTES) {
+  if (partSize <= MEDIA_CACHE_MAX_BYTES && end < MAX_END_TO_CACHE) {
     saveToCache(cacheKey, arrayBufferPart, headers);
   }
 
