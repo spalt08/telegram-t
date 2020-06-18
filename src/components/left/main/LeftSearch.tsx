@@ -169,7 +169,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
           {localResults.map((id) => (
             <LeftSearchResultChat
               chatId={id}
-              onClick={() => handleChatClick(id)}
+              onClick={handleChatClick}
             />
           ))}
         </div>
@@ -181,7 +181,7 @@ const LeftSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             <LeftSearchResultChat
               chatId={id}
               showHandle
-              onClick={() => handleChatClick(id)}
+              onClick={handleChatClick}
             />
           ))}
         </div>

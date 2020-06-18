@@ -17,7 +17,7 @@ import { selectChat, selectUser, selectIsChatPinned } from '../../../modules/sel
 type OwnProps = {
   chatId: number;
   showHandle?: boolean;
-  onClick: () => void;
+  onClick: (id: number) => void;
 };
 
 type StateProps = {
@@ -58,7 +58,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   return (
     <ListItem
       className="chat-item-clickable search-result"
-      onClick={onClick}
+      onClick={() => onClick(chatId)}
       contextActions={contextActions}
     >
       {isChatPrivate(chatId) ? (

@@ -17,7 +17,8 @@ type OwnProps = {
   icon?: string;
   title?: string;
   isMinimized?: boolean;
-  onClick: () => void;
+  onClick: (arg: any) => void;
+  clickArg: any;
 };
 
 type StateProps = {
@@ -30,6 +31,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   title,
   isMinimized,
   onClick,
+  clickArg,
   chat,
   privateChatUser,
 }) => {
@@ -69,7 +71,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   return (
     <div
       className={className}
-      onClick={onClick}
+      onClick={() => onClick(clickArg)}
       title={isMinimized ? titleText : undefined}
     >
       {iconElement}

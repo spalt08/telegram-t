@@ -101,7 +101,8 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
         icon={selectedType.icon}
         title={selectedType.title}
         isMinimized={shouldMinimize}
-        onClick={() => handleChatTypeClick(selectedType.key)}
+        onClick={handleChatTypeClick}
+        clickArg={selectedType.key}
       />
     );
   }
@@ -160,7 +161,8 @@ const SettingsFoldersChatsPicker: FC<OwnProps> = ({
           <PickerSelectedItem
             chatId={id}
             isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
-            onClick={() => handleItemClick(id)}
+            onClick={handleItemClick}
+            clickArg={id}
           />
         ))}
         {!hasMaxChats ? (

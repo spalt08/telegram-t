@@ -13,7 +13,8 @@ type OwnProps = {
   badgeCount?: number;
   isBadgeActive?: boolean;
   previousActiveTab: number | null;
-  onClick?: () => void;
+  onClick: (arg: number) => void;
+  clickArg: number;
 };
 
 const Tab: FC<OwnProps> = ({
@@ -24,6 +25,7 @@ const Tab: FC<OwnProps> = ({
   isBadgeActive,
   previousActiveTab,
   onClick,
+  clickArg,
 }) => {
   const tabRef = useRef<HTMLButtonElement>();
 
@@ -55,7 +57,7 @@ const Tab: FC<OwnProps> = ({
     <button
       type="button"
       className={buildClassName('Tab', className, active && 'active')}
-      onClick={onClick}
+      onClick={() => onClick(clickArg)}
       ref={tabRef}
     >
       <span>

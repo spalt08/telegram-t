@@ -84,7 +84,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
       </div>
       <div className="sticker-set-main">
         {displayedStickers.map((sticker) => (
-          <StickerButton sticker={sticker} load onClick={() => handleStickerSelect(sticker)} />
+          <StickerButton sticker={sticker} load onClick={handleStickerSelect} />
         ))}
       </div>
     </div>

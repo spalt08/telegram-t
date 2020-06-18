@@ -79,7 +79,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
           {recentlyFoundChatIds.map((id) => (
             <LeftSearchResultChat
               chatId={id}
-              onClick={() => handleClick(id)}
+              onClick={handleClick}
             />
           ))}
         </div>

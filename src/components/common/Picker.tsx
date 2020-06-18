@@ -79,7 +79,8 @@ const Picker: FC<OwnProps> = ({
           <PickerSelectedItem
             chatId={id}
             isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
-            onClick={() => handleItemClick(id)}
+            onClick={handleItemClick}
+            clickArg={id}
           />
         ))}
         <InputText

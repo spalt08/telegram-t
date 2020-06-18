@@ -32,8 +32,8 @@ type OwnProps = {
   uploadProgress?: number;
   albumMediaParams?: AlbumMediaParameters;
   lastSyncTime?: number;
-  onClick?: () => void;
-  onCancelUpload?: () => void;
+  onClick?: (id: number) => void;
+  onCancelUpload?: (message: ApiMessage) => void;
 };
 
 const Video: FC<OwnProps> = ({
@@ -89,14 +89,14 @@ const Video: FC<OwnProps> = ({
   const handleClick = useCallback(() => {
     if (isUploading) {
       if (onCancelUpload) {
-        onCancelUpload();
+        onCancelUpload(message);
       }
     } else if (isInline && !fullMediaData) {
       setIsDownloadAllowed((isAllowed) => !isAllowed);
     } else if (onClick) {
-      onClick();
+      onClick(message.id);
     }
-  }, [fullMediaData, isInline, isUploading, onCancelUpload, onClick]);
+  }, [fullMediaData, isInline, isUploading, message, onCancelUpload, onClick]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
 
