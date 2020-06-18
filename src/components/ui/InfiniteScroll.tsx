@@ -5,7 +5,9 @@ import React, {
   FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
+import { IS_TOUCH_ENV } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
+import setScrollTop from '../../util/setScrollTop';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -22,6 +24,8 @@ type OwnProps = {
 const DEFAULT_LIST_SELECTOR = '.ListItem';
 const DEFAULT_PRELOAD_BACKWARDS = 20;
 const DEFAULT_SENSITIVE_AREA = 1200;
+
+const SCROLL_DEBOUNCE_ARGS = IS_TOUCH_ENV ? [700, false, true] : [1000, true, false];
 
 const InfiniteScroll: FC<OwnProps> = ({
   ref,
@@ -53,9 +57,9 @@ const InfiniteScroll: FC<OwnProps> = ({
 
     return [
       // @ts-ignore
-      debounce(() => onLoadMore({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
+      debounce(() => onLoadMore({ direction: LoadMoreDirection.Backwards }), ...SCROLL_DEBOUNCE_ARGS),
       // @ts-ignore
-      debounce(() => onLoadMore({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
+      debounce(() => onLoadMore({ direction: LoadMoreDirection.Forwards }), ...SCROLL_DEBOUNCE_ARGS),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLoadMore, items]);
@@ -100,7 +104,8 @@ const InfiniteScroll: FC<OwnProps> = ({
       }
     }
 
-    container.scrollTop = newScrollTop;
+    setScrollTop(container, newScrollTop);
+
     stateRef.current.isScrollTopJustUpdated = true;
   }, [itemSelector, items]);
 
