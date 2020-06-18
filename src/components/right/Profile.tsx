@@ -205,7 +205,7 @@ const Profile: FC<OwnProps & StateProps & DispatchProps> = ({
     const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
     const chatInfoEl = container.querySelector<HTMLDivElement>('.ChatInfo');
 
-    if (tabsEl && chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop === 0) {
+    if (tabsEl && chatInfoEl && profileState === ProfileState.Profile && tabsEl.offsetTop - container.scrollTop <= 0) {
       isScrollingProgrammatically = true;
       fastSmoothScroll(container, chatInfoEl, 'start', container.offsetHeight * 2);
       setTimeout(() => {

@@ -45,7 +45,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
     });
   }, [loadTopUsers, loadContactList]);
 
-  useHorizontalScroll(topUsersRef.current, !topUsers);
+  useHorizontalScroll(topUsersRef, !topUsers);
 
   const handleClick = useCallback(
     (id: number) => {
@@ -63,7 +63,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
       {topUsers && (
         <div className="search-section">
           <h3 className="section-heading">People</h3>
-          <div ref={topUsersRef} className="top-peers">
+          <div ref={topUsersRef} className="top-peers no-selection">
             {topUsers.map((user) => (
               <div className="top-peer-item" onClick={() => handleClick(user.id)}>
                 <Avatar user={user} />

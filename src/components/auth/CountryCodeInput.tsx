@@ -34,7 +34,6 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
   } = props;
   const [filter, setFilter] = useState<string | undefined>();
   const [filteredList, setFilteredList] = useState(countryList);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     setTimeout(() => updateFilter(undefined), DROPDOWN_HIDING_DURATION);
@@ -43,7 +42,6 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
   function updateFilter(filterValue?: string) {
     setFilter(filterValue);
     setFilteredList(getFilteredList(filterValue));
-    setFocusedIndex(-1);
   }
 
   const handleChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
@@ -70,32 +68,6 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
       target.value = '';
     }
     updateFilter(target.value);
-  }
-
-  function onKeyDown(e: React.KeyboardEvent<any>) {
-    const dropdown = document.querySelector('.CountryCodeInput .menu-container') as Element;
-
-    if (e.keyCode !== 38 && e.keyCode !== 40) {
-      return;
-    }
-
-    let newIndex = focusedIndex;
-
-    if (e.keyCode === 38 && newIndex > 0) {
-      newIndex--;
-    } else if (e.keyCode === 40 && newIndex < dropdown.children.length - 1) {
-      newIndex++;
-    } else if (dropdown.children.length === 1) {
-      newIndex = 0;
-    } else {
-      return;
-    }
-
-    const item = dropdown.childNodes[newIndex] as HTMLElement;
-    if (item) {
-      setFocusedIndex(newIndex);
-      item.focus();
-    }
   }
 
   const CodeInput: FC<{ onTrigger: () => void; isOpen?: boolean }> = ({ onTrigger, isOpen }) => {
@@ -138,7 +110,6 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
     <DropdownMenu
       className="CountryCodeInput"
       trigger={CodeInput}
-      onKeyDown={onKeyDown}
     >
       {filteredList.map((country: Country) => (
         <MenuItem

@@ -7,13 +7,12 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
 
 import RippleEffect from './RippleEffect';
-import AttentionIndicator from './AttentionIndicator';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 
 import './ListItem.scss';
 
-type OnClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
+type OnClickHandler = (e: React.MouseEvent<HTMLDivElement>) => void;
 
 type MenuItemContextAction = {
   title: string;
@@ -28,7 +27,6 @@ type OwnProps = {
   className?: string;
   children: any;
   disabled?: boolean;
-  attention?: boolean;
   ripple?: boolean;
   narrow?: boolean;
   inactive?: boolean;
@@ -44,7 +42,6 @@ const ListItem: FC<OwnProps> = (props) => {
     className,
     children,
     disabled,
-    attention,
     ripple,
     narrow,
     inactive,
@@ -83,21 +80,21 @@ const ListItem: FC<OwnProps> = (props) => {
     getMenuElement,
   );
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (disabled || !onClick) {
       return;
     }
     onClick(e);
   }, [disabled, onClick]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (inactive) {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (inactive || IS_TOUCH_ENV) {
       return;
     }
-    if (contextActions) {
+    if (contextActions && (e.button === 2 || !onClick)) {
       handleBeforeContextMenu(e);
     }
-    if (!IS_TOUCH_ENV && e.button === 0) {
+    if (e.button === 0) {
       if (!onClick) {
         handleContextMenu(e);
       } else {
@@ -107,10 +104,11 @@ const ListItem: FC<OwnProps> = (props) => {
   }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
 
   const fullClassName = buildClassName(
-    'ListItem',
+    'ListItem no-selection',
     className,
     ripple && 'has-ripple',
     narrow && 'narrow',
+    disabled && 'disabled',
     inactive && 'inactive',
     contextMenuPosition && 'has-menu-open',
   );
@@ -120,9 +118,10 @@ const ListItem: FC<OwnProps> = (props) => {
       ref={containerRef}
       className={fullClassName}
     >
-      <button
-        type="button"
-        disabled={disabled}
+      <div
+        className="ListItem-button"
+        role="button"
+        tabIndex={0}
         onClick={!inactive && IS_TOUCH_ENV ? handleClick : undefined}
         onMouseDown={handleMouseDown}
         onContextMenu={!inactive && contextActions ? handleContextMenu : undefined}
@@ -134,8 +133,7 @@ const ListItem: FC<OwnProps> = (props) => {
         {!disabled && !inactive && ripple && (
           <RippleEffect delayed={shouldDelayRipple} />
         )}
-        {attention && <AttentionIndicator show={attention} />}
-      </button>
+      </div>
       {contextActions && contextMenuPosition !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}

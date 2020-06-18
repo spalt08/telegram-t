@@ -9,7 +9,8 @@ import {
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { ANIMATION_END_DELAY, MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+import { ANIMATION_END_DELAY } from '../../config';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 import {
   AVATAR_FULL_DIMENSIONS,
   calculateMediaViewerDimensions,
@@ -129,8 +130,6 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     isWebPagePhoto ? getMessageWebPagePhoto(message!) : getMessagePhoto(message!)
   )!) : undefined;
   const videoDimensions = isVideo ? getVideoDimensions(getMessageVideo(message!)!) : undefined;
-
-  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
   const forceUpdate = useForceUpdate();
   useEffect(() => {
@@ -301,7 +300,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
       {() => (
         <>
           <div className="media-viewer-head" onClick={stopEvent}>
-            {isMobile && (
+            {IS_MOBILE_SCREEN && (
               <Button
                 className="media-viewer-close"
                 round

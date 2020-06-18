@@ -10,6 +10,11 @@
   transition: background-color .15s ease, opacity .3s ease !important;
   position: relative;
 
+  @media (max-width: 600px) {
+    width: 18vw;
+    height: 18vw;
+  }
+
   &:not(.shown) {
     display: inline-block !important;
     visibility: hidden;

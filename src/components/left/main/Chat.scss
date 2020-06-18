@@ -1,11 +1,11 @@
 .Chat {
-  > button {
+  .ListItem-button {
     line-height: inherit;
     padding: .5625rem .6975rem .5625rem .5625rem;
   }
 
   @media (max-width: 600px) {
-    > button {
+    .ListItem-button {
       border-radius: 0;
     }
   }

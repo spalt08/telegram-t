@@ -1,5 +1,8 @@
 #UiLoader {
   height: 100%;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 
   .mask {
     position: fixed;

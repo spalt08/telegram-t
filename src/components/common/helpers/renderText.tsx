@@ -10,7 +10,7 @@ type TextPart = string | Element;
 export default function renderText(
   part: TextPart,
   filters: Array<'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight'> = ['emoji'],
-  params?: { query: string | undefined },
+  params?: { highlight: string | undefined },
 ): TextPart[] {
   if (typeof part !== 'string') {
     return [part];
@@ -37,7 +37,7 @@ export default function renderText(
         return addLineBreaks(text, 'html');
 
       case 'highlight':
-        return addHighlight(text, params!.query);
+        return addHighlight(text, params!.highlight);
     }
 
     return text;
@@ -129,14 +129,14 @@ function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html' = 'jsx'): Tex
   }, [] as TextPart[]);
 }
 
-function addHighlight(textParts: TextPart[], query: string | undefined): TextPart[] {
+function addHighlight(textParts: TextPart[], highlight: string | undefined): TextPart[] {
   return textParts.reduce((result, part) => {
-    if (typeof part !== 'string' || !query) {
+    if (typeof part !== 'string' || !highlight) {
       return [...result, part];
     }
 
     const lowerCaseText = part.toLowerCase();
-    const queryPosition = lowerCaseText.indexOf(query.toLowerCase());
+    const queryPosition = lowerCaseText.indexOf(highlight.toLowerCase());
     if (queryPosition < 0) {
       return [...result, part];
     }
@@ -144,9 +144,11 @@ function addHighlight(textParts: TextPart[], query: string | undefined): TextPar
     const content: TextPart[] = [];
     content.push(part.substring(0, queryPosition));
     content.push(
-      <span className="matching-text-highlight">{part.substring(queryPosition, queryPosition + query.length)}</span>,
+      <span className="matching-text-highlight">
+        {part.substring(queryPosition, queryPosition + highlight.length)}
+      </span>,
     );
-    content.push(part.substring(queryPosition + query.length));
+    content.push(part.substring(queryPosition + highlight.length));
 
     return content;
   }, [] as TextPart[]);

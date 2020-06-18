@@ -1,7 +1,7 @@
 import { ApiPhoto, ApiVideo, ApiSticker } from '../../../api/types';
 import { getPhotoInlineDimensions, getVideoDimensions, IDimensions } from '../../../modules/helpers';
 import windowSize from '../../../util/windowSize';
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../../config';
+import { IS_MOBILE_SCREEN } from '../../../util/environment';
 
 export type AlbumMediaParameters = {
   mediaCount: number;
@@ -11,6 +11,7 @@ export type AlbumMediaParameters = {
 };
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
+export const MOBILE_VERSION_QUERY = '(max-height: 640px)';
 const DEFAULT_MEDIA_DIMENSIONS: IDimensions = { width: 100, height: 100 };
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);
 export const ROUND_VIDEO_DIMENSIONS = 200;
@@ -18,7 +19,7 @@ export const AVATAR_FULL_DIMENSIONS = { width: 640, height: 640 };
 
 function getMaxMessageWidthRem(fromOwnMessage: boolean) {
   const regularMaxWidth = fromOwnMessage ? 30 : 29;
-  if (window.innerWidth > MOBILE_SCREEN_MAX_WIDTH) {
+  if (!IS_MOBILE_SCREEN) {
     return regularMaxWidth;
   }
 

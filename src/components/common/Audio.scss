@@ -14,18 +14,18 @@
     .Button {
       --color-primary: var(--color-text-green);
       --color-primary-shade: var(--color-green);
+      --color-primary-shade-darker: var(--color-green-darker);
       --color-white: var(--color-background-own);
     }
   }
 
   .toggle-play {
-    margin-right: .75rem;
-    width: 3.375rem;
-    height: 3.375rem;
+    margin-right: .5rem;
 
     &.smaller {
       width: 3rem;
       height: 3rem;
+      margin-right: .75rem;
 
       i {
         font-size: 1.625rem;
@@ -35,11 +35,12 @@
 
     i {
       position: absolute;
-      font-size: 1.9375rem;
-      margin-top: -.05rem;
 
       &.icon-play {
-        margin-left: .15rem;
+        margin-left: .125rem;
+        @media (max-width: 600px) {
+          margin-left: .0625rem;
+        }
       }
     }
 
@@ -60,7 +61,6 @@
 
   .content {
     align-self: center;
-    margin-top: .4375rem;
     min-width: 0;
     flex-grow: 1;
   }
@@ -68,6 +68,7 @@
   .title {
     font-weight: 500;
     margin: 0;
+    line-height: 1.25;
   }
 
   .voice-duration {
@@ -122,7 +123,6 @@
     margin-left: -6px;
     top: 1px;
     cursor: pointer;
-    user-select: none;
 
     &::before {
       content: '';
@@ -180,7 +180,7 @@
     }
   }
 
-  &.smaller {
+  &.bigger {
     .content {
       margin-top: .1875rem;
     }
@@ -212,5 +212,10 @@
       top: 0.1875rem;
       left: 0.1875rem;
     }
+  }
+
+  .ProgressSpinner.size-s svg {
+    width: 2.25rem;
+    height: 2.25rem;
   }
 }

@@ -13,6 +13,10 @@
     transform: translate3d(0, 0, 0);
     transition: transform var(--layer-transition);
 
+    body.animation-level-0 & {
+      transition: none;
+    }
+
     body.is-right-column-shown & {
       transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
     }
@@ -20,6 +24,16 @@
 
   @media (max-width: 600px) {
     padding: 0 0.5rem 0.5rem;
+
+    transform: translate3d(0, 0, 0);
+
+    body:not(.transition-locked) & {
+      transition: transform var(--layer-transition);
+    }
+
+    body.is-symbol-menu-open & {
+      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
+    }
   }
 
   &::before {
@@ -38,6 +52,11 @@
     @media (max-width: 600px) {
       left: 0;
       right: 0;
+      --shadow-color: #678a64;
+
+      body.is-symbol-menu-open & {
+        --shadow-color: #b4bf9e;
+      }
     }
 
     @media screen and (min-height: 750px) {
@@ -143,6 +162,35 @@
 
       .icon-check {
         animation: grow-icon .4s ease-out;
+      }
+    }
+  }
+
+  .mobile-symbol-menu-button {
+    width: 2.875rem;
+    height: 2.875rem;
+    position: relative;
+
+    .icon-smile,
+    .icon-keyboard {
+      position: absolute;
+    }
+
+    .icon-smile {
+      animation: grow-icon .4s ease-out;
+    }
+
+    .icon-keyboard {
+      animation: hide-icon .4s forwards ease-out;
+    }
+
+    &.menu-opened {
+      .icon-keyboard {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-smile {
+        animation: hide-icon .4s forwards ease-out;
       }
     }
   }

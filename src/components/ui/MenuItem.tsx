@@ -3,7 +3,6 @@ import React, { FC, useCallback } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 
 import RippleEffect from './RippleEffect';
-import AttentionIndicator from './AttentionIndicator';
 
 import './MenuItem.scss';
 
@@ -17,7 +16,6 @@ type OwnProps = {
   href?: string;
   download?: string;
   disabled?: boolean;
-  attention?: boolean;
   ripple?: boolean;
   destructive?: boolean;
 };
@@ -31,7 +29,6 @@ const MenuItem: FC<OwnProps> = (props) => {
     href,
     download,
     disabled,
-    attention,
     ripple,
     destructive,
   } = props;
@@ -79,7 +76,6 @@ const MenuItem: FC<OwnProps> = (props) => {
       {!disabled && ripple && (
         <RippleEffect />
       )}
-      {attention && <AttentionIndicator show={attention} />}
     </>
   );
 

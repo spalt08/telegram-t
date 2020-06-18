@@ -15,7 +15,6 @@ import { isChatArchived } from '../../../modules/helpers';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 import Button from '../../ui/Button';
-import AttentionIndicator from '../../ui/AttentionIndicator';
 import SearchInput from '../../ui/SearchInput';
 
 import './LeftMainHeader.scss';
@@ -34,7 +33,6 @@ type OwnProps = {
 type StateProps = {
   searchQuery?: string;
   isLoading: boolean;
-  isSettingsAttentionNeeded: boolean;
   currentUserId?: number;
   chatsById?: Record<number, ApiChat>;
 };
@@ -52,7 +50,6 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   onReset,
   searchQuery,
   isLoading,
-  isSettingsAttentionNeeded,
   currentUserId,
   chatsById,
   openChat,
@@ -81,8 +78,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        onMouseDown={hasMenu ? onTrigger : undefined}
-        onClick={!hasMenu ? () => onReset() : undefined}
+        onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? 'Open menu' : 'Return to chat list'}
       >
         <div className={buildClassName('animated-menu-icon', !hasMenu && 'state-back')} />
@@ -143,7 +139,6 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         <MenuItem
           icon="settings"
           onClick={onSelectSettings}
-          attention={isSettingsAttentionNeeded}
         >
           Settings
         </MenuItem>
@@ -154,8 +149,8 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
           Help
         </MenuItem>
       </DropdownMenu>
-      {hasMenu && <AttentionIndicator show={isSettingsAttentionNeeded} />}
       <SearchInput
+        inputId="telegram-search-input"
         value={contactsFilter || searchQuery}
         focused={isSearchFocused}
         isLoading={isLoading}
@@ -170,14 +165,12 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { query: searchQuery, fetchingStatus } = global.globalSearch;
-    const { isAnimationLevelSettingViewed } = global.settings;
     const { currentUserId } = global;
     const { byId: chatsById } = global.chats;
 
     return {
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
-      isSettingsAttentionNeeded: !isAnimationLevelSettingViewed,
       currentUserId,
       chatsById,
     };

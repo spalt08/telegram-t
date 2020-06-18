@@ -5,11 +5,16 @@
   width: var(--right-column-width);
   height: 100%;
   transform: translate3d(var(--right-column-width), 0, 0);
-  transition: transform var(--layer-transition);
   background: var(--color-background);
   border-left: 1px solid var(--color-borders);
   z-index: var(--z-right-column);
   pointer-events: all;
+
+  transition: transform var(--layer-transition);
+
+  body.animation-level-0 & {
+    transition: none;
+  }
 
   // @optimization
   &:not(:hover) {
@@ -28,7 +33,7 @@
   }
 
   > .Transition {
-    height: calc(100% - var(--header-height));
+    height: calc(var(--vh, 1vh) * 100 - var(--header-height));
   }
 }
 
@@ -59,6 +64,10 @@
 
     @media (max-width: 600px) {
       transition: opacity var(--layer-transition);
+
+      body.animation-level-0 & {
+        transition: none;
+      }
     }
   }
 
@@ -90,6 +99,10 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity var(--layer-transition);
+
+        body.animation-level-0 & {
+          transition: none;
+        }
       }
     }
   }

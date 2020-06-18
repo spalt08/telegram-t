@@ -1,6 +1,4 @@
-import React, {
-  FC, useCallback, useEffect, memo,
-} from '../../../lib/teact/teact';
+import React, { FC, useCallback, memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
@@ -12,20 +10,14 @@ import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 import Checkbox from '../../ui/Checkbox';
 import RadioGroup from '../../ui/RadioGroup';
-import AttentionIndicator from '../../ui/AttentionIndicator';
 
 type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
 };
 
-type StateProps = {
-  isAnimationLevelBadgeShown: boolean;
-} & Pick<ISettings, (
-  'messageTextSize' | 'animationLevel' |
-  'messageSendKeyCombo'
-)>;
+type StateProps = Pick<ISettings, 'messageTextSize' | 'animationLevel' | 'messageSendKeyCombo'>;
 
-type DispatchProps = Pick<GlobalActions, 'setSettingOption' | 'clearAnimationSettingAttention'>;
+type DispatchProps = Pick<GlobalActions, 'setSettingOption'>;
 
 const KEYBOARD_SEND_OPTIONS = [
   { value: 'enter', label: 'Send by Enter', subLabel: 'New line by Shift + Enter' },
@@ -38,16 +30,11 @@ const ANIMATION_LEVEL_OPTIONS = [
   'Lots of Stuff',
 ];
 
-const ANIMATION_LEVEL_ATTENTION_CLEAR_TIMEOUT_MS = 5000;
-
 const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
-  // onScreenSelect,
-  isAnimationLevelBadgeShown,
   messageTextSize,
   animationLevel,
   messageSendKeyCombo,
   setSettingOption,
-  clearAnimationSettingAttention,
 }) => {
   const handleAnimationLevelChange = useCallback((newLevel: number) => {
     ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {
@@ -56,14 +43,6 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
     setSettingOption({ animationLevel: newLevel });
   }, [setSettingOption]);
-
-  useEffect(() => {
-    if (isAnimationLevelBadgeShown) {
-      setTimeout(() => {
-        clearAnimationSettingAttention();
-      }, ANIMATION_LEVEL_ATTENTION_CLEAR_TIMEOUT_MS);
-    }
-  }, [isAnimationLevelBadgeShown, clearAnimationSettingAttention]);
 
   const handleMessageTextSizeChange = useCallback((newSize: number) => {
     setSettingOption({ messageTextSize: newSize });
@@ -89,13 +68,12 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
           icon="photo"
           className="not-implemented"
         >
-         Chat Background
+          Chat Background
         </ListItem>
       </div>
 
       <div className="settings-item">
         <h4 className="settings-item-header">
-          <AttentionIndicator show={isAnimationLevelBadgeShown} />
           Animation Level
         </h4>
         <p className="settings-item-description">Please choose the desired animations amount.</p>
@@ -170,10 +148,9 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { isAnimationLevelSettingViewed, byKey } = global.settings;
+    const { byKey } = global.settings;
 
     return {
-      isAnimationLevelBadgeShown: !isAnimationLevelSettingViewed,
       ...pick(byKey, [
         'messageTextSize',
         'animationLevel',
@@ -181,5 +158,5 @@ export default memo(withGlobal<OwnProps>(
       ]),
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setSettingOption', 'clearAnimationSettingAttention']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['setSettingOption']),
 )(SettingsGeneral));

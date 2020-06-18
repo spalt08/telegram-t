@@ -54,7 +54,7 @@
   .ListItem.picker-list-item {
     margin: 0;
 
-    > button {
+    .ListItem-button {
       padding-right: 0;
       display: flex;
       align-items: center;
@@ -65,11 +65,11 @@
       height: 3rem;
     }
 
-    &.chat-type-item > button {
+    &.chat-type-item .ListItem-button {
       padding: 0.875rem 0.75rem;
     }
 
-    &.chat-item > button {
+    &.chat-item .ListItem-button {
       padding: 0.5rem 0.75rem;
     }
 

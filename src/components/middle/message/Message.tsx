@@ -20,7 +20,7 @@ import {
   selectIsChatWithSelf,
   selectOutgoingStatus,
   selectUser,
-  selectIsMessageFocused,
+  selectIsMessageFocused, selectCurrentMessageSearch,
 } from '../../../modules/selectors';
 import {
   getMessageContent,
@@ -46,6 +46,7 @@ import { ROUND_VIDEO_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
+import { IS_MOBILE_SCREEN } from '../../../util/environment';
 
 import Avatar from '../../common/Avatar';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -91,6 +92,7 @@ type StateProps = {
   isSelectedToForward?: boolean;
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
+  highlight?: string;
 };
 
 type DispatchProps = Pick<GlobalActions, (
@@ -105,6 +107,10 @@ const FOCUS_MAX_OFFSET = 2000;
 // This is used when the viewport was replaced.
 const RELOCATED_FOCUS_OFFSET = 1500;
 const NBSP = '\u00A0';
+
+function getIsMenuDisabled() {
+  return IS_MOBILE_SCREEN && window.document.body.classList.contains('enable-symbol-menu-transforms');
+}
 
 const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   message,
@@ -124,6 +130,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   isSelectedToForward,
   isChatWithSelf,
   lastSyncTime,
+  highlight,
   isFirstInGroup,
   isLastInGroup,
   isLastInList,
@@ -142,7 +149,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(elementRef);
+  } = useContextMenuHandlers(elementRef, getIsMenuDisabled);
 
   const { chatId, id: messageId } = message;
 
@@ -168,7 +175,7 @@ const Message: FC<OwnProps & StateProps & DispatchProps> = ({
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage,
   } = getMessageContent(message);
-  const textParts = renderMessageText(message);
+  const textParts = renderMessageText(message, highlight);
   const hasMedia = (
     getMessageMediaHash(message, 'inline')
     || hasMessageLocalBlobUrl(message)
@@ -461,6 +468,9 @@ export default memo(withGlobal<OwnProps>(
     const isAudio = Boolean(getMessageAudio(message) || getMessageVoice(message));
     const { lastSyncTime } = global;
 
+    const messageSearch = !IS_MOBILE_SCREEN && selectCurrentMessageSearch(global);
+    const highlight = (messageSearch && messageSearch.currentType === 'text' && messageSearch.query) || undefined;
+
     return {
       ...(userId && { sender: selectUser(global, userId) }),
       originSender,
@@ -475,6 +485,7 @@ export default memo(withGlobal<OwnProps>(
       // Heavy inline videos are never cached and should be re-fetched after connection.
       // Audio on mobiles are also started automatically on page load.
       ...((isVideo || isAudio) && { lastSyncTime }),
+      highlight,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [

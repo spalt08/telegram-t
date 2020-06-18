@@ -1,6 +1,7 @@
 import React, {
   FC, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
+import { withGlobal } from '../../lib/teact/teactn';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import usePrevious from '../../hooks/usePrevious';
@@ -11,7 +12,7 @@ import './Transition.scss';
 
 type ChildrenFn = (isActive: boolean) => any;
 type OwnProps = {
-  activeKey: any;
+  activeKey: number;
   name: 'none' | 'slide' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'scroll-slide' | 'fade' | 'slide-layers';
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
@@ -21,6 +22,10 @@ type OwnProps = {
   onStart?: () => void;
   onStop?: () => void;
   children: ChildrenFn;
+};
+
+type StateProps = {
+  animationLevel: number;
 };
 
 const ANIMATION_DURATION = {
@@ -33,7 +38,7 @@ const ANIMATION_DURATION = {
   fade: 150,
 };
 
-const Transition: FC<OwnProps> = ({
+const Transition: FC<OwnProps & StateProps> = ({
   activeKey,
   name,
   direction = 'auto',
@@ -44,6 +49,7 @@ const Transition: FC<OwnProps> = ({
   onStart,
   onStop,
   children,
+  animationLevel,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const rendersRef = useRef<Record<number, ChildrenFn>>({});
@@ -94,7 +100,7 @@ const Transition: FC<OwnProps> = ({
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
-    if (name === 'none') {
+    if (name === 'none' || animationLevel === 0) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           node.classList.remove('from', 'through', 'to');
@@ -124,7 +130,9 @@ const Transition: FC<OwnProps> = ({
       });
     }
 
-    dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+    if (animationLevel > 0) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION[name] + ANIMATION_END_DELAY);
+    }
 
     requestAnimationFrame(() => {
       container.classList.add('animating');
@@ -173,6 +181,7 @@ const Transition: FC<OwnProps> = ({
     onStop,
     renderCount,
     shouldRestoreHeight,
+    animationLevel,
   ]);
 
   useLayoutEffect(() => {
@@ -204,7 +213,7 @@ const Transition: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Transition',
     className,
-    name,
+    animationLevel === 0 && name === 'scroll-slide' ? 'slide' : name,
   );
 
   return (
@@ -214,4 +223,7 @@ const Transition: FC<OwnProps> = ({
   );
 };
 
-export default Transition;
+export default withGlobal<OwnProps>((global) => {
+  const { animationLevel } = global.settings.byKey;
+  return { animationLevel };
+})(Transition);

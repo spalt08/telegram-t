@@ -11,7 +11,7 @@ import SafeLink from '../../middle/message/SafeLink';
 
 export type TextPart = string | Element;
 
-export function renderMessageText(message: ApiMessage) {
+export function renderMessageText(message: ApiMessage, highlight?: string) {
   const formattedText = message.content.text;
 
   if (!formattedText || !formattedText.text) {
@@ -20,15 +20,15 @@ export function renderMessageText(message: ApiMessage) {
   }
   const { text, entities } = formattedText;
 
-  return renderTextWithEntities(text, entities);
+  return renderTextWithEntities(text, entities, highlight);
 }
 
-export function renderTextWithEntities(text?: string, entities?: ApiMessageEntity[]) {
+export function renderTextWithEntities(text?: string, entities?: ApiMessageEntity[], highlight?: string) {
   if (!text) {
     return undefined;
   }
   if (!entities) {
-    return renderMessagePart(text);
+    return renderMessagePart(text, highlight);
   }
 
   let deleteLineBreakAfterPre = false;
@@ -47,7 +47,7 @@ export function renderTextWithEntities(text?: string, entities?: ApiMessageEntit
         deleteLineBreakAfterPre = false;
       }
       if (!nestedEntity && textBefore) {
-        result.push(...renderMessagePart(textBefore) as TextPart[]);
+        result.push(...renderMessagePart(textBefore, highlight) as TextPart[]);
       }
     }
 
@@ -96,7 +96,7 @@ export function renderTextWithEntities(text?: string, entities?: ApiMessageEntit
       textAfter = textAfter.substring(1);
     }
     if (textAfter) {
-      result.push(...renderMessagePart(textAfter) as TextPart[]);
+      result.push(...renderMessagePart(textAfter, highlight) as TextPart[]);
     }
   }
 
@@ -209,8 +209,12 @@ function processEntity(
   }
 }
 
-function renderMessagePart(str: TextPart) {
-  return renderText(str, ['hq_emoji', 'br']);
+function renderMessagePart(str: TextPart, highlight?: string) {
+  if (highlight) {
+    return renderText(str, ['hq_emoji', 'br', 'highlight'], { highlight });
+  } else {
+    return renderText(str, ['hq_emoji', 'br']);
+  }
 }
 
 function stopPropagation(event: any) {

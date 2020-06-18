@@ -33,6 +33,7 @@ export type OwnProps = {
   download?: string;
   disabled?: boolean;
   ripple?: boolean;
+  tabIndex?: number;
 };
 
 // Longest animation duration;
@@ -60,6 +61,7 @@ const Button: FC<OwnProps> = ({
   download,
   disabled,
   ripple,
+  tabIndex,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
@@ -109,6 +111,7 @@ const Button: FC<OwnProps> = ({
         href={href}
         title={ariaLabel}
         download={download}
+        tabIndex={tabIndex}
       >
         {children}
         {!disabled && ripple && (
@@ -131,6 +134,7 @@ const Button: FC<OwnProps> = ({
       onFocus={onFocus && !disabled ? onFocus : undefined}
       aria-label={ariaLabel}
       title={ariaLabel}
+      tabIndex={tabIndex}
     >
       {isLoading ? (
         <div>

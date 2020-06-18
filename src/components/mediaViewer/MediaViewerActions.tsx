@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from '../../lib/teact/teact';
 
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -23,8 +23,6 @@ const MediaViewerActions: FC<OwnProps> = ({
   onCloseMediaViewer,
   onForward,
 }) => {
-  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
-
   const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
       <Button
@@ -41,7 +39,7 @@ const MediaViewerActions: FC<OwnProps> = ({
     );
   }, []);
 
-  if (isMobile) {
+  if (IS_MOBILE_SCREEN) {
     return (
       <DropdownMenu
         trigger={MenuButton}

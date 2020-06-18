@@ -1,7 +1,7 @@
 .ListItem {
   position: relative;
 
-  > button {
+  .ListItem-button {
     width: 100%;
     background: none;
     border: none !important;
@@ -17,18 +17,6 @@
     border-radius: var(--border-radius-default);
     --ripple-color: rgba(0, 0, 0, .08);
 
-    &:not([disabled]) {
-      cursor: pointer;
-
-      &:hover, &:focus {
-        background-color: var(--color-chat-hover);
-      }
-    }
-
-    &[disabled] {
-      opacity: 0.5;
-    }
-
     > i {
       font-size: 1.5rem;
       margin-right: 2rem;
@@ -36,36 +24,52 @@
     }
   }
 
-  &:not(.has-ripple) {
-    > button:active {
+  &.disabled {
+    pointer-events: none;
+
+    .ListItem-button {
+      opacity: 0.5;
+    }
+  }
+
+  &:not(.disabled) {
+    .ListItem-button {
+      cursor: pointer;
+
+      &:hover, &:focus {
+        background-color: var(--color-chat-hover);
+      }
+    }
+  }
+
+  body.animation-level-0 & {
+    .ripple-container {
+      display: none;
+    }
+  }
+
+  &:not(.has-ripple),
+  body.animation-level-0 & {
+    .ListItem-button:active {
       background-color: var(--color-chat-active);
       transition: none !important;
     }
   }
 
-  &.no-selection {
-    user-select: none;
-  }
-
-  &.has-menu-open > button {
+  &.has-menu-open .ListItem-button {
     background-color: var(--color-chat-hover);
   }
 
   &.narrow {
     margin-bottom: 0.75rem;
 
-    > button {
+    .ListItem-button {
       padding: 0.5rem 1rem;
     }
   }
 
   &.inactive {
     pointer-events: none;
-  }
-
-  .AttentionIndicator {
-    top: 0.5rem;
-    left: 2.5rem;
   }
 
   &-context-menu {

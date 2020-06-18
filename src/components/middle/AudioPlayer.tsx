@@ -25,10 +25,10 @@ type StateProps = {
   senderName?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'focusMessage'>;
+type DispatchProps = Pick<GlobalActions, 'focusMessage' | 'closeAudioPlayer'>;
 
 const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
-  message, senderName, focusMessage,
+  message, senderName, focusMessage, closeAudioPlayer,
 }) => {
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
   const { playPause, isPlaying } = useAudioPlayer(message.id, mediaData);
@@ -48,6 +48,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         size="smaller"
         className={buildClassName('toggle-play', isPlaying ? 'pause' : 'play')}
         onClick={playPause}
+        ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
       >
         <i className="icon-play" />
         <i className="icon-pause" />
@@ -57,6 +58,18 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
         {audio ? renderAudio(audio) : renderVoice(senderName)}
         <RippleEffect />
       </div>
+
+      <Button
+        round
+        ripple
+        className="player-close"
+        color="translucent"
+        size="smaller"
+        onClick={closeAudioPlayer}
+        ariaLabel="Close player"
+      >
+        <i className="icon-close" />
+      </Button>
     </div>
   );
 };
@@ -90,5 +103,5 @@ export default withGlobal<OwnProps>(
 
     return { senderName };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['focusMessage', 'closeAudioPlayer']),
 )(AudioPlayer);

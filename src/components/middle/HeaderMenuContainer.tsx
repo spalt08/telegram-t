@@ -12,7 +12,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import { selectChat, selectIsChatWithSelf } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import { isChatPrivate, getCanDeleteChat } from '../../modules/helpers';
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 
 import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
@@ -63,7 +63,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { x, y } = anchor;
-  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
 
@@ -93,6 +92,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [closeMenu, onSubscribeChannel]);
 
   const handleSearch = useCallback(() => {
+    document.getElementById('magic-input')!.focus();
     onSearchClick();
     closeMenu();
   }, [closeMenu, onSearchClick]);
@@ -112,7 +112,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
-          {isMobile && canSubscribe && (
+          {IS_MOBILE_SCREEN && canSubscribe && (
             <MenuItem
               icon={isChannel ? 'channel' : 'group'}
               onClick={handleSubscribe}
@@ -120,7 +120,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps & DispatchProps> = ({
               {isChannel ? 'Subscribe' : 'Join Group'}
             </MenuItem>
           )}
-          {isMobile && (
+          {IS_MOBILE_SCREEN && (
             <MenuItem
               icon="search"
               onClick={handleSearch}

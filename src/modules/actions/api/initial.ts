@@ -4,12 +4,11 @@ import {
 
 import { GlobalState } from '../../../global/types';
 
-import { GRAMJS_SESSION_ID_KEY, ANIMATION_SETTINGS_VIEWED_KEY } from '../../../config';
+import { GRAMJS_SESSION_ID_KEY } from '../../../config';
 import { initApi, callApi } from '../../../api/gramjs';
 
 addReducer('initApi', (global: GlobalState, actions) => {
   const sessionId = localStorage.getItem(GRAMJS_SESSION_ID_KEY) || undefined;
-  const isAnimationLevelSettingViewed = Boolean(localStorage.getItem(ANIMATION_SETTINGS_VIEWED_KEY));
 
   void initApi(actions.apiUpdate, sessionId);
 
@@ -18,7 +17,6 @@ addReducer('initApi', (global: GlobalState, actions) => {
     authIsSessionRemembered: Boolean(sessionId),
     settings: {
       ...global.settings,
-      isAnimationLevelSettingViewed,
     },
   };
 });

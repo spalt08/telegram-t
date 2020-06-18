@@ -94,7 +94,7 @@ const RightSearch: FC<OwnProps & StateProps & DispatchProps> = ({
             <h3>{title && renderText(title)}</h3>
             <LastMessageMeta message={message} />
           </div>
-          <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { query })}</p>
+          <p className="subtitle">{renderText(text, ['emoji', 'highlight'], { highlight: query })}</p>
         </div>
       </ListItem>
     );

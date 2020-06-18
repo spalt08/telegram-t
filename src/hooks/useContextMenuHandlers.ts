@@ -6,25 +6,29 @@ import { IS_TOUCH_ENV } from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 250;
 
+type BooleanFunction = () => boolean | undefined;
+
 export default (
   elementRef: RefObject<HTMLElement>,
-  isMenuDisabled?: boolean,
+  isMenuDisabled?: boolean | BooleanFunction,
 ) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
+  const getIsMenuDisabled = typeof isMenuDisabled === 'function' ? isMenuDisabled : () => isMenuDisabled;
+
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
-    if (!isMenuDisabled && e.button === 2) {
-      e.currentTarget.classList.add('no-selection');
+    if (!getIsMenuDisabled() && e.button === 2) {
+      document.body.classList.add('no-selection');
     }
-  }, [isMenuDisabled]);
+  }, [getIsMenuDisabled]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    if (isMenuDisabled) {
+    if (getIsMenuDisabled()) {
       return;
     }
     e.preventDefault();
-    e.currentTarget.classList.remove('no-selection');
+    document.body.classList.remove('no-selection');
 
     if (contextMenuPosition) {
       return;
@@ -32,7 +36,7 @@ export default (
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-  }, [isMenuDisabled, contextMenuPosition]);
+  }, [getIsMenuDisabled, contextMenuPosition]);
 
   const handleContextMenuClose = useCallback(() => {
     setIsContextMenuOpen(false);
@@ -44,7 +48,7 @@ export default (
 
   // Support context menu on touch-devices
   useEffect(() => {
-    if (isMenuDisabled || !IS_TOUCH_ENV) {
+    if (getIsMenuDisabled() || !IS_TOUCH_ENV) {
       return undefined;
     }
 
@@ -56,6 +60,8 @@ export default (
     let timer: number | undefined;
 
     const clearLongPressTimer = () => {
+      document.body.classList.remove('no-selection');
+
       if (timer) {
         clearTimeout(timer);
         timer = undefined;
@@ -85,6 +91,8 @@ export default (
 
     const startLongPressTimer = (e: TouchEvent) => {
       clearLongPressTimer();
+
+      document.body.classList.add('no-selection');
       timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);
     };
 
@@ -101,7 +109,7 @@ export default (
       element.removeEventListener('touchend', clearLongPressTimer, true);
       element.removeEventListener('touchmove', clearLongPressTimer, true);
     };
-  }, [contextMenuPosition, isMenuDisabled, elementRef]);
+  }, [contextMenuPosition, getIsMenuDisabled, elementRef]);
 
   return {
     isContextMenuOpen,

@@ -7,7 +7,7 @@ import React, {
 
 import { IAnchorPosition } from '../../types';
 
-import { MOBILE_SCREEN_MAX_WIDTH } from '../../config';
+import { IS_MOBILE_SCREEN } from '../../util/environment';
 
 import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
@@ -33,7 +33,6 @@ const HeaderActions: FC<OwnProps> = ({
   const menuButtonRef = useRef<HTMLButtonElement>();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
-  const isMobile = window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH;
 
   const handleHeaderMenuOpen = useCallback(() => {
     setIsMenuOpen(true);
@@ -59,7 +58,7 @@ const HeaderActions: FC<OwnProps> = ({
       className="HeaderActions"
       onClick={stopPropagation}
     >
-      {!isMobile && canSubscribe && (
+      {!IS_MOBILE_SCREEN && canSubscribe && (
         <Button
           size="tiny"
           ripple
@@ -69,7 +68,7 @@ const HeaderActions: FC<OwnProps> = ({
           {isChannel ? 'Subscribe' : 'Join Group'}
         </Button>
       )}
-      {!isMobile && (
+      {!IS_MOBILE_SCREEN && (
         <Button
           round
           ripple={isRightColumnShown}
@@ -81,7 +80,7 @@ const HeaderActions: FC<OwnProps> = ({
           <i className="icon-search" />
         </Button>
       )}
-      {(isMobile || !canSubscribe) && (
+      {(IS_MOBILE_SCREEN || !canSubscribe) && (
         <Button
           round
           ripple

@@ -10,8 +10,8 @@ import {
   GLOBAL_STATE_CACHE_KEY,
   GRAMJS_SESSION_ID_KEY,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
-  MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
+import { IS_MOBILE_SCREEN } from '../util/environment';
 import { pick } from '../util/iteratees';
 
 const CACHE_THROTTLE_TIMEOUT = 1000;
@@ -136,7 +136,7 @@ function reduceChats(global: GlobalState): GlobalState['chats'] {
     },
     replyingToById: {},
     editingById: {},
-    ...(window.innerWidth <= MOBILE_SCREEN_MAX_WIDTH && { selectedId: undefined }),
+    ...(IS_MOBILE_SCREEN && { selectedId: undefined }),
   };
 }
 

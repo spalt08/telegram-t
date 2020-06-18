@@ -24,6 +24,9 @@ html, body {
   font-family: Roboto, system-ui, "Apple Color Emoji", sans-serif;
   color: var(--color-text);
   overflow: hidden;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 body.scrollable {
@@ -34,6 +37,9 @@ body.scrollable {
   height: 100%;
   max-width: 1680px;
   margin: 0 auto;
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 #middle-column-portals,
@@ -46,6 +52,11 @@ body.scrollable {
 
 .hidden {
   visibility: hidden;
+}
+
+.no-selection {
+  user-select: none;
+  -webkit-user-select: none !important;
 }
 
 /*
@@ -88,7 +99,7 @@ body.scrollable {
     border-radius: 0.35rem;
   }
 
-  &:hover {
+  &:hover, &:focus, &:focus-within {
     scrollbar-color: rgba(90, 90, 90, 0.3) transparent;
 
     &::-webkit-scrollbar-thumb {
