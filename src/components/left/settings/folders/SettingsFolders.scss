@@ -43,13 +43,24 @@
 
     .Avatar {
       margin-left: -0.25rem;
-      margin-right: 1.75rem;
+      margin-right: 1.5rem;
     }
 
     .title {
       display: flex;
       justify-content: flex-start;
       align-items: center;
+
+      h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.3125;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
     }
 
     .status {

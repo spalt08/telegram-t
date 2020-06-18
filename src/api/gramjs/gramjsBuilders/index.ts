@@ -74,7 +74,7 @@ export function buildInputPeerFromLocalDb(chatOrUserId: number): GramJs.TypeInpu
   }
 
   if (chatOrUserId <= -1000000000) {
-    const { accessHash } = (localDb.chats[chatOrUserId] as GramJs.Channel) || {};
+    const { accessHash } = (localDb.chats[-chatOrUserId] as GramJs.Channel) || {};
 
     return accessHash
       ? new GramJs.InputPeerChannel({

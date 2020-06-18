@@ -83,25 +83,32 @@
     display: flex;
     align-items: center;
     flex-grow: 1;
+    overflow: hidden;
 
     .Avatar {
+      flex-shrink: 0;
       margin-right: 0.75rem;
     }
 
     .info {
-      max-width: calc(100% - 3.75rem);
+      flex-grow: 1;
+      overflow: hidden;
     }
 
     .title {
       display: flex;
       align-items: center;
-      font-weight: 500;
-      font-size: 1rem;
-      line-height: 1.3125;
-      white-space: pre;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
+
+      h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.3125;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
 
       .VerifiedIcon {
         width: 1.25rem;
@@ -112,6 +119,7 @@
 
       .emoji {
         background-position: 0 0;
+        flex-shrink: 0;
       }
     }
 

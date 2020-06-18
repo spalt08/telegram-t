@@ -190,13 +190,17 @@ function chatFolderFilter(
   folder: ApiChatFolder,
   usersById: Record<number, ApiUser>,
 ): boolean {
-  const { excludedChatIds, includedChatIds } = folder;
+  const { excludedChatIds, includedChatIds, pinnedChatIds } = folder;
 
   if (excludedChatIds && excludedChatIds.includes(chat.id)) {
     return false;
   }
 
   if (includedChatIds && includedChatIds.includes(chat.id)) {
+    return true;
+  }
+
+  if (pinnedChatIds && pinnedChatIds.includes(chat.id)) {
     return true;
   }
 

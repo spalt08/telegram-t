@@ -135,10 +135,6 @@ export async function fetchChats({
 
   if (result instanceof GramJs.messages.DialogsSlice) {
     totalChatCount = result.count;
-
-    if (resultPinned instanceof GramJs.messages.DialogsSlice) {
-      totalChatCount = (totalChatCount || 0) + resultPinned.count;
-    }
   } else {
     totalChatCount = chatIds.length;
   }
@@ -636,12 +632,19 @@ export async function deleteChatFolder(id: number) {
     id,
     filter: undefined,
   }));
+  const recommendedChatFolders = await fetchRecommendedChatFolders();
 
   if (isActionSuccessful) {
     onUpdate({
       '@type': 'updateChatFolder',
       id,
       folder: undefined,
+    });
+  }
+  if (recommendedChatFolders) {
+    onUpdate({
+      '@type': 'updateRecommendedChatFolders',
+      folders: recommendedChatFolders,
     });
   }
 }

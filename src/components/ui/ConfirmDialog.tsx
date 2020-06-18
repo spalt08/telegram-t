@@ -24,6 +24,7 @@ const ConfirmDialog: FC<OwnProps> = ({
 }) => {
   return (
     <Modal
+      className="confirm"
       isOpen={isOpen}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}

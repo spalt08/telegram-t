@@ -99,10 +99,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps & DispatchProps> = ({
       />
       <div className="info">
         {isSavedMessages ? (
-          <div className="title">Saved Messages</div>
+          <div className="title">
+            <h3>Saved Messages</h3>
+          </div>
         ) : (
           <div className="title">
-            {fullName && renderText(fullName)}
+            <h3>{fullName && renderText(fullName)}</h3>
             {user && user.isVerified && <VerifiedIcon />}
           </div>
         )}

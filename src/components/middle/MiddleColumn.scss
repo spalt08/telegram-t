@@ -1,9 +1,11 @@
-#MiddleColumn {
-  display: flex;
-  justify-content: center;
-  height: 100%;
-  position: relative;
-  z-index: 1;
+#middle-column-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+  z-index: -1;
 
   &::before {
     content: "";
@@ -15,7 +17,6 @@
     right: 0;
     background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
     background-size: cover;
-    z-index: -1;
 
     @media (max-width: 600px) {
       background-image: url('../../assets/chat-bg-mobile.jpg');
@@ -29,17 +30,20 @@
       transform: scale(1);
       transform-origin: left center;
       transition: transform var(--layer-transition);
-
-      // Fix content shifting when scrolling chats in Safari
-      @supports (-webkit-backdrop-filter: blur(1px)) {
-        margin: 0;
-      }
     }
 
     body.animation-level-2.is-right-column-shown &::before {
       transform: scale(0.67);
     }
   }
+}
+
+#MiddleColumn {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+  z-index: 1;
 
   @media (max-width: 600px) {
     overflow: hidden;

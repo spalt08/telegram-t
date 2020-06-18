@@ -104,17 +104,22 @@
     .title {
       display: flex;
       align-items: center;
-      font-weight: 500;
-      font-size: 1.125rem;
-      line-height: 1.375rem;
-      white-space: pre-wrap;
 
-      @media (min-width: 1440px) and (max-width: 1500px) {
-        white-space: pre;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 16rem;
+      h3 {
+        font-weight: 500;
+        font-size: 1.125rem;
+        line-height: 1.375rem;
+        white-space: pre-wrap;
+        margin: 0;
+
+        @media (min-width: 1440px) and (max-width: 1500px) {
+          white-space: pre;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 16rem;
+        }
       }
+
 
       .VerifiedIcon {
         width: 1.25rem;
