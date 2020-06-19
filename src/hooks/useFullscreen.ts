@@ -34,14 +34,14 @@ export default function useFullscreenStatus(elRef: RefType, setIsPlayed: Callbac
       return;
     }
 
-    if (elRef.current.webkitEnterFullscreen) {
-      elRef.current.webkitEnterFullscreen();
-    } else if (elRef.current.requestFullscreen) {
+    if (elRef.current.requestFullscreen) {
       elRef.current.requestFullscreen();
-    } else if (elRef.current.mozRequestFullScreen) {
-      elRef.current.mozRequestFullScreen();
     } else if (elRef.current.webkitRequestFullscreen) {
       elRef.current.webkitRequestFullscreen();
+    } else if (elRef.current.webkitEnterFullscreen) {
+      elRef.current.webkitEnterFullscreen();
+    } else if (elRef.current.mozRequestFullScreen) {
+      elRef.current.mozRequestFullScreen();
     }
 
     setIsFullscreen(true);
