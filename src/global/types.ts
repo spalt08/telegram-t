@@ -117,7 +117,7 @@ export type GlobalState = {
     setsById: Record<string, ApiStickerSet>;
     added: {
       hash?: number;
-      setIds: string[];
+      setIds?: string[];
     };
     recent: {
       hash?: number;
@@ -270,8 +270,8 @@ export type ActionTypes = (
   // settings
   'setSettingOption' |
   // Stickers & GIFs
-  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
-  'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
+  'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |
   // misc
   'openMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' |

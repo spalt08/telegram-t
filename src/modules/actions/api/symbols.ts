@@ -2,16 +2,33 @@ import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 
 import { ApiSticker } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
-import { throttle } from '../../../util/schedulers';
+import { pause, throttle } from '../../../util/schedulers';
 import { updateStickerSets, updateStickerSet } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectStickerSet } from '../../selectors';
+
+const ADDED_SETS_THROTTLE = 500;
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
 addReducer('loadStickerSets', (global) => {
   const { hash } = global.stickers.added || {};
   void loadStickerSets(hash);
+});
+
+addReducer('loadAddedStickers', (global, actions) => {
+  const { setIds: addedSetIds } = global.stickers.added;
+  if (!addedSetIds || !addedSetIds.length) {
+    return;
+  }
+
+  (async () => {
+    for (let i = 0; i < addedSetIds.length; i++) {
+      actions.loadStickers({ stickerSetId: addedSetIds[i] });
+
+      await pause(ADDED_SETS_THROTTLE);
+    }
+  })();
 });
 
 addReducer('loadRecentStickers', (global) => {
@@ -212,14 +229,17 @@ async function searchStickers(query: string, hash = 0) {
   const { setsById, added } = global.stickers;
 
   const resultIds = result.sets.map(({ id }) => id);
-  added.setIds.forEach((id) => {
-    if (!resultIds.includes(id)) {
-      const { title } = setsById[id] || {};
-      if (title && searchWords(title, query)) {
-        resultIds.unshift(id);
+
+  if (added.setIds) {
+    added.setIds.forEach((id) => {
+      if (!resultIds.includes(id)) {
+        const { title } = setsById[id] || {};
+        if (title && searchWords(title, query)) {
+          resultIds.unshift(id);
+        }
       }
-    }
-  });
+    });
+  }
 
   setGlobal(updateStickerSets(
     global,

@@ -47,9 +47,7 @@ const INITIAL_STATE: GlobalState = {
 
   stickers: {
     setsById: {},
-    added: {
-      setIds: [],
-    },
+    added: {},
     recent: {
       stickers: [],
     },
