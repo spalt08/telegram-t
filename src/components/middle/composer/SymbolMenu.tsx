@@ -29,6 +29,7 @@ let closeTimeout: number | undefined;
 export type OwnProps = {
   isOpen: boolean;
   allowedAttachmentOptions: IAllowedAttachmentOptions;
+  onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
   onStickerSelect: (sticker: ApiSticker) => void;
@@ -39,7 +40,9 @@ export type OwnProps = {
 
 const SymbolMenu: FC<OwnProps> = ({
   isOpen, allowedAttachmentOptions,
-  onClose, onEmojiSelect, onStickerSelect, onGifSelect, onRemoveSymbol, onSearchOpen,
+  onLoad, onClose,
+  onEmojiSelect, onStickerSelect, onGifSelect,
+  onRemoveSymbol, onSearchOpen,
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const isActivated = useRef(false);
@@ -50,6 +53,10 @@ const SymbolMenu: FC<OwnProps> = ({
   if (!isActivated.current && isOpen) {
     isActivated.current = true;
   }
+
+  useEffect(() => {
+    onLoad();
+  }, [onLoad]);
 
   useEffect(() => {
     if (closeTimeout) {
