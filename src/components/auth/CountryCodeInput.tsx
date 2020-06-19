@@ -3,9 +3,9 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { countryList } from '../../util/phoneNumber';
-import { PLATFORM_ENV } from '../../util/environment';
 import searchWords from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
+import renderText from '../common/helpers/renderText';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -21,9 +21,6 @@ type OwnProps = {
 };
 
 const DROPDOWN_HIDING_DURATION = 100;
-const BASE_FLAG_CLASS = PLATFORM_ENV === 'Windows'
-  ? 'country-flag sprite'
-  : 'country-flag';
 
 const CountryCodeInput: FC<OwnProps> = (props) => {
   const {
@@ -120,7 +117,7 @@ const CountryCodeInput: FC<OwnProps> = (props) => {
           onClick={handleChange}
         >
           <span data-country-id={country.id} />
-          <span className={`${BASE_FLAG_CLASS} ${country.id.toLowerCase()}`}>{country.flag}</span>
+          <span className="country-flag">{renderText(country.flag, ['hq_emoji'])}</span>
           <span className="country-name">{country.name}</span>
           <span className="country-code">{country.code}</span>
         </MenuItem>

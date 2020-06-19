@@ -98,7 +98,7 @@ const ChatList: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <InfiniteScroll
-      className="ChatList custom-scroll optimized-list"
+      className="chat-list custom-scroll optimized-list"
       items={viewportIds}
       onLoadMore={getMore}
       preloadBackwards={CHAT_LIST_SLICE}

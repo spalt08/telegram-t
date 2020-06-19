@@ -172,16 +172,31 @@
     position: relative;
 
     .icon-smile,
-    .icon-keyboard {
+    .icon-keyboard,
+    .Spinner {
       position: absolute;
+    }
+
+    .Spinner {
+      --spinner-size: 1.5rem;
     }
 
     .icon-smile {
       animation: grow-icon .4s ease-out;
     }
 
-    .icon-keyboard {
+    .icon-keyboard, .Spinner {
       animation: hide-icon .4s forwards ease-out;
+    }
+
+    &.is-loading {
+      .Spinner {
+        animation: grow-icon .4s ease-out;
+      }
+
+      .icon-keyboard, .icon-smile {
+        animation: hide-icon .4s forwards ease-out;
+      }
     }
 
     &.menu-opened {
@@ -189,7 +204,7 @@
         animation: grow-icon .4s ease-out;
       }
 
-      .icon-smile {
+      .icon-smile, .Spinner {
         animation: hide-icon .4s forwards ease-out;
       }
     }
@@ -296,6 +311,10 @@
       & + .placeholder-text {
         display: none;
       }
+    }
+
+    &.focus-disabled {
+      pointer-events: none;
     }
   }
 

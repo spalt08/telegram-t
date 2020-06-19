@@ -47,7 +47,7 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 }) => {
   const [showFab, setShowFab] = useState(false);
   const prevChatId = usePrevious(openChatId, true);
-  const prevCanPost = usePrevious(canPost, true);
+  const prevCanPost = usePrevious(canPost);
 
   const renderingChatId = window.innerWidth > MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
     ? openChatId

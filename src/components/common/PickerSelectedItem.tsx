@@ -4,7 +4,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 import { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../modules/selectors';
-import { getChatTitle, getPrivateChatUserId, getUserFirstName } from '../../modules/helpers';
+import { getChatTitle, getUserFirstName, isChatPrivate } from '../../modules/helpers';
 import renderText from './helpers/renderText';
 
 import Avatar from './Avatar';
@@ -13,7 +13,7 @@ import './PickerSelectedItem.scss';
 import buildClassName from '../../util/buildClassName';
 
 type OwnProps = {
-  chatId?: number;
+  chatOrUserId?: number;
   icon?: string;
   title?: string;
   isMinimized?: boolean;
@@ -23,7 +23,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  privateChatUser?: ApiUser;
+  user?: ApiUser;
 };
 
 const PickerSelectedItem: FC<OwnProps & StateProps> = ({
@@ -33,7 +33,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   onClick,
   clickArg,
   chat,
-  privateChatUser,
+  user,
 }) => {
   let iconElement: any;
   let titleText: any;
@@ -46,19 +46,19 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     );
 
     titleText = title;
-  } else if (chat) {
+  } else if (chat || user) {
     iconElement = (
       <Avatar
         chat={chat}
-        user={privateChatUser}
+        user={user}
         size="small"
-        isSavedMessages={privateChatUser && privateChatUser.isSelf}
+        isSavedMessages={user && user.isSelf}
       />
     );
 
-    const name = privateChatUser && !privateChatUser.isSelf
-      ? getUserFirstName(privateChatUser)
-      : getChatTitle(chat, privateChatUser);
+    const name = !chat || (user && !user.isSelf)
+      ? getUserFirstName(user)
+      : getChatTitle(chat, user);
 
     titleText = name ? renderText(name) : undefined;
   }
@@ -88,18 +88,17 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
-    const chat = chatId ? selectChat(global, chatId) : undefined;
-    if (!chat) {
+  (global, { chatOrUserId }): StateProps => {
+    if (!chatOrUserId) {
       return {};
     }
 
-    const privateChatUserId = getPrivateChatUserId(chat);
-    const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
+    const user = isChatPrivate(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
 
     return {
       chat,
-      privateChatUser,
+      user,
     };
   },
 )(PickerSelectedItem));

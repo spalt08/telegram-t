@@ -25,6 +25,7 @@ type PeerEntityApiChatFields = Omit<ApiChat, (
 
 function buildApiChatFieldsFromPeerEntity(
   peerEntity: GramJs.TypeUser | GramJs.TypeChat,
+  isSupport = false,
 ): PeerEntityApiChatFields {
   const avatar = ('photo' in peerEntity) && buildAvatar(peerEntity.photo);
 
@@ -40,6 +41,7 @@ function buildApiChatFieldsFromPeerEntity(
       membersCount: peerEntity.participantsCount,
       joinDate: peerEntity.date,
     }),
+    ...(isSupport && { isSupport: true }),
     ...buildApiChatPermissions(peerEntity),
     ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),
     ...buildApiChatRestrictions(peerEntity),
@@ -157,6 +159,7 @@ function buildApiChatRestrictionReason(
 export function buildApiChatFromPreview(
   preview: GramJs.TypeChat | GramJs.TypeUser,
   omitType?: boolean,
+  isSupport = false,
 ): ApiChat | undefined {
   if (
     !(preview instanceof GramJs.Chat)
@@ -170,7 +173,7 @@ export function buildApiChatFromPreview(
     id: preview instanceof GramJs.User ? preview.id : -preview.id,
     type: getApiChatTypeFromPeerEntity(preview),
     title: preview instanceof GramJs.User ? getUserName(preview) : preview.title,
-    ...buildApiChatFieldsFromPeerEntity(preview),
+    ...buildApiChatFieldsFromPeerEntity(preview, isSupport),
   };
 
   if (omitType) {

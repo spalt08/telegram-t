@@ -28,6 +28,10 @@ export function selectIsChatWithSelf(global: GlobalState, chat: ApiChat) {
   return user && user.isSelf;
 }
 
+export function selectSupportChat(global: GlobalState) {
+  return Object.values(global.chats.byId).find(({ isSupport }: ApiChat) => isSupport);
+}
+
 export function selectChatOnlineCount(global: GlobalState, chat: ApiChat) {
   if (isChatSuperGroup(chat)) {
     return chat.onlineCount;

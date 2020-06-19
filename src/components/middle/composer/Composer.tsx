@@ -26,6 +26,7 @@ import renderText from '../../common/helpers/renderText';
 import insertHtmlInSelection from '../../../util/insertHtmlInSelection';
 import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharacterOutsideSelection';
 import { pick } from '../../../util/iteratees';
+import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
 import useVoiceRecording from './hooks/useVoiceRecording';
@@ -37,6 +38,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
+import Spinner from '../../ui/Spinner';
 import AttachMenu from './AttachMenu.async';
 import SymbolMenu from './SymbolMenu.async';
 import MessageInput from './MessageInput';
@@ -70,6 +72,8 @@ const VOICE_RECORDING_FILENAME = 'wonderful-voice-message.ogg';
 const MAX_NESTING_PARENTS = 5;
 // When voice recording is active, composer placeholder will hide to prevent overlapping
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
+
+const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 
 const Composer: FC<StateProps & DispatchProps> = ({
   editedMessage,
@@ -105,6 +109,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [isPollModalOpen, openPollModal, closePollModal] = useFlag();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
 
   const {
     startRecordingVoice,
@@ -235,8 +240,13 @@ const Composer: FC<StateProps & DispatchProps> = ({
         showError({
           error: {
             message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
+            isSlowMode: true,
           },
         });
+
+        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+        messageInput.blur();
+
         return;
       }
     }
@@ -281,6 +291,24 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }
   }, [setStickerSearchQuery, setGifSearchQuery]);
 
+  const handleSymbolMenuOpen = useCallback(() => {
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+
+    if (!IS_MOBILE_SCREEN || messageInput !== document.activeElement) {
+      openSymbolMenu();
+      return;
+    }
+
+    messageInput.blur();
+    setTimeout(() => {
+      openSymbolMenu();
+    }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
+  }, [openSymbolMenu]);
+
+  const handleInputFocus = useCallback(() => {
+    closeSymbolMenu();
+  }, [closeSymbolMenu]);
+
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
     : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length)
@@ -318,6 +346,13 @@ const Composer: FC<StateProps & DispatchProps> = ({
         : 'Record a voice message';
   }
 
+  const symbolMenuButtonClassName = buildClassName(
+    'mobile-symbol-menu-button',
+    isSymbolMenuLoaded
+      ? isSymbolMenuOpen && 'menu-opened'
+      : isSymbolMenuOpen && 'is-loading',
+  );
+
   return (
     <div className="Composer">
       <AttachmentModal
@@ -347,14 +382,15 @@ const Composer: FC<StateProps & DispatchProps> = ({
         <div className="message-input-wrapper">
           {IS_MOBILE_SCREEN ? (
             <Button
-              className={`mobile-symbol-menu-button ${isSymbolMenuOpen ? 'menu-opened' : ''}`}
+              className={symbolMenuButtonClassName}
               round
               color="translucent"
-              onClick={isSymbolMenuOpen ? closeSymbolMenu : openSymbolMenu}
+              onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
               ariaLabel="Choose emoji, sticker or GIF"
             >
               <i className="icon-smile" />
               <i className="icon-keyboard" />
+              <Spinner color="gray" />
             </Button>
           ) : (
             <ResponsiveHoverButton
@@ -375,6 +411,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
+            shouldSupressFocus={IS_MOBILE_SCREEN && isSymbolMenuOpen}
+            onSupressedFocus={handleInputFocus}
           />
           {!activeVoiceRecording && !editedMessage && (
             <ResponsiveHoverButton
@@ -403,6 +441,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
           <SymbolMenu
             isOpen={isSymbolMenuOpen}
             allowedAttachmentOptions={allowedAttachmentOptions}
+            onLoad={onSymbolMenuLoadingComplete}
             onClose={closeSymbolMenu}
             onEmojiSelect={insertTextAndUpdateCursor}
             onStickerSelect={handleStickerSelect}
