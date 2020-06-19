@@ -71,7 +71,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const [activeSetIndex, setActiveSetIndex] = useState<number>();
   const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
-  const areLoaded = Boolean(addedSetIds.length && Object.keys(stickerSetsById).length);
+  const areLoaded = Boolean(addedSetIds && (!addedSetIds.length || Object.keys(stickerSetsById).length));
 
   const allSets = useMemo(() => {
     if (!areLoaded) {

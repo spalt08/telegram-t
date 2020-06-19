@@ -177,8 +177,10 @@ const InfiniteScroll: FC<OwnProps> = ({
       } else {
         const nextAnchor = listItemElements[0];
 
-        stateRef.current.currentAnchor = nextAnchor;
-        stateRef.current.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+        if (nextAnchor) {
+          stateRef.current.currentAnchor = nextAnchor;
+          stateRef.current.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+        }
       }
     }
 

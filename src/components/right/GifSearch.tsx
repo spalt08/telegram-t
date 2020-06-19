@@ -91,7 +91,7 @@ const GifSearch: FC<StateProps & DispatchProps> = ({
         foundResults.map(renderSearchResult)
       ) : (
         <p className="helper-text" key="helper-text">
-          {query ? 'Nothing Found' : 'Start typing to search GIFs'}
+          {query ? 'No GIFs found' : 'Start typing to search GIFs'}
         </p>
       )}
     </InfiniteScroll>

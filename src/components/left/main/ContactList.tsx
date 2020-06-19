@@ -80,10 +80,12 @@ const ContactList: FC<OwnProps & StateProps & DispatchProps> = ({
             <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
           </ListItem>
         ))
-      ) : viewportIds && !viewportIds.length && Boolean(filter.length) ? (
-        <p className="no-results">No contacts matched your search.</p>
+      ) : viewportIds && !viewportIds.length ? (
+        <p className="no-results" key="no-results">
+          {filter.length ? 'No contacts matched your search.' : 'Contact list is empty.'}
+        </p>
       ) : (
-        <Loading />
+        <Loading key="loading" />
       )}
     </InfiniteScroll>
   );
