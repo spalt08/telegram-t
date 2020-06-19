@@ -229,7 +229,7 @@ export async function fetchChat({
     mtpUser = result.user;
   }
 
-  const chat = buildApiChatFromPreview(mtpUser!);
+  const chat = buildApiChatFromPreview(mtpUser!, undefined, type === 'support');
   if (!chat) {
     return undefined;
   }
