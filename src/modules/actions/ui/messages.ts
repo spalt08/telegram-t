@@ -2,7 +2,7 @@ import { FocusDirection } from '../../../types';
 
 import { addReducer, getGlobal, setGlobal } from '../../../lib/teact/teactn';
 import {
-  replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage, updateSelectedChatId,
+  replaceOutlyingIds, replaceViewportIds, updateFocusDirection, updateFocusedMessage,
 } from '../../reducers';
 import { selectOpenChat, selectViewportIds, selectIsRightColumnShown } from '../../selectors';
 
@@ -121,14 +121,15 @@ addReducer('focusMessage', (global, actions, payload) => {
   newGlobal = updateFocusedMessage(newGlobal, chatId, messageId, noHighlight);
 
   if (shouldSwitchChat) {
-    newGlobal = updateSelectedChatId(newGlobal, chatId);
     newGlobal = replaceViewportIds(newGlobal, chatId, undefined);
     newGlobal = updateFocusDirection(newGlobal, FocusDirection.Static);
   }
 
   const viewportIds = selectViewportIds(newGlobal, chatId);
   if (viewportIds && viewportIds.includes(messageId)) {
-    return newGlobal;
+    setGlobal(newGlobal);
+    actions.openChat({ id: chatId });
+    return undefined;
   }
 
   newGlobal = replaceOutlyingIds(newGlobal, chatId, undefined);
@@ -141,6 +142,7 @@ addReducer('focusMessage', (global, actions, payload) => {
   setGlobal(newGlobal);
 
   actions.loadViewportMessages({ shouldRelocate: true });
+  actions.openChat({ id: chatId });
   return undefined;
 });
 
