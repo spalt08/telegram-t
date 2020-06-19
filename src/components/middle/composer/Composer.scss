@@ -297,6 +297,10 @@
         display: none;
       }
     }
+
+    &.focus-disabled {
+      pointer-events: none;
+    }
   }
 
   .placeholder-text {

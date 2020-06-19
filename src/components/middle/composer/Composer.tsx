@@ -297,6 +297,10 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
   }, [openSymbolMenu]);
 
+  const handleInputFocus = useCallback(() => {
+    closeSymbolMenu();
+  }, [closeSymbolMenu]);
+
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
     : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length)
@@ -391,6 +395,8 @@ const Composer: FC<StateProps & DispatchProps> = ({
             onUpdate={setHtml}
             onSend={mainButtonState === MainButtonState.Edit ? handleEditComplete : handleSend}
             shouldSetFocus={isSymbolMenuOpen}
+            shouldSupressFocus={IS_MOBILE_SCREEN && isSymbolMenuOpen}
+            onSupressedFocus={handleInputFocus}
           />
           {!activeVoiceRecording && !editedMessage && (
             <ResponsiveHoverButton

@@ -19,7 +19,9 @@ type OwnProps = {
   html: string;
   placeholder: string;
   shouldSetFocus: boolean;
+  shouldSupressFocus?: boolean;
   onUpdate: (html: string) => void;
+  onSupressedFocus?: () => void;
   onSend: Function;
 };
 
@@ -37,11 +39,13 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   id,
   html,
   placeholder,
+  shouldSetFocus,
+  shouldSupressFocus,
+  onUpdate,
+  onSupressedFocus,
+  onSend,
   selectedChatId,
   replyingTo,
-  onUpdate,
-  onSend,
-  shouldSetFocus,
   editLastChatMessage,
 }) => {
   const inputRef = useRef<HTMLDivElement>();
@@ -105,12 +109,18 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
     };
   }, []);
 
+  const className = buildClassName(
+    'form-control custom-scroll',
+    html.length > 0 && 'touched',
+    shouldSupressFocus && 'focus-disabled',
+  );
+
   return (
-    <div id={id}>
+    <div id={id} onClick={shouldSupressFocus ? onSupressedFocus : undefined}>
       <div
         ref={inputRef}
         id={EDITABLE_INPUT_ID}
-        className={buildClassName('form-control custom-scroll', html.length > 0 && 'touched')}
+        className={className}
         contentEditable
         onClick={focusInput}
         onChange={handleChange}
