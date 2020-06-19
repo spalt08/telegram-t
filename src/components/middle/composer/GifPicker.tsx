@@ -81,9 +81,7 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     >
       {!canSendGifs ? (
         <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
-      ) : !areLoaded ? (
-        <Loading />
-      ) : savedGifs ? (
+      ) : savedGifs && savedGifs.length ? (
         savedGifs.map((gif, index) => (
           <GifButton
             key={gif.id}
@@ -92,7 +90,11 @@ const GifPicker: FC<OwnProps & StateProps & DispatchProps> = ({
             load={visibleIndexes.includes(index)}
           />
         ))
-      ) : undefined}
+      ) : savedGifs ? (
+        <div className="picker-disabled">No saved GIFs.</div>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 };
