@@ -45,6 +45,8 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [setSettingOption]);
 
   const handleMessageTextSizeChange = useCallback((newSize: number) => {
+    document.documentElement.style.setProperty('--message-text-size', `${newSize}px`);
+
     setSettingOption({ messageTextSize: newSize });
   }, [setSettingOption]);
 
@@ -54,7 +56,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-item pt-3 not-implemented">
+      <div className="settings-item pt-3">
         <h4 className="settings-item-header">Settings</h4>
 
         <RangeSlider
@@ -85,7 +87,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
         />
       </div>
 
-      <div className="settings-item not-implemented">
+      <div className="settings-item">
         <h4 className="settings-item-header">Keyboard</h4>
 
         <RadioGroup

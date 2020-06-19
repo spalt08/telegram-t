@@ -9,6 +9,7 @@
   .text-content {
     margin: 0;
     word-break: break-word;
+    font-size: var(--message-text-size, 1rem);
     line-height: 1.3125;
   }
 
@@ -172,6 +173,11 @@
       background-color: var(--color-selection-highlight-emoji);
       color: transparent;
     }
+  }
+
+  &:not(.custom-shape) .text-content .emoji {
+    width: calc(1.25 * var(--message-text-size, 1rem));
+    background-size: calc(1.25 * var(--message-text-size, 1rem));
   }
 }
 
@@ -358,7 +364,6 @@
 
   &.emoji-only-3 {
     font-size: 3rem;
-
 
     .emoji {
       width: 3rem;
