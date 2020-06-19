@@ -237,8 +237,13 @@ const Composer: FC<StateProps & DispatchProps> = ({
         showError({
           error: {
             message: `A wait of ${secondsRemaining} seconds is required before sending another message in this chat`,
+            isSlowMode: true,
           },
         });
+
+        const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+        messageInput.blur();
+
         return;
       }
     }

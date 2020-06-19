@@ -128,7 +128,16 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       console.error(err);
     }
 
-    handleError(err);
+    const isSlowMode = err.message.startsWith('A wait of') && (
+      request instanceof GramJs.messages.SendMessage
+      || request instanceof GramJs.messages.SendMedia
+      || request instanceof GramJs.messages.SendMultiMedia
+    );
+
+    handleError({
+      ...err,
+      isSlowMode,
+    });
     return undefined;
   }
 }
