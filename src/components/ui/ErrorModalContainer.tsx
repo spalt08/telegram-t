@@ -41,7 +41,7 @@ const ErrorModalContainer: FC<StateProps & DispatchProps> = ({ errors, dismissEr
 };
 
 function getErrorHeader(error: ApiError) {
-  if (error.message.startsWith('A wait of')) {
+  if (error.isSlowMode) {
     return 'Slowmode enabled';
   }
 

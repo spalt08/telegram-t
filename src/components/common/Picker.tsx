@@ -77,7 +77,7 @@ const Picker: FC<OwnProps> = ({
       <div className="picker-header custom-scroll">
         {selectedIds.map((id, i) => (
           <PickerSelectedItem
-            chatId={id}
+            chatOrUserId={id}
             isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
             onClick={handleItemClick}
             clickArg={id}

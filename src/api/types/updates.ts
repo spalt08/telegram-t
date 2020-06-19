@@ -224,6 +224,7 @@ export type ApiUpdateMessageImage = {
 
 export type ApiError = {
   message: string;
+  isSlowMode?: boolean;
 };
 
 export type ApiUpdateError = {

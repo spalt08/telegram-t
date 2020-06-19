@@ -90,6 +90,9 @@ export default (
     };
 
     const startLongPressTimer = (e: TouchEvent) => {
+      if (getIsMenuDisabled()) {
+        return;
+      }
       clearLongPressTimer();
 
       document.body.classList.add('no-selection');

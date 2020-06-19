@@ -4,7 +4,7 @@ import { ApiChat, ApiUser, ApiChatFolder } from '../../../api/types';
 import { ChatCreationProgress } from '../../../types';
 
 import {
-  SUPPORT_BOT_ID, ARCHIVED_FOLDER_ID, TOP_CHATS_PRELOAD_LIMIT, CHAT_LIST_LOAD_SLICE,
+  ARCHIVED_FOLDER_ID, TOP_CHATS_PRELOAD_LIMIT, CHAT_LIST_LOAD_SLICE,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -23,12 +23,15 @@ import {
   selectChatListType,
   selectIsChatPinned,
   selectChatFolder,
+  selectSupportChat,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { isChatSummaryOnly, isChatArchived, prepareChatList } from '../../helpers';
 
 const TOP_CHATS_PRELOAD_PAUSE = 500;
+// We expect this ID does not exist
+const TMP_CHAT_ID = -1;
 
 const runThrottledForLoadChats = throttle((cb) => cb(), 1000, true);
 const runThrottledForLoadTopChats = throttle((cb) => cb(), 3000, true);
@@ -73,9 +76,7 @@ addReducer('openChat', (global, actions, payload) => {
 
   // TODO Support non-user chats
   if (!chat) {
-    if (id === SUPPORT_BOT_ID) {
-      void callApi('fetchChat', { type: 'support' });
-    } else if (id === currentUserId) {
+    if (id === currentUserId) {
       void callApi('fetchChat', { type: 'self' });
     } else {
       const user = selectUser(global, id);
@@ -86,6 +87,23 @@ addReducer('openChat', (global, actions, payload) => {
   } else if (isChatSummaryOnly(chat)) {
     actions.requestChatUpdate({ chatId: id });
   }
+});
+
+addReducer('openSupportChat', (global, actions) => {
+  const chat = selectSupportChat(global);
+
+  actions.openChat({ id: chat ? chat.id : TMP_CHAT_ID });
+
+  if (chat) {
+    return;
+  }
+
+  (async () => {
+    const result = await callApi('fetchChat', { type: 'support' });
+    if (result) {
+      actions.openChat({ id: result.chatId });
+    }
+  })();
 });
 
 addReducer('loadMoreChats', (global, actions, payload) => {

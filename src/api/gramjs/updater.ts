@@ -578,9 +578,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   }
 }
 
-export function handleError(err: Error) {
+export function handleError(err: Error & { isSlowMode?: boolean }) {
   onUpdate({
     '@type': 'error',
-    error: pick(err, ['message']),
+    error: pick(err, ['message', 'isSlowMode']),
   });
 }
