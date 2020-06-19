@@ -71,6 +71,8 @@ const MAX_NESTING_PARENTS = 5;
 // When voice recording is active, composer placeholder will hide to prevent overlapping
 const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
+const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
+
 const Composer: FC<StateProps & DispatchProps> = ({
   editedMessage,
   chatId,
@@ -281,6 +283,20 @@ const Composer: FC<StateProps & DispatchProps> = ({
     }
   }, [setStickerSearchQuery, setGifSearchQuery]);
 
+  const handleSymbolMenuOpen = useCallback(() => {
+    const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
+
+    if (!IS_MOBILE_SCREEN || messageInput !== document.activeElement) {
+      openSymbolMenu();
+      return;
+    }
+
+    messageInput.blur();
+    setTimeout(() => {
+      openSymbolMenu();
+    }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
+  }, [openSymbolMenu]);
+
   const mainButtonState = editedMessage
     ? MainButtonState.Edit
     : !IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length)
@@ -350,7 +366,7 @@ const Composer: FC<StateProps & DispatchProps> = ({
               className={`mobile-symbol-menu-button ${isSymbolMenuOpen ? 'menu-opened' : ''}`}
               round
               color="translucent"
-              onClick={isSymbolMenuOpen ? closeSymbolMenu : openSymbolMenu}
+              onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
               ariaLabel="Choose emoji, sticker or GIF"
             >
               <i className="icon-smile" />
