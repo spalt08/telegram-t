@@ -1,12 +1,10 @@
 .NewGroup {
   height: 100%;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
   position: relative;
 
   &-inner {
-    flex-grow: 1;
+    height: calc(100% - var(--header-height));
     overflow: hidden;
 
     &.step-2 {
