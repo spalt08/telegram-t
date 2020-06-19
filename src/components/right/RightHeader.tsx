@@ -185,8 +185,7 @@ const RightHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   const isBackButton = IS_MOBILE_SCREEN || contentKey === HeaderContent.SharedMedia
-    || contentKey === HeaderContent.MemberList
-    || contentKey === HeaderContent.StickerSearch;
+    || contentKey === HeaderContent.MemberList;
 
   const buttonClassName = buildClassName(
     'animated-close-icon',
