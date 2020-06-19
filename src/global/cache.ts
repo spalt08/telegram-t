@@ -202,6 +202,10 @@ function reduceSettings(global: GlobalState): GlobalState['settings'] {
   const { byKey } = global.settings;
 
   return {
-    byKey,
+    byKey: {
+      ...byKey,
+      customChatBackground: undefined,
+      isBackgroundBlurred: true,
+    },
   };
 }

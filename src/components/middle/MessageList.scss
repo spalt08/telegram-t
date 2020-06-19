@@ -8,6 +8,15 @@
   overflow: auto;
   overflow-x: hidden;
 
+  .custom-bg-image & {
+    mask-image: linear-gradient(to top, transparent 0.1rem, black 1rem);
+    -webkit-mask-image: linear-gradient(to top, transparent 0.1rem, black 1rem);
+
+    body.has-open-context-menu & {
+      mask-image: none;
+    }
+  }
+
   @media (pointer: coarse) {
     -webkit-user-select: none;
     -webkit-touch-callout: none;

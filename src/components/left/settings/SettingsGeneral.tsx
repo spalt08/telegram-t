@@ -31,6 +31,7 @@ const ANIMATION_LEVEL_OPTIONS = [
 ];
 
 const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
+  onScreenSelect,
   messageTextSize,
   animationLevel,
   messageSendKeyCombo,
@@ -68,7 +69,7 @@ const SettingsGeneral: FC<OwnProps & StateProps & DispatchProps> = ({
 
         <ListItem
           icon="photo"
-          className="not-implemented"
+          onClick={() => onScreenSelect(SettingsScreens.GeneralChatBackground)}
         >
           Chat Background
         </ListItem>

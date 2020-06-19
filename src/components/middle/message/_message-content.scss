@@ -9,8 +9,11 @@
   .text-content {
     margin: 0;
     word-break: break-word;
-    font-size: var(--message-text-size, 1rem);
     line-height: 1.3125;
+  }
+
+  &:not(.custom-shape) {
+    font-size: var(--message-text-size, 1rem);
   }
 
   .matching-text-highlight {

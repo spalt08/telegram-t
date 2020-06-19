@@ -22,7 +22,7 @@ type StateProps = {
   searchQuery?: string;
 };
 
-type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery' | 'resetChatCreation'>;
+type DispatchProps = Pick<GlobalActions, 'setGlobalSearchQuery' | 'resetChatCreation' | 'setSettingOption'>;
 
 enum ContentType {
   Main,
@@ -42,6 +42,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
   searchQuery,
   setGlobalSearchQuery,
   resetChatCreation,
+  setSettingOption,
 }) => {
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
   const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
@@ -86,6 +87,10 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
         case SettingsScreens.Language:
           setSettingsScreen(SettingsScreens.Main);
           return;
+        case SettingsScreens.GeneralChatBackground:
+          setSettingOption({ customChatBackground: undefined });
+          setSettingsScreen(SettingsScreens.General);
+          return;
         case SettingsScreens.PrivacyPhoneNumber:
         case SettingsScreens.PrivacyLastSeen:
         case SettingsScreens.PrivacyProfilePhoto:
@@ -111,7 +116,7 @@ const LeftColumn: FC<StateProps & DispatchProps> = ({
     setTimeout(() => {
       setLastResetTime(Date.now());
     }, RESET_TRANSITION_DELAY_MS);
-  }, [content, settingsScreen, setGlobalSearchQuery, resetChatCreation]);
+  }, [content, setGlobalSearchQuery, resetChatCreation, settingsScreen, setSettingOption]);
 
   const handleSearchQuery = useCallback((query: string) => {
     if (content === LeftColumnContent.Contacts) {
@@ -192,5 +197,7 @@ export default memo(withGlobal(
     const { query } = global.globalSearch;
     return { searchQuery: query };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['setGlobalSearchQuery', 'resetChatCreation']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'setGlobalSearchQuery', 'resetChatCreation', 'setSettingOption',
+  ]),
 )(LeftColumn));

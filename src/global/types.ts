@@ -12,6 +12,7 @@ import {
   ApiError,
   ApiFormattedText,
   ApiChatFolder,
+  ApiWallpaper,
 } from '../api/types';
 import {
   FocusDirection,
@@ -230,6 +231,7 @@ export type GlobalState = {
 
   settings: {
     byKey: ISettings;
+    loadedWallpapers?: ApiWallpaper[];
   };
 
   errors: ApiError[];
@@ -276,7 +278,8 @@ export type ActionTypes = (
   // misc
   'openMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' |
   'loadWebPagePreview' | 'clearWebPagePreview' |
-  'saveDraft' | 'clearDraft' | 'loadChatDrafts'
+  'saveDraft' | 'clearDraft' | 'loadChatDrafts' |
+  'loadWallpapers'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;
