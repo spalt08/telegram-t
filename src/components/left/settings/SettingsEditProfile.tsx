@@ -95,6 +95,10 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
   const [usernameSuccess, usernameError] = useMemo(() => {
     const trimmedUsername = username.trim();
 
+    if (!trimmedUsername.length) {
+      return [];
+    }
+
     if (trimmedUsername.length < MIN_USERNAME_LENGTH) {
       return [undefined, 'Username is too short'];
     }
