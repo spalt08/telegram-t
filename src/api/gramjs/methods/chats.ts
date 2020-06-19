@@ -216,14 +216,14 @@ export async function fetchChat({
       ],
     }));
     if (!result || !result.length) {
-      return;
+      return undefined;
     }
 
     [mtpUser] = result;
   } else if (type === 'support') {
     const result = await invokeRequest(new GramJs.help.GetSupport());
     if (!result || !result.user) {
-      return;
+      return undefined;
     }
 
     mtpUser = result.user;
@@ -231,7 +231,7 @@ export async function fetchChat({
 
   const chat = buildApiChatFromPreview(mtpUser!);
   if (!chat) {
-    return;
+    return undefined;
   }
 
   onUpdate({
@@ -239,6 +239,8 @@ export async function fetchChat({
     id: chat.id,
     chat,
   });
+
+  return { chatId: chat.id };
 }
 
 export async function requestChatUpdate(chat: ApiChat) {

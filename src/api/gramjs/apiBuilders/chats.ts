@@ -40,6 +40,7 @@ function buildApiChatFieldsFromPeerEntity(
       membersCount: peerEntity.participantsCount,
       joinDate: peerEntity.date,
     }),
+    ...('support' in peerEntity && peerEntity.support && { isSupport: true }),
     ...buildApiChatPermissions(peerEntity),
     ...(('creator' in peerEntity) && { isCreator: peerEntity.creator }),
     ...buildApiChatRestrictions(peerEntity),

@@ -29,6 +29,7 @@ export interface ApiChat {
   defaultBannedRights?: ApiChatBannedRights;
   isCreator?: boolean;
   isRestricted?: boolean;
+  isSupport?: boolean;
   hasLeft?: boolean;
   restrictionReason?: ApiRestrictionReason;
 

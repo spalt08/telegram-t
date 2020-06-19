@@ -7,7 +7,6 @@ import { GlobalActions } from '../../../global/types';
 import { LeftColumnContent } from '../../../types';
 import { ApiChat } from '../../../api/types';
 
-import { SUPPORT_BOT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { pick } from '../../../util/iteratees';
 import { isChatArchived } from '../../../modules/helpers';
@@ -37,7 +36,7 @@ type StateProps = {
   chatsById?: Record<number, ApiChat>;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openChat'>;
+type DispatchProps = Pick<GlobalActions, 'openChat' | 'openSupportChat'>;
 
 const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   content,
@@ -53,6 +52,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   currentUserId,
   chatsById,
   openChat,
+  openSupportChat,
 }) => {
   const hasMenu = content === LeftColumnContent.ChatList;
 
@@ -95,10 +95,6 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
   const handleSelectSaved = useCallback(() => {
     openChat({ id: currentUserId });
   }, [currentUserId, openChat]);
-
-  const handleSelectSupport = useCallback(() => {
-    openChat({ id: SUPPORT_BOT_ID });
-  }, [openChat]);
 
   const isSearchFocused = content === LeftColumnContent.RecentChats
     || content === LeftColumnContent.GlobalSearch
@@ -144,7 +140,7 @@ const LeftMainHeader: FC<OwnProps & StateProps & DispatchProps> = ({
         </MenuItem>
         <MenuItem
           icon="help"
-          onClick={handleSelectSupport}
+          onClick={openSupportChat}
         >
           Help
         </MenuItem>
@@ -175,5 +171,8 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),
+  (setGlobal, actions): DispatchProps => pick(actions, [
+    'openChat',
+    'openSupportChat',
+  ]),
 )(LeftMainHeader));
