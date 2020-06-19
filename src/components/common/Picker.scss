@@ -32,7 +32,13 @@
   .picker-list {
     flex-grow: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0.5rem;
+
+    @media (max-width: 600px) {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
   }
 
   .no-results {
