@@ -218,7 +218,7 @@
   }
 
   @media (max-width: 600px) {
-    body.enable-symbol-menu-transforms {
+    body.enable-symbol-menu-transforms & {
       transform: translate3d(0, 0, 0);
     }
 

@@ -77,7 +77,7 @@ const SymbolMenu: FC<OwnProps> = ({
       fastRaf(() => {
         document.body.classList.remove('is-symbol-menu-open');
         setTimeout(() => {
-          document.body.classList.add('enable-symbol-menu-transforms');
+          document.body.classList.remove('enable-symbol-menu-transforms');
         }, SYMBOL_MENU_CLOSE_TIMEOUT);
       });
     }
