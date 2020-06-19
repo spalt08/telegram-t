@@ -339,7 +339,7 @@ class TelegramClient {
         if (partSize % MIN_CHUNK_SIZE !== 0) {
             throw new Error('The part size must be evenly divisible by 4096')
         }
-        const fileWriter = new BinaryWriter(Buffer.alloc(0))
+        const fileBuffer = new BinaryWriter(Buffer.alloc(0))
         // We need a separate download/upload connection
         let exported = Boolean(dcId)
         let sender
@@ -377,7 +377,7 @@ class TelegramClient {
                 let results = []
                 let i = 0
                 while (true) {
-                    let precise = false;
+                    let precise = false
                     if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
                         limit = ONE_MB - offset % ONE_MB
                         precise = true
@@ -397,29 +397,44 @@ class TelegramClient {
                     }
                 }
                 results = await Promise.all(results.map(p => p.catch(e => e)))
-                results = results.filter(result => !(result instanceof Error));
+                results = results.filter(result => !(result instanceof Error))
+
+                const partBuffer = new BinaryWriter(Buffer.alloc(0))
+                let isLast = false
+
                 for (const result of results) {
                     if (result.bytes.length) {
                         this._log.debug(`Saving ${result.bytes.length} more bytes`)
 
-                        fileWriter.write(result.bytes)
-                        if (args.progressCallback) {
-                            if (args.progressCallback.isCanceled) {
-                                throw new Error('USER_CANCELED')
-                            }
-
-                            const progress = offset / fileSize
-                            args.progressCallback(progress)
-                        }
+                        partBuffer.write(result.bytes)
                     }
                     // Last chunk.
                     if (result.bytes.length < partSize) {
-                        return fileWriter.getValue()
+                        isLast = true
                     }
                 }
+
+                if (args.progressCallback) {
+                    if (args.progressCallback.isCanceled) {
+                        throw new Error('USER_CANCELED')
+                    }
+
+                    const progress = offset / fileSize
+                    args.progressCallback(
+                        progress,
+                        args.progressCallback.acceptsBuffer ? partBuffer.getValue() : undefined
+                    )
+                }
+
+                fileBuffer.write(partBuffer.getValue())
+
                 // Last chunk.
-                if (args.end && (offset + results[results.length - 1].bytes.length) > args.end) {
-                    return fileWriter.getValue()
+                if (isLast || (args.end && (offset + results[results.length - 1].bytes.length) > args.end)) {
+                    if (args.progressCallback) {
+                        args.progressCallback(1)
+                    }
+
+                    return fileBuffer.getValue()
                 }
             }
         } finally {

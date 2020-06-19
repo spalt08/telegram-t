@@ -113,6 +113,10 @@ async function download(
   }
 
   if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
+    if (mediaFormat === ApiMediaFormat.Stream) {
+      onProgress!.acceptsBuffer = true;
+    }
+
     const data = await client.downloadMedia(entity, {
       sizeType, start, end, progressCallback: onProgress, workers: entityType === 'msg' ? WORKERS_FOR_MESSAGE_MEDIA : 1,
     });

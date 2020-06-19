@@ -5,7 +5,9 @@ import { GlobalActions } from '../../global/types';
 import { ApiAudio, ApiMessage } from '../../api/types';
 
 import * as mediaLoader from '../../util/mediaLoader';
-import { getMessageAudio, getMessageMediaHash, getUserFullName } from '../../modules/helpers';
+import {
+  getMediaDuration, getMessageAudio, getMessageMediaHash, getUserFullName,
+} from '../../modules/helpers';
 import { selectSender } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
@@ -31,7 +33,7 @@ const AudioPlayer: FC<OwnProps & StateProps & DispatchProps> = ({
   message, senderName, focusMessage, closeAudioPlayer,
 }) => {
   const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
-  const { playPause, isPlaying } = useAudioPlayer(message.id, mediaData);
+  const { playPause, isPlaying } = useAudioPlayer(message.id, getMediaDuration(message)!, mediaData);
 
   const handleClick = useCallback(() => {
     focusMessage({ chatId: message.chatId, messageId: message.id });

@@ -11,6 +11,7 @@ export interface ApiOnProgress {
   ): void;
 
   isCanceled?: boolean;
+  acceptsBuffer?: boolean;
 }
 
 export interface ApiAttachment {
