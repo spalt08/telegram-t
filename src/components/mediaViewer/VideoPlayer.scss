@@ -1,6 +1,14 @@
 .VideoPlayer {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+  // Safari: custom controls are not displayed after exiting full screen mode.
+  z-index: 1;
+
+  @media (max-width: 600px) {
+    overflow: visible;
+  }
 
   video {
     display: block;

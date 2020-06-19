@@ -8,6 +8,18 @@
     padding: .5rem 0 0;
   }
 
+  @media (max-width: 600px) {
+    padding-bottom: 4.5rem;
+    opacity: 0;
+    pointer-events: none;
+    background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
+
+    .video-controls-visible & {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
   .media-viewer-footer-content {
     position: relative;
     max-width: var(--messages-container-width);
@@ -16,6 +28,10 @@
     transition: opacity .15s;
 
     &:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
       opacity: 1;
     }
   }
@@ -51,6 +67,11 @@
         background: rgba(0, 0, 0, .75);
         border-radius: var(--border-radius-default);
         z-index: var(--z-below);
+
+        @media (max-width: 600px) {
+          display: none;
+          background: none;
+        }
       }
     }
   }

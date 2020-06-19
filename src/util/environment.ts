@@ -5,7 +5,7 @@ export function getPlatform() {
   const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
   const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
   const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-  let os: string | undefined;
+  let os: 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | undefined;
 
   if (macosPlatforms.indexOf(platform) !== -1) {
     os = 'Mac OS';
