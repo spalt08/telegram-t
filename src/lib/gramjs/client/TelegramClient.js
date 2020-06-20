@@ -339,7 +339,7 @@ class TelegramClient {
         if (partSize % MIN_CHUNK_SIZE !== 0) {
             throw new Error('The part size must be evenly divisible by 4096')
         }
-        const fileWriter = new BinaryWriter(Buffer.alloc(0))
+        const fileBuffer = new BinaryWriter(Buffer.alloc(0))
         // We need a separate download/upload connection
         let exported = Boolean(dcId)
         let sender
@@ -366,8 +366,11 @@ class TelegramClient {
             args.progressCallback(0)
         }
 
-        if (!workers) {
+        if (!workers || !fileSize) {
             workers = 1
+        }
+        if (!args.end){
+            args.end = fileSize
         }
 
         try {
@@ -377,7 +380,7 @@ class TelegramClient {
                 let results = []
                 let i = 0
                 while (true) {
-                    let precise = false;
+                    let precise = false
                     if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
                         limit = ONE_MB - offset % ONE_MB
                         precise = true
@@ -397,33 +400,48 @@ class TelegramClient {
                     }
                 }
                 results = await Promise.all(results.map(p => p.catch(e => e)))
-                results = results.filter(result => !(result instanceof Error));
+                results = results.filter(result => !(result instanceof Error))
+
+                const partBuffer = new BinaryWriter(Buffer.alloc(0))
+                let isLast = false
+
                 for (const result of results) {
                     if (result.bytes.length) {
                         this._log.debug(`Saving ${result.bytes.length} more bytes`)
 
-                        fileWriter.write(result.bytes)
-                        if (args.progressCallback) {
-                            if (args.progressCallback.isCanceled) {
-                                throw new Error('USER_CANCELED')
-                            }
-
-                            const progress = offset / fileSize
-                            args.progressCallback(progress)
-                        }
+                        partBuffer.write(result.bytes)
                     }
                     // Last chunk.
                     if (result.bytes.length < partSize) {
-                        return fileWriter.getValue()
+                        isLast = true
                     }
                 }
+
+                if (args.progressCallback) {
+                    if (args.progressCallback.isCanceled) {
+                        throw new Error('USER_CANCELED')
+                    }
+
+                    const progress = offset / fileSize
+                    args.progressCallback(
+                        progress,
+                        args.progressCallback.acceptsBuffer ? partBuffer.getValue() : undefined
+                    )
+                }
+
+                fileBuffer.write(partBuffer.getValue())
+
                 // Last chunk.
-                if (args.end && (offset + results[results.length - 1].bytes.length) > args.end) {
-                    return fileWriter.getValue()
+                if (isLast || (args.end && (offset + results[results.length - 1].bytes.length) > args.end)) {
+                    if (args.progressCallback) {
+                        args.progressCallback(1)
+                    }
+
+                    return fileBuffer.getValue()
                 }
             }
         } finally {
-            // TODO
+
         }
     }
 
@@ -658,22 +676,7 @@ class TelegramClient {
         // This causes issues for now because not enough utils
         // await request.resolve(this, utils)
 
-        if (request.CONSTRUCTOR_ID in this._floodWaitedRequests) {
-            const due = this._floodWaitedRequests[request.CONSTRUCTOR_ID]
-            const diff = Math.round(due - new Date().getTime() / 1000)
-            if (diff <= 3) {
-                delete this._floodWaitedRequests[request.CONSTRUCTOR_ID]
-            } else if (diff <= this.floodSleepLimit) {
-                this._log.info(`Sleeping early for ${diff}s on flood wait`)
-                await sleep(diff)
-                delete this._floodWaitedRequests[request.CONSTRUCTOR_ID]
-            } else {
-                throw new FloodWaitError({
-                    request: request,
-                    capture: diff,
-                })
-            }
-        }
+
         this._lastRequest = new Date().getTime()
         let attempt = 0
         for (attempt = 0; attempt < this._requestRetries; attempt++) {
@@ -689,7 +692,6 @@ class TelegramClient {
                     this._log.warn(`Telegram is having internal issues ${e.constructor.name}`)
                     await sleep(2000)
                 } else if (e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) {
-                    this._floodWaitedRequests[request.CONSTRUCTOR_ID] = new Date().getTime() / 1000 + e.seconds
                     if (e.seconds <= this.floodSleepLimit) {
                         this._log.info(`Sleeping for ${e.seconds}s on flood wait`)
                         await sleep(e.seconds * 1000)

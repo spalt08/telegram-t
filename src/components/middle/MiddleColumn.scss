@@ -15,12 +15,31 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background: rgb(230, 235, 238) url('../../assets/chat-bg.jpg') no-repeat center;
+    background-color: rgb(230, 235, 238);
+    background-image: url('../../assets/chat-bg.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
     background-size: cover;
+
+    transition: background-image .3s ease, filter .3s ease;
+
+    body.animation-level-0 & {
+      transition: none;
+    }
 
     @media (max-width: 600px) {
       background-image: url('../../assets/chat-bg-mobile.jpg');
     }
+  }
+
+  .custom-bg-image &::before {
+    margin: -1rem;
+    background-image: var(--custom-background) !important;
+    filter: blur(0px);
+  }
+
+  .custom-bg-image.blurred &::before {
+    filter: blur(12px);
   }
 
   @media screen and (min-width: 1276px) {
@@ -30,6 +49,11 @@
       transform: scale(1);
       transform-origin: left center;
       transition: transform var(--layer-transition);
+    }
+
+    body.animation-level-2 .custom-bg-image &::before {
+      margin: -16rem -5rem -20rem -1rem;
+      transition: transform var(--layer-transition), background-image .3s ease, filter .3s ease;
     }
 
     body.animation-level-2.is-right-column-shown &::before {

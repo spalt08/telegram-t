@@ -6,19 +6,23 @@ import buildClassName from '../../util/buildClassName';
 
 import './ProgressSpinner.scss';
 
-const RADIUSES = { s: 22, m: 25, l: 28 };
+const RADIUSES = {
+  s: 22, m: 25, l: 28, xl: 20,
+};
 const STROKE_WIDTH = 2;
 const MIN_PROGRESS = 0.05;
 const MAX_PROGRESS = 1;
 
 const ProgressSpinner: FC<{
   progress?: number;
-  size?: 's' | 'm' | 'l';
+  size?: 's' | 'm' | 'l' | 'xl';
+  square?: boolean;
   transparent?: boolean;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }> = ({
   progress = 0,
   size = 'l',
+  square,
   transparent,
   onClick,
 }) => {
@@ -48,6 +52,7 @@ const ProgressSpinner: FC<{
           stroke-width=${STROKE_WIDTH}
           stroke-dasharray="${circumference} ${circumference}"}
           stroke-dashoffset="${strokeDashOffset}"
+          stroke-linecap="round"
           r=${circleRadius}
           cx=${borderRadius}
           cy=${borderRadius}
@@ -61,6 +66,7 @@ const ProgressSpinner: FC<{
   const className = buildClassName(
     `ProgressSpinner size-${size}`,
     transparent && 'transparent',
+    square && 'square',
   );
 
   return (

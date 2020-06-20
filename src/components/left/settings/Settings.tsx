@@ -12,6 +12,7 @@ import SettingsMain from './SettingsMain';
 import SettingsEditProfile from './SettingsEditProfile';
 import SettingsFolders from './folders/SettingsFolders';
 import SettingsGeneral from './SettingsGeneral';
+import SettingsGeneralChatBackground from './SettingsGeneralChatBackground';
 import SettingsNotifications from './SettingsNotifications';
 import SettingsPrivacy from './SettingsPrivacy';
 import SettingsLanguage from './SettingsLanguage';
@@ -96,6 +97,11 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Language:
         return (
           <SettingsLanguage />
+        );
+
+      case SettingsScreens.GeneralChatBackground:
+        return (
+          <SettingsGeneralChatBackground onScreenSelect={onScreenSelect} />
         );
 
       case SettingsScreens.PrivacyActiveSessions:

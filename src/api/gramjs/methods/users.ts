@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { OnApiUpdate, ApiUser, ApiChat } from '../../types';
 
-import { invokeRequest, uploadFile } from './client';
+import { invokeRequest } from './client';
 import {
   buildInputEntity,
   calculateResultHash,
@@ -53,45 +53,6 @@ export async function fetchNearestCountry() {
   const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc());
 
   return dcInfo ? dcInfo.country : undefined;
-}
-
-export function updateProfile({
-  firstName,
-  lastName,
-  about,
-}: {
-  firstName?: string;
-  lastName?: string;
-  about?: string;
-}) {
-  // This endpoint handles empty strings with an unexpected error, so we replace them with `undefined`
-  return invokeRequest(new GramJs.account.UpdateProfile({
-    firstName: firstName || undefined,
-    lastName: lastName || undefined,
-    about: about || undefined,
-  }));
-}
-
-export function checkUsername(username: string) {
-  return invokeRequest(new GramJs.account.CheckUsername({ username }));
-}
-
-export function updateUsername(username: string) {
-  return invokeRequest(new GramJs.account.UpdateUsername({ username }));
-}
-
-export async function updateProfilePhoto(file: File) {
-  const inputFile = await uploadFile(file);
-  return invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    file: inputFile,
-  }));
-}
-
-export async function uploadProfilePhoto(file: File) {
-  const inputFile = await uploadFile(file);
-  await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    file: inputFile,
-  }));
 }
 
 export async function fetchTopUsers({ hash = 0 }: { hash?: number }) {

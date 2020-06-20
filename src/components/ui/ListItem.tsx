@@ -59,7 +59,7 @@ const ListItem: FC<OwnProps> = (props) => {
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(containerRef);
+  } = useContextMenuHandlers(containerRef, !contextActions);
 
   const getTriggerElement = useCallback(() => containerRef.current, []);
 

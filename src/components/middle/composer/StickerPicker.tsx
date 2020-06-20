@@ -34,13 +34,13 @@ type OwnProps = {
 type StateProps = {
   recentStickers: ApiSticker[];
   favoriteStickers: ApiSticker[];
-  addedSetIds: string[];
   stickerSetsById: Record<string, ApiStickerSet>;
+  addedSetIds?: string[];
 };
 
 type DispatchProps = Pick<GlobalActions, (
   'loadStickerSets' | 'loadRecentStickers' | 'loadFavoriteStickers' |
-  'addRecentSticker' | 'loadStickers' | 'unfaveSticker'
+  'addRecentSticker' | 'loadAddedStickers' | 'unfaveSticker'
 )>;
 
 const SMOOTH_SCROLL_DISTANCE = 500;
@@ -62,7 +62,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   loadStickerSets,
   loadRecentStickers,
   loadFavoriteStickers,
-  loadStickers,
+  loadAddedStickers,
   addRecentSticker,
   unfaveSticker,
 }) => {
@@ -71,14 +71,16 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   const [activeSetIndex, setActiveSetIndex] = useState<number>();
   const [visibleSetIndexes, setVisibleSetIndexes] = useState<number[]>([]);
 
-  const areLoaded = Boolean(addedSetIds && (!addedSetIds.length || Object.keys(stickerSetsById).length));
+  const areAddedLoaded = Boolean(addedSetIds);
 
   const allSets = useMemo(() => {
-    if (!areLoaded) {
+    if (!areAddedLoaded) {
       return MEMO_EMPTY_ARRAY;
     }
 
-    const themeSets: StickerSetOrRecent[] = addedSetIds.map((id) => stickerSetsById[id]).filter(Boolean);
+    const themeSets: StickerSetOrRecent[] = addedSetIds
+      ? addedSetIds.map((id) => stickerSetsById[id]).filter(Boolean)
+      : [];
 
     if (favoriteStickers.length) {
       themeSets.unshift({
@@ -99,7 +101,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     return themeSets;
-  }, [areLoaded, addedSetIds, recentStickers, favoriteStickers, stickerSetsById]);
+  }, [areAddedLoaded, addedSetIds, recentStickers, favoriteStickers, stickerSetsById]);
 
   const updateVisibleSetIndexes = useCallback(() => {
     if (!containerRef.current) {
@@ -117,19 +119,25 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
       loadRecentStickers();
       loadFavoriteStickers();
     }
-  }, [load, loadStickerSets, loadRecentStickers, loadFavoriteStickers]);
+  }, [load, loadFavoriteStickers, loadRecentStickers, loadStickerSets]);
 
   useEffect(() => {
-    if (areLoaded) {
+    if (addedSetIds && addedSetIds.length) {
+      loadAddedStickers();
+    }
+  }, [addedSetIds, loadAddedStickers]);
+
+  useEffect(() => {
+    if (areAddedLoaded) {
       updateVisibleSetIndexes();
     }
-  }, [areLoaded, updateVisibleSetIndexes]);
+  }, [areAddedLoaded, updateVisibleSetIndexes]);
 
   useHorizontalScroll(headerRef);
 
   // Scroll header when active set updates
   useEffect(() => {
-    if (!areLoaded) {
+    if (!areAddedLoaded) {
       return;
     }
 
@@ -146,7 +154,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
         behavior: 'smooth',
       });
     }, HEADER_SCROLL_DELAY);
-  }, [areLoaded, activeSetIndex]);
+  }, [areAddedLoaded, activeSetIndex]);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker) => {
     onStickerSelect(sticker);
@@ -211,7 +219,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', className);
 
-  if (!areLoaded || !canSendStickers) {
+  if (!areAddedLoaded || !canSendStickers) {
     return (
       <div className={fullClassName}>
         {!canSendStickers ? (
@@ -240,7 +248,6 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
           <StickerSet
             stickerSet={stickerSet}
             load={visibleSetIndexes.includes(index)}
-            loadStickers={loadStickers}
             onStickerSelect={handleStickerSelect}
             onStickerUnfave={handleStickerUnfave}
           />
@@ -262,15 +269,15 @@ export default memo(withGlobal<OwnProps>(
     return {
       recentStickers: recent.stickers,
       favoriteStickers: favorite.stickers,
-      addedSetIds: added.setIds,
       stickerSetsById: setsById,
+      addedSetIds: added.setIds,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, [
     'loadStickerSets',
     'loadRecentStickers',
     'loadFavoriteStickers',
-    'loadStickers',
+    'loadAddedStickers',
     'addRecentSticker',
     'unfaveSticker',
   ]),

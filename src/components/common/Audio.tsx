@@ -8,9 +8,16 @@ import {
 
 import windowSize from '../../util/windowSize';
 import { REM } from './helpers/mediaDimensions';
-import { IS_OPUS_SUPPORTED, IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../../util/environment';
+import {
+  IS_OPUS_SUPPORTED,
+  IS_MOBILE_SCREEN,
+  IS_PROGRESSIVE_AUDIO_SUPPORTED,
+  IS_STREAMING_SUPPORTED,
+} from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
-import { getMediaTransferState, getMessageMediaHash, isOwnMessage } from '../../modules/helpers';
+import {
+  getMediaDuration, getMediaTransferState, getMessageMediaHash, isOwnMessage,
+} from '../../modules/helpers';
 import { renderWaveformToDataUri } from './helpers/waveform';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -42,7 +49,7 @@ interface ISeekMethods {
   handleStopSeek: () => void;
 }
 
-const AUTO_LOAD = IS_TOUCH_ENV;
+const AUTO_LOAD = !IS_PROGRESSIVE_AUDIO_SUPPORTED && !IS_STREAMING_SUPPORTED;
 const MAX_WIDTH_ON_MOBILE = 69;
 const BUTTON_WIDTH_ON_MOBILE = 3.75 * REM;
 
@@ -68,14 +75,14 @@ const Audio: FC<OwnProps> = ({
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
     !(shouldDownload && lastSyncTime),
-    audio || IS_OPUS_SUPPORTED ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+    resolveAudioFormat((audio || voice)!),
   );
 
   const { isBuffered, bufferingHandlers, checkBuffering } = useBuffering();
 
   const {
-    isPlaying, playProgress, playPause, setCurrentTime, audioProxy,
-  } = useAudioPlayer(message.id, mediaData, bufferingHandlers, checkBuffering, !AUTO_LOAD);
+    isPlaying, playProgress, playPause, setCurrentTime, duration,
+  } = useAudioPlayer(message.id, getMediaDuration(message)!, mediaData, bufferingHandlers, checkBuffering, !AUTO_LOAD);
 
   const {
     isUploading, isTransferring, transferProgress,
@@ -117,10 +124,10 @@ const Audio: FC<OwnProps> = ({
       const seekBar = e.currentTarget.closest('.seekline,.waveform');
       if (seekBar) {
         const { width, left } = seekBar.getBoundingClientRect();
-        setCurrentTime(audioProxy.duration * ((e.clientX - left) / width));
+        setCurrentTime(duration * ((e.clientX - left) / width));
       }
     }
-  }, [audioProxy, setCurrentTime]);
+  }, [duration, setCurrentTime]);
 
   const handleStartSeek = useCallback((e: React.MouseEvent<HTMLElement>) => {
     isSeeking.current = true;
@@ -310,6 +317,30 @@ function renderWaveform(
       onMouseUp={handleStopSeek}
     />
   );
+}
+
+
+function resolveAudioFormat(media: ApiAudio | ApiVoice) {
+  if ('mimeType' in media) {
+    // Audio
+
+    if (!IS_PROGRESSIVE_AUDIO_SUPPORTED && media.mimeType === 'audio/mpeg' && IS_STREAMING_SUPPORTED) {
+      // Safari desktop
+      return ApiMediaFormat.Stream;
+    }
+
+    // Chrome; `AUTO_LOAD` in iOS Safari
+    return ApiMediaFormat.Progressive;
+  } else {
+    // Voice
+
+    // Safari
+    if (!IS_OPUS_SUPPORTED) {
+      return ApiMediaFormat.BlobUrl;
+    }
+
+    return ApiMediaFormat.Progressive;
+  }
 }
 
 export default memo(Audio);

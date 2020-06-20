@@ -15,8 +15,7 @@ import {
   loadPollOptionResults,
 } from './messages';
 import {
-  fetchFullUser, fetchNearestCountry, uploadProfilePhoto,
-  updateProfile, updateProfilePhoto, checkUsername, updateUsername,
+  fetchFullUser, fetchNearestCountry,
   fetchTopUsers, fetchContactList, fetchUsers,
 } from './users';
 import {
@@ -24,6 +23,10 @@ import {
   faveSticker, fetchStickers, fetchSavedGifs, searchStickers, installStickerSet, uninstallStickerSet,
   searchGifs,
 } from './symbols';
+import {
+  updateProfile, checkUsername, updateUsername,
+  updateProfilePhoto, uploadProfilePhoto, fetchWallpapers,
+} from './account';
 
 export default {
   destroy,
@@ -79,6 +82,7 @@ export default {
   updateProfilePhoto,
   checkUsername,
   updateUsername,
+  fetchWallpapers,
   fetchCurrentUser,
   fetchTopUsers,
   fetchContactList,

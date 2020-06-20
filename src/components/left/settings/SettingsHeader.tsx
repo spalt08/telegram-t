@@ -89,6 +89,9 @@ const SettingsHeader: FC<OwnProps & DispatchProps> = ({
       case SettingsScreens.Language:
         return <h3>Language</h3>;
 
+      case SettingsScreens.GeneralChatBackground:
+        return <h3>Chat Background</h3>;
+
       case SettingsScreens.PrivacyPhoneNumber:
         return <h3>Phone Number</h3>;
       case SettingsScreens.PrivacyLastSeen:

@@ -85,18 +85,6 @@
 .icon-microphone-alt:before {
   content: "\e93b";
 }
-.icon-large-pause:before {
-  content: "\e92e";
-}
-.icon-large-play:before {
-  content: "\e92f";
-}
-.icon-pause:before {
-  content: "\e93d";
-}
-.icon-play:before {
-  content: "\e943";
-}
 .icon-poll:before {
   content: "\e938";
 }
@@ -196,6 +184,24 @@
 .icon-unpin:before {
   content: "\e956";
 }
+.icon-smallscreen:before {
+  content: "\e95e";
+}
+.icon-fullscreen:before {
+  content: "\e95f";
+}
+.icon-large-pause:before {
+  content: "\e92e";
+}
+.icon-large-play:before {
+  content: "\e92f";
+}
+.icon-pause:before {
+  content: "\e93d";
+}
+.icon-play:before {
+  content: "\e943";
+}
 .icon-channelviews:before {
   content: "\e912";
 }
@@ -219,10 +225,6 @@
 }
 .icon-delete-left:before {
   content: "\e945";
-
-  // This compensates a slight offset this icon get after conversion from SVG
-  position: relative;
-  left: -1px;
 }
 .icon-recent:before {
   content: "\e946";

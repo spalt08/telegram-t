@@ -265,3 +265,13 @@ export function getMessageContentIds(
       return result;
     }, [] as Array<number>);
 }
+
+export function getMediaDuration(message: ApiMessage) {
+  const { audio, voice, video } = getMessageContent(message);
+  const media = audio || voice || video;
+  if (!media) {
+    return undefined;
+  }
+
+  return media.duration;
+}

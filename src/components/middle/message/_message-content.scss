@@ -12,6 +12,10 @@
     line-height: 1.3125;
   }
 
+  &:not(.custom-shape) {
+    font-size: var(--message-text-size, 1rem);
+  }
+
   .matching-text-highlight {
     background: #CAE3F7;
     border-radius: 0.25rem;
@@ -172,6 +176,11 @@
       background-color: var(--color-selection-highlight-emoji);
       color: transparent;
     }
+  }
+
+  &:not(.custom-shape) .text-content .emoji {
+    width: calc(1.25 * var(--message-text-size, 1rem));
+    background-size: calc(1.25 * var(--message-text-size, 1rem));
   }
 }
 
@@ -358,7 +367,6 @@
 
   &.emoji-only-3 {
     font-size: 3rem;
-
 
     .emoji {
       width: 3rem;

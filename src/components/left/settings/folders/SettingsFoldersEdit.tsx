@@ -215,66 +215,68 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps & DispatchProps> = ({
   }
 
   return (
-    <div className="settings-content custom-scroll">
-      <div className="settings-folders-header">
-        <div className="settings-folders-icon">
-          {animationData && (
-            <AnimatedSticker
-              animationData={animationData}
-              play={isAnimationLoaded}
-              noLoop
-              onLoad={handleAnimationLoad}
-            />
+    <div className="settings-fab-wrapper">
+      <div className="settings-content custom-scroll">
+        <div className="settings-folders-header">
+          <div className="settings-folders-icon">
+            {animationData && (
+              <AnimatedSticker
+                animationData={animationData}
+                play={isAnimationLoaded}
+                noLoop
+                onLoad={handleAnimationLoad}
+              />
+            )}
+          </div>
+
+          {state.mode === 'create' && (
+            <p className="settings-item-description mb-3">
+              Choose chats and types of chats that will appear and never appear in this folder.
+            </p>
           )}
+
+          <InputText
+            className="mb-0"
+            label="Folder Name"
+            value={state.folder.title}
+            onChange={handleChange}
+            error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
+          />
         </div>
 
-        {state.mode === 'create' && (
-          <p className="settings-item-description mb-3">
-            Choose chats and types of chats that will appear and never appear in this folder.
-          </p>
-        )}
+        <div className="settings-item no-border pt-3">
+          {state.error && state.error === ERROR_NO_CHATS && (
+            <p className="settings-item-description color-danger mb-2">
+              {state.error}
+            </p>
+          )}
 
-        <InputText
-          className="mb-0"
-          label="Folder Name"
-          value={state.folder.title}
-          onChange={handleChange}
-          error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
-        />
-      </div>
+          <h4 className="settings-item-header mb-3">Included chats</h4>
 
-      <div className="settings-item no-border pt-3">
-        {state.error && state.error === ERROR_NO_CHATS && (
-          <p className="settings-item-description color-danger mb-2">
-            {state.error}
-          </p>
-        )}
+          <ListItem
+            className="settings-folders-list-item color-primary mb-0"
+            icon="add"
+            onClick={onAddIncludedChats}
+          >
+            Add Chats
+          </ListItem>
 
-        <h4 className="settings-item-header mb-3">Included chats</h4>
+          {renderChats('included')}
+        </div>
 
-        <ListItem
-          className="settings-folders-list-item color-primary mb-0"
-          icon="add"
-          onClick={onAddIncludedChats}
-        >
-          Add Chats
-        </ListItem>
+        <div className="settings-item no-border pt-3">
+          <h4 className="settings-item-header mb-3">Excluded chats</h4>
 
-        {renderChats('included')}
-      </div>
+          <ListItem
+            className="settings-folders-list-item color-primary mb-0"
+            icon="add"
+            onClick={onAddExcludedChats}
+          >
+            Add Chats
+          </ListItem>
 
-      <div className="settings-item no-border pt-3">
-        <h4 className="settings-item-header mb-3">Excluded chats</h4>
-
-        <ListItem
-          className="settings-folders-list-item color-primary mb-0"
-          icon="add"
-          onClick={onAddExcludedChats}
-        >
-          Add Chats
-        </ListItem>
-
-        {renderChats('excluded')}
+          {renderChats('excluded')}
+        </div>
       </div>
 
       <FloatingActionButton

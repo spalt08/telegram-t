@@ -5,6 +5,7 @@ import React, {
 import { withGlobal } from '../../../lib/teact/teactn';
 
 import { GlobalActions } from '../../../global/types';
+import { ISettings } from '../../../types';
 
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
@@ -28,6 +29,7 @@ type OwnProps = {
 type StateProps = {
   selectedChatId?: number;
   replyingTo?: number;
+  messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
 };
 
 type DispatchProps = Pick<GlobalActions, 'editLastChatMessage'>;
@@ -46,6 +48,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
   onSend,
   selectedChatId,
   replyingTo,
+  messageSendKeyCombo,
   editLastChatMessage,
 }) => {
   const inputRef = useRef<HTMLDivElement>();
@@ -78,9 +81,14 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+      if (
+        (messageSendKeyCombo === 'enter' && !e.shiftKey)
+        || (messageSendKeyCombo === 'ctrl-enter' && e.ctrlKey)
+      ) {
+        e.preventDefault();
 
-      onSend();
+        onSend();
+      }
     }
     if (e.key === 'ArrowUp' && !html.length) {
       e.preventDefault();
@@ -134,6 +142,7 @@ const MessageInput: FC<OwnProps & StateProps & DispatchProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { chats: { selectedId: selectedChatId, replyingToById } } = global;
+    const { messageSendKeyCombo } = global.settings.byKey;
 
     if (!selectedChatId) {
       return {};
@@ -142,6 +151,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       selectedChatId,
       replyingTo: replyingToById[selectedChatId],
+      messageSendKeyCombo,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['editLastChatMessage']),

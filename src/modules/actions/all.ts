@@ -16,6 +16,7 @@ import './api/globalSearch';
 import './api/messageSearch';
 import './api/sync';
 import './api/users';
+import './api/misc';
 
 import './apiUpdaters/initial';
 import './apiUpdaters/chats';
