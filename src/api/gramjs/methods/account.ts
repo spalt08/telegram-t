@@ -15,11 +15,11 @@ export function updateProfile({
   lastName?: string;
   about?: string;
 }) {
-  // This endpoint handles empty strings with an unexpected error, so we replace them with `undefined`
+  // This endpoint handles empty strings with an unexpected error, so we replace them with space
   return invokeRequest(new GramJs.account.UpdateProfile({
-    firstName: firstName || undefined,
-    lastName: lastName || undefined,
-    about: about || undefined,
+    firstName: firstName || ' ',
+    lastName: lastName || ' ',
+    about: about || ' ',
   }));
 }
 

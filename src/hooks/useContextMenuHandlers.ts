@@ -2,29 +2,30 @@ import { RefObject } from 'react';
 import { useState, useEffect, useCallback } from '../lib/teact/teact';
 
 import { IAnchorPosition } from '../types';
-import { IS_TOUCH_ENV } from '../util/environment';
+import { IS_TOUCH_ENV, IS_MOBILE_SCREEN } from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 250;
 
-type BooleanFunction = () => boolean | undefined;
+function checkIsDisabledForMobile() {
+  return IS_MOBILE_SCREEN
+  && window.document.body.classList.contains('enable-symbol-menu-transforms');
+}
 
 export default (
   elementRef: RefObject<HTMLElement>,
-  isMenuDisabled?: boolean | BooleanFunction,
+  isMenuDisabled?: boolean,
 ) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
-  const getIsMenuDisabled = typeof isMenuDisabled === 'function' ? isMenuDisabled : () => isMenuDisabled;
-
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
-    if (!getIsMenuDisabled() && e.button === 2) {
+    if (!isMenuDisabled && e.button === 2) {
       document.body.classList.add('no-selection');
     }
-  }, [getIsMenuDisabled]);
+  }, [isMenuDisabled]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    if (getIsMenuDisabled()) {
+    if (isMenuDisabled) {
       return;
     }
     e.preventDefault();
@@ -36,7 +37,7 @@ export default (
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-  }, [getIsMenuDisabled, contextMenuPosition]);
+  }, [isMenuDisabled, contextMenuPosition]);
 
   const handleContextMenuClose = useCallback(() => {
     setIsContextMenuOpen(false);
@@ -48,7 +49,7 @@ export default (
 
   // Support context menu on touch-devices
   useEffect(() => {
-    if (getIsMenuDisabled() || !IS_TOUCH_ENV) {
+    if (isMenuDisabled || !IS_TOUCH_ENV) {
       return undefined;
     }
 
@@ -90,7 +91,7 @@ export default (
     };
 
     const startLongPressTimer = (e: TouchEvent) => {
-      if (getIsMenuDisabled()) {
+      if (isMenuDisabled || checkIsDisabledForMobile()) {
         return;
       }
       clearLongPressTimer();
@@ -112,7 +113,7 @@ export default (
       element.removeEventListener('touchend', clearLongPressTimer, true);
       element.removeEventListener('touchmove', clearLongPressTimer, true);
     };
-  }, [contextMenuPosition, getIsMenuDisabled, elementRef]);
+  }, [contextMenuPosition, isMenuDisabled, elementRef]);
 
   return {
     isContextMenuOpen,

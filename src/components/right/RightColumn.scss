@@ -32,7 +32,7 @@
   }
 
   > .Transition {
-    height: calc(var(--vh, 1vh) * 100 - var(--header-height));
+    height: calc(100% - var(--header-height));
   }
 }
 
