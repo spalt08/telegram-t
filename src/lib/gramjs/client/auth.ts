@@ -213,7 +213,6 @@ async function signInUserWithQrCode(
         if (result2 instanceof Api.auth.LoginTokenSuccess && result2.authorization instanceof Api.auth.Authorization) {
             return result2.authorization.user;
         } else if (result2 instanceof Api.auth.LoginTokenMigrateTo) {
-            // This was not tested. Probably a DC change is not needed.
             await client._switchDC(result2.dcId);
             const migratedResult = await client.invoke(new Api.auth.ImportLoginToken({
                 token: result2.token,
