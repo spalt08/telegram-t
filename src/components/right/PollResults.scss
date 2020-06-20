@@ -1,10 +1,9 @@
-@import '../../styles/mixins';
-
 .PollResults {
   height: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
+  pointer-events: auto;
 
   #RightOverlay & {
     height: calc(100% - 60px);

@@ -51,6 +51,7 @@
   .chat-info-wrapper {
     @media (max-width: 600px) {
       flex-grow: 1;
+      max-width: calc(100% - 6.25rem);
     }
   }
 
@@ -99,6 +100,9 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      @media (max-width: 600px) {
+        max-width: calc(100% - 3.5rem);
+      }
     }
 
     .title {
@@ -111,6 +115,13 @@
         line-height: 1.375rem;
         white-space: pre-wrap;
         margin: 0;
+
+        @media (max-width: 600px) {
+          white-space: pre;
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
         @media (min-width: 1440px) and (max-width: 1500px) {
           white-space: pre;

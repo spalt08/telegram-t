@@ -103,6 +103,11 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
     return themeSets;
   }, [areAddedLoaded, addedSetIds, recentStickers, favoriteStickers, stickerSetsById]);
 
+  const noPopulatedSets = useMemo(() => (
+    areAddedLoaded
+    && allSets.filter((set) => set.stickers && set.stickers.length).length === 0
+  ), [allSets, areAddedLoaded]);
+
   const updateVisibleSetIndexes = useCallback(() => {
     if (!containerRef.current) {
       return;
@@ -177,7 +182,7 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
   }, [updateVisibleSetIndexes]);
 
   function renderCover(stickerSet: StickerSetOrRecent, index: number) {
-    const firstSticker = stickerSet.stickers[0];
+    const firstSticker = stickerSet.stickers && stickerSet.stickers[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',
       index === activeSetIndex && 'activated',
@@ -219,11 +224,13 @@ const StickerPicker: FC<OwnProps & StateProps & DispatchProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', className);
 
-  if (!areAddedLoaded || !canSendStickers) {
+  if (!areAddedLoaded || noPopulatedSets || !canSendStickers) {
     return (
       <div className={fullClassName}>
         {!canSendStickers ? (
           <div className="picker-disabled">Sending stickers is not allowed in this chat.</div>
+        ) : noPopulatedSets ? (
+          <div className="picker-disabled">You have no saved Stickers.</div>
         ) : (
           <Loading />
         )}

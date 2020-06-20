@@ -29,7 +29,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
   stickerSetId, set, canSendStickers, loadStickers, sendMessage, toggleStickerSet,
 }) => {
   const isAdded = set && Boolean(set.installedDate);
-  const areStickersLoaded = Boolean(set && set.stickers.length);
+  const areStickersLoaded = Boolean(set && set.stickers);
 
   const displayedStickers = useMemo(() => {
     if (!set) {
@@ -37,7 +37,7 @@ const StickerSetResult: FC<OwnProps & StateProps & DispatchProps> = ({
     }
 
     const coverStickerIds = (set.covers || []).map(({ id }) => id);
-    const otherStickers = set.stickers.filter(({ id }) => !coverStickerIds.includes(id));
+    const otherStickers = set.stickers ? set.stickers.filter(({ id }) => !coverStickerIds.includes(id)) : [];
 
     return [...set.covers || [], ...otherStickers].slice(0, STICKERS_TO_DISPLAY);
   }, [set]);

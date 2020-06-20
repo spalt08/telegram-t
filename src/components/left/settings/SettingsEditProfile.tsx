@@ -45,6 +45,7 @@ const USERNAME_REGEX = /^([a-zA-Z0-9_]+)$/;
 const MAX_BIO_LENGTH = 70;
 
 const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
+const ERROR_LAST_NAME_MISSING = 'Please provide your last name';
 const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
 function isUsernameValid(username: string) {
@@ -191,6 +192,11 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
       return;
     }
 
+    if (!trimmedLastName.length) {
+      setError(ERROR_LAST_NAME_MISSING);
+      return;
+    }
+
     if (trimmedBio.length > MAX_BIO_LENGTH) {
       setError(ERROR_BIO_TOO_LONG);
       return;
@@ -245,6 +251,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
             onChange={handleLastNameChange}
             label="Last Name"
             disabled={isLoading}
+            error={error === ERROR_LAST_NAME_MISSING ? error : undefined}
           />
           <InputText
             value={bio}

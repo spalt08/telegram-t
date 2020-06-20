@@ -172,10 +172,10 @@ const RoundVideo: FC<OwnProps> = ({
             loop={!isActivated}
             playsInline
             poster={thumbDataUri}
-            onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
             onEnded={isActivated ? handleEnded : undefined}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...bufferingHandlers}
+            onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
           >
             <source src={mediaData} />
           </video>

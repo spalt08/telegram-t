@@ -32,7 +32,7 @@ const StickerSet: FC<OwnProps> = ({
         // @ts-ignore teact feature
         style={`height: ${stickerSetHeight}px`}
       >
-        {stickerSet.stickers.map((sticker) => (
+        {stickerSet.stickers && stickerSet.stickers.map((sticker) => (
           <StickerButton
             key={sticker.id}
             sticker={sticker}

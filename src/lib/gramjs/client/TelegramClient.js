@@ -369,9 +369,6 @@ class TelegramClient {
         if (!workers || !fileSize) {
             workers = 1
         }
-        if (!args.end){
-            args.end = fileSize
-        }
 
         try {
             let limit = partSize

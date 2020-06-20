@@ -290,10 +290,27 @@
   line-height: 1.2;
   font-size: 10rem;
 
+  &.is-reply {
+    max-width: 100%;
+  }
+
   .reply-message {
     display: flex;
     align-items: flex-start;
     flex-direction: row-reverse;
+
+    > p {
+      margin-bottom: 0;
+    }
+
+    .EmbeddedMessage {
+      margin-left: 0.5rem;
+      border-radius: var(--border-radius-messages);
+
+      @media (max-width: 600px) {
+        max-width: calc(90vw - 12rem);
+      }
+    }
   }
 
   .text-content {
@@ -310,20 +327,6 @@
       left: 0;
       bottom: 0;
       right: 0;
-    }
-  }
-
-  .reply-message {
-    display: flex;
-    align-items: flex-start;
-
-    > p {
-      margin-bottom: 0;
-    }
-
-    .EmbeddedMessage {
-      margin-left: 0.5rem;
-      border-radius: var(--border-radius-messages);
     }
   }
 
