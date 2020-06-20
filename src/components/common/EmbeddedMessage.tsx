@@ -1,4 +1,4 @@
-import React, { FC } from '../../lib/teact/teact';
+import React, { FC, useEffect } from '../../lib/teact/teact';
 
 import { ApiUser, ApiMessage, ApiChat } from '../../api/types';
 
@@ -15,6 +15,7 @@ import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';
+import webpHero from '../../util/webpHero';
 
 import RippleEffect from '../ui/RippleEffect';
 import ActionMessage from '../middle/ActionMessage';
@@ -38,6 +39,8 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaThumbnail = message && getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !loadPictogram);
   const fullClassName = buildClassName('EmbeddedMessage', className, !message && 'not-implemented');
+  const pictogramId = message && `sticker-reply-thumb${message.id}`;
+  const { sticker } = (message && message.content) || {};
 
   const senderTitle = sender && (
     isChatPrivate(sender.id)
@@ -45,9 +48,17 @@ const EmbeddedMessage: FC<OwnProps> = ({
       : getChatTitle(sender as ApiChat)
   );
 
+  useEffect(() => {
+    if (mediaBlobUrl && sticker) {
+      webpHero({
+        selectors: `#${pictogramId}`,
+      });
+    }
+  }, [mediaBlobUrl, sticker, pictogramId]);
+
   return (
     <div className={fullClassName} onClick={message ? onClick : undefined}>
-      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
+      {mediaThumbnail && renderPictogram(pictogramId, mediaThumbnail, mediaBlobUrl)}
       <div className="message-text">
         <div className="message-title">{renderText(senderTitle || title || NBSP)}</div>
         <p>
@@ -65,11 +76,15 @@ const EmbeddedMessage: FC<OwnProps> = ({
   );
 };
 
-function renderPictogram(thumbDataUri: string, blobUrl?: string) {
+function renderPictogram(
+  id: string | undefined,
+  thumbDataUri: string,
+  blobUrl?: string,
+) {
   const { width, height } = getPictogramDimensions();
 
   return (
-    <img src={blobUrl || thumbDataUri} width={width} height={height} alt="" />
+    <img id={id} src={blobUrl || thumbDataUri} width={width} height={height} alt="" />
   );
 }
 

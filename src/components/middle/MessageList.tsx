@@ -31,7 +31,7 @@ import {
   orderBy,
   pick,
 } from '../../util/iteratees';
-import { debounce, fastRaf, throttle } from '../../util/schedulers';
+import { debounce, throttle, fastRaf } from '../../util/schedulers';
 import { formatHumanDate } from '../../util/dateFormat';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import buildClassName from '../../util/buildClassName';
@@ -384,6 +384,9 @@ const MessageList: FC<OwnProps & StateProps & DispatchProps> = ({
 
       setScrollTop(container, newScrollTop);
       isScrollTopJustUpdated = true;
+      fastRaf(() => {
+        isScrollTopJustUpdated = false;
+      });
     }
 
     scrollOffsetRef.current = Math.max(scrollHeight - newScrollTop, offsetHeight);
