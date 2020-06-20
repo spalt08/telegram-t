@@ -65,7 +65,6 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     hasThumbnail: Boolean(thumb),
     count,
     hash,
-    stickers: [],
   };
 }
 
