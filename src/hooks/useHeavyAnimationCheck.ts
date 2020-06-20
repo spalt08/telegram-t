@@ -28,8 +28,8 @@ export default (
     document.addEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
 
     return () => {
-      document.removeEventListener(ANIMATION_START_EVENT, handleAnimationStart);
       document.removeEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
+      document.removeEventListener(ANIMATION_START_EVENT, handleAnimationStart);
     };
   }, [handleAnimationEnd, handleAnimationStart]);
 };
