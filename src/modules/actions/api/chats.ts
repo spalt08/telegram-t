@@ -304,16 +304,20 @@ addReducer('toggleChatPinned', (global, actions, payload) => {
     if (folder) {
       const shouldBePinned = !selectIsChatPinned(global, id, folderId);
 
-      const { pinnedChatIds } = folder;
+      const { pinnedChatIds, includedChatIds } = folder;
       const newPinnedIds = shouldBePinned
         ? [id, ...(pinnedChatIds || [])]
         : (pinnedChatIds || []).filter((pinnedId) => pinnedId !== id);
+
+      // With both Pin and Unpin we need to re-add a user to the included group
+      const newIncludedChatIds = [id, ...includedChatIds];
 
       void callApi('editChatFolder', {
         id: folderId,
         folderUpdate: {
           ...folder,
           pinnedChatIds: newPinnedIds,
+          includedChatIds: newIncludedChatIds,
         },
       });
     }
