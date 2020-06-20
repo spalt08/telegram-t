@@ -1,6 +1,7 @@
 .ForwardPicker {
   height: 100%;
   position: relative;
+  pointer-events: auto;
 
   #RightOverlay & {
     height: calc(100% - 60px);

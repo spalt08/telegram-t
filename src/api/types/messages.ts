@@ -38,7 +38,7 @@ export interface ApiStickerSet {
   hasThumbnail?: boolean;
   count: number;
   hash: number;
-  stickers: ApiSticker[];
+  stickers?: ApiSticker[];
   covers?: ApiSticker[];
 }
 

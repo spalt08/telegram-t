@@ -49,7 +49,7 @@ interface ISeekMethods {
   handleStopSeek: () => void;
 }
 
-const AUTO_LOAD = !IS_PROGRESSIVE_AUDIO_SUPPORTED && !IS_STREAMING_SUPPORTED;
+const IS_IOS = !IS_PROGRESSIVE_AUDIO_SUPPORTED && !IS_STREAMING_SUPPORTED;
 const MAX_WIDTH_ON_MOBILE = 69;
 const BUTTON_WIDTH_ON_MOBILE = 3.75 * REM;
 
@@ -70,7 +70,7 @@ const Audio: FC<OwnProps> = ({
   // We need to preload on mobiles to enable playing by click.
   const [isActivated, setIsActivated] = useState(false);
 
-  const shouldDownload = isActivated || AUTO_LOAD;
+  const shouldDownload = isActivated || IS_IOS;
 
   const { mediaData, downloadProgress } = useMediaWithDownloadProgress(
     getMessageMediaHash(message, 'inline'),
@@ -78,11 +78,11 @@ const Audio: FC<OwnProps> = ({
     resolveAudioFormat((audio || voice)!),
   );
 
-  const { isBuffered, bufferingHandlers, checkBuffering } = useBuffering();
+  const { isBuffered, bufferingHandlers, checkBuffering } = useBuffering(undefined, audio && IS_IOS);
 
   const {
     isPlaying, playProgress, playPause, setCurrentTime, duration,
-  } = useAudioPlayer(message.id, getMediaDuration(message)!, mediaData, bufferingHandlers, checkBuffering, !AUTO_LOAD);
+  } = useAudioPlayer(message.id, getMediaDuration(message)!, mediaData, bufferingHandlers, checkBuffering, !IS_IOS);
 
   const {
     isUploading, isTransferring, transferProgress,
@@ -329,7 +329,7 @@ function resolveAudioFormat(media: ApiAudio | ApiVoice) {
       return ApiMediaFormat.Stream;
     }
 
-    // Chrome; `AUTO_LOAD` in iOS Safari
+    // Normal way and its imitation on iOS Safari
     return ApiMediaFormat.Progressive;
   } else {
     // Voice

@@ -4,21 +4,25 @@ type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => voi
 
 const MIN_READY_STATE = 3;
 
-export default (cb?: BufferingEvent) => {
+export default (cb?: BufferingEvent, shouldWatchTimeUpdate = false) => {
   const [isBuffered, setIsBuffered] = useState(true);
 
   const handleBuffering = useCallback<BufferingEvent>((e) => {
-    setIsBuffered((e.currentTarget as HTMLMediaElement).readyState >= MIN_READY_STATE);
+    const media = e.currentTarget as HTMLMediaElement;
+    setIsBuffered(media.readyState >= MIN_READY_STATE && (!shouldWatchTimeUpdate || media.currentTime > 0));
     if (cb) {
       cb(e);
     }
-  }, [cb]);
+  }, [cb, shouldWatchTimeUpdate]);
 
   const bufferingHandlers = {
     onLoadStart: handleBuffering, // Safari initial
     onLoadedData: handleBuffering,
     onPlaying: handleBuffering,
-    onPause: handleBuffering, // Chrome seeking
+    onPause: handleBuffering, // Chrome seeking,
+    ...(shouldWatchTimeUpdate && {
+      onTimeUpdate: handleBuffering, // iOS audio
+    }),
   };
 
   return {

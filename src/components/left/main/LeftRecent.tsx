@@ -61,7 +61,7 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
   return (
     <div className="LeftRecent custom-scroll">
       {topUsers && (
-        <div className="search-section">
+        <div className="search-section mb-0">
           <h3 className="section-heading">People</h3>
           <div ref={topUsersRef} className="top-peers no-selection">
             {topUsers.map((user) => (
@@ -74,8 +74,8 @@ const LeftRecent: FC<OwnProps & StateProps & DispatchProps> = ({
         </div>
       )}
       {recentlyFoundChatIds && (
-        <div className="search-section">
-          <h3 className="section-heading">Recent</h3>
+        <div className="search-section pt-1">
+          <h3 className="section-heading mt-0">Recent</h3>
           {recentlyFoundChatIds.map((id) => (
             <LeftSearchResultChat
               chatId={id}

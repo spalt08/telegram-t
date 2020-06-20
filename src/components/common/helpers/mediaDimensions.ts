@@ -153,7 +153,7 @@ export function getDocumentThumbnailDimensions(smaller?: boolean): IDimensions {
 export function getStickerDimensions(sticker: ApiSticker): IDimensions {
   const { width, height } = sticker;
   const aspectRatio = (height && width) && height / width;
-  const baseWidth = 16 * REM;
+  const baseWidth = IS_MOBILE_SCREEN ? 12 * REM : 16 * REM;
   const calculatedHeight = aspectRatio ? baseWidth * aspectRatio : baseWidth;
 
   if (aspectRatio && calculatedHeight > baseWidth) {

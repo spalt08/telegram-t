@@ -101,6 +101,10 @@ export function getMessageMediaHash(
     return undefined;
   }
 
+  if (target === 'pictogram' && sticker && sticker.isAnimated) {
+    return undefined;
+  }
+
   const base = getMessageKey(message);
 
   if (photo || webPagePhoto) {
