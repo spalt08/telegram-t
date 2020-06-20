@@ -20,5 +20,5 @@ export default (playerRef: RefObject<HTMLVideoElement>, shouldPlay: boolean) => 
     }
   }, [playerRef]);
 
-  useHeavyAnimationCheck(play, pause);
+  useHeavyAnimationCheck(pause, play);
 };
