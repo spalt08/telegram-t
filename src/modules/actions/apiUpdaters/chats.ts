@@ -179,34 +179,33 @@ addReducer('apiUpdate', (global, actions, update: ApiUpdate) => {
       const listType = selectChatListType(newGlobal, id);
       if (listType) {
         const { [listType]: orderedPinnedIds } = newGlobal.chats.orderedPinnedIds;
-        if (orderedPinnedIds) {
-          let newOrderedPinnedIds = orderedPinnedIds;
-          if (!isPinned) {
-            newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => pinnedId !== id);
-          } else if (!newOrderedPinnedIds.includes(id)) {
-            // When moving pinned chats to archive, active ordered pinned ids don't get updated
-            // (to preserve chat pinned state when it returns from archive)
-            // If user already has max pinned chats, we should check for orderedIds
-            // that don't point to listed chats
-            if (listType === 'active' && newOrderedPinnedIds.length >= MAX_ACTIVE_PINNED_CHATS) {
-              const listIds = newGlobal.chats.listIds.active;
-              newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => listIds && listIds.includes(pinnedId));
-            }
 
-            newOrderedPinnedIds = [id, ...newOrderedPinnedIds];
+        let newOrderedPinnedIds = orderedPinnedIds || [];
+        if (!isPinned) {
+          newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => pinnedId !== id);
+        } else if (!newOrderedPinnedIds.includes(id)) {
+          // When moving pinned chats to archive, active ordered pinned ids don't get updated
+          // (to preserve chat pinned state when it returns from archive)
+          // If user already has max pinned chats, we should check for orderedIds
+          // that don't point to listed chats
+          if (listType === 'active' && newOrderedPinnedIds.length >= MAX_ACTIVE_PINNED_CHATS) {
+            const listIds = newGlobal.chats.listIds.active;
+            newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => listIds && listIds.includes(pinnedId));
           }
 
-          newGlobal = {
-            ...newGlobal,
-            chats: {
-              ...newGlobal.chats,
-              orderedPinnedIds: {
-                ...newGlobal.chats.orderedPinnedIds,
-                [listType]: newOrderedPinnedIds.length ? newOrderedPinnedIds : undefined,
-              },
-            },
-          };
+          newOrderedPinnedIds = [id, ...newOrderedPinnedIds];
         }
+
+        newGlobal = {
+          ...newGlobal,
+          chats: {
+            ...newGlobal.chats,
+            orderedPinnedIds: {
+              ...newGlobal.chats.orderedPinnedIds,
+              [listType]: newOrderedPinnedIds.length ? newOrderedPinnedIds : undefined,
+            },
+          },
+        };
       }
 
       setGlobal(newGlobal);
