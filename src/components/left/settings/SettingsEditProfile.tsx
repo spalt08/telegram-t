@@ -83,14 +83,6 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
 
   useUpdateOnResize();
 
-  const isSaveButtonShown = useMemo(() => {
-    if (isUsernameTouched && (!isUsernameAvailable || !isUsernameValid(username))) {
-      return false;
-    }
-
-    return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
-  }, [isProfileFieldsTouched, isUsernameTouched, isUsernameAvailable, photo, username]);
-
   const isLoading = progress === ProfileEditProgress.InProgress;
 
   const [usernameSuccess, usernameError] = useMemo(() => {
@@ -119,6 +111,14 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
       isUsernameAvailable === false ? 'Username is already taken' : undefined,
     ];
   }, [username, isUsernameAvailable]);
+
+  const isSaveButtonShown = useMemo(() => {
+    if (isUsernameTouched && usernameError) {
+      return false;
+    }
+
+    return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
+  }, [isUsernameTouched, usernameError, photo, isProfileFieldsTouched, isUsernameAvailable]);
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -174,7 +174,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
     setUsername(newUsername);
     setIsUsernameTouched(true);
 
-    if (isUsernameValid(newUsername)) {
+    if (newUsername.length && isUsernameValid(newUsername)) {
       runDebouncedForCheckUsername(() => {
         checkUsername({ username: newUsername });
       });
