@@ -37,6 +37,10 @@
   }
 
   &::before {
+    .custom-bg-image & {
+      display: none;
+    }
+
     --shadow-color: #84a686;
 
     content: "";

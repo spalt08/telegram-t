@@ -8,6 +8,7 @@ type Handler = (e: Event) => void;
 
 export default (
   trackId: number,
+  originalDuration: number, // Sometimes incorrect for voice messages
   src?: string,
   handlers?: Record<string, Handler>,
   onInit?: (element: HTMLAudioElement) => void,
@@ -31,7 +32,8 @@ export default (
           break;
         case 'onTimeUpdate': {
           const { proxy } = controllerRef.current!;
-          setPlayProgress(proxy.currentTime / proxy.duration);
+          const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
+          setPlayProgress(proxy.currentTime / duration);
           break;
         }
       }
@@ -56,13 +58,14 @@ export default (
   const {
     play, pause, setCurrentTime, proxy, destroy,
   } = controllerRef.current!;
+  const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
 
   // RAF progress
   useEffect(() => {
-    if (proxy.duration) {
-      setPlayProgress(proxy.currentTime / proxy.duration);
+    if (duration) {
+      setPlayProgress(proxy.currentTime / duration);
     }
-  }, [playProgress, proxy]);
+  }, [duration, playProgress, proxy]);
 
   // Cleanup
   useEffect(() => destroy, [destroy]);
@@ -89,5 +92,6 @@ export default (
     playPause,
     setCurrentTime,
     audioProxy: proxy,
+    duration,
   };
 };

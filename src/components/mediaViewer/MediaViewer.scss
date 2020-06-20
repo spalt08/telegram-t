@@ -165,6 +165,17 @@
       bottom: unset;
       height: 6rem;
       background-position-y: center;
+
+      @media (max-width: 600px) {
+        opacity: 0;
+        transition: opacity .15s ease-in;
+        pointer-events: none;
+
+        .video-controls-visible & {
+          opacity: 1;
+          pointer-events: all;
+        }
+      }
     }
   }
 }

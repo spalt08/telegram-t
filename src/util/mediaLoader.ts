@@ -10,7 +10,11 @@ import { DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { fetchBlob, preloadImage } from './files';
-import { IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported } from './environment';
+import {
+  IS_OPUS_SUPPORTED,
+  IS_PROGRESSIVE_SUPPORTED,
+  isWebpSupported,
+} from './environment';
 import { oggToWav } from './oggToWav';
 
 const asCacheApiType = {
@@ -18,6 +22,7 @@ const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
   [ApiMediaFormat.Lottie]: cacheApi.Type.Json,
   [ApiMediaFormat.Progressive]: undefined,
+  [ApiMediaFormat.Stream]: undefined,
 };
 
 const MEMORY_CACHE: Record<string, ApiPreparedMedia> = {};
@@ -87,6 +92,40 @@ async function fetchFromCacheOrRemote(url: string, mediaFormat: ApiMediaFormat, 
 
       return prepared;
     }
+  }
+
+  if (mediaFormat === ApiMediaFormat.Stream) {
+    const mediaSource = new MediaSource();
+    const streamUrl = URL.createObjectURL(mediaSource);
+    let isOpen = false;
+
+    mediaSource.addEventListener('sourceopen', () => {
+      if (isOpen) {
+        return;
+      }
+      isOpen = true;
+
+      const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+
+      void callApi('downloadMedia', { url, mediaFormat }, (progress: number, arrayBuffer: ArrayBuffer) => {
+        if (onProgress) {
+          onProgress(progress);
+        }
+
+        if (progress === 1) {
+          mediaSource.endOfStream();
+        }
+
+        if (!arrayBuffer) {
+          return;
+        }
+
+        sourceBuffer.appendBuffer(arrayBuffer!);
+      });
+    });
+
+    MEMORY_CACHE[url] = streamUrl;
+    return streamUrl;
   }
 
   const remote = await callApi('downloadMedia', { url, mediaFormat }, onProgress);

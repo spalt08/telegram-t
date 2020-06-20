@@ -9,9 +9,10 @@ const RESIZE_THROTTLE_MS = 500;
 
 type OwnProps = {
   text: TextPart | TextPart[];
+  onClick: () => void;
 };
 
-const MediaViewerFooter: FC<OwnProps> = ({ text = '' }) => {
+const MediaViewerFooter: FC<OwnProps> = ({ text = '', onClick }) => {
   const [isMultiline, setIsMultiline] = useState(false);
   useEffect(() => {
     const footerContent = document.querySelector('.MediaViewerFooter .media-text') as HTMLDivElement | null;
@@ -43,7 +44,7 @@ const MediaViewerFooter: FC<OwnProps> = ({ text = '' }) => {
   return (
     <div className="MediaViewerFooter" onClick={stopEvent}>
       {text && (
-        <div className="media-viewer-footer-content">
+        <div className="media-viewer-footer-content" onClick={onClick}>
           <p className={`media-text custom-scroll ${isMultiline ? 'multiline' : ''}`}>{text}</p>
         </div>
       )}

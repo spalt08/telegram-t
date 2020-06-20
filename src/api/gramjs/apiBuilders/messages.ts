@@ -184,7 +184,7 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
   const voice = buildVoice(media);
   if (voice) return { voice };
 
-  const document = buildDocument(media);
+  const document = buildDocumentFromMedia(media);
   if (document) return { document };
 
   const contact = buildContact(media);
@@ -352,26 +352,31 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
   };
 }
 
-function buildDocument(media: GramJs.TypeMessageMedia): ApiDocument | undefined {
-  if (
-    !(media instanceof GramJs.MessageMediaDocument)
-    || !(media.document instanceof GramJs.Document)
-    || !media.document
-  ) {
+function buildDocumentFromMedia(media: GramJs.TypeMessageMedia) {
+  if (!(media instanceof GramJs.MessageMediaDocument) || !media.document) {
+    return undefined;
+  }
+
+  return buildApiDocument(media.document);
+}
+
+export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | undefined {
+  if (!(document instanceof GramJs.Document)) {
     return undefined;
   }
 
   const {
-    size, mimeType, date, thumbs,
-  } = media.document;
+    id, size, mimeType, date, thumbs,
+  } = document;
 
   const thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
 
   return {
+    id: String(id),
     size,
     mimeType,
     timestamp: date,
-    fileName: getFilenameFromDocument(media.document),
+    fileName: getFilenameFromDocument(document),
     thumbnail,
   };
 }

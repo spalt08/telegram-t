@@ -31,7 +31,9 @@ let timeout: number | undefined;
 let DEBUG_isLogged = false;
 
 const Main: FC<StateProps> = ({
-  isLeftColumnShown, isRightColumnShown, animationLevel,
+  isLeftColumnShown,
+  isRightColumnShown,
+  animationLevel,
 }) => {
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;

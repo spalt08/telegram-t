@@ -5,6 +5,10 @@
     --secondary-color: var(--color-text-green);
   }
 
+  .content-inner & {
+    min-width: 14rem;
+  }
+
   display: flex;
   align-items: center;
 

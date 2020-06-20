@@ -170,7 +170,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
 // Remove `hash` so we can request all MTP entities on next load.
 function reduceStickers(global: GlobalState): GlobalState['stickers'] {
   return {
-    setsById: pick(global.stickers.setsById, global.stickers.added.setIds),
+    setsById: pick(global.stickers.setsById, global.stickers.added.setIds || []),
     added: {
       setIds: global.stickers.added.setIds,
     },
@@ -202,6 +202,10 @@ function reduceSettings(global: GlobalState): GlobalState['settings'] {
   const { byKey } = global.settings;
 
   return {
-    byKey,
+    byKey: {
+      ...byKey,
+      customChatBackground: undefined,
+      isBackgroundBlurred: true,
+    },
   };
 }

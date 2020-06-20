@@ -4,12 +4,15 @@ type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => voi
 
 const MIN_READY_STATE = 3;
 
-export default () => {
+export default (cb?: BufferingEvent) => {
   const [isBuffered, setIsBuffered] = useState(true);
 
   const handleBuffering = useCallback<BufferingEvent>((e) => {
     setIsBuffered((e.currentTarget as HTMLMediaElement).readyState >= MIN_READY_STATE);
-  }, []);
+    if (cb) {
+      cb(e);
+    }
+  }, [cb]);
 
   const bufferingHandlers = {
     onLoadStart: handleBuffering, // Safari initial

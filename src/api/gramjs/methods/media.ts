@@ -11,7 +11,9 @@ import { getEntityTypeById } from '../gramjsBuilders';
 import { blobToDataUri } from '../../../util/files';
 import * as cacheApi from '../../../util/cacheApi';
 
-type EntityType = 'msg' | 'sticker' | 'gif' | 'channel' | 'chat' | 'user' | 'stickerSet';
+type EntityType = 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'stickerSet';
+
+const MAX_WORKERS = 16;
 
 export default async function downloadMedia(
   {
@@ -56,7 +58,7 @@ async function download(
   end?: number,
   mediaFormat?: ApiMediaFormat,
 ) {
-  const mediaMatch = url.match(/(avatar|msg|stickerSet|sticker|gif|file)([-\d\w./]+)(\?size=\w+)?/);
+  const mediaMatch = url.match(/(avatar|msg|stickerSet|sticker|wallpaper|gif|file)([-\d\w./]+)(\?size=\w+)?/);
   if (!mediaMatch) {
     return undefined;
   }
@@ -83,7 +85,7 @@ async function download(
     entityType = getEntityTypeById(Number(entityId));
     entityId = Math.abs(Number(entityId));
   } else {
-    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'gif' | 'stickerSet';
+    entityType = mediaMatch[1] as 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'stickerSet';
   }
 
   switch (entityType) {
@@ -99,6 +101,7 @@ async function download(
       break;
     case 'sticker':
     case 'gif':
+    case 'wallpaper':
       entity = localDb.documents[entityId as string];
       break;
     case 'stickerSet':
@@ -110,9 +113,13 @@ async function download(
     return undefined;
   }
 
-  if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif') {
+  if (entityType === 'msg' || entityType === 'sticker' || entityType === 'gif' || entityType === 'wallpaper') {
+    if (mediaFormat === ApiMediaFormat.Stream) {
+      onProgress!.acceptsBuffer = true;
+    }
+
     const data = await client.downloadMedia(entity, {
-      sizeType, start, end, progressCallback: onProgress, workers: 16,
+      sizeType, start, end, progressCallback: onProgress, workers: MAX_WORKERS,
     });
     let mimeType;
     let fullSize;

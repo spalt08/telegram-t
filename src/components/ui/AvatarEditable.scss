@@ -33,7 +33,7 @@
 
     i {
       transform: scale(1);
-      transition: transform .15s ease;
+      transition: transform .15s linear;
       z-index: var(--z-register-add-avatar);
     }
 

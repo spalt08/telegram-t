@@ -2,14 +2,13 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../lib/teact/teact';
 
-import { ApiMediaFormat } from '../api/types';
-
 import { IS_PROGRESSIVE_SUPPORTED } from '../util/environment';
+import { ApiMediaFormat } from '../api/types';
 import * as mediaLoader from '../util/mediaLoader';
 import useForceUpdate from './useForceUpdate';
 
-const PROGRESSIVE_PROGRESS = 0.75;
-const PROGRESSIVE_TIMEOUT = 1500;
+const STREAMING_PROGRESS = 0.75;
+const STREAMING_TIMEOUT = 1500;
 
 export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   mediaHash: string | undefined,
@@ -20,9 +19,11 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
   delay?: number | false,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory<T>(mediaHash) : undefined;
-  const isProgressive = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
+  const isStreaming = mediaFormat === ApiMediaFormat.Stream || (
+    IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive
+  );
   const forceUpdate = useForceUpdate();
-  const [downloadProgress, setDownloadProgress] = useState(mediaData && !isProgressive ? 1 : 0);
+  const [downloadProgress, setDownloadProgress] = useState(mediaData && !isStreaming ? 1 : 0);
   const startedAtRef = useRef<number | undefined>();
 
   const handleProgress = useCallback((progress: number) => {
@@ -52,13 +53,13 @@ export default <T extends ApiMediaFormat = ApiMediaFormat.BlobUrl>(
             setTimeout(forceUpdate, delay - spentTime);
           }
         });
-      } else if (isProgressive) {
+      } else if (isStreaming) {
         setTimeout(() => {
-          setDownloadProgress(PROGRESSIVE_PROGRESS);
-        }, PROGRESSIVE_TIMEOUT);
+          setDownloadProgress(STREAMING_PROGRESS);
+        }, STREAMING_TIMEOUT);
       }
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isProgressive, delay, handleProgress]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isStreaming, delay, handleProgress]);
 
   useEffect(() => {
     if (noLoad && startedAtRef.current) {

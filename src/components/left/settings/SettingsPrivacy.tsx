@@ -19,7 +19,7 @@ const SettingsPrivacy: FC<OwnProps> = ({ onScreenSelect }) => {
         >
           <div className="multiline-menu-item">
             <span className="title">Blocked Users</span>
-            <span className="subtitle">6 users</span>
+            <span className="subtitle">2 users</span>
           </div>
         </ListItem>
         <ListItem

@@ -1,3 +1,5 @@
+import { ApiDocument } from './messages';
+
 export * from './users';
 export * from './chats';
 export * from './messages';
@@ -11,6 +13,7 @@ export interface ApiOnProgress {
   ): void;
 
   isCanceled?: boolean;
+  acceptsBuffer?: boolean;
 }
 
 export interface ApiAttachment {
@@ -28,4 +31,9 @@ export interface ApiAttachment {
     waveform: number[];
   };
   previewBlobUrl?: string;
+}
+
+export interface ApiWallpaper {
+  slug: string;
+  document: ApiDocument;
 }

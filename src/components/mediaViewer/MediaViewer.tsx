@@ -63,7 +63,7 @@ type StateProps = {
   animationLevel: 0 | 1 | 2;
 };
 
-type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu'>;
+type DispatchProps = Pick<GlobalActions, 'openMediaViewer' | 'openForwardMenu' | 'focusMessage'>;
 
 const ANIMATION_DURATION = 350;
 
@@ -76,6 +76,7 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
   chatMessages,
   openMediaViewer,
   openForwardMenu,
+  focusMessage,
   animationLevel,
 }) => {
   const isOpen = Boolean(avatarOwner || messageId);
@@ -179,6 +180,11 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
     openMediaViewer({ chatId: undefined, messageId: undefined });
   }, [openMediaViewer]);
 
+  const handleFooterClick = useCallback(() => {
+    openMediaViewer({ chatId: undefined, messageId: undefined });
+    focusMessage({ chatId, messageId });
+  }, [chatId, focusMessage, messageId, openMediaViewer]);
+
   const handleForward = useCallback(() => {
     openForwardMenu({ fromChatId: chatId, messageIds: [messageId], noDelay: true });
   }, [openForwardMenu, chatId, messageId]);
@@ -267,12 +273,18 @@ const MediaViewer: FC<StateProps & DispatchProps> = ({
               posterData={blobUrlPreview || thumbDataUri}
               posterSize={message && calculateMediaViewerDimensions(videoDimensions!, hasFooter)}
               downloadProgress={downloadProgress}
+              fileSize={video!.size}
               isMediaViewerOpen={isOpen}
               noPlay={!isActive}
               onClose={handleClose}
             />
           )}
-          {textParts && <MediaViewerFooter text={textParts} />}
+          {textParts && (
+            <MediaViewerFooter
+              text={textParts}
+              onClick={handleFooterClick}
+            />
+          )}
         </div>
       );
     }
@@ -399,5 +411,5 @@ export default memo(withGlobal(
       animationLevel,
     };
   },
-  (setGlobal, actions): DispatchProps => pick(actions, ['openMediaViewer', 'openForwardMenu']),
+  (setGlobal, actions): DispatchProps => pick(actions, ['openMediaViewer', 'openForwardMenu', 'focusMessage']),
 )(MediaViewer));

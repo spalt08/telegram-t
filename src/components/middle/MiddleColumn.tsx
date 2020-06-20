@@ -17,6 +17,7 @@ import {
 } from '../../modules/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { pick } from '../../util/iteratees';
+import buildClassName from '../../util/buildClassName';
 import usePrevious from '../../hooks/usePrevious';
 
 import MiddleHeader from './MiddleHeader';
@@ -33,6 +34,8 @@ type StateProps = {
   messageSendingRestrictionReason?: string;
   hasPinnedMessage?: boolean;
   isMobileSearch?: boolean;
+  customBackgroundBlobUrl?: string;
+  isBackgroundBlurred?: boolean;
 };
 
 type DispatchProps = Pick<GlobalActions, 'openChat'>;
@@ -44,6 +47,8 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
   hasPinnedMessage,
   openChat,
   isMobileSearch,
+  customBackgroundBlobUrl,
+  isBackgroundBlurred,
 }) => {
   const [showFab, setShowFab] = useState(false);
   const prevChatId = usePrevious(openChatId, true);
@@ -65,9 +70,19 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
       : undefined;
   }, [openChatId, openChat]);
 
+  const className = buildClassName(
+    hasPinnedMessage && 'has-pinned-message',
+    customBackgroundBlobUrl && 'custom-bg-image',
+    customBackgroundBlobUrl && isBackgroundBlurred && 'blurred',
+  );
+
   return (
-    <div id="MiddleColumn" className={hasPinnedMessage ? 'has-pinned-message' : undefined}>
-      <div id="middle-column-bg" />
+    <div id="MiddleColumn" className={className}>
+      <div
+        id="middle-column-bg"
+        // @ts-ignore
+        style={customBackgroundBlobUrl ? `--custom-background: url(${customBackgroundBlobUrl})` : undefined}
+      />
       <div id="middle-column-portals" />
       {renderingChatId && (
         <>
@@ -92,8 +107,15 @@ const MiddleColumn: FC<StateProps & DispatchProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const { chats: { selectedId: openChatId, listIds } } = global;
+
+    const { isBackgroundBlurred, customChatBackground } = global.settings.byKey;
+    const { blobUrl: customBackgroundBlobUrl } = customChatBackground || {};
+
     if (!listIds.active || !openChatId) {
-      return {};
+      return {
+        customBackgroundBlobUrl,
+        isBackgroundBlurred,
+      };
     }
 
     const chat = selectChat(global, openChatId);
@@ -114,6 +136,8 @@ export default memo(withGlobal(
       messageSendingRestrictionReason: chat && getMessageSendingRestrictionReason(chat),
       hasPinnedMessage: Boolean(pinnedMessageId),
       isMobileSearch,
+      customBackgroundBlobUrl,
+      isBackgroundBlurred,
     };
   },
   (setGlobal, actions): DispatchProps => pick(actions, ['openChat']),

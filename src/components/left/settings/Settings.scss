@@ -191,6 +191,7 @@
 .settings-fab-wrapper {
   height: calc(100% - var(--header-height));
   position: relative;
+  overflow: hidden;
 
   .settings-content {
     height: 100%;

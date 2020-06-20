@@ -12,6 +12,7 @@ import {
   ApiError,
   ApiFormattedText,
   ApiChatFolder,
+  ApiWallpaper,
 } from '../api/types';
 import {
   FocusDirection,
@@ -117,7 +118,7 @@ export type GlobalState = {
     setsById: Record<string, ApiStickerSet>;
     added: {
       hash?: number;
-      setIds: string[];
+      setIds?: string[];
     };
     recent: {
       hash?: number;
@@ -230,6 +231,7 @@ export type GlobalState = {
 
   settings: {
     byKey: ISettings;
+    loadedWallpapers?: ApiWallpaper[];
   };
 
   errors: ApiError[];
@@ -270,13 +272,14 @@ export type ActionTypes = (
   // settings
   'setSettingOption' |
   // Stickers & GIFs
-  'loadStickerSets' | 'loadRecentStickers' | 'loadStickers' | 'loadSavedGifs' | 'loadFavoriteStickers' |
-  'loadFeaturedStickers' | 'setStickerSearchQuery' | 'setGifSearchQuery' | 'searchMoreGifs' |
+  'loadStickerSets' | 'loadAddedStickers' | 'loadRecentStickers' | 'loadFavoriteStickers' | 'loadFeaturedStickers' |
+  'loadStickers' | 'setStickerSearchQuery' | 'loadSavedGifs' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |
   // misc
   'openMediaViewer' | 'openAudioPlayer' | 'closeAudioPlayer' |
   'loadWebPagePreview' | 'clearWebPagePreview' |
-  'saveDraft' | 'clearDraft' | 'loadChatDrafts'
+  'saveDraft' | 'clearDraft' | 'loadChatDrafts' |
+  'loadWallpapers'
 );
 
 export type GlobalActions = Record<ActionTypes, (...args: any[]) => void>;

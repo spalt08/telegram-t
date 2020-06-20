@@ -47,9 +47,7 @@ const INITIAL_STATE: GlobalState = {
 
   stickers: {
     setsById: {},
-    added: {
-      setIds: [],
-    },
+    added: {},
     recent: {
       stickers: [],
     },
@@ -89,6 +87,7 @@ const INITIAL_STATE: GlobalState = {
       messageTextSize: DEFAULT_MESSAGE_TEXT_SIZE_PX,
       messageSendKeyCombo: 'enter',
       language: 'en',
+      isBackgroundBlurred: true,
     },
   },
 

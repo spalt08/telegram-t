@@ -1,6 +1,11 @@
 import { pause } from '../util/schedulers';
 import generateIdFor from '../util/generateIdFor';
-import { DEBUG, MEDIA_CACHE_MAX_BYTES, MEDIA_PROGRESSIVE_CACHE_NAME } from '../config';
+import {
+  DEBUG,
+  MEDIA_CACHE_MAX_BYTES,
+  MEDIA_PROGRESSIVE_CACHE_DISABLED,
+  MEDIA_PROGRESSIVE_CACHE_NAME,
+} from '../config';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -36,7 +41,7 @@ export async function respondForProgressive(e: FetchEvent) {
   }
 
   const cacheKey = `${url}?start=${start}&end=${end}`;
-  const [cachedArrayBuffer, cachedHeaders] = await fetchFromCache(cacheKey);
+  const [cachedArrayBuffer, cachedHeaders] = !MEDIA_PROGRESSIVE_CACHE_DISABLED ? await fetchFromCache(cacheKey) : [];
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -82,7 +87,7 @@ export async function respondForProgressive(e: FetchEvent) {
     ['Content-Type', mimeType],
   ];
 
-  if (partSize <= MEDIA_CACHE_MAX_BYTES && end < MAX_END_TO_CACHE) {
+  if (!MEDIA_PROGRESSIVE_CACHE_DISABLED && partSize <= MEDIA_CACHE_MAX_BYTES && end < MAX_END_TO_CACHE) {
     saveToCache(cacheKey, arrayBufferPart, headers);
   }
 

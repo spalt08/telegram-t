@@ -18,6 +18,10 @@
     position: relative;
   }
 
+  .modal-content {
+    overflow: hidden;
+  }
+
   .confirm-button {
     position: absolute;
     bottom: 1rem;

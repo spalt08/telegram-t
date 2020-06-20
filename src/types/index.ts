@@ -23,6 +23,11 @@ export interface ISettings extends Record<string, any> {
   animationLevel: 0 | 1 | 2;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
   language: 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'es' | 'uk';
+  customChatBackground?: {
+    slug: string;
+    blobUrl: string;
+  };
+  isBackgroundBlurred?: boolean;
 }
 
 export type IAnchorPosition = {
@@ -33,10 +38,11 @@ export type IAnchorPosition = {
 export enum SettingsScreens {
   Main,
   EditProfile,
-  General,
   Notifications,
-  Privacy,
   Language,
+  General,
+  GeneralChatBackground,
+  Privacy,
   PrivacyPhoneNumber,
   PrivacyLastSeen,
   PrivacyProfilePhoto,

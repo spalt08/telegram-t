@@ -28,11 +28,13 @@ onmessage = async (message: OriginMessageEvent) => {
       try {
         if (messageId) {
           callbackState[messageId] = (...callbackArgs: any[]) => {
+            const lastArg = callbackArgs[callbackArgs.length - 1];
+
             sendToOrigin({
               type: 'methodCallback',
               messageId,
               callbackArgs,
-            });
+            }, lastArg instanceof ArrayBuffer ? lastArg : undefined);
           };
 
           args.push(callbackState[messageId] as never);
@@ -100,6 +102,10 @@ function onUpdate(update: ApiUpdate) {
   });
 }
 
-function sendToOrigin(data: WorkerMessageData) {
-  postMessage(data);
+function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
+  if (arrayBuffer) {
+    postMessage(data, [arrayBuffer]);
+  } else {
+    postMessage(data);
+  }
 }

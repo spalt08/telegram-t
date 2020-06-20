@@ -10,6 +10,7 @@ export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 20;
 
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';
+export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512000; // 512 KB
 
