@@ -4,7 +4,7 @@ import React, {
 
 import { IDimensions } from '../../modules/helpers';
 
-import { IS_MOBILE_SCREEN, IS_TOUCH_ENV, PLATFORM_ENV } from '../../util/environment';
+import { IS_MOBILE_SCREEN, IS_TOUCH_ENV } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreenStatus from '../../hooks/useFullscreen';
@@ -43,7 +43,7 @@ const VideoPlayer: FC<OwnProps> = ({
   onClose,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
-  const [isPlayed, setIsPlayed] = useState(PLATFORM_ENV !== 'iOS');
+  const [isPlayed, setIsPlayed] = useState(!IS_TOUCH_ENV);
   const [currentTime, setCurrentTime] = useState(0);
   const [bufferedDuration, setBufferedDuration] = useState(0);
   const [isControlsVisible, setIsControlsVisible] = useState(true);

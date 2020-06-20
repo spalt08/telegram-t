@@ -24,6 +24,7 @@
     position: relative;
     max-width: var(--messages-container-width);
     margin: auto;
+    cursor: pointer;
     opacity: .5;
     transition: opacity .15s;
 
