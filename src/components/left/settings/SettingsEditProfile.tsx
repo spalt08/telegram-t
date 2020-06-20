@@ -45,7 +45,6 @@ const USERNAME_REGEX = /^([a-zA-Z0-9_]+)$/;
 const MAX_BIO_LENGTH = 70;
 
 const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
-const ERROR_LAST_NAME_MISSING = 'Please provide your last name';
 const ERROR_BIO_TOO_LONG = 'Bio can\' be longer than 70 characters';
 
 function isUsernameValid(username: string) {
@@ -83,14 +82,6 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
 
   useUpdateOnResize();
 
-  const isSaveButtonShown = useMemo(() => {
-    if (isUsernameTouched && (!isUsernameAvailable || !isUsernameValid(username))) {
-      return false;
-    }
-
-    return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
-  }, [isProfileFieldsTouched, isUsernameTouched, isUsernameAvailable, photo, username]);
-
   const isLoading = progress === ProfileEditProgress.InProgress;
 
   const [usernameSuccess, usernameError] = useMemo(() => {
@@ -119,6 +110,14 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
       isUsernameAvailable === false ? 'Username is already taken' : undefined,
     ];
   }, [username, isUsernameAvailable]);
+
+  const isSaveButtonShown = useMemo(() => {
+    if (isUsernameTouched && usernameError) {
+      return false;
+    }
+
+    return Boolean(photo) || isProfileFieldsTouched || isUsernameAvailable === true;
+  }, [isUsernameTouched, usernameError, photo, isProfileFieldsTouched, isUsernameAvailable]);
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -174,7 +173,7 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
     setUsername(newUsername);
     setIsUsernameTouched(true);
 
-    if (isUsernameValid(newUsername)) {
+    if (newUsername.length && isUsernameValid(newUsername)) {
       runDebouncedForCheckUsername(() => {
         checkUsername({ username: newUsername });
       });
@@ -189,11 +188,6 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
 
     if (!trimmedFirstName.length) {
       setError(ERROR_FIRST_NAME_MISSING);
-      return;
-    }
-
-    if (!trimmedLastName.length) {
-      setError(ERROR_LAST_NAME_MISSING);
       return;
     }
 
@@ -251,7 +245,6 @@ const SettingsEditProfile: FC<StateProps & DispatchProps> = ({
             onChange={handleLastNameChange}
             label="Last Name"
             disabled={isLoading}
-            error={error === ERROR_LAST_NAME_MISSING ? error : undefined}
           />
           <InputText
             value={bio}

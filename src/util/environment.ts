@@ -22,7 +22,7 @@ export function getPlatform() {
   return os;
 }
 
-const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 export const PLATFORM_ENV = getPlatform();
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
@@ -35,7 +35,7 @@ export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && ['Mac OS', 'iOS'].includes(PLA
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
 // TODO Consider failed service worker
 export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
-export const IS_PROGRESSIVE_AUDIO_SUPPORTED = IS_PROGRESSIVE_SUPPORTED && !isSafari;
+export const IS_PROGRESSIVE_AUDIO_SUPPORTED = IS_PROGRESSIVE_SUPPORTED && !IS_SAFARI;
 export const IS_STREAMING_SUPPORTED = 'MediaSource' in window;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
 

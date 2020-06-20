@@ -5,6 +5,7 @@ import { withGlobal } from '../../lib/teact/teactn';
 
 import { GlobalActions } from '../../global/types';
 
+import { IS_SAFARI } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import { selectCurrentMessageSearch, selectOpenChat } from '../../modules/selectors';
 import { pick } from '../../util/iteratees';
@@ -29,7 +30,7 @@ type DispatchProps = Pick<GlobalActions, (
   'setMessageSearchQuery' | 'searchMessages' | 'focusMessage' | 'closeMessageTextSearch'
 )>;
 
-const KEYBOARD_DELAY = 100;
+const KEYBOARD_DELAY = IS_SAFARI ? 100 : 500;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
