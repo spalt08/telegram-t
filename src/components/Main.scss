@@ -17,6 +17,7 @@
   min-width: 18rem;
   max-width: 26.5rem;
   height: 100%;
+
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }
@@ -56,6 +57,7 @@
       background: black;
       opacity: var(--layer-blackout-opacity);
       transition: opacity var(--layer-transition);
+      z-index: 1;
 
       body.animation-level-0 & {
         transition: none;
