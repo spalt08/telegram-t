@@ -205,7 +205,7 @@ const MiddleHeader: FC<OwnProps & StateProps & DispatchProps> = ({
             onClick={handlePinnedMessageClick}
           />
         )}
-        {!canSubscribeToChat && audioMessage && (
+        {audioMessage && (
           <AudioPlayer key={getMessageKey(audioMessage)} message={audioMessage} />
         )}
         <HeaderActions

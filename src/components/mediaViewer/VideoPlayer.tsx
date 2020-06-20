@@ -169,11 +169,11 @@ const VideoPlayer: FC<OwnProps> = ({
         poster={posterData}
         width={posterSize && posterSize.width}
         height={posterSize && posterSize.height}
-        onTimeUpdate={handleTimeUpdate}
         onProgress={handleBufferisation}
         onEnded={handleEnded}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...bufferingHandlers}
+        onTimeUpdate={handleTimeUpdate}
       >
         {url && <source src={url} />}
       </video>
