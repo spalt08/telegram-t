@@ -18,7 +18,7 @@
     position: relative;
   }
 
-  .modal-content {
+  .modal-content, #avatar-crop {
     overflow: hidden;
   }
 
@@ -30,7 +30,6 @@
   }
 
   #avatar-crop {
-    width: 100%;
     max-width: 25rem;
     margin: 0 auto;
     position: relative;
