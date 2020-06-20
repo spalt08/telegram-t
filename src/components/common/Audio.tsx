@@ -10,9 +10,9 @@ import windowSize from '../../util/windowSize';
 import { REM } from './helpers/mediaDimensions';
 import {
   IS_OPUS_SUPPORTED,
-  IS_TOUCH_ENV,
   IS_MOBILE_SCREEN,
   IS_PROGRESSIVE_AUDIO_SUPPORTED,
+  IS_STREAMING_SUPPORTED,
 } from '../../util/environment';
 import { formatMediaDateTime, formatMediaDuration } from '../../util/dateFormat';
 import {
@@ -49,7 +49,7 @@ interface ISeekMethods {
   handleStopSeek: () => void;
 }
 
-const AUTO_LOAD = IS_TOUCH_ENV;
+const AUTO_LOAD = !IS_PROGRESSIVE_AUDIO_SUPPORTED && !IS_STREAMING_SUPPORTED;
 const MAX_WIDTH_ON_MOBILE = 69;
 const BUTTON_WIDTH_ON_MOBILE = 3.75 * REM;
 
@@ -324,19 +324,23 @@ function resolveAudioFormat(media: ApiAudio | ApiVoice) {
   if ('mimeType' in media) {
     // Audio
 
-    if (media.mimeType === 'audio/mpeg' && !IS_PROGRESSIVE_AUDIO_SUPPORTED) {
+    if (!IS_PROGRESSIVE_AUDIO_SUPPORTED && media.mimeType === 'audio/mpeg' && IS_STREAMING_SUPPORTED) {
+      // Safari desktop
       return ApiMediaFormat.Stream;
     }
+
+    // Chrome; `AUTO_LOAD` in iOS Safari
+    return ApiMediaFormat.Progressive;
   } else {
     // Voice
 
-    // eslint-disable-next-line no-lonely-if
+    // Safari
     if (!IS_OPUS_SUPPORTED) {
       return ApiMediaFormat.BlobUrl;
     }
-  }
 
-  return ApiMediaFormat.Progressive;
+    return ApiMediaFormat.Progressive;
+  }
 }
 
 export default memo(Audio);
