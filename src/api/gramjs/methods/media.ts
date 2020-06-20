@@ -13,7 +13,7 @@ import * as cacheApi from '../../../util/cacheApi';
 
 type EntityType = 'msg' | 'sticker' | 'wallpaper' | 'gif' | 'channel' | 'chat' | 'user' | 'stickerSet';
 
-const WORKERS_FOR_MESSAGE_MEDIA = 16;
+const MAX_WORKERS = 16;
 
 export default async function downloadMedia(
   {
@@ -119,7 +119,7 @@ async function download(
     }
 
     const data = await client.downloadMedia(entity, {
-      sizeType, start, end, progressCallback: onProgress, workers: entityType === 'msg' ? WORKERS_FOR_MESSAGE_MEDIA : 1,
+      sizeType, start, end, progressCallback: onProgress, workers: MAX_WORKERS,
     });
     let mimeType;
     let fullSize;
