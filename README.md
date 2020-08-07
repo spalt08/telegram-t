@@ -2,7 +2,7 @@
 
 ## Demo
 
-https://telegram-t-a4e1e3.netlify.com
+https://telegram-t-a7e1e1.netlify.app/
 
 ## Local setup
 
