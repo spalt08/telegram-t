@@ -20,7 +20,7 @@ Obtain API ID and API hash on [my.telegram.org](https://my.telegram.org) and pop
 npm run dev
 ```
 
-## **Features**
+## **Features** (as of March 23, 2020)
    - Performance
      - Transferred size: ~290 kb with of most features loaded (w/o lazy voice recorder polyfill)
      - Full caching for instant subsequent launch
